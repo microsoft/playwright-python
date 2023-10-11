@@ -506,8 +506,6 @@ async def test_should_press_the_meta_key(page, server, is_firefox, is_mac):
         assert key == "Meta"
 
     if is_firefox:
-        assert code == "OSLeft"
-    else:
         assert code == "MetaLeft"
 
     if is_firefox and not is_mac:

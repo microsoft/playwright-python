@@ -2220,7 +2220,7 @@ class ElementHandle(JSHandle):
         **Usage**
 
         ```py
-        # single selection matching the value
+        # Single selection matching the value or label
         await handle.select_option(\"blue\")
         # single selection matching the label
         await handle.select_option(label=\"blue\")
@@ -2229,7 +2229,7 @@ class ElementHandle(JSHandle):
         ```
 
         ```py
-        # single selection matching the value
+        # Single selection matching the value or label
         handle.select_option(\"blue\")
         # single selection matching both the label
         handle.select_option(label=\"blue\")
@@ -3860,9 +3860,9 @@ class Frame(SyncBase):
 
         ```py
         import asyncio
-        from playwright.async_api import async_playwright
+        from playwright.async_api import async_playwright, Playwright
 
-        async def run(playwright):
+        async def run(playwright: Playwright):
             chromium = playwright.chromium
             browser = await chromium.launch()
             page = await browser.new_page()
@@ -3879,9 +3879,9 @@ class Frame(SyncBase):
         ```
 
         ```py
-        from playwright.sync_api import sync_playwright
+        from playwright.sync_api import sync_playwright, Playwright
 
-        def run(playwright):
+        def run(playwright: Playwright):
             chromium = playwright.chromium
             browser = chromium.launch()
             page = browser.new_page()
@@ -5699,7 +5699,7 @@ class Frame(SyncBase):
         **Usage**
 
         ```py
-        # single selection matching the value
+        # Single selection matching the value or label
         await frame.select_option(\"select#colors\", \"blue\")
         # single selection matching the label
         await frame.select_option(\"select#colors\", label=\"blue\")
@@ -5708,7 +5708,7 @@ class Frame(SyncBase):
         ```
 
         ```py
-        # single selection matching the value
+        # Single selection matching the value or label
         frame.select_option(\"select#colors\", \"blue\")
         # single selection matching both the label
         frame.select_option(\"select#colors\", label=\"blue\")
@@ -6145,9 +6145,9 @@ class Frame(SyncBase):
 
         ```py
         import asyncio
-        from playwright.async_api import async_playwright
+        from playwright.async_api import async_playwright, Playwright
 
-        async def run(playwright):
+        async def run(playwright: Playwright):
             webkit = playwright.webkit
             browser = await webkit.launch()
             page = await browser.new_page()
@@ -6162,9 +6162,9 @@ class Frame(SyncBase):
         ```
 
         ```py
-        from playwright.sync_api import sync_playwright
+        from playwright.sync_api import sync_playwright, Playwright
 
-        def run(playwright):
+        def run(playwright: Playwright):
             webkit = playwright.webkit
             browser = webkit.launch()
             page = browser.new_page()
@@ -7045,9 +7045,9 @@ class Selectors(SyncBase):
 
         ```py
         import asyncio
-        from playwright.async_api import async_playwright
+        from playwright.async_api import async_playwright, Playwright
 
-        async def run(playwright):
+        async def run(playwright: Playwright):
             tag_selector = \"\"\"
               {
                   // Returns the first element matching given selector in the root's subtree.
@@ -7083,9 +7083,9 @@ class Selectors(SyncBase):
         ```
 
         ```py
-        from playwright.sync_api import sync_playwright
+        from playwright.sync_api import sync_playwright, Playwright
 
-        def run(playwright):
+        def run(playwright: Playwright):
             tag_selector = \"\"\"
               {
                   // Returns the first element matching given selector in the root's subtree.
@@ -8265,9 +8265,9 @@ class Page(SyncContextManager):
 
         ```py
         import asyncio
-        from playwright.async_api import async_playwright
+        from playwright.async_api import async_playwright, Playwright
 
-        async def run(playwright):
+        async def run(playwright: Playwright):
             chromium = playwright.chromium
             browser = await chromium.launch()
             page = await browser.new_page()
@@ -8284,9 +8284,9 @@ class Page(SyncContextManager):
         ```
 
         ```py
-        from playwright.sync_api import sync_playwright
+        from playwright.sync_api import sync_playwright, Playwright
 
-        def run(playwright):
+        def run(playwright: Playwright):
             chromium = playwright.chromium
             browser = chromium.launch()
             page = browser.new_page()
@@ -8969,14 +8969,14 @@ class Page(SyncContextManager):
         ```py
         import asyncio
         import hashlib
-        from playwright.async_api import async_playwright
+        from playwright.async_api import async_playwright, Playwright
 
         def sha256(text):
             m = hashlib.sha256()
             m.update(bytes(text, \"utf8\"))
             return m.hexdigest()
 
-        async def run(playwright):
+        async def run(playwright: Playwright):
             webkit = playwright.webkit
             browser = await webkit.launch(headless=False)
             page = await browser.new_page()
@@ -9000,14 +9000,14 @@ class Page(SyncContextManager):
 
         ```py
         import hashlib
-        from playwright.sync_api import sync_playwright
+        from playwright.sync_api import sync_playwright, Playwright
 
         def sha256(text):
             m = hashlib.sha256()
             m.update(bytes(text, \"utf8\"))
             return m.hexdigest()
 
-        def run(playwright):
+        def run(playwright: Playwright):
             webkit = playwright.webkit
             browser = webkit.launch(headless=False)
             page = browser.new_page()
@@ -9069,9 +9069,9 @@ class Page(SyncContextManager):
 
         ```py
         import asyncio
-        from playwright.async_api import async_playwright
+        from playwright.async_api import async_playwright, Playwright
 
-        async def run(playwright):
+        async def run(playwright: Playwright):
             webkit = playwright.webkit
             browser = await webkit.launch(headless=false)
             context = await browser.new_context()
@@ -9095,9 +9095,9 @@ class Page(SyncContextManager):
         ```
 
         ```py
-        from playwright.sync_api import sync_playwright
+        from playwright.sync_api import sync_playwright, Playwright
 
-        def run(playwright):
+        def run(playwright: Playwright):
             webkit = playwright.webkit
             browser = webkit.launch(headless=false)
             context = browser.new_context()
@@ -11357,7 +11357,7 @@ class Page(SyncContextManager):
         **Usage**
 
         ```py
-        # single selection matching the value
+        # Single selection matching the value or label
         await page.select_option(\"select#colors\", \"blue\")
         # single selection matching the label
         await page.select_option(\"select#colors\", label=\"blue\")
@@ -11366,7 +11366,7 @@ class Page(SyncContextManager):
         ```
 
         ```py
-        # single selection matching the value
+        # Single selection matching the value or label
         page.select_option(\"select#colors\", \"blue\")
         # single selection matching both the label
         page.select_option(\"select#colors\", label=\"blue\")
@@ -11844,9 +11844,9 @@ class Page(SyncContextManager):
 
         ```py
         import asyncio
-        from playwright.async_api import async_playwright
+        from playwright.async_api import async_playwright, Playwright
 
-        async def run(playwright):
+        async def run(playwright: Playwright):
             webkit = playwright.webkit
             browser = await webkit.launch()
             page = await browser.new_page()
@@ -11861,9 +11861,9 @@ class Page(SyncContextManager):
         ```
 
         ```py
-        from playwright.sync_api import sync_playwright
+        from playwright.sync_api import sync_playwright, Playwright
 
-        def run(playwright):
+        def run(playwright: Playwright):
             webkit = playwright.webkit
             browser = webkit.launch()
             page = browser.new_page()
@@ -13347,9 +13347,9 @@ class BrowserContext(SyncContextManager):
 
         ```py
         import asyncio
-        from playwright.async_api import async_playwright
+        from playwright.async_api import async_playwright, Playwright
 
-        async def run(playwright):
+        async def run(playwright: Playwright):
             webkit = playwright.webkit
             browser = await webkit.launch(headless=false)
             context = await browser.new_context()
@@ -13373,9 +13373,9 @@ class BrowserContext(SyncContextManager):
         ```
 
         ```py
-        from playwright.sync_api import sync_playwright
+        from playwright.sync_api import sync_playwright, Playwright
 
-        def run(playwright):
+        def run(playwright: Playwright):
             webkit = playwright.webkit
             browser = webkit.launch(headless=false)
             context = browser.new_context()
@@ -13462,14 +13462,14 @@ class BrowserContext(SyncContextManager):
         ```py
         import asyncio
         import hashlib
-        from playwright.async_api import async_playwright
+        from playwright.async_api import async_playwright, Playwright
 
-        def sha256(text):
+        def sha256(text: str) -> str:
             m = hashlib.sha256()
             m.update(bytes(text, \"utf8\"))
             return m.hexdigest()
 
-        async def run(playwright):
+        async def run(playwright: Playwright):
             webkit = playwright.webkit
             browser = await webkit.launch(headless=False)
             context = await browser.new_context()
@@ -13496,12 +13496,12 @@ class BrowserContext(SyncContextManager):
         import hashlib
         from playwright.sync_api import sync_playwright
 
-        def sha256(text):
+        def sha256(text: str) -> str:
             m = hashlib.sha256()
             m.update(bytes(text, \"utf8\"))
             return m.hexdigest()
 
-        def run(playwright):
+        def run(playwright: Playwright):
             webkit = playwright.webkit
             browser = webkit.launch(headless=False)
             context = browser.new_context()
@@ -15213,9 +15213,9 @@ class Playwright(SyncBase):
 
         ```py
         import asyncio
-        from playwright.async_api import async_playwright
+        from playwright.async_api import async_playwright, Playwright
 
-        async def run(playwright):
+        async def run(playwright: Playwright):
             webkit = playwright.webkit
             iphone = playwright.devices[\"iPhone 6\"]
             browser = await webkit.launch()
@@ -15232,9 +15232,9 @@ class Playwright(SyncBase):
         ```
 
         ```py
-        from playwright.sync_api import sync_playwright
+        from playwright.sync_api import sync_playwright, Playwright
 
-        def run(playwright):
+        def run(playwright: Playwright):
             webkit = playwright.webkit
             iphone = playwright.devices[\"iPhone 6\"]
             browser = webkit.launch()
@@ -17022,6 +17022,9 @@ class Locator(SyncBase):
 
         Returns the number of elements matching the locator.
 
+        **NOTE** If you need to assert the number of elements on the page, prefer `locator_assertions.to_have_count()`
+        to avoid flakiness. See [assertions guide](https://playwright.dev/python/docs/test-assertions) for more details.
+
         **Usage**
 
         ```py
@@ -17131,6 +17134,9 @@ class Locator(SyncBase):
         """Locator.get_attribute
 
         Returns the matching element's attribute value.
+
+        **NOTE** If you need to assert an element's attribute, prefer `locator_assertions.to_have_attribute()` to
+        avoid flakiness. See [assertions guide](https://playwright.dev/python/docs/test-assertions) for more details.
 
         Parameters
         ----------
@@ -17248,6 +17254,9 @@ class Locator(SyncBase):
 
         Returns the [`element.innerText`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/innerText).
 
+        **NOTE** If you need to assert text on the page, prefer `locator_assertions.to_have_text()` with
+        `useInnerText` option to avoid flakiness. See [assertions guide](https://playwright.dev/python/docs/test-assertions) for more details.
+
         Parameters
         ----------
         timeout : Union[float, None]
@@ -17267,6 +17276,9 @@ class Locator(SyncBase):
         """Locator.input_value
 
         Returns the value for the matching `<input>` or `<textarea>` or `<select>` element.
+
+        **NOTE** If you need to assert input value, prefer `locator_assertions.to_have_value()` to avoid flakiness.
+        See [assertions guide](https://playwright.dev/python/docs/test-assertions) for more details.
 
         **Usage**
 
@@ -17305,6 +17317,9 @@ class Locator(SyncBase):
 
         Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
 
+        **NOTE** If you need to assert that checkbox is checked, prefer `locator_assertions.to_be_checked()` to avoid
+        flakiness. See [assertions guide](https://playwright.dev/python/docs/test-assertions) for more details.
+
         **Usage**
 
         ```py
@@ -17334,6 +17349,9 @@ class Locator(SyncBase):
         """Locator.is_disabled
 
         Returns whether the element is disabled, the opposite of [enabled](https://playwright.dev/python/docs/actionability#enabled).
+
+        **NOTE** If you need to assert that an element is disabled, prefer `locator_assertions.to_be_disabled()` to
+        avoid flakiness. See [assertions guide](https://playwright.dev/python/docs/test-assertions) for more details.
 
         **Usage**
 
@@ -17365,6 +17383,9 @@ class Locator(SyncBase):
 
         Returns whether the element is [editable](https://playwright.dev/python/docs/actionability#editable).
 
+        **NOTE** If you need to assert that an element is editable, prefer `locator_assertions.to_be_editable()` to
+        avoid flakiness. See [assertions guide](https://playwright.dev/python/docs/test-assertions) for more details.
+
         **Usage**
 
         ```py
@@ -17394,6 +17415,9 @@ class Locator(SyncBase):
         """Locator.is_enabled
 
         Returns whether the element is [enabled](https://playwright.dev/python/docs/actionability#enabled).
+
+        **NOTE** If you need to assert that an element is enabled, prefer `locator_assertions.to_be_enabled()` to
+        avoid flakiness. See [assertions guide](https://playwright.dev/python/docs/test-assertions) for more details.
 
         **Usage**
 
@@ -17425,6 +17449,9 @@ class Locator(SyncBase):
 
         Returns whether the element is hidden, the opposite of [visible](https://playwright.dev/python/docs/actionability#visible).
 
+        **NOTE** If you need to assert that element is hidden, prefer `locator_assertions.to_be_hidden()` to avoid
+        flakiness. See [assertions guide](https://playwright.dev/python/docs/test-assertions) for more details.
+
         **Usage**
 
         ```py
@@ -17453,6 +17480,9 @@ class Locator(SyncBase):
         """Locator.is_visible
 
         Returns whether the element is [visible](https://playwright.dev/python/docs/actionability#visible).
+
+        **NOTE** If you need to assert that element is visible, prefer `locator_assertions.to_be_visible()` to avoid
+        flakiness. See [assertions guide](https://playwright.dev/python/docs/test-assertions) for more details.
 
         **Usage**
 
@@ -17964,6 +17994,9 @@ class Locator(SyncBase):
 
         Returns the [`node.textContent`](https://developer.mozilla.org/en-US/docs/Web/API/Node/textContent).
 
+        **NOTE** If you need to assert text on the page, prefer `locator_assertions.to_have_text()` to avoid
+        flakiness. See [assertions guide](https://playwright.dev/python/docs/test-assertions) for more details.
+
         Parameters
         ----------
         timeout : Union[float, None]
@@ -18161,6 +18194,9 @@ class Locator(SyncBase):
 
         Returns an array of `node.innerText` values for all matching nodes.
 
+        **NOTE** If you need to assert text on the page, prefer `locator_assertions.to_have_text()` with
+        `useInnerText` option to avoid flakiness. See [assertions guide](https://playwright.dev/python/docs/test-assertions) for more details.
+
         **Usage**
 
         ```py
@@ -18182,6 +18218,9 @@ class Locator(SyncBase):
         """Locator.all_text_contents
 
         Returns an array of `node.textContent` values for all matching nodes.
+
+        **NOTE** If you need to assert text on the page, prefer `locator_assertions.to_have_text()` to avoid
+        flakiness. See [assertions guide](https://playwright.dev/python/docs/test-assertions) for more details.
 
         **Usage**
 
@@ -20667,14 +20706,38 @@ class LocatorAssertions(SyncBase):
         Ensures that `Locator` points to an [attached](https://playwright.dev/python/docs/actionability#attached) and
         [visible](https://playwright.dev/python/docs/actionability#visible) DOM node.
 
+        To check that at least one element from the list is visible, use `locator.first()`.
+
         **Usage**
 
         ```py
+        # A specific element is visible.
         await expect(page.get_by_text(\"Welcome\")).to_be_visible()
+
+        # At least one item in the list is visible.
+        await expect(page.get_by_test_id(\"todo-item\").first).to_be_visible()
+
+        # At least one of the two elements is visible, possibly both.
+        await expect(
+            page.get_by_role(\"button\", name=\"Sign in\")
+            .or_(page.get_by_role(\"button\", name=\"Sign up\"))
+            .first
+        ).to_be_visible()
         ```
 
         ```py
+        # A specific element is visible.
         expect(page.get_by_text(\"Welcome\")).to_be_visible()
+
+        # At least one item in the list is visible.
+        expect(page.get_by_test_id(\"todo-item\").first).to_be_visible()
+
+        # At least one of the two elements is visible, possibly both.
+        expect(
+            page.get_by_role(\"button\", name=\"Sign in\")
+            .or_(page.get_by_role(\"button\", name=\"Sign up\"))
+            .first
+        ).to_be_visible()
         ```
 
         Parameters

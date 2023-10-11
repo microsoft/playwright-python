@@ -220,7 +220,7 @@ class LocatorAssertions(AssertionsBase):
         __tracebackhide__ = True
         expected_text = to_expected_text_values([value])
         await self._expect_impl(
-            "to.have.attribute",
+            "to.have.attribute.value",
             FrameExpectOptions(
                 expressionArg=name, expectedText=expected_text, timeout=timeout
             ),

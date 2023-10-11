@@ -25,6 +25,10 @@ class LocalUtils(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
+        self.devices = {
+            device["name"]: parse_device_descriptor(device["descriptor"])
+            for device in initializer["deviceDescriptors"]
+        }
 
     async def zip(self, params: Dict) -> None:
         await self._channel.send("zip", params)
@@ -75,3 +79,14 @@ class LocalUtils(ChannelOwner):
                 }
             },
         )
+
+
+def parse_device_descriptor(dict: Dict) -> Dict:
+    return {
+        "user_agent": dict["userAgent"],
+        "viewport": dict["viewport"],
+        "device_scale_factor": dict["deviceScaleFactor"],
+        "is_mobile": dict["isMobile"],
+        "has_touch": dict["hasTouch"],
+        "default_browser_type": dict["defaultBrowserType"],
+    }

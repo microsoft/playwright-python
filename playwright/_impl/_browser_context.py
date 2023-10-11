@@ -145,7 +145,7 @@ class BrowserContext(ChannelOwner):
         )
         self._channel.on(
             "console",
-            lambda params: self._on_console_message(from_channel(params["message"])),
+            lambda event: self._on_console_message(event),
         )
 
         self._channel.on(
@@ -545,7 +545,8 @@ class BrowserContext(ChannelOwner):
         if response:
             response._finished_future.set_result(True)
 
-    def _on_console_message(self, message: ConsoleMessage) -> None:
+    def _on_console_message(self, event: Dict) -> None:
+        message = ConsoleMessage(event, self._loop, self._dispatcher_fiber)
         self.emit(BrowserContext.Events.Console, message)
         page = message.page
         if page:

@@ -17,7 +17,6 @@ from typing import Dict
 from playwright._impl._browser_type import BrowserType
 from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._fetch import APIRequest
-from playwright._impl._local_utils import LocalUtils
 from playwright._impl._selectors import Selectors, SelectorsOwner
 
 
@@ -48,12 +47,7 @@ class Playwright(ChannelOwner):
         self._connection.on(
             "close", lambda: self.selectors._remove_channel(selectors_owner)
         )
-        self.devices = {}
-        self.devices = {
-            device["name"]: parse_device_descriptor(device["descriptor"])
-            for device in initializer["deviceDescriptors"]
-        }
-        self._utils: LocalUtils = from_channel(initializer["utils"])
+        self.devices = self._connection.local_utils.devices
 
     def __getitem__(self, value: str) -> "BrowserType":
         if value == "chromium":
@@ -72,14 +66,3 @@ class Playwright(ChannelOwner):
 
     async def stop(self) -> None:
         pass
-
-
-def parse_device_descriptor(dict: Dict) -> Dict:
-    return {
-        "user_agent": dict["userAgent"],
-        "viewport": dict["viewport"],
-        "device_scale_factor": dict["deviceScaleFactor"],
-        "is_mobile": dict["isMobile"],
-        "has_touch": dict["hasTouch"],
-        "default_browser_type": dict["defaultBrowserType"],
-    }
