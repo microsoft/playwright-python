@@ -195,16 +195,6 @@ def parse_value(value: Any, refs: Optional[Dict[int, Any]] = None) -> Any:
         if "bi" in value:
             return int(value["bi"])
 
-        if "m" in value:
-            v = {}
-            refs[value["m"]["id"]] = v
-            return v
-
-        if "se" in value:
-            v = set()
-            refs[value["se"]["id"]] = v
-            return v
-
         if "a" in value:
             a: List = []
             refs[value["id"]] = a

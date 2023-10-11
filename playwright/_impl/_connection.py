@@ -345,11 +345,11 @@ class Connection(EventEmitter):
                 "internal": not stack_trace_information["apiName"],
             },
         }
-        self._transport.send(message)
-        self._callbacks[id] = callback
-
         if self._tracing_count > 0 and frames and guid != "localUtils":
             self.local_utils.add_stack_to_tracing_no_reply(id, frames)
+
+        self._transport.send(message)
+        self._callbacks[id] = callback
 
         return callback
 

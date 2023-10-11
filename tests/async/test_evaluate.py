@@ -69,14 +69,6 @@ async def test_evaluate_transfer_bigint(page: Page) -> None:
     assert await page.evaluate("a => a", 17) == 17
 
 
-async def test_should_transfer_maps(page):
-    assert await page.evaluate("() => new Map([[1, { test: 42n }]])") == {}
-
-
-async def test_should_transfer_sets(page):
-    assert await page.evaluate("() => new Set([1, { test: 42n }])") == set()
-
-
 async def test_evaluate_return_undefined_for_objects_with_symbols(page):
     assert await page.evaluate('[Symbol("foo4")]') == [None]
     assert (
