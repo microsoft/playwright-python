@@ -328,13 +328,12 @@ async def test_page_route_should_not_work_with_redirects(page, server):
 
 async def test_page_route_should_work_with_redirects_for_subresources(page, server):
     intercepted = []
-    await page.route(
-        "**/*",
-        lambda route: (
-            asyncio.create_task(route.continue_()),
-            intercepted.append(route.request),
-        ),
-    )
+
+    async def handle_route(route) -> None:
+        await route.continue_()
+        intercepted.append(route.request)
+
+    await page.route("**/*", handle_route)
 
     server.set_redirect("/one-style.css", "/two-style.css")
     server.set_redirect("/two-style.css", "/three-style.css")
@@ -348,8 +347,7 @@ async def test_page_route_should_work_with_redirects_for_subresources(page, serv
     assert response.status == 200
     assert "one-style.html" in response.url
 
-    # TODO: https://github.com/microsoft/playwright/issues/12789
-    assert len(intercepted) >= 2
+    assert len(intercepted) == 2
     assert intercepted[0].resource_type == "document"
     assert "one-style.html" in intercepted[0].url
 
