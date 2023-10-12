@@ -17,7 +17,7 @@ from typing import Dict
 
 import pytest
 
-from playwright.async_api import async_playwright
+from playwright.async_api import Page, async_playwright
 
 from ..server import Server
 
@@ -67,3 +67,20 @@ async def test_cancel_pending_protocol_call_on_playwright_stop(server: Server) -
     with pytest.raises(Exception) as exc_info:
         await pending_task
     assert "Connection closed" in str(exc_info.value)
+
+
+async def test_should_collect_stale_handles(page: Page, server: Server) -> None:
+    page.on("request", lambda: None)
+    response = await page.goto(server.PREFIX + "/title.html")
+    for i in range(1000):
+        await page.evaluate(
+            """async () => {
+            const response = await fetch('/');
+            await response.text();
+        }"""
+        )
+    with pytest.raises(Exception) as exc_info:
+        await response.all_headers()
+    assert "The object has been collected to prevent unbounded heap growth." in str(
+        exc_info.value
+    )
