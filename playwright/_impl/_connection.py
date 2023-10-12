@@ -51,11 +51,11 @@ else:  # pragma: no cover
 
 
 class Channel(AsyncIOEventEmitter):
-    def __init__(self, connection: "Connection", guid: str) -> None:
+    def __init__(self, connection: "Connection", object: "ChannelOwner") -> None:
         super().__init__()
-        self._connection: Connection = connection
-        self._guid = guid
-        self._object: Optional[ChannelOwner] = None
+        self._connection = connection
+        self._guid = object._guid
+        self._object = object
 
     async def send(self, method: str, params: Dict = None) -> Any:
         return await self._connection.wrap_api_call(
@@ -71,7 +71,7 @@ class Channel(AsyncIOEventEmitter):
         # No reply messages are used to e.g. waitForEventInfo(after).
         self._connection.wrap_api_call_sync(
             lambda: self._connection._send_message_to_server(
-                self._guid, method, {} if params is None else params, True
+                self._object, method, {} if params is None else params, True
             )
         )
 
@@ -80,7 +80,9 @@ class Channel(AsyncIOEventEmitter):
     ) -> Any:
         if params is None:
             params = {}
-        callback = self._connection._send_message_to_server(self._guid, method, params)
+        callback = self._connection._send_message_to_server(
+            self._object, method, params
+        )
         if self._connection._error:
             error = self._connection._error
             self._connection._error = None
@@ -121,7 +123,7 @@ class ChannelOwner(AsyncIOEventEmitter):
         self._loop: asyncio.AbstractEventLoop = parent._loop
         self._dispatcher_fiber: Any = parent._dispatcher_fiber
         self._type = type
-        self._guid = guid
+        self._guid: str = guid
         self._connection: Connection = (
             parent._connection if isinstance(parent, ChannelOwner) else parent
         )
@@ -129,9 +131,9 @@ class ChannelOwner(AsyncIOEventEmitter):
             parent if isinstance(parent, ChannelOwner) else None
         )
         self._objects: Dict[str, "ChannelOwner"] = {}
-        self._channel: Channel = Channel(self._connection, guid)
-        self._channel._object = self
+        self._channel: Channel = Channel(self._connection, self)
         self._initializer = initializer
+        self._was_collected = False
 
         self._connection._objects[guid] = self
         if self._parent:
@@ -139,15 +141,16 @@ class ChannelOwner(AsyncIOEventEmitter):
 
         self._event_to_subscription_mapping: Dict[str, str] = {}
 
-    def _dispose(self) -> None:
+    def _dispose(self, reason: Optional[str]) -> None:
         # Clean up from parent and connection.
         if self._parent:
             del self._parent._objects[self._guid]
         del self._connection._objects[self._guid]
+        self._was_collected = reason == "gc"
 
         # Dispose all children.
         for object in list(self._objects.values()):
-            object._dispose()
+            object._dispose(reason)
         self._objects.clear()
 
     def _adopt(self, child: "ChannelOwner") -> None:
@@ -308,10 +311,14 @@ class Connection(EventEmitter):
             self._tracing_count -= 1
 
     def _send_message_to_server(
-        self, guid: str, method: str, params: Dict, no_reply: bool = False
+        self, object: ChannelOwner, method: str, params: Dict, no_reply: bool = False
     ) -> ProtocolCallback:
         if self._closed_error_message:
             raise Error(self._closed_error_message)
+        if object._was_collected:
+            raise Error(
+                "The object has been collected to prevent unbounded heap growth."
+            )
         self._last_id += 1
         id = self._last_id
         callback = ProtocolCallback(self._loop)
@@ -335,7 +342,7 @@ class Connection(EventEmitter):
         )
         message = {
             "id": id,
-            "guid": guid,
+            "guid": object._guid,
             "method": method,
             "params": self._replace_channels_with_guids(params),
             "metadata": {
@@ -345,7 +352,7 @@ class Connection(EventEmitter):
                 "internal": not stack_trace_information["apiName"],
             },
         }
-        if self._tracing_count > 0 and frames and guid != "localUtils":
+        if self._tracing_count > 0 and frames and object._guid != "localUtils":
             self.local_utils.add_stack_to_tracing_no_reply(id, frames)
 
         self._transport.send(message)
@@ -401,7 +408,8 @@ class Connection(EventEmitter):
             return
 
         if method == "__dispose__":
-            self._objects[guid]._dispose()
+            assert isinstance(params, dict)
+            self._objects[guid]._dispose(cast(Optional[str], params.get("reason")))
             return
         object = self._objects[guid]
         should_replace_guids_with_channels = "jsonPipe@" not in guid
