@@ -40,3 +40,10 @@ repos:
         pass_filenames: false
         types: [python]
         additional_dependencies: ["pyright@1.1.278"]
+  - repo: local
+    hooks:
+      - id: check-license-header
+        name: Check License Header
+        entry: ./utils/linting/check_file_header.py
+        language: python
+        types: [python]
