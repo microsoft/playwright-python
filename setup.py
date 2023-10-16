@@ -209,11 +209,17 @@ setup(
     project_urls={
         "Release notes": "https://github.com/microsoft/playwright-python/releases",
     },
-    packages=["playwright"],
+    packages=[
+        "playwright",
+        "playwright.async_api",
+        "playwright.sync_api",
+        "playwright._impl",
+        "playwright._impl.__pyinstaller",
+    ],
     include_package_data=True,
     install_requires=[
         "greenlet==3.0.0",
-        "pyee==9.0.4",
+        "pyee==11.0.1",
         "typing-extensions;python_version<='3.8'",
     ],
     classifiers=[
@@ -225,17 +231,12 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.8",
     cmdclass={"bdist_wheel": PlaywrightBDistWheelCommand},
-    use_scm_version={
-        "version_scheme": "post-release",
-        "write_to": "playwright/_repo_version.py",
-        "write_to_template": 'version = "{version}"\n',
-    },
-    setup_requires=["setuptools-scm==7.0.5", "wheel==0.38.1"],
     entry_points={
         "console_scripts": [
             "playwright=playwright.__main__:main",

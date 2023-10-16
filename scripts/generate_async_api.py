@@ -18,8 +18,8 @@ import re
 from types import FunctionType
 from typing import Any
 
-from scripts.documentation_provider import DocumentationProvider
-from scripts.generate_api import (
+from documentation_provider import DocumentationProvider
+from generate_api import (
     api_globals,
     arguments,
     generated_types,

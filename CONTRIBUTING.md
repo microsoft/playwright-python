@@ -15,7 +15,7 @@ source ./env/bin/activate
 Install required dependencies:
 
 ```sh
-python -m pip install --upgrade pip wheel
+python -m pip install --upgrade pip
 pip install -r local-requirements.txt
 ```
 
