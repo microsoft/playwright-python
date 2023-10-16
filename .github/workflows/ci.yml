@@ -28,7 +28,7 @@ jobs:
         python-version: "3.10"
     - name: Install dependencies & browsers
       run: |
-        python -m pip install --upgrade pip wheel
+        python -m pip install --upgrade pip
         pip install -r local-requirements.txt
         pip install -e .
         python setup.py bdist_wheel
@@ -68,6 +68,15 @@ jobs:
         - os: ubuntu-latest
           python-version: '3.11'
           browser: chromium
+        - os: windows-latest
+          python-version: '3.12'
+          browser: chromium
+        - os: macos-latest
+          python-version: '3.12'
+          browser: chromium
+        - os: ubuntu-latest
+          python-version: '3.12'
+          browser: chromium
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
@@ -77,7 +86,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies & browsers
       run: |
-        python -m pip install --upgrade pip wheel
+        python -m pip install --upgrade pip
         pip install -r local-requirements.txt
         pip install -e .
         python setup.py bdist_wheel
@@ -88,8 +97,6 @@ jobs:
       run: pytest tests/test_reference_count_async.py --browser=${{ matrix.browser }}
     - name: Test Wheel Installation
       run: pytest tests/test_installation.py --browser=${{ matrix.browser }}
-    - name: Test Generation Scripts
-      run: pytest tests/test_generation_scripts.py --browser=${{ matrix.browser }}
     - name: Test Sync API
       if: matrix.os != 'ubuntu-latest'
       run: pytest tests/sync --browser=${{ matrix.browser }} --timeout 90
@@ -125,7 +132,7 @@ jobs:
         python-version: "3.10"
     - name: Install dependencies & browsers
       run: |
-        python -m pip install --upgrade pip wheel
+        python -m pip install --upgrade pip
         pip install -r local-requirements.txt
         pip install -e .
         python setup.py bdist_wheel
