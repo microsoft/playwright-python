@@ -222,6 +222,7 @@ setup(
         "pyee==11.0.1",
         "typing-extensions;python_version<='3.8'",
     ],
+    setup_requires=["setuptools-scm==8.0.4", "wheel==0.41.2"],
     classifiers=[
         "Topic :: Software Development :: Testing",
         "Topic :: Internet :: WWW/HTTP :: Browsers",
