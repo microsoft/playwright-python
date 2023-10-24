@@ -23,11 +23,10 @@ from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     for browser_type in [p.chromium, p.firefox, p.webkit]:
-        browser = browser_type.launch()
-        page = browser.new_page()
-        page.goto('http://playwright.dev')
-        page.screenshot(path=f'example-{browser_type.name}.png')
-        browser.close()
+        with browser_type.launch() as browser:
+            with browser.new_page() as page:
+                page.goto('http://playwright.dev')
+                page.screenshot(path=f'example-{browser_type.name}.png')
 ```
 
 ```py
@@ -37,11 +36,10 @@ from playwright.async_api import async_playwright
 async def main():
     async with async_playwright() as p:
         for browser_type in [p.chromium, p.firefox, p.webkit]:
-            browser = await browser_type.launch()
-            page = await browser.new_page()
-            await page.goto('http://playwright.dev')
-            await page.screenshot(path=f'example-{browser_type.name}.png')
-            await browser.close()
+            async with await browser_type.launch() as browser:
+                async with await browser.new_page() as page:
+                    await page.goto('http://playwright.dev')
+                    await page.screenshot(path=f'example-{browser_type.name}.png')
 
 asyncio.run(main())
 ```
