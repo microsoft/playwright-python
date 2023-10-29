@@ -237,7 +237,7 @@ async def prepare_browser_context_params(params: Dict) -> None:
         params["recordHar"] = prepare_record_har_options(params)
         del params["recordHarPath"]
     if "recordVideoDir" in params:
-        params["recordVideo"] = {"dir": str(params["recordVideoDir"])}
+        params["recordVideo"] = {"dir": Path(params["recordVideoDir"]).absolute()}
         if "recordVideoSize" in params:
             params["recordVideo"]["size"] = params["recordVideoSize"]
             del params["recordVideoSize"]

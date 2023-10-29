@@ -51,7 +51,7 @@ class Tracing(ChannelOwner):
                 "tracingStartChunk", filter_none({"title": title, "name": name})
             )
 
-        trace_name = await self._connection.wrap_api_call(_inner_start)
+        trace_name = await self._connection.wrap_api_call(_inner_start, True)
         await self._start_collecting_stacks(trace_name)
 
     async def start_chunk(self, title: str = None, name: str = None) -> None:
@@ -68,11 +68,14 @@ class Tracing(ChannelOwner):
         )
 
     async def stop_chunk(self, path: Union[pathlib.Path, str] = None) -> None:
-        await self._do_stop_chunk(path)
+        await self._connection.wrap_api_call(lambda: self._do_stop_chunk(path), True)
 
     async def stop(self, path: Union[pathlib.Path, str] = None) -> None:
-        await self._do_stop_chunk(path)
-        await self._channel.send("tracingStop")
+        async def _inner() -> None:
+            await self._do_stop_chunk(path)
+            await self._channel.send("tracingStop")
+
+        await self._connection.wrap_api_call(_inner, True)
 
     async def _do_stop_chunk(self, file_path: Union[pathlib.Path, str] = None) -> None:
         if self._is_tracing:
