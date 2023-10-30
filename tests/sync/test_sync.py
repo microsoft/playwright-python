@@ -150,10 +150,14 @@ def test_sync_wait_for_event(page: Page, server: Server) -> None:
 
 
 def test_sync_wait_for_event_raise(page: Page) -> None:
-    with pytest.raises(Error):
-        with page.expect_event("popup", timeout=500) as popup:
+    with pytest.raises(AssertionError):
+        with page.expect_event("popup", timeout=500):
             assert False
-        assert popup.value is None
+
+    with pytest.raises(Error) as exc_info:
+        with page.expect_event("popup", timeout=500):
+            page.wait_for_timeout(1_000)
+    assert "Timeout 500ms exceeded" in exc_info.value.message
 
 
 def test_sync_make_existing_page_sync(page: Page) -> None:
@@ -279,6 +283,12 @@ def test_expect_response_should_work(page: Page, server: Server) -> None:
     assert resp.value.status == 200
     assert resp.value.ok
     assert resp.value.request
+
+
+def test_expect_response_should_not_hang_when_predicate_throws(page: Page) -> None:
+    with pytest.raises(Exception, match="Oops!"):
+        with page.expect_response("**/*"):
+            raise Exception("Oops!")
 
 
 def test_expect_response_should_use_context_timeout(

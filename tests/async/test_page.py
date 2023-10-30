@@ -344,6 +344,14 @@ async def test_wait_for_response_should_use_context_timeout(
     assert "Timeout 1000ms exceeded" in exc_info.value.message
 
 
+async def test_expect_response_should_not_hang_when_predicate_throws(
+    page: Page,
+) -> None:
+    with pytest.raises(Exception, match="Oops!"):
+        async with page.expect_response("**/*"):
+            raise Exception("Oops!")
+
+
 async def test_expose_binding(page):
     binding_source = []
 

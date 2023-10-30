@@ -33,6 +33,9 @@ class AsyncEventInfo(Generic[T]):
     async def value(self) -> T:
         return mapping.from_maybe_impl(await self._future)
 
+    def _cancel(self) -> None:
+        self._future.cancel()
+
     def is_done(self) -> bool:
         return self._future.done()
 
@@ -50,7 +53,10 @@ class AsyncEventContextManager(Generic[T]):
         exc_val: BaseException,
         exc_tb: TracebackType,
     ) -> None:
-        await self._event.value
+        if exc_val:
+            self._event._cancel()
+        else:
+            await self._event.value
 
 
 class AsyncBase(ImplWrapper):
