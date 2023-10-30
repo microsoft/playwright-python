@@ -227,9 +227,7 @@ def test_to_have_js_property_pass_null(page: Page) -> None:
     expect(locator).to_have_js_property("foo", None)
 
 
-def test_assertions_locator_to_have_text(
-    page: Page, server: Server
-) -> None:
+def test_assertions_locator_to_have_text(page: Page, server: Server) -> None:
     page.goto(server.EMPTY_PAGE)
     page.set_content("<div id=foobar>kek</div>")
     expect(page.locator("div#foobar")).to_have_text("kek")

@@ -961,7 +961,7 @@ class Page(ChannelOwner):
         try:
             await asyncio.wait(
                 [
-                    asyncio.create_task(self._browser_context._pause()),
+                    asyncio.create_task(self._browser_context._channel.send("pause")),
                     self._closed_or_crashed_future,
                 ],
                 return_when=asyncio.FIRST_COMPLETED,
