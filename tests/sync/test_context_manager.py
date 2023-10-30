@@ -14,7 +14,9 @@
 
 from typing import Dict
 
-from playwright.sync_api import BrowserType
+import pytest
+
+from playwright.sync_api import BrowserContext, BrowserType
 
 
 def test_context_managers(browser_type: BrowserType, launch_arguments: Dict) -> None:
@@ -26,3 +28,9 @@ def test_context_managers(browser_type: BrowserType, launch_arguments: Dict) -> 
             assert len(browser.contexts) == 1
         assert len(browser.contexts) == 0
     assert not browser.is_connected()
+
+
+def test_context_managers_not_hang(context: BrowserContext) -> None:
+    with pytest.raises(Exception, match="Oops!"):
+        with context.new_page():
+            raise Exception("Oops!")

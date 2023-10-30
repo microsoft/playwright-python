@@ -281,6 +281,12 @@ def test_expect_response_should_work(page: Page, server: Server) -> None:
     assert resp.value.request
 
 
+def test_expect_response_should_not_hang_when_predicate_throws(page: Page) -> None:
+    with pytest.raises(Exception, match="Oops!"):
+        with page.expect_response("**/*"):
+            raise Exception("Oops!")
+
+
 def test_expect_response_should_use_context_timeout(
     page: Page, context: BrowserContext, server: Server
 ) -> None:
