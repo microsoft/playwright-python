@@ -150,10 +150,14 @@ def test_sync_wait_for_event(page: Page, server: Server) -> None:
 
 
 def test_sync_wait_for_event_raise(page: Page) -> None:
-    with pytest.raises(Error):
-        with page.expect_event("popup", timeout=500) as popup:
+    with pytest.raises(AssertionError):
+        with page.expect_event("popup", timeout=500):
             assert False
-        assert popup.value is None
+
+    with pytest.raises(Error) as exc_info:
+        with page.expect_event("popup", timeout=500):
+            page.wait_for_timeout(1_000)
+    assert "Timeout 500ms exceeded" in exc_info.value.message
 
 
 def test_sync_make_existing_page_sync(page: Page) -> None:
