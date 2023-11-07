@@ -14,6 +14,7 @@
 
 import asyncio
 import re
+from pathlib import Path
 from typing import Callable
 
 import pytest
@@ -22,6 +23,7 @@ from flaky import flaky
 from playwright.async_api import BrowserType, Error, Playwright, Route
 from tests.conftest import RemoteServer
 from tests.server import Server
+from tests.utils import parse_trace
 
 
 async def test_browser_type_connect_should_be_able_to_reconnect_to_a_browser(
@@ -299,3 +301,61 @@ async def test_should_upload_large_file(
     )
     assert match.group("name") == b"file1"
     assert match.group("filename") == b"200MB.zip"
+
+
+async def test_should_record_trace_with_source(
+    launch_server: Callable[[], RemoteServer],
+    server: Server,
+    tmp_path: Path,
+    browser_type: BrowserType,
+):
+    remote = launch_server()
+    browser = await browser_type.connect(remote.ws_endpoint)
+    context = await browser.new_context()
+    page = await context.new_page()
+
+    await context.tracing.start(sources=True)
+    await page.goto(server.EMPTY_PAGE)
+    await page.set_content("<button>Click</button>")
+    await page.click("'Click'")
+    path = tmp_path / "trace1.zip"
+    await context.tracing.stop(path=path)
+
+    await context.close()
+    await browser.close()
+
+    (resources, events) = parse_trace(path)
+    current_file_content = Path(__file__).read_bytes()
+    found_current_file = False
+    for name, resource in resources.items():
+        if resource == current_file_content:
+            found_current_file = True
+            break
+    assert found_current_file
+
+
+async def test_should_record_trace_with_relative_trace_path(
+    launch_server: Callable[[], RemoteServer],
+    server: Server,
+    tmp_path: Path,
+    browser_type: BrowserType,
+):
+    remote = launch_server()
+    browser = await browser_type.connect(remote.ws_endpoint)
+    context = await browser.new_context()
+    page = await context.new_page()
+
+    await context.tracing.start(sources=True)
+    await page.goto(server.EMPTY_PAGE)
+    await page.set_content("<button>Click</button>")
+    await page.click("'Click'")
+    try:
+        await context.tracing.stop(path="trace1.zip")
+
+        await context.close()
+        await browser.close()
+
+        # make sure trace1.zip exists
+        assert Path("trace1.zip").exists()
+    finally:
+        Path("trace1.zip").unlink()

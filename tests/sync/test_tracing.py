@@ -12,14 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 import re
-import zipfile
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List
 
 from playwright.sync_api import Browser, BrowserContext, BrowserType, Page
 from tests.server import Server
+from tests.utils import get_trace_actions, parse_trace
 
 
 def test_browser_context_output_trace(
@@ -103,7 +102,7 @@ def test_should_collect_trace_with_resources_but_no_js(
 
     (_, events) = parse_trace(trace_file_path)
     assert events[0]["type"] == "context-options"
-    assert get_actions(events) == [
+    assert get_trace_actions(events) == [
         "Page.goto",
         "Page.set_content",
         "Page.click",
@@ -158,7 +157,7 @@ def test_should_collect_two_traces(
 
     (_, events) = parse_trace(tracing1_path)
     assert events[0]["type"] == "context-options"
-    assert get_actions(events) == [
+    assert get_trace_actions(events) == [
         "Page.goto",
         "Page.set_content",
         "Page.click",
@@ -166,7 +165,7 @@ def test_should_collect_two_traces(
 
     (_, events) = parse_trace(tracing2_path)
     assert events[0]["type"] == "context-options"
-    assert get_actions(events) == ["Page.dblclick", "Page.close"]
+    assert get_trace_actions(events) == ["Page.dblclick", "Page.close"]
 
 
 def test_should_not_throw_when_stopping_without_start_but_not_exporting(
@@ -193,7 +192,7 @@ def test_should_work_with_playwright_context_managers(
 
     (_, events) = parse_trace(trace_file_path)
     assert events[0]["type"] == "context-options"
-    assert get_actions(events) == [
+    assert get_trace_actions(events) == [
         "Page.goto",
         "Page.set_content",
         "Page.expect_console_message",
@@ -217,7 +216,7 @@ def test_should_display_wait_for_load_state_even_if_did_not_wait_for_it(
     context.tracing.stop(path=trace_file_path)
 
     (_, events) = parse_trace(trace_file_path)
-    assert get_actions(events) == [
+    assert get_trace_actions(events) == [
         "Page.goto",
         "Page.wait_for_load_state",
         "Page.wait_for_load_state",
@@ -258,7 +257,7 @@ def test_should_respect_traces_dir_and_name(
         )
 
     (resources, events) = parse_trace(tmpdir / "trace1.zip")
-    assert get_actions(events) == ["Page.goto"]
+    assert get_trace_actions(events) == ["Page.goto"]
     assert resource_names(resources) == [
         "resources/XXX.css",
         "resources/XXX.html",
@@ -268,7 +267,7 @@ def test_should_respect_traces_dir_and_name(
     ]
 
     (resources, events) = parse_trace(tmpdir / "trace2.zip")
-    assert get_actions(events) == ["Page.goto"]
+    assert get_trace_actions(events) == ["Page.goto"]
     assert resource_names(resources) == [
         "resources/XXX.css",
         "resources/XXX.html",
@@ -277,42 +276,3 @@ def test_should_respect_traces_dir_and_name(
         "trace.stacks",
         "trace.trace",
     ]
-
-
-def parse_trace(path: Path) -> Tuple[Dict[str, bytes], List[Any]]:
-    resources: Dict[str, bytes] = {}
-    with zipfile.ZipFile(path, "r") as zip:
-        for name in zip.namelist():
-            resources[name] = zip.read(name)
-    action_map: Dict[str, Any] = {}
-    events: List[Any] = []
-    for name in ["trace.trace", "trace.network"]:
-        for line in resources[name].decode().splitlines():
-            if not line:
-                continue
-            event = json.loads(line)
-            if event["type"] == "before":
-                event["type"] = "action"
-                action_map[event["callId"]] = event
-                events.append(event)
-            elif event["type"] == "input":
-                pass
-            elif event["type"] == "after":
-                existing = action_map[event["callId"]]
-                existing["error"] = event.get("error", None)
-            else:
-                events.append(event)
-    return (resources, events)
-
-
-def get_actions(events: List[Any]) -> List[str]:
-    action_events = sorted(
-        list(
-            filter(
-                lambda e: e["type"] == "action",
-                events,
-            )
-        ),
-        key=lambda e: e["startTime"],
-    )
-    return [e["apiName"] for e in action_events]
