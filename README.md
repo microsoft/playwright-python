@@ -9,6 +9,10 @@ Warnings:
 
 Note: For testing with Playwright and undetected-playwright, use multiple venv's
 
+## Demos (tested on Win 10)
+![img.png](assets/nowsecure_nl.png)
+![img.png](assets/creep_js.png)
+
 
 ## Dependencies
 
