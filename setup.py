@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Dict, List
 
 from setuptools import setup
+from build_patched import patch_driver
 
 try:
     from auditwheel.wheeltools import InWheel
@@ -147,6 +148,9 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
             )
             with zipfile.ZipFile(zip_file, "r") as zip:
                 extractall(zip, f"driver/{wheel_bundle['zip_name']}")
+
+            patch_driver(os.getcwd()+f"/driver/{wheel_bundle['zip_name']}")
+
             wheel_location = without_platform + wheel_bundle["wheel"]
             shutil.copy(base_wheel_location, wheel_location)
             with zipfile.ZipFile(wheel_location, "a") as zip:
@@ -195,19 +199,20 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
         zip_file = f"driver/playwright-{driver_version}-{zip_name}.zip"
         with zipfile.ZipFile(zip_file, "r") as zip:
             extractall(zip, "playwright/driver")
+        patch_driver(os.getcwd()+"/playwright/driver")
 
 
 setup(
-    name="playwright",
-    author="Microsoft Corporation",
+    name="undetected-playwright",
+    author="Microsoft Corporation, patches by github.com/kaliiiiiiiiii",
     author_email="",
-    description="A high-level API to automate web browsers",
+    description="Undetected version of botright",
     long_description=Path("README.md").read_text(encoding="utf-8"),
     long_description_content_type="text/markdown",
     license="Apache-2.0",
-    url="https://github.com/Microsoft/playwright-python",
+    url="https://github.com/kaliiiiiiiiii/undetected-playwright-python",
     project_urls={
-        "Release notes": "https://github.com/microsoft/playwright-python/releases",
+        "Release notes": "https://github.com/kaliiiiiiiiii/undetected-playwright-python/releases",
     },
     packages=[
         "playwright",

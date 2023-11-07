@@ -90,6 +90,12 @@ class BrowserType(ChannelOwner):
         chromiumSandbox: bool = None,
         firefoxUserPrefs: Dict[str, Union[str, float, bool]] = None,
     ) -> Browser:
+
+        # undetected-playwright patches
+        if not ignoreDefaultArgs:
+            ignoreDefaultArgs = []
+        ignoreDefaultArgs.append('--enable-automation')
+
         params = locals_to_params(locals())
         normalize_launch_params(params)
         browser = cast(
