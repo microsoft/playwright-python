@@ -20,13 +20,14 @@ Note: For testing with Playwright and undetected-playwright, use multiple venv's
 
 ## Installation
 
-You don't want to clone & build the whole repo? \
-**Download** undetected-playwright for your platform from the [releases](https://github.com/kaliiiiiiiiii/undetected-playwright-python/releases) and install with (replace with the downloaded file name):
+#### You don't want to clone & build the whole repo?
+
+**copy the download url** (right-click, copy link) for your platform from the [latest release](https://github.com/kaliiiiiiiiii/undetected-playwright-python/releases/latest) and install with (replace the url accordingly):
 ```shell
-pip install undetected_playwright-****.whl
+pip install https://github.com/kaliiiiiiiiii/undetected-playwright-python/releases/download/0.0.1/undetected_playwright-0.1.dev682+gb82acaf.d20231107-py3-none-manylinux1_x86_64.whl
 ```
 
-Build from this repo:
+#### Build from this repo:
 ```
 git clone https://github.com/kaliiiiiiiiii/undetected-playwright-python
 cd undetected-playwright-python
