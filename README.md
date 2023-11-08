@@ -20,9 +20,13 @@ Note: For testing with Playwright and undetected-playwright, use multiple venv's
 
 ## Installation
 
-You don't want to clone & build the whole repo? Try using the script at [Patch native playwright](#Patch-native-playwright)
+You don't want to clone & build the whole repo? \
+**Download** undetected-playwright for your platform from the [releases](https://github.com/kaliiiiiiiiii/undetected-playwright-python/releases) and install with (replace with the downloaded file name):
+```shell
+pip install undetected_playwright-****.whl
+```
 
-Run in the shell:
+Build from this repo:
 ```
 git clone https://github.com/kaliiiiiiiiii/undetected-playwright-python
 cd undetected-playwright-python
@@ -84,98 +88,6 @@ with sync_playwright() as p:
     input("Press ENTER to exit:")
     browser.close()
 ```
-
-## Patch native playwright
-Warning: \
-**Running** this **multiple times breaks playwright**, be aware!
-
-<details>
-<summary>Python Code (Click to expand)</summary>
-
-```python
-import re
-import os
-import playwright
-
-def patch_driver(path: str):
-    # patch driver
-    print(f'[PATCH] patching driver for "{path}"', file=sys.stderr)
-
-    def replace(path: str, old_str: str, new_str: str):
-        with open(path, "r") as f:
-            content = f.read()
-            content = content.replace(old_str, new_str)
-        with open(path, "w") as f:
-            f.write(content)
-
-    server_path = path + "/package/lib/server"
-    chromium_path = server_path + "/chromium"
-
-    # comment out all "Runtime.enable" occurences
-    cr_devtools_path = chromium_path + "/crDevTools.js"
-    replace(cr_devtools_path, "session.send('Runtime.enable')", "/*session.send('Runtime.enable'), */")
-
-    cr_page_path = chromium_path + "/crPage.js"
-    with open(cr_page_path, "r") as f:
-        cr_page = f.read()
-        cr_page = cr_page.replace("this._client.send('Runtime.enable', {}),",
-                                  "/*this._client.send('Runtime.enable', {}),*/")
-        cr_page = cr_page.replace("session._sendMayFail('Runtime.enable');",
-                                  "/*session._sendMayFail('Runtime.enable');*/")
-    with open(cr_page_path, "w") as f:
-        f.write(cr_page)
-
-    cr_sv_worker_path = chromium_path + "/crServiceWorker.js"
-    replace(cr_sv_worker_path, "session.send('Runtime.enable', {}).catch(e => {});",
-            "/*session.send('Runtime.enable', {}).catch(e => {});*/")
-
-    # patch ExecutionContext eval to still work
-    frames_path = server_path + "/frames.js"
-
-    _context_re = re.compile(r".*\s_context?\s*\(world\)\s*\{(?:[^}{]+|\{(?:[^}{]+|\{[^}{]*\})*\})*\}")
-    _context_replacement = \
-        " async _context(world) {\n" \
-        """
-        // atm ignores world_name
-        if (this._isolatedContext == undefined) {
-          var worldName = "utility"
-          var result = await this._page._delegate._mainFrameSession._client.send('Page.createIsolatedWorld', {
-            frameId: this._id,
-            grantUniveralAccess: true,
-            worldName: worldName
-          });
-          var crContext = new _crExecutionContext.CRExecutionContext(this._page._delegate._mainFrameSession._client, {id:result.executionContextId})
-          this._isolatedContext = new _dom.FrameExecutionContext(crContext, this, worldName)
-        }
-        return this._isolatedContext
-        \n""" \
-        "}"
-    clear_re = re.compile(
-        r".\s_onClearLifecycle?\s*\(\)\s*\{")
-    clear_repl = \
-        " _onClearLifecycle() {\n" \
-        """
-        this._isolatedContext = undefined;
-        """
-
-    with open(frames_path, "r") as f:
-        frames_js = f.read()
-        frames_js = "// undetected-playwright-patch - custom imports\n" \
-                    "var _crExecutionContext = require('./chromium/crExecutionContext')\n" \
-                    "var _dom =  require('./dom')\n" \
-                    + "\n" + frames_js
-
-        # patch _context function
-        frames_js = _context_re.subn(_context_replacement, frames_js, count=1)[0]
-        frames_js = clear_re.subn(clear_repl, frames_js, count=1)[0]
-
-    with open(frames_path, "w") as f:
-        f.write(frames_js)
-
-driver_module_path = os.path.dirname(playwright.__file__) + "/driver"
-patch_driver(driver_module_path)
-```
-</details>
 
 ## Documentation
 
