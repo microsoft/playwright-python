@@ -4,6 +4,11 @@
 
 This is a patch of the original playwright implementation for Python.
 
+It currently passes for sure (tested on Win10):
+- ✅ [CloudFare] 
+- ✅ [Bet365] (shape//F5 I think)
+- [Others] Unknown/Not tested
+
 Warnings: 
 * the **Only chromium** part for Playwright is patched.
 * This will overwrite your default playwright package.
