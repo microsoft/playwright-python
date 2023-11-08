@@ -120,7 +120,5 @@ See the original
     - [x] reset on frame-reload//navigation
 
 ## TODO's
-
-- [ ] make setup.py compatible for pypi uploads
 - [ ] add GitHub runner to build releases automated
 
