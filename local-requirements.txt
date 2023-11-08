@@ -18,6 +18,6 @@ pytest-xdist==3.3.1
 requests==2.31.0
 service_identity==23.1.0
 setuptools==68.2.2
-twisted==23.8.0
+twisted==23.10.0
 types-pyOpenSSL==23.2.0.2
 wheel==0.41.2
