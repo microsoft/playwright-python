@@ -102,11 +102,12 @@ with sync_playwright() as p:
 
 ## Documentation
 
-See the original
+See original \
 [https://playwright.dev/python/docs/intro](https://playwright.dev/python/docs/intro)
 
 ## API Reference
 
+See original \
 [https://playwright.dev/python/docs/api/class-playwright](https://playwright.dev/python/docs/api/class-playwright)
 
 
