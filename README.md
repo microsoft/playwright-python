@@ -20,7 +20,7 @@ Note: For testing with Playwright and undetected-playwright, use multiple venv's
 
 ## Installation
 
-#### You don't want to clone & build the whole repo?
+#### From a Release (recommended)
 
 **copy the download url** (right-click, copy link) for your platform from the [latest release](https://github.com/kaliiiiiiiiii/undetected-playwright-python/releases/latest) and install with (replace the url accordingly):
 ```shell
