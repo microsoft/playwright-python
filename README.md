@@ -1,5 +1,6 @@
 # 🎭 [Playwright](https://playwright.dev) for Python 
-[![PyPI version](https://badge.fury.io/py/playwright.svg)](https://pypi.python.org/pypi/playwright/)
+
+[//]: # ([![PyPI version]&#40;https://badge.fury.io/py/playwright.svg&#41;]&#40;https://pypi.python.org/pypi/playwright/&#41;)
 
 This is a patch of the original playwright implementation for Python.
 
