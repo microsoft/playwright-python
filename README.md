@@ -1,6 +1,6 @@
 # 🎭 [Playwright](https://playwright.dev) for Python 
 
-[//]: # ([![PyPI version]&#40;https://badge.fury.io/py/playwright.svg&#41;]&#40;https://pypi.python.org/pypi/playwright/&#41;)
+[![PyPI version](https://badge.fury.io/py/undetected-playwright-patch.svg)](https://badge.fury.io/py/undetected-playwright-patch)
 
 This is a patch of the original playwright implementation for Python.
 
@@ -26,11 +26,11 @@ Note: For testing with Playwright and undetected-playwright, use multiple venv's
 
 ## Installation
 
-#### From a Release (recommended)
+#### From PyPi (recommended)
 
-**copy the download url** (right-click, copy link) for your platform from the [latest release](https://github.com/kaliiiiiiiiii/undetected-playwright-python/releases/latest) and install with (replace the url accordingly):
+execute in your shell console
 ```shell
-pip install https://github.com/kaliiiiiiiiii/undetected-playwright-python/releases/download/0.0.1/undetected_playwright-0.1.dev682+gb82acaf.d20231107-py3-none-manylinux1_x86_64.whl
+pip install unetected-playwright-patch
 ```
 
 #### Build from this repo:
@@ -54,6 +54,8 @@ from playwright.async_api import async_playwright, Playwright
 
 async def run(playwright: Playwright):
     args = []
+    
+    # disable navigator.webdriver:true flag
     args.append("--disable-blink-features=AutomationControlled")
     browser = await playwright.chromium.launch(channel="chrome", headless=False,
                                                args=args)
@@ -85,6 +87,8 @@ from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     args = []
+    
+    # disable navigator.webdriver:true flag
     args.append("--disable-blink-features=AutomationControlled")
     browser = p.chromium.launch(args=args, headless=False, channel="chrome")
     page = browser.new_page()

@@ -100,7 +100,7 @@ def main(build: bool = True, build_all: bool = False, ):
 
 
 if __name__ == "__main__":
-    main(build=True, build_all=False)
+    main(build=True, build_all=True)
 
     loop = asyncio.ProactorEventLoop()
     loop.run_until_complete(patch_check_main())

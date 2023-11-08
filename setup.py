@@ -203,7 +203,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
 
 
 setup(
-    name="undetected-playwright",
+    name="undetected-playwright-patch",
     author="Microsoft Corporation, patches by github.com/kaliiiiiiiiii",
     author_email="",
     description="Undetected version of botright",
@@ -213,6 +213,8 @@ setup(
     url="https://github.com/kaliiiiiiiiii/undetected-playwright-python",
     project_urls={
         "Release notes": "https://github.com/kaliiiiiiiiii/undetected-playwright-python/releases",
+        'Bug Reports': 'https://github.com/kaliiiiiiiiii/undetected-playwright-python/issues',
+        'Source Code': 'https://github.com/kaliiiiiiiiii/undetected-playwright-python/',
     },
     packages=[
         "playwright",
