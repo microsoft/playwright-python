@@ -30,7 +30,7 @@ Note: For testing with Playwright and undetected-playwright, use multiple venv's
 
 execute in your shell console
 ```shell
-pip install unetected-playwright-patch
+pip install undetected-playwright-patch
 ```
 
 #### Build from this repo:
