@@ -61,9 +61,6 @@ Then you need to run
 chmod +x <The path your terminal tells you for node>
 ```
 
-
-
-
 [//]: # (run `pip install undetected-playwright-python` in your terminal)
 
 ## Example
