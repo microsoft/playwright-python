@@ -2,8 +2,8 @@
 requires = ["setuptools==68.2.2", "setuptools-scm==8.0.4", "wheel==0.41.2", "auditwheel==5.4.0"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools_scm]
-version_file = "playwright/_repo_version.py"
+# [tool.setuptools_scm]
+# version_file = "playwright/_repo_version.py"
 
 [tool.pytest.ini_options]
 addopts = "-Wall -rsx -vv -s"

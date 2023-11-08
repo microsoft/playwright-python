@@ -49,9 +49,9 @@ def download_driver(zip_name: str) -> None:
         return
     url = "https://playwright.azureedge.net/builds/driver/"
     if (
-        "-alpha" in driver_version
-        or "-beta" in driver_version
-        or "-next" in driver_version
+            "-alpha" in driver_version
+            or "-beta" in driver_version
+            or "-next" in driver_version
     ):
         url = url + "next/"
     url = url + zip_file
@@ -129,15 +129,15 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
             wheels = list(
                 filter(
                     lambda wheel: wheel["platform"] == sys.platform
-                    and wheel["machine"] == platform.machine().lower(),
+                                  and wheel["machine"] == platform.machine().lower(),
                     base_wheel_bundles,
                 )
             )[:1]
         self._build_wheels(wheels)
 
     def _build_wheels(
-        self,
-        wheels: List[Dict[str, str]],
+            self,
+            wheels: List[Dict[str, str]],
     ) -> None:
         base_wheel_location: str = glob.glob(os.path.join(self.dist_dir, "*.whl"))[0]
         without_platform = base_wheel_location[:-7]
@@ -149,7 +149,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
             with zipfile.ZipFile(zip_file, "r") as zip:
                 extractall(zip, f"driver/{wheel_bundle['zip_name']}")
 
-            patch_driver(os.getcwd()+f"/driver/{wheel_bundle['zip_name']}")
+            patch_driver(os.getcwd() + f"/driver/{wheel_bundle['zip_name']}")
 
             wheel_location = without_platform + wheel_bundle["wheel"]
             shutil.copy(base_wheel_location, wheel_location)
@@ -169,8 +169,8 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
             for whlfile in glob.glob(os.path.join(self.dist_dir, "*.whl")):
                 os.makedirs("wheelhouse", exist_ok=True)
                 with InWheel(
-                    in_wheel=whlfile,
-                    out_wheel=os.path.join("wheelhouse", os.path.basename(whlfile)),
+                        in_wheel=whlfile,
+                        out_wheel=os.path.join("wheelhouse", os.path.basename(whlfile)),
                 ):
                     print(f"Updating RECORD file of {whlfile}")
             shutil.rmtree(self.dist_dir)
@@ -180,15 +180,15 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
             print("auditwheel not installed, not updating RECORD file")
 
     def _download_and_extract_local_driver(
-        self,
-        wheels: List[Dict[str, str]],
+            self,
+            wheels: List[Dict[str, str]],
     ) -> None:
         zip_names_for_current_system = set(
             map(
                 lambda wheel: wheel["zip_name"],
                 filter(
                     lambda wheel: wheel["machine"] == platform.machine().lower()
-                    and wheel["platform"] == sys.platform,
+                                  and wheel["platform"] == sys.platform,
                     wheels,
                 ),
             )
@@ -199,7 +199,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
         zip_file = f"driver/playwright-{driver_version}-{zip_name}.zip"
         with zipfile.ZipFile(zip_file, "r") as zip:
             extractall(zip, "playwright/driver")
-        patch_driver(os.getcwd()+"/playwright/driver")
+        patch_driver(os.getcwd() + "/playwright/driver")
 
 
 setup(
