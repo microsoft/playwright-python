@@ -24,6 +24,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    loop = asyncio.ProactorEventLoop()
-    loop.run_until_complete(main())
-    # asyncio.run(main) # should work for non-Windows as well
+    asyncio.run(main())
