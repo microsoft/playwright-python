@@ -18,7 +18,7 @@ import sys
 from pathlib import Path
 
 import playwright
-from playwright._repo_version import version
+# from playwright._repo_version import version
 
 
 def compute_driver_executable() -> Path:
@@ -33,5 +33,5 @@ def get_driver_env() -> dict:
     env = os.environ.copy()
     env["PW_LANG_NAME"] = "python"
     env["PW_LANG_NAME_VERSION"] = f"{sys.version_info.major}.{sys.version_info.minor}"
-    env["PW_CLI_DISPLAY_VERSION"] = version
+#    env["PW_CLI_DISPLAY_VERSION"] = version
     return env
