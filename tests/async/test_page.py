@@ -1294,3 +1294,33 @@ async def test_expose_binding_should_serialize_cycles(page: Page):
     await page.expose_binding("log", lambda source, o: binding(source, o))
     await page.evaluate("const a = {}; a.b = a; window.log(a)")
     assert binding_values[0]["b"] == binding_values[0]
+
+
+async def test_page_pause_should_reset_default_timeouts(
+    page: Page, headless: bool, server: Server
+) -> None:
+    if not headless:
+        pytest.skip()
+
+    await page.goto(server.EMPTY_PAGE)
+    page.pause()
+    with pytest.raises(Error, match="Timeout 30000ms exceeded."):
+        await page.get_by_text("foo").click()
+
+
+async def test_page_pause_should_reset_custom_timeouts(
+    page: Page, headless: bool, server: Server
+) -> None:
+    if not headless:
+        pytest.skip()
+
+    page.set_default_timeout(123)
+    page.set_default_navigation_timeout(456)
+    await page.goto(server.EMPTY_PAGE)
+    page.pause()
+    with pytest.raises(Error, match="Timeout 123ms exceeded."):
+        await page.get_by_text("foo").click()
+
+    server.set_route("/empty.html", lambda route: None)
+    with pytest.raises(Error, match="Timeout 456ms exceeded."):
+        await page.goto(server.EMPTY_PAGE)

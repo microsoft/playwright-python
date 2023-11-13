@@ -35,7 +35,7 @@ from .server import Server, WebSocketServerServer, test_server
 _dirname = get_file_dirname()
 
 
-def pytest_generate_tests(metafunc: Any) -> None:
+def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
     if "browser_name" in metafunc.fixturenames:
         browsers = metafunc.config.option.browser or ["chromium", "firefox", "webkit"]
         metafunc.parametrize("browser_name", browsers, scope="session")
@@ -54,11 +54,14 @@ def assetdir() -> Path:
 
 
 @pytest.fixture(scope="session")
-def launch_arguments(pytestconfig: Any) -> Dict:
+def headless(pytestconfig: pytest.Config) -> bool:
+    return not (pytestconfig.getoption("--headed") or os.getenv("HEADFUL", False))
+
+
+@pytest.fixture(scope="session")
+def launch_arguments(pytestconfig: pytest.Config, headless: bool) -> Dict:
     return {
-        "headless": not (
-            pytestconfig.getoption("--headed") or os.getenv("HEADFUL", False)
-        ),
+        "headless": headless,
         "channel": pytestconfig.getoption("--browser-channel"),
     }
 
@@ -92,12 +95,12 @@ def after_each_hook() -> Generator[None, None, None]:
 
 
 @pytest.fixture(scope="session")
-def browser_name(pytestconfig: Any) -> None:
+def browser_name(pytestconfig: pytest.Config) -> None:
     return pytestconfig.getoption("browser")
 
 
 @pytest.fixture(scope="session")
-def browser_channel(pytestconfig: Any) -> None:
+def browser_channel(pytestconfig: pytest.Config) -> None:
     return pytestconfig.getoption("--browser-channel")
 
 
@@ -169,7 +172,7 @@ def skip_by_platform(request: pytest.FixtureRequest) -> None:
         pytest.skip(f"skipped on this platform: {sys.platform}")
 
 
-def pytest_addoption(parser: Any) -> None:
+def pytest_addoption(parser: pytest.Parser) -> None:
     group = parser.getgroup("playwright", "Playwright")
     group.addoption(
         "--browser",
