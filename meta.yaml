@@ -23,7 +23,7 @@ requirements:
     - setuptools_scm
   run:
     - python
-    - greenlet ==3.0.0
+    - greenlet ==3.0.1
     - pyee ==11.0.1
     - typing_extensions # [py<39]
 test:
