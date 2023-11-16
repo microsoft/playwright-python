@@ -78,7 +78,7 @@ async def test_should_intercept_with_post_data_override(server: Server, page: Pa
     await page.route("**/*.html", lambda route: handle(route))
     await page.goto(server.PREFIX + "/empty.html")
     request = await request_promise
-    assert request.post_body.decode("utf-8") == '{"foo":"bar"}'
+    assert request.post_body.decode("utf-8") == '{"foo": "bar"}'
 
 
 async def test_should_fulfill_popup_main_request_using_alias(

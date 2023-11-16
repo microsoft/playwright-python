@@ -36,16 +36,17 @@ from playwright._impl._api_structures import (
     SetCookieParam,
     StorageState,
 )
-from playwright._impl._api_types import Error
 from playwright._impl._artifact import Artifact
 from playwright._impl._cdp_session import CDPSession
 from playwright._impl._connection import (
     ChannelOwner,
+    filter_none,
     from_channel,
     from_nullable_channel,
 )
 from playwright._impl._console_message import ConsoleMessage
 from playwright._impl._dialog import Dialog
+from playwright._impl._errors import Error, TargetClosedError
 from playwright._impl._event_context_manager import EventContextManagerImpl
 from playwright._impl._fetch import APIRequestContext
 from playwright._impl._frame import Frame
@@ -70,7 +71,7 @@ from playwright._impl._helper import (
 from playwright._impl._network import Request, Response, Route, serialize_headers
 from playwright._impl._page import BindingCall, Page, Worker
 from playwright._impl._tracing import Tracing
-from playwright._impl._wait_helper import WaitHelper
+from playwright._impl._waiter import Waiter
 from playwright._impl._web_error import WebError
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -194,6 +195,7 @@ class BrowserContext(ChannelOwner):
         self.once(
             self.Events.Close, lambda context: self._closed_future.set_result(True)
         )
+        self._close_reason: Optional[str] = None
         self._set_event_to_subscription_mapping(
             {
                 BrowserContext.Events.Console: "console",
@@ -433,16 +435,16 @@ class BrowserContext(ChannelOwner):
     ) -> EventContextManagerImpl:
         if timeout is None:
             timeout = self._timeout_settings.timeout()
-        wait_helper = WaitHelper(self, f"browser_context.expect_event({event})")
-        wait_helper.reject_on_timeout(
+        waiter = Waiter(self, f"browser_context.expect_event({event})")
+        waiter.reject_on_timeout(
             timeout, f'Timeout {timeout}ms exceeded while waiting for event "{event}"'
         )
         if event != BrowserContext.Events.Close:
-            wait_helper.reject_on_event(
-                self, BrowserContext.Events.Close, Error("Context closed")
+            waiter.reject_on_event(
+                self, BrowserContext.Events.Close, lambda: TargetClosedError()
             )
-        wait_helper.wait_for_event(self, event, predicate)
-        return EventContextManagerImpl(wait_helper.result())
+        waiter.wait_for_event(self, event, predicate)
+        return EventContextManagerImpl(waiter.result())
 
     def _on_close(self) -> None:
         if self._browser:
@@ -450,9 +452,10 @@ class BrowserContext(ChannelOwner):
 
         self.emit(BrowserContext.Events.Close, self)
 
-    async def close(self) -> None:
+    async def close(self, reason: str = None) -> None:
         if self._close_was_called:
             return
+        self._close_reason = reason
         self._close_was_called = True
 
         async def _inner_close() -> None:
@@ -479,7 +482,7 @@ class BrowserContext(ChannelOwner):
                 await har.delete()
 
         await self._channel._connection.wrap_api_call(_inner_close, True)
-        await self._channel.send("close")
+        await self._channel.send("close", filter_none({"reason": reason}))
         await self._closed_future
 
     async def storage_state(self, path: Union[str, Path] = None) -> StorageState:
@@ -487,6 +490,13 @@ class BrowserContext(ChannelOwner):
         if path:
             await async_writefile(path, json.dumps(result))
         return result
+
+    def _effective_close_reason(self) -> Optional[str]:
+        if self._close_reason:
+            return self._close_reason
+        if self._browser:
+            return self._browser._close_reason
+        return None
 
     async def wait_for_event(
         self, event: str, predicate: Callable = None, timeout: float = None

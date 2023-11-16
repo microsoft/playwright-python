@@ -28,13 +28,13 @@ class Artifact(ChannelOwner):
         super().__init__(parent, type, guid, initializer)
         self.absolute_path = initializer["absolutePath"]
 
-    async def path_after_finished(self) -> Optional[pathlib.Path]:
+    async def path_after_finished(self) -> pathlib.Path:
         if self._connection.is_remote:
             raise Error(
                 "Path is not available when using browser_type.connect(). Use save_as() to save a local copy."
             )
         path = await self._channel.send("pathAfterFinished")
-        return pathlib.Path(path) if path else None
+        return pathlib.Path(path)
 
     async def save_as(self, path: Union[str, Path]) -> None:
         stream = cast(Stream, from_channel(await self._channel.send("saveAsStream")))

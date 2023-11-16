@@ -18,8 +18,8 @@ from typing import Dict
 import pytest
 
 from playwright.async_api import Page, async_playwright
-
-from ..server import Server
+from tests.server import Server
+from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
 
 
 async def test_should_cancel_underlying_protocol_calls(
@@ -66,7 +66,7 @@ async def test_cancel_pending_protocol_call_on_playwright_stop(server: Server) -
     await playwright.stop()
     with pytest.raises(Exception) as exc_info:
         await pending_task
-    assert "Connection closed" in str(exc_info.value)
+    assert TARGET_CLOSED_ERROR_MESSAGE in str(exc_info.value)
 
 
 async def test_should_collect_stale_handles(page: Page, server: Server) -> None:

@@ -49,16 +49,16 @@ from playwright._impl._api_structures import (
     ResourceTiming,
     SecurityDetails,
 )
-from playwright._impl._api_types import Error
 from playwright._impl._connection import (
     ChannelOwner,
     filter_none,
     from_channel,
     from_nullable_channel,
 )
+from playwright._impl._errors import Error
 from playwright._impl._event_context_manager import EventContextManagerImpl
 from playwright._impl._helper import locals_to_params
-from playwright._impl._wait_helper import WaitHelper
+from playwright._impl._waiter import Waiter
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser_context import BrowserContext
@@ -641,22 +641,20 @@ class WebSocket(ChannelOwner):
     ) -> EventContextManagerImpl:
         if timeout is None:
             timeout = cast(Any, self._parent)._timeout_settings.timeout()
-        wait_helper = WaitHelper(self, f"web_socket.expect_event({event})")
-        wait_helper.reject_on_timeout(
+        waiter = Waiter(self, f"web_socket.expect_event({event})")
+        waiter.reject_on_timeout(
             cast(float, timeout),
             f'Timeout {timeout}ms exceeded while waiting for event "{event}"',
         )
         if event != WebSocket.Events.Close:
-            wait_helper.reject_on_event(
-                self, WebSocket.Events.Close, Error("Socket closed")
-            )
+            waiter.reject_on_event(self, WebSocket.Events.Close, Error("Socket closed"))
         if event != WebSocket.Events.Error:
-            wait_helper.reject_on_event(
-                self, WebSocket.Events.Error, Error("Socket error")
-            )
-        wait_helper.reject_on_event(self._page, "close", Error("Page closed"))
-        wait_helper.wait_for_event(self, event, predicate)
-        return EventContextManagerImpl(wait_helper.result())
+            waiter.reject_on_event(self, WebSocket.Events.Error, Error("Socket error"))
+        waiter.reject_on_event(
+            self._page, "close", lambda: self._page._close_error_with_reason()
+        )
+        waiter.wait_for_event(self, event, predicate)
+        return EventContextManagerImpl(waiter.result())
 
     async def wait_for_event(
         self, event: str, predicate: Callable = None, timeout: float = None

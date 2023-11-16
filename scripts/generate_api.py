@@ -246,7 +246,7 @@ from playwright._impl._selectors import Selectors as SelectorsImpl
 from playwright._impl._video import Video as VideoImpl
 from playwright._impl._tracing import Tracing as TracingImpl
 from playwright._impl._locator import Locator as LocatorImpl, FrameLocator as FrameLocatorImpl
-from playwright._impl._api_types import Error
+from playwright._impl._errors import Error
 from playwright._impl._fetch import APIRequest as APIRequestImpl, APIResponse as APIResponseImpl, APIRequestContext as APIRequestContextImpl
 from playwright._impl._assertions import PageAssertions as PageAssertionsImpl, LocatorAssertions as LocatorAssertionsImpl, APIResponseAssertions as APIResponseAssertionsImpl
 """

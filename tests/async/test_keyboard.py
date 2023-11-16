@@ -13,8 +13,7 @@
 # limitations under the License.
 import pytest
 
-from playwright._impl._api_types import Error
-from playwright.async_api import Page
+from playwright.async_api import Error, Page
 
 
 async def captureLastKeydown(page):

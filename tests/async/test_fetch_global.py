@@ -300,7 +300,7 @@ async def test_should_json_stringify_body_when_content_type_is_application_json(
         ),
     )
     body = req.post_body
-    assert body.decode() == json.dumps(serialization, separators=(",", ":"))
+    assert body.decode() == json.dumps(serialization)
     await request.dispose()
 
 
@@ -309,7 +309,7 @@ async def test_should_not_double_stringify_body_when_content_type_is_application
     playwright: Playwright, server: Server, serialization: Any
 ):
     request = await playwright.request.new_context()
-    stringified_value = json.dumps(serialization, separators=(",", ":"))
+    stringified_value = json.dumps(serialization)
     [req, _] = await asyncio.gather(
         server.wait_for_request("/empty.html"),
         request.post(
@@ -328,7 +328,7 @@ async def test_should_accept_already_serialized_data_as_bytes_when_content_type_
     playwright: Playwright, server: Server
 ):
     request = await playwright.request.new_context()
-    stringified_value = json.dumps({"foo": "bar"}, separators=(",", ":")).encode()
+    stringified_value = json.dumps({"foo": "bar"}).encode()
     [req, _] = await asyncio.gather(
         server.wait_for_request("/empty.html"),
         request.post(
@@ -410,5 +410,5 @@ async def test_should_serialize_null_values_in_json(
     server.set_route("/echo", lambda req: (req.write(req.post_body), req.finish()))
     response = await request.post(server.PREFIX + "/echo", data={"foo": None})
     assert response.status == 200
-    assert await response.text() == '{"foo":null}'
+    assert await response.text() == '{"foo": null}'
     await request.dispose()

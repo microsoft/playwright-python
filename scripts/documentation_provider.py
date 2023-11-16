@@ -323,7 +323,7 @@ class DocumentationProvider:
         str_value = str(value)
         if isinstance(value, list):
             return f"[{', '.join(list(map(lambda a: self.serialize_python_type(a), value)))}]"
-        if str_value == "<class 'playwright._impl._api_types.Error'>":
+        if str_value == "<class 'playwright._impl._errors.Error'>":
             return "Error"
         if str_value == "<class 'NoneType'>":
             return "None"
@@ -337,11 +337,7 @@ class DocumentationProvider:
         if match:
             return "EventContextManager[" + match.group(1) + "]"
         match = re.match(r"^<class 'playwright\._impl\.[\w_]+\.([^']+)'>$", str_value)
-        if (
-            match
-            and "_api_structures" not in str_value
-            and "_api_types" not in str_value
-        ):
+        if match and "_api_structures" not in str_value and "_errors" not in str_value:
             if match.group(1) == "EventContextManagerImpl":
                 return "EventContextManager"
             return match.group(1)

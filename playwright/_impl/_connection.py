@@ -36,6 +36,7 @@ from pyee import EventEmitter
 from pyee.asyncio import AsyncIOEventEmitter
 
 import playwright
+from playwright._impl._errors import TargetClosedError
 from playwright._impl._helper import Error, ParsedMessagePayload, parse_error
 from playwright._impl._transport import Transport
 
@@ -250,7 +251,7 @@ class Connection(EventEmitter):
         ] = contextvars.ContextVar("ApiZone", default=None)
         self._local_utils: Optional["LocalUtils"] = local_utils
         self._tracing_count = 0
-        self._closed_error_message: Optional[str] = None
+        self._closed_error: Optional[Exception] = None
 
     @property
     def local_utils(self) -> "LocalUtils":
@@ -281,21 +282,21 @@ class Connection(EventEmitter):
         self._loop.run_until_complete(self._transport.wait_until_stopped())
         self.cleanup()
 
-    async def stop_async(self, error_message: str = None) -> None:
+    async def stop_async(self) -> None:
         self._transport.request_stop()
         await self._transport.wait_until_stopped()
-        self.cleanup(error_message)
+        self.cleanup()
 
-    def cleanup(self, error_message: str = None) -> None:
-        if not error_message:
-            error_message = "Connection closed"
-        self._closed_error_message = error_message
+    def cleanup(self, cause: Exception = None) -> None:
+        self._closed_error = (
+            TargetClosedError(str(cause)) if cause else TargetClosedError()
+        )
         if self._init_task and not self._init_task.done():
             self._init_task.cancel()
         for ws_connection in self._child_ws_connections:
             ws_connection._transport.dispose()
         for callback in self._callbacks.values():
-            callback.future.set_exception(Error(error_message))
+            callback.future.set_exception(self._closed_error)
         self._callbacks.clear()
         self.emit("close")
 
@@ -313,8 +314,8 @@ class Connection(EventEmitter):
     def _send_message_to_server(
         self, object: ChannelOwner, method: str, params: Dict, no_reply: bool = False
     ) -> ProtocolCallback:
-        if self._closed_error_message:
-            raise Error(self._closed_error_message)
+        if self._closed_error:
+            raise self._closed_error
         if object._was_collected:
             raise Error(
                 "The object has been collected to prevent unbounded heap growth."
@@ -361,7 +362,7 @@ class Connection(EventEmitter):
         return callback
 
     def dispatch(self, msg: ParsedMessagePayload) -> None:
-        if self._closed_error_message:
+        if self._closed_error:
             return
         id = msg.get("id")
         if id:
@@ -373,11 +374,12 @@ class Connection(EventEmitter):
             if callback.no_reply:
                 return
             error = msg.get("error")
-            if error:
+            if error and not msg.get("result"):
                 parsed_error = parse_error(error["error"])  # type: ignore
                 parsed_error._stack = "".join(
                     traceback.format_list(callback.stack_trace)[-10:]
                 )
+                parsed_error._message += format_call_log(msg.get("log"))  # type: ignore
                 callback.future.set_exception(parsed_error)
             else:
                 result = self._replace_guids_with_channels(msg.get("result"))
@@ -565,3 +567,11 @@ def _extract_stack_trace_information_from_stack(
 
 def filter_none(d: Mapping) -> Dict:
     return {k: v for k, v in d.items() if v is not None}
+
+
+def format_call_log(log: Optional[List[str]]) -> str:
+    if not log:
+        return ""
+    if len(list(filter(lambda x: x.strip(), log))) == 0:
+        return ""
+    return "\nCall log:\n" + "\n  - ".join(log) + "\n"

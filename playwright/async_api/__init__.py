@@ -21,7 +21,7 @@ web automation that is ever-green, capable, reliable and fast.
 from typing import Any, Optional, Union, overload
 
 import playwright._impl._api_structures
-import playwright._impl._api_types
+import playwright._impl._errors
 import playwright.async_api._generated
 from playwright._impl._assertions import (
     APIResponseAssertions as APIResponseAssertionsImpl,
@@ -79,8 +79,8 @@ SourceLocation = playwright._impl._api_structures.SourceLocation
 StorageState = playwright._impl._api_structures.StorageState
 ViewportSize = playwright._impl._api_structures.ViewportSize
 
-Error = playwright._impl._api_types.Error
-TimeoutError = playwright._impl._api_types.TimeoutError
+Error = playwright._impl._errors.Error
+TimeoutError = playwright._impl._errors.TimeoutError
 
 
 def async_playwright() -> PlaywrightContextManager:

@@ -15,7 +15,7 @@
 import inspect
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from playwright._impl._api_types import Error
+from playwright._impl._errors import Error
 from playwright._impl._map import Map
 
 API_ATTR = "_pw_api_instance_"
