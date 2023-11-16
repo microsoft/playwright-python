@@ -20,6 +20,7 @@ import pytest
 
 from playwright.async_api import Browser, Error
 from tests.server import Server
+from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
 
 
 async def test_page_event_should_create_new_context(browser):
@@ -133,7 +134,7 @@ async def test_close_should_abort_wait_for_event(browser):
     with pytest.raises(Error) as exc_info:
         async with context.expect_page():
             await context.close()
-    assert "Context closed" in exc_info.value.message
+    assert TARGET_CLOSED_ERROR_MESSAGE in exc_info.value.message
 
 
 async def test_close_should_be_callable_twice(browser):

@@ -42,7 +42,6 @@ from playwright._impl._api_structures import (
     StorageState,
     ViewportSize,
 )
-from playwright._impl._api_types import Error
 from playwright._impl._assertions import (
     APIResponseAssertions as APIResponseAssertionsImpl,
 )
@@ -56,6 +55,7 @@ from playwright._impl._console_message import ConsoleMessage as ConsoleMessageIm
 from playwright._impl._dialog import Dialog as DialogImpl
 from playwright._impl._download import Download as DownloadImpl
 from playwright._impl._element_handle import ElementHandle as ElementHandleImpl
+from playwright._impl._errors import Error
 from playwright._impl._fetch import APIRequest as APIRequestImpl
 from playwright._impl._fetch import APIRequestContext as APIRequestContextImpl
 from playwright._impl._fetch import APIResponse as APIResponseImpl
@@ -7361,7 +7361,7 @@ class Download(SyncBase):
 
         return mapping.from_maybe_impl(self._sync(self._impl_obj.failure()))
 
-    def path(self) -> typing.Optional[pathlib.Path]:
+    def path(self) -> pathlib.Path:
         """Download.path
 
         Returns path to the downloaded file in case of successful download. The method will wait for the download to finish
@@ -7372,7 +7372,7 @@ class Download(SyncBase):
 
         Returns
         -------
-        Union[pathlib.Path, None]
+        pathlib.Path
         """
 
         return mapping.from_maybe_impl(self._sync(self._impl_obj.path()))
@@ -10069,7 +10069,12 @@ class Page(SyncContextManager):
 
         return mapping.from_maybe_impl(self._sync(self._impl_obj.title()))
 
-    def close(self, *, run_before_unload: typing.Optional[bool] = None) -> None:
+    def close(
+        self,
+        *,
+        run_before_unload: typing.Optional[bool] = None,
+        reason: typing.Optional[str] = None
+    ) -> None:
         """Page.close
 
         If `runBeforeUnload` is `false`, does not run any unload handlers and waits for the page to be closed. If
@@ -10085,10 +10090,14 @@ class Page(SyncContextManager):
         run_before_unload : Union[bool, None]
             Defaults to `false`. Whether to run the
             [before unload](https://developer.mozilla.org/en-US/docs/Web/Events/beforeunload) page handlers.
+        reason : Union[str, None]
+            The reason to be reported to the operations interrupted by the page closure.
         """
 
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.close(runBeforeUnload=run_before_unload))
+            self._sync(
+                self._impl_obj.close(runBeforeUnload=run_before_unload, reason=reason)
+            )
         )
 
     def is_closed(self) -> bool:
@@ -13784,15 +13793,20 @@ class BrowserContext(SyncContextManager):
             ).future,
         )
 
-    def close(self) -> None:
+    def close(self, *, reason: typing.Optional[str] = None) -> None:
         """BrowserContext.close
 
         Closes the browser context. All the pages that belong to the browser context will be closed.
 
         **NOTE** The default browser context cannot be closed.
+
+        Parameters
+        ----------
+        reason : Union[str, None]
+            The reason to be reported to the operations interrupted by the context closure.
         """
 
-        return mapping.from_maybe_impl(self._sync(self._impl_obj.close()))
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.close(reason=reason)))
 
     def storage_state(
         self, *, path: typing.Optional[typing.Union[str, pathlib.Path]] = None
@@ -14524,7 +14538,7 @@ class Browser(SyncContextManager):
             )
         )
 
-    def close(self) -> None:
+    def close(self, *, reason: typing.Optional[str] = None) -> None:
         """Browser.close
 
         In case this browser is obtained using `browser_type.launch()`, closes the browser and all of its pages (if
@@ -14538,9 +14552,14 @@ class Browser(SyncContextManager):
         `browser.close()`.
 
         The `Browser` object itself is considered to be disposed and cannot be used anymore.
+
+        Parameters
+        ----------
+        reason : Union[str, None]
+            The reason to be reported to the operations interrupted by the browser closure.
         """
 
-        return mapping.from_maybe_impl(self._sync(self._impl_obj.close()))
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.close(reason=reason)))
 
     def new_browser_cdp_session(self) -> "CDPSession":
         """Browser.new_browser_cdp_session

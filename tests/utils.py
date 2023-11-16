@@ -55,3 +55,6 @@ def get_trace_actions(events: List[Any]) -> List[str]:
         key=lambda e: e["startTime"],
     )
     return [e["apiName"] for e in action_events]
+
+
+TARGET_CLOSED_ERROR_MESSAGE = "Target page, context or browser has been closed"

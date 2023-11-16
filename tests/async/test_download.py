@@ -19,6 +19,7 @@ from pathlib import Path
 import pytest
 
 from playwright.async_api import Browser, Error, Page
+from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
 
 
 def assert_file_content(path, content):
@@ -185,7 +186,7 @@ async def test_should_error_when_saving_after_deletion(tmpdir, browser, server):
     await download.delete()
     with pytest.raises(Error) as exc:
         await download.save_as(user_path)
-    assert "Target page, context or browser has been closed" in exc.value.message
+    assert TARGET_CLOSED_ERROR_MESSAGE in exc.value.message
     await page.close()
 
 

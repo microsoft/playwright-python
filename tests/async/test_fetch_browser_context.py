@@ -165,12 +165,8 @@ async def test_should_support_post_data(
 
     await support_post_data("My request", "My request".encode())
     await support_post_data(b"My request", "My request".encode())
-    await support_post_data(
-        ["my", "request"], json.dumps(["my", "request"], separators=(",", ":")).encode()
-    )
-    await support_post_data(
-        {"my": "request"}, json.dumps({"my": "request"}, separators=(",", ":")).encode()
-    )
+    await support_post_data(["my", "request"], json.dumps(["my", "request"]).encode())
+    await support_post_data({"my": "request"}, json.dumps({"my": "request"}).encode())
     with pytest.raises(Error, match="Unsupported 'data' type: <class 'function'>"):
         await support_post_data(lambda: None, None)
 

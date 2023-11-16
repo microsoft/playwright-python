@@ -28,6 +28,7 @@ from playwright.sync_api import (
     sync_playwright,
 )
 from tests.server import Server
+from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
 
 
 def test_sync_query_selector(page: Page) -> None:
@@ -272,7 +273,7 @@ def test_close_should_reject_all_promises(context: BrowserContext) -> None:
             lambda: new_page.evaluate("() => new Promise(r => {})"),
             lambda: new_page.close(),
         )
-    assert "Target closed" in exc_info.value.message
+    assert TARGET_CLOSED_ERROR_MESSAGE in exc_info.value.message
 
 
 def test_expect_response_should_work(page: Page, server: Server) -> None:

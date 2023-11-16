@@ -27,9 +27,9 @@ from playwright._impl._api_structures import (
 from playwright._impl._artifact import Artifact
 from playwright._impl._browser_context import BrowserContext
 from playwright._impl._cdp_session import CDPSession
-from playwright._impl._connection import ChannelOwner, from_channel
+from playwright._impl._connection import ChannelOwner, filter_none, from_channel
+from playwright._impl._errors import is_target_closed_error
 from playwright._impl._helper import (
-    BROWSER_CLOSED_ERROR,
     ColorScheme,
     ForcedColors,
     HarContentPolicy,
@@ -37,7 +37,6 @@ from playwright._impl._helper import (
     ReducedMotion,
     ServiceWorkersPolicy,
     async_readfile,
-    is_safe_close_error,
     locals_to_params,
     make_dirs_for_file,
     prepare_record_har_options,
@@ -60,12 +59,12 @@ class Browser(ChannelOwner):
         super().__init__(parent, type, guid, initializer)
         self._browser_type = parent
         self._is_connected = True
-        self._is_closed_or_closing = False
         self._should_close_connection_on_close = False
         self._cr_tracing_path: Optional[str] = None
 
         self._contexts: List[BrowserContext] = []
         self._channel.on("close", lambda _: self._on_close())
+        self._close_reason: Optional[str] = None
 
     def __repr__(self) -> str:
         return f"<Browser type={self._browser_type} version={self.version}>"
@@ -73,7 +72,6 @@ class Browser(ChannelOwner):
     def _on_close(self) -> None:
         self._is_connected = False
         self.emit(Browser.Events.Disconnected, self)
-        self._is_closed_or_closing = True
 
     @property
     def contexts(self) -> List[BrowserContext]:
@@ -179,17 +177,16 @@ class Browser(ChannelOwner):
 
         return await self._connection.wrap_api_call(inner)
 
-    async def close(self) -> None:
-        if self._is_closed_or_closing:
-            return
-        self._is_closed_or_closing = True
+    async def close(self, reason: str = None) -> None:
+        self._close_reason = reason
         try:
-            await self._channel.send("close")
+            if self._should_close_connection_on_close:
+                await self._connection.stop_async()
+            else:
+                await self._channel.send("close", filter_none({"reason": reason}))
         except Exception as e:
-            if not is_safe_close_error(e):
+            if not is_target_closed_error(e):
                 raise e
-        if self._should_close_connection_on_close:
-            await self._connection.stop_async(BROWSER_CLOSED_ERROR)
 
     @property
     def version(self) -> str:

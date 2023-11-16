@@ -20,6 +20,7 @@ import pytest
 
 from playwright.async_api import BrowserContext, Error, Page, Route, TimeoutError
 from tests.server import Server
+from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
 
 
 async def test_close_should_reject_all_promises(context):
@@ -28,7 +29,7 @@ async def test_close_should_reject_all_promises(context):
         await asyncio.gather(
             new_page.evaluate("() => new Promise(r => {})"), new_page.close()
         )
-    assert "Target closed" in exc_info.value.message
+    assert " closed" in exc_info.value.message
 
 
 async def test_closed_should_not_visible_in_context_pages(context):
@@ -112,7 +113,7 @@ async def test_close_should_terminate_network_waiters(context, server):
     )
     for i in range(2):
         error = results[i]
-        assert "Page closed" in error.message
+        assert TARGET_CLOSED_ERROR_MESSAGE in error.message
         assert "Timeout" not in error.message
 
 
@@ -269,7 +270,7 @@ async def test_wait_for_event_should_fail_with_error_upon_disconnect(page):
     with pytest.raises(Error) as exc_info:
         async with page.expect_download():
             await page.close()
-    assert "Page closed" in exc_info.value.message
+    assert TARGET_CLOSED_ERROR_MESSAGE in exc_info.value.message
 
 
 async def test_wait_for_response_should_work(page, server):

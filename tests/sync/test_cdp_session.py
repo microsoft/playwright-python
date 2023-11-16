@@ -16,6 +16,7 @@ import pytest
 
 from playwright.sync_api import Browser, Error, Page
 from tests.server import Server
+from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
 
 
 @pytest.mark.only_browser("chromium")
@@ -55,7 +56,7 @@ def test_should_be_able_to_detach_session(page: Page) -> None:
     client.detach()
     with pytest.raises(Error) as exc_info:
         client.send("Runtime.evaluate", {"expression": "3 + 1", "returnByValue": True})
-    assert "Target page, context or browser has been closed" in exc_info.value.message
+    assert TARGET_CLOSED_ERROR_MESSAGE in exc_info.value.message
 
 
 @pytest.mark.only_browser("chromium")

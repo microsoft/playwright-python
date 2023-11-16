@@ -30,13 +30,13 @@ from playwright._impl._api_structures import (
     StorageState,
 )
 from playwright._impl._connection import ChannelOwner, filter_none, from_channel
+from playwright._impl._errors import is_target_closed_error
 from playwright._impl._helper import (
     Error,
     NameValue,
     async_readfile,
     async_writefile,
     is_file_payload,
-    is_safe_close_error,
     locals_to_params,
     object_to_array,
     to_impl,
@@ -330,13 +330,13 @@ class APIRequestContext(ChannelOwner):
         if data:
             if isinstance(data, str):
                 if is_json_content_type(serialized_headers):
-                    json_data = data
+                    json_data = data if is_json_parsable(data) else json.dumps(data)
                 else:
                     post_data_buffer = data.encode()
             elif isinstance(data, bytes):
                 post_data_buffer = data
             elif isinstance(data, (dict, list, int, bool)):
-                json_data = data
+                json_data = json.dumps(data)
             else:
                 raise Error(f"Unsupported 'data' type: {type(data)}")
         elif form:
@@ -451,7 +451,7 @@ class APIResponse:
                 raise Error("Response has been disposed")
             return base64.b64decode(result["binary"])
         except Error as exc:
-            if is_safe_close_error(exc):
+            if is_target_closed_error(exc):
                 raise Error("Response has been disposed")
             raise exc
 
@@ -491,3 +491,13 @@ def is_json_content_type(headers: network.HeadersArray = None) -> bool:
         if header["name"] == "Content-Type":
             return header["value"].startswith("application/json")
     return False
+
+
+def is_json_parsable(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    try:
+        json.loads(value)
+        return True
+    except json.JSONDecodeError:
+        return False

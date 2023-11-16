@@ -40,7 +40,7 @@ from urllib.parse import urljoin
 from greenlet import greenlet
 
 from playwright._impl._api_structures import NameValue
-from playwright._impl._api_types import Error, TimeoutError
+from playwright._impl._errors import Error, TargetClosedError, TimeoutError
 from playwright._impl._str_utils import escape_regex_flags
 
 if sys.version_info >= (3, 8):  # pragma: no cover
@@ -221,6 +221,8 @@ def parse_error(error: ErrorPayload) -> Error:
     base_error_class = Error
     if error.get("name") == "TimeoutError":
         base_error_class = TimeoutError
+    if error.get("name") == "TargetClosedError":
+        base_error_class = TargetClosedError
     exc = base_error_class(cast(str, patch_error_message(error.get("message"))))
     exc._name = error["name"]
     exc._stack = error["stack"]
@@ -320,17 +322,6 @@ class RouteHandler:
         if all:
             return [{"glob": "**/*"}]
         return patterns
-
-
-BROWSER_CLOSED_ERROR = "Browser has been closed"
-BROWSER_OR_CONTEXT_CLOSED_ERROR = "Target page, context or browser has been closed"
-
-
-def is_safe_close_error(error: Exception) -> bool:
-    message = str(error)
-    return message.endswith(BROWSER_CLOSED_ERROR) or message.endswith(
-        BROWSER_OR_CONTEXT_CLOSED_ERROR
-    )
 
 
 to_snake_case_regex = re.compile("((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))")

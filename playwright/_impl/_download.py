@@ -54,7 +54,7 @@ class Download:
     async def failure(self) -> Optional[str]:
         return await self._artifact.failure()
 
-    async def path(self) -> Optional[pathlib.Path]:
+    async def path(self) -> pathlib.Path:
         return await self._artifact.path_after_finished()
 
     async def save_as(self, path: Union[str, Path]) -> None:
