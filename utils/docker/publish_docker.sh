@@ -16,7 +16,7 @@ if [[ "${RELEASE_CHANNEL}" == "stable" ]]; then
     exit 1
   fi
 elif [[ "${RELEASE_CHANNEL}" == "canary" ]]; then
-  if [[ "${PW_VERSION}" != *post* ]]; then
+  if [[ "${PW_VERSION}" != *dev* ]]; then
     echo "ERROR: cannot publish canary docker with Playwright version '${PW_VERSION}'"
     exit 1
   fi
