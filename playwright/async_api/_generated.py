@@ -19488,6 +19488,7 @@ class LocatorAssertions(AsyncBase):
         name: str,
         value: typing.Union[str, typing.Pattern[str]],
         *,
+        ignore_case: typing.Optional[bool] = None,
         timeout: typing.Optional[float] = None
     ) -> None:
         """LocatorAssertions.not_to_have_attribute
@@ -19500,6 +19501,9 @@ class LocatorAssertions(AsyncBase):
             Attribute name.
         value : Union[Pattern[str], str]
             Expected attribute value.
+        ignore_case : Union[bool, None]
+            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            expression flag if specified.
         timeout : Union[float, None]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
@@ -19507,7 +19511,7 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.not_to_have_attribute(
-                name=name, value=value, timeout=timeout
+                name=name, value=value, ignore_case=ignore_case, timeout=timeout
             )
         )
 
