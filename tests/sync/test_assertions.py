@@ -105,6 +105,15 @@ def test_assertions_locator_to_have_attribute(page: Page, server: Server) -> Non
         expect(page.locator("div#foobar")).to_have_attribute("id", "koko", timeout=100)
 
 
+def test_assertions_locator_to_have_attribute_ignore_case(
+    page: Page, server: Page
+) -> None:
+    page.set_content("<div id=NoDe>Text content</div>")
+    locator = page.locator("#NoDe")
+    expect(locator).to_have_attribute("id", "node", ignore_case=True)
+    expect(locator).not_to_have_attribute("id", "node")
+
+
 def test_assertions_locator_to_have_class(page: Page, server: Server) -> None:
     page.goto(server.EMPTY_PAGE)
     page.set_content("<div class=foobar>kek</div>")

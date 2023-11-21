@@ -112,6 +112,15 @@ async def test_assertions_locator_to_have_attribute(page: Page, server: Server) 
         )
 
 
+async def test_assertions_locator_to_have_attribute_ignore_case(
+    page: Page, server: Page
+) -> None:
+    await page.set_content("<div id=NoDe>Text content</div>")
+    locator = page.locator("#NoDe")
+    await expect(locator).to_have_attribute("id", "node", ignore_case=True)
+    await expect(locator).not_to_have_attribute("id", "node")
+
+
 async def test_assertions_locator_to_have_class(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content("<div class=foobar>kek</div>")

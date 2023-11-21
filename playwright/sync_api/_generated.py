@@ -1926,13 +1926,16 @@ class ElementHandle(JSHandle):
         properties and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
 
         Since `eventInit` is event-specific, please refer to the events documentation for the lists of initial properties:
+        - [DeviceMotionEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent/DeviceMotionEvent)
+        - [DeviceOrientationEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent/DeviceOrientationEvent)
         - [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent)
+        - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
         - [FocusEvent](https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent/FocusEvent)
         - [KeyboardEvent](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/KeyboardEvent)
         - [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/MouseEvent)
         - [PointerEvent](https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/PointerEvent)
         - [TouchEvent](https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent/TouchEvent)
-        - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
+        - [WheelEvent](https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent/WheelEvent)
 
         You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
 
@@ -4172,13 +4175,16 @@ class Frame(SyncBase):
         properties and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
 
         Since `eventInit` is event-specific, please refer to the events documentation for the lists of initial properties:
+        - [DeviceMotionEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent/DeviceMotionEvent)
+        - [DeviceOrientationEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent/DeviceOrientationEvent)
         - [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent)
+        - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
         - [FocusEvent](https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent/FocusEvent)
         - [KeyboardEvent](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/KeyboardEvent)
         - [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/MouseEvent)
         - [PointerEvent](https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/PointerEvent)
         - [TouchEvent](https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent/TouchEvent)
-        - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
+        - [WheelEvent](https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent/WheelEvent)
 
         You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
 
@@ -7364,8 +7370,8 @@ class Download(SyncBase):
     def path(self) -> pathlib.Path:
         """Download.path
 
-        Returns path to the downloaded file in case of successful download. The method will wait for the download to finish
-        if necessary. The method throws when connected remotely.
+        Returns path to the downloaded file for a successful download, or throws for a failed/canceled download. The method
+        will wait for the download to finish if necessary. The method throws when connected remotely.
 
         Note that the download's file name is a random GUID, use `download.suggested_filename()` to get suggested
         file name.
@@ -8577,13 +8583,16 @@ class Page(SyncContextManager):
         properties and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
 
         Since `eventInit` is event-specific, please refer to the events documentation for the lists of initial properties:
+        - [DeviceMotionEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent/DeviceMotionEvent)
+        - [DeviceOrientationEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent/DeviceOrientationEvent)
         - [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent)
+        - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
         - [FocusEvent](https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent/FocusEvent)
         - [KeyboardEvent](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/KeyboardEvent)
         - [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/MouseEvent)
         - [PointerEvent](https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/PointerEvent)
         - [TouchEvent](https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent/TouchEvent)
-        - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
+        - [WheelEvent](https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent/WheelEvent)
 
         You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
 
@@ -9073,7 +9082,7 @@ class Page(SyncContextManager):
 
         async def run(playwright: Playwright):
             webkit = playwright.webkit
-            browser = await webkit.launch(headless=false)
+            browser = await webkit.launch(headless=False)
             context = await browser.new_context()
             page = await context.new_page()
             await page.expose_binding(\"pageURL\", lambda source: source[\"page\"].url)
@@ -9099,7 +9108,7 @@ class Page(SyncContextManager):
 
         def run(playwright: Playwright):
             webkit = playwright.webkit
-            browser = webkit.launch(headless=false)
+            browser = webkit.launch(headless=False)
             context = browser.new_context()
             page = context.new_page()
             page.expose_binding(\"pageURL\", lambda source: source[\"page\"].url)
@@ -13360,7 +13369,7 @@ class BrowserContext(SyncContextManager):
 
         async def run(playwright: Playwright):
             webkit = playwright.webkit
-            browser = await webkit.launch(headless=false)
+            browser = await webkit.launch(headless=False)
             context = await browser.new_context()
             await context.expose_binding(\"pageURL\", lambda source: source[\"page\"].url)
             page = await context.new_page()
@@ -13386,7 +13395,7 @@ class BrowserContext(SyncContextManager):
 
         def run(playwright: Playwright):
             webkit = playwright.webkit
-            browser = webkit.launch(headless=false)
+            browser = webkit.launch(headless=False)
             context = browser.new_context()
             context.expose_binding(\"pageURL\", lambda source: source[\"page\"].url)
             page = context.new_page()
@@ -14864,6 +14873,9 @@ class BrowserType(SyncBase):
         accept_downloads: typing.Optional[bool] = None,
         traces_dir: typing.Optional[typing.Union[str, pathlib.Path]] = None,
         chromium_sandbox: typing.Optional[bool] = None,
+        firefox_user_prefs: typing.Optional[
+            typing.Dict[str, typing.Union[str, float, bool]]
+        ] = None,
         record_har_path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
         record_har_omit_content: typing.Optional[bool] = None,
         record_video_dir: typing.Optional[typing.Union[str, pathlib.Path]] = None,
@@ -14999,6 +15011,9 @@ class BrowserType(SyncBase):
             If specified, traces are saved into this directory.
         chromium_sandbox : Union[bool, None]
             Enable Chromium sandboxing. Defaults to `false`.
+        firefox_user_prefs : Union[Dict[str, Union[bool, float, str]], None]
+            Firefox user preferences. Learn more about the Firefox user preferences at
+            [`about:config`](https://support.mozilla.org/en-US/kb/about-config-editor-firefox).
         record_har_path : Union[pathlib.Path, str, None]
             Enables [HAR](http://www.softwareishard.com/blog/har-12-spec) recording for all pages into the specified HAR file
             on the filesystem. If not specified, the HAR is not recorded. Make sure to call `browser_context.close()`
@@ -15087,6 +15102,7 @@ class BrowserType(SyncBase):
                     acceptDownloads=accept_downloads,
                     tracesDir=traces_dir,
                     chromiumSandbox=chromium_sandbox,
+                    firefoxUserPrefs=mapping.to_impl(firefox_user_prefs),
                     recordHarPath=record_har_path,
                     recordHarOmitContent=record_har_omit_content,
                     recordVideoDir=record_video_dir,
@@ -15886,13 +15902,16 @@ class Locator(SyncBase):
         properties and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
 
         Since `eventInit` is event-specific, please refer to the events documentation for the lists of initial properties:
+        - [DeviceMotionEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent/DeviceMotionEvent)
+        - [DeviceOrientationEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent/DeviceOrientationEvent)
         - [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent)
+        - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
         - [FocusEvent](https://developer.mozilla.org/en-US/docs/Web/API/FocusEvent/FocusEvent)
         - [KeyboardEvent](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/KeyboardEvent)
         - [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/MouseEvent)
         - [PointerEvent](https://developer.mozilla.org/en-US/docs/Web/API/PointerEvent/PointerEvent)
         - [TouchEvent](https://developer.mozilla.org/en-US/docs/Web/API/TouchEvent/TouchEvent)
-        - [Event](https://developer.mozilla.org/en-US/docs/Web/API/Event/Event)
+        - [WheelEvent](https://developer.mozilla.org/en-US/docs/Web/API/WheelEvent/WheelEvent)
 
         You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
 
@@ -18519,8 +18538,8 @@ class APIRequestContext(SyncBase):
         """APIRequestContext.dispose
 
         All responses returned by `a_pi_request_context.get()` and similar methods are stored in the memory, so that
-        you can later call `a_pi_response.body()`. This method discards all stored responses, and makes
-        `a_pi_response.body()` throw \"Response disposed\" error.
+        you can later call `a_pi_response.body()`.This method discards all its resources, calling any method on
+        disposed `APIRequestContext` will throw an exception.
         """
 
         return mapping.from_maybe_impl(self._sync(self._impl_obj.dispose()))
@@ -19435,6 +19454,11 @@ class LocatorAssertions(SyncBase):
         Ensures the `Locator` points to an element that contains the given text. You can use regular expressions for the
         value as well.
 
+        **Details**
+
+        When `expected` parameter is a string, Playwright will normalize whitespaces and line breaks both in the actual
+        text and in the expected string before matching. When regular expression is used, the actual text is matched as is.
+
         **Usage**
 
         ```py
@@ -19578,6 +19602,7 @@ class LocatorAssertions(SyncBase):
         name: str,
         value: typing.Union[str, typing.Pattern[str]],
         *,
+        ignore_case: typing.Optional[bool] = None,
         timeout: typing.Optional[float] = None
     ) -> None:
         """LocatorAssertions.to_have_attribute
@@ -19606,6 +19631,9 @@ class LocatorAssertions(SyncBase):
             Attribute name.
         value : Union[Pattern[str], str]
             Expected attribute value.
+        ignore_case : Union[bool, None]
+            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            expression flag if specified.
         timeout : Union[float, None]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
@@ -19614,7 +19642,7 @@ class LocatorAssertions(SyncBase):
         return mapping.from_maybe_impl(
             self._sync(
                 self._impl_obj.to_have_attribute(
-                    name=name, value=value, timeout=timeout
+                    name=name, value=value, ignore_case=ignore_case, timeout=timeout
                 )
             )
         )
@@ -20189,6 +20217,11 @@ class LocatorAssertions(SyncBase):
 
         Ensures the `Locator` points to an element with the given text. You can use regular expressions for the value as
         well.
+
+        **Details**
+
+        When `expected` parameter is a string, Playwright will normalize whitespaces and line breaks both in the actual
+        text and in the expected string before matching. When regular expression is used, the actual text is matched as is.
 
         **Usage**
 

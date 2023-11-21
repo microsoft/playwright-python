@@ -18,7 +18,11 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
 
 from playwright._impl._api_structures import FilePayload, FloatRect, Position
-from playwright._impl._connection import ChannelOwner, from_nullable_channel
+from playwright._impl._connection import (
+    ChannelOwner,
+    filter_none,
+    from_nullable_channel,
+)
 from playwright._impl._helper import (
     Error,
     KeyboardModifier,
@@ -191,20 +195,17 @@ class ElementHandle(JSHandle):
         timeout: float = None,
         noWaitAfter: bool = None,
     ) -> None:
-        params = locals_to_params(locals())
         frame = await self.owner_frame()
         if not frame:
             raise Error("Cannot set input files to detached element")
         converted = await convert_input_files(files, frame.page.context)
-        if converted["files"] is not None:
-            await self._channel.send(
-                "setInputFiles", {**params, "files": converted["files"]}
-            )
-        else:
-            await self._channel.send(
-                "setInputFilePaths",
-                locals_to_params({**params, **converted, "files": None}),
-            )
+        await self._channel.send(
+            "setInputFiles",
+            {
+                **filter_none({"timeout": timeout, "noWaitAfter": noWaitAfter}),
+                **converted,
+            },
+        )
 
     async def focus(self) -> None:
         await self._channel.send("focus")
@@ -407,14 +408,4 @@ def convert_select_option_values(
             element = [element]
         elements = list(map(lambda e: e._channel, element))
 
-    return filter_out_none(dict(options=options, elements=elements))
-
-
-def filter_out_none(args: Dict) -> Any:
-    copy = {}
-    for key in args:
-        if key == "self":
-            continue
-        if args[key] is not None:
-            copy[key] = args[key]
-    return copy
+    return filter_none(dict(options=options, elements=elements))

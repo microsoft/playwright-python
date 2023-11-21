@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import time
-from typing import Callable
+from pathlib import Path
+from typing import Any, Callable
 
 import pytest
 
@@ -221,3 +223,29 @@ def test_browser_type_connect_should_fulfill_with_global_fetch_result(
     assert response.json() == {"foo": "bar"}
 
     remote.kill()
+
+
+def test_set_input_files_should_preserve_last_modified_timestamp(
+    browser_type: BrowserType,
+    launch_server: Callable[[], RemoteServer],
+    assetdir: Path,
+) -> None:
+    # Launch another server to not affect other tests.
+    remote = launch_server()
+
+    browser = browser_type.connect(remote.ws_endpoint)
+    context = browser.new_context()
+    page = context.new_page()
+
+    page.set_content("<input type=file multiple=true/>")
+    input = page.locator("input")
+    files: Any = ["file-to-upload.txt", "file-to-upload-2.txt"]
+    input.set_input_files([assetdir / file for file in files])
+    assert input.evaluate("input => [...input.files].map(f => f.name)") == files
+    timestamps = input.evaluate("input => [...input.files].map(f => f.lastModified)")
+    expected_timestamps = [os.path.getmtime(assetdir / file) * 1000 for file in files]
+
+    # On Linux browser sometimes reduces the timestamp by 1ms: 1696272058110.0715  -> 1696272058109 or even
+    # rounds it to seconds in WebKit: 1696272058110 -> 1696272058000.
+    for i in range(len(timestamps)):
+        assert abs(timestamps[i] - expected_timestamps[i]) < 1000

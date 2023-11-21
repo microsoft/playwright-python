@@ -22,6 +22,7 @@ from pyee import EventEmitter
 from playwright._impl._api_structures import AriaRole, FilePayload, Position
 from playwright._impl._connection import (
     ChannelOwner,
+    filter_none,
     from_channel,
     from_nullable_channel,
 )
@@ -689,17 +690,21 @@ class Frame(ChannelOwner):
         timeout: float = None,
         noWaitAfter: bool = None,
     ) -> None:
-        params = locals_to_params(locals())
         converted = await convert_input_files(files, self.page.context)
-        if converted["files"] is not None:
-            await self._channel.send(
-                "setInputFiles", {**params, "files": converted["files"]}
-            )
-        else:
-            await self._channel.send(
-                "setInputFilePaths",
-                locals_to_params({**params, **converted, "files": None}),
-            )
+        await self._channel.send(
+            "setInputFiles",
+            {
+                **filter_none(
+                    {
+                        "selector": selector,
+                        "strict": strict,
+                        "timeout": timeout,
+                        "noWaitAfter": noWaitAfter,
+                    }
+                ),
+                **converted,
+            },
+        )
 
     async def type(
         self,
