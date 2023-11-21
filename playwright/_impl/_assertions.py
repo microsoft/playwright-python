@@ -233,10 +233,13 @@ class LocatorAssertions(AssertionsBase):
         self,
         name: str,
         value: Union[str, Pattern[str]],
+        ignore_case: bool = None,
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_have_attribute(name, value, timeout=timeout)
+        await self._not.to_have_attribute(
+            name, value, ignore_case=ignore_case, timeout=timeout
+        )
 
     async def to_have_class(
         self,
