@@ -197,7 +197,7 @@ async def test_evaluate_throw_if_underlying_element_was_disposed(page):
         await page.evaluate("e => e.textContent", element)
     except Error as e:
         error = e
-    assert "JSHandle is disposed" in error.message
+    assert "no object with guid" in error.message
 
 
 async def test_evaluate_evaluate_exception(page):

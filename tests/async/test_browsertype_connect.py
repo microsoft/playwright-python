@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+import os
 import re
 from pathlib import Path
 from typing import Callable
@@ -359,3 +360,31 @@ async def test_should_record_trace_with_relative_trace_path(
         assert Path("trace1.zip").exists()
     finally:
         Path("trace1.zip").unlink()
+
+
+async def test_set_input_files_should_preserve_last_modified_timestamp(
+    browser_type: BrowserType,
+    launch_server: Callable[[], RemoteServer],
+    assetdir: Path,
+) -> None:
+    # Launch another server to not affect other tests.
+    remote = launch_server()
+
+    browser = await browser_type.connect(remote.ws_endpoint)
+    context = await browser.new_context()
+    page = await context.new_page()
+
+    await page.set_content("<input type=file multiple=true/>")
+    input = page.locator("input")
+    files = ["file-to-upload.txt", "file-to-upload-2.txt"]
+    await input.set_input_files([assetdir / file for file in files])
+    assert await input.evaluate("input => [...input.files].map(f => f.name)") == files
+    timestamps = await input.evaluate(
+        "input => [...input.files].map(f => f.lastModified)"
+    )
+    expected_timestamps = [os.path.getmtime(assetdir / file) * 1000 for file in files]
+
+    # On Linux browser sometimes reduces the timestamp by 1ms: 1696272058110.0715  -> 1696272058109 or even
+    # rounds it to seconds in WebKit: 1696272058110 -> 1696272058000.
+    for i in range(len(timestamps)):
+        assert abs(timestamps[i] - expected_timestamps[i]) < 1000

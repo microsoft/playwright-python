@@ -137,6 +137,7 @@ class BrowserType(ChannelOwner):
         acceptDownloads: bool = None,
         tracesDir: Union[pathlib.Path, str] = None,
         chromiumSandbox: bool = None,
+        firefoxUserPrefs: Dict[str, Union[str, float, bool]] = None,
         recordHarPath: Union[Path, str] = None,
         recordHarOmitContent: bool = None,
         recordVideoDir: Union[Path, str] = None,

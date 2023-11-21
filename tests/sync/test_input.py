@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+from pathlib import Path
+from typing import Any
 
 from playwright.sync_api import Page
 
@@ -24,3 +27,21 @@ def test_expect_file_chooser(page: Page) -> None:
     fc.set_files(
         {"name": "test.txt", "mimeType": "text/plain", "buffer": b"Hello World"}
     )
+
+
+def test_set_input_files_should_preserve_last_modified_timestamp(
+    page: Page,
+    assetdir: Path,
+) -> None:
+    page.set_content("<input type=file multiple=true/>")
+    input = page.locator("input")
+    files: Any = ["file-to-upload.txt", "file-to-upload-2.txt"]
+    input.set_input_files([assetdir / file for file in files])
+    assert input.evaluate("input => [...input.files].map(f => f.name)") == files
+    timestamps = input.evaluate("input => [...input.files].map(f => f.lastModified)")
+    expected_timestamps = [os.path.getmtime(assetdir / file) * 1000 for file in files]
+
+    # On Linux browser sometimes reduces the timestamp by 1ms: 1696272058110.0715  -> 1696272058109 or even
+    # rounds it to seconds in WebKit: 1696272058110 -> 1696272058000.
+    for i in range(len(timestamps)):
+        assert abs(timestamps[i] - expected_timestamps[i]) < 1000

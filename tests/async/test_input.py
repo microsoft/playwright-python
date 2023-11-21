@@ -17,6 +17,7 @@ import os
 import re
 import shutil
 import sys
+from pathlib import Path
 
 import pytest
 from flaky import flaky
@@ -349,6 +350,26 @@ async def test_should_upload_large_file(page, server, tmp_path):
     )
     assert match.group("name") == b"file1"
     assert match.group("filename") == b"200MB.zip"
+
+
+async def test_set_input_files_should_preserve_last_modified_timestamp(
+    page: Page,
+    assetdir: Path,
+) -> None:
+    await page.set_content("<input type=file multiple=true/>")
+    input = page.locator("input")
+    files = ["file-to-upload.txt", "file-to-upload-2.txt"]
+    await input.set_input_files([assetdir / file for file in files])
+    assert await input.evaluate("input => [...input.files].map(f => f.name)") == files
+    timestamps = await input.evaluate(
+        "input => [...input.files].map(f => f.lastModified)"
+    )
+    expected_timestamps = [os.path.getmtime(assetdir / file) * 1000 for file in files]
+
+    # On Linux browser sometimes reduces the timestamp by 1ms: 1696272058110.0715  -> 1696272058109 or even
+    # rounds it to seconds in WebKit: 1696272058110 -> 1696272058000.
+    for i in range(len(timestamps)):
+        assert abs(timestamps[i] - expected_timestamps[i]) < 1000
 
 
 @flaky
