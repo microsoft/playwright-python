@@ -18,11 +18,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
 
 from playwright._impl._api_structures import FilePayload, FloatRect, Position
-from playwright._impl._connection import (
-    ChannelOwner,
-    filter_none,
-    from_nullable_channel,
-)
+from playwright._impl._connection import ChannelOwner, from_nullable_channel
 from playwright._impl._helper import (
     Error,
     KeyboardModifier,
@@ -202,7 +198,8 @@ class ElementHandle(JSHandle):
         await self._channel.send(
             "setInputFiles",
             {
-                **filter_none({"timeout": timeout, "noWaitAfter": noWaitAfter}),
+                "timeout": timeout,
+                "noWaitAfter": noWaitAfter,
                 **converted,
             },
         )
@@ -408,4 +405,4 @@ def convert_select_option_values(
             element = [element]
         elements = list(map(lambda e: e._channel, element))
 
-    return filter_none(dict(options=options, elements=elements))
+    return dict(options=options, elements=elements)

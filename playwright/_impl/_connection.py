@@ -82,7 +82,7 @@ class Channel(AsyncIOEventEmitter):
         if params is None:
             params = {}
         callback = self._connection._send_message_to_server(
-            self._object, method, params
+            self._object, method, _filter_none(params)
         )
         if self._connection._error:
             error = self._connection._error
@@ -565,7 +565,7 @@ def _extract_stack_trace_information_from_stack(
     }
 
 
-def filter_none(d: Mapping) -> Dict:
+def _filter_none(d: Mapping) -> Dict:
     return {k: v for k, v in d.items() if v is not None}
 
 

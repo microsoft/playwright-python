@@ -28,7 +28,6 @@ from playwright._impl._browser_context import BrowserContext
 from playwright._impl._connection import (
     ChannelOwner,
     Connection,
-    filter_none,
     from_channel,
     from_nullable_channel,
 )
@@ -200,15 +199,13 @@ class BrowserType(ChannelOwner):
         pipe_channel = (
             await local_utils._channel.send_return_as_dict(
                 "connect",
-                filter_none(
-                    {
-                        "wsEndpoint": ws_endpoint,
-                        "headers": headers,
-                        "slowMo": slow_mo,
-                        "timeout": timeout,
-                        "exposeNetwork": expose_network,
-                    }
-                ),
+                {
+                    "wsEndpoint": ws_endpoint,
+                    "headers": headers,
+                    "slowMo": slow_mo,
+                    "timeout": timeout,
+                    "exposeNetwork": expose_network,
+                },
             )
         )["pipe"]
         transport = JsonPipeTransport(self._connection._loop, pipe_channel)

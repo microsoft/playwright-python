@@ -27,7 +27,7 @@ from playwright._impl._api_structures import (
 from playwright._impl._artifact import Artifact
 from playwright._impl._browser_context import BrowserContext
 from playwright._impl._cdp_session import CDPSession
-from playwright._impl._connection import ChannelOwner, filter_none, from_channel
+from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._errors import is_target_closed_error
 from playwright._impl._helper import (
     ColorScheme,
@@ -183,7 +183,7 @@ class Browser(ChannelOwner):
             if self._should_close_connection_on_close:
                 await self._connection.stop_async()
             else:
-                await self._channel.send("close", filter_none({"reason": reason}))
+                await self._channel.send("close", {"reason": reason})
         except Exception as e:
             if not is_target_closed_error(e):
                 raise e
