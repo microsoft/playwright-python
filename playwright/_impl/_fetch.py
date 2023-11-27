@@ -29,7 +29,7 @@ from playwright._impl._api_structures import (
     ServerFilePayload,
     StorageState,
 )
-from playwright._impl._connection import ChannelOwner, filter_none, from_channel
+from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._errors import is_target_closed_error
 from playwright._impl._helper import (
     Error,
@@ -368,22 +368,20 @@ class APIRequestContext(ChannelOwner):
 
         response = await self._channel.send(
             "fetch",
-            filter_none(
-                {
-                    "url": url,
-                    "params": object_to_array(params),
-                    "method": method,
-                    "headers": serialized_headers,
-                    "postData": post_data,
-                    "jsonData": json_data,
-                    "formData": form_data,
-                    "multipartData": multipart_data,
-                    "timeout": timeout,
-                    "failOnStatusCode": failOnStatusCode,
-                    "ignoreHTTPSErrors": ignoreHTTPSErrors,
-                    "maxRedirects": maxRedirects,
-                }
-            ),
+            {
+                "url": url,
+                "params": object_to_array(params),
+                "method": method,
+                "headers": serialized_headers,
+                "postData": post_data,
+                "jsonData": json_data,
+                "formData": form_data,
+                "multipartData": multipart_data,
+                "timeout": timeout,
+                "failOnStatusCode": failOnStatusCode,
+                "ignoreHTTPSErrors": ignoreHTTPSErrors,
+                "maxRedirects": maxRedirects,
+            },
         )
         return APIResponse(self, response)
 

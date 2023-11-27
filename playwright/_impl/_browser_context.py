@@ -40,7 +40,6 @@ from playwright._impl._artifact import Artifact
 from playwright._impl._cdp_session import CDPSession
 from playwright._impl._connection import (
     ChannelOwner,
-    filter_none,
     from_channel,
     from_nullable_channel,
 )
@@ -482,7 +481,7 @@ class BrowserContext(ChannelOwner):
                 await har.delete()
 
         await self._channel._connection.wrap_api_call(_inner_close, True)
-        await self._channel.send("close", filter_none({"reason": reason}))
+        await self._channel.send("close", {"reason": reason})
         await self._closed_future
 
     async def storage_state(self, path: Union[str, Path] = None) -> StorageState:

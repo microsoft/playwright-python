@@ -38,7 +38,6 @@ from playwright._impl._api_structures import (
     FrameExpectResult,
     Position,
 )
-from playwright._impl._connection import filter_none
 from playwright._impl._element_handle import ElementHandle
 from playwright._impl._helper import (
     Error,
@@ -707,7 +706,7 @@ class Locator:
             {
                 "selector": self._selector,
                 "expression": expression,
-                **(filter_none(options)),
+                **options,
             },
         )
         if result.get("received"):

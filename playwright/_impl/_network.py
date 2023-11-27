@@ -51,7 +51,6 @@ from playwright._impl._api_structures import (
 )
 from playwright._impl._connection import (
     ChannelOwner,
-    filter_none,
     from_channel,
     from_nullable_channel,
 )
@@ -303,12 +302,10 @@ class Route(ChannelOwner):
         await self._race_with_page_close(
             self._channel.send(
                 "abort",
-                filter_none(
-                    {
-                        "errorCode": errorCode,
-                        "requestUrl": self.request._initializer["url"],
-                    }
-                ),
+                {
+                    "errorCode": errorCode,
+                    "requestUrl": self.request._initializer["url"],
+                },
             )
         )
         self._report_handled(True)
