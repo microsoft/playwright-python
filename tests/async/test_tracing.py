@@ -23,7 +23,7 @@ from tests.utils import get_trace_actions, parse_trace
 
 async def test_browser_context_output_trace(
     browser: Browser, server: Server, tmp_path: Path
-):
+) -> None:
     context = await browser.new_context()
     await context.tracing.start(screenshots=True, snapshots=True)
     page = await context.new_page()
@@ -32,7 +32,7 @@ async def test_browser_context_output_trace(
     assert Path(tmp_path / "trace.zip").exists()
 
 
-async def test_start_stop(browser: Browser):
+async def test_start_stop(browser: Browser) -> None:
     context = await browser.new_context()
     await context.tracing.start()
     await context.tracing.stop()
@@ -41,13 +41,13 @@ async def test_start_stop(browser: Browser):
 
 async def test_browser_context_should_not_throw_when_stopping_without_start_but_not_exporting(
     context: BrowserContext, server: Server, tmp_path: Path
-):
+) -> None:
     await context.tracing.stop()
 
 
 async def test_browser_context_output_trace_chunk(
     browser: Browser, server: Server, tmp_path: Path
-):
+) -> None:
     context = await browser.new_context()
     await context.tracing.start(screenshots=True, snapshots=True)
     page = await context.new_page()
@@ -67,7 +67,7 @@ async def test_browser_context_output_trace_chunk(
 
 async def test_should_collect_sources(
     context: BrowserContext, page: Page, server: Server, tmp_path: Path
-):
+) -> None:
     await context.tracing.start(sources=True)
     await page.goto(server.EMPTY_PAGE)
     await page.set_content("<button>Click</button>")
@@ -234,7 +234,7 @@ async def test_should_respect_traces_dir_and_name(
     browser_type: BrowserType,
     server: Server,
     tmpdir: Path,
-    launch_arguments: Dict[str, str],
+    launch_arguments: Dict,
 ) -> None:
     traces_dir = tmpdir / "traces"
     browser = await browser_type.launch(traces_dir=traces_dir, **launch_arguments)

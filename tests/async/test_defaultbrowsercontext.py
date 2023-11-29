@@ -14,30 +14,43 @@
 
 import asyncio
 import os
+from pathlib import Path
+from typing import Any, AsyncGenerator, Awaitable, Callable, Dict, Optional, Tuple
 
 import pytest
 
-from playwright.async_api import Error, expect
+from playwright.async_api import BrowserContext, BrowserType, Error, Page, expect
+from tests.server import Server
+from tests.utils import must
+
+from .utils import Utils
 
 
 @pytest.fixture()
-async def launch_persistent(tmpdir, launch_arguments, browser_type):
-    context = None
+async def launch_persistent(
+    tmpdir: Path, launch_arguments: Dict, browser_type: BrowserType
+) -> AsyncGenerator[Callable[..., Awaitable[Tuple[Page, BrowserContext]]], None]:
+    context: Optional[BrowserContext] = None
 
-    async def _launch(**options):
+    async def _launch(**options: Any) -> Tuple[Page, BrowserContext]:
         nonlocal context
         if context:
             raise ValueError("can only launch one persistent context")
         context = await browser_type.launch_persistent_context(
             str(tmpdir), **{**launch_arguments, **options}
         )
+        assert context
         return (context.pages[0], context)
 
     yield _launch
-    await context.close()
+    await must(context).close()
 
 
-async def test_context_cookies_should_work(server, launch_persistent, is_chromium):
+async def test_context_cookies_should_work(
+    server: Server,
+    launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
+    is_chromium: bool,
+) -> None:
     (page, context) = await launch_persistent()
     await page.goto(server.EMPTY_PAGE)
     document_cookie = await page.evaluate(
@@ -62,7 +75,11 @@ async def test_context_cookies_should_work(server, launch_persistent, is_chromiu
     ]
 
 
-async def test_context_add_cookies_should_work(server, launch_persistent, is_chromium):
+async def test_context_add_cookies_should_work(
+    server: Server,
+    launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
+    is_chromium: bool,
+) -> None:
     (page, context) = await launch_persistent()
     await page.goto(server.EMPTY_PAGE)
     await page.context.add_cookies(
@@ -83,7 +100,10 @@ async def test_context_add_cookies_should_work(server, launch_persistent, is_chr
     ]
 
 
-async def test_context_clear_cookies_should_work(server, launch_persistent):
+async def test_context_clear_cookies_should_work(
+    server: Server,
+    launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
+) -> None:
     (page, context) = await launch_persistent()
     await page.goto(server.EMPTY_PAGE)
     await page.context.add_cookies(
@@ -100,8 +120,10 @@ async def test_context_clear_cookies_should_work(server, launch_persistent):
 
 
 async def test_should_not_block_third_party_cookies(
-    server, launch_persistent, is_chromium, is_firefox
-):
+    server: Server,
+    launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
+    is_firefox: bool,
+) -> None:
     (page, context) = await launch_persistent()
     await page.goto(server.EMPTY_PAGE)
     await page.evaluate(
@@ -144,19 +166,27 @@ async def test_should_not_block_third_party_cookies(
         assert cookies == []
 
 
-async def test_should_support_viewport_option(launch_persistent, utils):
+async def test_should_support_viewport_option(
+    launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
+    utils: Utils,
+) -> None:
     (page, context) = await launch_persistent(viewport={"width": 456, "height": 789})
     await utils.verify_viewport(page, 456, 789)
     page2 = await context.new_page()
     await utils.verify_viewport(page2, 456, 789)
 
 
-async def test_should_support_device_scale_factor_option(launch_persistent, utils):
+async def test_should_support_device_scale_factor_option(
+    launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
+) -> None:
     (page, context) = await launch_persistent(device_scale_factor=3)
     assert await page.evaluate("window.devicePixelRatio") == 3
 
 
-async def test_should_support_user_agent_option(launch_persistent, server):
+async def test_should_support_user_agent_option(
+    launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
+    server: Server,
+) -> None:
     (page, context) = await launch_persistent(user_agent="foobar")
     assert await page.evaluate("() => navigator.userAgent") == "foobar"
     [request, _] = await asyncio.gather(
@@ -166,14 +196,20 @@ async def test_should_support_user_agent_option(launch_persistent, server):
     assert request.getHeader("user-agent") == "foobar"
 
 
-async def test_should_support_bypass_csp_option(launch_persistent, server):
+async def test_should_support_bypass_csp_option(
+    launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
+    server: Server,
+) -> None:
     (page, context) = await launch_persistent(bypass_csp=True)
     await page.goto(server.PREFIX + "/csp.html")
     await page.add_script_tag(content="window.__injected = 42;")
     assert await page.evaluate("() => window.__injected") == 42
 
 
-async def test_should_support_javascript_enabled_option(launch_persistent, is_webkit):
+async def test_should_support_javascript_enabled_option(
+    launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
+    is_webkit: bool,
+) -> None:
     (page, context) = await launch_persistent(java_script_enabled=False)
     await page.goto('data:text/html, <script>var something = "forbidden"</script>')
     with pytest.raises(Error) as exc:
@@ -184,29 +220,42 @@ async def test_should_support_javascript_enabled_option(launch_persistent, is_we
         assert "something is not defined" in exc.value.message
 
 
-async def test_should_support_http_credentials_option(server, launch_persistent):
+async def test_should_support_http_credentials_option(
+    server: Server,
+    launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
+) -> None:
     (page, context) = await launch_persistent(
         http_credentials={"username": "user", "password": "pass"}
     )
     server.set_auth("/playground.html", "user", "pass")
     response = await page.goto(server.PREFIX + "/playground.html")
+    assert response
     assert response.status == 200
 
 
-async def test_should_support_offline_option(server, launch_persistent):
+async def test_should_support_offline_option(
+    server: Server,
+    launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
+) -> None:
     (page, context) = await launch_persistent(offline=True)
     with pytest.raises(Error):
         await page.goto(server.EMPTY_PAGE)
 
 
-async def test_should_support_has_touch_option(server, launch_persistent):
+async def test_should_support_has_touch_option(
+    server: Server,
+    launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
+) -> None:
     (page, context) = await launch_persistent(has_touch=True)
     await page.goto(server.PREFIX + "/mobile.html")
     assert await page.evaluate('() => "ontouchstart" in window')
 
 
 @pytest.mark.skip_browser("firefox")
-async def test_should_work_in_persistent_context(server, launch_persistent):
+async def test_should_work_in_persistent_context(
+    server: Server,
+    launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
+) -> None:
     # Firefox does not support mobile.
     (page, context) = await launch_persistent(
         viewport={"width": 320, "height": 480}, is_mobile=True
@@ -215,7 +264,9 @@ async def test_should_work_in_persistent_context(server, launch_persistent):
     assert await page.evaluate("() => window.innerWidth") == 980
 
 
-async def test_should_support_color_scheme_option(server, launch_persistent):
+async def test_should_support_color_scheme_option(
+    launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
+) -> None:
     (page, context) = await launch_persistent(color_scheme="dark")
     assert (
         await page.evaluate('() => matchMedia("(prefers-color-scheme: light)").matches')
@@ -226,7 +277,9 @@ async def test_should_support_color_scheme_option(server, launch_persistent):
     )
 
 
-async def test_should_support_timezone_id_option(launch_persistent):
+async def test_should_support_timezone_id_option(
+    launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
+) -> None:
     (page, context) = await launch_persistent(timezone_id="America/Jamaica")
     assert (
         await page.evaluate("() => new Date(1479579154987).toString()")
@@ -234,14 +287,17 @@ async def test_should_support_timezone_id_option(launch_persistent):
     )
 
 
-async def test_should_support_locale_option(launch_persistent):
+async def test_should_support_locale_option(
+    launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
+) -> None:
     (page, context) = await launch_persistent(locale="fr-FR")
     assert await page.evaluate("() => navigator.language") == "fr-FR"
 
 
 async def test_should_support_geolocation_and_permission_option(
-    server, launch_persistent
-):
+    server: Server,
+    launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
+) -> None:
     (page, context) = await launch_persistent(
         geolocation={"longitude": 10, "latitude": 10}, permissions=["geolocation"]
     )
@@ -255,14 +311,19 @@ async def test_should_support_geolocation_and_permission_option(
 
 
 async def test_should_support_ignore_https_errors_option(
-    https_server, launch_persistent
-):
+    https_server: Server,
+    launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
+) -> None:
     (page, context) = await launch_persistent(ignore_https_errors=True)
     response = await page.goto(https_server.EMPTY_PAGE)
+    assert response
     assert response.ok
 
 
-async def test_should_support_extra_http_headers_option(server, launch_persistent):
+async def test_should_support_extra_http_headers_option(
+    server: Server,
+    launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
+) -> None:
     (page, context) = await launch_persistent(extra_http_headers={"foo": "bar"})
     [request, _] = await asyncio.gather(
         server.wait_for_request("/empty.html"),
@@ -271,7 +332,10 @@ async def test_should_support_extra_http_headers_option(server, launch_persisten
     assert request.getHeader("foo") == "bar"
 
 
-async def test_should_accept_user_data_dir(server, tmpdir, launch_persistent):
+async def test_should_accept_user_data_dir(
+    tmpdir: Path,
+    launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
+) -> None:
     (page, context) = await launch_persistent()
     # Note: we need an open page to make sure its functional.
     assert len(os.listdir(tmpdir)) > 0
@@ -280,8 +344,11 @@ async def test_should_accept_user_data_dir(server, tmpdir, launch_persistent):
 
 
 async def test_should_restore_state_from_userDataDir(
-    browser_type, launch_arguments, server, tmp_path_factory
-):
+    browser_type: BrowserType,
+    launch_arguments: Dict,
+    server: Server,
+    tmp_path_factory: pytest.TempPathFactory,
+) -> None:
     user_data_dir1 = tmp_path_factory.mktemp("test")
     browser_context = await browser_type.launch_persistent_context(
         user_data_dir1, **launch_arguments
@@ -309,7 +376,9 @@ async def test_should_restore_state_from_userDataDir(
     await browser_context3.close()
 
 
-async def test_should_have_default_url_when_launching_browser(launch_persistent):
+async def test_should_have_default_url_when_launching_browser(
+    launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
+) -> None:
     (page, context) = await launch_persistent()
     urls = list(map(lambda p: p.url, context.pages))
     assert urls == ["about:blank"]
@@ -317,28 +386,35 @@ async def test_should_have_default_url_when_launching_browser(launch_persistent)
 
 @pytest.mark.skip_browser("firefox")
 async def test_should_throw_if_page_argument_is_passed(
-    browser_type, server, tmpdir, launch_arguments
-):
+    browser_type: BrowserType, server: Server, tmpdir: Path, launch_arguments: Dict
+) -> None:
     options = {**launch_arguments, "args": [server.EMPTY_PAGE]}
     with pytest.raises(Error) as exc:
         await browser_type.launch_persistent_context(tmpdir, **options)
     assert "can not specify page" in exc.value.message
 
 
-async def test_should_fire_close_event_for_a_persistent_context(launch_persistent):
+async def test_should_fire_close_event_for_a_persistent_context(
+    launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
+) -> None:
     (page, context) = await launch_persistent()
-    fired_event = asyncio.Future()
-    context.on("close", lambda: fired_event.set_result(True))
+    fired_event: "asyncio.Future[bool]" = asyncio.Future()
+    context.on("close", lambda _: fired_event.set_result(True))
     await context.close()
     await fired_event
 
 
-async def test_should_support_reduced_motion(launch_persistent):
+async def test_should_support_reduced_motion(
+    launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
+) -> None:
     (page, context) = await launch_persistent(reduced_motion="reduce")
     assert await page.evaluate("matchMedia('(prefers-reduced-motion: reduce)').matches")
 
 
-async def test_should_support_har_option(browser, server, assetdir, launch_persistent):
+async def test_should_support_har_option(
+    assetdir: Path,
+    launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
+) -> None:
     (page, context) = await launch_persistent()
     await page.route_from_har(har=assetdir / "har-fulfill.har")
     await page.goto("http://no.playwright/")

@@ -17,8 +17,11 @@ from typing import Dict
 import pytest
 from flaky import flaky
 
+from playwright.async_api import Browser, Page
+from tests.server import Server
 
-async def test_should_work(page, server):
+
+async def test_should_work(page: Page, server: Server) -> None:
     async with page.expect_event("requestfinished") as request_info:
         await page.goto(server.EMPTY_PAGE)
     request = await request_info.value
@@ -31,7 +34,9 @@ async def test_should_work(page, server):
 
 
 @flaky
-async def test_should_work_for_subresource(page, server, is_win, is_mac, is_webkit):
+async def test_should_work_for_subresource(
+    page: Page, server: Server, is_win: bool, is_mac: bool, is_webkit: bool
+) -> None:
     if is_webkit and (is_mac or is_win):
         pytest.skip()
     requests = []
@@ -47,7 +52,7 @@ async def test_should_work_for_subresource(page, server, is_win, is_mac, is_webk
 
 
 @flaky  # Upstream flaky
-async def test_should_work_for_ssl(browser, https_server):
+async def test_should_work_for_ssl(browser: Browser, https_server: Server) -> None:
     page = await browser.new_page(ignore_https_errors=True)
     async with page.expect_event("requestfinished") as request_info:
         await page.goto(https_server.EMPTY_PAGE)
@@ -62,7 +67,7 @@ async def test_should_work_for_ssl(browser, https_server):
 
 
 @pytest.mark.skip_browser("webkit")  # In WebKit, redirects don"t carry the timing info
-async def test_should_work_for_redirect(page, server):
+async def test_should_work_for_redirect(page: Page, server: Server) -> None:
     server.set_redirect("/foo.html", "/empty.html")
     responses = []
     page.on("response", lambda response: responses.append(response))

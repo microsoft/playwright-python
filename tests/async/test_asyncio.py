@@ -24,10 +24,10 @@ from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
 
 async def test_should_cancel_underlying_protocol_calls(
     browser_name: str, launch_arguments: Dict
-):
+) -> None:
     handler_exception = None
 
-    def exception_handlerdler(loop, context) -> None:
+    def exception_handlerdler(loop: asyncio.AbstractEventLoop, context: Dict) -> None:
         nonlocal handler_exception
         handler_exception = context["exception"]
 
@@ -70,8 +70,9 @@ async def test_cancel_pending_protocol_call_on_playwright_stop(server: Server) -
 
 
 async def test_should_collect_stale_handles(page: Page, server: Server) -> None:
-    page.on("request", lambda: None)
+    page.on("request", lambda _: None)
     response = await page.goto(server.PREFIX + "/title.html")
+    assert response
     for i in range(1000):
         await page.evaluate(
             """async () => {

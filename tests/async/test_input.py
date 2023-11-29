@@ -18,21 +18,25 @@ import re
 import shutil
 import sys
 from pathlib import Path
+from typing import Any
 
 import pytest
 from flaky import flaky
 
 from playwright._impl._path_utils import get_file_dirname
-from playwright.async_api import Page
+from playwright.async_api import FilePayload, Page
+from tests.server import Server
+from tests.utils import must
 
 _dirname = get_file_dirname()
 FILE_TO_UPLOAD = _dirname / ".." / "assets/file-to-upload.txt"
 
 
-async def test_should_upload_the_file(page, server):
+async def test_should_upload_the_file(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/fileupload.html")
     file_path = os.path.relpath(FILE_TO_UPLOAD, os.getcwd())
     input = await page.query_selector("input")
+    assert input
     await input.set_input_files(file_path)
     assert await page.evaluate("e => e.files[0].name", input) == "file-to-upload.txt"
     assert (
@@ -49,7 +53,7 @@ async def test_should_upload_the_file(page, server):
     )
 
 
-async def test_should_work(page, assetdir):
+async def test_should_work(page: Page, assetdir: Path) -> None:
     await page.set_content("<input type=file>")
     await page.set_input_files("input", assetdir / "file-to-upload.txt")
     assert await page.eval_on_selector("input", "input => input.files.length") == 1
@@ -59,13 +63,16 @@ async def test_should_work(page, assetdir):
     )
 
 
-async def test_should_set_from_memory(page):
+async def test_should_set_from_memory(page: Page) -> None:
     await page.set_content("<input type=file>")
+    file: FilePayload = {
+        "name": "test.txt",
+        "mimeType": "text/plain",
+        "buffer": b"this is a test",
+    }
     await page.set_input_files(
         "input",
-        files=[
-            {"name": "test.txt", "mimeType": "text/plain", "buffer": b"this is a test"}
-        ],
+        files=[file],
     )
     assert await page.eval_on_selector("input", "input => input.files.length") == 1
     assert (
@@ -74,7 +81,7 @@ async def test_should_set_from_memory(page):
     )
 
 
-async def test_should_emit_event(page: Page):
+async def test_should_emit_event(page: Page) -> None:
     await page.set_content("<input type=file>")
     fc_done: asyncio.Future = asyncio.Future()
     page.once("filechooser", lambda file_chooser: fc_done.set_result(file_chooser))
@@ -87,7 +94,7 @@ async def test_should_emit_event(page: Page):
     )
 
 
-async def test_should_work_when_file_input_is_attached_to_dom(page: Page):
+async def test_should_work_when_file_input_is_attached_to_dom(page: Page) -> None:
     await page.set_content("<input type=file>")
     async with page.expect_file_chooser() as fc_info:
         await page.click("input")
@@ -95,7 +102,7 @@ async def test_should_work_when_file_input_is_attached_to_dom(page: Page):
     assert file_chooser
 
 
-async def test_should_work_when_file_input_is_not_attached_to_DOM(page):
+async def test_should_work_when_file_input_is_not_attached_to_DOM(page: Page) -> None:
     async with page.expect_file_chooser() as fc_info:
         await page.evaluate(
             """() => {
@@ -110,7 +117,7 @@ async def test_should_work_when_file_input_is_not_attached_to_DOM(page):
 
 async def test_should_return_the_same_file_chooser_when_there_are_many_watchdogs_simultaneously(
     page: Page,
-):
+) -> None:
     await page.set_content("<input type=file>")
     results = await asyncio.gather(
         page.wait_for_event("filechooser"),
@@ -120,7 +127,7 @@ async def test_should_return_the_same_file_chooser_when_there_are_many_watchdogs
     assert results[0] == results[1]
 
 
-async def test_should_accept_single_file(page: Page):
+async def test_should_accept_single_file(page: Page) -> None:
     await page.set_content('<input type=file oninput="javascript:console.timeStamp()">')
     async with page.expect_file_chooser() as fc_info:
         await page.click("input")
@@ -135,7 +142,7 @@ async def test_should_accept_single_file(page: Page):
     )
 
 
-async def test_should_be_able_to_read_selected_file(page: Page):
+async def test_should_be_able_to_read_selected_file(page: Page) -> None:
     page.once(
         "filechooser", lambda file_chooser: file_chooser.set_files(FILE_TO_UPLOAD)
     )
@@ -155,8 +162,8 @@ async def test_should_be_able_to_read_selected_file(page: Page):
 
 
 async def test_should_be_able_to_reset_selected_files_with_empty_file_list(
-    page: Page, server
-):
+    page: Page,
+) -> None:
     await page.set_content("<input type=file>")
     page.once(
         "filechooser", lambda file_chooser: file_chooser.set_files(FILE_TO_UPLOAD)
@@ -187,8 +194,8 @@ async def test_should_be_able_to_reset_selected_files_with_empty_file_list(
 
 
 async def test_should_not_accept_multiple_files_for_single_file_input(
-    page, server, assetdir
-):
+    page: Page, assetdir: Path
+) -> None:
     await page.set_content("<input type=file>")
     async with page.expect_file_chooser() as fc_info:
         await page.click("input")
@@ -203,7 +210,7 @@ async def test_should_not_accept_multiple_files_for_single_file_input(
     assert exc_info.value
 
 
-async def test_should_emit_input_and_change_events(page):
+async def test_should_emit_input_and_change_events(page: Page) -> None:
     events = []
     await page.expose_function("eventHandled", lambda e: events.append(e))
     await page.set_content(
@@ -215,13 +222,13 @@ async def test_should_emit_input_and_change_events(page):
             </script>
         """
     )
-    await (await page.query_selector("input")).set_input_files(FILE_TO_UPLOAD)
+    await must(await page.query_selector("input")).set_input_files(FILE_TO_UPLOAD)
     assert len(events) == 2
     assert events[0]["type"] == "input"
     assert events[1]["type"] == "change"
 
 
-async def test_should_work_for_single_file_pick(page):
+async def test_should_work_for_single_file_pick(page: Page) -> None:
     await page.set_content("<input type=file>")
     async with page.expect_file_chooser() as fc_info:
         await page.click("input")
@@ -229,7 +236,7 @@ async def test_should_work_for_single_file_pick(page):
     assert file_chooser.is_multiple() is False
 
 
-async def test_should_work_for_multiple(page):
+async def test_should_work_for_multiple(page: Page) -> None:
     await page.set_content("<input multiple type=file>")
     async with page.expect_file_chooser() as fc_info:
         await page.click("input")
@@ -237,7 +244,7 @@ async def test_should_work_for_multiple(page):
     assert file_chooser.is_multiple()
 
 
-async def test_should_work_for_webkitdirectory(page):
+async def test_should_work_for_webkitdirectory(page: Page) -> None:
     await page.set_content("<input multiple webkitdirectory type=file>")
     async with page.expect_file_chooser() as fc_info:
         await page.click("input")
@@ -245,7 +252,7 @@ async def test_should_work_for_webkitdirectory(page):
     assert file_chooser.is_multiple()
 
 
-def _assert_wheel_event(expected, received, browser_name):
+def _assert_wheel_event(expected: Any, received: Any, browser_name: str) -> None:
     # Chromium reports deltaX/deltaY scaled by host device scale factor.
     # https://bugs.chromium.org/p/chromium/issues/detail?id=1324819
     # https://github.com/microsoft/playwright/issues/7362
@@ -259,7 +266,7 @@ def _assert_wheel_event(expected, received, browser_name):
     assert received == expected
 
 
-async def test_wheel_should_work(page: Page, server, browser_name: str):
+async def test_wheel_should_work(page: Page, browser_name: str) -> None:
     await page.set_content(
         """
         <div style="width: 5000px; height: 5000px;"></div>
@@ -310,7 +317,9 @@ async def _listen_for_wheel_events(page: Page, selector: str) -> None:
 
 
 @flaky
-async def test_should_upload_large_file(page, server, tmp_path):
+async def test_should_upload_large_file(
+    page: Page, server: Server, tmp_path: Path
+) -> None:
     await page.goto(server.PREFIX + "/input/fileupload.html")
     large_file_path = tmp_path / "200MB.zip"
     data = b"A" * 1024
@@ -343,11 +352,13 @@ async def test_should_upload_large_file(page, server, tmp_path):
     assert contents[:1024] == data
     # flake8: noqa: E203
     assert contents[len(contents) - 1024 :] == data
+    assert request.post_body
     match = re.search(
         rb'^.*Content-Disposition: form-data; name="(?P<name>.*)"; filename="(?P<filename>.*)".*$',
         request.post_body,
         re.MULTILINE,
     )
+    assert match
     assert match.group("name") == b"file1"
     assert match.group("filename") == b"200MB.zip"
 
@@ -373,7 +384,9 @@ async def test_set_input_files_should_preserve_last_modified_timestamp(
 
 
 @flaky
-async def test_should_upload_multiple_large_file(page: Page, server, tmp_path):
+async def test_should_upload_multiple_large_file(
+    page: Page, server: Server, tmp_path: Path
+) -> None:
     files_count = 10
     await page.goto(server.PREFIX + "/input/fileupload-multi.html")
     upload_file = tmp_path / "50MB_1.zip"

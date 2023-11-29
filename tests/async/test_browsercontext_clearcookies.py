@@ -12,8 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from playwright.async_api import Browser, BrowserContext, Page
+from tests.server import Server
 
-async def test_should_clear_cookies(context, page, server):
+
+async def test_should_clear_cookies(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     await context.add_cookies(
         [{"url": server.EMPTY_PAGE, "name": "cookie1", "value": "1"}]
@@ -25,7 +30,9 @@ async def test_should_clear_cookies(context, page, server):
     assert await page.evaluate("document.cookie") == ""
 
 
-async def test_should_isolate_cookies_when_clearing(context, server, browser):
+async def test_should_isolate_cookies_when_clearing(
+    context: BrowserContext, server: Server, browser: Browser
+) -> None:
     another_context = await browser.new_context()
     await context.add_cookies(
         [{"url": server.EMPTY_PAGE, "name": "page1cookie", "value": "page1value"}]

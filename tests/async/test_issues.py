@@ -13,14 +13,15 @@
 # limitations under the License.
 
 from asyncio import FIRST_COMPLETED, CancelledError, create_task, wait
+from typing import Dict
 
 import pytest
 
-from playwright.async_api import Page
+from playwright.async_api import Browser, BrowserType, Page, Playwright
 
 
 @pytest.mark.only_browser("chromium")
-async def test_issue_189(browser_type, launch_arguments):
+async def test_issue_189(browser_type: BrowserType, launch_arguments: Dict) -> None:
     browser = await browser_type.launch(
         **launch_arguments, ignore_default_args=["--mute-audio"]
     )
@@ -30,13 +31,13 @@ async def test_issue_189(browser_type, launch_arguments):
 
 
 @pytest.mark.only_browser("chromium")
-async def test_issue_195(playwright, browser):
+async def test_issue_195(playwright: Playwright, browser: Browser) -> None:
     iphone_11 = playwright.devices["iPhone 11"]
     context = await browser.new_context(**iphone_11)
     await context.close()
 
 
-async def test_connection_task_cancel(page: Page):
+async def test_connection_task_cancel(page: Page) -> None:
     await page.set_content("<input />")
     done, pending = await wait(
         {

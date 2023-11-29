@@ -18,11 +18,12 @@ from asyncio.futures import Future
 import pytest
 from flaky import flaky
 
-from playwright.async_api import Error, Page, Worker
+from playwright.async_api import Browser, ConsoleMessage, Error, Page, Worker
+from tests.server import Server
 from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
 
 
-async def test_workers_page_workers(page: Page, server):
+async def test_workers_page_workers(page: Page, server: Server) -> None:
     async with page.expect_worker() as worker_info:
         await page.goto(server.PREFIX + "/worker/worker.html")
     worker = await worker_info.value
@@ -38,7 +39,7 @@ async def test_workers_page_workers(page: Page, server):
     assert len(page.workers) == 0
 
 
-async def test_workers_should_emit_created_and_destroyed_events(page: Page):
+async def test_workers_should_emit_created_and_destroyed_events(page: Page) -> None:
     worker_obj = None
     async with page.expect_event("worker") as event_info:
         worker_obj = await page.evaluate_handle(
@@ -55,7 +56,7 @@ async def test_workers_should_emit_created_and_destroyed_events(page: Page):
     assert TARGET_CLOSED_ERROR_MESSAGE in exc.value.message
 
 
-async def test_workers_should_report_console_logs(page):
+async def test_workers_should_report_console_logs(page: Page) -> None:
     async with page.expect_console_message() as message_info:
         await page.evaluate(
             '() => new Worker(URL.createObjectURL(new Blob(["console.log(1)"], {type: "application/javascript"})))'
@@ -64,8 +65,10 @@ async def test_workers_should_report_console_logs(page):
     assert message.text == "1"
 
 
-async def test_workers_should_have_JSHandles_for_console_logs(page, browser_name):
-    log_promise = asyncio.Future()
+async def test_workers_should_have_JSHandles_for_console_logs(
+    page: Page, browser_name: str
+) -> None:
+    log_promise: "asyncio.Future[ConsoleMessage]" = asyncio.Future()
     page.on("console", lambda m: log_promise.set_result(m))
     await page.evaluate(
         "() => new Worker(URL.createObjectURL(new Blob(['console.log(1,2,3,this)'], {type: 'application/javascript'})))"
@@ -79,7 +82,7 @@ async def test_workers_should_have_JSHandles_for_console_logs(page, browser_name
     assert await (await log.args[3].get_property("origin")).json_value() == "null"
 
 
-async def test_workers_should_evaluate(page):
+async def test_workers_should_evaluate(page: Page) -> None:
     async with page.expect_event("worker") as event_info:
         await page.evaluate(
             "() => new Worker(URL.createObjectURL(new Blob(['console.log(1)'], {type: 'application/javascript'})))"
@@ -88,8 +91,8 @@ async def test_workers_should_evaluate(page):
     assert await worker.evaluate("1+1") == 2
 
 
-async def test_workers_should_report_errors(page):
-    error_promise = asyncio.Future()
+async def test_workers_should_report_errors(page: Page) -> None:
+    error_promise: "asyncio.Future[Error]" = asyncio.Future()
     page.on("pageerror", lambda e: error_promise.set_result(e))
     await page.evaluate(
         """() => new Worker(URL.createObjectURL(new Blob([`
@@ -105,7 +108,7 @@ async def test_workers_should_report_errors(page):
 
 
 @flaky  # Upstream flaky
-async def test_workers_should_clear_upon_navigation(server, page):
+async def test_workers_should_clear_upon_navigation(server: Server, page: Page) -> None:
     await page.goto(server.EMPTY_PAGE)
     async with page.expect_event("worker") as event_info:
         await page.evaluate(
@@ -121,7 +124,9 @@ async def test_workers_should_clear_upon_navigation(server, page):
 
 
 @flaky  # Upstream flaky
-async def test_workers_should_clear_upon_cross_process_navigation(server, page):
+async def test_workers_should_clear_upon_cross_process_navigation(
+    server: Server, page: Page
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     async with page.expect_event("worker") as event_info:
         await page.evaluate(
@@ -139,7 +144,9 @@ async def test_workers_should_clear_upon_cross_process_navigation(server, page):
 @pytest.mark.skip_browser(
     "firefox"
 )  # https://github.com/microsoft/playwright/issues/21760
-async def test_workers_should_report_network_activity(page, server):
+async def test_workers_should_report_network_activity(
+    page: Page, server: Server
+) -> None:
     async with page.expect_worker() as worker_info:
         await page.goto(server.PREFIX + "/worker/worker.html")
     worker = await worker_info.value
@@ -160,7 +167,9 @@ async def test_workers_should_report_network_activity(page, server):
 @pytest.mark.skip_browser(
     "firefox"
 )  # https://github.com/microsoft/playwright/issues/21760
-async def test_workers_should_report_network_activity_on_worker_creation(page, server):
+async def test_workers_should_report_network_activity_on_worker_creation(
+    page: Page, server: Server
+) -> None:
     # Chromium needs waitForDebugger enabled for this one.
     await page.goto(server.EMPTY_PAGE)
     url = server.PREFIX + "/one-style.css"
@@ -180,7 +189,9 @@ async def test_workers_should_report_network_activity_on_worker_creation(page, s
     assert response.ok
 
 
-async def test_workers_should_format_number_using_context_locale(browser, server):
+async def test_workers_should_format_number_using_context_locale(
+    browser: Browser, server: Server
+) -> None:
     context = await browser.new_context(locale="ru-RU")
     page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)

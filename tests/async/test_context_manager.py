@@ -12,12 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Dict
+
 import pytest
 
 from playwright.async_api import BrowserContext, BrowserType
 
 
-async def test_context_managers(browser_type: BrowserType, launch_arguments):
+async def test_context_managers(
+    browser_type: BrowserType, launch_arguments: Dict
+) -> None:
     async with await browser_type.launch(**launch_arguments) as browser:
         async with await browser.new_context() as context:
             async with await context.new_page():
@@ -28,7 +32,7 @@ async def test_context_managers(browser_type: BrowserType, launch_arguments):
     assert not browser.is_connected()
 
 
-async def test_context_managers_not_hang(context: BrowserContext):
+async def test_context_managers_not_hang(context: BrowserContext) -> None:
     with pytest.raises(Exception, match="Oops!"):
         async with await context.new_page():
             raise Exception("Oops!")

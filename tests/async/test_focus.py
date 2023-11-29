@@ -14,15 +14,17 @@
 
 import pytest
 
+from playwright.async_api import Page
 
-async def test_should_work(page):
+
+async def test_should_work(page: Page) -> None:
     await page.set_content("<div id=d1 tabIndex=0></div>")
     assert await page.evaluate("() => document.activeElement.nodeName") == "BODY"
     await page.focus("#d1")
     assert await page.evaluate("() => document.activeElement.id") == "d1"
 
 
-async def test_should_emit_focus_event(page):
+async def test_should_emit_focus_event(page: Page) -> None:
     await page.set_content("<div id=d1 tabIndex=0></div>")
     focused = []
     await page.expose_function("focusEvent", lambda: focused.append(True))
@@ -31,7 +33,7 @@ async def test_should_emit_focus_event(page):
     assert focused == [True]
 
 
-async def test_should_emit_blur_event(page):
+async def test_should_emit_blur_event(page: Page) -> None:
     await page.set_content(
         "<div id=d1 tabIndex=0>DIV1</div><div id=d2 tabIndex=0>DIV2</div>"
     )
@@ -47,7 +49,7 @@ async def test_should_emit_blur_event(page):
     assert blurred == [True]
 
 
-async def test_should_traverse_focus(page):
+async def test_should_traverse_focus(page: Page) -> None:
     await page.set_content('<input id="i1"><input id="i2">')
     focused = []
     await page.expose_function("focusEvent", lambda: focused.append(True))
@@ -63,7 +65,7 @@ async def test_should_traverse_focus(page):
     assert await page.eval_on_selector("#i2", "e => e.value") == "Last"
 
 
-async def test_should_traverse_focus_in_all_directions(page):
+async def test_should_traverse_focus_in_all_directions(page: Page) -> None:
     await page.set_content('<input value="1"><input value="2"><input value="3">')
     await page.keyboard.press("Tab")
     assert await page.evaluate("() => document.activeElement.value") == "1"
@@ -79,7 +81,7 @@ async def test_should_traverse_focus_in_all_directions(page):
 
 @pytest.mark.only_platform("darwin")
 @pytest.mark.only_browser("webkit")
-async def test_should_traverse_only_form_elements(page):
+async def test_should_traverse_only_form_elements(page: Page) -> None:
     await page.set_content(
         """
       <input id="input-1">

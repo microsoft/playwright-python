@@ -14,12 +14,13 @@
 
 import pytest
 
-from playwright.async_api import Browser, Error
+from playwright.async_api import Browser, Error, Page
+from tests.server import Server
 from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
 
 
 @pytest.mark.only_browser("chromium")
-async def test_should_work(page):
+async def test_should_work(page: Page) -> None:
     client = await page.context.new_cdp_session(page)
     events = []
     client.on("Runtime.consoleAPICalled", lambda params: events.append(params))
@@ -35,7 +36,7 @@ async def test_should_work(page):
 
 
 @pytest.mark.only_browser("chromium")
-async def test_should_receive_events(page, server):
+async def test_should_receive_events(page: Page, server: Server) -> None:
     client = await page.context.new_cdp_session(page)
     await client.send("Network.enable")
     events = []
@@ -45,7 +46,7 @@ async def test_should_receive_events(page, server):
 
 
 @pytest.mark.only_browser("chromium")
-async def test_should_be_able_to_detach_session(page):
+async def test_should_be_able_to_detach_session(page: Page) -> None:
     client = await page.context.new_cdp_session(page)
     await client.send("Runtime.enable")
     eval_response = await client.send(
@@ -61,7 +62,7 @@ async def test_should_be_able_to_detach_session(page):
 
 
 @pytest.mark.only_browser("chromium")
-async def test_should_not_break_page_close(browser):
+async def test_should_not_break_page_close(browser: Browser) -> None:
     context = await browser.new_context()
     page = await context.new_page()
     session = await page.context.new_cdp_session(page)
@@ -71,7 +72,7 @@ async def test_should_not_break_page_close(browser):
 
 
 @pytest.mark.only_browser("chromium")
-async def test_should_detach_when_page_closes(browser):
+async def test_should_detach_when_page_closes(browser: Browser) -> None:
     context = await browser.new_context()
     page = await context.new_page()
     session = await context.new_cdp_session(page)
@@ -82,7 +83,7 @@ async def test_should_detach_when_page_closes(browser):
 
 
 @pytest.mark.only_browser("chromium")
-async def test_should_work_with_main_frame(browser: Browser):
+async def test_should_work_with_main_frame(browser: Browser) -> None:
     context = await browser.new_context()
     page = await context.new_page()
     client = await context.new_cdp_session(page.main_frame)

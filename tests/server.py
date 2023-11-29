@@ -21,7 +21,17 @@ import socket
 import threading
 from contextlib import closing
 from http import HTTPStatus
-from typing import Any, Callable, Dict, Generator, Generic, Set, Tuple, TypeVar
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    Generic,
+    Optional,
+    Set,
+    Tuple,
+    TypeVar,
+)
 from urllib.parse import urlparse
 
 from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerProtocol
@@ -43,7 +53,7 @@ def find_free_port() -> int:
 
 
 class HttpRequestWithPostBody(http.Request):
-    post_body = None
+    post_body: Optional[bytes] = None
 
 
 T = TypeVar("T")
@@ -86,7 +96,7 @@ class Server:
         request_subscribers: Dict[str, asyncio.Future] = {}
         auth: Dict[str, Tuple[str, str]] = {}
         csp: Dict[str, str] = {}
-        routes: Dict[str, Callable[[http.Request], Any]] = {}
+        routes: Dict[str, Callable[[HttpRequestWithPostBody], Any]] = {}
         gzip_routes: Set[str] = set()
         self.request_subscribers = request_subscribers
         self.auth = auth

@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright.async_api import Dialog, Page
+from playwright.async_api import Browser, Dialog, Page
 
 
-async def test_should_fire(page: Page, server):
+async def test_should_fire(page: Page) -> None:
     result = []
 
-    async def on_dialog(dialog: Dialog):
+    async def on_dialog(dialog: Dialog) -> None:
         result.append(True)
         assert dialog.type == "alert"
         assert dialog.default_value == ""
@@ -30,10 +30,10 @@ async def test_should_fire(page: Page, server):
     assert result
 
 
-async def test_should_allow_accepting_prompts(page: Page, server):
+async def test_should_allow_accepting_prompts(page: Page) -> None:
     result = []
 
-    async def on_dialog(dialog: Dialog):
+    async def on_dialog(dialog: Dialog) -> None:
         result.append(True)
         assert dialog.type == "prompt"
         assert dialog.default_value == "yes."
@@ -45,10 +45,10 @@ async def test_should_allow_accepting_prompts(page: Page, server):
     assert result
 
 
-async def test_should_dismiss_the_prompt(page: Page, server):
+async def test_should_dismiss_the_prompt(page: Page) -> None:
     result = []
 
-    async def on_dialog(dialog: Dialog):
+    async def on_dialog(dialog: Dialog) -> None:
         result.append(True)
         await dialog.dismiss()
 
@@ -57,10 +57,10 @@ async def test_should_dismiss_the_prompt(page: Page, server):
     assert result
 
 
-async def test_should_accept_the_confirm_prompt(page: Page, server):
+async def test_should_accept_the_confirm_prompt(page: Page) -> None:
     result = []
 
-    async def on_dialog(dialog: Dialog):
+    async def on_dialog(dialog: Dialog) -> None:
         result.append(True)
         await dialog.accept()
 
@@ -69,10 +69,10 @@ async def test_should_accept_the_confirm_prompt(page: Page, server):
     assert result
 
 
-async def test_should_dismiss_the_confirm_prompt(page: Page, server):
+async def test_should_dismiss_the_confirm_prompt(page: Page) -> None:
     result = []
 
-    async def on_dialog(dialog: Dialog):
+    async def on_dialog(dialog: Dialog) -> None:
         result.append(True)
         await dialog.dismiss()
 
@@ -81,7 +81,9 @@ async def test_should_dismiss_the_confirm_prompt(page: Page, server):
     assert result
 
 
-async def test_should_be_able_to_close_context_with_open_alert(browser):
+async def test_should_be_able_to_close_context_with_open_alert(
+    browser: Browser,
+) -> None:
     context = await browser.new_context()
     page = await context.new_page()
     async with page.expect_event("dialog"):
@@ -89,12 +91,12 @@ async def test_should_be_able_to_close_context_with_open_alert(browser):
     await context.close()
 
 
-async def test_should_auto_dismiss_the_prompt_without_listeners(page):
+async def test_should_auto_dismiss_the_prompt_without_listeners(page: Page) -> None:
     result = await page.evaluate('() => prompt("question?")')
     assert not result
 
 
-async def test_should_auto_dismiss_the_alert_without_listeners(page):
+async def test_should_auto_dismiss_the_alert_without_listeners(page: Page) -> None:
     await page.set_content(
         '<div onclick="window.alert(123); window._clicked=true">Click me</div>'
     )

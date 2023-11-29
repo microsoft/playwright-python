@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from playwright.async_api import Page, Response
+from tests.server import Server
 
-async def test_listeners(page, server):
+
+async def test_listeners(page: Page, server: Server) -> None:
     log = []
 
-    def print_response(response):
+    def print_response(response: Response) -> None:
         log.append(response)
 
     page.on("response", print_response)

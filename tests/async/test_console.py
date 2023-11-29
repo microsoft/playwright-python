@@ -17,9 +17,10 @@ from typing import List
 import pytest
 
 from playwright.async_api import ConsoleMessage, Page
+from tests.server import Server
 
 
-async def test_console_should_work(page: Page, browser_name):
+async def test_console_should_work(page: Page, browser_name: str) -> None:
     messages: List[ConsoleMessage] = []
     page.once("console", lambda m: messages.append(m))
     async with page.expect_console_message() as message_info:
@@ -37,14 +38,14 @@ async def test_console_should_work(page: Page, browser_name):
     assert await message.args[2].json_value() == {"foo": "bar"}
 
 
-async def test_console_should_emit_same_log_twice(page):
+async def test_console_should_emit_same_log_twice(page: Page) -> None:
     messages = []
     page.on("console", lambda m: messages.append(m.text))
     await page.evaluate('() => { for (let i = 0; i < 2; ++i ) console.log("hello"); } ')
     assert messages == ["hello", "hello"]
 
 
-async def test_console_should_use_text_for__str__(page):
+async def test_console_should_use_text_for__str__(page: Page) -> None:
     messages = []
     page.on("console", lambda m: messages.append(m))
     await page.evaluate('() => console.log("Hello world")')
@@ -52,8 +53,8 @@ async def test_console_should_use_text_for__str__(page):
     assert str(messages[0]) == "Hello world"
 
 
-async def test_console_should_work_for_different_console_api_calls(page, server):
-    messages = []
+async def test_console_should_work_for_different_console_api_calls(page: Page) -> None:
+    messages: List[ConsoleMessage] = []
     page.on("console", lambda m: messages.append(m))
     # All console events will be reported before 'page.evaluate' is finished.
     await page.evaluate(
@@ -87,7 +88,9 @@ async def test_console_should_work_for_different_console_api_calls(page, server)
     ]
 
 
-async def test_console_should_not_fail_for_window_object(page, browser_name):
+async def test_console_should_not_fail_for_window_object(
+    page: Page, browser_name: str
+) -> None:
     async with page.expect_console_message() as message_info:
         await page.evaluate("console.error(window)")
     message = await message_info.value
@@ -99,7 +102,7 @@ async def test_console_should_not_fail_for_window_object(page, browser_name):
 
 # Upstream issue https://bugs.webkit.org/show_bug.cgi?id=229515
 @pytest.mark.skip_browser("webkit")
-async def test_console_should_trigger_correct_log(page, server):
+async def test_console_should_trigger_correct_log(page: Page, server: Server) -> None:
     await page.goto("about:blank")
     async with page.expect_console_message() as message_info:
         await page.evaluate("async url => fetch(url).catch(e => {})", server.EMPTY_PAGE)
@@ -108,7 +111,9 @@ async def test_console_should_trigger_correct_log(page, server):
     assert message.type == "error"
 
 
-async def test_console_should_have_location_for_console_api_calls(page, server):
+async def test_console_should_have_location_for_console_api_calls(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     async with page.expect_console_message() as message_info:
         await page.goto(server.PREFIX + "/consolelog.html")
@@ -122,8 +127,8 @@ async def test_console_should_have_location_for_console_api_calls(page, server):
 
 
 async def test_console_should_not_throw_when_there_are_console_messages_in_detached_iframes(
-    page, server
-):
+    page: Page, server: Server
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     async with page.expect_popup() as page_info:
         await page.evaluate(
