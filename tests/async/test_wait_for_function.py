@@ -16,17 +16,17 @@ from datetime import datetime
 
 import pytest
 
-from playwright.async_api import Error, Page
+from playwright.async_api import ConsoleMessage, Error, Page
 
 
-async def test_should_timeout(page: Page):
+async def test_should_timeout(page: Page) -> None:
     start_time = datetime.now()
     timeout = 42
     await page.wait_for_timeout(timeout)
     assert ((datetime.now() - start_time).microseconds * 1000) >= timeout / 2
 
 
-async def test_should_accept_a_string(page: Page):
+async def test_should_accept_a_string(page: Page) -> None:
     watchdog = page.wait_for_function("window.__FOO === 1")
     await page.evaluate("window['__FOO'] = 1")
     await watchdog
@@ -34,7 +34,7 @@ async def test_should_accept_a_string(page: Page):
 
 async def test_should_work_when_resolved_right_before_execution_context_disposal(
     page: Page,
-):
+) -> None:
     await page.add_init_script("window['__RELOADED'] = true")
     await page.wait_for_function(
         """() => {
@@ -45,7 +45,7 @@ async def test_should_work_when_resolved_right_before_execution_context_disposal
     )
 
 
-async def test_should_poll_on_interval(page: Page):
+async def test_should_poll_on_interval(page: Page) -> None:
     polling = 100
     time_delta = await page.wait_for_function(
         """() => {
@@ -60,10 +60,10 @@ async def test_should_poll_on_interval(page: Page):
     assert await time_delta.json_value() >= polling
 
 
-async def test_should_avoid_side_effects_after_timeout(page: Page):
+async def test_should_avoid_side_effects_after_timeout(page: Page) -> None:
     counter = 0
 
-    async def on_console(message):
+    async def on_console(message: ConsoleMessage) -> None:
         nonlocal counter
         counter += 1
 
@@ -85,7 +85,7 @@ async def test_should_avoid_side_effects_after_timeout(page: Page):
     assert counter == saved_counter
 
 
-async def test_should_throw_on_polling_mutation(page: Page):
+async def test_should_throw_on_polling_mutation(page: Page) -> None:
     with pytest.raises(Error) as exc_info:
-        await page.wait_for_function("() => true", polling="mutation")
+        await page.wait_for_function("() => true", polling="mutation")  # type: ignore
     assert "Unknown polling option: mutation" in exc_info.value.message

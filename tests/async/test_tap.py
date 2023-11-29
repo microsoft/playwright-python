@@ -13,20 +13,21 @@
 # limitations under the License.
 
 import asyncio
+from typing import AsyncGenerator, Optional, cast
 
 import pytest
 
-from playwright.async_api import ElementHandle, JSHandle, Page
+from playwright.async_api import Browser, BrowserContext, ElementHandle, JSHandle, Page
 
 
 @pytest.fixture
-async def context(browser):
+async def context(browser: Browser) -> AsyncGenerator[BrowserContext, None]:
     context = await browser.new_context(has_touch=True)
     yield context
     await context.close()
 
 
-async def test_should_send_all_of_the_correct_events(page):
+async def test_should_send_all_of_the_correct_events(page: Page) -> None:
     await page.set_content(
         """
             <div id="a" style="background: lightblue; width: 50px; height: 50px">a</div>
@@ -54,7 +55,7 @@ async def test_should_send_all_of_the_correct_events(page):
     ]
 
 
-async def test_should_not_send_mouse_events_touchstart_is_canceled(page):
+async def test_should_not_send_mouse_events_touchstart_is_canceled(page: Page) -> None:
     await page.set_content("hello world")
     await page.evaluate(
         """() => {
@@ -76,7 +77,7 @@ async def test_should_not_send_mouse_events_touchstart_is_canceled(page):
     ]
 
 
-async def test_should_not_send_mouse_events_touchend_is_canceled(page):
+async def test_should_not_send_mouse_events_touchend_is_canceled(page: Page) -> None:
     await page.set_content("hello world")
     await page.evaluate(
         """() => {
@@ -98,7 +99,7 @@ async def test_should_not_send_mouse_events_touchend_is_canceled(page):
     ]
 
 
-async def test_should_work_with_modifiers(page):
+async def test_should_work_with_modifiers(page: Page) -> None:
     await page.set_content("hello world")
     alt_key_promise = asyncio.create_task(
         page.evaluate(
@@ -115,7 +116,7 @@ async def test_should_work_with_modifiers(page):
     assert await alt_key_promise is True
 
 
-async def test_should_send_well_formed_touch_points(page):
+async def test_should_send_well_formed_touch_points(page: Page) -> None:
     promises = asyncio.gather(
         page.evaluate(
             """() => new Promise(resolve => {
@@ -172,15 +173,18 @@ async def test_should_send_well_formed_touch_points(page):
     assert touchend == []
 
 
-async def test_should_wait_until_an_element_is_visible_to_tap_it(page):
-    div = await page.evaluate_handle(
-        """() => {
+async def test_should_wait_until_an_element_is_visible_to_tap_it(page: Page) -> None:
+    div = cast(
+        ElementHandle,
+        await page.evaluate_handle(
+            """() => {
             const button = document.createElement('button');
             button.textContent = 'not clicked';
             document.body.appendChild(button);
             button.style.display = 'none';
             return button;
         }"""
+        ),
     )
     tap_promise = asyncio.create_task(div.tap())
     await asyncio.sleep(0)  # issue tap
@@ -190,7 +194,7 @@ async def test_should_wait_until_an_element_is_visible_to_tap_it(page):
     assert await div.text_content() == "clicked"
 
 
-async def test_locators_tap(page: Page):
+async def test_locators_tap(page: Page) -> None:
     await page.set_content(
         """
         <div id="a" style="background: lightblue; width: 50px; height: 50px">a</div>
@@ -218,7 +222,8 @@ async def test_locators_tap(page: Page):
     ]
 
 
-async def track_events(target: ElementHandle) -> JSHandle:
+async def track_events(target: Optional[ElementHandle]) -> JSHandle:
+    assert target
     return await target.evaluate_handle(
         """target => {
             const events = [];

@@ -20,7 +20,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, AsyncGenerator, Callable, Dict, Generator, List
+from typing import Any, AsyncGenerator, Callable, Dict, Generator, List, Optional, cast
 
 import pytest
 from PIL import Image
@@ -95,13 +95,13 @@ def after_each_hook() -> Generator[None, None, None]:
 
 
 @pytest.fixture(scope="session")
-def browser_name(pytestconfig: pytest.Config) -> None:
-    return pytestconfig.getoption("browser")
+def browser_name(pytestconfig: pytest.Config) -> str:
+    return cast(str, pytestconfig.getoption("browser"))
 
 
 @pytest.fixture(scope="session")
-def browser_channel(pytestconfig: pytest.Config) -> None:
-    return pytestconfig.getoption("--browser-channel")
+def browser_channel(pytestconfig: pytest.Config) -> Optional[str]:
+    return cast(Optional[str], pytestconfig.getoption("--browser-channel"))
 
 
 @pytest.fixture(scope="session")

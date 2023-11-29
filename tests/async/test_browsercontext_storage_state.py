@@ -14,9 +14,12 @@
 
 import asyncio
 import json
+from pathlib import Path
+
+from playwright.async_api import Browser, BrowserContext
 
 
-async def test_should_capture_local_storage(context, is_webkit, is_win):
+async def test_should_capture_local_storage(context: BrowserContext) -> None:
     page1 = await context.new_page()
     await page1.route(
         "**/*", lambda route: asyncio.create_task(route.fulfill(body="<html></html>"))
@@ -39,7 +42,7 @@ async def test_should_capture_local_storage(context, is_webkit, is_win):
     }
 
 
-async def test_should_set_local_storage(browser, is_webkit, is_win):
+async def test_should_set_local_storage(browser: Browser) -> None:
     context = await browser.new_context(
         storage_state={
             "origins": [
@@ -61,7 +64,9 @@ async def test_should_set_local_storage(browser, is_webkit, is_win):
     await context.close()
 
 
-async def test_should_round_trip_through_the_file(browser, context, tmpdir):
+async def test_should_round_trip_through_the_file(
+    browser: Browser, context: BrowserContext, tmpdir: Path
+) -> None:
     page1 = await context.new_page()
     await page1.route(
         "**/*",

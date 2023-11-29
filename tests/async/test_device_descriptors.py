@@ -11,11 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Dict
+
 import pytest
+
+from playwright.async_api import Playwright
 
 
 @pytest.mark.only_browser("chromium")
-async def test_should_work(playwright, launch_arguments) -> None:
+async def test_should_work(playwright: Playwright, launch_arguments: Dict) -> None:
     device_descriptor = playwright.devices["Pixel 2"]
     device_type = device_descriptor["default_browser_type"]
     browser = await playwright[device_type].launch(**launch_arguments)

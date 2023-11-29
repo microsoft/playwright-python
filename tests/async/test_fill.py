@@ -12,14 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from playwright.async_api import Page
+from tests.server import Server
 
-async def test_fill_textarea(page, server):
+
+async def test_fill_textarea(page: Page, server: Server) -> None:
     await page.goto(f"{server.PREFIX}/input/textarea.html")
     await page.fill("textarea", "some value")
     assert await page.evaluate("result") == "some value"
 
 
-async def test_fill_input(page, server):
+#
+
+
+async def test_fill_input(page: Page, server: Server) -> None:
     await page.goto(f"{server.PREFIX}/input/textarea.html")
     await page.fill("input", "some value")
     assert await page.evaluate("result") == "some value"

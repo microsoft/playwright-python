@@ -13,10 +13,13 @@
 # limitations under the License.
 import pytest
 
-from playwright.async_api import Error, Page
+from playwright.async_api import Error, JSHandle, Page
+from tests.server import Server
+
+from .utils import Utils
 
 
-async def captureLastKeydown(page):
+async def captureLastKeydown(page: Page) -> JSHandle:
     lastEvent = await page.evaluate_handle(
         """() => {
         const lastEvent = {
@@ -42,7 +45,7 @@ async def captureLastKeydown(page):
     return lastEvent
 
 
-async def test_keyboard_type_into_a_textarea(page):
+async def test_keyboard_type_into_a_textarea(page: Page) -> None:
     await page.evaluate(
         """
             const textarea = document.createElement('textarea');
@@ -55,7 +58,7 @@ async def test_keyboard_type_into_a_textarea(page):
     assert await page.evaluate('document.querySelector("textarea").value') == text
 
 
-async def test_keyboard_move_with_the_arrow_keys(page, server):
+async def test_keyboard_move_with_the_arrow_keys(page: Page, server: Server) -> None:
     await page.goto(f"{server.PREFIX}/input/textarea.html")
     await page.type("textarea", "Hello World!")
     assert (
@@ -80,9 +83,12 @@ async def test_keyboard_move_with_the_arrow_keys(page, server):
     )
 
 
-async def test_keyboard_send_a_character_with_elementhandle_press(page, server):
+async def test_keyboard_send_a_character_with_elementhandle_press(
+    page: Page, server: Server
+) -> None:
     await page.goto(f"{server.PREFIX}/input/textarea.html")
     textarea = await page.query_selector("textarea")
+    assert textarea
     await textarea.press("a")
     assert await page.evaluate("document.querySelector('textarea').value") == "a"
     await page.evaluate(
@@ -92,7 +98,9 @@ async def test_keyboard_send_a_character_with_elementhandle_press(page, server):
     assert await page.evaluate("document.querySelector('textarea').value") == "a"
 
 
-async def test_should_send_a_character_with_send_character(page, server):
+async def test_should_send_a_character_with_send_character(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/input/textarea.html")
     await page.focus("textarea")
     await page.keyboard.insert_text("嗨")
@@ -104,10 +112,9 @@ async def test_should_send_a_character_with_send_character(page, server):
     assert await page.evaluate('() => document.querySelector("textarea").value') == "嗨a"
 
 
-async def test_should_only_emit_input_event(page, server):
+async def test_should_only_emit_input_event(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/textarea.html")
     await page.focus("textarea")
-    page.on("console", "m => console.log(m.text())")
     events = await page.evaluate_handle(
         """() => {
     const events = [];
@@ -123,7 +130,9 @@ async def test_should_only_emit_input_event(page, server):
     assert await events.json_value() == ["input"]
 
 
-async def test_should_report_shiftkey(page: Page, server, is_mac, is_firefox):
+async def test_should_report_shiftkey(
+    page: Page, server: Server, is_mac: bool, is_firefox: bool
+) -> None:
     if is_firefox and is_mac:
         pytest.skip()
     await page.goto(server.PREFIX + "/input/keyboard.html")
@@ -178,7 +187,7 @@ async def test_should_report_shiftkey(page: Page, server, is_mac, is_firefox):
         )
 
 
-async def test_should_report_multiple_modifiers(page: Page, server):
+async def test_should_report_multiple_modifiers(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/keyboard.html")
     keyboard = page.keyboard
     await keyboard.down("Control")
@@ -210,7 +219,9 @@ async def test_should_report_multiple_modifiers(page: Page, server):
     assert await page.evaluate("() => getResult()") == "Keyup: Alt AltLeft 18 []"
 
 
-async def test_should_send_proper_codes_while_typing(page: Page, server):
+async def test_should_send_proper_codes_while_typing(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/input/keyboard.html")
     await page.keyboard.type("!")
     assert await page.evaluate("() => getResult()") == "\n".join(
@@ -230,7 +241,9 @@ async def test_should_send_proper_codes_while_typing(page: Page, server):
     )
 
 
-async def test_should_send_proper_codes_while_typing_with_shift(page: Page, server):
+async def test_should_send_proper_codes_while_typing_with_shift(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/input/keyboard.html")
     keyboard = page.keyboard
     await keyboard.down("Shift")
@@ -246,7 +259,7 @@ async def test_should_send_proper_codes_while_typing_with_shift(page: Page, serv
     await keyboard.up("Shift")
 
 
-async def test_should_not_type_canceled_events(page: Page, server):
+async def test_should_not_type_canceled_events(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/textarea.html")
     await page.focus("textarea")
     await page.evaluate(
@@ -269,7 +282,7 @@ async def test_should_not_type_canceled_events(page: Page, server):
     )
 
 
-async def test_should_press_plus(page: Page, server):
+async def test_should_press_plus(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/keyboard.html")
     await page.keyboard.press("+")
     assert await page.evaluate("() => getResult()") == "\n".join(
@@ -281,7 +294,7 @@ async def test_should_press_plus(page: Page, server):
     )
 
 
-async def test_should_press_shift_plus(page: Page, server):
+async def test_should_press_shift_plus(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/keyboard.html")
     await page.keyboard.press("Shift++")
     assert await page.evaluate("() => getResult()") == "\n".join(
@@ -295,7 +308,9 @@ async def test_should_press_shift_plus(page: Page, server):
     )
 
 
-async def test_should_support_plus_separated_modifiers(page: Page, server):
+async def test_should_support_plus_separated_modifiers(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/input/keyboard.html")
     await page.keyboard.press("Shift+~")
     assert await page.evaluate("() => getResult()") == "\n".join(
@@ -309,7 +324,9 @@ async def test_should_support_plus_separated_modifiers(page: Page, server):
     )
 
 
-async def test_should_suport_multiple_plus_separated_modifiers(page: Page, server):
+async def test_should_suport_multiple_plus_separated_modifiers(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/input/keyboard.html")
     await page.keyboard.press("Control+Shift+~")
     assert await page.evaluate("() => getResult()") == "\n".join(
@@ -324,7 +341,7 @@ async def test_should_suport_multiple_plus_separated_modifiers(page: Page, serve
     )
 
 
-async def test_should_shift_raw_codes(page: Page, server):
+async def test_should_shift_raw_codes(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/keyboard.html")
     await page.keyboard.press("Shift+Digit3")
     assert await page.evaluate("() => getResult()") == "\n".join(
@@ -338,7 +355,7 @@ async def test_should_shift_raw_codes(page: Page, server):
     )
 
 
-async def test_should_specify_repeat_property(page: Page, server):
+async def test_should_specify_repeat_property(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/textarea.html")
     await page.focus("textarea")
     lastEvent = await captureLastKeydown(page)
@@ -357,7 +374,7 @@ async def test_should_specify_repeat_property(page: Page, server):
     assert await lastEvent.evaluate("e => e.repeat") is False
 
 
-async def test_should_type_all_kinds_of_characters(page: Page, server):
+async def test_should_type_all_kinds_of_characters(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/textarea.html")
     await page.focus("textarea")
     text = "This text goes onto two lines.\nThis character is 嗨."
@@ -365,7 +382,7 @@ async def test_should_type_all_kinds_of_characters(page: Page, server):
     assert await page.eval_on_selector("textarea", "t => t.value") == text
 
 
-async def test_should_specify_location(page: Page, server):
+async def test_should_specify_location(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/textarea.html")
     lastEvent = await captureLastKeydown(page)
     textarea = await page.query_selector("textarea")
@@ -384,12 +401,12 @@ async def test_should_specify_location(page: Page, server):
     assert await lastEvent.evaluate("e => e.location") == 3
 
 
-async def test_should_press_enter(page: Page, server):
+async def test_should_press_enter(page: Page) -> None:
     await page.set_content("<textarea></textarea>")
     await page.focus("textarea")
     lastEventHandle = await captureLastKeydown(page)
 
-    async def testEnterKey(key, expectedKey, expectedCode):
+    async def testEnterKey(key: str, expectedKey: str, expectedCode: str) -> None:
         await page.keyboard.press(key)
         lastEvent = await lastEventHandle.json_value()
         assert lastEvent["key"] == expectedKey
@@ -404,7 +421,7 @@ async def test_should_press_enter(page: Page, server):
     await testEnterKey("\r", "Enter", "Enter")
 
 
-async def test_should_throw_unknown_keys(page: Page, server):
+async def test_should_throw_unknown_keys(page: Page, server: Server) -> None:
     with pytest.raises(Error) as exc:
         await page.keyboard.press("NotARealKey")
     assert exc.value.message == 'Unknown key: "NotARealKey"'
@@ -418,7 +435,7 @@ async def test_should_throw_unknown_keys(page: Page, server):
     assert exc.value.message == 'Unknown key: "😊"'
 
 
-async def test_should_type_emoji(page: Page, server):
+async def test_should_type_emoji(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/textarea.html")
     await page.type("textarea", "👹 Tokyo street Japan 🇯🇵")
     assert (
@@ -427,7 +444,9 @@ async def test_should_type_emoji(page: Page, server):
     )
 
 
-async def test_should_type_emoji_into_an_iframe(page: Page, server, utils):
+async def test_should_type_emoji_into_an_iframe(
+    page: Page, server: Server, utils: Utils
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     await utils.attach_frame(page, "emoji-test", server.PREFIX + "/input/textarea.html")
     frame = page.frames[1]
@@ -440,7 +459,9 @@ async def test_should_type_emoji_into_an_iframe(page: Page, server, utils):
     )
 
 
-async def test_should_handle_select_all(page: Page, server, is_mac):
+async def test_should_handle_select_all(
+    page: Page, server: Server, is_mac: bool
+) -> None:
     await page.goto(server.PREFIX + "/input/textarea.html")
     textarea = await page.query_selector("textarea")
     assert textarea
@@ -453,9 +474,12 @@ async def test_should_handle_select_all(page: Page, server, is_mac):
     assert await page.eval_on_selector("textarea", "textarea => textarea.value") == ""
 
 
-async def test_should_be_able_to_prevent_select_all(page, server, is_mac):
+async def test_should_be_able_to_prevent_select_all(
+    page: Page, server: Server, is_mac: bool
+) -> None:
     await page.goto(server.PREFIX + "/input/textarea.html")
     textarea = await page.query_selector("textarea")
+    assert textarea
     await textarea.type("some text")
     await page.eval_on_selector(
         "textarea",
@@ -480,9 +504,12 @@ async def test_should_be_able_to_prevent_select_all(page, server, is_mac):
 
 @pytest.mark.only_platform("darwin")
 @pytest.mark.skip_browser("firefox")  # Upstream issue
-async def test_should_support_macos_shortcuts(page, server, is_firefox, is_mac):
+async def test_should_support_macos_shortcuts(
+    page: Page, server: Server, is_firefox: bool, is_mac: bool
+) -> None:
     await page.goto(server.PREFIX + "/input/textarea.html")
     textarea = await page.query_selector("textarea")
+    assert textarea
     await textarea.type("some text")
     # select one word backwards
     await page.keyboard.press("Shift+Control+Alt+KeyB")
@@ -492,7 +519,9 @@ async def test_should_support_macos_shortcuts(page, server, is_firefox, is_mac):
     )
 
 
-async def test_should_press_the_meta_key(page, server, is_firefox, is_mac):
+async def test_should_press_the_meta_key(
+    page: Page, server: Server, is_firefox: bool, is_mac: bool
+) -> None:
     lastEvent = await captureLastKeydown(page)
     await page.keyboard.press("Meta")
     v = await lastEvent.json_value()
@@ -513,7 +542,9 @@ async def test_should_press_the_meta_key(page, server, is_firefox, is_mac):
         assert metaKey
 
 
-async def test_should_work_after_a_cross_origin_navigation(page, server):
+async def test_should_work_after_a_cross_origin_navigation(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/empty.html")
     await page.goto(server.CROSS_PROCESS_PREFIX + "/empty.html")
     lastEvent = await captureLastKeydown(page)
@@ -523,7 +554,9 @@ async def test_should_work_after_a_cross_origin_navigation(page, server):
 
 # event.keyIdentifier has been removed from all browsers except WebKit
 @pytest.mark.only_browser("webkit")
-async def test_should_expose_keyIdentifier_in_webkit(page, server):
+async def test_should_expose_keyIdentifier_in_webkit(
+    page: Page, server: Server
+) -> None:
     lastEvent = await captureLastKeydown(page)
     keyMap = {
         "ArrowUp": "Up",
@@ -542,7 +575,7 @@ async def test_should_expose_keyIdentifier_in_webkit(page, server):
         assert await lastEvent.evaluate("e => e.keyIdentifier") == keyIdentifier
 
 
-async def test_should_scroll_with_pagedown(page: Page, server):
+async def test_should_scroll_with_pagedown(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/scrollable.html")
     # A click is required for WebKit to send the event into the body.
     await page.click("body")

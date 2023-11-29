@@ -26,7 +26,7 @@ pytestmark = pytest.mark.only_browser("chromium")
 
 async def test_connect_to_an_existing_cdp_session(
     launch_arguments: Dict, browser_type: BrowserType
-):
+) -> None:
     port = find_free_port()
     browser_server = await browser_type.launch(
         **launch_arguments, args=[f"--remote-debugging-port={port}"]
@@ -39,7 +39,7 @@ async def test_connect_to_an_existing_cdp_session(
 
 async def test_connect_to_an_existing_cdp_session_twice(
     launch_arguments: Dict, browser_type: BrowserType, server: Server
-):
+) -> None:
     port = find_free_port()
     browser_server = await browser_type.launch(
         **launch_arguments, args=[f"--remote-debugging-port={port}"]
@@ -72,7 +72,7 @@ def _ws_endpoint_from_url(url: str) -> str:
 
 async def test_conect_over_a_ws_endpoint(
     launch_arguments: Dict, browser_type: BrowserType, server: Server
-):
+) -> None:
     port = find_free_port()
     browser_server = await browser_type.launch(
         **launch_arguments, args=[f"--remote-debugging-port={port}"]
@@ -90,8 +90,8 @@ async def test_conect_over_a_ws_endpoint(
 
 
 async def test_connect_over_cdp_passing_header_works(
-    launch_arguments: Dict, browser_type: BrowserType, server: Server
-):
+    browser_type: BrowserType, server: Server
+) -> None:
     request = asyncio.create_task(server.wait_for_request("/ws"))
     with pytest.raises(Error):
         await browser_type.connect_over_cdp(

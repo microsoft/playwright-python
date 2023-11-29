@@ -13,26 +13,30 @@
 # limitations under the License.
 
 import asyncio
+from typing import Optional
 
 import pytest
 
-from playwright.async_api import Error, TimeoutError
+from playwright.async_api import Browser, Error, Page, Playwright, TimeoutError
+from tests.server import Server
+
+from .utils import Utils
 
 
-async def give_it_a_chance_to_click(page):
+async def give_it_a_chance_to_click(page: Page) -> None:
     for _ in range(5):
         await page.evaluate(
             "() => new Promise(f => requestAnimationFrame(() => requestAnimationFrame(f)))"
         )
 
 
-async def test_click_the_button(page, server):
+async def test_click_the_button(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.click("button")
     assert await page.evaluate("result") == "Clicked"
 
 
-async def test_click_svg(page, server):
+async def test_click_svg(page: Page, server: Server) -> None:
     await page.set_content(
         """
         <svg height="100" width="100">
@@ -44,14 +48,18 @@ async def test_click_svg(page, server):
     assert await page.evaluate("window.__CLICKED") == 42
 
 
-async def test_click_the_button_if_window_node_is_removed(page, server):
+async def test_click_the_button_if_window_node_is_removed(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.evaluate("() => delete window.Node")
     await page.click("button")
     assert await page.evaluate("() => result") == "Clicked"
 
 
-async def test_click_on_a_span_with_an_inline_element_inside(page, server):
+async def test_click_on_a_span_with_an_inline_element_inside(
+    page: Page, server: Server
+) -> None:
     await page.set_content(
         """
         <style>
@@ -66,7 +74,7 @@ async def test_click_on_a_span_with_an_inline_element_inside(page, server):
     assert await page.evaluate("window.CLICKED") == 42
 
 
-async def test_click_not_throw_when_page_closes(browser, server):
+async def test_click_not_throw_when_page_closes(browser: Browser) -> None:
     context = await browser.new_context()
     page = await context.new_page()
     try:
@@ -79,7 +87,7 @@ async def test_click_not_throw_when_page_closes(browser, server):
     await context.close()
 
 
-async def test_click_the_button_after_navigation(page, server):
+async def test_click_the_button_after_navigation(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.click("button")
     await page.goto(server.PREFIX + "/input/button.html")
@@ -87,7 +95,9 @@ async def test_click_the_button_after_navigation(page, server):
     assert await page.evaluate("() => result") == "Clicked"
 
 
-async def test_click_the_button_after_a_cross_origin_navigation_(page, server):
+async def test_click_the_button_after_a_cross_origin_navigation_(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.click("button")
     await page.goto(server.CROSS_PROCESS_PREFIX + "/input/button.html")
@@ -95,7 +105,7 @@ async def test_click_the_button_after_a_cross_origin_navigation_(page, server):
     assert await page.evaluate("() => result") == "Clicked"
 
 
-async def test_click_with_disabled_javascript(browser, server):
+async def test_click_with_disabled_javascript(browser: Browser, server: Server) -> None:
     context = await browser.new_context(java_script_enabled=False)
     page = await context.new_page()
     await page.goto(server.PREFIX + "/wrappedlink.html")
@@ -106,8 +116,8 @@ async def test_click_with_disabled_javascript(browser, server):
 
 
 async def test_click_when_one_of_inline_box_children_is_outside_of_viewport(
-    page, server
-):
+    page: Page, server: Server
+) -> None:
     await page.set_content(
         """
         <style>
@@ -123,7 +133,7 @@ async def test_click_when_one_of_inline_box_children_is_outside_of_viewport(
     assert await page.evaluate("() => window.CLICKED") == 42
 
 
-async def test_select_the_text_by_triple_clicking(page, server):
+async def test_select_the_text_by_triple_clicking(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/textarea.html")
     text = "This is the text that we are going to try to select. Let's see how it goes."
     await page.fill("textarea", text)
@@ -139,7 +149,7 @@ async def test_select_the_text_by_triple_clicking(page, server):
     )
 
 
-async def test_click_offscreen_buttons(page, server):
+async def test_click_offscreen_buttons(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/offscreenbuttons.html")
     messages = []
     page.on("console", lambda msg: messages.append(msg.text))
@@ -162,30 +172,31 @@ async def test_click_offscreen_buttons(page, server):
     ]
 
 
-async def test_waitFor_visible_when_already_visible(page, server):
+async def test_waitFor_visible_when_already_visible(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.click("button")
     assert await page.evaluate("result") == "Clicked"
 
 
-async def test_wait_with_force(page, server):
-    error = None
+async def test_wait_with_force(page: Page, server: Server) -> None:
+    error: Optional[Error] = None
     await page.goto(server.PREFIX + "/input/button.html")
     await page.eval_on_selector("button", "b => b.style.display = 'none'")
     try:
         await page.click("button", force=True)
     except Error as e:
         error = e
+    assert error
     assert "Element is not visible" in error.message
     assert await page.evaluate("result") == "Was not clicked"
 
 
-async def test_wait_for_display_none_to_be_gone(page, server):
+async def test_wait_for_display_none_to_be_gone(page: Page, server: Server) -> None:
     done = []
     await page.goto(server.PREFIX + "/input/button.html")
     await page.eval_on_selector("button", "b => b.style.display = 'none'")
 
-    async def click():
+    async def click() -> None:
         await page.click("button", timeout=0)
         done.append(True)
 
@@ -199,12 +210,14 @@ async def test_wait_for_display_none_to_be_gone(page, server):
     assert await page.evaluate("result") == "Clicked"
 
 
-async def test_wait_for_visibility_hidden_to_be_gone(page, server):
+async def test_wait_for_visibility_hidden_to_be_gone(
+    page: Page, server: Server
+) -> None:
     done = []
     await page.goto(server.PREFIX + "/input/button.html")
     await page.eval_on_selector("button", "b => b.style.visibility = 'hidden'")
 
-    async def click():
+    async def click() -> None:
         await page.click("button", timeout=0)
         done.append(True)
 
@@ -218,7 +231,9 @@ async def test_wait_for_visibility_hidden_to_be_gone(page, server):
     assert await page.evaluate("result") == "Clicked"
 
 
-async def test_timeout_waiting_for_display_none_to_be_gone(page, server):
+async def test_timeout_waiting_for_display_none_to_be_gone(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.eval_on_selector("button", "b => b.style.display = 'none'")
     try:
@@ -230,7 +245,9 @@ async def test_timeout_waiting_for_display_none_to_be_gone(page, server):
     assert "element is not visible - waiting" in error.message
 
 
-async def test_timeout_waiting_for_visbility_hidden_to_be_gone(page, server):
+async def test_timeout_waiting_for_visbility_hidden_to_be_gone(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.eval_on_selector("button", "b => b.style.visibility = 'hidden'")
     try:
@@ -242,12 +259,14 @@ async def test_timeout_waiting_for_visbility_hidden_to_be_gone(page, server):
     assert "element is not visible - waiting" in error.message
 
 
-async def test_waitFor_visible_when_parent_is_hidden(page, server):
+async def test_waitFor_visible_when_parent_is_hidden(
+    page: Page, server: Server
+) -> None:
     done = []
     await page.goto(server.PREFIX + "/input/button.html")
     await page.eval_on_selector("button", "b => b.parentElement.style.display = 'none'")
 
-    async def click():
+    async def click() -> None:
         await page.click("button", timeout=0)
         done.append(True)
 
@@ -262,13 +281,13 @@ async def test_waitFor_visible_when_parent_is_hidden(page, server):
     assert await page.evaluate("result") == "Clicked"
 
 
-async def test_click_wrapped_links(page, server):
+async def test_click_wrapped_links(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/wrappedlink.html")
     await page.click("a")
     assert await page.evaluate("window.__clicked")
 
 
-async def test_click_on_checkbox_input_and_toggle(page, server):
+async def test_click_on_checkbox_input_and_toggle(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/checkbox.html")
     assert await page.evaluate("() => result.check") is None
     await page.click("input#agree")
@@ -287,7 +306,7 @@ async def test_click_on_checkbox_input_and_toggle(page, server):
     assert await page.evaluate("result.check") is False
 
 
-async def test_click_on_checkbox_label_and_toggle(page, server):
+async def test_click_on_checkbox_label_and_toggle(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/checkbox.html")
     assert await page.evaluate("result.check") is None
     await page.click('label[for="agree"]')
@@ -301,7 +320,9 @@ async def test_click_on_checkbox_label_and_toggle(page, server):
     assert await page.evaluate("result.check") is False
 
 
-async def test_not_hang_with_touch_enabled_viewports(playwright, server, browser):
+async def test_not_hang_with_touch_enabled_viewports(
+    playwright: Playwright, browser: Browser
+) -> None:
     iphone_6 = playwright.devices["iPhone 6"]
     context = await browser.new_context(
         viewport=iphone_6["viewport"], has_touch=iphone_6["has_touch"]
@@ -313,7 +334,7 @@ async def test_not_hang_with_touch_enabled_viewports(playwright, server, browser
     await context.close()
 
 
-async def test_scroll_and_click_the_button(page, server):
+async def test_scroll_and_click_the_button(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/scrollable.html")
     await page.click("#button-5")
     assert (
@@ -327,7 +348,7 @@ async def test_scroll_and_click_the_button(page, server):
     )
 
 
-async def test_double_click_the_button(page, server):
+async def test_double_click_the_button(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.evaluate(
         """() => {
@@ -342,7 +363,7 @@ async def test_double_click_the_button(page, server):
     assert await page.evaluate("result") == "Clicked"
 
 
-async def test_click_a_partially_obscured_button(page, server):
+async def test_click_a_partially_obscured_button(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.evaluate(
         """() => {
@@ -357,13 +378,15 @@ async def test_click_a_partially_obscured_button(page, server):
     assert await page.evaluate("() => window.result") == "Clicked"
 
 
-async def test_click_a_rotated_button(page, server):
+async def test_click_a_rotated_button(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/rotatedButton.html")
     await page.click("button")
     assert await page.evaluate("result") == "Clicked"
 
 
-async def test_fire_contextmenu_event_on_right_click(page, server):
+async def test_fire_contextmenu_event_on_right_click(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/input/scrollable.html")
     await page.click("#button-8", button="right")
     assert (
@@ -372,23 +395,28 @@ async def test_fire_contextmenu_event_on_right_click(page, server):
     )
 
 
-async def test_click_links_which_cause_navigation(page, server):
+async def test_click_links_which_cause_navigation(page: Page, server: Server) -> None:
     await page.set_content(f'<a href="{server.EMPTY_PAGE}">empty.html</a>')
     # This await should not hang.
     await page.click("a")
 
 
-async def test_click_the_button_inside_an_iframe(page, server, utils):
+async def test_click_the_button_inside_an_iframe(
+    page: Page, server: Server, utils: Utils
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content('<div style="width:100px;height:100px">spacer</div>')
     await utils.attach_frame(page, "button-test", server.PREFIX + "/input/button.html")
     frame = page.frames[1]
     button = await frame.query_selector("button")
+    assert button
     await button.click()
     assert await frame.evaluate("window.result") == "Clicked"
 
 
-async def test_click_the_button_with_device_scale_factor_set(browser, server, utils):
+async def test_click_the_button_with_device_scale_factor_set(
+    browser: Browser, server: Server, utils: Utils
+) -> None:
     context = await browser.new_context(
         viewport={"width": 400, "height": 400}, device_scale_factor=5
     )
@@ -398,12 +426,15 @@ async def test_click_the_button_with_device_scale_factor_set(browser, server, ut
     await utils.attach_frame(page, "button-test", server.PREFIX + "/input/button.html")
     frame = page.frames[1]
     button = await frame.query_selector("button")
+    assert button
     await button.click()
     assert await frame.evaluate("window.result") == "Clicked"
     await context.close()
 
 
-async def test_click_the_button_with_px_border_with_offset(page, server, is_webkit):
+async def test_click_the_button_with_px_border_with_offset(
+    page: Page, server: Server, is_webkit: bool
+) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.eval_on_selector("button", "button => button.style.borderWidth = '8px'")
     await page.click("button", position={"x": 20, "y": 10})
@@ -413,7 +444,9 @@ async def test_click_the_button_with_px_border_with_offset(page, server, is_webk
     assert await page.evaluate("offsetY") == 10 + 8 if is_webkit else 10
 
 
-async def test_click_the_button_with_em_border_with_offset(page, server, is_webkit):
+async def test_click_the_button_with_em_border_with_offset(
+    page: Page, server: Server, is_webkit: bool
+) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.eval_on_selector("button", "button => button.style.borderWidth = '2em'")
     await page.eval_on_selector("button", "button => button.style.fontSize = '12px'")
@@ -424,7 +457,9 @@ async def test_click_the_button_with_em_border_with_offset(page, server, is_webk
     assert await page.evaluate("offsetY") == 12 * 2 + 10 if is_webkit else 10
 
 
-async def test_click_a_very_large_button_with_offset(page, server, is_webkit):
+async def test_click_a_very_large_button_with_offset(
+    page: Page, server: Server, is_webkit: bool
+) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.eval_on_selector("button", "button => button.style.borderWidth = '8px'")
     await page.eval_on_selector(
@@ -438,8 +473,8 @@ async def test_click_a_very_large_button_with_offset(page, server, is_webkit):
 
 
 async def test_click_a_button_in_scrolling_container_with_offset(
-    page, server, is_webkit
-):
+    page: Page, server: Server, is_webkit: bool
+) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.eval_on_selector(
         "button",
@@ -465,8 +500,8 @@ async def test_click_a_button_in_scrolling_container_with_offset(
 
 @pytest.mark.skip_browser("firefox")
 async def test_click_the_button_with_offset_with_page_scale(
-    browser, server, is_chromium, is_webkit
-):
+    browser: Browser, server: Server
+) -> None:
     context = await browser.new_context(
         viewport={"width": 400, "height": 400}, is_mobile=True
     )
@@ -494,7 +529,7 @@ async def test_click_the_button_with_offset_with_page_scale(
     await context.close()
 
 
-async def test_wait_for_stable_position(page, server):
+async def test_wait_for_stable_position(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.eval_on_selector(
         "button",
@@ -517,9 +552,10 @@ async def test_wait_for_stable_position(page, server):
     assert await page.evaluate("pageY") == 10
 
 
-async def test_timeout_waiting_for_stable_position(page, server):
+async def test_timeout_waiting_for_stable_position(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     button = await page.query_selector("button")
+    assert button
     await button.evaluate(
         """button => {
             button.style.transition = 'margin 5s linear 0s'
@@ -535,7 +571,7 @@ async def test_timeout_waiting_for_stable_position(page, server):
     assert "element is not stable - waiting" in error.message
 
 
-async def test_wait_for_becoming_hit_target(page, server):
+async def test_wait_for_becoming_hit_target(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.eval_on_selector(
         "button",
@@ -559,7 +595,7 @@ async def test_wait_for_becoming_hit_target(page, server):
 
     clicked = [False]
 
-    async def click():
+    async def click() -> None:
         await page.click("button")
         clicked.append(True)
 
@@ -576,9 +612,10 @@ async def test_wait_for_becoming_hit_target(page, server):
     assert await page.evaluate("() => window.result") == "Clicked"
 
 
-async def test_timeout_waiting_for_hit_target(page, server):
+async def test_timeout_waiting_for_hit_target(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     button = await page.query_selector("button")
+    assert button
     await page.evaluate(
         """() => {
       document.body.style.position = 'relative'
@@ -597,14 +634,18 @@ async def test_timeout_waiting_for_hit_target(page, server):
         await button.click(timeout=5000)
     except TimeoutError as e:
         error = e
+    assert error
     assert "Timeout 5000ms exceeded." in error.message
     assert '<div id="blocker"></div> intercepts pointer events' in error.message
     assert "retrying click action" in error.message
 
 
-async def test_fail_when_obscured_and_not_waiting_for_hit_target(page, server):
+async def test_fail_when_obscured_and_not_waiting_for_hit_target(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     button = await page.query_selector("button")
+    assert button
     await page.evaluate(
         """() => {
             document.body.style.position = 'relative'
@@ -622,13 +663,13 @@ async def test_fail_when_obscured_and_not_waiting_for_hit_target(page, server):
     assert await page.evaluate("window.result") == "Was not clicked"
 
 
-async def test_wait_for_button_to_be_enabled(page, server):
+async def test_wait_for_button_to_be_enabled(page: Page, server: Server) -> None:
     await page.set_content(
         '<button onclick="javascript:window.__CLICKED=true;" disabled><span>Click target</span></button>'
     )
     done = []
 
-    async def click():
+    async def click() -> None:
         await page.click("text=Click target")
         done.append(True)
 
@@ -641,27 +682,30 @@ async def test_wait_for_button_to_be_enabled(page, server):
     assert await page.evaluate("window.__CLICKED")
 
 
-async def test_timeout_waiting_for_button_to_be_enabled(page, server):
+async def test_timeout_waiting_for_button_to_be_enabled(
+    page: Page, server: Server
+) -> None:
     await page.set_content(
         '<button onclick="javascript:window.__CLICKED=true;" disabled><span>Click target</span></button>'
     )
-    error = None
+    error: Optional[Error] = None
     try:
         await page.click("text=Click target", timeout=3000)
     except TimeoutError as e:
         error = e
     assert await page.evaluate("window.__CLICKED") is None
+    assert error
     assert "Timeout 3000ms exceeded" in error.message
     assert "element is not enabled - waiting" in error.message
 
 
-async def test_wait_for_input_to_be_enabled(page, server):
+async def test_wait_for_input_to_be_enabled(page: Page, server: Server) -> None:
     await page.set_content(
         '<input onclick="javascript:window.__CLICKED=true;" disabled>'
     )
     done = []
 
-    async def click():
+    async def click() -> None:
         await page.click("input")
         done.append(True)
 
@@ -674,7 +718,7 @@ async def test_wait_for_input_to_be_enabled(page, server):
     assert await page.evaluate("window.__CLICKED")
 
 
-async def test_wait_for_select_to_be_enabled(page, server):
+async def test_wait_for_select_to_be_enabled(page: Page, server: Server) -> None:
     await page.set_content(
         """
         <select disabled><option selected>Hello</option></select>
@@ -688,7 +732,7 @@ async def test_wait_for_select_to_be_enabled(page, server):
     )
     done = []
 
-    async def click():
+    async def click() -> None:
         await page.click("select")
         done.append(True)
 
@@ -701,7 +745,7 @@ async def test_wait_for_select_to_be_enabled(page, server):
     assert await page.evaluate("window.__CLICKED")
 
 
-async def test_click_disabled_div(page, server):
+async def test_click_disabled_div(page: Page, server: Server) -> None:
     await page.set_content(
         '<div onclick="javascript:window.__CLICKED=true;" disabled>Click target</div>'
     )
@@ -709,7 +753,9 @@ async def test_click_disabled_div(page, server):
     assert await page.evaluate("window.__CLICKED")
 
 
-async def test_climb_dom_for_inner_label_with_pointer_events_none(page, server):
+async def test_climb_dom_for_inner_label_with_pointer_events_none(
+    page: Page, server: Server
+) -> None:
     await page.set_content(
         '<button onclick="javascript:window.__CLICKED=true;"><label style="pointer-events:none">Click target</label></button>'
     )
@@ -717,7 +763,7 @@ async def test_climb_dom_for_inner_label_with_pointer_events_none(page, server):
     assert await page.evaluate("window.__CLICKED")
 
 
-async def test_climb_up_to_role_button(page, server):
+async def test_climb_up_to_role_button(page: Page, server: Server) -> None:
     await page.set_content(
         '<div role=button onclick="javascript:window.__CLICKED=true;"><div style="pointer-events:none"><span><div>Click target</div></span></div>'
     )
@@ -726,14 +772,14 @@ async def test_climb_up_to_role_button(page, server):
 
 
 async def test_wait_for_BUTTON_to_be_clickable_when_it_has_pointer_events_none(
-    page, server
-):
+    page: Page,
+) -> None:
     await page.set_content(
         '<button onclick="javascript:window.__CLICKED=true;" style="pointer-events:none"><span>Click target</span></button>'
     )
     done = []
 
-    async def click():
+    async def click() -> None:
         await page.click("text=Click target")
         done.append(True)
 
@@ -749,8 +795,8 @@ async def test_wait_for_BUTTON_to_be_clickable_when_it_has_pointer_events_none(
 
 
 async def test_wait_for_LABEL_to_be_clickable_when_it_has_pointer_events_none(
-    page, server
-):
+    page: Page,
+) -> None:
     await page.set_content(
         '<label onclick="javascript:window.__CLICKED=true;" style="pointer-events:none"><span>Click target</span></label>'
     )
@@ -766,7 +812,7 @@ async def test_wait_for_LABEL_to_be_clickable_when_it_has_pointer_events_none(
     assert await page.evaluate("window.__CLICKED")
 
 
-async def test_update_modifiers_correctly(page, server):
+async def test_update_modifiers_correctly(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.click("button", modifiers=["Shift"])
     assert await page.evaluate("shiftKey")
@@ -783,7 +829,9 @@ async def test_update_modifiers_correctly(page, server):
     assert await page.evaluate("shiftKey") is False
 
 
-async def test_click_an_offscreen_element_when_scroll_behavior_is_smooth(page):
+async def test_click_an_offscreen_element_when_scroll_behavior_is_smooth(
+    page: Page,
+) -> None:
     await page.set_content(
         """
         <div style="border: 1px solid black; height: 500px; overflow: auto; width: 500px; scroll-behavior: smooth">
@@ -796,25 +844,30 @@ async def test_click_an_offscreen_element_when_scroll_behavior_is_smooth(page):
 
 
 async def test_report_nice_error_when_element_is_detached_and_force_clicked(
-    page, server
-):
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/input/animating-button.html")
     await page.evaluate("addButton()")
     handle = await page.query_selector("button")
+    assert handle
     await page.evaluate("stopButton(true)")
-    error = None
+    error: Optional[Error] = None
     try:
         await handle.click(force=True)
     except Error as e:
         error = e
     assert await page.evaluate("window.clicked") is None
+    assert error
     assert "Element is not attached to the DOM" in error.message
 
 
-async def test_fail_when_element_detaches_after_animation(page, server):
+async def test_fail_when_element_detaches_after_animation(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/input/animating-button.html")
     await page.evaluate("addButton()")
     handle = await page.query_selector("button")
+    assert handle
     promise = asyncio.create_task(handle.click())
     await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     await page.evaluate("stopButton(true)")
@@ -824,12 +877,14 @@ async def test_fail_when_element_detaches_after_animation(page, server):
     assert "Element is not attached to the DOM" in exc_info.value.message
 
 
-async def test_retry_when_element_detaches_after_animation(page, server):
+async def test_retry_when_element_detaches_after_animation(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/input/animating-button.html")
     await page.evaluate("addButton()")
     clicked = []
 
-    async def click():
+    async def click() -> None:
         await page.click("button")
         clicked.append(True)
 
@@ -851,7 +906,9 @@ async def test_retry_when_element_detaches_after_animation(page, server):
     assert await page.evaluate("window.clicked")
 
 
-async def test_retry_when_element_is_animating_from_outside_the_viewport(page, server):
+async def test_retry_when_element_is_animating_from_outside_the_viewport(
+    page: Page, server: Server
+) -> None:
     await page.set_content(
         """<style>
         @keyframes move {
@@ -875,6 +932,7 @@ async def test_retry_when_element_is_animating_from_outside_the_viewport(page, s
         """
     )
     handle = await page.query_selector("button")
+    assert handle
     promise = asyncio.create_task(handle.click())
     await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     await handle.evaluate("button => button.className = 'animated'")
@@ -883,8 +941,8 @@ async def test_retry_when_element_is_animating_from_outside_the_viewport(page, s
 
 
 async def test_fail_when_element_is_animating_from_outside_the_viewport_with_force(
-    page, server
-):
+    page: Page,
+) -> None:
     await page.set_content(
         """<style>
         @keyframes move {
@@ -908,19 +966,23 @@ async def test_fail_when_element_is_animating_from_outside_the_viewport_with_for
         """
     )
     handle = await page.query_selector("button")
+    assert handle
     promise = asyncio.create_task(handle.click(force=True))
     await asyncio.sleep(0)  # execute scheduled tasks, but don't await them
     await handle.evaluate("button => button.className = 'animated'")
-    error = None
+    error: Optional[Error] = None
     try:
         await promise
     except Error as e:
         error = e
     assert await page.evaluate("window.clicked") is None
+    assert error
     assert "Element is outside of the viewport" in error.message
 
 
-async def test_not_retarget_when_element_changes_on_hover(page, server):
+async def test_not_retarget_when_element_changes_on_hover(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/react.html")
     await page.evaluate(
         """() => {
@@ -932,7 +994,9 @@ async def test_not_retarget_when_element_changes_on_hover(page, server):
     assert await page.evaluate("window.button2") is None
 
 
-async def test_not_retarget_when_element_is_recycled_on_hover(page, server):
+async def test_not_retarget_when_element_is_recycled_on_hover(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/react.html")
     await page.evaluate(
         """() => {
@@ -948,14 +1012,16 @@ async def test_not_retarget_when_element_is_recycled_on_hover(page, server):
     assert await page.evaluate("window.button2")
 
 
-async def test_click_the_button_when_window_inner_width_is_corrupted(page, server):
+async def test_click_the_button_when_window_inner_width_is_corrupted(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.evaluate("window.innerWidth = 0")
     await page.click("button")
     assert await page.evaluate("result") == "Clicked"
 
 
-async def test_timeout_when_click_opens_alert(page, server):
+async def test_timeout_when_click_opens_alert(page: Page, server: Server) -> None:
     await page.set_content('<div onclick="window.alert(123)">Click me</div>')
     async with page.expect_event("dialog") as dialog_info:
         with pytest.raises(Error) as exc_info:
@@ -965,31 +1031,31 @@ async def test_timeout_when_click_opens_alert(page, server):
     await dialog.dismiss()
 
 
-async def test_check_the_box(page):
+async def test_check_the_box(page: Page) -> None:
     await page.set_content('<input id="checkbox" type="checkbox"></input>')
     await page.check("input")
     assert await page.evaluate("checkbox.checked")
 
 
-async def test_not_check_the_checked_box(page):
+async def test_not_check_the_checked_box(page: Page) -> None:
     await page.set_content('<input id="checkbox" type="checkbox" checked></input>')
     await page.check("input")
     assert await page.evaluate("checkbox.checked")
 
 
-async def test_uncheck_the_box(page):
+async def test_uncheck_the_box(page: Page) -> None:
     await page.set_content('<input id="checkbox" type="checkbox" checked></input>')
     await page.uncheck("input")
     assert await page.evaluate("checkbox.checked") is False
 
 
-async def test_not_uncheck_the_unchecked_box(page):
+async def test_not_uncheck_the_unchecked_box(page: Page) -> None:
     await page.set_content('<input id="checkbox" type="checkbox"></input>')
     await page.uncheck("input")
     assert await page.evaluate("checkbox.checked") is False
 
 
-async def test_check_the_box_by_label(page):
+async def test_check_the_box_by_label(page: Page) -> None:
     await page.set_content(
         '<label for="checkbox"><input id="checkbox" type="checkbox"></input></label>'
     )
@@ -997,7 +1063,7 @@ async def test_check_the_box_by_label(page):
     assert await page.evaluate("checkbox.checked")
 
 
-async def test_check_the_box_outside_label(page):
+async def test_check_the_box_outside_label(page: Page) -> None:
     await page.set_content(
         '<label for="checkbox">Text</label><div><input id="checkbox" type="checkbox"></input></div>'
     )
@@ -1005,7 +1071,7 @@ async def test_check_the_box_outside_label(page):
     assert await page.evaluate("checkbox.checked")
 
 
-async def test_check_the_box_inside_label_without_id(page):
+async def test_check_the_box_inside_label_without_id(page: Page) -> None:
     await page.set_content(
         '<label>Text<span><input id="checkbox" type="checkbox"></input></span></label>'
     )
@@ -1013,7 +1079,7 @@ async def test_check_the_box_inside_label_without_id(page):
     assert await page.evaluate("checkbox.checked")
 
 
-async def test_check_radio(page):
+async def test_check_radio(page: Page) -> None:
     await page.set_content(
         """
         <input type='radio'>one</input>
@@ -1024,7 +1090,7 @@ async def test_check_radio(page):
     assert await page.evaluate("two.checked")
 
 
-async def test_check_the_box_by_aria_role(page):
+async def test_check_the_box_by_aria_role(page: Page) -> None:
     await page.set_content(
         """<div role='checkbox' id='checkbox'>CHECKBOX</div>
         <script>

@@ -22,7 +22,7 @@ from tests.server import Server
 
 async def test_should_not_allow_to_access_frame_on_popup_main_request(
     page: Page, server: Server
-):
+) -> None:
     await page.set_content(f'<a target=_blank href="{server.EMPTY_PAGE}">click me</a>')
     request_promise = asyncio.ensure_future(page.context.wait_for_event("request"))
     popup_promise = asyncio.ensure_future(page.context.wait_for_event("page"))
@@ -38,6 +38,7 @@ async def test_should_not_allow_to_access_frame_on_popup_main_request(
     )
 
     response = await request.response()
+    assert response
     await response.finished()
     await popup_promise
     await clicked

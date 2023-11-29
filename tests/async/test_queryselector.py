@@ -11,12 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from pathlib import Path
+
 import pytest
 
-from playwright.async_api import Error, Page
+from playwright.async_api import Browser, Error, Page, Selectors
+
+from .utils import Utils
 
 
-async def test_selectors_register_should_work(selectors, browser, browser_name):
+async def test_selectors_register_should_work(
+    selectors: Selectors, browser: Browser, browser_name: str
+) -> None:
     tag_selector = """
         {
             create(root, target) {
@@ -74,8 +80,8 @@ async def test_selectors_register_should_work(selectors, browser, browser_name):
 
 
 async def test_selectors_register_should_work_with_path(
-    selectors, page: Page, utils, assetdir
-):
+    selectors: Selectors, page: Page, utils: Utils, assetdir: Path
+) -> None:
     await utils.register_selector_engine(
         selectors, "foo", path=assetdir / "sectionselectorengine.js"
     )
@@ -84,8 +90,8 @@ async def test_selectors_register_should_work_with_path(
 
 
 async def test_selectors_register_should_work_in_main_and_isolated_world(
-    selectors, page: Page, utils
-):
+    selectors: Selectors, page: Page, utils: Utils
+) -> None:
     dummy_selector_script = """{
       create(root, target) { },
       query(root, selector) {
@@ -150,7 +156,9 @@ async def test_selectors_register_should_work_in_main_and_isolated_world(
     )
 
 
-async def test_selectors_register_should_handle_errors(selectors, page: Page, utils):
+async def test_selectors_register_should_handle_errors(
+    selectors: Selectors, page: Page, utils: Utils
+) -> None:
     with pytest.raises(Error) as exc:
         await page.query_selector("neverregister=ignored")
     assert (

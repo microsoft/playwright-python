@@ -14,6 +14,7 @@
 
 import os
 import re
+from typing import Callable
 from urllib.parse import urlparse
 
 import pytest
@@ -26,14 +27,16 @@ _dirname = get_file_dirname()
 FILE_TO_UPLOAD = _dirname / ".." / "assets/file-to-upload.txt"
 
 
-async def test_locators_click_should_work(page: Page, server: Server):
+async def test_locators_click_should_work(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     button = page.locator("button")
     await button.click()
     assert await page.evaluate("window['result']") == "Clicked"
 
 
-async def test_locators_click_should_work_with_node_removed(page: Page, server: Server):
+async def test_locators_click_should_work_with_node_removed(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.evaluate("delete window['Node']")
     button = page.locator("button")
@@ -41,7 +44,9 @@ async def test_locators_click_should_work_with_node_removed(page: Page, server: 
     assert await page.evaluate("window['result']") == "Clicked"
 
 
-async def test_locators_click_should_work_for_text_nodes(page: Page, server: Server):
+async def test_locators_click_should_work_for_text_nodes(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.evaluate(
         """() => {
@@ -58,7 +63,7 @@ async def test_locators_click_should_work_for_text_nodes(page: Page, server: Ser
     assert await page.evaluate("result") == "Clicked"
 
 
-async def test_locators_should_have_repr(page: Page, server: Server):
+async def test_locators_should_have_repr(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     button = page.locator("button")
     await button.click()
@@ -68,39 +73,39 @@ async def test_locators_should_have_repr(page: Page, server: Server):
     )
 
 
-async def test_locators_get_attribute_should_work(page: Page, server: Server):
+async def test_locators_get_attribute_should_work(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/dom.html")
     button = page.locator("#outer")
     assert await button.get_attribute("name") == "value"
     assert await button.get_attribute("foo") is None
 
 
-async def test_locators_input_value_should_work(page: Page, server: Server):
+async def test_locators_input_value_should_work(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/dom.html")
     await page.fill("#textarea", "input value")
     text_area = page.locator("#textarea")
     assert await text_area.input_value() == "input value"
 
 
-async def test_locators_inner_html_should_work(page: Page, server: Server):
+async def test_locators_inner_html_should_work(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/dom.html")
     locator = page.locator("#outer")
     assert await locator.inner_html() == '<div id="inner">Text,\nmore text</div>'
 
 
-async def test_locators_inner_text_should_work(page: Page, server: Server):
+async def test_locators_inner_text_should_work(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/dom.html")
     locator = page.locator("#inner")
     assert await locator.inner_text() == "Text, more text"
 
 
-async def test_locators_text_content_should_work(page: Page, server: Server):
+async def test_locators_text_content_should_work(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/dom.html")
     locator = page.locator("#inner")
     assert await locator.text_content() == "Text,\nmore text"
 
 
-async def test_locators_is_hidden_and_is_visible_should_work(page: Page):
+async def test_locators_is_hidden_and_is_visible_should_work(page: Page) -> None:
     await page.set_content("<div>Hi</div><span></span>")
 
     div = page.locator("div")
@@ -112,7 +117,7 @@ async def test_locators_is_hidden_and_is_visible_should_work(page: Page):
     assert await span.is_hidden() is True
 
 
-async def test_locators_is_enabled_and_is_disabled_should_work(page: Page):
+async def test_locators_is_enabled_and_is_disabled_should_work(page: Page) -> None:
     await page.set_content(
         """
         <button disabled>button1</button>
@@ -134,7 +139,7 @@ async def test_locators_is_enabled_and_is_disabled_should_work(page: Page):
     assert await button1.is_disabled() is False
 
 
-async def test_locators_is_editable_should_work(page: Page):
+async def test_locators_is_editable_should_work(page: Page) -> None:
     await page.set_content(
         """
         <input id=input1 disabled><textarea></textarea><input id=input2>
@@ -148,7 +153,7 @@ async def test_locators_is_editable_should_work(page: Page):
     assert await input2.is_editable() is True
 
 
-async def test_locators_is_checked_should_work(page: Page):
+async def test_locators_is_checked_should_work(page: Page) -> None:
     await page.set_content(
         """
         <input type='checkbox' checked><div>Not a checkbox</div>
@@ -161,7 +166,7 @@ async def test_locators_is_checked_should_work(page: Page):
     assert await element.is_checked() is False
 
 
-async def test_locators_all_text_contents_should_work(page: Page):
+async def test_locators_all_text_contents_should_work(page: Page) -> None:
     await page.set_content(
         """
         <div>A</div><div>B</div><div>C</div>
@@ -172,7 +177,7 @@ async def test_locators_all_text_contents_should_work(page: Page):
     assert await element.all_text_contents() == ["A", "B", "C"]
 
 
-async def test_locators_all_inner_texts(page: Page):
+async def test_locators_all_inner_texts(page: Page) -> None:
     await page.set_content(
         """
         <div>A</div><div>B</div><div>C</div>
@@ -183,7 +188,9 @@ async def test_locators_all_inner_texts(page: Page):
     assert await element.all_inner_texts() == ["A", "B", "C"]
 
 
-async def test_locators_should_query_existing_element(page: Page, server: Server):
+async def test_locators_should_query_existing_element(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/playground.html")
     await page.set_content(
         """<html><body><div class="second"><div class="inner">A</div></div></body></html>"""
@@ -196,7 +203,7 @@ async def test_locators_should_query_existing_element(page: Page, server: Server
     )
 
 
-async def test_locators_evaluate_handle_should_work(page: Page, server: Server):
+async def test_locators_evaluate_handle_should_work(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/dom.html")
     outer = page.locator("#outer")
     inner = outer.locator("#inner")
@@ -218,7 +225,7 @@ async def test_locators_evaluate_handle_should_work(page: Page, server: Server):
     )
 
 
-async def test_locators_should_query_existing_elements(page: Page):
+async def test_locators_should_query_existing_elements(page: Page) -> None:
     await page.set_content(
         """<html><body><div>A</div><br/><div>B</div></body></html>"""
     )
@@ -231,7 +238,9 @@ async def test_locators_should_query_existing_elements(page: Page):
     assert result == ["A", "B"]
 
 
-async def test_locators_return_empty_array_for_non_existing_elements(page: Page):
+async def test_locators_return_empty_array_for_non_existing_elements(
+    page: Page,
+) -> None:
     await page.set_content(
         """<html><body><div>A</div><br/><div>B</div></body></html>"""
     )
@@ -241,7 +250,7 @@ async def test_locators_return_empty_array_for_non_existing_elements(page: Page)
     assert elements == []
 
 
-async def test_locators_evaluate_all_should_work(page: Page):
+async def test_locators_evaluate_all_should_work(page: Page) -> None:
     await page.set_content(
         """<html><body><div class="tweet"><div class="like">100</div><div class="like">10</div></div></body></html>"""
     )
@@ -250,7 +259,9 @@ async def test_locators_evaluate_all_should_work(page: Page):
     assert content == ["100", "10"]
 
 
-async def test_locators_evaluate_all_should_work_with_missing_selector(page: Page):
+async def test_locators_evaluate_all_should_work_with_missing_selector(
+    page: Page,
+) -> None:
     await page.set_content(
         """<div class="a">not-a-child-div</div><div id="myId"></div"""
     )
@@ -259,7 +270,7 @@ async def test_locators_evaluate_all_should_work_with_missing_selector(page: Pag
     assert nodes_length == 0
 
 
-async def test_locators_hover_should_work(page: Page, server: Server):
+async def test_locators_hover_should_work(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/scrollable.html")
     button = page.locator("#button-6")
     await button.hover()
@@ -268,7 +279,7 @@ async def test_locators_hover_should_work(page: Page, server: Server):
     )
 
 
-async def test_locators_fill_should_work(page: Page, server: Server):
+async def test_locators_fill_should_work(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/textarea.html")
     button = page.locator("input")
     await button.fill("some value")
@@ -284,21 +295,21 @@ async def test_locators_clear_should_work(page: Page, server: Server) -> None:
     assert await page.evaluate("result") == ""
 
 
-async def test_locators_check_should_work(page: Page):
+async def test_locators_check_should_work(page: Page) -> None:
     await page.set_content("<input id='checkbox' type='checkbox'></input>")
     button = page.locator("input")
     await button.check()
     assert await page.evaluate("checkbox.checked") is True
 
 
-async def test_locators_uncheck_should_work(page: Page):
+async def test_locators_uncheck_should_work(page: Page) -> None:
     await page.set_content("<input id='checkbox' type='checkbox' checked></input>")
     button = page.locator("input")
     await button.uncheck()
     assert await page.evaluate("checkbox.checked") is False
 
 
-async def test_locators_select_option_should_work(page: Page, server: Server):
+async def test_locators_select_option_should_work(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/select.html")
     select = page.locator("select")
     await select.select_option("blue")
@@ -306,7 +317,7 @@ async def test_locators_select_option_should_work(page: Page, server: Server):
     assert await page.evaluate("result.onChange") == ["blue"]
 
 
-async def test_locators_focus_should_work(page: Page, server: Server):
+async def test_locators_focus_should_work(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     button = page.locator("button")
     assert await button.evaluate("button => document.activeElement === button") is False
@@ -314,14 +325,14 @@ async def test_locators_focus_should_work(page: Page, server: Server):
     assert await button.evaluate("button => document.activeElement === button") is True
 
 
-async def test_locators_dispatch_event_should_work(page: Page, server: Server):
+async def test_locators_dispatch_event_should_work(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     button = page.locator("button")
     await button.dispatch_event("click")
     assert await page.evaluate("result") == "Clicked"
 
 
-async def test_locators_should_upload_a_file(page: Page, server: Server):
+async def test_locators_should_upload_a_file(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/fileupload.html")
     input = page.locator("input[type=file]")
 
@@ -333,13 +344,13 @@ async def test_locators_should_upload_a_file(page: Page, server: Server):
     )
 
 
-async def test_locators_should_press(page: Page):
+async def test_locators_should_press(page: Page) -> None:
     await page.set_content("<input type='text' />")
     await page.locator("input").press("h")
     assert await page.eval_on_selector("input", "input => input.value") == "h"
 
 
-async def test_locators_should_scroll_into_view(page: Page, server: Server):
+async def test_locators_should_scroll_into_view(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/offscreenbuttons.html")
     for i in range(11):
         button = page.locator(f"#btn{i}")
@@ -357,7 +368,7 @@ async def test_locators_should_scroll_into_view(page: Page, server: Server):
 
 async def test_locators_should_select_textarea(
     page: Page, server: Server, browser_name: str
-):
+) -> None:
     await page.goto(server.PREFIX + "/input/textarea.html")
     textarea = page.locator("textarea")
     await textarea.evaluate("textarea => textarea.value = 'some value'")
@@ -369,21 +380,21 @@ async def test_locators_should_select_textarea(
         assert await page.evaluate("window.getSelection().toString()") == "some value"
 
 
-async def test_locators_should_type(page: Page):
+async def test_locators_should_type(page: Page) -> None:
     await page.set_content("<input type='text' />")
     await page.locator("input").type("hello")
     assert await page.eval_on_selector("input", "input => input.value") == "hello"
 
 
-async def test_locators_should_press_sequentially(page: Page):
+async def test_locators_should_press_sequentially(page: Page) -> None:
     await page.set_content("<input type='text' />")
     await page.locator("input").press_sequentially("hello")
     assert await page.eval_on_selector("input", "input => input.value") == "hello"
 
 
 async def test_locators_should_screenshot(
-    page: Page, server: Server, assert_to_be_golden
-):
+    page: Page, server: Server, assert_to_be_golden: Callable[[bytes, str], None]
+) -> None:
     await page.set_viewport_size(
         {
             "width": 500,
@@ -398,7 +409,7 @@ async def test_locators_should_screenshot(
     )
 
 
-async def test_locators_should_return_bounding_box(page: Page, server: Server):
+async def test_locators_should_return_bounding_box(page: Page, server: Server) -> None:
     await page.set_viewport_size(
         {
             "width": 500,
@@ -416,7 +427,7 @@ async def test_locators_should_return_bounding_box(page: Page, server: Server):
     }
 
 
-async def test_locators_should_respect_first_and_last(page: Page):
+async def test_locators_should_respect_first_and_last(page: Page) -> None:
     await page.set_content(
         """
         <section>
@@ -431,7 +442,7 @@ async def test_locators_should_respect_first_and_last(page: Page):
     assert await page.locator("div").last.locator("p").count() == 3
 
 
-async def test_locators_should_respect_nth(page: Page):
+async def test_locators_should_respect_nth(page: Page) -> None:
     await page.set_content(
         """
     <section>
@@ -445,7 +456,7 @@ async def test_locators_should_respect_nth(page: Page):
     assert await page.locator("div").nth(2).locator("p").count() == 3
 
 
-async def test_locators_should_throw_on_capture_without_nth(page: Page):
+async def test_locators_should_throw_on_capture_without_nth(page: Page) -> None:
     await page.set_content(
         """
         <section><div><p>A</p></div></section>
@@ -455,7 +466,7 @@ async def test_locators_should_throw_on_capture_without_nth(page: Page):
         await page.locator("*css=div >> p").nth(1).click()
 
 
-async def test_locators_should_throw_due_to_strictness(page: Page):
+async def test_locators_should_throw_due_to_strictness(page: Page) -> None:
     await page.set_content(
         """
         <div>A</div><div>B</div>
@@ -465,7 +476,7 @@ async def test_locators_should_throw_due_to_strictness(page: Page):
         await page.locator("div").is_visible()
 
 
-async def test_locators_should_throw_due_to_strictness_2(page: Page):
+async def test_locators_should_throw_due_to_strictness_2(page: Page) -> None:
     await page.set_content(
         """
         <select><option>One</option><option>Two</option></select>
@@ -475,7 +486,7 @@ async def test_locators_should_throw_due_to_strictness_2(page: Page):
         await page.locator("option").evaluate("e => {}")
 
 
-async def test_locators_set_checked(page: Page):
+async def test_locators_set_checked(page: Page) -> None:
     await page.set_content("`<input id='checkbox' type='checkbox'></input>`")
     locator = page.locator("input")
     await locator.set_checked(True)
@@ -493,7 +504,7 @@ async def test_locators_wait_for(page: Page) -> None:
     assert await locator.text_content() == "target"
 
 
-async def test_should_wait_for_hidden(page):
+async def test_should_wait_for_hidden(page: Page) -> None:
     await page.set_content("<div><span>target</span></div>")
     locator = page.locator("span")
     task = locator.wait_for(state="hidden")
@@ -501,7 +512,7 @@ async def test_should_wait_for_hidden(page):
     await task
 
 
-async def test_should_combine_visible_with_other_selectors(page):
+async def test_should_combine_visible_with_other_selectors(page: Page) -> None:
     await page.set_content(
         """<div>
         <div class="item" style="display: none">Hidden data0</div>
@@ -520,13 +531,17 @@ async def test_should_combine_visible_with_other_selectors(page):
     )
 
 
-async def test_locator_count_should_work_with_deleted_map_in_main_world(page):
+async def test_locator_count_should_work_with_deleted_map_in_main_world(
+    page: Page,
+) -> None:
     await page.evaluate("Map = 1")
     await page.locator("#searchResultTableDiv .x-grid3-row").count()
     await expect(page.locator("#searchResultTableDiv .x-grid3-row")).to_have_count(0)
 
 
-async def test_locator_locator_and_framelocator_locator_should_accept_locator(page):
+async def test_locator_locator_and_framelocator_locator_should_accept_locator(
+    page: Page,
+) -> None:
     await page.set_content(
         """
         <div><input value=outer></div>
@@ -681,7 +696,7 @@ async def test_drag_to(page: Page, server: Server) -> None:
     )
 
 
-async def test_drag_to_with_position(page: Page, server: Server):
+async def test_drag_to_with_position(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content(
         """
@@ -917,14 +932,16 @@ async def test_should_support_locator_that(page: Page) -> None:
     ).to_have_count(1)
 
 
-async def test_should_filter_by_case_insensitive_regex_in_a_child(page):
+async def test_should_filter_by_case_insensitive_regex_in_a_child(page: Page) -> None:
     await page.set_content('<div class="test"><h5>Title Text</h5></div>')
     await expect(
         page.locator("div", has_text=re.compile(r"^title text$", re.I))
     ).to_have_text("Title Text")
 
 
-async def test_should_filter_by_case_insensitive_regex_in_multiple_children(page):
+async def test_should_filter_by_case_insensitive_regex_in_multiple_children(
+    page: Page,
+) -> None:
     await page.set_content(
         '<div class="test"><h5>Title</h5> <h2><i>Text</i></h2></div>'
     )
@@ -933,7 +950,7 @@ async def test_should_filter_by_case_insensitive_regex_in_multiple_children(page
     ).to_have_class("test")
 
 
-async def test_should_filter_by_regex_with_special_symbols(page):
+async def test_should_filter_by_regex_with_special_symbols(page: Page) -> None:
     await page.set_content(
         '<div class="test"><h5>First/"and"</h5><h2><i>Second\\</i></h2></div>'
     )
@@ -984,7 +1001,7 @@ async def test_should_support_locator_filter(page: Page) -> None:
     await expect(page.locator("div").filter(has_not_text="foo")).to_have_count(2)
 
 
-async def test_locators_should_support_locator_and(page: Page, server: Server):
+async def test_locators_should_support_locator_and(page: Page, server: Server) -> None:
     await page.set_content(
         """
         <div data-testid=foo>hello</div><div data-testid=bar>world</div>
@@ -1009,7 +1026,7 @@ async def test_locators_should_support_locator_and(page: Page, server: Server):
     ).to_have_count(2)
 
 
-async def test_locators_has_does_not_encode_unicode(page: Page, server: Server):
+async def test_locators_has_does_not_encode_unicode(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     locators = [
         page.locator("button", has_text="Драматург"),

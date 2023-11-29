@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import re
-from typing import List, cast
+from typing import Any, List, cast
 
 from playwright.async_api import (
     ElementHandle,
@@ -26,7 +26,7 @@ from playwright.async_api import (
 
 
 class Utils:
-    async def attach_frame(self, page: Page, frame_id: str, url: str):
+    async def attach_frame(self, page: Page, frame_id: str, url: str) -> Frame:
         handle = await page.evaluate_handle(
             """async ({ frame_id, url }) => {
                 const frame = document.createElement('iframe');
@@ -38,9 +38,11 @@ class Utils:
             }""",
             {"frame_id": frame_id, "url": url},
         )
-        return await cast(ElementHandle, handle.as_element()).content_frame()
+        frame = await cast(ElementHandle, handle.as_element()).content_frame()
+        assert frame
+        return frame
 
-    async def detach_frame(self, page: Page, frame_id: str):
+    async def detach_frame(self, page: Page, frame_id: str) -> None:
         await page.evaluate(
             "frame_id => document.getElementById(frame_id).remove()", frame_id
         )
@@ -58,14 +60,14 @@ class Utils:
             result = result + utils.dump_frames(child, "    " + indentation)
         return result
 
-    async def verify_viewport(self, page: Page, width: int, height: int):
+    async def verify_viewport(self, page: Page, width: int, height: int) -> None:
         assert cast(ViewportSize, page.viewport_size)["width"] == width
         assert cast(ViewportSize, page.viewport_size)["height"] == height
         assert await page.evaluate("window.innerWidth") == width
         assert await page.evaluate("window.innerHeight") == height
 
     async def register_selector_engine(
-        self, selectors: Selectors, *args, **kwargs
+        self, selectors: Selectors, *args: Any, **kwargs: Any
     ) -> None:
         try:
             await selectors.register(*args, **kwargs)

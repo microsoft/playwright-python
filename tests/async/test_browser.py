@@ -16,10 +16,10 @@ import re
 
 import pytest
 
-from playwright.async_api import Browser, Error
+from playwright.async_api import Browser, BrowserType, Error
 
 
-async def test_should_create_new_page(browser):
+async def test_should_create_new_page(browser: Browser) -> None:
     page1 = await browser.new_page()
     assert len(browser.contexts) == 1
 
@@ -33,7 +33,7 @@ async def test_should_create_new_page(browser):
     assert len(browser.contexts) == 0
 
 
-async def test_should_throw_upon_second_create_new_page(browser):
+async def test_should_throw_upon_second_create_new_page(browser: Browser) -> None:
     page = await browser.new_page()
     with pytest.raises(Error) as exc:
         await page.context.new_page()
@@ -41,7 +41,7 @@ async def test_should_throw_upon_second_create_new_page(browser):
     assert "Please use browser.new_context()" in exc.value.message
 
 
-async def test_version_should_work(browser: Browser, is_chromium):
+async def test_version_should_work(browser: Browser, is_chromium: bool) -> None:
     version = browser.version
     if is_chromium:
         assert re.match(r"^\d+\.\d+\.\d+\.\d+$", version)
@@ -49,5 +49,7 @@ async def test_version_should_work(browser: Browser, is_chromium):
         assert re.match(r"^\d+\.\d+", version)
 
 
-async def test_should_return_browser_type(browser, browser_type):
+async def test_should_return_browser_type(
+    browser: Browser, browser_type: BrowserType
+) -> None:
     assert browser.browser_type is browser_type

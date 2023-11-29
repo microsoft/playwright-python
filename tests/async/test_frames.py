@@ -13,14 +13,17 @@
 # limitations under the License.
 
 import asyncio
+from typing import Optional
 
 import pytest
 
 from playwright.async_api import Error, Page
 from tests.server import Server
 
+from .utils import Utils
 
-async def test_evaluate_handle(page, server):
+
+async def test_evaluate_handle(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     main_frame = page.main_frame
     assert main_frame.page == page
@@ -28,21 +31,27 @@ async def test_evaluate_handle(page, server):
     assert window_handle
 
 
-async def test_frame_element(page, server, utils):
+async def test_frame_element(page: Page, server: Server, utils: Utils) -> None:
     await page.goto(server.EMPTY_PAGE)
     frame1 = await utils.attach_frame(page, "frame1", server.EMPTY_PAGE)
+    assert frame1
     await utils.attach_frame(page, "frame2", server.EMPTY_PAGE)
     frame3 = await utils.attach_frame(page, "frame3", server.EMPTY_PAGE)
+    assert frame3
     frame1handle1 = await page.query_selector("#frame1")
+    assert frame1handle1
     frame1handle2 = await frame1.frame_element()
     frame3handle1 = await page.query_selector("#frame3")
+    assert frame3handle1
     frame3handle2 = await frame3.frame_element()
     assert await frame1handle1.evaluate("(a, b) => a === b", frame1handle2)
     assert await frame3handle1.evaluate("(a, b) => a === b", frame3handle2)
     assert await frame1handle1.evaluate("(a, b) => a === b", frame3handle1) is False
 
 
-async def test_frame_element_with_content_frame(page, server, utils):
+async def test_frame_element_with_content_frame(
+    page: Page, server: Server, utils: Utils
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     frame = await utils.attach_frame(page, "frame1", server.EMPTY_PAGE)
     handle = await frame.frame_element()
@@ -50,30 +59,39 @@ async def test_frame_element_with_content_frame(page, server, utils):
     assert content_frame == frame
 
 
-async def test_frame_element_throw_when_detached(page, server, utils):
+async def test_frame_element_throw_when_detached(
+    page: Page, server: Server, utils: Utils
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     frame1 = await utils.attach_frame(page, "frame1", server.EMPTY_PAGE)
     await page.eval_on_selector("#frame1", "e => e.remove()")
-    error = None
+    error: Optional[Error] = None
     try:
         await frame1.frame_element()
     except Error as e:
         error = e
+    assert error
     assert error.message == "Frame has been detached."
 
 
-async def test_evaluate_throw_for_detached_frames(page, server, utils):
+async def test_evaluate_throw_for_detached_frames(
+    page: Page, server: Server, utils: Utils
+) -> None:
     frame1 = await utils.attach_frame(page, "frame1", server.EMPTY_PAGE)
+    assert frame1
     await utils.detach_frame(page, "frame1")
-    error = None
+    error: Optional[Error] = None
     try:
         await frame1.evaluate("7 * 8")
     except Error as e:
         error = e
+    assert error
     assert "Frame was detached" in error.message
 
 
-async def test_evaluate_isolated_between_frames(page, server, utils):
+async def test_evaluate_isolated_between_frames(
+    page: Page, server: Server, utils: Utils
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     await utils.attach_frame(page, "frame1", server.EMPTY_PAGE)
     assert len(page.frames) == 2
@@ -90,7 +108,9 @@ async def test_evaluate_isolated_between_frames(page, server, utils):
     assert a2 == 2
 
 
-async def test_should_handle_nested_frames(page, server, utils):
+async def test_should_handle_nested_frames(
+    page: Page, server: Server, utils: Utils
+) -> None:
     await page.goto(server.PREFIX + "/frames/nested-frames.html")
     assert utils.dump_frames(page.main_frame) == [
         "http://localhost:<PORT>/frames/nested-frames.html",
@@ -102,8 +122,8 @@ async def test_should_handle_nested_frames(page, server, utils):
 
 
 async def test_should_send_events_when_frames_are_manipulated_dynamically(
-    page, server, utils
-):
+    page: Page, server: Server, utils: Utils
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     # validate frameattached events
     attached_frames = []
@@ -134,21 +154,27 @@ async def test_should_send_events_when_frames_are_manipulated_dynamically(
     assert detached_frames[0].is_detached()
 
 
-async def test_framenavigated_when_navigating_on_anchor_urls(page, server):
+async def test_framenavigated_when_navigating_on_anchor_urls(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     async with page.expect_event("framenavigated"):
         await page.goto(server.EMPTY_PAGE + "#foo")
     assert page.url == server.EMPTY_PAGE + "#foo"
 
 
-async def test_persist_main_frame_on_cross_process_navigation(page, server):
+async def test_persist_main_frame_on_cross_process_navigation(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     main_frame = page.main_frame
     await page.goto(server.CROSS_PROCESS_PREFIX + "/empty.html")
     assert page.main_frame == main_frame
 
 
-async def test_should_not_send_attach_detach_events_for_main_frame(page, server):
+async def test_should_not_send_attach_detach_events_for_main_frame(
+    page: Page, server: Server
+) -> None:
     has_events = []
     page.on("frameattached", lambda frame: has_events.append(True))
     page.on("framedetached", lambda frame: has_events.append(True))
@@ -156,7 +182,7 @@ async def test_should_not_send_attach_detach_events_for_main_frame(page, server)
     assert has_events == []
 
 
-async def test_detach_child_frames_on_navigation(page, server):
+async def test_detach_child_frames_on_navigation(page: Page, server: Server) -> None:
     attached_frames = []
     detached_frames = []
     navigated_frames = []
@@ -177,7 +203,7 @@ async def test_detach_child_frames_on_navigation(page, server):
     assert len(navigated_frames) == 1
 
 
-async def test_framesets(page, server):
+async def test_framesets(page: Page, server: Server) -> None:
     attached_frames = []
     detached_frames = []
     navigated_frames = []
@@ -198,7 +224,7 @@ async def test_framesets(page, server):
     assert len(navigated_frames) == 1
 
 
-async def test_frame_from_inside_shadow_dom(page, server):
+async def test_frame_from_inside_shadow_dom(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/shadow.html")
     await page.evaluate(
         """async url => {
@@ -213,7 +239,7 @@ async def test_frame_from_inside_shadow_dom(page, server):
     assert page.frames[1].url == server.EMPTY_PAGE
 
 
-async def test_frame_name(page, server, utils):
+async def test_frame_name(page: Page, server: Server, utils: Utils) -> None:
     await utils.attach_frame(page, "theFrameId", server.EMPTY_PAGE)
     await page.evaluate(
         """url => {
@@ -230,7 +256,7 @@ async def test_frame_name(page, server, utils):
     assert page.frames[2].name == "theFrameName"
 
 
-async def test_frame_parent(page, server, utils):
+async def test_frame_parent(page: Page, server: Server, utils: Utils) -> None:
     await utils.attach_frame(page, "frame1", server.EMPTY_PAGE)
     await utils.attach_frame(page, "frame2", server.EMPTY_PAGE)
     assert page.frames[0].parent_frame is None
@@ -239,8 +265,8 @@ async def test_frame_parent(page, server, utils):
 
 
 async def test_should_report_different_frame_instance_when_frame_re_attaches(
-    page, server, utils
-):
+    page: Page, server: Server, utils: Utils
+) -> None:
     frame1 = await utils.attach_frame(page, "frame1", server.EMPTY_PAGE)
     await page.evaluate(
         """() => {
@@ -258,7 +284,7 @@ async def test_should_report_different_frame_instance_when_frame_re_attaches(
     assert frame1 != frame2
 
 
-async def test_strict_mode(page: Page, server: Server):
+async def test_strict_mode(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content(
         """

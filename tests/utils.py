@@ -15,7 +15,7 @@
 import json
 import zipfile
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple, TypeVar
 
 
 def parse_trace(path: Path) -> Tuple[Dict[str, bytes], List[Any]]:
@@ -58,3 +58,10 @@ def get_trace_actions(events: List[Any]) -> List[str]:
 
 
 TARGET_CLOSED_ERROR_MESSAGE = "Target page, context or browser has been closed"
+
+MustType = TypeVar("MustType")
+
+
+def must(value: Optional[MustType]) -> MustType:
+    assert value
+    return value

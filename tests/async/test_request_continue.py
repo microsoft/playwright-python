@@ -13,14 +13,20 @@
 # limitations under the License.
 
 import asyncio
+from typing import Optional
+
+from playwright.async_api import Page, Route
+from tests.server import Server
 
 
-async def test_request_continue_should_work(page, server):
+async def test_request_continue_should_work(page: Page, server: Server) -> None:
     await page.route("**/*", lambda route: asyncio.create_task(route.continue_()))
     await page.goto(server.EMPTY_PAGE)
 
 
-async def test_request_continue_should_amend_http_headers(page, server):
+async def test_request_continue_should_amend_http_headers(
+    page: Page, server: Server
+) -> None:
     await page.route(
         "**/*",
         lambda route: asyncio.create_task(
@@ -36,7 +42,7 @@ async def test_request_continue_should_amend_http_headers(page, server):
     assert request.getHeader("foo") == "bar"
 
 
-async def test_request_continue_should_amend_method(page, server):
+async def test_request_continue_should_amend_method(page: Page, server: Server) -> None:
     server_request = asyncio.create_task(server.wait_for_request("/sleep.zzz"))
     await page.goto(server.EMPTY_PAGE)
     await page.route(
@@ -50,7 +56,9 @@ async def test_request_continue_should_amend_method(page, server):
     assert (await server_request).method.decode() == "POST"
 
 
-async def test_request_continue_should_amend_method_on_main_request(page, server):
+async def test_request_continue_should_amend_method_on_main_request(
+    page: Page, server: Server
+) -> None:
     request = asyncio.create_task(server.wait_for_request("/empty.html"))
     await page.route(
         "**/*", lambda route: asyncio.create_task(route.continue_(method="POST"))
@@ -59,7 +67,9 @@ async def test_request_continue_should_amend_method_on_main_request(page, server
     assert (await request).method.decode() == "POST"
 
 
-async def test_request_continue_should_amend_post_data(page, server):
+async def test_request_continue_should_amend_post_data(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.route(
         "**/*",
@@ -74,10 +84,11 @@ async def test_request_continue_should_amend_post_data(page, server):
             """
         ),
     )
+    assert server_request.post_body
     assert server_request.post_body.decode() == "doggo"
 
 
-async def test_should_override_request_url(page, server):
+async def test_should_override_request_url(page: Page, server: Server) -> None:
     request = asyncio.create_task(server.wait_for_request("/empty.html"))
     await page.route(
         "**/foo",
@@ -88,10 +99,10 @@ async def test_should_override_request_url(page, server):
     assert (await request).method == b"GET"
 
 
-async def test_should_raise_except(page, server):
-    exc_fut = asyncio.Future()
+async def test_should_raise_except(page: Page, server: Server) -> None:
+    exc_fut: "asyncio.Future[Optional[Exception]]" = asyncio.Future()
 
-    async def capture_exception(route):
+    async def capture_exception(route: Route) -> None:
         try:
             await route.continue_(url="file:///tmp/does-not-exist")
             exc_fut.set_result(None)
@@ -103,7 +114,7 @@ async def test_should_raise_except(page, server):
     assert "New URL must have same protocol as overridden URL" in str(await exc_fut)
 
 
-async def test_should_amend_utf8_post_data(page, server):
+async def test_should_amend_utf8_post_data(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.route(
         "**/*",
@@ -115,10 +126,11 @@ async def test_should_amend_utf8_post_data(page, server):
         page.evaluate("fetch('/sleep.zzz', { method: 'POST', body: 'birdy' })"),
     )
     assert server_request.method == b"POST"
+    assert server_request.post_body
     assert server_request.post_body.decode("utf8") == "пушкин"
 
 
-async def test_should_amend_binary_post_data(page, server):
+async def test_should_amend_binary_post_data(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.route(
         "**/*",

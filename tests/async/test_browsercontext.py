@@ -14,16 +14,28 @@
 
 import asyncio
 import re
+from typing import Any, List
 from urllib.parse import urlparse
 
 import pytest
 
-from playwright.async_api import Browser, Error
+from playwright.async_api import (
+    Browser,
+    BrowserContext,
+    Error,
+    JSHandle,
+    Page,
+    Playwright,
+    Request,
+    Route,
+)
 from tests.server import Server
 from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
 
+from .utils import Utils
 
-async def test_page_event_should_create_new_context(browser):
+
+async def test_page_event_should_create_new_context(browser: Browser) -> None:
     assert len(browser.contexts) == 0
     context = await browser.new_context()
     assert len(browser.contexts) == 1
@@ -33,7 +45,9 @@ async def test_page_event_should_create_new_context(browser):
     assert context.browser == browser
 
 
-async def test_window_open_should_use_parent_tab_context(browser, server):
+async def test_window_open_should_use_parent_tab_context(
+    browser: Browser, server: Server
+) -> None:
     context = await browser.new_context()
     page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
@@ -44,7 +58,9 @@ async def test_window_open_should_use_parent_tab_context(browser, server):
     await context.close()
 
 
-async def test_page_event_should_isolate_localStorage_and_cookies(browser, server):
+async def test_page_event_should_isolate_localStorage_and_cookies(
+    browser: Browser, server: Server
+) -> None:
     # Create two incognito contexts.
     context1 = await browser.new_context()
     context2 = await browser.new_context()
@@ -90,14 +106,16 @@ async def test_page_event_should_isolate_localStorage_and_cookies(browser, serve
     assert browser.contexts == []
 
 
-async def test_page_event_should_propagate_default_viewport_to_the_page(browser, utils):
+async def test_page_event_should_propagate_default_viewport_to_the_page(
+    browser: Browser, utils: Utils
+) -> None:
     context = await browser.new_context(viewport={"width": 456, "height": 789})
     page = await context.new_page()
     await utils.verify_viewport(page, 456, 789)
     await context.close()
 
 
-async def test_page_event_should_respect_device_scale_factor(browser):
+async def test_page_event_should_respect_device_scale_factor(browser: Browser) -> None:
     context = await browser.new_context(device_scale_factor=3)
     page = await context.new_page()
     assert await page.evaluate("window.devicePixelRatio") == 3
@@ -105,8 +123,8 @@ async def test_page_event_should_respect_device_scale_factor(browser):
 
 
 async def test_page_event_should_not_allow_device_scale_factor_with_null_viewport(
-    browser,
-):
+    browser: Browser,
+) -> None:
     with pytest.raises(Error) as exc_info:
         await browser.new_context(no_viewport=True, device_scale_factor=1)
     assert (
@@ -115,7 +133,9 @@ async def test_page_event_should_not_allow_device_scale_factor_with_null_viewpor
     )
 
 
-async def test_page_event_should_not_allow_is_mobile_with_null_viewport(browser):
+async def test_page_event_should_not_allow_is_mobile_with_null_viewport(
+    browser: Browser,
+) -> None:
     with pytest.raises(Error) as exc_info:
         await browser.new_context(no_viewport=True, is_mobile=True)
     assert (
@@ -124,12 +144,12 @@ async def test_page_event_should_not_allow_is_mobile_with_null_viewport(browser)
     )
 
 
-async def test_close_should_work_for_empty_context(browser):
+async def test_close_should_work_for_empty_context(browser: Browser) -> None:
     context = await browser.new_context()
     await context.close()
 
 
-async def test_close_should_abort_wait_for_event(browser):
+async def test_close_should_abort_wait_for_event(browser: Browser) -> None:
     context = await browser.new_context()
     with pytest.raises(Error) as exc_info:
         async with context.expect_page():
@@ -137,7 +157,7 @@ async def test_close_should_abort_wait_for_event(browser):
     assert TARGET_CLOSED_ERROR_MESSAGE in exc_info.value.message
 
 
-async def test_close_should_be_callable_twice(browser):
+async def test_close_should_be_callable_twice(browser: Browser) -> None:
     context = await browser.new_context()
     await asyncio.gather(
         context.close(),
@@ -146,8 +166,8 @@ async def test_close_should_be_callable_twice(browser):
     await context.close()
 
 
-async def test_user_agent_should_work(browser, server):
-    async def baseline():
+async def test_user_agent_should_work(browser: Browser, server: Server) -> None:
+    async def baseline() -> None:
         context = await browser.new_context()
         page = await context.new_page()
         assert "Mozilla" in await page.evaluate("navigator.userAgent")
@@ -155,7 +175,7 @@ async def test_user_agent_should_work(browser, server):
 
     await baseline()
 
-    async def override():
+    async def override() -> None:
         context = await browser.new_context(user_agent="foobar")
         page = await context.new_page()
         [request, _] = await asyncio.gather(
@@ -168,7 +188,9 @@ async def test_user_agent_should_work(browser, server):
     await override()
 
 
-async def test_user_agent_should_work_for_subframes(browser, server, utils):
+async def test_user_agent_should_work_for_subframes(
+    browser: Browser, server: Server, utils: Utils
+) -> None:
     context = await browser.new_context(user_agent="foobar")
     page = await context.new_page()
     [request, _] = await asyncio.gather(
@@ -179,7 +201,9 @@ async def test_user_agent_should_work_for_subframes(browser, server, utils):
     await context.close()
 
 
-async def test_user_agent_should_emulate_device_user_agent(playwright, browser, server):
+async def test_user_agent_should_emulate_device_user_agent(
+    playwright: Playwright, browser: Browser, server: Server
+) -> None:
     context = await browser.new_context(
         user_agent=playwright.devices["iPhone 6"]["user_agent"]
     )
@@ -189,8 +213,10 @@ async def test_user_agent_should_emulate_device_user_agent(playwright, browser, 
     await context.close()
 
 
-async def test_user_agent_should_make_a_copy_of_default_options(browser, server):
-    options = {"user_agent": "foobar"}
+async def test_user_agent_should_make_a_copy_of_default_options(
+    browser: Browser, server: Server
+) -> None:
+    options: Any = {"user_agent": "foobar"}
     context = await browser.new_context(**options)
     options["user_agent"] = "wrong"
     page = await context.new_page()
@@ -202,8 +228,10 @@ async def test_user_agent_should_make_a_copy_of_default_options(browser, server)
     await context.close()
 
 
-async def test_page_event_should_bypass_csp_meta_tag(browser, server):
-    async def baseline():
+async def test_page_event_should_bypass_csp_meta_tag(
+    browser: Browser, server: Server
+) -> None:
+    async def baseline() -> None:
         context = await browser.new_context()
         page = await context.new_page()
         await page.goto(server.PREFIX + "/csp.html")
@@ -217,7 +245,7 @@ async def test_page_event_should_bypass_csp_meta_tag(browser, server):
     await baseline()
 
     # By-pass CSP and try one more time.
-    async def override():
+    async def override() -> None:
         context = await browser.new_context(bypass_csp=True)
         page = await context.new_page()
         await page.goto(server.PREFIX + "/csp.html")
@@ -228,11 +256,13 @@ async def test_page_event_should_bypass_csp_meta_tag(browser, server):
     await override()
 
 
-async def test_page_event_should_bypass_csp_header(browser, server):
+async def test_page_event_should_bypass_csp_header(
+    browser: Browser, server: Server
+) -> None:
     # Make sure CSP prohibits add_script_tag.
     server.set_csp("/empty.html", 'default-src "self"')
 
-    async def baseline():
+    async def baseline() -> None:
         context = await browser.new_context()
         page = await context.new_page()
         await page.goto(server.EMPTY_PAGE)
@@ -246,7 +276,7 @@ async def test_page_event_should_bypass_csp_header(browser, server):
     await baseline()
 
     # By-pass CSP and try one more time.
-    async def override():
+    async def override() -> None:
         context = await browser.new_context(bypass_csp=True)
         page = await context.new_page()
         await page.goto(server.EMPTY_PAGE)
@@ -257,7 +287,9 @@ async def test_page_event_should_bypass_csp_header(browser, server):
     await override()
 
 
-async def test_page_event_should_bypass_after_cross_process_navigation(browser, server):
+async def test_page_event_should_bypass_after_cross_process_navigation(
+    browser: Browser, server: Server
+) -> None:
     context = await browser.new_context(bypass_csp=True)
     page = await context.new_page()
     await page.goto(server.PREFIX + "/csp.html")
@@ -270,8 +302,10 @@ async def test_page_event_should_bypass_after_cross_process_navigation(browser, 
     await context.close()
 
 
-async def test_page_event_should_bypass_csp_in_iframes_as_well(browser, server, utils):
-    async def baseline():
+async def test_page_event_should_bypass_csp_in_iframes_as_well(
+    browser: Browser, server: Server, utils: Utils
+) -> None:
+    async def baseline() -> None:
         # Make sure CSP prohibits add_script_tag in an iframe.
         context = await browser.new_context()
         page = await context.new_page()
@@ -287,7 +321,7 @@ async def test_page_event_should_bypass_csp_in_iframes_as_well(browser, server, 
     await baseline()
 
     # By-pass CSP and try one more time.
-    async def override():
+    async def override() -> None:
         context = await browser.new_context(bypass_csp=True)
         page = await context.new_page()
         await page.goto(server.EMPTY_PAGE)
@@ -302,8 +336,8 @@ async def test_page_event_should_bypass_csp_in_iframes_as_well(browser, server, 
     await override()
 
 
-async def test_csp_should_work(browser, is_webkit):
-    async def baseline():
+async def test_csp_should_work(browser: Browser, is_webkit: bool) -> None:
+    async def baseline() -> None:
         context = await browser.new_context(java_script_enabled=False)
         page = await context.new_page()
         await page.goto('data:text/html, <script>var something = "forbidden"</script>')
@@ -317,7 +351,7 @@ async def test_csp_should_work(browser, is_webkit):
 
     await baseline()
 
-    async def override():
+    async def override() -> None:
         context = await browser.new_context()
         page = await context.new_page()
         await page.goto('data:text/html, <script>var something = "forbidden"</script>')
@@ -328,15 +362,17 @@ async def test_csp_should_work(browser, is_webkit):
 
 
 async def test_csp_should_be_able_to_navigate_after_disabling_javascript(
-    browser, server
-):
+    browser: Browser, server: Server
+) -> None:
     context = await browser.new_context(java_script_enabled=False)
     page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
     await context.close()
 
 
-async def test_pages_should_return_all_of_the_pages(context, server):
+async def test_pages_should_return_all_of_the_pages(
+    context: BrowserContext, server: Server
+) -> None:
     page = await context.new_page()
     second = await context.new_page()
     all_pages = context.pages
@@ -345,17 +381,19 @@ async def test_pages_should_return_all_of_the_pages(context, server):
     assert second in all_pages
 
 
-async def test_pages_should_close_all_belonging_pages_once_closing_context(context):
+async def test_pages_should_close_all_belonging_pages_once_closing_context(
+    context: BrowserContext,
+) -> None:
     await context.new_page()
     assert len(context.pages) == 1
     await context.close()
     assert context.pages == []
 
 
-async def test_expose_binding_should_work(context):
+async def test_expose_binding_should_work(context: BrowserContext) -> None:
     binding_source = []
 
-    def binding(source, a, b):
+    def binding(source: Any, a: int, b: int) -> int:
         binding_source.append(source)
         return a + b
 
@@ -369,7 +407,7 @@ async def test_expose_binding_should_work(context):
     assert result == 11
 
 
-async def test_expose_function_should_work(context):
+async def test_expose_function_should_work(context: BrowserContext) -> None:
     await context.expose_function("add", lambda a, b: a + b)
     page = await context.new_page()
     await page.expose_function("mul", lambda a, b: a * b)
@@ -384,8 +422,8 @@ async def test_expose_function_should_work(context):
 
 
 async def test_expose_function_should_throw_for_duplicate_registrations(
-    context, server
-):
+    context: BrowserContext, server: Server
+) -> None:
     await context.expose_function("foo", lambda: None)
     await context.expose_function("bar", lambda: None)
     with pytest.raises(Error) as exc_info:
@@ -408,8 +446,8 @@ async def test_expose_function_should_throw_for_duplicate_registrations(
 
 
 async def test_expose_function_should_be_callable_from_inside_add_init_script(
-    context, server
-):
+    context: BrowserContext, server: Server
+) -> None:
     args = []
     await context.expose_function("woof", lambda arg: args.append(arg))
     await context.add_init_script("woof('context')")
@@ -422,10 +460,10 @@ async def test_expose_function_should_be_callable_from_inside_add_init_script(
     assert args == ["context", "page"]
 
 
-async def test_expose_bindinghandle_should_work(context):
-    targets = []
+async def test_expose_bindinghandle_should_work(context: BrowserContext) -> None:
+    targets: List[JSHandle] = []
 
-    def logme(t):
+    def logme(t: JSHandle) -> int:
         targets.append(t)
         return 17
 
@@ -436,16 +474,16 @@ async def test_expose_bindinghandle_should_work(context):
     assert result == 17
 
 
-async def test_route_should_intercept(context, server):
+async def test_route_should_intercept(context: BrowserContext, server: Server) -> None:
     intercepted = []
 
-    def handle(route, request):
+    def handle(route: Route, request: Request) -> None:
         intercepted.append(True)
         assert "empty.html" in request.url
         assert request.headers["user-agent"]
         assert request.method == "GET"
         assert request.post_data is None
-        assert request.is_navigation_request
+        assert request.is_navigation_request()
         assert request.resource_type == "document"
         assert request.frame == page.main_frame
         assert request.frame.url == "about:blank"
@@ -454,17 +492,18 @@ async def test_route_should_intercept(context, server):
     await context.route("**/empty.html", lambda route, request: handle(route, request))
     page = await context.new_page()
     response = await page.goto(server.EMPTY_PAGE)
+    assert response
     assert response.ok
     assert intercepted == [True]
     await context.close()
 
 
-async def test_route_should_unroute(context, server):
+async def test_route_should_unroute(context: BrowserContext, server: Server) -> None:
     page = await context.new_page()
 
-    intercepted = []
+    intercepted: List[int] = []
 
-    def handler(route, request, ordinal):
+    def handler(route: Route, request: Request, ordinal: int) -> None:
         intercepted.append(ordinal)
         asyncio.create_task(route.continue_())
 
@@ -476,7 +515,7 @@ async def test_route_should_unroute(context, server):
         "**/empty.html", lambda route, request: handler(route, request, 3)
     )
 
-    def handler4(route, request):
+    def handler4(route: Route, request: Request) -> None:
         handler(route, request, 4)
 
     await context.route(re.compile("empty.html"), handler4)
@@ -495,7 +534,9 @@ async def test_route_should_unroute(context, server):
     assert intercepted == [1]
 
 
-async def test_route_should_yield_to_page_route(context, server):
+async def test_route_should_yield_to_page_route(
+    context: BrowserContext, server: Server
+) -> None:
     await context.route(
         "**/empty.html",
         lambda route, request: asyncio.create_task(
@@ -512,11 +553,14 @@ async def test_route_should_yield_to_page_route(context, server):
     )
 
     response = await page.goto(server.EMPTY_PAGE)
+    assert response
     assert response.ok
     assert await response.text() == "page"
 
 
-async def test_route_should_fall_back_to_context_route(context, server):
+async def test_route_should_fall_back_to_context_route(
+    context: BrowserContext, server: Server
+) -> None:
     await context.route(
         "**/empty.html",
         lambda route, request: asyncio.create_task(
@@ -533,46 +577,59 @@ async def test_route_should_fall_back_to_context_route(context, server):
     )
 
     response = await page.goto(server.EMPTY_PAGE)
+    assert response
     assert response.ok
     assert await response.text() == "context"
 
 
-async def test_auth_should_fail_without_credentials(context, server):
+async def test_auth_should_fail_without_credentials(
+    context: BrowserContext, server: Server
+) -> None:
     server.set_auth("/empty.html", "user", "pass")
     page = await context.new_page()
     response = await page.goto(server.EMPTY_PAGE)
+    assert response
     assert response.status == 401
 
 
-async def test_auth_should_work_with_correct_credentials(browser, server):
+async def test_auth_should_work_with_correct_credentials(
+    browser: Browser, server: Server
+) -> None:
     server.set_auth("/empty.html", "user", "pass")
     context = await browser.new_context(
         http_credentials={"username": "user", "password": "pass"}
     )
     page = await context.new_page()
     response = await page.goto(server.EMPTY_PAGE)
+    assert response
     assert response.status == 200
     await context.close()
 
 
-async def test_auth_should_fail_with_wrong_credentials(browser, server):
+async def test_auth_should_fail_with_wrong_credentials(
+    browser: Browser, server: Server
+) -> None:
     server.set_auth("/empty.html", "user", "pass")
     context = await browser.new_context(
         http_credentials={"username": "foo", "password": "bar"}
     )
     page = await context.new_page()
     response = await page.goto(server.EMPTY_PAGE)
+    assert response
     assert response.status == 401
     await context.close()
 
 
-async def test_auth_should_return_resource_body(browser, server):
+async def test_auth_should_return_resource_body(
+    browser: Browser, server: Server
+) -> None:
     server.set_auth("/playground.html", "user", "pass")
     context = await browser.new_context(
         http_credentials={"username": "user", "password": "pass"}
     )
     page = await context.new_page()
     response = await page.goto(server.PREFIX + "/playground.html")
+    assert response
     assert response.status == 200
     assert await page.title() == "Playground"
     assert "Playground" in await response.text()
@@ -580,8 +637,8 @@ async def test_auth_should_return_resource_body(browser, server):
 
 
 async def test_should_work_with_correct_credentials_and_matching_origin(
-    browser, server
-):
+    browser: Browser, server: Server
+) -> None:
     server.set_auth("/empty.html", "user", "pass")
     context = await browser.new_context(
         http_credentials={
@@ -592,13 +649,14 @@ async def test_should_work_with_correct_credentials_and_matching_origin(
     )
     page = await context.new_page()
     response = await page.goto(server.EMPTY_PAGE)
+    assert response
     assert response.status == 200
     await context.close()
 
 
 async def test_should_work_with_correct_credentials_and_matching_origin_case_insensitive(
-    browser, server
-):
+    browser: Browser, server: Server
+) -> None:
     server.set_auth("/empty.html", "user", "pass")
     context = await browser.new_context(
         http_credentials={
@@ -609,13 +667,14 @@ async def test_should_work_with_correct_credentials_and_matching_origin_case_ins
     )
     page = await context.new_page()
     response = await page.goto(server.EMPTY_PAGE)
+    assert response
     assert response.status == 200
     await context.close()
 
 
 async def test_should_fail_with_correct_credentials_and_mismatching_scheme(
-    browser, server
-):
+    browser: Browser, server: Server
+) -> None:
     server.set_auth("/empty.html", "user", "pass")
     context = await browser.new_context(
         http_credentials={
@@ -626,28 +685,31 @@ async def test_should_fail_with_correct_credentials_and_mismatching_scheme(
     )
     page = await context.new_page()
     response = await page.goto(server.EMPTY_PAGE)
+    assert response
     assert response.status == 401
     await context.close()
 
 
 async def test_should_fail_with_correct_credentials_and_mismatching_hostname(
-    browser, server
-):
+    browser: Browser, server: Server
+) -> None:
     server.set_auth("/empty.html", "user", "pass")
     hostname = urlparse(server.PREFIX).hostname
+    assert hostname
     origin = server.PREFIX.replace(hostname, "mismatching-hostname")
     context = await browser.new_context(
         http_credentials={"username": "user", "password": "pass", "origin": origin}
     )
     page = await context.new_page()
     response = await page.goto(server.EMPTY_PAGE)
+    assert response
     assert response.status == 401
     await context.close()
 
 
 async def test_should_fail_with_correct_credentials_and_mismatching_port(
-    browser, server
-):
+    browser: Browser, server: Server
+) -> None:
     server.set_auth("/empty.html", "user", "pass")
     origin = server.PREFIX.replace(str(server.PORT), str(server.PORT + 1))
     context = await browser.new_context(
@@ -655,11 +717,14 @@ async def test_should_fail_with_correct_credentials_and_mismatching_port(
     )
     page = await context.new_page()
     response = await page.goto(server.EMPTY_PAGE)
+    assert response
     assert response.status == 401
     await context.close()
 
 
-async def test_offline_should_work_with_initial_option(browser, server):
+async def test_offline_should_work_with_initial_option(
+    browser: Browser, server: Server
+) -> None:
     context = await browser.new_context(offline=True)
     page = await context.new_page()
     with pytest.raises(Error) as exc_info:
@@ -667,11 +732,14 @@ async def test_offline_should_work_with_initial_option(browser, server):
     assert exc_info.value
     await context.set_offline(False)
     response = await page.goto(server.EMPTY_PAGE)
+    assert response
     assert response.status == 200
     await context.close()
 
 
-async def test_offline_should_emulate_navigator_online(context, server):
+async def test_offline_should_emulate_navigator_online(
+    context: BrowserContext, server: Server
+) -> None:
     page = await context.new_page()
     assert await page.evaluate("window.navigator.onLine")
     await context.set_offline(True)
@@ -680,7 +748,9 @@ async def test_offline_should_emulate_navigator_online(context, server):
     assert await page.evaluate("window.navigator.onLine")
 
 
-async def test_page_event_should_have_url(context, server):
+async def test_page_event_should_have_url(
+    context: BrowserContext, server: Server
+) -> None:
     page = await context.new_page()
     async with context.expect_page() as other_page_info:
         await page.evaluate("url => window.open(url)", server.EMPTY_PAGE)
@@ -688,7 +758,9 @@ async def test_page_event_should_have_url(context, server):
     assert other_page.url == server.EMPTY_PAGE
 
 
-async def test_page_event_should_have_url_after_domcontentloaded(context, server):
+async def test_page_event_should_have_url_after_domcontentloaded(
+    context: BrowserContext, server: Server
+) -> None:
     page = await context.new_page()
     async with context.expect_page() as other_page_info:
         await page.evaluate("url => window.open(url)", server.EMPTY_PAGE)
@@ -698,8 +770,8 @@ async def test_page_event_should_have_url_after_domcontentloaded(context, server
 
 
 async def test_page_event_should_have_about_blank_url_with_domcontentloaded(
-    context, server
-):
+    context: BrowserContext, server: Server
+) -> None:
     page = await context.new_page()
     async with context.expect_page() as other_page_info:
         await page.evaluate("url => window.open(url)", "about:blank")
@@ -709,8 +781,8 @@ async def test_page_event_should_have_about_blank_url_with_domcontentloaded(
 
 
 async def test_page_event_should_have_about_blank_for_empty_url_with_domcontentloaded(
-    context, server
-):
+    context: BrowserContext, server: Server
+) -> None:
     page = await context.new_page()
     async with context.expect_page() as other_page_info:
         await page.evaluate("window.open()")
@@ -720,8 +792,8 @@ async def test_page_event_should_have_about_blank_for_empty_url_with_domcontentl
 
 
 async def test_page_event_should_report_when_a_new_page_is_created_and_closed(
-    context, server
-):
+    context: BrowserContext, server: Server
+) -> None:
     page = await context.new_page()
     async with context.expect_page() as page_info:
         await page.evaluate(
@@ -739,7 +811,7 @@ async def test_page_event_should_report_when_a_new_page_is_created_and_closed(
     assert other_page in all_pages
 
     close_event_received = []
-    other_page.once("close", lambda: close_event_received.append(True))
+    other_page.once("close", lambda _: close_event_received.append(True))
     await other_page.close()
     assert close_event_received == [True]
 
@@ -748,7 +820,9 @@ async def test_page_event_should_report_when_a_new_page_is_created_and_closed(
     assert other_page not in all_pages
 
 
-async def test_page_event_should_report_initialized_pages(context, server):
+async def test_page_event_should_report_initialized_pages(
+    context: BrowserContext, server: Server
+) -> None:
     async with context.expect_page() as page_info:
         await context.new_page()
     new_page = await page_info.value
@@ -760,7 +834,9 @@ async def test_page_event_should_report_initialized_pages(context, server):
     assert popup.url == "about:blank"
 
 
-async def test_page_event_should_have_an_opener(context, server):
+async def test_page_event_should_have_an_opener(
+    context: BrowserContext, server: Server
+) -> None:
     page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
     async with context.expect_page() as page_info:
@@ -771,12 +847,14 @@ async def test_page_event_should_have_an_opener(context, server):
     assert await page.opener() is None
 
 
-async def test_page_event_should_fire_page_lifecycle_events(context, server):
-    events = []
+async def test_page_event_should_fire_page_lifecycle_events(
+    context: BrowserContext, server: Server
+) -> None:
+    events: List[str] = []
 
-    def handle_page(page):
+    def handle_page(page: Page) -> None:
         events.append("CREATED: " + page.url)
-        page.on("close", lambda: events.append("DESTROYED: " + page.url))
+        page.on("close", lambda _: events.append("DESTROYED: " + page.url))
 
     context.on("page", handle_page)
 
@@ -787,7 +865,9 @@ async def test_page_event_should_fire_page_lifecycle_events(context, server):
 
 
 @pytest.mark.skip_browser("webkit")
-async def test_page_event_should_work_with_shift_clicking(context, server):
+async def test_page_event_should_work_with_shift_clicking(
+    context: BrowserContext, server: Server
+) -> None:
     # WebKit: Shift+Click does not open a new window.
     page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
@@ -799,7 +879,9 @@ async def test_page_event_should_work_with_shift_clicking(context, server):
 
 
 @pytest.mark.only_browser("chromium")
-async def test_page_event_should_work_with_ctrl_clicking(context, server, is_mac):
+async def test_page_event_should_work_with_ctrl_clicking(
+    context: BrowserContext, server: Server, is_mac: bool
+) -> None:
     # Firefox: reports an opener in this case.
     # WebKit: Ctrl+Click does not open a new tab.
     page = await context.new_page()
@@ -811,7 +893,7 @@ async def test_page_event_should_work_with_ctrl_clicking(context, server, is_mac
     assert await popup.opener() is None
 
 
-async def test_strict_selectors_on_context(browser: Browser, server: Server):
+async def test_strict_selectors_on_context(browser: Browser, server: Server) -> None:
     context = await browser.new_context(strict_selectors=True)
     page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
@@ -829,7 +911,7 @@ async def test_strict_selectors_on_context(browser: Browser, server: Server):
 
 
 @pytest.mark.skip_browser("webkit")  # https://bugs.webkit.org/show_bug.cgi?id=225281
-async def test_should_support_forced_colors(browser: Browser):
+async def test_should_support_forced_colors(browser: Browser) -> None:
     context = await browser.new_context(forced_colors="active")
     page = await context.new_page()
     assert await page.evaluate("matchMedia('(forced-colors: active)').matches")
