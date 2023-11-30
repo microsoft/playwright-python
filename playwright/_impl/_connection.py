@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+import collections.abc
 import contextvars
 import datetime
 import inspect
@@ -455,7 +456,9 @@ class Connection(EventEmitter):
             return payload
         if isinstance(payload, Path):
             return str(payload)
-        if isinstance(payload, list):
+        if isinstance(payload, collections.abc.Sequence) and not isinstance(
+            payload, str
+        ):
             return list(map(self._replace_channels_with_guids, payload))
         if isinstance(payload, Channel):
             return dict(guid=payload._guid)

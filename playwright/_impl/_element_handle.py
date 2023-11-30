@@ -15,7 +15,17 @@
 import base64
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Union,
+    cast,
+)
 
 from playwright._impl._api_structures import FilePayload, FloatRect, Position
 from playwright._impl._connection import ChannelOwner, from_nullable_channel
@@ -103,7 +113,7 @@ class ElementHandle(JSHandle):
 
     async def hover(
         self,
-        modifiers: List[KeyboardModifier] = None,
+        modifiers: Sequence[KeyboardModifier] = None,
         position: Position = None,
         timeout: float = None,
         noWaitAfter: bool = None,
@@ -114,7 +124,7 @@ class ElementHandle(JSHandle):
 
     async def click(
         self,
-        modifiers: List[KeyboardModifier] = None,
+        modifiers: Sequence[KeyboardModifier] = None,
         position: Position = None,
         delay: float = None,
         button: MouseButton = None,
@@ -128,7 +138,7 @@ class ElementHandle(JSHandle):
 
     async def dblclick(
         self,
-        modifiers: List[KeyboardModifier] = None,
+        modifiers: Sequence[KeyboardModifier] = None,
         position: Position = None,
         delay: float = None,
         button: MouseButton = None,
@@ -141,10 +151,10 @@ class ElementHandle(JSHandle):
 
     async def select_option(
         self,
-        value: Union[str, List[str]] = None,
-        index: Union[int, List[int]] = None,
-        label: Union[str, List[str]] = None,
-        element: Union["ElementHandle", List["ElementHandle"]] = None,
+        value: Union[str, Sequence[str]] = None,
+        index: Union[int, Sequence[int]] = None,
+        label: Union[str, Sequence[str]] = None,
+        element: Union["ElementHandle", Sequence["ElementHandle"]] = None,
         timeout: float = None,
         force: bool = None,
         noWaitAfter: bool = None,
@@ -161,7 +171,7 @@ class ElementHandle(JSHandle):
 
     async def tap(
         self,
-        modifiers: List[KeyboardModifier] = None,
+        modifiers: Sequence[KeyboardModifier] = None,
         position: Position = None,
         timeout: float = None,
         force: bool = None,
@@ -187,7 +197,9 @@ class ElementHandle(JSHandle):
 
     async def set_input_files(
         self,
-        files: Union[str, Path, FilePayload, List[Union[str, Path]], List[FilePayload]],
+        files: Union[
+            str, Path, FilePayload, Sequence[Union[str, Path]], Sequence[FilePayload]
+        ],
         timeout: float = None,
         noWaitAfter: bool = None,
     ) -> None:
@@ -284,7 +296,7 @@ class ElementHandle(JSHandle):
         animations: Literal["allow", "disabled"] = None,
         caret: Literal["hide", "initial"] = None,
         scale: Literal["css", "device"] = None,
-        mask: List["Locator"] = None,
+        mask: Sequence["Locator"] = None,
         mask_color: str = None,
     ) -> bytes:
         params = locals_to_params(locals())
@@ -378,10 +390,10 @@ class ElementHandle(JSHandle):
 
 
 def convert_select_option_values(
-    value: Union[str, List[str]] = None,
-    index: Union[int, List[int]] = None,
-    label: Union[str, List[str]] = None,
-    element: Union["ElementHandle", List["ElementHandle"]] = None,
+    value: Union[str, Sequence[str]] = None,
+    index: Union[int, Sequence[int]] = None,
+    label: Union[str, Sequence[str]] = None,
+    element: Union["ElementHandle", Sequence["ElementHandle"]] = None,
 ) -> Any:
     if value is None and index is None and label is None and element is None:
         return {}
@@ -389,19 +401,19 @@ def convert_select_option_values(
     options: Any = None
     elements: Any = None
     if value:
-        if not isinstance(value, list):
+        if isinstance(value, str):
             value = [value]
         options = (options or []) + list(map(lambda e: dict(valueOrLabel=e), value))
     if index:
-        if not isinstance(index, list):
+        if isinstance(index, int):
             index = [index]
         options = (options or []) + list(map(lambda e: dict(index=e), index))
     if label:
-        if not isinstance(label, list):
+        if isinstance(label, str):
             label = [label]
         options = (options or []) + list(map(lambda e: dict(label=e), label))
     if element:
-        if not isinstance(element, list):
+        if isinstance(element, ElementHandle):
             element = [element]
         elements = list(map(lambda e: e._channel, element))
 

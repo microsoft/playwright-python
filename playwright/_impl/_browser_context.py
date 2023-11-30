@@ -25,6 +25,7 @@ from typing import (
     List,
     Optional,
     Pattern,
+    Sequence,
     Set,
     Union,
     cast,
@@ -284,21 +285,21 @@ class BrowserContext(ChannelOwner):
             raise Error("Please use browser.new_context()")
         return from_channel(await self._channel.send("newPage"))
 
-    async def cookies(self, urls: Union[str, List[str]] = None) -> List[Cookie]:
+    async def cookies(self, urls: Union[str, Sequence[str]] = None) -> List[Cookie]:
         if urls is None:
             urls = []
-        if not isinstance(urls, list):
+        if isinstance(urls, str):
             urls = [urls]
         return await self._channel.send("cookies", dict(urls=urls))
 
-    async def add_cookies(self, cookies: List[SetCookieParam]) -> None:
+    async def add_cookies(self, cookies: Sequence[SetCookieParam]) -> None:
         await self._channel.send("addCookies", dict(cookies=cookies))
 
     async def clear_cookies(self) -> None:
         await self._channel.send("clearCookies")
 
     async def grant_permissions(
-        self, permissions: List[str], origin: str = None
+        self, permissions: Sequence[str], origin: str = None
     ) -> None:
         await self._channel.send("grantPermissions", locals_to_params(locals()))
 

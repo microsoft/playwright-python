@@ -35,7 +35,7 @@ profile = "black"
 
 [tool.pyright]
 include = ["playwright", "tests/sync"]
-ignore = ["tests/async/", "scripts/", "examples/"]
+ignore = ["tests/async/", "scripts/"]
 pythonVersion = "3.8"
 reportMissingImports = false
 reportTypedDictNotRequiredAccess = false

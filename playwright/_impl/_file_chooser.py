@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, Sequence, Union
 
 from playwright._impl._api_structures import FilePayload
 
@@ -48,7 +48,9 @@ class FileChooser:
 
     async def set_files(
         self,
-        files: Union[str, Path, FilePayload, List[Union[str, Path]], List[FilePayload]],
+        files: Union[
+            str, Path, FilePayload, Sequence[Union[str, Path]], Sequence[FilePayload]
+        ],
         timeout: float = None,
         noWaitAfter: bool = None,
     ) -> None:
