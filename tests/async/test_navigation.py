@@ -29,7 +29,7 @@ from playwright.async_api import (
     Route,
     TimeoutError,
 )
-from tests.server import HttpRequestWithPostBody, Server
+from tests.server import Server, TestServerRequest
 
 
 async def test_goto_should_work(page: Page, server: Server) -> None:
@@ -155,7 +155,7 @@ async def test_goto_should_return_response_when_page_changes_its_url_after_load(
 async def test_goto_should_work_with_subframes_return_204(
     page: Page, server: Server
 ) -> None:
-    def handle(request: HttpRequestWithPostBody) -> None:
+    def handle(request: TestServerRequest) -> None:
         request.setResponseCode(204)
         request.finish()
 
@@ -168,7 +168,7 @@ async def test_goto_should_fail_when_server_returns_204(
     page: Page, server: Server, is_chromium: bool, is_webkit: bool
 ) -> None:
     # WebKit just loads an empty page.
-    def handle(request: HttpRequestWithPostBody) -> None:
+    def handle(request: TestServerRequest) -> None:
         request.setResponseCode(204)
         request.finish()
 
@@ -897,7 +897,7 @@ async def test_wait_for_load_state_in_popup(
     await page.goto(server.EMPTY_PAGE)
     css_requests = []
 
-    def handle_request(request: HttpRequestWithPostBody) -> None:
+    def handle_request(request: TestServerRequest) -> None:
         css_requests.append(request)
         request.write(b"body {}")
         request.finish()
@@ -1080,7 +1080,7 @@ async def test_reload_should_work_with_data_url(page: Page, server: Server) -> N
 
 
 async def test_should_work_with__blank_target(page: Page, server: Server) -> None:
-    def handler(request: HttpRequestWithPostBody) -> None:
+    def handler(request: TestServerRequest) -> None:
         request.write(
             f'<a href="{server.EMPTY_PAGE}" target="_blank">Click me</a>'.encode()
         )
@@ -1095,7 +1095,7 @@ async def test_should_work_with__blank_target(page: Page, server: Server) -> Non
 async def test_should_work_with_cross_process__blank_target(
     page: Page, server: Server
 ) -> None:
-    def handler(request: HttpRequestWithPostBody) -> None:
+    def handler(request: TestServerRequest) -> None:
         request.write(
             f'<a href="{server.CROSS_PROCESS_PREFIX}/empty.html" target="_blank">Click me</a>'.encode()
         )

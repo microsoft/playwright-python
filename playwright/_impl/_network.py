@@ -167,7 +167,7 @@ class Request(ChannelOwner):
         data = self._fallback_overrides.post_data_buffer
         if not data:
             return None
-        return data.decode() if isinstance(data, bytes) else data
+        return data.decode()
 
     @property
     def post_data_json(self) -> Optional[Any]:
