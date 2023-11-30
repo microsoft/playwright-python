@@ -19,7 +19,7 @@ from typing import Callable, List
 import pytest
 
 from playwright.async_api import Browser, BrowserContext, Error, Page
-from tests.server import HttpRequestWithPostBody, Server
+from tests.server import Server, TestServerRequest
 from tests.utils import must
 
 
@@ -49,7 +49,7 @@ async def test_should_roundtrip_cookie(
     cookies = await context.cookies()
     await context.clear_cookies()
     assert await context.cookies() == []
-    await context.add_cookies(cookies)
+    await context.add_cookies(cookies)  # type: ignore
     assert await context.cookies() == cookies
 
 
@@ -58,7 +58,7 @@ async def test_should_send_cookie_header(
 ) -> None:
     cookie: List[str] = []
 
-    def handler(request: HttpRequestWithPostBody) -> None:
+    def handler(request: TestServerRequest) -> None:
         cookie.extend(must(request.requestHeaders.getRawHeaders("cookie")))
         request.finish()
 
@@ -154,7 +154,7 @@ async def test_should_isolate_send_cookie_header(
 ) -> None:
     cookie: List[str] = []
 
-    def handler(request: HttpRequestWithPostBody) -> None:
+    def handler(request: TestServerRequest) -> None:
         cookie.extend(request.requestHeaders.getRawHeaders("cookie") or [])
         request.finish()
 

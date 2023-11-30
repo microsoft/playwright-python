@@ -28,7 +28,7 @@ from playwright.async_api import (
     Route,
     TimeoutError,
 )
-from tests.server import HttpRequestWithPostBody, Server
+from tests.server import Server, TestServerRequest
 from tests.utils import TARGET_CLOSED_ERROR_MESSAGE, must
 
 
@@ -151,7 +151,7 @@ async def test_load_should_fire_when_expected(page: Page) -> None:
 async def test_should_work_with_wait_for_loadstate(page: Page, server: Server) -> None:
     messages = []
 
-    def _handler(request: HttpRequestWithPostBody) -> None:
+    def _handler(request: TestServerRequest) -> None:
         messages.append("route")
         request.setHeader("Content-Type", "text/html")
         request.write(b"<link rel='stylesheet' href='./one-style.css'>")

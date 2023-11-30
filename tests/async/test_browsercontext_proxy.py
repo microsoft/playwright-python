@@ -20,7 +20,7 @@ import pytest
 from flaky import flaky
 
 from playwright.async_api import Browser, BrowserContext
-from tests.server import HttpRequestWithPostBody, Server
+from tests.server import Server, TestServerRequest
 
 
 @pytest.fixture(scope="session")
@@ -89,7 +89,7 @@ async def test_should_work_with_ip_port_notion(
 async def test_should_authenticate(
     context_factory: "Callable[..., Awaitable[BrowserContext]]", server: Server
 ) -> None:
-    def handler(req: HttpRequestWithPostBody) -> None:
+    def handler(req: TestServerRequest) -> None:
         auth = req.getHeader("proxy-authorization")
         if not auth:
             req.setHeader(
@@ -120,7 +120,7 @@ async def test_should_authenticate(
 async def test_should_authenticate_with_empty_password(
     context_factory: "Callable[..., Awaitable[BrowserContext]]", server: Server
 ) -> None:
-    def handler(req: HttpRequestWithPostBody) -> None:
+    def handler(req: TestServerRequest) -> None:
         auth = req.getHeader("proxy-authorization")
         if not auth:
             req.setHeader(

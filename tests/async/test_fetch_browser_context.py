@@ -14,7 +14,7 @@
 
 import asyncio
 import json
-from typing import Any
+from typing import Any, cast
 from urllib.parse import parse_qs
 
 import pytest
@@ -220,7 +220,9 @@ async def test_should_support_multipart_form_data(
         ),
     )
     assert request.method == b"POST"
-    assert must(request.getHeader("Content-Type")).startswith("multipart/form-data; ")
+    assert cast(str, request.getHeader("Content-Type")).startswith(
+        "multipart/form-data; "
+    )
     assert must(request.getHeader("Content-Length")) == str(
         len(must(request.post_body))
     )

@@ -20,7 +20,7 @@ from typing import Callable, Generator
 import pytest
 
 from playwright.async_api import Browser, Download, Error, Page
-from tests.server import HttpRequestWithPostBody, Server
+from tests.server import Server, TestServerRequest
 from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
 
 
@@ -31,13 +31,13 @@ def assert_file_content(path: Path, content: str) -> None:
 
 @pytest.fixture(autouse=True)
 def after_each_hook(server: Server) -> Generator[None, None, None]:
-    def handle_download(request: HttpRequestWithPostBody) -> None:
+    def handle_download(request: TestServerRequest) -> None:
         request.setHeader("Content-Type", "application/octet-stream")
         request.setHeader("Content-Disposition", "attachment")
         request.write(b"Hello world")
         request.finish()
 
-    def handle_download_with_file_name(request: HttpRequestWithPostBody) -> None:
+    def handle_download_with_file_name(request: TestServerRequest) -> None:
         request.setHeader("Content-Type", "application/octet-stream")
         request.setHeader("Content-Disposition", "attachment; filename=file.txt")
         request.write(b"Hello world")
@@ -206,7 +206,7 @@ async def test_should_report_non_navigation_downloads(
     browser: Browser, server: Server
 ) -> None:
     # Mac WebKit embedder does not download in this case, although Safari does.
-    def handle_download(request: HttpRequestWithPostBody) -> None:
+    def handle_download(request: TestServerRequest) -> None:
         request.setHeader("Content-Type", "application/octet-stream")
         request.write(b"Hello world")
         request.finish()
@@ -275,7 +275,7 @@ async def test_should_report_alt_click_downloads(
 ) -> None:
     # Firefox does not download on alt-click by default.
     # Our WebKit embedder does not download on alt-click, although Safari does.
-    def handle_download(request: HttpRequestWithPostBody) -> None:
+    def handle_download(request: TestServerRequest) -> None:
         request.setHeader("Content-Type", "application/octet-stream")
         request.write(b"Hello world")
         request.finish()
@@ -365,7 +365,7 @@ async def test_should_delete_downloads_on_browser_gone(
 
 
 async def test_download_cancel_should_work(browser: Browser, server: Server) -> None:
-    def handle_download(request: HttpRequestWithPostBody) -> None:
+    def handle_download(request: TestServerRequest) -> None:
         request.setHeader("Content-Type", "application/octet-stream")
         request.setHeader("Content-Disposition", "attachment")
         # Chromium requires a large enough payload to trigger the download event soon enough

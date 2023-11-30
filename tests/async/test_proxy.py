@@ -19,7 +19,7 @@ from typing import Callable
 import pytest
 
 from playwright.async_api import Browser, Error
-from tests.server import HttpRequestWithPostBody, Server
+from tests.server import Server, TestServerRequest
 
 
 async def test_should_throw_for_bad_server_value(
@@ -86,7 +86,7 @@ async def test_should_work_with_ip_port_notion(
 async def test_should_authenticate(
     browser_factory: "Callable[..., asyncio.Future[Browser]]", server: Server
 ) -> None:
-    def handler(req: HttpRequestWithPostBody) -> None:
+    def handler(req: TestServerRequest) -> None:
         auth = req.getHeader("proxy-authorization")
         if not auth:
             req.setHeader(
@@ -116,7 +116,7 @@ async def test_should_authenticate(
 async def test_should_authenticate_with_empty_password(
     browser_factory: "Callable[..., asyncio.Future[Browser]]", server: Server
 ) -> None:
-    def handler(req: HttpRequestWithPostBody) -> None:
+    def handler(req: TestServerRequest) -> None:
         auth = req.getHeader("proxy-authorization")
         if not auth:
             req.setHeader(

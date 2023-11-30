@@ -29,7 +29,7 @@ from playwright.async_api import (
     Request,
     Route,
 )
-from tests.server import HttpRequestWithPostBody, Server
+from tests.server import Server, TestServerRequest
 from tests.utils import must
 
 
@@ -412,7 +412,7 @@ async def test_page_route_should_work_with_equal_requests(
     await page.goto(server.EMPTY_PAGE)
     hits = [True]
 
-    def handle_request(request: HttpRequestWithPostBody, hits: List[bool]) -> None:
+    def handle_request(request: TestServerRequest, hits: List[bool]) -> None:
         request.write(str(len(hits) * 11).encode())
         request.finish()
         hits.append(True)
@@ -857,7 +857,7 @@ async def test_request_fulfill_should_not_modify_the_headers_sent_to_the_server(
     # this is just to enable request interception, which disables caching in chromium
     await page.route(server.PREFIX + "/unused", lambda route, req: None)
 
-    def _handler1(response: HttpRequestWithPostBody) -> None:
+    def _handler1(response: TestServerRequest) -> None:
         interceptedRequests.append(response)
         response.setHeader("Access-Control-Allow-Origin", "*")
         response.write(b"done")

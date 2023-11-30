@@ -18,12 +18,12 @@ import os
 import re
 import zipfile
 from pathlib import Path
+from typing import cast
 
 import pytest
 
 from playwright.async_api import Browser, BrowserContext, Error, Page, Route, expect
 from tests.server import Server
-from tests.utils import must
 
 
 async def test_should_work(browser: Browser, server: Server, tmpdir: Path) -> None:
@@ -560,7 +560,7 @@ async def test_should_disambiguate_by_header(
 ) -> None:
     server.set_route(
         "/echo",
-        lambda req: (req.write(must(req.getHeader("baz")).encode()), req.finish()),
+        lambda req: (req.write(cast(str, req.getHeader("baz")).encode()), req.finish()),
     )
     fetch_function = """
         async (bazValue) => {

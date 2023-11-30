@@ -23,7 +23,7 @@ from flaky import flaky
 
 from playwright.async_api import BrowserType, Error, Playwright, Route
 from tests.conftest import RemoteServer
-from tests.server import HttpRequestWithPostBody, Server
+from tests.server import Server, TestServerRequest
 from tests.utils import parse_trace
 
 
@@ -168,7 +168,7 @@ async def test_browser_type_connect_should_reject_navigation_when_browser_closes
 async def test_should_not_allow_getting_the_path(
     browser_type: BrowserType, launch_server: Callable[[], RemoteServer], server: Server
 ) -> None:
-    def handle_download(request: HttpRequestWithPostBody) -> None:
+    def handle_download(request: TestServerRequest) -> None:
         request.setHeader("Content-Type", "application/octet-stream")
         request.setHeader("Content-Disposition", "attachment")
         request.write(b"Hello world")

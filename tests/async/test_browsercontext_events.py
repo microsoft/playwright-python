@@ -20,7 +20,7 @@ import pytest
 from playwright.async_api import Page
 from tests.utils import must
 
-from ..server import HttpRequestWithPostBody, Server
+from ..server import Server, TestServerRequest
 
 
 async def test_console_event_should_work(page: Page) -> None:
@@ -162,7 +162,7 @@ async def test_dialog_event_should_work_in_immdiately_closed_popup(page: Page) -
 async def test_dialog_event_should_work_with_inline_script_tag(
     page: Page, server: Server
 ) -> None:
-    def handle_route(request: HttpRequestWithPostBody) -> None:
+    def handle_route(request: TestServerRequest) -> None:
         request.setHeader("content-type", "text/html")
         request.write(b"""<script>window.result = prompt('hey?')</script>""")
         request.finish()

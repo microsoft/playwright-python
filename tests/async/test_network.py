@@ -23,7 +23,7 @@ from flaky import flaky
 from twisted.web import http
 
 from playwright.async_api import Browser, Error, Page, Request, Response, Route
-from tests.server import HttpRequestWithPostBody, Server
+from tests.server import Server, TestServerRequest
 
 from .utils import Utils
 
@@ -631,7 +631,7 @@ async def test_network_events_request_failed(
     is_mac: bool,
     is_win: bool,
 ) -> None:
-    def handle_request(request: HttpRequestWithPostBody) -> None:
+    def handle_request(request: TestServerRequest) -> None:
         request.setHeader("Content-Type", "text/css")
         request.transport.loseConnection()
 

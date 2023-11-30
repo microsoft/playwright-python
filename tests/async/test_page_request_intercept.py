@@ -18,13 +18,13 @@ from typing import cast
 import pytest
 
 from playwright.async_api import Error, Page, Route, expect
-from tests.server import HttpRequestWithPostBody, Server
+from tests.server import Server, TestServerRequest
 
 
 async def test_should_support_timeout_option_in_route_fetch(
     server: Server, page: Page
 ) -> None:
-    def _handler(request: HttpRequestWithPostBody) -> None:
+    def _handler(request: TestServerRequest) -> None:
         request.responseHeaders.addRawHeader("Content-Length", "4096")
         request.responseHeaders.addRawHeader("Content-Type", "text/html")
         request.write(b"")

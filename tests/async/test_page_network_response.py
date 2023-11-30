@@ -17,7 +17,7 @@ import asyncio
 import pytest
 
 from playwright.async_api import Error, Page
-from tests.server import HttpRequestWithPostBody, Server
+from tests.server import Server, TestServerRequest
 
 
 async def test_should_reject_response_finished_if_page_closes(
@@ -25,7 +25,7 @@ async def test_should_reject_response_finished_if_page_closes(
 ) -> None:
     await page.goto(server.EMPTY_PAGE)
 
-    def handle_get(request: HttpRequestWithPostBody) -> None:
+    def handle_get(request: TestServerRequest) -> None:
         # In Firefox, |fetch| will be hanging until it receives |Content-Type| header
         # from server.
         request.setHeader("Content-Type", "text/plain; charset=utf-8")
@@ -51,7 +51,7 @@ async def test_should_reject_response_finished_if_context_closes(
 ) -> None:
     await page.goto(server.EMPTY_PAGE)
 
-    def handle_get(request: HttpRequestWithPostBody) -> None:
+    def handle_get(request: TestServerRequest) -> None:
         # In Firefox, |fetch| will be hanging until it receives |Content-Type| header
         # from server.
         request.setHeader("Content-Type", "text/plain; charset=utf-8")
