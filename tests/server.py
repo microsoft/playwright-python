@@ -70,6 +70,7 @@ class ExpectResponse(Generic[T]):
 
 
 class TestServerRequest(http.Request):
+    __test__ = False
     channel: "TestServerHTTPChannel"
     post_body: Optional[bytes] = None
 
