@@ -39,6 +39,7 @@ class Cookie(TypedDict, total=False):
     sameSite: Literal["Lax", "None", "Strict"]
 
 
+# TODO: We are waiting for PEP705 so SetCookieParam can be readonly and matches Cookie.
 class SetCookieParam(TypedDict, total=False):
     name: str
     value: str

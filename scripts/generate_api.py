@@ -15,17 +15,7 @@
 import re
 import sys
 from types import FunctionType
-from typing import (  # type: ignore
-    Any,
-    Dict,
-    List,
-    Match,
-    Optional,
-    Union,
-    cast,
-    get_args,
-    get_origin,
-)
+from typing import Any, Dict, List, Match, Optional, Union, cast, get_args, get_origin
 from typing import get_type_hints as typing_get_type_hints
 
 from playwright._impl._accessibility import Accessibility

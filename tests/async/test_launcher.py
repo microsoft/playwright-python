@@ -130,7 +130,7 @@ async def test_browser_launch_should_return_background_pages(
                 f"--disable-extensions-except={extension_path}",
                 f"--load-extension={extension_path}",
             ],
-        },  # type: ignore
+        },
     )
     background_page = None
     if len(context.background_pages):

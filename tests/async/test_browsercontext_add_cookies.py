@@ -49,6 +49,7 @@ async def test_should_roundtrip_cookie(
     cookies = await context.cookies()
     await context.clear_cookies()
     assert await context.cookies() == []
+    # TODO: We are waiting for PEP705 so SetCookieParam can be readonly and matches the Cookie type.
     await context.add_cookies(cookies)  # type: ignore
     assert await context.cookies() == cookies
 
