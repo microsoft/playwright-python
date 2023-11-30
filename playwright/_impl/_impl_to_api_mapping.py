@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import inspect
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Union
 
 from playwright._impl._errors import Error
 from playwright._impl._map import Map
@@ -81,7 +81,7 @@ class ImplToApiMapping:
     def from_impl_nullable(self, obj: Any = None) -> Optional[Any]:
         return self.from_impl(obj) if obj else None
 
-    def from_impl_list(self, items: List[Any]) -> List[Any]:
+    def from_impl_list(self, items: Sequence[Any]) -> List[Any]:
         return list(map(lambda a: self.from_impl(a), items))
 
     def from_impl_dict(self, map: Dict[str, Any]) -> Dict[str, Any]:

@@ -194,7 +194,8 @@ async def test_should_delete_header_with_undefined_value(
 
     async def delete_foo_header(route: Route, request: Request) -> None:
         headers = await request.all_headers()
-        await route.fallback(headers={**headers, "foo": None})
+        del headers["foo"]
+        await route.fallback(headers=headers)
 
     await page.route(server.PREFIX + "/something", delete_foo_header)
 

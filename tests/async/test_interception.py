@@ -16,7 +16,7 @@ import asyncio
 import json
 import re
 from pathlib import Path
-from typing import Callable, List
+from typing import Callable, List, Optional
 
 import pytest
 
@@ -344,7 +344,7 @@ async def test_page_route_should_not_work_with_redirects(
     assert "/non-existing-page.html" in intercepted[0].url
 
     chain = []
-    r = response.request
+    r: Optional[Request] = response.request
     while r:
         chain.append(r)
         assert r.is_navigation_request()
@@ -392,7 +392,7 @@ async def test_page_route_should_work_with_redirects_for_subresources(
     assert intercepted[0].resource_type == "document"
     assert "one-style.html" in intercepted[0].url
 
-    r = intercepted[1]
+    r: Optional[Request] = intercepted[1]
     for url in [
         "/one-style.css",
         "/two-style.css",

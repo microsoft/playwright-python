@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import collections.abc
 import math
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
@@ -140,7 +141,7 @@ def serialize_value(
     if value in visitor_info.visited:
         return dict(ref=visitor_info.visited[value])
 
-    if isinstance(value, list):
+    if isinstance(value, collections.abc.Sequence) and not isinstance(value, str):
         id = visitor_info.visit(value)
         a = []
         for e in value:

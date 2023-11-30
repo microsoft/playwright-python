@@ -25,6 +25,7 @@ from typing import (
     List,
     Optional,
     Pattern,
+    Sequence,
     Tuple,
     TypeVar,
     Union,
@@ -144,7 +145,7 @@ class Locator:
 
     async def click(
         self,
-        modifiers: List[KeyboardModifier] = None,
+        modifiers: Sequence[KeyboardModifier] = None,
         position: Position = None,
         delay: float = None,
         button: MouseButton = None,
@@ -159,7 +160,7 @@ class Locator:
 
     async def dblclick(
         self,
-        modifiers: List[KeyboardModifier] = None,
+        modifiers: Sequence[KeyboardModifier] = None,
         position: Position = None,
         delay: float = None,
         button: MouseButton = None,
@@ -415,7 +416,7 @@ class Locator:
 
     async def hover(
         self,
-        modifiers: List[KeyboardModifier] = None,
+        modifiers: Sequence[KeyboardModifier] = None,
         position: Position = None,
         timeout: float = None,
         noWaitAfter: bool = None,
@@ -521,7 +522,7 @@ class Locator:
         animations: Literal["allow", "disabled"] = None,
         caret: Literal["hide", "initial"] = None,
         scale: Literal["css", "device"] = None,
-        mask: List["Locator"] = None,
+        mask: Sequence["Locator"] = None,
         mask_color: str = None,
     ) -> bytes:
         params = locals_to_params(locals())
@@ -542,10 +543,10 @@ class Locator:
 
     async def select_option(
         self,
-        value: Union[str, List[str]] = None,
-        index: Union[int, List[int]] = None,
-        label: Union[str, List[str]] = None,
-        element: Union["ElementHandle", List["ElementHandle"]] = None,
+        value: Union[str, Sequence[str]] = None,
+        index: Union[int, Sequence[int]] = None,
+        label: Union[str, Sequence[str]] = None,
+        element: Union["ElementHandle", Sequence["ElementHandle"]] = None,
         timeout: float = None,
         noWaitAfter: bool = None,
         force: bool = None,
@@ -572,8 +573,8 @@ class Locator:
             str,
             pathlib.Path,
             FilePayload,
-            List[Union[str, pathlib.Path]],
-            List[FilePayload],
+            Sequence[Union[str, pathlib.Path]],
+            Sequence[FilePayload],
         ],
         timeout: float = None,
         noWaitAfter: bool = None,
@@ -587,7 +588,7 @@ class Locator:
 
     async def tap(
         self,
-        modifiers: List[KeyboardModifier] = None,
+        modifiers: Sequence[KeyboardModifier] = None,
         position: Position = None,
         timeout: float = None,
         force: bool = None,

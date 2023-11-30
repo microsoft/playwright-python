@@ -148,7 +148,7 @@ def arguments(func: FunctionType, indent: int) -> str:
         elif (
             "typing.Any" in value_str
             or "typing.Dict" in value_str
-            or "typing.List" in value_str
+            or "typing.Sequence" in value_str
             or "Handle" in value_str
         ):
             tokens.append(f"{name}=mapping.to_impl({to_snake_case(name)})")
@@ -191,7 +191,10 @@ def return_value(value: Any) -> List[str]:
         and str(get_args(value)[1]) == "<class 'NoneType'>"
     ):
         return ["mapping.from_impl_nullable(", ")"]
-    if str(get_origin(value)) == "<class 'list'>":
+    if str(get_origin(value)) in [
+        "<class 'list'>",
+        "<class 'collections.abc.Sequence'>",
+    ]:
         return ["mapping.from_impl_list(", ")"]
     if str(get_origin(value)) == "<class 'dict'>":
         return ["mapping.from_impl_dict(", ")"]

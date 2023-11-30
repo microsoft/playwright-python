@@ -15,7 +15,7 @@
 import json
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Sequence, Union, cast
 
 from playwright._impl._api_structures import (
     Geolocation,
@@ -96,7 +96,7 @@ class Browser(ChannelOwner):
         locale: str = None,
         timezoneId: str = None,
         geolocation: Geolocation = None,
-        permissions: List[str] = None,
+        permissions: Sequence[str] = None,
         extraHTTPHeaders: Dict[str, str] = None,
         offline: bool = None,
         httpCredentials: HttpCredentials = None,
@@ -141,7 +141,7 @@ class Browser(ChannelOwner):
         locale: str = None,
         timezoneId: str = None,
         geolocation: Geolocation = None,
-        permissions: List[str] = None,
+        permissions: Sequence[str] = None,
         extraHTTPHeaders: Dict[str, str] = None,
         offline: bool = None,
         httpCredentials: HttpCredentials = None,
@@ -200,7 +200,7 @@ class Browser(ChannelOwner):
         page: Page = None,
         path: Union[str, Path] = None,
         screenshots: bool = None,
-        categories: List[str] = None,
+        categories: Sequence[str] = None,
     ) -> None:
         params = locals_to_params(locals())
         if page:

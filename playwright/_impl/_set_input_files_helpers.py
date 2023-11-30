@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import base64
+import collections.abc
 import os
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Union, cast
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import TypedDict
@@ -41,10 +42,16 @@ class InputFilesList(TypedDict, total=False):
 
 
 async def convert_input_files(
-    files: Union[str, Path, FilePayload, List[Union[str, Path]], List[FilePayload]],
+    files: Union[
+        str, Path, FilePayload, Sequence[Union[str, Path]], Sequence[FilePayload]
+    ],
     context: "BrowserContext",
 ) -> InputFilesList:
-    items = files if isinstance(files, list) else [files]
+    items = (
+        files
+        if isinstance(files, collections.abc.Sequence) and not isinstance(files, str)
+        else [files]
+    )
 
     if any([isinstance(item, (str, Path)) for item in items]):
         if not all([isinstance(item, (str, Path)) for item in items]):
