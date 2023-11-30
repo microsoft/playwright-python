@@ -20,6 +20,7 @@ import pytest
 
 from playwright.sync_api import BrowserContext, Error, FilePayload, Page
 from tests.server import Server
+from tests.utils import must
 
 
 def test_get_should_work(context: BrowserContext, server: Server) -> None:
@@ -150,11 +151,11 @@ def test_should_support_post_data(
                 server.PREFIX + "/simple.json", data=fetch_data
             )
         assert request.value.method.decode() == method.upper()
-        assert request.value.post_body == request_post_data  # type: ignore
+        assert request.value.post_body == request_post_data
         assert response.status == 200
         assert response.url == server.PREFIX + "/simple.json"
         assert request.value.getHeader("Content-Length") == str(
-            len(request.value.post_body)  # type: ignore
+            len(must(request.value.post_body))
         )
 
     support_post_data("My request", "My request".encode())
@@ -182,9 +183,9 @@ def test_should_support_application_x_www_form_urlencoded(
         server_req.value.getHeader("Content-Type")
         == "application/x-www-form-urlencoded"
     )
-    body = server_req.value.post_body.decode()  # type: ignore
+    body = must(server_req.value.post_body).decode()
     assert server_req.value.getHeader("Content-Length") == str(len(body))
-    params: Dict[bytes, List[bytes]] = parse_qs(server_req.value.post_body)  # type: ignore
+    params: Dict[bytes, List[bytes]] = parse_qs(server_req.value.post_body)
     assert params[b"firstName"] == [b"John"]
     assert params[b"lastName"] == [b"Doe"]
     assert params[b"file"] == [b"f.js"]
@@ -212,7 +213,7 @@ def test_should_support_multipart_form_data(
     assert content_type
     assert content_type.startswith("multipart/form-data; ")
     assert server_req.value.getHeader("Content-Length") == str(
-        len(server_req.value.post_body)  # type: ignore
+        len(must(server_req.value.post_body))
     )
     assert server_req.value.args[b"firstName"] == [b"John"]
     assert server_req.value.args[b"lastName"] == [b"Doe"]

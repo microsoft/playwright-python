@@ -90,9 +90,7 @@ def test_assertions_locator_to_contain_text(page: Page, server: Server) -> None:
         expect(page.locator("div#foobar")).to_contain_text("bar", timeout=100)
 
     page.set_content("<div>Text \n1</div><div>Text2</div><div>Text3</div>")
-    expect(page.locator("div")).to_contain_text(
-        ["ext     1", re.compile("ext3")]  # type: ignore
-    )
+    expect(page.locator("div")).to_contain_text(["ext     1", re.compile("ext3")])
 
 
 def test_assertions_locator_to_have_attribute(page: Page, server: Server) -> None:
@@ -244,9 +242,7 @@ def test_assertions_locator_to_have_text(page: Page, server: Server) -> None:
 
     page.set_content("<div>Text    \n1</div><div>Text   2a</div>")
     # Should only normalize whitespace in the first item.
-    expect(page.locator("div")).to_have_text(
-        ["Text  1", re.compile(r"Text   \d+a")]  # type: ignore
-    )
+    expect(page.locator("div")).to_have_text(["Text  1", re.compile(r"Text   \d+a")])
 
 
 @pytest.mark.parametrize(

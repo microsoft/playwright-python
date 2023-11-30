@@ -204,7 +204,8 @@ def test_should_delete_header_with_undefined_value(
 
     def delete_foo_header(route: Route, request: Request) -> None:
         headers = request.all_headers()
-        route.fallback(headers={**headers, "foo": None})  # type: ignore
+        del headers["foo"]
+        route.fallback(headers=headers)
 
     context.route(server.PREFIX + "/something", delete_foo_header)
     with server.expect_request("/something") as server_req_info:
