@@ -15,19 +15,20 @@
 import pytest
 
 from playwright.sync_api import Error, Page, Route
-from tests.server import Server
+from tests.server import Server, TestServerRequest
 
 
 def test_should_support_timeout_option_in_route_fetch(
     server: Server, page: Page
 ) -> None:
+    def _handle(request: TestServerRequest) -> None:
+        request.responseHeaders.addRawHeader("Content-Length", "4096")
+        request.responseHeaders.addRawHeader("Content-Type", "text/html")
+        request.write(b"")
+
     server.set_route(
         "/slow",
-        lambda request: (
-            request.responseHeaders.addRawHeader("Content-Length", "4096"),
-            request.responseHeaders.addRawHeader("Content-Type", "text/html"),
-            request.write(b""),
-        ),
+        _handle,
     )
 
     def handle(route: Route) -> None:

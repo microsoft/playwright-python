@@ -84,3 +84,33 @@ def test_emitted_for_domcontentloaded_and_load(page: Page, server: Server) -> No
             page.goto(server.EMPTY_PAGE)
     assert isinstance(dom_info.value, Page)
     assert isinstance(load_info.value, Page)
+
+
+def test_page_pause_should_reset_default_timeouts(
+    page: Page, headless: bool, server: Server
+) -> None:
+    if not headless:
+        pytest.skip()
+
+    page.goto(server.EMPTY_PAGE)
+    page.pause()
+    with pytest.raises(Error, match="Timeout 30000ms exceeded."):
+        page.get_by_text("foo").click()
+
+
+def test_page_pause_should_reset_custom_timeouts(
+    page: Page, headless: bool, server: Server
+) -> None:
+    if not headless:
+        pytest.skip()
+
+    page.set_default_timeout(123)
+    page.set_default_navigation_timeout(456)
+    page.goto(server.EMPTY_PAGE)
+    page.pause()
+    with pytest.raises(Error, match="Timeout 123ms exceeded."):
+        page.get_by_text("foo").click()
+
+    server.set_route("/empty.html", lambda route: None)
+    with pytest.raises(Error, match="Timeout 456ms exceeded."):
+        page.goto(server.EMPTY_PAGE)

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+from typing import Any, Callable, Coroutine, cast
 
 import pytest
 
@@ -27,27 +28,24 @@ async def test_should_work(page: Page, server: Server) -> None:
 
 async def test_should_fall_back(page: Page, server: Server) -> None:
     intercepted = []
-    await page.route(
-        "**/empty.html",
-        lambda route: (
-            intercepted.append(1),
-            asyncio.create_task(route.fallback()),
-        ),
-    )
-    await page.route(
-        "**/empty.html",
-        lambda route: (
-            intercepted.append(2),
-            asyncio.create_task(route.fallback()),
-        ),
-    )
-    await page.route(
-        "**/empty.html",
-        lambda route: (
-            intercepted.append(3),
-            asyncio.create_task(route.fallback()),
-        ),
-    )
+
+    def _handler1(route: Route) -> None:
+        intercepted.append(1)
+        asyncio.create_task(route.fallback())
+
+    await page.route("**/empty.html", _handler1)
+
+    def _handler2(route: Route) -> None:
+        intercepted.append(2)
+        asyncio.create_task(route.fallback())
+
+    await page.route("**/empty.html", _handler2)
+
+    def _handler3(route: Route) -> None:
+        intercepted.append(3)
+        asyncio.create_task(route.fallback())
+
+    await page.route("**/empty.html", _handler3)
 
     await page.goto(server.EMPTY_PAGE)
     assert intercepted == [3, 2, 1]
@@ -56,8 +54,8 @@ async def test_should_fall_back(page: Page, server: Server) -> None:
 async def test_should_fall_back_async_delayed(page: Page, server: Server) -> None:
     intercepted = []
 
-    def create_handler(i: int):
-        async def handler(route):
+    def create_handler(i: int) -> Callable[[Route], Coroutine]:
+        async def handler(route: Route) -> None:
             intercepted.append(i)
             await asyncio.sleep(0.1)
             await route.fallback()
@@ -84,6 +82,7 @@ async def test_should_chain_once(page: Page, server: Server) -> None:
     )
 
     resp = await page.goto(server.PREFIX + "/madeup.txt")
+    assert resp
     body = await resp.body()
     assert body == b"fulfilled one"
 
@@ -91,7 +90,7 @@ async def test_should_chain_once(page: Page, server: Server) -> None:
 async def test_should_not_chain_fulfill(page: Page, server: Server) -> None:
     failed = [False]
 
-    def handler(route: Route):
+    def handler(route: Route) -> None:
         failed[0] = True
 
     await page.route("**/empty.html", handler)
@@ -104,6 +103,7 @@ async def test_should_not_chain_fulfill(page: Page, server: Server) -> None:
     )
 
     response = await page.goto(server.EMPTY_PAGE)
+    assert response
     body = await response.body()
     assert body == b"fulfilled"
     assert not failed[0]
@@ -114,7 +114,7 @@ async def test_should_not_chain_abort(
 ) -> None:
     failed = [False]
 
-    def handler(route: Route):
+    def handler(route: Route) -> None:
         failed[0] = True
 
     await page.route("**/empty.html", handler)
@@ -137,9 +137,9 @@ async def test_should_not_chain_abort(
 async def test_should_fall_back_after_exception(page: Page, server: Server) -> None:
     await page.route("**/empty.html", lambda route: route.continue_())
 
-    async def handler(route: Route):
+    async def handler(route: Route) -> None:
         try:
-            await route.fulfill(response=47)
+            await route.fulfill(response=cast(Any, {}))
         except Exception:
             await route.fallback()
 
@@ -151,14 +151,14 @@ async def test_should_fall_back_after_exception(page: Page, server: Server) -> N
 async def test_should_amend_http_headers(page: Page, server: Server) -> None:
     values = []
 
-    async def handler(route: Route):
+    async def handler(route: Route) -> None:
         values.append(route.request.headers.get("foo"))
         values.append(await route.request.header_value("FOO"))
         await route.continue_()
 
     await page.route("**/sleep.zzz", handler)
 
-    async def handler_with_header_mods(route: Route):
+    async def handler_with_header_mods(route: Route) -> None:
         await route.fallback(headers={**route.request.headers, "FOO": "bar"})
 
     await page.route("**/*", handler_with_header_mods)
@@ -186,15 +186,16 @@ async def test_should_delete_header_with_undefined_value(
 
     intercepted_request = []
 
-    async def capture_and_continue(route: Route, request: Request):
+    async def capture_and_continue(route: Route, request: Request) -> None:
         intercepted_request.append(request)
         await route.continue_()
 
     await page.route("**/*", capture_and_continue)
 
-    async def delete_foo_header(route: Route, request: Request):
+    async def delete_foo_header(route: Route, request: Request) -> None:
         headers = await request.all_headers()
-        await route.fallback(headers={**headers, "foo": None})
+        del headers["foo"]
+        await route.fallback(headers=headers)
 
     await page.route(server.PREFIX + "/something", delete_foo_header)
 
@@ -227,13 +228,12 @@ async def test_should_amend_method(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
 
     method = []
-    await page.route(
-        "**/*",
-        lambda route: (
-            method.append(route.request.method),
-            asyncio.create_task(route.continue_()),
-        ),
-    )
+
+    def _handler(route: Route) -> None:
+        method.append(route.request.method)
+        asyncio.create_task(route.continue_())
+
+    await page.route("**/*", _handler)
     await page.route(
         "**/*", lambda route: asyncio.create_task(route.fallback(method="POST"))
     )
@@ -249,19 +249,17 @@ async def test_should_amend_method(page: Page, server: Server) -> None:
 
 async def test_should_override_request_url(page: Page, server: Server) -> None:
     url = []
-    await page.route(
-        "**/global-var.html",
-        lambda route: (
-            url.append(route.request.url),
-            asyncio.create_task(route.continue_()),
-        ),
-    )
-    await page.route(
-        "**/foo",
-        lambda route: asyncio.create_task(
-            route.fallback(url=server.PREFIX + "/global-var.html")
-        ),
-    )
+
+    def _handler1(route: Route) -> None:
+        url.append(route.request.url)
+        asyncio.create_task(route.continue_())
+
+    await page.route("**/global-var.html", _handler1)
+
+    def _handler2(route: Route) -> None:
+        asyncio.create_task(route.fallback(url=server.PREFIX + "/global-var.html"))
+
+    await page.route("**/foo", _handler2)
 
     [server_request, response, _] = await asyncio.gather(
         server.wait_for_request("/global-var.html"),
@@ -280,13 +278,12 @@ async def test_should_override_request_url(page: Page, server: Server) -> None:
 async def test_should_amend_post_data(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     post_data = []
-    await page.route(
-        "**/*",
-        lambda route: (
-            post_data.append(route.request.post_data),
-            asyncio.create_task(route.continue_()),
-        ),
-    )
+
+    def _handler(route: Route) -> None:
+        post_data.append(route.request.post_data)
+        asyncio.create_task(route.continue_())
+
+    await page.route("**/*", _handler)
     await page.route(
         "**/*", lambda route: asyncio.create_task(route.fallback(post_data="doggo"))
     )
@@ -298,22 +295,20 @@ async def test_should_amend_post_data(page: Page, server: Server) -> None:
     assert server_request.post_body == b"doggo"
 
 
-async def test_should_amend_binary_post_data(page, server):
+async def test_should_amend_binary_post_data(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     post_data_buffer = []
-    await page.route(
-        "**/*",
-        lambda route: (
-            post_data_buffer.append(route.request.post_data),
-            asyncio.create_task(route.continue_()),
-        ),
-    )
-    await page.route(
-        "**/*",
-        lambda route: asyncio.create_task(
-            route.fallback(post_data=b"\x00\x01\x02\x03\x04")
-        ),
-    )
+
+    def _handler1(route: Route) -> None:
+        post_data_buffer.append(route.request.post_data)
+        asyncio.create_task(route.continue_())
+
+    await page.route("**/*", _handler1)
+
+    async def _handler2(route: Route) -> None:
+        await route.fallback(post_data=b"\x00\x01\x02\x03\x04")
+
+    await page.route("**/*", _handler2)
 
     [server_request, result] = await asyncio.gather(
         server.wait_for_request("/sleep.zzz"),
@@ -329,42 +324,38 @@ async def test_should_chain_fallback_with_dynamic_url(
     server: Server, page: Page
 ) -> None:
     intercepted = []
-    await page.route(
-        "**/bar",
-        lambda route: (
-            intercepted.append(1),
-            asyncio.create_task(route.fallback(url=server.EMPTY_PAGE)),
-        ),
-    )
-    await page.route(
-        "**/foo",
-        lambda route: (
-            intercepted.append(2),
-            asyncio.create_task(route.fallback(url="http://localhost/bar")),
-        ),
-    )
-    await page.route(
-        "**/empty.html",
-        lambda route: (
-            intercepted.append(3),
-            asyncio.create_task(route.fallback(url="http://localhost/foo")),
-        ),
-    )
+
+    def _handler1(route: Route) -> None:
+        intercepted.append(1)
+        asyncio.create_task(route.fallback(url=server.EMPTY_PAGE))
+
+    await page.route("**/bar", _handler1)
+
+    def _handler2(route: Route, request: Request) -> None:
+        intercepted.append(2)
+        asyncio.create_task(route.fallback(url="http://localhost/bar"))
+
+    await page.route("**/foo", _handler2)
+
+    def _handler3(route: Route, request: Request) -> None:
+        intercepted.append(3)
+        asyncio.create_task(route.fallback(url="http://localhost/foo"))
+
+    await page.route("**/empty.html", _handler3)
 
     await page.goto(server.EMPTY_PAGE)
     assert intercepted == [3, 2, 1]
 
 
-async def test_should_amend_json_post_data(server, page):
+async def test_should_amend_json_post_data(server: Server, page: Page) -> None:
     await page.goto(server.EMPTY_PAGE)
     post_data = []
-    await page.route(
-        "**/*",
-        lambda route: (
-            post_data.append(route.request.post_data),
-            asyncio.create_task(route.continue_()),
-        ),
-    )
+
+    def _handle1(route: Route, request: Request) -> None:
+        post_data.append(route.request.post_data)
+        asyncio.create_task(route.continue_())
+
+    await page.route("**/*", _handle1)
     await page.route(
         "**/*",
         lambda route: asyncio.create_task(route.fallback(post_data={"foo": "bar"})),

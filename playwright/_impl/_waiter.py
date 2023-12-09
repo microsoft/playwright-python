@@ -16,15 +16,15 @@ import asyncio
 import math
 import uuid
 from asyncio.tasks import Task
-from typing import Any, Callable, List, Tuple
+from typing import Any, Callable, List, Tuple, Union
 
 from pyee import EventEmitter
 
-from playwright._impl._api_types import Error, TimeoutError
 from playwright._impl._connection import ChannelOwner
+from playwright._impl._errors import Error, TimeoutError
 
 
-class WaitHelper:
+class Waiter:
     def __init__(self, channel_owner: ChannelOwner, event: str) -> None:
         self._result: asyncio.Future = asyncio.Future()
         self._wait_id = uuid.uuid4().hex
@@ -66,12 +66,12 @@ class WaitHelper:
         self,
         emitter: EventEmitter,
         event: str,
-        error: Error,
+        error: Union[Error, Callable[..., Error]],
         predicate: Callable = None,
     ) -> None:
         def listener(event_data: Any = None) -> None:
             if not predicate or predicate(event_data):
-                self._reject(error)
+                self._reject(error() if callable(error) else error)
 
         emitter.on(event, listener)
         self._registered_listeners.append((emitter, event, listener))

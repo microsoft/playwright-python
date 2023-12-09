@@ -16,11 +16,7 @@ import pathlib
 from typing import Dict, Optional, Union, cast
 
 from playwright._impl._artifact import Artifact
-from playwright._impl._connection import (
-    ChannelOwner,
-    filter_none,
-    from_nullable_channel,
-)
+from playwright._impl._connection import ChannelOwner, from_nullable_channel
 from playwright._impl._helper import locals_to_params
 
 
@@ -48,7 +44,7 @@ class Tracing(ChannelOwner):
         async def _inner_start() -> str:
             await self._channel.send("tracingStart", params)
             return await self._channel.send(
-                "tracingStartChunk", filter_none({"title": title, "name": name})
+                "tracingStartChunk", {"title": title, "name": name}
             )
 
         trace_name = await self._connection.wrap_api_call(_inner_start, True)

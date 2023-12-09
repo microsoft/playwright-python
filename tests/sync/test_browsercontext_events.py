@@ -18,7 +18,7 @@ import pytest
 
 from playwright.sync_api import Dialog, Page
 
-from ..server import HttpRequestWithPostBody, Server
+from ..server import Server, TestServerRequest
 
 
 def test_console_event_should_work(page: Page) -> None:
@@ -170,7 +170,7 @@ def test_dialog_event_should_work_in_immdiately_closed_popup(page: Page) -> None
 def test_dialog_event_should_work_with_inline_script_tag(
     page: Page, server: Server
 ) -> None:
-    def handle_route(request: HttpRequestWithPostBody) -> None:
+    def handle_route(request: TestServerRequest) -> None:
         request.setHeader("content-type", "text/html")
         request.write(b"""<script>window.result = prompt('hey?')</script>""")
         request.finish()

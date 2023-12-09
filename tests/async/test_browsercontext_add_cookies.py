@@ -14,13 +14,16 @@
 
 import asyncio
 import datetime
+from typing import Callable, List
 
 import pytest
 
-from playwright.async_api import Error
+from playwright.async_api import Browser, BrowserContext, Error, Page
+from tests.server import Server, TestServerRequest
+from tests.utils import must
 
 
-async def test_should_work(context, page, server):
+async def test_should_work(context: BrowserContext, page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await context.add_cookies(
         [{"url": server.EMPTY_PAGE, "name": "password", "value": "123456"}]
@@ -28,7 +31,9 @@ async def test_should_work(context, page, server):
     assert await page.evaluate("() => document.cookie") == "password=123456"
 
 
-async def test_should_roundtrip_cookie(context, page, server):
+async def test_should_roundtrip_cookie(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     # @see https://en.wikipedia.org/wiki/Year_2038_problem
     date = int(datetime.datetime(2038, 1, 1).timestamp() * 1000)
@@ -44,15 +49,18 @@ async def test_should_roundtrip_cookie(context, page, server):
     cookies = await context.cookies()
     await context.clear_cookies()
     assert await context.cookies() == []
-    await context.add_cookies(cookies)
+    # TODO: We are waiting for PEP705 so SetCookieParam can be readonly and matches the Cookie type.
+    await context.add_cookies(cookies)  # type: ignore
     assert await context.cookies() == cookies
 
 
-async def test_should_send_cookie_header(server, context):
-    cookie = []
+async def test_should_send_cookie_header(
+    server: Server, context: BrowserContext
+) -> None:
+    cookie: List[str] = []
 
-    def handler(request):
-        cookie.extend(request.requestHeaders.getRawHeaders("cookie"))
+    def handler(request: TestServerRequest) -> None:
+        cookie.extend(must(request.requestHeaders.getRawHeaders("cookie")))
         request.finish()
 
     server.set_route("/empty.html", handler)
@@ -64,7 +72,9 @@ async def test_should_send_cookie_header(server, context):
     assert cookie == ["cookie=value"]
 
 
-async def test_should_isolate_cookies_in_browser_contexts(context, server, browser):
+async def test_should_isolate_cookies_in_browser_contexts(
+    context: BrowserContext, server: Server, browser: Browser
+) -> None:
     another_context = await browser.new_context()
     await context.add_cookies(
         [{"url": server.EMPTY_PAGE, "name": "isolatecookie", "value": "page1value"}]
@@ -84,7 +94,9 @@ async def test_should_isolate_cookies_in_browser_contexts(context, server, brows
     await another_context.close()
 
 
-async def test_should_isolate_session_cookies(context, server, browser):
+async def test_should_isolate_session_cookies(
+    context: BrowserContext, server: Server, browser: Browser
+) -> None:
     server.set_route(
         "/setcookie.html",
         lambda r: (
@@ -110,7 +122,9 @@ async def test_should_isolate_session_cookies(context, server, browser):
     await context_b.close()
 
 
-async def test_should_isolate_persistent_cookies(context, server, browser):
+async def test_should_isolate_persistent_cookies(
+    context: BrowserContext, server: Server, browser: Browser
+) -> None:
     server.set_route(
         "/setcookie.html",
         lambda r: (
@@ -136,10 +150,12 @@ async def test_should_isolate_persistent_cookies(context, server, browser):
     await context_2.close()
 
 
-async def test_should_isolate_send_cookie_header(server, context, browser):
-    cookie = []
+async def test_should_isolate_send_cookie_header(
+    server: Server, context: BrowserContext, browser: Browser
+) -> None:
+    cookie: List[str] = []
 
-    def handler(request):
+    def handler(request: TestServerRequest) -> None:
         cookie.extend(request.requestHeaders.getRawHeaders("cookie") or [])
         request.finish()
 
@@ -161,7 +177,9 @@ async def test_should_isolate_send_cookie_header(server, context, browser):
     await context_2.close()
 
 
-async def test_should_isolate_cookies_between_launches(browser_factory, server):
+async def test_should_isolate_cookies_between_launches(
+    browser_factory: Callable[..., "asyncio.Future[Browser]"], server: Server
+) -> None:
     browser_1 = await browser_factory()
     context_1 = await browser_1.new_context()
     await context_1.add_cookies(
@@ -183,7 +201,9 @@ async def test_should_isolate_cookies_between_launches(browser_factory, server):
     await browser_2.close()
 
 
-async def test_should_set_multiple_cookies(context, page, server):
+async def test_should_set_multiple_cookies(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     await context.add_cookies(
         [
@@ -202,7 +222,9 @@ async def test_should_set_multiple_cookies(context, page, server):
     )
 
 
-async def test_should_have_expires_set_to_neg_1_for_session_cookies(context, server):
+async def test_should_have_expires_set_to_neg_1_for_session_cookies(
+    context: BrowserContext, server: Server
+) -> None:
     await context.add_cookies(
         [{"url": server.EMPTY_PAGE, "name": "expires", "value": "123456"}]
     )
@@ -210,7 +232,9 @@ async def test_should_have_expires_set_to_neg_1_for_session_cookies(context, ser
     assert cookies[0]["expires"] == -1
 
 
-async def test_should_set_cookie_with_reasonable_defaults(context, server, is_chromium):
+async def test_should_set_cookie_with_reasonable_defaults(
+    context: BrowserContext, server: Server, is_chromium: bool
+) -> None:
     await context.add_cookies(
         [{"url": server.EMPTY_PAGE, "name": "defaults", "value": "123456"}]
     )
@@ -230,7 +254,9 @@ async def test_should_set_cookie_with_reasonable_defaults(context, server, is_ch
     ]
 
 
-async def test_should_set_a_cookie_with_a_path(context, page, server, is_chromium):
+async def test_should_set_a_cookie_with_a_path(
+    context: BrowserContext, page: Page, server: Server, is_chromium: bool
+) -> None:
     await page.goto(server.PREFIX + "/grid.html")
     await context.add_cookies(
         [
@@ -261,7 +287,9 @@ async def test_should_set_a_cookie_with_a_path(context, page, server, is_chromiu
     assert await page.evaluate("document.cookie") == "gridcookie=GRID"
 
 
-async def test_should_not_set_a_cookie_with_blank_page_url(context, server):
+async def test_should_not_set_a_cookie_with_blank_page_url(
+    context: BrowserContext, server: Server
+) -> None:
     with pytest.raises(Error) as exc_info:
         await context.add_cookies(
             [
@@ -275,7 +303,9 @@ async def test_should_not_set_a_cookie_with_blank_page_url(context, server):
     )
 
 
-async def test_should_not_set_a_cookie_on_a_data_url_page(context):
+async def test_should_not_set_a_cookie_on_a_data_url_page(
+    context: BrowserContext,
+) -> None:
     with pytest.raises(Error) as exc_info:
         await context.add_cookies(
             [
@@ -292,8 +322,8 @@ async def test_should_not_set_a_cookie_on_a_data_url_page(context):
 
 
 async def test_should_default_to_setting_secure_cookie_for_https_websites(
-    context, page, server
-):
+    context: BrowserContext, page: Page, server: Server
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     SECURE_URL = "https://example.com"
     await context.add_cookies([{"url": SECURE_URL, "name": "foo", "value": "bar"}])
@@ -302,8 +332,8 @@ async def test_should_default_to_setting_secure_cookie_for_https_websites(
 
 
 async def test_should_be_able_to_set_unsecure_cookie_for_http_website(
-    context, page, server
-):
+    context: BrowserContext, page: Page, server: Server
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     HTTP_URL = "http://example.com"
     await context.add_cookies([{"url": HTTP_URL, "name": "foo", "value": "bar"}])
@@ -312,8 +342,8 @@ async def test_should_be_able_to_set_unsecure_cookie_for_http_website(
 
 
 async def test_should_set_a_cookie_on_a_different_domain(
-    context, page, server, is_chromium
-):
+    context: BrowserContext, page: Page, server: Server, is_chromium: bool
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     await context.add_cookies(
         [{"url": "https://www.example.com", "name": "example-cookie", "value": "best"}]
@@ -333,7 +363,9 @@ async def test_should_set_a_cookie_on_a_different_domain(
     ]
 
 
-async def test_should_set_cookies_for_a_frame(context, page, server):
+async def test_should_set_cookies_for_a_frame(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     await context.add_cookies(
         [{"url": server.PREFIX, "name": "frame-cookie", "value": "value"}]
@@ -355,8 +387,12 @@ async def test_should_set_cookies_for_a_frame(context, page, server):
 
 
 async def test_should_not_block_third_party_cookies(
-    context, page, server, is_chromium, is_firefox
-):
+    context: BrowserContext,
+    page: Page,
+    server: Server,
+    is_chromium: bool,
+    is_firefox: bool,
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.evaluate(
         """src => {

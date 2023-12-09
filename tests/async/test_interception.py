@@ -15,17 +15,28 @@
 import asyncio
 import json
 import re
+from pathlib import Path
+from typing import Callable, List, Optional
 
 import pytest
 
-from playwright.async_api import Browser, BrowserContext, Error, Page, Playwright, Route
-from tests.server import Server
+from playwright.async_api import (
+    Browser,
+    BrowserContext,
+    Error,
+    Page,
+    Playwright,
+    Request,
+    Route,
+)
+from tests.server import Server, TestServerRequest
+from tests.utils import must
 
 
-async def test_page_route_should_intercept(page, server):
+async def test_page_route_should_intercept(page: Page, server: Server) -> None:
     intercepted = []
 
-    async def handle_request(route, request):
+    async def handle_request(route: Route, request: Request) -> None:
         assert route.request == request
         assert "empty.html" in request.url
         assert request.headers["user-agent"]
@@ -41,38 +52,36 @@ async def test_page_route_should_intercept(page, server):
     await page.route("**/empty.html", handle_request)
 
     response = await page.goto(server.EMPTY_PAGE)
+    assert response
     assert response.ok
     assert len(intercepted) == 1
 
 
-async def test_page_route_should_unroute(page: Page, server):
+async def test_page_route_should_unroute(page: Page, server: Server) -> None:
     intercepted = []
 
-    await page.route(
-        "**/*",
-        lambda route: (
-            intercepted.append(1),
-            asyncio.create_task(route.continue_()),
-        ),
-    )
+    def _handle1(route: Route) -> None:
+        intercepted.append(1)
+        asyncio.create_task(route.continue_())
+
+    await page.route("**/*", _handle1)
+
+    def _handle2(route: Route, request: Request) -> None:
+        intercepted.append(2)
+        asyncio.create_task(route.continue_())
+
+    await page.route("**/empty.html", _handle2)
+
+    def _handle3(route: Route, request: Request) -> None:
+        intercepted.append(3)
+        asyncio.create_task(route.continue_())
 
     await page.route(
         "**/empty.html",
-        lambda route: (
-            intercepted.append(2),
-            asyncio.create_task(route.continue_()),
-        ),
+        _handle3,
     )
 
-    await page.route(
-        "**/empty.html",
-        lambda route: (
-            intercepted.append(3),
-            asyncio.create_task(route.continue_()),
-        ),
-    )
-
-    def handler4(route):
+    def handler4(route: Route) -> None:
         intercepted.append(4)
         asyncio.create_task(route.continue_())
 
@@ -92,7 +101,9 @@ async def test_page_route_should_unroute(page: Page, server):
     assert intercepted == [1]
 
 
-async def test_page_route_should_work_when_POST_is_redirected_with_302(page, server):
+async def test_page_route_should_work_when_POST_is_redirected_with_302(
+    page: Page, server: Server
+) -> None:
     server.set_redirect("/rredirect", "/empty.html")
     await page.goto(server.EMPTY_PAGE)
     await page.route("**/*", lambda route: route.continue_())
@@ -109,8 +120,8 @@ async def test_page_route_should_work_when_POST_is_redirected_with_302(page, ser
 
 # @see https://github.com/GoogleChrome/puppeteer/issues/3973
 async def test_page_route_should_work_when_header_manipulation_headers_with_redirect(
-    page, server
-):
+    page: Page, server: Server
+) -> None:
     server.set_redirect("/rrredirect", "/empty.html")
     await page.route(
         "**/*",
@@ -121,8 +132,10 @@ async def test_page_route_should_work_when_header_manipulation_headers_with_redi
 
 
 # @see https://github.com/GoogleChrome/puppeteer/issues/4743
-async def test_page_route_should_be_able_to_remove_headers(page, server):
-    async def handle_request(route):
+async def test_page_route_should_be_able_to_remove_headers(
+    page: Page, server: Server
+) -> None:
+    async def handle_request(route: Route) -> None:
         headers = route.request.headers
         if "origin" in headers:
             del headers["origin"]
@@ -139,14 +152,18 @@ async def test_page_route_should_be_able_to_remove_headers(page, server):
     assert serverRequest.getHeader("origin") is None
 
 
-async def test_page_route_should_contain_referer_header(page, server):
+async def test_page_route_should_contain_referer_header(
+    page: Page, server: Server
+) -> None:
     requests = []
+
+    def _handle(route: Route, request: Request) -> None:
+        requests.append(route.request)
+        asyncio.create_task(route.continue_())
+
     await page.route(
         "**/*",
-        lambda route: (
-            requests.append(route.request),
-            asyncio.create_task(route.continue_()),
-        ),
+        _handle,
     )
 
     await page.goto(server.PREFIX + "/one-style.html")
@@ -155,8 +172,8 @@ async def test_page_route_should_contain_referer_header(page, server):
 
 
 async def test_page_route_should_properly_return_navigation_response_when_URL_has_cookies(
-    context, page, server
-):
+    context: BrowserContext, page: Page, server: Server
+) -> None:
     # Setup cookie.
     await page.goto(server.EMPTY_PAGE)
     await context.add_cookies(
@@ -166,29 +183,36 @@ async def test_page_route_should_properly_return_navigation_response_when_URL_ha
     # Setup request interception.
     await page.route("**/*", lambda route: route.continue_())
     response = await page.reload()
+    assert response
     assert response.status == 200
 
 
-async def test_page_route_should_show_custom_HTTP_headers(page, server):
+async def test_page_route_should_show_custom_HTTP_headers(
+    page: Page, server: Server
+) -> None:
     await page.set_extra_http_headers({"foo": "bar"})
 
-    def assert_headers(request):
+    def assert_headers(request: Request) -> None:
         assert request.headers["foo"] == "bar"
+
+    def _handle(route: Route) -> None:
+        assert_headers(route.request)
+        asyncio.create_task(route.continue_())
 
     await page.route(
         "**/*",
-        lambda route: (
-            assert_headers(route.request),
-            asyncio.create_task(route.continue_()),
-        ),
+        _handle,
     )
 
     response = await page.goto(server.EMPTY_PAGE)
+    assert response
     assert response.ok
 
 
 # @see https://github.com/GoogleChrome/puppeteer/issues/4337
-async def test_page_route_should_work_with_redirect_inside_sync_XHR(page, server):
+async def test_page_route_should_work_with_redirect_inside_sync_XHR(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     server.set_redirect("/logo.png", "/pptr.png")
     await page.route("**/*", lambda route: route.continue_())
@@ -204,43 +228,48 @@ async def test_page_route_should_work_with_redirect_inside_sync_XHR(page, server
     assert status == 200
 
 
-async def test_page_route_should_work_with_custom_referer_headers(page, server):
+async def test_page_route_should_work_with_custom_referer_headers(
+    page: Page, server: Server
+) -> None:
     await page.set_extra_http_headers({"referer": server.EMPTY_PAGE})
 
-    def assert_headers(route):
+    def assert_headers(route: Route) -> None:
         assert route.request.headers["referer"] == server.EMPTY_PAGE
+
+    def _handle(route: Route, request: Request) -> None:
+        assert_headers(route)
+        asyncio.create_task(route.continue_())
 
     await page.route(
         "**/*",
-        lambda route: (
-            assert_headers(route),
-            asyncio.create_task(route.continue_()),
-        ),
+        _handle,
     )
 
     response = await page.goto(server.EMPTY_PAGE)
+    assert response
     assert response.ok
 
 
-async def test_page_route_should_be_abortable(page, server):
+async def test_page_route_should_be_abortable(page: Page, server: Server) -> None:
     await page.route(r"/\.css$/", lambda route: asyncio.create_task(route.abort()))
     failed = []
 
-    def handle_request(request):
-        if request.url.includes(".css"):
+    def handle_request(request: Request) -> None:
+        if ".css" in request.url:
             failed.append(True)
 
     page.on("requestfailed", handle_request)
 
     response = await page.goto(server.PREFIX + "/one-style.html")
+    assert response
     assert response.ok
     assert response.request.failure is None
     assert len(failed) == 0
 
 
 async def test_page_route_should_be_abortable_with_custom_error_codes(
-    page: Page, server, is_webkit, is_firefox
-):
+    page: Page, server: Server, is_webkit: bool, is_firefox: bool
+) -> None:
     await page.route(
         "**/*",
         lambda route: route.abort("internetdisconnected"),
@@ -259,7 +288,7 @@ async def test_page_route_should_be_abortable_with_custom_error_codes(
         assert failed_request.failure == "net::ERR_INTERNET_DISCONNECTED"
 
 
-async def test_page_route_should_send_referer(page, server):
+async def test_page_route_should_send_referer(page: Page, server: Server) -> None:
     await page.set_extra_http_headers({"referer": "http://google.com/"})
 
     await page.route("**/*", lambda route: route.continue_())
@@ -271,8 +300,8 @@ async def test_page_route_should_send_referer(page, server):
 
 
 async def test_page_route_should_fail_navigation_when_aborting_main_resource(
-    page, server, is_webkit, is_firefox
-):
+    page: Page, server: Server, is_webkit: bool, is_firefox: bool
+) -> None:
     await page.route("**/*", lambda route: route.abort())
     with pytest.raises(Error) as exc:
         await page.goto(server.EMPTY_PAGE)
@@ -285,14 +314,18 @@ async def test_page_route_should_fail_navigation_when_aborting_main_resource(
         assert "net::ERR_FAILED" in exc.value.message
 
 
-async def test_page_route_should_not_work_with_redirects(page, server):
+async def test_page_route_should_not_work_with_redirects(
+    page: Page, server: Server
+) -> None:
     intercepted = []
+
+    def _handle(route: Route, request: Request) -> None:
+        asyncio.create_task(route.continue_())
+        intercepted.append(route.request)
+
     await page.route(
         "**/*",
-        lambda route: (
-            asyncio.create_task(route.continue_()),
-            intercepted.append(route.request),
-        ),
+        _handle,
     )
 
     server.set_redirect("/non-existing-page.html", "/non-existing-page-2.html")
@@ -301,6 +334,7 @@ async def test_page_route_should_not_work_with_redirects(page, server):
     server.set_redirect("/non-existing-page-4.html", "/empty.html")
 
     response = await page.goto(server.PREFIX + "/non-existing-page.html")
+    assert response
     assert response.status == 200
     assert "empty.html" in response.url
 
@@ -310,7 +344,7 @@ async def test_page_route_should_not_work_with_redirects(page, server):
     assert "/non-existing-page.html" in intercepted[0].url
 
     chain = []
-    r = response.request
+    r: Optional[Request] = response.request
     while r:
         chain.append(r)
         assert r.is_navigation_request()
@@ -326,14 +360,18 @@ async def test_page_route_should_not_work_with_redirects(page, server):
         assert chain[idx].redirected_to == (chain[idx - 1] if idx > 0 else None)
 
 
-async def test_page_route_should_work_with_redirects_for_subresources(page, server):
-    intercepted = []
+async def test_page_route_should_work_with_redirects_for_subresources(
+    page: Page, server: Server
+) -> None:
+    intercepted: List[Request] = []
+
+    def _handle(route: Route) -> None:
+        asyncio.create_task(route.continue_())
+        intercepted.append(route.request)
+
     await page.route(
         "**/*",
-        lambda route: (
-            asyncio.create_task(route.continue_()),
-            intercepted.append(route.request),
-        ),
+        _handle,
     )
 
     server.set_redirect("/one-style.css", "/two-style.css")
@@ -345,6 +383,7 @@ async def test_page_route_should_work_with_redirects_for_subresources(page, serv
     )
 
     response = await page.goto(server.PREFIX + "/one-style.html")
+    assert response
     assert response.status == 200
     assert "one-style.html" in response.url
 
@@ -353,33 +392,36 @@ async def test_page_route_should_work_with_redirects_for_subresources(page, serv
     assert intercepted[0].resource_type == "document"
     assert "one-style.html" in intercepted[0].url
 
-    r = intercepted[1]
+    r: Optional[Request] = intercepted[1]
     for url in [
         "/one-style.css",
         "/two-style.css",
         "/three-style.css",
         "/four-style.css",
     ]:
+        assert r
         assert r.resource_type == "stylesheet"
         assert url in r.url
         r = r.redirected_to
     assert r is None
 
 
-async def test_page_route_should_work_with_equal_requests(page, server):
+async def test_page_route_should_work_with_equal_requests(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     hits = [True]
 
-    def handle_request(request, hits):
+    def handle_request(request: TestServerRequest, hits: List[bool]) -> None:
         request.write(str(len(hits) * 11).encode())
         request.finish()
         hits.append(True)
 
     server.set_route("/zzz", lambda r: handle_request(r, hits))
 
-    spinner = []
+    spinner: List[bool] = []
 
-    async def handle_route(route):
+    async def handle_route(route: Route) -> None:
         if len(spinner) == 1:
             await route.abort()
             spinner.pop(0)
@@ -401,15 +443,17 @@ async def test_page_route_should_work_with_equal_requests(page, server):
 
 
 async def test_page_route_should_navigate_to_dataURL_and_not_fire_dataURL_requests(
-    page, server
-):
+    page: Page, server: Server
+) -> None:
     requests = []
+
+    def _handle(route: Route) -> None:
+        requests.append(route.request)
+        asyncio.create_task(route.continue_())
+
     await page.route(
         "**/*",
-        lambda route: (
-            requests.append(route.request),
-            asyncio.create_task(route.continue_()),
-        ),
+        _handle,
     )
 
     data_URL = "data:text/html,<div>yo</div>"
@@ -419,17 +463,16 @@ async def test_page_route_should_navigate_to_dataURL_and_not_fire_dataURL_reques
 
 
 async def test_page_route_should_be_able_to_fetch_dataURL_and_not_fire_dataURL_requests(
-    page, server
-):
+    page: Page, server: Server
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     requests = []
-    await page.route(
-        "**/*",
-        lambda route: (
-            requests.append(route.request),
-            asyncio.create_task(route.continue_()),
-        ),
-    )
+
+    def _handle(route: Route) -> None:
+        requests.append(route.request)
+        asyncio.create_task(route.continue_())
+
+    await page.route("**/*", _handle)
 
     data_URL = "data:text/html,<div>yo</div>"
     text = await page.evaluate("url => fetch(url).then(r => r.text())", data_URL)
@@ -438,43 +481,50 @@ async def test_page_route_should_be_able_to_fetch_dataURL_and_not_fire_dataURL_r
 
 
 async def test_page_route_should_navigate_to_URL_with_hash_and_and_fire_requests_without_hash(
-    page, server
-):
+    page: Page, server: Server
+) -> None:
     requests = []
+
+    def _handle(route: Route) -> None:
+        requests.append(route.request)
+        asyncio.create_task(route.continue_())
+
     await page.route(
         "**/*",
-        lambda route: (
-            requests.append(route.request),
-            asyncio.create_task(route.continue_()),
-        ),
+        _handle,
     )
 
     response = await page.goto(server.EMPTY_PAGE + "#hash")
+    assert response
     assert response.status == 200
     assert response.url == server.EMPTY_PAGE
     assert len(requests) == 1
     assert requests[0].url == server.EMPTY_PAGE
 
 
-async def test_page_route_should_work_with_encoded_server(page, server):
+async def test_page_route_should_work_with_encoded_server(
+    page: Page, server: Server
+) -> None:
     # The requestWillBeSent will report encoded URL, whereas interception will
     # report URL as-is. @see crbug.com/759388
     await page.route("**/*", lambda route: route.continue_())
     response = await page.goto(server.PREFIX + "/some nonexisting page")
+    assert response
     assert response.status == 404
 
 
-async def test_page_route_should_work_with_encoded_server___2(page, server):
+async def test_page_route_should_work_with_encoded_server___2(
+    page: Page, server: Server
+) -> None:
     # The requestWillBeSent will report URL as-is, whereas interception will
     # report encoded URL for stylesheet. @see crbug.com/759388
-    requests = []
-    await page.route(
-        "**/*",
-        lambda route: (
-            asyncio.create_task(route.continue_()),
-            requests.append(route.request),
-        ),
-    )
+    requests: List[Request] = []
+
+    def _handle(route: Route) -> None:
+        asyncio.create_task(route.continue_())
+        requests.append(route.request)
+
+    await page.route("**/*", _handle)
 
     response = await page.goto(
         f"""data:text/html,<link rel="stylesheet" href="{server.PREFIX}/fonts?helvetica|arial"/>"""
@@ -482,14 +532,14 @@ async def test_page_route_should_work_with_encoded_server___2(page, server):
     assert response is None
     # TODO: https://github.com/microsoft/playwright/issues/12789
     assert len(requests) >= 1
-    assert (await requests[0].response()).status == 404
+    assert (must(await requests[0].response())).status == 404
 
 
 async def test_page_route_should_not_throw_Invalid_Interception_Id_if_the_request_was_cancelled(
-    page, server
-):
+    page: Page, server: Server
+) -> None:
     await page.set_content("<iframe></iframe>")
-    route_future = asyncio.Future()
+    route_future: "asyncio.Future[Route]" = asyncio.Future()
     await page.route("**/*", lambda r, _: route_future.set_result(r))
 
     async with page.expect_request("**/*"):
@@ -503,28 +553,31 @@ async def test_page_route_should_not_throw_Invalid_Interception_Id_if_the_reques
 
 
 async def test_page_route_should_intercept_main_resource_during_cross_process_navigation(
-    page, server
-):
+    page: Page, server: Server
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     intercepted = []
+
+    def _handle(route: Route) -> None:
+        intercepted.append(True)
+        asyncio.create_task(route.continue_())
+
     await page.route(
         server.CROSS_PROCESS_PREFIX + "/empty.html",
-        lambda route: (
-            intercepted.append(True),
-            asyncio.create_task(route.continue_()),
-        ),
+        _handle,
     )
 
     response = await page.goto(server.CROSS_PROCESS_PREFIX + "/empty.html")
+    assert response
     assert response.ok
     assert len(intercepted) == 1
 
 
 @pytest.mark.skip_browser("webkit")
-async def test_page_route_should_create_a_redirect(page, server):
+async def test_page_route_should_create_a_redirect(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/empty.html")
 
-    async def handle_route(route, request):
+    async def handle_route(route: Route, request: Request) -> None:
         if request.url != (server.PREFIX + "/redirect_this"):
             return await route.continue_()
         await route.fulfill(status=301, headers={"location": "/empty.html"})
@@ -544,10 +597,12 @@ async def test_page_route_should_create_a_redirect(page, server):
     assert text == ""
 
 
-async def test_page_route_should_support_cors_with_GET(page, server, browser_name):
+async def test_page_route_should_support_cors_with_GET(
+    page: Page, server: Server, browser_name: str
+) -> None:
     await page.goto(server.EMPTY_PAGE)
 
-    async def handle_route(route, request):
+    async def handle_route(route: Route, request: Request) -> None:
         headers = {
             "access-control-allow-origin": "*"
             if request.url.endswith("allow")
@@ -590,7 +645,9 @@ async def test_page_route_should_support_cors_with_GET(page, server, browser_nam
         assert "NetworkError" in exc.value.message
 
 
-async def test_page_route_should_support_cors_with_POST(page, server):
+async def test_page_route_should_support_cors_with_POST(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.route(
         "**/cars",
@@ -617,7 +674,9 @@ async def test_page_route_should_support_cors_with_POST(page, server):
     assert resp == ["electric", "gas"]
 
 
-async def test_page_route_should_support_cors_for_different_methods(page, server):
+async def test_page_route_should_support_cors_for_different_methods(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.route(
         "**/cars",
@@ -659,7 +718,7 @@ async def test_page_route_should_support_cors_for_different_methods(page, server
     assert resp == ["DELETE", "electric", "gas"]
 
 
-async def test_request_fulfill_should_work_a(page, server):
+async def test_request_fulfill_should_work_a(page: Page, server: Server) -> None:
     await page.route(
         "**/*",
         lambda route: route.fulfill(
@@ -671,26 +730,33 @@ async def test_request_fulfill_should_work_a(page, server):
     )
 
     response = await page.goto(server.EMPTY_PAGE)
+    assert response
     assert response.status == 201
     assert response.headers["foo"] == "bar"
     assert await page.evaluate("() => document.body.textContent") == "Yo, page!"
 
 
-async def test_request_fulfill_should_work_with_status_code_422(page, server):
+async def test_request_fulfill_should_work_with_status_code_422(
+    page: Page, server: Server
+) -> None:
     await page.route(
         "**/*",
         lambda route: route.fulfill(status=422, body="Yo, page!"),
     )
 
     response = await page.goto(server.EMPTY_PAGE)
+    assert response
     assert response.status == 422
     assert response.status_text == "Unprocessable Entity"
     assert await page.evaluate("() => document.body.textContent") == "Yo, page!"
 
 
 async def test_request_fulfill_should_allow_mocking_binary_responses(
-    page: Page, server, assert_to_be_golden, assetdir
-):
+    page: Page,
+    server: Server,
+    assert_to_be_golden: Callable[[bytes, str], None],
+    assetdir: Path,
+) -> None:
     await page.route(
         "**/*",
         lambda route: route.fulfill(
@@ -714,8 +780,8 @@ async def test_request_fulfill_should_allow_mocking_binary_responses(
 
 
 async def test_request_fulfill_should_allow_mocking_svg_with_charset(
-    page, server, assert_to_be_golden
-):
+    page: Page, server: Server, assert_to_be_golden: Callable[[bytes, str], None]
+) -> None:
     await page.route(
         "**/*",
         lambda route: route.fulfill(
@@ -734,12 +800,16 @@ async def test_request_fulfill_should_allow_mocking_svg_with_charset(
         server.PREFIX,
     )
     img = await page.query_selector("img")
+    assert img
     assert_to_be_golden(await img.screenshot(), "mock-svg.png")
 
 
 async def test_request_fulfill_should_work_with_file_path(
-    page: Page, server, assert_to_be_golden, assetdir
-):
+    page: Page,
+    server: Server,
+    assert_to_be_golden: Callable[[bytes, str], None],
+    assetdir: Path,
+) -> None:
     await page.route(
         "**/*",
         lambda route: route.fulfill(
@@ -761,16 +831,17 @@ async def test_request_fulfill_should_work_with_file_path(
 
 
 async def test_request_fulfill_should_stringify_intercepted_request_response_headers(
-    page, server
-):
+    page: Page, server: Server
+) -> None:
     await page.route(
         "**/*",
         lambda route: route.fulfill(
-            status=200, headers={"foo": True}, body="Yo, page!"
+            status=200, headers={"foo": True}, body="Yo, page!"  # type: ignore
         ),
     )
 
     response = await page.goto(server.EMPTY_PAGE)
+    assert response
     assert response.status == 200
     headers = response.headers
     assert headers["foo"] == "True"
@@ -778,23 +849,21 @@ async def test_request_fulfill_should_stringify_intercepted_request_response_hea
 
 
 async def test_request_fulfill_should_not_modify_the_headers_sent_to_the_server(
-    page, server
-):
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/empty.html")
     interceptedRequests = []
 
     # this is just to enable request interception, which disables caching in chromium
     await page.route(server.PREFIX + "/unused", lambda route, req: None)
 
-    server.set_route(
-        "/something",
-        lambda response: (
-            interceptedRequests.append(response),
-            response.setHeader("Access-Control-Allow-Origin", "*"),
-            response.write(b"done"),
-            response.finish(),
-        ),
-    )
+    def _handler1(response: TestServerRequest) -> None:
+        interceptedRequests.append(response)
+        response.setHeader("Access-Control-Allow-Origin", "*")
+        response.write(b"done")
+        response.finish()
+
+    server.set_route("/something", _handler1)
 
     text = await page.evaluate(
         """async url => {
@@ -805,13 +874,15 @@ async def test_request_fulfill_should_not_modify_the_headers_sent_to_the_server(
     )
     assert text == "done"
 
-    playwrightRequest = asyncio.Future()
+    playwrightRequest: "asyncio.Future[Request]" = asyncio.Future()
+
+    def _handler2(route: Route, request: Request) -> None:
+        playwrightRequest.set_result(request)
+        asyncio.create_task(route.continue_(headers={**request.headers}))
+
     await page.route(
         server.CROSS_PROCESS_PREFIX + "/something",
-        lambda route, request: (
-            playwrightRequest.set_result(request),
-            asyncio.create_task(route.continue_(headers={**request.headers})),
-        ),
+        _handler2,
     )
 
     textAfterRoute = await page.evaluate(
@@ -829,22 +900,23 @@ async def test_request_fulfill_should_not_modify_the_headers_sent_to_the_server(
     )
 
 
-async def test_request_fulfill_should_include_the_origin_header(page, server):
+async def test_request_fulfill_should_include_the_origin_header(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/empty.html")
     interceptedRequest = []
-    await page.route(
-        server.CROSS_PROCESS_PREFIX + "/something",
-        lambda route, request: (
-            interceptedRequest.append(request),
-            asyncio.create_task(
-                route.fulfill(
-                    headers={"Access-Control-Allow-Origin": "*"},
-                    content_type="text/plain",
-                    body="done",
-                )
-            ),
-        ),
-    )
+
+    def _handle(route: Route, request: Request) -> None:
+        interceptedRequest.append(request)
+        asyncio.create_task(
+            route.fulfill(
+                headers={"Access-Control-Allow-Origin": "*"},
+                content_type="text/plain",
+                body="done",
+            )
+        )
+
+    await page.route(server.CROSS_PROCESS_PREFIX + "/something", _handle)
 
     text = await page.evaluate(
         """async url => {
@@ -858,10 +930,12 @@ async def test_request_fulfill_should_include_the_origin_header(page, server):
     assert interceptedRequest[0].headers["origin"] == server.PREFIX
 
 
-async def test_request_fulfill_should_work_with_request_interception(page, server):
+async def test_request_fulfill_should_work_with_request_interception(
+    page: Page, server: Server
+) -> None:
     requests = {}
 
-    async def _handle_route(route: Route):
+    async def _handle_route(route: Route) -> None:
         requests[route.request.url.split("/").pop()] = route.request
         await route.continue_()
 
@@ -876,8 +950,8 @@ async def test_request_fulfill_should_work_with_request_interception(page, serve
 
 
 async def test_Interception_should_work_with_request_interception(
-    browser: Browser, https_server
-):
+    browser: Browser, https_server: Server
+) -> None:
     context = await browser.new_context(ignore_https_errors=True)
     page = await context.new_page()
 
@@ -889,8 +963,8 @@ async def test_Interception_should_work_with_request_interception(
 
 
 async def test_ignore_http_errors_service_worker_should_intercept_after_a_service_worker(
-    page, server
-):
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/serviceworkers/fetchdummy/sw.html")
     await page.evaluate("() => window.activationPromise")
 
@@ -898,7 +972,7 @@ async def test_ignore_http_errors_service_worker_should_intercept_after_a_servic
     sw_response = await page.evaluate('() => fetchDummy("foo")')
     assert sw_response == "responseFromServiceWorker:foo"
 
-    def _handle_route(route):
+    def _handle_route(route: Route) -> None:
         asyncio.ensure_future(
             route.fulfill(
                 status=200,
@@ -918,10 +992,12 @@ async def test_ignore_http_errors_service_worker_should_intercept_after_a_servic
     assert non_intercepted_response == "FAILURE: Not Found"
 
 
-async def test_page_route_should_support_times_parameter(page: Page, server: Server):
+async def test_page_route_should_support_times_parameter(
+    page: Page, server: Server
+) -> None:
     intercepted = []
 
-    async def handle_request(route):
+    async def handle_request(route: Route) -> None:
         await route.continue_()
         intercepted.append(True)
 
@@ -935,10 +1011,10 @@ async def test_page_route_should_support_times_parameter(page: Page, server: Ser
 
 async def test_context_route_should_support_times_parameter(
     context: BrowserContext, page: Page, server: Server
-):
+) -> None:
     intercepted = []
 
-    async def handle_request(route):
+    async def handle_request(route: Route) -> None:
         await route.continue_()
         intercepted.append(True)
 

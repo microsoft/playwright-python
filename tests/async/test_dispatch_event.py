@@ -13,13 +13,21 @@
 # limitations under the License.
 
 
-async def test_should_dispatch_click_event(page, server):
+from playwright.async_api import Page, Selectors
+from tests.server import Server
+
+from .utils import Utils
+
+
+async def test_should_dispatch_click_event(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.dispatch_event("button", "click")
     assert await page.evaluate("() => result") == "Clicked"
 
 
-async def test_should_dispatch_click_event_properties(page, server):
+async def test_should_dispatch_click_event_properties(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.dispatch_event("button", "click")
     assert await page.evaluate("() => bubbles")
@@ -27,7 +35,7 @@ async def test_should_dispatch_click_event_properties(page, server):
     assert await page.evaluate("() => composed")
 
 
-async def test_should_dispatch_click_svg(page):
+async def test_should_dispatch_click_svg(page: Page) -> None:
     await page.set_content(
         """
       <svg height="100" width="100">
@@ -39,7 +47,9 @@ async def test_should_dispatch_click_svg(page):
     assert await page.evaluate("() => window.__CLICKED") == 42
 
 
-async def test_should_dispatch_click_on_a_span_with_an_inline_element_inside(page):
+async def test_should_dispatch_click_on_a_span_with_an_inline_element_inside(
+    page: Page,
+) -> None:
     await page.set_content(
         """
       <style>
@@ -54,7 +64,9 @@ async def test_should_dispatch_click_on_a_span_with_an_inline_element_inside(pag
     assert await page.evaluate("() => window.CLICKED") == 42
 
 
-async def test_should_dispatch_click_after_navigation(page, server):
+async def test_should_dispatch_click_after_navigation(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.dispatch_event("button", "click")
     await page.goto(server.PREFIX + "/input/button.html")
@@ -62,7 +74,9 @@ async def test_should_dispatch_click_after_navigation(page, server):
     assert await page.evaluate("() => result") == "Clicked"
 
 
-async def test_should_dispatch_click_after_a_cross_origin_navigation(page, server):
+async def test_should_dispatch_click_after_a_cross_origin_navigation(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.dispatch_event("button", "click")
     await page.goto(server.CROSS_PROCESS_PREFIX + "/input/button.html")
@@ -70,7 +84,7 @@ async def test_should_dispatch_click_after_a_cross_origin_navigation(page, serve
     assert await page.evaluate("() => result") == "Clicked"
 
 
-async def test_should_not_fail_when_element_is_blocked_on_hover(page, server):
+async def test_should_not_fail_when_element_is_blocked_on_hover(page: Page) -> None:
     await page.set_content(
         """<style>
       container { display: block; position: relative; width: 200px; height: 50px; }
@@ -87,7 +101,9 @@ async def test_should_not_fail_when_element_is_blocked_on_hover(page, server):
     assert await page.evaluate("() => window.clicked")
 
 
-async def test_should_dispatch_click_when_node_is_added_in_shadow_dom(page, server):
+async def test_should_dispatch_click_when_node_is_added_in_shadow_dom(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     watchdog = page.dispatch_event("span", "click")
     await page.evaluate(
@@ -110,7 +126,7 @@ async def test_should_dispatch_click_when_node_is_added_in_shadow_dom(page, serv
     assert await page.evaluate("() => window.clicked")
 
 
-async def test_should_be_atomic(selectors, page, utils):
+async def test_should_be_atomic(selectors: Selectors, page: Page, utils: Utils) -> None:
     await utils.register_selector_engine(
         selectors,
         "dispatch_event",
@@ -135,7 +151,7 @@ async def test_should_be_atomic(selectors, page, utils):
     assert await page.evaluate("() => window._clicked")
 
 
-async def test_should_dispatch_drag_drop_events(page, server):
+async def test_should_dispatch_drag_drop_events(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/drag-n-drop.html")
     dataTransfer = await page.evaluate_handle("() => new DataTransfer()")
     await page.dispatch_event("#source", "dragstart", {"dataTransfer": dataTransfer})
@@ -147,12 +163,16 @@ async def test_should_dispatch_drag_drop_events(page, server):
     )
 
 
-async def test_should_dispatch_drag_and_drop_events_element_handle(page, server):
+async def test_should_dispatch_drag_and_drop_events_element_handle(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/drag-n-drop.html")
     dataTransfer = await page.evaluate_handle("() => new DataTransfer()")
     source = await page.query_selector("#source")
+    assert source
     await source.dispatch_event("dragstart", {"dataTransfer": dataTransfer})
     target = await page.query_selector("#target")
+    assert target
     await target.dispatch_event("drop", {"dataTransfer": dataTransfer})
     assert await page.evaluate(
         """() => {
@@ -161,8 +181,11 @@ async def test_should_dispatch_drag_and_drop_events_element_handle(page, server)
     )
 
 
-async def test_should_dispatch_click_event_element_handle(page, server):
+async def test_should_dispatch_click_event_element_handle(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     button = await page.query_selector("button")
+    assert button
     await button.dispatch_event("click")
     assert await page.evaluate("() => result") == "Clicked"

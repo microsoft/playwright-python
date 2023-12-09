@@ -14,18 +14,24 @@
 
 import pytest
 
-from playwright.async_api import Error
+from playwright.async_api import Browser, Error
+from tests.server import Server
 
 
-async def test_ignore_https_error_should_work(browser, https_server):
+async def test_ignore_https_error_should_work(
+    browser: Browser, https_server: Server
+) -> None:
     context = await browser.new_context(ignore_https_errors=True)
     page = await context.new_page()
     response = await page.goto(https_server.EMPTY_PAGE)
+    assert response
     assert response.ok
     await context.close()
 
 
-async def test_ignore_https_error_should_work_negative_case(browser, https_server):
+async def test_ignore_https_error_should_work_negative_case(
+    browser: Browser, https_server: Server
+) -> None:
     context = await browser.new_context()
     page = await context.new_page()
     with pytest.raises(Error):

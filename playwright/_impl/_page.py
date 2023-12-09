@@ -27,6 +27,7 @@ from typing import (
     List,
     Optional,
     Pattern,
+    Sequence,
     Union,
     cast,
 )
@@ -40,7 +41,6 @@ from playwright._impl._api_structures import (
     Position,
     ViewportSize,
 )
-from playwright._impl._api_types import Error
 from playwright._impl._artifact import Artifact
 from playwright._impl._connection import (
     ChannelOwner,
@@ -50,6 +50,7 @@ from playwright._impl._connection import (
 from playwright._impl._console_message import ConsoleMessage
 from playwright._impl._download import Download
 from playwright._impl._element_handle import ElementHandle
+from playwright._impl._errors import Error, TargetClosedError, is_target_closed_error
 from playwright._impl._event_context_manager import EventContextManagerImpl
 from playwright._impl._file_chooser import FileChooser
 from playwright._impl._frame import Frame
@@ -72,7 +73,6 @@ from playwright._impl._helper import (
     URLMatchResponse,
     async_readfile,
     async_writefile,
-    is_safe_close_error,
     locals_to_params,
     make_dirs_for_file,
     serialize_error,
@@ -86,7 +86,7 @@ from playwright._impl._js_handle import (
 )
 from playwright._impl._network import Request, Response, Route, serialize_headers
 from playwright._impl._video import Video
-from playwright._impl._wait_helper import WaitHelper
+from playwright._impl._waiter import Waiter
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal
@@ -151,6 +151,7 @@ class Page(ChannelOwner):
         )
         self._video: Optional[Video] = None
         self._opener = cast("Page", from_nullable_channel(initializer.get("opener")))
+        self._close_reason: Optional[str] = None
 
         self._channel.on(
             "bindingCall",
@@ -195,13 +196,15 @@ class Page(ChannelOwner):
         self._closed_or_crashed_future: asyncio.Future = asyncio.Future()
         self.on(
             Page.Events.Close,
-            lambda _: self._closed_or_crashed_future.set_result(True)
+            lambda _: self._closed_or_crashed_future.set_result(
+                self._close_error_with_reason()
+            )
             if not self._closed_or_crashed_future.done()
             else None,
         )
         self.on(
             Page.Events.Crash,
-            lambda _: self._closed_or_crashed_future.set_result(True)
+            lambda _: self._closed_or_crashed_future.set_result(TargetClosedError())
             if not self._closed_or_crashed_future.done()
             else None,
         )
@@ -634,7 +637,7 @@ class Page(ChannelOwner):
         animations: Literal["allow", "disabled"] = None,
         caret: Literal["hide", "initial"] = None,
         scale: Literal["css", "device"] = None,
-        mask: List["Locator"] = None,
+        mask: Sequence["Locator"] = None,
         mask_color: str = None,
     ) -> bytes:
         params = locals_to_params(locals())
@@ -662,13 +665,14 @@ class Page(ChannelOwner):
     async def title(self) -> str:
         return await self._main_frame.title()
 
-    async def close(self, runBeforeUnload: bool = None) -> None:
+    async def close(self, runBeforeUnload: bool = None, reason: str = None) -> None:
+        self._close_reason = reason
         try:
             await self._channel.send("close", locals_to_params(locals()))
             if self._owned_context:
                 await self._owned_context.close()
         except Exception as e:
-            if not is_safe_close_error(e) and not runBeforeUnload:
+            if not is_target_closed_error(e) and not runBeforeUnload:
                 raise e
 
     def is_closed(self) -> bool:
@@ -677,7 +681,7 @@ class Page(ChannelOwner):
     async def click(
         self,
         selector: str,
-        modifiers: List[KeyboardModifier] = None,
+        modifiers: Sequence[KeyboardModifier] = None,
         position: Position = None,
         delay: float = None,
         button: MouseButton = None,
@@ -693,7 +697,7 @@ class Page(ChannelOwner):
     async def dblclick(
         self,
         selector: str,
-        modifiers: List[KeyboardModifier] = None,
+        modifiers: Sequence[KeyboardModifier] = None,
         position: Position = None,
         delay: float = None,
         button: MouseButton = None,
@@ -708,7 +712,7 @@ class Page(ChannelOwner):
     async def tap(
         self,
         selector: str,
-        modifiers: List[KeyboardModifier] = None,
+        modifiers: Sequence[KeyboardModifier] = None,
         position: Position = None,
         timeout: float = None,
         force: bool = None,
@@ -830,7 +834,7 @@ class Page(ChannelOwner):
     async def hover(
         self,
         selector: str,
-        modifiers: List[KeyboardModifier] = None,
+        modifiers: Sequence[KeyboardModifier] = None,
         position: Position = None,
         timeout: float = None,
         noWaitAfter: bool = None,
@@ -857,10 +861,10 @@ class Page(ChannelOwner):
     async def select_option(
         self,
         selector: str,
-        value: Union[str, List[str]] = None,
-        index: Union[int, List[int]] = None,
-        label: Union[str, List[str]] = None,
-        element: Union["ElementHandle", List["ElementHandle"]] = None,
+        value: Union[str, Sequence[str]] = None,
+        index: Union[int, Sequence[int]] = None,
+        label: Union[str, Sequence[str]] = None,
+        element: Union["ElementHandle", Sequence["ElementHandle"]] = None,
         timeout: float = None,
         noWaitAfter: bool = None,
         force: bool = None,
@@ -878,7 +882,9 @@ class Page(ChannelOwner):
     async def set_input_files(
         self,
         selector: str,
-        files: Union[str, Path, FilePayload, List[Union[str, Path]], List[FilePayload]],
+        files: Union[
+            str, Path, FilePayload, Sequence[Union[str, Path]], Sequence[FilePayload]
+        ],
         timeout: float = None,
         strict: bool = None,
         noWaitAfter: bool = None,
@@ -1006,6 +1012,11 @@ class Page(ChannelOwner):
             self._video = Video(self)
         return self._video
 
+    def _close_error_with_reason(self) -> TargetClosedError:
+        return TargetClosedError(
+            self._close_reason or self._browser_context._effective_close_reason()
+        )
+
     def expect_event(
         self,
         event: str,
@@ -1025,18 +1036,20 @@ class Page(ChannelOwner):
     ) -> EventContextManagerImpl:
         if timeout is None:
             timeout = self._timeout_settings.timeout()
-        wait_helper = WaitHelper(self, f"page.expect_event({event})")
-        wait_helper.reject_on_timeout(
+        waiter = Waiter(self, f"page.expect_event({event})")
+        waiter.reject_on_timeout(
             timeout, f'Timeout {timeout}ms exceeded while waiting for event "{event}"'
         )
         if log_line:
-            wait_helper.log(log_line)
+            waiter.log(log_line)
         if event != Page.Events.Crash:
-            wait_helper.reject_on_event(self, Page.Events.Crash, Error("Page crashed"))
+            waiter.reject_on_event(self, Page.Events.Crash, Error("Page crashed"))
         if event != Page.Events.Close:
-            wait_helper.reject_on_event(self, Page.Events.Close, Error("Page closed"))
-        wait_helper.wait_for_event(self, event, predicate)
-        return EventContextManagerImpl(wait_helper.result())
+            waiter.reject_on_event(
+                self, Page.Events.Close, lambda: self._close_error_with_reason()
+            )
+        waiter.wait_for_event(self, event, predicate)
+        return EventContextManagerImpl(waiter.result())
 
     def expect_console_message(
         self,

@@ -12,13 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Callable
+
 from playwright.async_api import Page
 from tests.server import Server
+from tests.utils import must
 
 
 async def test_should_screenshot_with_mask(
-    page: Page, server: Server, assert_to_be_golden
-):
+    page: Page, server: Server, assert_to_be_golden: Callable[[bytes, str], None]
+) -> None:
     await page.set_viewport_size(
         {
             "width": 500,
@@ -35,7 +38,7 @@ async def test_should_screenshot_with_mask(
         "mask-should-work-with-locator.png",
     )
     assert_to_be_golden(
-        await (await page.query_selector("body")).screenshot(
+        await must(await page.query_selector("body")).screenshot(
             mask=[page.locator("div").nth(5)]
         ),
         "mask-should-work-with-element-handle.png",

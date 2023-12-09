@@ -13,12 +13,14 @@
 # limitations under the License.
 
 import asyncio
+from typing import Optional
 
 import pytest
 
-from playwright.sync_api import Page
+from playwright.async_api import Page
+from tests.utils import must
 
-from ..server import HttpRequestWithPostBody, Server
+from ..server import Server, TestServerRequest
 
 
 async def test_console_event_should_work(page: Page) -> None:
@@ -86,7 +88,7 @@ async def test_console_event_should_work_in_immediately_closed_popup(
 
 
 async def test_dialog_event_should_work1(page: Page) -> None:
-    prompt_task = None
+    prompt_task: Optional[asyncio.Future[str]] = None
 
     async def open_dialog() -> None:
         nonlocal prompt_task
@@ -101,11 +103,11 @@ async def test_dialog_event_should_work1(page: Page) -> None:
     assert dialog1.message == "hey?"
     assert dialog1.page == page
     await dialog1.accept("hello")
-    assert await prompt_task == "hello"
+    assert await must(prompt_task) == "hello"
 
 
 async def test_dialog_event_should_work_in_popup(page: Page) -> None:
-    prompt_task = None
+    prompt_task: Optional[asyncio.Future[str]] = None
 
     async def open_dialog() -> None:
         nonlocal prompt_task
@@ -121,7 +123,7 @@ async def test_dialog_event_should_work_in_popup(page: Page) -> None:
     assert dialog.message == "hey?"
     assert dialog.page == popup
     await dialog.accept("hello")
-    assert await prompt_task == "hello"
+    assert await must(prompt_task) == "hello"
 
 
 # console message from javascript: url is not reported at all
@@ -160,7 +162,7 @@ async def test_dialog_event_should_work_in_immdiately_closed_popup(page: Page) -
 async def test_dialog_event_should_work_with_inline_script_tag(
     page: Page, server: Server
 ) -> None:
-    def handle_route(request: HttpRequestWithPostBody) -> None:
+    def handle_route(request: TestServerRequest) -> None:
         request.setHeader("content-type", "text/html")
         request.write(b"""<script>window.result = prompt('hey?')</script>""")
         request.finish()
@@ -179,7 +181,7 @@ async def test_dialog_event_should_work_with_inline_script_tag(
     assert dialog.page == popup
     await dialog.accept("hello")
     await promise
-    await popup.evaluate("window.result") == "hello"
+    assert await popup.evaluate("window.result") == "hello"
 
 
 async def test_console_event_should_work_with_context_manager(page: Page) -> None:

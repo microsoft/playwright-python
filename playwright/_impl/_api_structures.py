@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import sys
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Sequence, Union
 
 if sys.version_info >= (3, 8):  # pragma: no cover
     from typing import Literal, TypedDict
@@ -39,6 +39,7 @@ class Cookie(TypedDict, total=False):
     sameSite: Literal["Lax", "None", "Strict"]
 
 
+# TODO: We are waiting for PEP705 so SetCookieParam can be readonly and matches Cookie.
 class SetCookieParam(TypedDict, total=False):
     name: str
     value: str
@@ -185,7 +186,7 @@ class ExpectedTextValue(TypedDict, total=False):
 
 class FrameExpectOptions(TypedDict, total=False):
     expressionArg: Any
-    expectedText: Optional[List[ExpectedTextValue]]
+    expectedText: Optional[Sequence[ExpectedTextValue]]
     expectedNumber: Optional[float]
     expectedValue: Optional[Any]
     useInnerText: Optional[bool]

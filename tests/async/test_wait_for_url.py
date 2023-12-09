@@ -17,9 +17,10 @@ import re
 import pytest
 
 from playwright.async_api import Error, Page
+from tests.server import Server
 
 
-async def test_wait_for_url_should_work(page: Page, server):
+async def test_wait_for_url_should_work(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.evaluate(
         "url => window.location.href = url", server.PREFIX + "/grid.html"
@@ -28,7 +29,7 @@ async def test_wait_for_url_should_work(page: Page, server):
     assert "grid.html" in page.url
 
 
-async def test_wait_for_url_should_respect_timeout(page: Page, server):
+async def test_wait_for_url_should_respect_timeout(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     with pytest.raises(Error) as exc_info:
         await page.wait_for_url("**/frame.html", timeout=2500)
@@ -36,16 +37,16 @@ async def test_wait_for_url_should_respect_timeout(page: Page, server):
 
 
 async def test_wait_for_url_should_work_with_both_domcontentloaded_and_load(
-    page: Page, server
-):
+    page: Page, server: Server
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.wait_for_url("**/*", wait_until="domcontentloaded")
     await page.wait_for_url("**/*", wait_until="load")
 
 
 async def test_wait_for_url_should_work_with_clicking_on_anchor_links(
-    page: Page, server
-):
+    page: Page, server: Server
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content('<a href="#foobar">foobar</a>')
     await page.click("a")
@@ -53,7 +54,9 @@ async def test_wait_for_url_should_work_with_clicking_on_anchor_links(
     assert page.url == server.EMPTY_PAGE + "#foobar"
 
 
-async def test_wait_for_url_should_work_with_history_push_state(page: Page, server):
+async def test_wait_for_url_should_work_with_history_push_state(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content(
         """
@@ -68,7 +71,9 @@ async def test_wait_for_url_should_work_with_history_push_state(page: Page, serv
     assert page.url == server.PREFIX + "/wow.html"
 
 
-async def test_wait_for_url_should_work_with_history_replace_state(page: Page, server):
+async def test_wait_for_url_should_work_with_history_replace_state(
+    page: Page, server: Server
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content(
         """
@@ -84,8 +89,8 @@ async def test_wait_for_url_should_work_with_history_replace_state(page: Page, s
 
 
 async def test_wait_for_url_should_work_with_dom_history_back_forward(
-    page: Page, server
-):
+    page: Page, server: Server
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content(
         """
@@ -112,8 +117,8 @@ async def test_wait_for_url_should_work_with_dom_history_back_forward(
 
 
 async def test_wait_for_url_should_work_with_url_match_for_same_document_navigations(
-    page: Page, server
-):
+    page: Page, server: Server
+) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.evaluate("history.pushState({}, '', '/first.html')")
     await page.evaluate("history.pushState({}, '', '/second.html')")
@@ -122,7 +127,7 @@ async def test_wait_for_url_should_work_with_url_match_for_same_document_navigat
     assert "/third.html" in page.url
 
 
-async def test_wait_for_url_should_work_with_commit(page: Page, server):
+async def test_wait_for_url_should_work_with_commit(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.evaluate(
         "url => window.location.href = url", server.PREFIX + "/grid.html"

@@ -13,12 +13,18 @@
 # limitations under the License.
 
 
+from pathlib import Path
+from typing import Dict
+
 import pytest
+
+from playwright.async_api import BrowserType
+from tests.server import Server
 
 
 async def test_should_have_default_url_when_launching_browser(
-    browser_type, launch_arguments, tmpdir
-):
+    browser_type: BrowserType, launch_arguments: Dict, tmpdir: Path
+) -> None:
     browser_context = await browser_type.launch_persistent_context(
         tmpdir, **{**launch_arguments, "headless": False}
     )
@@ -28,8 +34,8 @@ async def test_should_have_default_url_when_launching_browser(
 
 
 async def test_should_close_browser_with_beforeunload_page(
-    browser_type, launch_arguments, server, tmpdir
-):
+    browser_type: BrowserType, launch_arguments: Dict, server: Server, tmpdir: Path
+) -> None:
     browser_context = await browser_type.launch_persistent_context(
         tmpdir, **{**launch_arguments, "headless": False}
     )
@@ -42,8 +48,8 @@ async def test_should_close_browser_with_beforeunload_page(
 
 
 async def test_should_not_crash_when_creating_second_context(
-    browser_type, launch_arguments, server
-):
+    browser_type: BrowserType, launch_arguments: Dict, server: Server
+) -> None:
     browser = await browser_type.launch(**{**launch_arguments, "headless": False})
     browser_context = await browser.new_context()
     await browser_context.new_page()
@@ -54,7 +60,9 @@ async def test_should_not_crash_when_creating_second_context(
     await browser.close()
 
 
-async def test_should_click_background_tab(browser_type, launch_arguments, server):
+async def test_should_click_background_tab(
+    browser_type: BrowserType, launch_arguments: Dict, server: Server
+) -> None:
     browser = await browser_type.launch(**{**launch_arguments, "headless": False})
     page = await browser.new_page()
     await page.set_content(
@@ -66,8 +74,8 @@ async def test_should_click_background_tab(browser_type, launch_arguments, serve
 
 
 async def test_should_close_browser_after_context_menu_was_triggered(
-    browser_type, launch_arguments, server
-):
+    browser_type: BrowserType, launch_arguments: Dict, server: Server
+) -> None:
     browser = await browser_type.launch(**{**launch_arguments, "headless": False})
     page = await browser.new_page()
     await page.goto(server.PREFIX + "/grid.html")
@@ -76,8 +84,12 @@ async def test_should_close_browser_after_context_menu_was_triggered(
 
 
 async def test_should_not_block_third_party_cookies(
-    browser_type, launch_arguments, server, is_chromium, is_firefox
-):
+    browser_type: BrowserType,
+    launch_arguments: Dict,
+    server: Server,
+    is_chromium: bool,
+    is_firefox: bool,
+) -> None:
     browser = await browser_type.launch(**{**launch_arguments, "headless": False})
     page = await browser.new_page()
     await page.goto(server.EMPTY_PAGE)
@@ -125,8 +137,8 @@ async def test_should_not_block_third_party_cookies(
 
 @pytest.mark.skip_browser("webkit")
 async def test_should_not_override_viewport_size_when_passed_null(
-    browser_type, launch_arguments, server
-):
+    browser_type: BrowserType, launch_arguments: Dict, server: Server
+) -> None:
     # Our WebKit embedder does not respect window features.
     browser = await browser_type.launch(**{**launch_arguments, "headless": False})
     context = await browser.new_context(no_viewport=True)
@@ -148,7 +160,9 @@ async def test_should_not_override_viewport_size_when_passed_null(
     await browser.close()
 
 
-async def test_page_bring_to_front_should_work(browser_type, launch_arguments):
+async def test_page_bring_to_front_should_work(
+    browser_type: BrowserType, launch_arguments: Dict
+) -> None:
     browser = await browser_type.launch(**{**launch_arguments, "headless": False})
     page1 = await browser.new_page()
     await page1.set_content("Page1")

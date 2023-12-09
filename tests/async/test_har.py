@@ -18,6 +18,7 @@ import os
 import re
 import zipfile
 from pathlib import Path
+from typing import cast
 
 import pytest
 
@@ -25,7 +26,7 @@ from playwright.async_api import Browser, BrowserContext, Error, Page, Route, ex
 from tests.server import Server
 
 
-async def test_should_work(browser, server, tmpdir):
+async def test_should_work(browser: Browser, server: Server, tmpdir: Path) -> None:
     path = os.path.join(tmpdir, "log.har")
     context = await browser.new_context(record_har_path=path)
     page = await context.new_page()
@@ -36,7 +37,9 @@ async def test_should_work(browser, server, tmpdir):
         assert "log" in data
 
 
-async def test_should_omit_content(browser, server, tmpdir):
+async def test_should_omit_content(
+    browser: Browser, server: Server, tmpdir: Path
+) -> None:
     path = os.path.join(tmpdir, "log.har")
     context = await browser.new_context(
         record_har_path=path,
@@ -54,7 +57,9 @@ async def test_should_omit_content(browser, server, tmpdir):
         assert "encoding" not in content1
 
 
-async def test_should_omit_content_legacy(browser, server, tmpdir):
+async def test_should_omit_content_legacy(
+    browser: Browser, server: Server, tmpdir: Path
+) -> None:
     path = os.path.join(tmpdir, "log.har")
     context = await browser.new_context(
         record_har_path=path, record_har_omit_content=True
@@ -71,7 +76,9 @@ async def test_should_omit_content_legacy(browser, server, tmpdir):
         assert "encoding" not in content1
 
 
-async def test_should_attach_content(browser, server, tmpdir, is_firefox):
+async def test_should_attach_content(
+    browser: Browser, server: Server, tmpdir: Path
+) -> None:
     path = os.path.join(tmpdir, "log.har.zip")
     context = await browser.new_context(
         record_har_path=path,
@@ -128,7 +135,9 @@ async def test_should_attach_content(browser, server, tmpdir, is_firefox):
                 assert len(f.read()) == entries[2]["response"]["content"]["size"]
 
 
-async def test_should_not_omit_content(browser, server, tmpdir):
+async def test_should_not_omit_content(
+    browser: Browser, server: Server, tmpdir: Path
+) -> None:
     path = os.path.join(tmpdir, "log.har")
     context = await browser.new_context(
         record_har_path=path, record_har_omit_content=False
@@ -142,7 +151,9 @@ async def test_should_not_omit_content(browser, server, tmpdir):
         assert "text" in content1
 
 
-async def test_should_include_content(browser, server, tmpdir):
+async def test_should_include_content(
+    browser: Browser, server: Server, tmpdir: Path
+) -> None:
     path = os.path.join(tmpdir, "log.har")
     context = await browser.new_context(record_har_path=path)
     page = await context.new_page()
@@ -158,7 +169,9 @@ async def test_should_include_content(browser, server, tmpdir):
         assert "HAR Page" in content1["text"]
 
 
-async def test_should_default_to_full_mode(browser, server, tmpdir):
+async def test_should_default_to_full_mode(
+    browser: Browser, server: Server, tmpdir: Path
+) -> None:
     path = os.path.join(tmpdir, "log.har")
     context = await browser.new_context(
         record_har_path=path,
@@ -173,7 +186,9 @@ async def test_should_default_to_full_mode(browser, server, tmpdir):
         assert log["entries"][0]["request"]["bodySize"] >= 0
 
 
-async def test_should_support_minimal_mode(browser, server, tmpdir):
+async def test_should_support_minimal_mode(
+    browser: Browser, server: Server, tmpdir: Path
+) -> None:
     path = os.path.join(tmpdir, "log.har")
     context = await browser.new_context(
         record_har_path=path,
@@ -308,7 +323,7 @@ async def test_should_only_handle_requests_matching_url_filter(
     )
     page = await context.new_page()
 
-    async def handler(route: Route):
+    async def handler(route: Route) -> None:
         assert route.request.url == "http://no.playwright/"
         await route.fulfill(
             status=200,
@@ -330,7 +345,7 @@ async def test_should_only_handle_requests_matching_url_filter_no_fallback(
     await context.route_from_har(har=assetdir / "har-fulfill.har", url="**/*.js")
     page = await context.new_page()
 
-    async def handler(route: Route):
+    async def handler(route: Route) -> None:
         assert route.request.url == "http://no.playwright/"
         await route.fulfill(
             status=200,
@@ -351,7 +366,7 @@ async def test_should_only_handle_requests_matching_url_filter_no_fallback_page(
 ) -> None:
     await page.route_from_har(har=assetdir / "har-fulfill.har", url="**/*.js")
 
-    async def handler(route: Route):
+    async def handler(route: Route) -> None:
         assert route.request.url == "http://no.playwright/"
         await route.fulfill(
             status=200,
@@ -431,6 +446,7 @@ async def test_should_go_back_to_redirected_navigation(
     await expect(page).to_have_url(server.EMPTY_PAGE)
 
     response = await page.go_back()
+    assert response
     await expect(page).to_have_url("https://www.theverge.com/")
     assert response.request.url == "https://www.theverge.com/"
     assert await page.evaluate("window.location.href") == "https://www.theverge.com/"
@@ -454,6 +470,7 @@ async def test_should_go_forward_to_redirected_navigation(
     await page.go_back()
     await expect(page).to_have_url(server.EMPTY_PAGE)
     response = await page.go_forward()
+    assert response
     await expect(page).to_have_url("https://www.theverge.com/")
     assert response.request.url == "https://www.theverge.com/"
     assert await page.evaluate("window.location.href") == "https://www.theverge.com/"
@@ -469,6 +486,7 @@ async def test_should_reload_redirected_navigation(
     await page.goto("https://theverge.com/")
     await expect(page).to_have_url("https://www.theverge.com/")
     response = await page.reload()
+    assert response
     await expect(page).to_have_url("https://www.theverge.com/")
     assert response.request.url == "https://www.theverge.com/"
     assert await page.evaluate("window.location.href") == "https://www.theverge.com/"
@@ -541,7 +559,8 @@ async def test_should_disambiguate_by_header(
     browser: Browser, server: Server, tmpdir: Path
 ) -> None:
     server.set_route(
-        "/echo", lambda req: (req.write(req.getHeader("baz").encode()), req.finish())
+        "/echo",
+        lambda req: (req.write(cast(str, req.getHeader("baz")).encode()), req.finish()),
     )
     fetch_function = """
         async (bazValue) => {

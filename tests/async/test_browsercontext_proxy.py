@@ -12,20 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
 import base64
+from typing import AsyncGenerator, Awaitable, Callable
 
 import pytest
 from flaky import flaky
 
+from playwright.async_api import Browser, BrowserContext
+from tests.server import Server, TestServerRequest
+
 
 @pytest.fixture(scope="session")
-async def browser(browser_factory):
+async def browser(
+    browser_factory: "Callable[..., asyncio.Future[Browser]]",
+) -> AsyncGenerator[Browser, None]:
     browser = await browser_factory(proxy={"server": "dummy"})
     yield browser
     await browser.close()
 
 
-async def test_should_use_proxy(context_factory, server):
+async def test_should_use_proxy(
+    context_factory: "Callable[..., asyncio.Future[BrowserContext]]", server: Server
+) -> None:
     server.set_route(
         "/target.html",
         lambda r: (
@@ -39,7 +48,9 @@ async def test_should_use_proxy(context_factory, server):
     assert await page.title() == "Served by the proxy"
 
 
-async def test_should_use_proxy_for_second_page(context_factory, server):
+async def test_should_use_proxy_for_second_page(
+    context_factory: "Callable[..., Awaitable[BrowserContext]]", server: Server
+) -> None:
     server.set_route(
         "/target.html",
         lambda r: (
@@ -58,7 +69,9 @@ async def test_should_use_proxy_for_second_page(context_factory, server):
     assert await page2.title() == "Served by the proxy"
 
 
-async def test_should_work_with_ip_port_notion(context_factory, server):
+async def test_should_work_with_ip_port_notion(
+    context_factory: "Callable[..., Awaitable[BrowserContext]]", server: Server
+) -> None:
     server.set_route(
         "/target.html",
         lambda r: (
@@ -73,8 +86,10 @@ async def test_should_work_with_ip_port_notion(context_factory, server):
 
 
 @flaky  # Upstream flaky
-async def test_should_authenticate(context_factory, server):
-    def handler(req):
+async def test_should_authenticate(
+    context_factory: "Callable[..., Awaitable[BrowserContext]]", server: Server
+) -> None:
+    def handler(req: TestServerRequest) -> None:
         auth = req.getHeader("proxy-authorization")
         if not auth:
             req.setHeader(
@@ -102,8 +117,10 @@ async def test_should_authenticate(context_factory, server):
 
 
 @flaky  # Upstream flaky
-async def test_should_authenticate_with_empty_password(context_factory, server):
-    def handler(req):
+async def test_should_authenticate_with_empty_password(
+    context_factory: "Callable[..., Awaitable[BrowserContext]]", server: Server
+) -> None:
+    def handler(req: TestServerRequest) -> None:
         auth = req.getHeader("proxy-authorization")
         if not auth:
             req.setHeader(

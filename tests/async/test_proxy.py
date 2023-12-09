@@ -12,20 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
 import base64
+from typing import Callable
 
 import pytest
 
-from playwright.async_api import Error
+from playwright.async_api import Browser, Error
+from tests.server import Server, TestServerRequest
 
 
-async def test_should_throw_for_bad_server_value(browser_factory):
+async def test_should_throw_for_bad_server_value(
+    browser_factory: "Callable[..., asyncio.Future[Browser]]",
+) -> None:
     with pytest.raises(Error) as exc_info:
         await browser_factory(proxy={"server": 123})
     assert "proxy.server: expected string, got number" in exc_info.value.message
 
 
-async def test_should_use_proxy(browser_factory, server):
+async def test_should_use_proxy(
+    browser_factory: "Callable[..., asyncio.Future[Browser]]", server: Server
+) -> None:
     server.set_route(
         "/target.html",
         lambda r: (
@@ -39,7 +46,9 @@ async def test_should_use_proxy(browser_factory, server):
     assert await page.title() == "Served by the proxy"
 
 
-async def test_should_use_proxy_for_second_page(browser_factory, server):
+async def test_should_use_proxy_for_second_page(
+    browser_factory: "Callable[..., asyncio.Future[Browser]]", server: Server
+) -> None:
     server.set_route(
         "/target.html",
         lambda r: (
@@ -58,7 +67,9 @@ async def test_should_use_proxy_for_second_page(browser_factory, server):
     assert await page2.title() == "Served by the proxy"
 
 
-async def test_should_work_with_ip_port_notion(browser_factory, server):
+async def test_should_work_with_ip_port_notion(
+    browser_factory: "Callable[..., asyncio.Future[Browser]]", server: Server
+) -> None:
     server.set_route(
         "/target.html",
         lambda r: (
@@ -72,8 +83,10 @@ async def test_should_work_with_ip_port_notion(browser_factory, server):
     assert await page.title() == "Served by the proxy"
 
 
-async def test_should_authenticate(browser_factory, server):
-    def handler(req):
+async def test_should_authenticate(
+    browser_factory: "Callable[..., asyncio.Future[Browser]]", server: Server
+) -> None:
+    def handler(req: TestServerRequest) -> None:
         auth = req.getHeader("proxy-authorization")
         if not auth:
             req.setHeader(
@@ -100,8 +113,10 @@ async def test_should_authenticate(browser_factory, server):
     )
 
 
-async def test_should_authenticate_with_empty_password(browser_factory, server):
-    def handler(req):
+async def test_should_authenticate_with_empty_password(
+    browser_factory: "Callable[..., asyncio.Future[Browser]]", server: Server
+) -> None:
+    def handler(req: TestServerRequest) -> None:
         auth = req.getHeader("proxy-authorization")
         if not auth:
             req.setHeader(

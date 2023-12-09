@@ -15,10 +15,11 @@
 
 import pytest
 
-from playwright.async_api import BrowserContext, Error, Page
+from playwright.async_api import Browser, BrowserContext, Error, Page
+from tests.server import Server
 
 
-async def test_should_work(page: Page, server, context: BrowserContext):
+async def test_should_work(page: Page, server: Server, context: BrowserContext) -> None:
     await context.grant_permissions(["geolocation"])
     await page.goto(server.EMPTY_PAGE)
     await context.set_geolocation({"latitude": 10, "longitude": 10})
@@ -30,7 +31,7 @@ async def test_should_work(page: Page, server, context: BrowserContext):
     assert geolocation == {"latitude": 10, "longitude": 10}
 
 
-async def test_should_throw_when_invalid_longitude(context):
+async def test_should_throw_when_invalid_longitude(context: BrowserContext) -> None:
     with pytest.raises(Error) as exc:
         await context.set_geolocation({"latitude": 10, "longitude": 200})
     assert (
@@ -39,7 +40,9 @@ async def test_should_throw_when_invalid_longitude(context):
     )
 
 
-async def test_should_isolate_contexts(page, server, context, browser):
+async def test_should_isolate_contexts(
+    page: Page, server: Server, context: BrowserContext, browser: Browser
+) -> None:
     await context.grant_permissions(["geolocation"])
     await context.set_geolocation({"latitude": 10, "longitude": 10})
     await page.goto(server.EMPTY_PAGE)
@@ -68,12 +71,10 @@ async def test_should_isolate_contexts(page, server, context, browser):
     await context2.close()
 
 
-async def test_should_use_context_options(browser, server):
-    options = {
-        "geolocation": {"latitude": 10, "longitude": 10},
-        "permissions": ["geolocation"],
-    }
-    context = await browser.new_context(**options)
+async def test_should_use_context_options(browser: Browser, server: Server) -> None:
+    context = await browser.new_context(
+        geolocation={"latitude": 10, "longitude": 10}, permissions=["geolocation"]
+    )
     page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
 
@@ -86,7 +87,9 @@ async def test_should_use_context_options(browser, server):
     await context.close()
 
 
-async def test_watch_position_should_be_notified(page, server, context):
+async def test_watch_position_should_be_notified(
+    page: Page, server: Server, context: BrowserContext
+) -> None:
     await context.grant_permissions(["geolocation"])
     await page.goto(server.EMPTY_PAGE)
     messages = []
@@ -117,7 +120,9 @@ async def test_watch_position_should_be_notified(page, server, context):
     assert "lat=40 lng=50" in all_messages
 
 
-async def test_should_use_context_options_for_popup(page, context, server):
+async def test_should_use_context_options_for_popup(
+    page: Page, context: BrowserContext, server: Server
+) -> None:
     await context.grant_permissions(["geolocation"])
     await context.set_geolocation({"latitude": 10, "longitude": 10})
     async with page.expect_popup() as popup_info:

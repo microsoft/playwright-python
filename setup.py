@@ -31,7 +31,7 @@ except ImportError:
     InWheel = None
 from wheel.bdist_wheel import bdist_wheel as BDistWheelCommand
 
-driver_version = "1.39.0"
+driver_version = "1.40.0-beta-1700587209000"
 
 
 def extractall(zip: zipfile.ZipFile, path: str) -> None:
@@ -225,7 +225,7 @@ setup(
     ],
     include_package_data=True,
     install_requires=[
-        "greenlet==3.0.0",
+        "greenlet==3.0.1",
         "pyee==11.0.1",
         "typing-extensions;python_version<='3.8'",
     ],

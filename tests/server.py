@@ -21,18 +21,31 @@ import socket
 import threading
 from contextlib import closing
 from http import HTTPStatus
-from typing import Any, Callable, Dict, Generator, Generic, Set, Tuple, TypeVar
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    Generic,
+    Optional,
+    Set,
+    Tuple,
+    TypeVar,
+    cast,
+)
 from urllib.parse import urlparse
 
 from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerProtocol
 from OpenSSL import crypto
-from twisted.internet import reactor, ssl
-from twisted.internet.protocol import ClientFactory
+from twisted.internet import reactor as _twisted_reactor
+from twisted.internet import ssl
+from twisted.internet.selectreactor import SelectReactor
 from twisted.web import http
 
 from playwright._impl._path_utils import get_file_dirname
 
 _dirname = get_file_dirname()
+reactor = cast(SelectReactor, _twisted_reactor)
 
 
 def find_free_port() -> int:
@@ -40,10 +53,6 @@ def find_free_port() -> int:
         s.bind(("", 0))
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         return s.getsockname()[1]
-
-
-class HttpRequestWithPostBody(http.Request):
-    post_body = None
 
 
 T = TypeVar("T")
@@ -58,6 +67,76 @@ class ExpectResponse(Generic[T]):
         if not hasattr(self, "_value"):
             raise ValueError("no received value")
         return self._value
+
+
+class TestServerRequest(http.Request):
+    __test__ = False
+    channel: "TestServerHTTPChannel"
+    post_body: Optional[bytes] = None
+
+    def process(self) -> None:
+        server = self.channel.factory.server_instance
+        if self.content:
+            self.post_body = self.content.read()
+            self.content.seek(0, 0)
+        else:
+            self.post_body = None
+        uri = urlparse(self.uri.decode())
+        path = uri.path
+
+        request_subscriber = server.request_subscribers.get(path)
+        if request_subscriber:
+            request_subscriber._loop.call_soon_threadsafe(
+                request_subscriber.set_result, self
+            )
+            server.request_subscribers.pop(path)
+
+        if server.auth.get(path):
+            authorization_header = self.requestHeaders.getRawHeaders("authorization")
+            creds_correct = False
+            if authorization_header:
+                creds_correct = server.auth.get(path) == (
+                    self.getUser().decode(),
+                    self.getPassword().decode(),
+                )
+            if not creds_correct:
+                self.setHeader(b"www-authenticate", 'Basic realm="Secure Area"')
+                self.setResponseCode(HTTPStatus.UNAUTHORIZED)
+                self.finish()
+                return
+        if server.csp.get(path):
+            self.setHeader(b"Content-Security-Policy", server.csp[path])
+        if server.routes.get(path):
+            server.routes[path](self)
+            return
+        file_content = None
+        try:
+            file_content = (server.static_path / path[1:]).read_bytes()
+            content_type = mimetypes.guess_type(path)[0]
+            if content_type and content_type.startswith("text/"):
+                content_type += "; charset=utf-8"
+            self.setHeader(b"Content-Type", content_type)
+            self.setHeader(b"Cache-Control", "no-cache, no-store")
+            if path in server.gzip_routes:
+                self.setHeader("Content-Encoding", "gzip")
+                self.write(gzip.compress(file_content))
+            else:
+                self.setHeader(b"Content-Length", str(len(file_content)))
+                self.write(file_content)
+            self.setResponseCode(HTTPStatus.OK)
+        except (FileNotFoundError, IsADirectoryError, PermissionError):
+            self.setResponseCode(HTTPStatus.NOT_FOUND)
+        self.finish()
+
+
+class TestServerHTTPChannel(http.HTTPChannel):
+    factory: "TestServerFactory"
+    requestFactory = TestServerRequest
+
+
+class TestServerFactory(http.HTTPFactory):
+    server_instance: "Server"
+    protocol = TestServerHTTPChannel
 
 
 class Server:
@@ -79,103 +158,39 @@ class Server:
         return self.PREFIX
 
     @abc.abstractmethod
-    def listen(self, factory: ClientFactory) -> None:
+    def listen(self, factory: TestServerFactory) -> None:
         pass
 
     def start(self) -> None:
         request_subscribers: Dict[str, asyncio.Future] = {}
         auth: Dict[str, Tuple[str, str]] = {}
         csp: Dict[str, str] = {}
-        routes: Dict[str, Callable[[http.Request], Any]] = {}
+        routes: Dict[str, Callable[[TestServerRequest], Any]] = {}
         gzip_routes: Set[str] = set()
         self.request_subscribers = request_subscribers
         self.auth = auth
         self.csp = csp
         self.routes = routes
         self.gzip_routes = gzip_routes
-        static_path = _dirname / "assets"
+        self.static_path = _dirname / "assets"
+        factory = TestServerFactory()
+        factory.server_instance = self
+        self.listen(factory)
 
-        class TestServerHTTPHandler(http.Request):
-            def process(self) -> None:
-                request = self
-                if request.content:
-                    self.post_body = request.content.read()
-                    request.content.seek(0, 0)
-                else:
-                    self.post_body = None
-                uri = urlparse(request.uri.decode())
-                path = uri.path
-
-                request_subscriber = request_subscribers.get(path)
-                if request_subscriber:
-                    request_subscriber._loop.call_soon_threadsafe(
-                        request_subscriber.set_result, request
-                    )
-                    request_subscribers.pop(path)
-
-                if auth.get(path):
-                    authorization_header = request.requestHeaders.getRawHeaders(
-                        "authorization"
-                    )
-                    creds_correct = False
-                    if authorization_header:
-                        creds_correct = auth.get(path) == (
-                            request.getUser().decode(),
-                            request.getPassword().decode(),
-                        )
-                    if not creds_correct:
-                        request.setHeader(
-                            b"www-authenticate", 'Basic realm="Secure Area"'
-                        )
-                        request.setResponseCode(HTTPStatus.UNAUTHORIZED)
-                        request.finish()
-                        return
-                if csp.get(path):
-                    request.setHeader(b"Content-Security-Policy", csp[path])
-                if routes.get(path):
-                    routes[path](request)
-                    return
-                file_content = None
-                try:
-                    file_content = (static_path / path[1:]).read_bytes()
-                    content_type = mimetypes.guess_type(path)[0]
-                    if content_type and content_type.startswith("text/"):
-                        content_type += "; charset=utf-8"
-                    request.setHeader(b"Content-Type", content_type)
-                    request.setHeader(b"Cache-Control", "no-cache, no-store")
-                    if path in gzip_routes:
-                        request.setHeader("Content-Encoding", "gzip")
-                        request.write(gzip.compress(file_content))
-                    else:
-                        request.setHeader(b"Content-Length", str(len(file_content)))
-                        request.write(file_content)
-                    self.setResponseCode(HTTPStatus.OK)
-                except (FileNotFoundError, IsADirectoryError, PermissionError):
-                    request.setResponseCode(HTTPStatus.NOT_FOUND)
-                self.finish()
-
-        class MyHttp(http.HTTPChannel):
-            requestFactory = TestServerHTTPHandler
-
-        class MyHttpFactory(http.HTTPFactory):
-            protocol = MyHttp
-
-        self.listen(MyHttpFactory())
-
-    async def wait_for_request(self, path: str) -> HttpRequestWithPostBody:
+    async def wait_for_request(self, path: str) -> TestServerRequest:
         if path in self.request_subscribers:
             return await self.request_subscribers[path]
-        future: asyncio.Future["HttpRequestWithPostBody"] = asyncio.Future()
+        future: asyncio.Future["TestServerRequest"] = asyncio.Future()
         self.request_subscribers[path] = future
         return await future
 
     @contextlib.contextmanager
     def expect_request(
         self, path: str
-    ) -> Generator[ExpectResponse[HttpRequestWithPostBody], None, None]:
+    ) -> Generator[ExpectResponse[TestServerRequest], None, None]:
         future = asyncio.create_task(self.wait_for_request(path))
 
-        cb_wrapper: ExpectResponse[HttpRequestWithPostBody] = ExpectResponse()
+        cb_wrapper: ExpectResponse[TestServerRequest] = ExpectResponse()
 
         def done_cb(task: asyncio.Task) -> None:
             cb_wrapper._value = future.result()
@@ -197,7 +212,7 @@ class Server:
         self.routes.clear()
 
     def set_route(
-        self, path: str, callback: Callable[[HttpRequestWithPostBody], Any]
+        self, path: str, callback: Callable[[TestServerRequest], Any]
     ) -> None:
         self.routes[path] = callback
 
@@ -214,7 +229,7 @@ class Server:
 
 
 class HTTPServer(Server):
-    def listen(self, factory: ClientFactory) -> None:
+    def listen(self, factory: http.HTTPFactory) -> None:
         reactor.listenTCP(self.PORT, factory, interface="127.0.0.1")
         try:
             reactor.listenTCP(self.PORT, factory, interface="::1")
@@ -225,7 +240,7 @@ class HTTPServer(Server):
 class HTTPSServer(Server):
     protocol = "https"
 
-    def listen(self, factory: ClientFactory) -> None:
+    def listen(self, factory: http.HTTPFactory) -> None:
         cert = ssl.PrivateCertificate.fromCertificateAndKeyPair(
             ssl.Certificate.loadPEM(
                 (_dirname / "testserver" / "cert.pem").read_bytes()
@@ -285,7 +300,7 @@ class TestServer:
         self.https_server.start()
         self.ws_server.start()
         self.thread = threading.Thread(
-            target=lambda: reactor.run(installSignalHandlers=0)
+            target=lambda: reactor.run(installSignalHandlers=False)
         )
         self.thread.start()
 

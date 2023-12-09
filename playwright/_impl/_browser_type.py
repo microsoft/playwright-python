@@ -15,7 +15,7 @@
 import asyncio
 import pathlib
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Union, cast
+from typing import TYPE_CHECKING, Dict, Optional, Pattern, Sequence, Union, cast
 
 from playwright._impl._api_structures import (
     Geolocation,
@@ -23,18 +23,16 @@ from playwright._impl._api_structures import (
     ProxySettings,
     ViewportSize,
 )
-from playwright._impl._api_types import Error
 from playwright._impl._browser import Browser, prepare_browser_context_params
 from playwright._impl._browser_context import BrowserContext
 from playwright._impl._connection import (
     ChannelOwner,
     Connection,
-    filter_none,
     from_channel,
     from_nullable_channel,
 )
+from playwright._impl._errors import Error
 from playwright._impl._helper import (
-    BROWSER_CLOSED_ERROR,
     ColorScheme,
     Env,
     ForcedColors,
@@ -46,7 +44,7 @@ from playwright._impl._helper import (
 )
 from playwright._impl._json_pipe import JsonPipeTransport
 from playwright._impl._network import serialize_headers
-from playwright._impl._wait_helper import throw_on_timeout
+from playwright._impl._waiter import throw_on_timeout
 
 if TYPE_CHECKING:
     from playwright._impl._playwright import Playwright
@@ -74,8 +72,8 @@ class BrowserType(ChannelOwner):
         self,
         executablePath: Union[str, Path] = None,
         channel: str = None,
-        args: List[str] = None,
-        ignoreDefaultArgs: Union[bool, List[str]] = None,
+        args: Sequence[str] = None,
+        ignoreDefaultArgs: Union[bool, Sequence[str]] = None,
         handleSIGINT: bool = None,
         handleSIGTERM: bool = None,
         handleSIGHUP: bool = None,
@@ -109,8 +107,8 @@ class BrowserType(ChannelOwner):
         userDataDir: Union[str, Path],
         channel: str = None,
         executablePath: Union[str, Path] = None,
-        args: List[str] = None,
-        ignoreDefaultArgs: Union[bool, List[str]] = None,
+        args: Sequence[str] = None,
+        ignoreDefaultArgs: Union[bool, Sequence[str]] = None,
         handleSIGINT: bool = None,
         handleSIGTERM: bool = None,
         handleSIGHUP: bool = None,
@@ -131,7 +129,7 @@ class BrowserType(ChannelOwner):
         locale: str = None,
         timezoneId: str = None,
         geolocation: Geolocation = None,
-        permissions: List[str] = None,
+        permissions: Sequence[str] = None,
         extraHTTPHeaders: Dict[str, str] = None,
         offline: bool = None,
         httpCredentials: HttpCredentials = None,
@@ -144,6 +142,7 @@ class BrowserType(ChannelOwner):
         acceptDownloads: bool = None,
         tracesDir: Union[pathlib.Path, str] = None,
         chromiumSandbox: bool = None,
+        firefoxUserPrefs: Dict[str, Union[str, float, bool]] = None,
         recordHarPath: Union[Path, str] = None,
         recordHarOmitContent: bool = None,
         recordVideoDir: Union[Path, str] = None,
@@ -206,15 +205,13 @@ class BrowserType(ChannelOwner):
         pipe_channel = (
             await local_utils._channel.send_return_as_dict(
                 "connect",
-                filter_none(
-                    {
-                        "wsEndpoint": ws_endpoint,
-                        "headers": headers,
-                        "slowMo": slow_mo,
-                        "timeout": timeout,
-                        "exposeNetwork": expose_network,
-                    }
-                ),
+                {
+                    "wsEndpoint": ws_endpoint,
+                    "headers": headers,
+                    "slowMo": slow_mo,
+                    "timeout": timeout,
+                    "exposeNetwork": expose_network,
+                },
             )
         )["pipe"]
         transport = JsonPipeTransport(self._connection._loop, pipe_channel)
@@ -255,7 +252,7 @@ class BrowserType(ChannelOwner):
                     page._on_close()
                 context._on_close()
             browser._on_close()
-            connection.cleanup(BROWSER_CLOSED_ERROR)
+            connection.cleanup()
 
         transport.once("close", handle_transport_close)
 

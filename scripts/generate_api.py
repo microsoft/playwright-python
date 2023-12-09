@@ -15,17 +15,7 @@
 import re
 import sys
 from types import FunctionType
-from typing import (  # type: ignore
-    Any,
-    Dict,
-    List,
-    Match,
-    Optional,
-    Union,
-    cast,
-    get_args,
-    get_origin,
-)
+from typing import Any, Dict, List, Match, Optional, Union, cast, get_args, get_origin
 from typing import get_type_hints as typing_get_type_hints
 
 from playwright._impl._accessibility import Accessibility
@@ -148,7 +138,7 @@ def arguments(func: FunctionType, indent: int) -> str:
         elif (
             "typing.Any" in value_str
             or "typing.Dict" in value_str
-            or "typing.List" in value_str
+            or "typing.Sequence" in value_str
             or "Handle" in value_str
         ):
             tokens.append(f"{name}=mapping.to_impl({to_snake_case(name)})")
@@ -191,7 +181,10 @@ def return_value(value: Any) -> List[str]:
         and str(get_args(value)[1]) == "<class 'NoneType'>"
     ):
         return ["mapping.from_impl_nullable(", ")"]
-    if str(get_origin(value)) == "<class 'list'>":
+    if str(get_origin(value)) in [
+        "<class 'list'>",
+        "<class 'collections.abc.Sequence'>",
+    ]:
         return ["mapping.from_impl_list(", ")"]
     if str(get_origin(value)) == "<class 'dict'>":
         return ["mapping.from_impl_dict(", ")"]
@@ -246,7 +239,7 @@ from playwright._impl._selectors import Selectors as SelectorsImpl
 from playwright._impl._video import Video as VideoImpl
 from playwright._impl._tracing import Tracing as TracingImpl
 from playwright._impl._locator import Locator as LocatorImpl, FrameLocator as FrameLocatorImpl
-from playwright._impl._api_types import Error
+from playwright._impl._errors import Error
 from playwright._impl._fetch import APIRequest as APIRequestImpl, APIResponse as APIResponseImpl, APIRequestContext as APIRequestContextImpl
 from playwright._impl._assertions import PageAssertions as PageAssertionsImpl, LocatorAssertions as LocatorAssertionsImpl, APIResponseAssertions as APIResponseAssertionsImpl
 """

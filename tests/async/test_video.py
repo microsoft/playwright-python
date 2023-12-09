@@ -13,19 +13,30 @@
 # limitations under the License.
 
 import os
+from pathlib import Path
+from typing import Dict
+
+from playwright.async_api import Browser, BrowserType
+from tests.server import Server
 
 
-async def test_should_expose_video_path(browser, tmpdir, server):
+async def test_should_expose_video_path(
+    browser: Browser, tmpdir: Path, server: Server
+) -> None:
     page = await browser.new_page(record_video_dir=tmpdir)
     await page.goto(server.PREFIX + "/grid.html")
+    assert page.video
     path = await page.video.path()
     assert str(tmpdir) in str(path)
     await page.context.close()
 
 
-async def test_short_video_should_throw(browser, tmpdir, server):
+async def test_short_video_should_throw(
+    browser: Browser, tmpdir: Path, server: Server
+) -> None:
     page = await browser.new_page(record_video_dir=tmpdir)
     await page.goto(server.PREFIX + "/grid.html")
+    assert page.video
     path = await page.video.path()
     assert str(tmpdir) in str(path)
     await page.wait_for_timeout(1000)
@@ -34,8 +45,8 @@ async def test_short_video_should_throw(browser, tmpdir, server):
 
 
 async def test_short_video_should_throw_persistent_context(
-    browser_type, tmpdir, launch_arguments, server
-):
+    browser_type: BrowserType, tmpdir: Path, launch_arguments: Dict, server: Server
+) -> None:
     context = await browser_type.launch_persistent_context(
         str(tmpdir),
         **launch_arguments,
@@ -47,17 +58,19 @@ async def test_short_video_should_throw_persistent_context(
     await page.wait_for_timeout(1000)
     await context.close()
 
+    assert page.video
     path = await page.video.path()
     assert str(tmpdir) in str(path)
 
 
 async def test_should_not_error_if_page_not_closed_before_save_as(
-    browser, tmpdir, server
-):
+    browser: Browser, tmpdir: Path, server: Server
+) -> None:
     page = await browser.new_page(record_video_dir=tmpdir)
     await page.goto(server.PREFIX + "/grid.html")
     await page.wait_for_timeout(1000)  # make sure video has some data
     out_path = tmpdir / "some-video.webm"
+    assert page.video
     saved = page.video.save_as(out_path)
     await page.close()
     await saved

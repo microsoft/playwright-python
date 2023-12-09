@@ -23,8 +23,8 @@ from tests.server import Server
 
 async def test_should_fulfill_intercepted_response(
     page: Page, context: BrowserContext, server: Server
-):
-    async def handle(route: Route):
+) -> None:
+    async def handle(route: Route) -> None:
         response = await page.request.fetch(route.request)
         await route.fulfill(
             response=response,
@@ -36,6 +36,7 @@ async def test_should_fulfill_intercepted_response(
 
     await context.route("**/*", handle)
     response = await page.goto(server.PREFIX + "/empty.html")
+    assert response
     assert response.status == 201
     assert response.headers["foo"] == "bar"
     assert response.headers["content-type"] == "text/plain"
@@ -44,8 +45,8 @@ async def test_should_fulfill_intercepted_response(
 
 async def test_should_fulfill_response_with_empty_body(
     page: Page, context: BrowserContext, server: Server
-):
-    async def handle(route: Route):
+) -> None:
+    async def handle(route: Route) -> None:
         response = await page.request.fetch(route.request)
         await route.fulfill(
             response=response, status=201, body="", headers={"content-length": "0"}
@@ -53,26 +54,28 @@ async def test_should_fulfill_response_with_empty_body(
 
     await context.route("**/*", handle)
     response = await page.goto(server.PREFIX + "/title.html")
+    assert response
     assert response.status == 201
     assert await response.text() == ""
 
 
 async def test_should_override_with_defaults_when_intercepted_response_not_provided(
     page: Page, context: BrowserContext, server: Server, browser_name: str
-):
-    def server_handler(request: http.Request):
+) -> None:
+    def server_handler(request: http.Request) -> None:
         request.setHeader("foo", "bar")
         request.write("my content".encode())
         request.finish()
 
     server.set_route("/empty.html", server_handler)
 
-    async def handle(route: Route):
+    async def handle(route: Route) -> None:
         await page.request.fetch(route.request)
         await route.fulfill(status=201)
 
     await context.route("**/*", handle)
     response = await page.goto(server.EMPTY_PAGE)
+    assert response
     assert response.status == 201
     assert await response.text() == ""
     if browser_name == "webkit":
@@ -83,8 +86,8 @@ async def test_should_override_with_defaults_when_intercepted_response_not_provi
 
 async def test_should_fulfill_with_any_response(
     page: Page, context: BrowserContext, server: Server
-):
-    def server_handler(request: http.Request):
+) -> None:
+    def server_handler(request: http.Request) -> None:
         request.setHeader("foo", "bar")
         request.write("Woo-hoo".encode())
         request.finish()
@@ -98,6 +101,7 @@ async def test_should_fulfill_with_any_response(
         ),
     )
     response = await page.goto(server.EMPTY_PAGE)
+    assert response
     assert response.status == 201
     assert await response.text() == "Woo-hoo"
     assert response.headers["foo"] == "bar"
@@ -105,15 +109,16 @@ async def test_should_fulfill_with_any_response(
 
 async def test_should_support_fulfill_after_intercept(
     page: Page, context: BrowserContext, server: Server, assetdir: Path
-):
+) -> None:
     request_future = asyncio.create_task(server.wait_for_request("/title.html"))
 
-    async def handle_route(route: Route):
+    async def handle_route(route: Route) -> None:
         response = await page.request.fetch(route.request)
         await route.fulfill(response=response)
 
     await context.route("**", handle_route)
     response = await page.goto(server.PREFIX + "/title.html")
+    assert response
     request = await request_future
     assert request.uri.decode() == "/title.html"
     original = (assetdir / "title.html").read_text()
@@ -122,10 +127,10 @@ async def test_should_support_fulfill_after_intercept(
 
 async def test_should_give_access_to_the_intercepted_response(
     page: Page, context: BrowserContext, server: Server
-):
+) -> None:
     await page.goto(server.EMPTY_PAGE)
 
-    route_task = asyncio.Future()
+    route_task: "asyncio.Future[Route]" = asyncio.Future()
     await context.route("**/title.html", lambda route: route_task.set_result(route))
 
     eval_task = asyncio.create_task(
@@ -155,10 +160,10 @@ async def test_should_give_access_to_the_intercepted_response(
 
 async def test_should_give_access_to_the_intercepted_response_body(
     page: Page, context: BrowserContext, server: Server
-):
+) -> None:
     await page.goto(server.EMPTY_PAGE)
 
-    route_task = asyncio.Future()
+    route_task: "asyncio.Future[Route]" = asyncio.Future()
     await context.route("**/simple.json", lambda route: route_task.set_result(route))
 
     eval_task = asyncio.create_task(
