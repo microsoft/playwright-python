@@ -206,7 +206,7 @@ setup(
     name="undetected-playwright-patch",
     author="Microsoft Corporation, patches by github.com/kaliiiiiiiiii",
     author_email="",
-    description="Undetected version of botright",
+    description="Undetected version of playwright",
     long_description=Path("README.md").read_text(encoding="utf-8"),
     long_description_content_type="text/markdown",
     license="Apache-2.0",
