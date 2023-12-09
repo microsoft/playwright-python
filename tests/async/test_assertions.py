@@ -18,7 +18,7 @@ from datetime import datetime
 
 import pytest
 
-from playwright.async_api import Browser, Error, Page, expect
+from undetected_playwright.async_api import Browser, Error, Page, expect
 from tests.server import Server
 
 

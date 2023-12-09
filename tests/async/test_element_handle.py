@@ -17,7 +17,7 @@ from typing import Optional, cast
 
 import pytest
 
-from playwright.async_api import Browser, ElementHandle, Error, FloatRect, Page
+from undetected_playwright.async_api import Browser, ElementHandle, Error, FloatRect, Page
 from tests.server import Server
 
 from .utils import Utils

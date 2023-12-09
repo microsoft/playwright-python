@@ -19,7 +19,7 @@ from typing import AsyncGenerator, Awaitable, Callable
 import pytest
 from flaky import flaky
 
-from playwright.async_api import Browser, BrowserContext
+from undetected_playwright.async_api import Browser, BrowserContext
 from tests.server import Server, TestServerRequest
 
 

@@ -1,5 +1,5 @@
 import asyncio
-from playwright.async_api import async_playwright, Playwright
+from undetected_playwright.async_api import async_playwright, Playwright
 
 
 async def run(playwright: Playwright):

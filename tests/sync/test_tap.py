@@ -16,7 +16,7 @@ from typing import Generator, Optional
 
 import pytest
 
-from playwright.sync_api import Browser, BrowserContext, ElementHandle, JSHandle, Page
+from undetected_playwright.sync_api import Browser, BrowserContext, ElementHandle, JSHandle, Page
 
 
 @pytest.fixture

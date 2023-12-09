@@ -21,7 +21,7 @@ from typing import Callable
 import pytest
 from flaky import flaky
 
-from playwright.async_api import BrowserType, Error, Playwright, Route
+from undetected_playwright.async_api import BrowserType, Error, Playwright, Route
 from tests.conftest import RemoteServer
 from tests.server import Server, TestServerRequest
 from tests.utils import parse_trace

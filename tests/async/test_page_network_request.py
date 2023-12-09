@@ -16,7 +16,7 @@ import asyncio
 
 import pytest
 
-from playwright.async_api import Error, Page, Request
+from undetected_playwright.async_api import Error, Page, Request
 from tests.server import Server
 
 

@@ -1,5 +1,5 @@
-# undetected-playwright here!
-from playwright.sync_api import sync_playwright
+# undetected-undetected_playwright here!
+from undetected_playwright.sync_api import sync_playwright
 
 
 with sync_playwright() as p:

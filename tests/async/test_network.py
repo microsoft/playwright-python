@@ -22,7 +22,7 @@ import pytest
 from flaky import flaky
 from twisted.web import http
 
-from playwright.async_api import Browser, Error, Page, Request, Response, Route
+from undetected_playwright.async_api import Browser, Error, Page, Request, Response, Route
 from tests.server import Server, TestServerRequest
 
 from .utils import Utils

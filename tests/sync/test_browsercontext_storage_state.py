@@ -15,7 +15,7 @@
 import json
 from pathlib import Path
 
-from playwright.sync_api import Browser, BrowserContext
+from undetected_playwright.sync_api import Browser, BrowserContext
 
 
 def test_should_capture_local_storage(context: BrowserContext) -> None:

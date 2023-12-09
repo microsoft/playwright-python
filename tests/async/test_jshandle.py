@@ -17,7 +17,7 @@ import math
 from datetime import datetime
 from typing import Any, Dict
 
-from playwright.async_api import Page
+from undetected_playwright.async_api import Page
 
 
 async def test_jshandle_evaluate_work(page: Page) -> None:

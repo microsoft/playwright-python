@@ -14,7 +14,7 @@
 
 import pytest
 
-from playwright.async_api import Page
+from undetected_playwright.async_api import Page
 
 
 async def test_should_work(page: Page) -> None:

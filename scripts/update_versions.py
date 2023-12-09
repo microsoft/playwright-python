@@ -14,7 +14,7 @@
 import re
 from pathlib import Path
 
-from playwright.sync_api import sync_playwright
+from undetected_playwright.sync_api import sync_playwright
 
 
 def main() -> None:

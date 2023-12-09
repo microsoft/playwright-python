@@ -16,7 +16,7 @@ import datetime
 
 import pytest
 
-from playwright.async_api import BrowserContext, Page
+from undetected_playwright.async_api import BrowserContext, Page
 from tests.server import Server
 
 

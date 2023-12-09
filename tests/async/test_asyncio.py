@@ -17,7 +17,7 @@ from typing import Dict
 
 import pytest
 
-from playwright.async_api import Page, async_playwright
+from undetected_playwright.async_api import Page, async_playwright
 from tests.server import Server
 from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
 

@@ -129,7 +129,7 @@ def main() -> None:
 
     print(header)
     print(
-        "from playwright._impl._sync_base import EventContextManager, SyncBase, SyncContextManager, mapping"
+        "from undetected_playwright._impl._sync_base import EventContextManager, SyncBase, SyncContextManager, mapping"
     )
 
     for t in generated_types:

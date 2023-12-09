@@ -22,7 +22,7 @@ from typing import cast
 
 import pytest
 
-from playwright.async_api import Browser, BrowserContext, Error, Page, Route, expect
+from undetected_playwright.async_api import Browser, BrowserContext, Error, Page, Route, expect
 from tests.server import Server
 
 
@@ -387,7 +387,7 @@ async def test_should_support_regex_filter(
 ) -> None:
     await context.route_from_har(
         har=assetdir / "har-fulfill.har",
-        url=re.compile(r".*(\.js|.*\.css|no.playwright\/)"),
+        url=re.compile(r".*(\.js|.*\.css|no.undetected_playwright\/)"),
     )
     page = await context.new_page()
     await page.goto("http://no.playwright/")

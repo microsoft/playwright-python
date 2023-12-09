@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright.sync_api import Page
+from undetected_playwright.sync_api import Page
 
 
 def test_should_work_with_internal_and(page: Page) -> None:

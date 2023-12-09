@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright.sync_api import Browser, BrowserType
+from undetected_playwright.sync_api import Browser, BrowserType
 
 
 def test_should_return_browser_type(

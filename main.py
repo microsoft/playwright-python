@@ -1,7 +1,7 @@
 import asyncio
 
-# undetected-playwright here!
-from playwright.async_api import async_playwright, Playwright
+# undetected-undetected_playwright here!
+from undetected_playwright.async_api import async_playwright, Playwright
 
 
 async def run(playwright: Playwright):

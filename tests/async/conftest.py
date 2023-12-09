@@ -17,7 +17,7 @@ from typing import Any, AsyncGenerator, Awaitable, Callable, Dict, Generator, Li
 
 import pytest
 
-from playwright.async_api import (
+from undetected_playwright.async_api import (
     Browser,
     BrowserContext,
     BrowserType,

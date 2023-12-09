@@ -15,7 +15,7 @@
 import threading
 from typing import Dict
 
-from playwright.sync_api import sync_playwright
+from undetected_playwright.sync_api import sync_playwright
 
 
 def test_running_in_thread(browser_name: str, launch_arguments: Dict) -> None:

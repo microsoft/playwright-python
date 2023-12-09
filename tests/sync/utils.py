@@ -15,7 +15,7 @@
 import re
 from typing import Any, List, cast
 
-from playwright.sync_api import Error, Frame, Page, Selectors, ViewportSize
+from undetected_playwright.sync_api import Error, Frame, Page, Selectors, ViewportSize
 
 
 class Utils:

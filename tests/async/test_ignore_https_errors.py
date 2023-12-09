@@ -14,7 +14,7 @@
 
 import pytest
 
-from playwright.async_api import Browser, Error
+from undetected_playwright.async_api import Browser, Error
 from tests.server import Server
 
 

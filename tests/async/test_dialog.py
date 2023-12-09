@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright.async_api import Browser, Dialog, Page
+from undetected_playwright.async_api import Browser, Dialog, Page
 
 
 async def test_should_fire(page: Page) -> None:

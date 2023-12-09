@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright.sync_api import Page
+from undetected_playwright.sync_api import Page
 
 
 def test_check_the_box(page: Page) -> None:

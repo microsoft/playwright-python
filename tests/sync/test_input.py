@@ -16,7 +16,7 @@ import os
 from pathlib import Path
 from typing import Any
 
-from playwright.sync_api import Page
+from undetected_playwright.sync_api import Page
 
 
 def test_expect_file_chooser(page: Page) -> None:

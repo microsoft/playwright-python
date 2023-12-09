@@ -23,8 +23,8 @@ from typing import Any
 import pytest
 from flaky import flaky
 
-from playwright._impl._path_utils import get_file_dirname
-from playwright.async_api import FilePayload, Page
+from undetected_playwright._impl._path_utils import get_file_dirname
+from undetected_playwright.async_api import FilePayload, Page
 from tests.server import Server
 from tests.utils import must
 

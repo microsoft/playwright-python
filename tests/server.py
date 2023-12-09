@@ -42,7 +42,7 @@ from twisted.internet import ssl
 from twisted.internet.selectreactor import SelectReactor
 from twisted.web import http
 
-from playwright._impl._path_utils import get_file_dirname
+from undetected_playwright._impl._path_utils import get_file_dirname
 
 _dirname = get_file_dirname()
 reactor = cast(SelectReactor, _twisted_reactor)

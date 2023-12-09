@@ -16,7 +16,7 @@ import re
 
 import pytest
 
-from playwright.async_api import Browser, BrowserType, Error
+from undetected_playwright.async_api import Browser, BrowserType, Error
 
 
 async def test_should_create_new_page(browser: Browser) -> None:

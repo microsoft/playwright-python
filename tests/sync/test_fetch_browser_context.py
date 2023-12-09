@@ -18,7 +18,7 @@ from urllib.parse import parse_qs
 
 import pytest
 
-from playwright.sync_api import BrowserContext, Error, FilePayload, Page
+from undetected_playwright.sync_api import BrowserContext, Error, FilePayload, Page
 from tests.server import Server
 from tests.utils import must
 

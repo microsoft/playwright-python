@@ -15,7 +15,7 @@
 from pathlib import Path
 from typing import Dict
 
-from playwright.async_api import Browser, BrowserType
+from undetected_playwright.async_api import Browser, BrowserType
 from tests.server import Server
 from tests.utils import must
 

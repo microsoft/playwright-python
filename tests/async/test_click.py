@@ -17,7 +17,7 @@ from typing import Optional
 
 import pytest
 
-from playwright.async_api import Browser, Error, Page, Playwright, TimeoutError
+from undetected_playwright.async_api import Browser, Error, Page, Playwright, TimeoutError
 from tests.server import Server
 
 from .utils import Utils

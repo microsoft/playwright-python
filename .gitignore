@@ -1,6 +1,6 @@
 **/__pycache__/
 driver/
-playwright/driver/
+undetected_playwright/driver/
 playwright.egg-info/
 build/
 dist/

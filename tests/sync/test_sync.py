@@ -18,7 +18,7 @@ from typing import Any, Dict
 
 import pytest
 
-from playwright.sync_api import (
+from undetected_playwright.sync_api import (
     Browser,
     BrowserContext,
     Dialog,
@@ -163,7 +163,7 @@ def test_sync_wait_for_event_raise(page: Page) -> None:
 
 def test_sync_make_existing_page_sync(page: Page) -> None:
     page = page
-    assert page.evaluate("() => ({'playwright': true})") == {"playwright": True}
+    assert page.evaluate("() => ({'undetected_playwright': true})") == {"undetected_playwright": True}
     page.set_content("<h1>myElement</h1>")
     page.wait_for_selector("text=myElement")
 

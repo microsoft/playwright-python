@@ -14,7 +14,7 @@
 
 import pytest
 
-from playwright.sync_api import Error, Page
+from undetected_playwright.sync_api import Error, Page
 
 
 def test_should_wait_for_visible(page: Page) -> None:

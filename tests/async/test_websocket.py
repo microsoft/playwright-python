@@ -18,7 +18,7 @@ from typing import Union
 import pytest
 from flaky import flaky
 
-from playwright.async_api import Error, Page, WebSocket
+from undetected_playwright.async_api import Error, Page, WebSocket
 from tests.conftest import WebSocketServerServer
 from tests.server import Server
 

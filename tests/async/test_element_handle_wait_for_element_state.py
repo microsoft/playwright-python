@@ -17,7 +17,7 @@ from typing import List
 
 import pytest
 
-from playwright.async_api import ElementHandle, Error, Page
+from undetected_playwright.async_api import ElementHandle, Error, Page
 from tests.server import Server
 
 

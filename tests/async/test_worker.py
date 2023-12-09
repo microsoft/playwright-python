@@ -18,7 +18,7 @@ from asyncio.futures import Future
 import pytest
 from flaky import flaky
 
-from playwright.async_api import Browser, ConsoleMessage, Error, Page, Worker
+from undetected_playwright.async_api import Browser, ConsoleMessage, Error, Page, Worker
 from tests.server import Server
 from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
 

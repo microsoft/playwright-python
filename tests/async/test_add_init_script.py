@@ -15,7 +15,7 @@
 from pathlib import Path
 from typing import Optional
 
-from playwright.async_api import BrowserContext, Error, Page
+from undetected_playwright.async_api import BrowserContext, Error, Page
 
 
 async def test_add_init_script_evaluate_before_anything_else_on_the_page(

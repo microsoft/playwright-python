@@ -19,7 +19,7 @@ from typing import Any, AsyncGenerator, Awaitable, Callable, Dict, Optional, Tup
 
 import pytest
 
-from playwright.async_api import BrowserContext, BrowserType, Error, Page, expect
+from undetected_playwright.async_api import BrowserContext, BrowserType, Error, Page, expect
 from tests.server import Server
 from tests.utils import must
 

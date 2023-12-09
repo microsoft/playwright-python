@@ -37,7 +37,7 @@ pytest --browser chromium
 Checking for typing errors
 
 ```sh
-mypy playwright
+mypy undetected_playwright
 ```
 
 Format the code
@@ -52,7 +52,7 @@ For more details look at the [CI configuration](./blob/main/.github/workflows/ci
 Collect coverage
 
 ```sh
-pytest --browser chromium --cov-report html --cov=playwright
+pytest --browser chromium --cov-report html --cov=undetected_playwright
 open htmlcov/index.html
 ```
 

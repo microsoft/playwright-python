@@ -15,7 +15,7 @@
 import asyncio
 from typing import Optional
 
-from playwright.async_api import Page, Route
+from undetected_playwright.async_api import Page, Route
 from tests.server import Server
 
 

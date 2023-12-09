@@ -19,7 +19,7 @@ from typing import Dict, Optional
 
 import pytest
 
-from playwright.async_api import BrowserType, Error
+from undetected_playwright.async_api import BrowserType, Error
 from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
 
 

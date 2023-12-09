@@ -14,7 +14,7 @@
 
 import re
 
-from playwright.async_api import Page, expect
+from undetected_playwright.async_api import Page, expect
 
 
 async def test_get_by_escaping(page: Page) -> None:

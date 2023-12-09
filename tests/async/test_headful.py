@@ -18,7 +18,7 @@ from typing import Dict
 
 import pytest
 
-from playwright.async_api import BrowserType
+from undetected_playwright.async_api import BrowserType
 from tests.server import Server
 
 

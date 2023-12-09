@@ -21,7 +21,7 @@ from typing import Any, cast
 
 import pytest
 
-from playwright.sync_api import Browser, BrowserContext, Error, Page, Route, expect
+from undetected_playwright.sync_api import Browser, BrowserContext, Error, Page, Route, expect
 from tests.server import Server
 
 
@@ -347,7 +347,7 @@ def test_should_support_regex_filter(
 ) -> None:
     context.route_from_har(
         har=assetdir / "har-fulfill.har",
-        url=re.compile(r".*(\.js|.*\.css|no.playwright\/)"),
+        url=re.compile(r".*(\.js|.*\.css|no.undetected_playwright\/)"),
     )
     page = context.new_page()
     page.goto("http://no.playwright/")

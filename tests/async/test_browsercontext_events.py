@@ -17,7 +17,7 @@ from typing import Optional
 
 import pytest
 
-from playwright.async_api import Page
+from undetected_playwright.async_api import Page
 from tests.utils import must
 
 from ..server import Server, TestServerRequest

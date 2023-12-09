@@ -20,7 +20,7 @@ from typing import Callable, List, Optional
 
 import pytest
 
-from playwright.async_api import (
+from undetected_playwright.async_api import (
     Browser,
     BrowserContext,
     Error,

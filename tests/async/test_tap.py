@@ -17,7 +17,7 @@ from typing import AsyncGenerator, Optional, cast
 
 import pytest
 
-from playwright.async_api import Browser, BrowserContext, ElementHandle, JSHandle, Page
+from undetected_playwright.async_api import Browser, BrowserContext, ElementHandle, JSHandle, Page
 
 
 @pytest.fixture

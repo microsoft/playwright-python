@@ -14,7 +14,7 @@ Playwright is a Python library to automate [Chromium](https://www.chromium.org/H
 ## Example
 
 ```py
-from playwright.sync_api import sync_playwright
+from undetected_playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     for browser_type in [p.chromium, p.firefox, p.webkit]:
@@ -27,7 +27,8 @@ with sync_playwright() as p:
 
 ```py
 import asyncio
-from playwright.async_api import async_playwright
+from undetected_playwright.async_api import async_playwright
+
 
 async def main():
     async with async_playwright() as p:
@@ -37,6 +38,7 @@ async def main():
             await page.goto('http://playwright.dev')
             await page.screenshot(path=f'example-{browser_type.name}.png')
             await browser.close()
+
 
 asyncio.run(main())
 ```

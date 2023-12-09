@@ -19,7 +19,7 @@ from sys import stderr
 from typing import Any, Dict, List, Set, Union, get_args, get_origin, get_type_hints
 from urllib.parse import urljoin
 
-from playwright._impl._helper import to_snake_case
+from undetected_playwright._impl._helper import to_snake_case
 
 enum_regex = r"^\"[^\"]+\"(?:\|\"[^\"]+\")+$"
 union_regex = r"^[^\|]+(?:\|[^\|]+)+$"
@@ -32,7 +32,7 @@ class DocumentationProvider:
         self.links: Dict[str, str] = {}
         self.printed_entries: List[str] = []
         process_output = subprocess.run(
-            ["python", "-m", "playwright", "print-api-json"],
+            ["python", "-m", "undetected_playwright", "print-api-json"],
             check=True,
             capture_output=True,
         )
@@ -314,7 +314,7 @@ class DocumentationProvider:
         str_value = str(value)
         if isinstance(value, list):
             return f"[{', '.join(list(map(lambda a: self.serialize_python_type(a, direction), value)))}]"
-        if str_value == "<class 'playwright._impl._errors.Error'>":
+        if str_value == "<class 'undetected_playwright._impl._errors.Error'>":
             return "Error"
         if str_value == "<class 'NoneType'>":
             return "None"
@@ -322,12 +322,12 @@ class DocumentationProvider:
         if match:
             return match.group(1)
         match = re.match(
-            r"playwright._impl._event_context_manager.EventContextManagerImpl\[playwright._impl.[^.]+.(.*)\]",
+            r"undetected_playwright._impl._event_context_manager.EventContextManagerImpl\[undetected_playwright._impl.[^.]+.(.*)\]",
             str_value,
         )
         if match:
             return "EventContextManager[" + match.group(1) + "]"
-        match = re.match(r"^<class 'playwright\._impl\.[\w_]+\.([^']+)'>$", str_value)
+        match = re.match(r"^<class 'undetected_playwright\._impl\.[\w_]+\.([^']+)'>$", str_value)
         if match and "_api_structures" not in str_value and "_errors" not in str_value:
             if match.group(1) == "EventContextManagerImpl":
                 return "EventContextManager"

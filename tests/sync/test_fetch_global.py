@@ -18,7 +18,7 @@ from urllib.parse import urlparse
 
 import pytest
 
-from playwright.sync_api import APIResponse, Error, Playwright, StorageState
+from undetected_playwright.sync_api import APIResponse, Error, Playwright, StorageState
 from tests.server import Server
 
 

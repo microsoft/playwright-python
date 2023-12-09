@@ -15,7 +15,7 @@ from typing import Dict
 
 import pytest
 
-from playwright.async_api import Playwright
+from undetected_playwright.async_api import Playwright
 
 
 @pytest.mark.only_browser("chromium")

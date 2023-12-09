@@ -14,7 +14,7 @@
 
 import re
 
-from playwright.sync_api import Page, expect
+from undetected_playwright.sync_api import Page, expect
 
 
 def test_get_by_test_id(page: Page) -> None:

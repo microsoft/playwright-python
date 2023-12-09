@@ -16,7 +16,7 @@ import asyncio
 import json
 from pathlib import Path
 
-from playwright.async_api import Browser, BrowserContext
+from undetected_playwright.async_api import Browser, BrowserContext
 
 
 async def test_should_capture_local_storage(context: BrowserContext) -> None:

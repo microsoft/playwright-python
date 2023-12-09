@@ -17,7 +17,7 @@ from typing import cast
 
 import pytest
 
-from playwright.async_api import Error, Page, Route, expect
+from undetected_playwright.async_api import Error, Page, Route, expect
 from tests.server import Server, TestServerRequest
 
 

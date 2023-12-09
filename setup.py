@@ -44,7 +44,7 @@ def extractall(zip: zipfile.ZipFile, path: str) -> None:
 
 
 def download_driver(zip_name: str) -> None:
-    zip_file = f"playwright-{driver_version}-{zip_name}.zip"
+    zip_file = f"undetected_playwright-{driver_version}-{zip_name}.zip"
     if os.path.exists("driver/" + zip_file):
         return
     url = "https://playwright.azureedge.net/builds/driver/"
@@ -73,10 +73,10 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
     def run(self) -> None:
         shutil.rmtree("build", ignore_errors=True)
         shutil.rmtree("dist", ignore_errors=True)
-        shutil.rmtree("playwright.egg-info", ignore_errors=True)
+        shutil.rmtree("undetected_playwright.egg-info", ignore_errors=True)
         super().run()
         os.makedirs("driver", exist_ok=True)
-        os.makedirs("playwright/driver", exist_ok=True)
+        os.makedirs("undetected_playwright/driver", exist_ok=True)
         base_wheel_bundles: List[Dict[str, str]] = [
             {
                 "wheel": "macosx_10_13_x86_64.whl",
@@ -144,7 +144,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
         for wheel_bundle in wheels:
             download_driver(wheel_bundle["zip_name"])
             zip_file = (
-                f"driver/playwright-{driver_version}-{wheel_bundle['zip_name']}.zip"
+                f"driver/undetected_playwright-{driver_version}-{wheel_bundle['zip_name']}.zip"
             )
             with zipfile.ZipFile(zip_file, "r") as zip:
                 extractall(zip, f"driver/{wheel_bundle['zip_name']}")
@@ -159,9 +159,9 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
                     for file in files:
                         from_path = os.path.join(dir_path, file)
                         to_path = os.path.relpath(from_path, driver_root)
-                        zip.write(from_path, f"playwright/driver/{to_path}")
+                        zip.write(from_path, f"undetected_playwright/driver/{to_path}")
                 zip.writestr(
-                    "playwright/driver/README.md",
+                    "undetected_playwright/driver/README.md",
                     f"{wheel_bundle['wheel']} driver package",
                 )
         os.remove(base_wheel_location)
@@ -196,17 +196,17 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
         assert len(zip_names_for_current_system) == 1
         zip_name = zip_names_for_current_system.pop()
         download_driver(zip_name)
-        zip_file = f"driver/playwright-{driver_version}-{zip_name}.zip"
+        zip_file = f"driver/undetected_playwright-{driver_version}-{zip_name}.zip"
         with zipfile.ZipFile(zip_file, "r") as zip:
-            extractall(zip, "playwright/driver")
-        patch_driver(os.getcwd() + "/playwright/driver")
+            extractall(zip, "undetected_playwright/driver")
+        patch_driver(os.getcwd() + "/undetected_playwright/driver")
 
 
 setup(
-    name="undetected-playwright-patch",
+    name="undetected-undetected_playwright-patch",
     author="Microsoft Corporation, patches by github.com/kaliiiiiiiiii",
     author_email="",
-    description="Undetected version of playwright",
+    description="Undetected version of undetected_playwright",
     long_description=Path("README.md").read_text(encoding="utf-8"),
     long_description_content_type="text/markdown",
     license="Apache-2.0",
@@ -217,11 +217,11 @@ setup(
         'Source Code': 'https://github.com/kaliiiiiiiiii/undetected-playwright-python/',
     },
     packages=[
-        "playwright",
-        "playwright.async_api",
-        "playwright.sync_api",
-        "playwright._impl",
-        "playwright._impl.__pyinstaller",
+        "undetected_playwright",
+        "undetected_playwright.async_api",
+        "undetected_playwright.sync_api",
+        "undetected_playwright._impl",
+        "undetected_playwright._impl.__pyinstaller",
     ],
     include_package_data=True,
     install_requires=[
@@ -248,8 +248,8 @@ setup(
     cmdclass={"bdist_wheel": PlaywrightBDistWheelCommand},
     entry_points={
         "console_scripts": [
-            "playwright=playwright.__main__:main",
+            "undetected_playwright=undetected_playwright.__main__:main",
         ],
-        "pyinstaller40": ["hook-dirs=playwright._impl.__pyinstaller:get_hook_dirs"],
+        "pyinstaller40": ["hook-dirs=undetected_playwright._impl.__pyinstaller:get_hook_dirs"],
     },
 )

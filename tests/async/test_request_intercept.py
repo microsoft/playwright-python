@@ -17,7 +17,7 @@ from pathlib import Path
 
 from twisted.web import http
 
-from playwright.async_api import Page, Route
+from undetected_playwright.async_api import Page, Route
 from tests.server import Server
 
 

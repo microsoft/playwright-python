@@ -17,7 +17,7 @@ from typing import Any, Callable, Coroutine, cast
 
 import pytest
 
-from playwright.async_api import BrowserContext, Error, Page, Request, Route
+from undetected_playwright.async_api import BrowserContext, Error, Page, Request, Route
 from tests.server import Server
 
 
