@@ -71,7 +71,7 @@ class BrowserType(ChannelOwner):
     async def launch(
         self,
         executablePath: Union[str, Path] = None,
-        channel: str = None,
+        channel: str = "chrome",
         args: Sequence[str] = None,
         ignoreDefaultArgs: Union[bool, Sequence[str]] = None,
         handleSIGINT: bool = None,
@@ -90,7 +90,8 @@ class BrowserType(ChannelOwner):
     ) -> Browser:
 
         # undetected-undetected_playwright patches
-        if not ignoreDefaultArgs:
+        if ignoreDefaultArgs is None:
+            # noinspection PyPep8Naming
             ignoreDefaultArgs = []
         ignoreDefaultArgs.append('--enable-automation')
 
@@ -105,7 +106,7 @@ class BrowserType(ChannelOwner):
     async def launch_persistent_context(
         self,
         userDataDir: Union[str, Path],
-        channel: str = None,
+        channel: str = "chrome",
         executablePath: Union[str, Path] = None,
         args: Sequence[str] = None,
         ignoreDefaultArgs: Union[bool, Sequence[str]] = None,
@@ -154,6 +155,13 @@ class BrowserType(ChannelOwner):
         recordHarMode: HarMode = None,
         recordHarContent: HarContentPolicy = None,
     ) -> BrowserContext:
+
+        # undetected-undetected_playwright patches
+        if ignoreDefaultArgs is None:
+            # noinspection PyPep8Naming
+            ignoreDefaultArgs = []
+        ignoreDefaultArgs.append('--enable-automation')
+
         userDataDir = str(Path(userDataDir)) if userDataDir else ""
         params = locals_to_params(locals())
         await prepare_browser_context_params(params)

@@ -7,7 +7,7 @@ from undetected_playwright.async_api import async_playwright, Playwright
 async def run(playwright: Playwright):
     args = []
     args.append("--disable-blink-features=AutomationControlled")
-    browser = await playwright.chromium.launch(channel="chrome", headless=False,
+    browser = await playwright.chromium.launch(headless=False,
                                                args=args)
     page = await browser.new_page()
     await page.goto("https://nowsecure.nl/#relax")

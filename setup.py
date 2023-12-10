@@ -44,7 +44,7 @@ def extractall(zip: zipfile.ZipFile, path: str) -> None:
 
 
 def download_driver(zip_name: str) -> None:
-    zip_file = f"undetected_playwright-{driver_version}-{zip_name}.zip"
+    zip_file = f"playwright-{driver_version}-{zip_name}.zip"
     if os.path.exists("driver/" + zip_file):
         return
     url = "https://playwright.azureedge.net/builds/driver/"
@@ -144,7 +144,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
         for wheel_bundle in wheels:
             download_driver(wheel_bundle["zip_name"])
             zip_file = (
-                f"driver/undetected_playwright-{driver_version}-{wheel_bundle['zip_name']}.zip"
+                f"driver/playwright-{driver_version}-{wheel_bundle['zip_name']}.zip"
             )
             with zipfile.ZipFile(zip_file, "r") as zip:
                 extractall(zip, f"driver/{wheel_bundle['zip_name']}")
@@ -196,17 +196,17 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
         assert len(zip_names_for_current_system) == 1
         zip_name = zip_names_for_current_system.pop()
         download_driver(zip_name)
-        zip_file = f"driver/undetected_playwright-{driver_version}-{zip_name}.zip"
+        zip_file = f"driver/playwright-{driver_version}-{zip_name}.zip"
         with zipfile.ZipFile(zip_file, "r") as zip:
             extractall(zip, "undetected_playwright/driver")
         patch_driver(os.getcwd() + "/undetected_playwright/driver")
 
 
 setup(
-    name="undetected-undetected_playwright-patch",
+    name="undetected-playwright-patch",
     author="Microsoft Corporation, patches by github.com/kaliiiiiiiiii",
     author_email="",
-    description="Undetected version of undetected_playwright",
+    description="Undetected version of playwright",
     long_description=Path("README.md").read_text(encoding="utf-8"),
     long_description_content_type="text/markdown",
     license="Apache-2.0",

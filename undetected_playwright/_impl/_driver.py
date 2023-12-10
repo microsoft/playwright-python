@@ -25,8 +25,8 @@ def compute_driver_executable() -> Path:
     package_path = Path(inspect.getfile(undetected_playwright)).parent
     platform = sys.platform
     if platform == "win32":
-        return package_path / "driver" / "undetected_playwright.cmd"
-    return package_path / "driver" / "undetected_playwright.sh"
+        return package_path / "driver" / "playwright.cmd"
+    return package_path / "driver" / "playwright.sh"
 
 
 def get_driver_env() -> dict:

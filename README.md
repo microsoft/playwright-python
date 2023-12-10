@@ -1,51 +1,118 @@
-# 🎭 [Playwright](https://playwright.dev) for Python [![PyPI version](https://badge.fury.io/py/playwright.svg)](https://pypi.python.org/pypi/playwright/) [![Anaconda version](https://img.shields.io/conda/v/microsoft/playwright)](https://anaconda.org/Microsoft/playwright) [![Join Discord](https://img.shields.io/badge/join-discord-infomational)](https://aka.ms/playwright/discord)
+# 🎭 [Playwright](https://playwright.dev) for Python 
 
-Playwright is a Python library to automate [Chromium](https://www.chromium.org/Home), [Firefox](https://www.mozilla.org/en-US/firefox/new/) and [WebKit](https://webkit.org/) browsers with a single API. Playwright delivers automation that is **ever-green**, **capable**, **reliable** and **fast**. [See how Playwright is better](https://playwright.dev/python/docs/why-playwright).
+[![PyPI version](https://badge.fury.io/py/undetected-playwright-patch.svg)](https://badge.fury.io/py/undetected-playwright-patch)
 
+This is a patch of the original playwright implementation for Python.
+
+It currently passes for sure (tested on Win10):
+- ✅ [CloudFare] 
+- ✅ [Bet365] (shape//F5 I think)
+- [Others] Unknown/Not tested
+
+Warnings: 
+* the **Only chromium** part for Playwright is patched.
+
+## Demos (tested on Win 10)
+![img.png](assets/nowsecure_nl.png)
+![img.png](assets/creep_js.png)
+
+
+## Dependencies
+
+* Google-Chrome installed (`channel="chrome"` recommended, default)
+
+## Installation
+
+#### From PyPi (recommended)
+
+execute in your shell console
+```shell
+pip install undetected-playwright-patch
+```
+
+#### Build from this repo:
+```
+git clone https://github.com/kaliiiiiiiiii/undetected-playwright-python
+cd undetected-playwright-python
+python -m pip install -r local-requirements.txt
+python build_patched.py
+```
+
+## Example
+
+```python
+import asyncio
+
+# undetected-playwright here!
+from undetected_playwright.async_api import async_playwright, Playwright
+
+
+async def run(playwright: Playwright):
+    args = []
+    
+    # disable navigator.webdriver:true flag
+    args.append("--disable-blink-features=AutomationControlled")
+    browser = await playwright.chromium.launch(headless=False,
+                                               args=args)
+    page = await browser.new_page()
+    await page.goto("https://nowsecure.nl/#relax")
+    input("Press ENTER to continue to Creep-JS:")
+    await page.goto("https://nowsecure.nl/#relax")
+    await page.goto("https://abrahamjuliot.github.io/creepjs/")
+    input("Press ENTER to exit:")
+    await browser.close()
+
+
+async def main():
+    async with async_playwright() as playwright:
+        await run(playwright)
+
+
+if __name__ == "__main__":
+    loop = asyncio.ProactorEventLoop()
+    loop.run_until_complete(main())
+    # asyncio.run(main) # should work for non-Windows as well
+```
+
+```py
+
+# undetected-playwright here!
+from undetected_playwright.sync_api import sync_playwright
+
+
+with sync_playwright() as p:
+    args = []
+    
+    # disable navigator.webdriver:true flag
+    args.append("--disable-blink-features=AutomationControlled")
+    browser = p.chromium.launch(args=args, headless=False)
+    page = browser.new_page()
+    page.goto("https://nowsecure.nl/#relax")
+    input("Press ENTER to continue to Creep-JS:")
+    page.goto("https://nowsecure.nl/#relax")
+    page.goto("https://abrahamjuliot.github.io/creepjs/")
+    input("Press ENTER to exit:")
+    browser.close()
+```
 
 ## Documentation
 
+See the original
 [https://playwright.dev/python/docs/intro](https://playwright.dev/python/docs/intro)
 
 ## API Reference
 
 [https://playwright.dev/python/docs/api/class-playwright](https://playwright.dev/python/docs/api/class-playwright)
 
-## Example
-
-```py
-from undetected_playwright.sync_api import sync_playwright
-
-with sync_playwright() as p:
-    for browser_type in [p.chromium, p.firefox, p.webkit]:
-        browser = browser_type.launch()
-        page = browser.new_page()
-        page.goto('http://playwright.dev')
-        page.screenshot(path=f'example-{browser_type.name}.png')
-        browser.close()
-```
-
-```py
-import asyncio
-from undetected_playwright.async_api import async_playwright
 
 
-async def main():
-    async with async_playwright() as p:
-        for browser_type in [p.chromium, p.firefox, p.webkit]:
-            browser = await browser_type.launch()
-            page = await browser.new_page()
-            await page.goto('http://playwright.dev')
-            await page.screenshot(path=f'example-{browser_type.name}.png')
-            await browser.close()
+## Patches
+- [ ] [`Runtime.enable`](https://chromedevtools.github.io/devtools-protocol/tot/Runtime/#method-enable)
+  - [x] remove Runtime.enable occurences
+  - [x] patch _context(world) getter
+    - [x] isolatedWorld (utility)
+    - [ ] main world (main)
+    - [x] reset on frame-reload//navigation
 
-
-asyncio.run(main())
-```
-
-## Other languages
-
-More comfortable in another programming language? [Playwright](https://playwright.dev) is also available in
-- [Node.js (JavaScript / TypeScript)](https://playwright.dev/docs/intro),
-- [.NET](https://playwright.dev/dotnet/docs/intro),
-- [Java](https://playwright.dev/java/docs/intro).
+## TODO's
+- [ ] add GitHub runner to build releases automated
