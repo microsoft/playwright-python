@@ -15,7 +15,7 @@ from typing import Dict
 
 import pytest
 
-from playwright.sync_api import sync_playwright
+from undetected_playwright.sync_api import sync_playwright
 from tests.server import Server
 
 

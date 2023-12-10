@@ -18,7 +18,7 @@ from urllib.parse import urlparse
 
 import pytest
 
-from playwright.sync_api import APIResponse, Error, Playwright, StorageState
+from undetected_playwright.sync_api import APIResponse, Error, Playwright, StorageState
 from tests.server import Server
 
 
@@ -321,5 +321,5 @@ def test_should_serialize_null_values_in_json(
     server.set_route("/echo", lambda req: (req.write(req.post_body), req.finish()))
     response = request.post(server.PREFIX + "/echo", data={"foo": None})
     assert response.status == 200
-    assert response.text() == '{"foo":null}'
+    assert response.text() == '{"foo": null}'
     request.dispose()

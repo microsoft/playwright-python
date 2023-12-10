@@ -15,7 +15,7 @@
 import sys
 from pathlib import Path
 
-from playwright.sync_api import Playwright, sync_playwright
+from undetected_playwright.sync_api import Playwright, sync_playwright
 
 
 def main(playwright: Playwright, browser_name: str) -> None:

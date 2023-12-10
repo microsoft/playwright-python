@@ -17,7 +17,7 @@ from datetime import datetime
 
 import pytest
 
-from playwright.sync_api import Browser, Error, Page, expect
+from undetected_playwright.sync_api import Browser, Error, Page, expect
 from tests.server import Server
 
 
@@ -90,9 +90,7 @@ def test_assertions_locator_to_contain_text(page: Page, server: Server) -> None:
         expect(page.locator("div#foobar")).to_contain_text("bar", timeout=100)
 
     page.set_content("<div>Text \n1</div><div>Text2</div><div>Text3</div>")
-    expect(page.locator("div")).to_contain_text(
-        ["ext     1", re.compile("ext3")]  # type: ignore
-    )
+    expect(page.locator("div")).to_contain_text(["ext     1", re.compile("ext3")])
 
 
 def test_assertions_locator_to_have_attribute(page: Page, server: Server) -> None:
@@ -103,6 +101,15 @@ def test_assertions_locator_to_have_attribute(page: Page, server: Server) -> Non
     expect(page.locator("div#foobar")).not_to_have_attribute("id", "kek", timeout=100)
     with pytest.raises(AssertionError):
         expect(page.locator("div#foobar")).to_have_attribute("id", "koko", timeout=100)
+
+
+def test_assertions_locator_to_have_attribute_ignore_case(
+    page: Page, server: Page
+) -> None:
+    page.set_content("<div id=NoDe>Text content</div>")
+    locator = page.locator("#NoDe")
+    expect(locator).to_have_attribute("id", "node", ignore_case=True)
+    expect(locator).not_to_have_attribute("id", "node")
 
 
 def test_assertions_locator_to_have_class(page: Page, server: Server) -> None:
@@ -235,9 +242,7 @@ def test_assertions_locator_to_have_text(page: Page, server: Server) -> None:
 
     page.set_content("<div>Text    \n1</div><div>Text   2a</div>")
     # Should only normalize whitespace in the first item.
-    expect(page.locator("div")).to_have_text(
-        ["Text  1", re.compile(r"Text   \d+a")]  # type: ignore
-    )
+    expect(page.locator("div")).to_have_text(["Text  1", re.compile(r"Text   \d+a")])
 
 
 @pytest.mark.parametrize(

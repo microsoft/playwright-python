@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright.async_api import Page
+from undetected_playwright.async_api import Page
 
 
-async def test_should_work_with_internal_and(page: Page, server):
+async def test_should_work_with_internal_and(page: Page) -> None:
     await page.set_content(
         """
         <div class=foo>hello</div><div class=bar>world</div>

@@ -3,7 +3,7 @@ requires = ["setuptools==68.2.2", "setuptools-scm==8.0.4", "wheel==0.41.2", "aud
 build-backend = "setuptools.build_meta"
 
 # [tool.setuptools_scm]
-# version_file = "playwright/_repo_version.py"
+# version_file = "undetected_playwright/_repo_version.py"
 
 [tool.pytest.ini_options]
 addopts = "-Wall -rsx -vv -s"
@@ -25,17 +25,16 @@ warn_unused_configs = true
 check_untyped_defs = true
 disallow_untyped_defs = true
 no_implicit_optional = false
-
-[[tool.mypy.overrides]]
-module = "tests/async.*"
-ignore_errors = true
+exclude = [
+    "build/",
+    "env/",
+]
 
 [tool.isort]
 profile = "black"
 
 [tool.pyright]
-include = ["playwright", "tests/sync"]
-ignore = ["tests/async/", "scripts/", "examples/"]
+include = ["playwright", "tests", "scripts"]
 pythonVersion = "3.8"
 reportMissingImports = false
 reportTypedDictNotRequiredAccess = false

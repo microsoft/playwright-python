@@ -1,13 +1,11 @@
 import asyncio
-from playwright.async_api import async_playwright, Playwright
+from undetected_playwright.async_api import async_playwright, Playwright
 
 
 async def run(playwright: Playwright):
     args = []
     args.append("--disable-blink-features=AutomationControlled")
-    browser = await playwright.chromium.launch(channel="chrome", headless=False,
-                                               ignore_default_args=['--enable-automation'],
-                                               args=args)
+    browser = await playwright.chromium.launch( headless=False, args=args)
     page = await browser.new_page()
     await page.goto("https://hmaker.github.io/selenium-detector/")
     await page.evaluate("document")
@@ -26,5 +24,4 @@ async def main():
 
 
 if __name__ == "__main__":
-    loop = asyncio.ProactorEventLoop()
-    loop.run_until_complete(main())
+    asyncio.run(main())

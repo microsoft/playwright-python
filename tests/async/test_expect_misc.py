@@ -14,7 +14,7 @@
 
 import pytest
 
-from playwright.async_api import Page, expect
+from undetected_playwright.async_api import Page, expect
 from tests.server import Server
 
 

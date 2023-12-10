@@ -16,7 +16,7 @@ from pathlib import Path
 
 import pytest
 
-from playwright.sync_api import BrowserContext, Error, Page
+from undetected_playwright.sync_api import BrowserContext, Error, Page
 
 
 def test_add_init_script_evaluate_before_anything_else_on_the_page(page: Page) -> None:

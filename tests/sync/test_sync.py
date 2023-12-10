@@ -18,7 +18,7 @@ from typing import Any, Dict
 
 import pytest
 
-from playwright.sync_api import (
+from undetected_playwright.sync_api import (
     Browser,
     BrowserContext,
     Dialog,
@@ -28,6 +28,7 @@ from playwright.sync_api import (
     sync_playwright,
 )
 from tests.server import Server
+from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
 
 
 def test_sync_query_selector(page: Page) -> None:
@@ -162,7 +163,7 @@ def test_sync_wait_for_event_raise(page: Page) -> None:
 
 def test_sync_make_existing_page_sync(page: Page) -> None:
     page = page
-    assert page.evaluate("() => ({'playwright': true})") == {"playwright": True}
+    assert page.evaluate("() => ({'undetected_playwright': true})") == {"undetected_playwright": True}
     page.set_content("<h1>myElement</h1>")
     page.wait_for_selector("text=myElement")
 
@@ -272,7 +273,7 @@ def test_close_should_reject_all_promises(context: BrowserContext) -> None:
             lambda: new_page.evaluate("() => new Promise(r => {})"),
             lambda: new_page.close(),
         )
-    assert "Target closed" in exc_info.value.message
+    assert TARGET_CLOSED_ERROR_MESSAGE in exc_info.value.message
 
 
 def test_expect_response_should_work(page: Page, server: Server) -> None:

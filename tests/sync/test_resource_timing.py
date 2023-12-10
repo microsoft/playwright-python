@@ -17,7 +17,7 @@ from typing import Dict
 import pytest
 from flaky import flaky
 
-from playwright.sync_api import Browser, Page
+from undetected_playwright.sync_api import Browser, Page
 from tests.server import Server
 
 

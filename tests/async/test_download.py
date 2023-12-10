@@ -15,26 +15,29 @@ import asyncio
 import os
 from asyncio.futures import Future
 from pathlib import Path
+from typing import Callable, Generator
 
 import pytest
 
-from playwright.async_api import Browser, Error, Page
+from undetected_playwright.async_api import Browser, Download, Error, Page
+from tests.server import Server, TestServerRequest
+from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
 
 
-def assert_file_content(path, content):
+def assert_file_content(path: Path, content: str) -> None:
     with open(path, "r") as fd:
         assert fd.read() == content
 
 
 @pytest.fixture(autouse=True)
-def after_each_hook(server):
-    def handle_download(request):
+def after_each_hook(server: Server) -> Generator[None, None, None]:
+    def handle_download(request: TestServerRequest) -> None:
         request.setHeader("Content-Type", "application/octet-stream")
         request.setHeader("Content-Disposition", "attachment")
         request.write(b"Hello world")
         request.finish()
 
-    def handle_download_with_file_name(request):
+    def handle_download_with_file_name(request: TestServerRequest) -> None:
         request.setHeader("Content-Type", "application/octet-stream")
         request.setHeader("Content-Disposition", "attachment; filename=file.txt")
         request.write(b"Hello world")
@@ -45,7 +48,9 @@ def after_each_hook(server):
     yield
 
 
-async def test_should_report_downloads_with_accept_downloads_false(page: Page, server):
+async def test_should_report_downloads_with_accept_downloads_false(
+    page: Page, server: Server
+) -> None:
     await page.set_content(
         f'<a href="{server.PREFIX}/downloadWithFilename">download</a>'
     )
@@ -62,7 +67,9 @@ async def test_should_report_downloads_with_accept_downloads_false(page: Page, s
     assert await download.path()
 
 
-async def test_should_report_downloads_with_accept_downloads_true(browser, server):
+async def test_should_report_downloads_with_accept_downloads_true(
+    browser: Browser, server: Server
+) -> None:
     page = await browser.new_page(accept_downloads=True)
     await page.set_content(f'<a href="{server.PREFIX}/download">download</a>')
     async with page.expect_download() as download_info:
@@ -74,7 +81,9 @@ async def test_should_report_downloads_with_accept_downloads_true(browser, serve
     await page.close()
 
 
-async def test_should_save_to_user_specified_path(tmpdir: Path, browser, server):
+async def test_should_save_to_user_specified_path(
+    tmpdir: Path, browser: Browser, server: Server
+) -> None:
     page = await browser.new_page(accept_downloads=True)
     await page.set_content(f'<a href="{server.PREFIX}/download">download</a>')
     async with page.expect_download() as download_info:
@@ -88,8 +97,8 @@ async def test_should_save_to_user_specified_path(tmpdir: Path, browser, server)
 
 
 async def test_should_save_to_user_specified_path_without_updating_original_path(
-    tmpdir, browser, server
-):
+    tmpdir: Path, browser: Browser, server: Server
+) -> None:
     page = await browser.new_page(accept_downloads=True)
     await page.set_content(f'<a href="{server.PREFIX}/download">download</a>')
     async with page.expect_download() as download_info:
@@ -107,8 +116,8 @@ async def test_should_save_to_user_specified_path_without_updating_original_path
 
 
 async def test_should_save_to_two_different_paths_with_multiple_save_as_calls(
-    tmpdir, browser, server
-):
+    tmpdir: Path, browser: Browser, server: Server
+) -> None:
     page = await browser.new_page(accept_downloads=True)
     await page.set_content(f'<a href="{server.PREFIX}/download">download</a>')
     async with page.expect_download() as download_info:
@@ -126,7 +135,9 @@ async def test_should_save_to_two_different_paths_with_multiple_save_as_calls(
     await page.close()
 
 
-async def test_should_save_to_overwritten_filepath(tmpdir: Path, browser, server):
+async def test_should_save_to_overwritten_filepath(
+    tmpdir: Path, browser: Browser, server: Server
+) -> None:
     page = await browser.new_page(accept_downloads=True)
     await page.set_content(f'<a href="{server.PREFIX}/download">download</a>')
     async with page.expect_download() as download_info:
@@ -143,8 +154,8 @@ async def test_should_save_to_overwritten_filepath(tmpdir: Path, browser, server
 
 
 async def test_should_create_subdirectories_when_saving_to_non_existent_user_specified_path(
-    tmpdir, browser, server
-):
+    tmpdir: Path, browser: Browser, server: Server
+) -> None:
     page = await browser.new_page(accept_downloads=True)
     await page.set_content(f'<a href="{server.PREFIX}/download">download</a>')
     async with page.expect_download() as download_info:
@@ -158,8 +169,8 @@ async def test_should_create_subdirectories_when_saving_to_non_existent_user_spe
 
 
 async def test_should_error_when_saving_with_downloads_disabled(
-    tmpdir, browser, server
-):
+    tmpdir: Path, browser: Browser, server: Server
+) -> None:
     page = await browser.new_page(accept_downloads=False)
     await page.set_content(f'<a href="{server.PREFIX}/download">download</a>')
     async with page.expect_download() as download_info:
@@ -175,7 +186,9 @@ async def test_should_error_when_saving_with_downloads_disabled(
     await page.close()
 
 
-async def test_should_error_when_saving_after_deletion(tmpdir, browser, server):
+async def test_should_error_when_saving_after_deletion(
+    tmpdir: Path, browser: Browser, server: Server
+) -> None:
     page = await browser.new_page(accept_downloads=True)
     await page.set_content(f'<a href="{server.PREFIX}/download">download</a>')
     async with page.expect_download() as download_info:
@@ -185,13 +198,15 @@ async def test_should_error_when_saving_after_deletion(tmpdir, browser, server):
     await download.delete()
     with pytest.raises(Error) as exc:
         await download.save_as(user_path)
-    assert "Target page, context or browser has been closed" in exc.value.message
+    assert TARGET_CLOSED_ERROR_MESSAGE in exc.value.message
     await page.close()
 
 
-async def test_should_report_non_navigation_downloads(browser, server):
+async def test_should_report_non_navigation_downloads(
+    browser: Browser, server: Server
+) -> None:
     # Mac WebKit embedder does not download in this case, although Safari does.
-    def handle_download(request):
+    def handle_download(request: TestServerRequest) -> None:
         request.setHeader("Content-Type", "application/octet-stream")
         request.write(b"Hello world")
         request.finish()
@@ -214,12 +229,12 @@ async def test_should_report_non_navigation_downloads(browser, server):
 
 
 async def test_report_download_path_within_page_on_download_handler_for_files(
-    browser: Browser, server
-):
+    browser: Browser, server: Server
+) -> None:
     page = await browser.new_page(accept_downloads=True)
-    on_download_path: Future[str] = asyncio.Future()
+    on_download_path: Future[Path] = asyncio.Future()
 
-    async def on_download(download):
+    async def on_download(download: Download) -> None:
         on_download_path.set_result(await download.path())
 
     page.once(
@@ -234,12 +249,12 @@ async def test_report_download_path_within_page_on_download_handler_for_files(
 
 
 async def test_download_report_download_path_within_page_on_handle_for_blobs(
-    browser, server
-):
+    browser: Browser, server: Server
+) -> None:
     page = await browser.new_page(accept_downloads=True)
-    on_download_path = asyncio.Future()
+    on_download_path: "asyncio.Future[Path]" = asyncio.Future()
 
-    async def on_download(download):
+    async def on_download(download: Download) -> None:
         on_download_path.set_result(await download.path())
 
     page.once(
@@ -255,10 +270,12 @@ async def test_download_report_download_path_within_page_on_handle_for_blobs(
 
 
 @pytest.mark.only_browser("chromium")
-async def test_should_report_alt_click_downloads(browser, server):
+async def test_should_report_alt_click_downloads(
+    browser: Browser, server: Server
+) -> None:
     # Firefox does not download on alt-click by default.
     # Our WebKit embedder does not download on alt-click, although Safari does.
-    def handle_download(request):
+    def handle_download(request: TestServerRequest) -> None:
         request.setHeader("Content-Type", "application/octet-stream")
         request.write(b"Hello world")
         request.finish()
@@ -277,7 +294,9 @@ async def test_should_report_alt_click_downloads(browser, server):
     await page.close()
 
 
-async def test_should_report_new_window_downloads(browser, server):
+async def test_should_report_new_window_downloads(
+    browser: Browser, server: Server
+) -> None:
     page = await browser.new_page(accept_downloads=True)
     await page.set_content(
         f'<a target=_blank href="{server.PREFIX}/download">download</a>'
@@ -290,7 +309,7 @@ async def test_should_report_new_window_downloads(browser, server):
     await page.close()
 
 
-async def test_should_delete_file(browser, server):
+async def test_should_delete_file(browser: Browser, server: Server) -> None:
     page = await browser.new_page(accept_downloads=True)
     await page.set_content(f'<a href="{server.PREFIX}/download">download</a>')
     async with page.expect_download() as download_info:
@@ -303,7 +322,9 @@ async def test_should_delete_file(browser, server):
     await page.close()
 
 
-async def test_should_delete_downloads_on_context_destruction(browser, server):
+async def test_should_delete_downloads_on_context_destruction(
+    browser: Browser, server: Server
+) -> None:
     page = await browser.new_page(accept_downloads=True)
     await page.set_content(f'<a href="{server.PREFIX}/download">download</a>')
     async with page.expect_download() as download_info:
@@ -321,7 +342,9 @@ async def test_should_delete_downloads_on_context_destruction(browser, server):
     assert os.path.exists(path2) is False
 
 
-async def test_should_delete_downloads_on_browser_gone(browser_factory, server):
+async def test_should_delete_downloads_on_browser_gone(
+    browser_factory: "Callable[..., asyncio.Future[Browser]]", server: Server
+) -> None:
     browser = await browser_factory()
     page = await browser.new_page(accept_downloads=True)
     await page.set_content(f'<a href="{server.PREFIX}/download">download</a>')
@@ -341,8 +364,8 @@ async def test_should_delete_downloads_on_browser_gone(browser_factory, server):
     assert os.path.exists(os.path.join(path1, "..")) is False
 
 
-async def test_download_cancel_should_work(browser, server):
-    def handle_download(request):
+async def test_download_cancel_should_work(browser: Browser, server: Server) -> None:
+    def handle_download(request: TestServerRequest) -> None:
         request.setHeader("Content-Type", "application/octet-stream")
         request.setHeader("Content-Disposition", "attachment")
         # Chromium requires a large enough payload to trigger the download event soon enough

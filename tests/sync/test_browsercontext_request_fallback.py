@@ -16,7 +16,7 @@ from typing import Any, Callable, List
 
 import pytest
 
-from playwright.sync_api import BrowserContext, Error, Page, Request, Route
+from undetected_playwright.sync_api import BrowserContext, Error, Page, Request, Route
 from tests.server import Server
 
 
@@ -204,7 +204,8 @@ def test_should_delete_header_with_undefined_value(
 
     def delete_foo_header(route: Route, request: Request) -> None:
         headers = request.all_headers()
-        route.fallback(headers={**headers, "foo": None})  # type: ignore
+        del headers["foo"]
+        route.fallback(headers=headers)
 
     context.route(server.PREFIX + "/something", delete_foo_header)
     with server.expect_request("/something") as server_req_info:

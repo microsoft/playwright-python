@@ -16,7 +16,7 @@ from typing import Dict
 
 import pytest
 
-from playwright.sync_api import BrowserType
+from undetected_playwright.sync_api import BrowserType
 from tests.server import find_free_port
 
 pytestmark = pytest.mark.only_browser("chromium")

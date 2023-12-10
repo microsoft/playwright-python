@@ -20,8 +20,8 @@ from typing import Any, Dict
 
 import pytest
 
-from playwright.async_api import async_playwright
-from playwright.sync_api import sync_playwright
+from undetected_playwright.async_api import async_playwright
+from undetected_playwright.sync_api import sync_playwright
 
 
 def _test_signals_async(
@@ -57,7 +57,7 @@ def _test_signals_async(
             await context.close()
             wait_queue.put("close browser")
             await browser.close()
-            wait_queue.put("close playwright")
+            wait_queue.put("close undetected_playwright")
             await playwright.stop()
             wait_queue.put("all done")
 
@@ -95,7 +95,7 @@ def _test_signals_sync(
         context.close()
         wait_queue.put("close browser")
         browser.close()
-        wait_queue.put("close playwright")
+        wait_queue.put("close undetected_playwright")
         playwright.stop()
         wait_queue.put("all done")
 
@@ -118,7 +118,7 @@ def _create_signals_test(
         "ready",
         "close context",
         "close browser",
-        "close playwright",
+        "close undetected_playwright",
         "all done",
     ]
     assert process.exitcode == 0

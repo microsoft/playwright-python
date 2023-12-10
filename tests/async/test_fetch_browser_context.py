@@ -14,15 +14,17 @@
 
 import asyncio
 import json
+from typing import Any, cast
 from urllib.parse import parse_qs
 
 import pytest
 
-from playwright.async_api import BrowserContext, Error, Page
+from undetected_playwright.async_api import BrowserContext, Error, FilePayload, Page
 from tests.server import Server
+from tests.utils import must
 
 
-async def test_get_should_work(context: BrowserContext, server: Server):
+async def test_get_should_work(context: BrowserContext, server: Server) -> None:
     response = await context.request.get(server.PREFIX + "/simple.json")
     assert response.url == server.PREFIX + "/simple.json"
     assert response.status == 200
@@ -36,7 +38,7 @@ async def test_get_should_work(context: BrowserContext, server: Server):
     assert await response.text() == '{"foo": "bar"}\n'
 
 
-async def test_fetch_should_work(context: BrowserContext, server: Server):
+async def test_fetch_should_work(context: BrowserContext, server: Server) -> None:
     response = await context.request.fetch(server.PREFIX + "/simple.json")
     assert response.url == server.PREFIX + "/simple.json"
     assert response.status == 200
@@ -50,7 +52,9 @@ async def test_fetch_should_work(context: BrowserContext, server: Server):
     assert await response.text() == '{"foo": "bar"}\n'
 
 
-async def test_should_throw_on_network_error(context: BrowserContext, server: Server):
+async def test_should_throw_on_network_error(
+    context: BrowserContext, server: Server
+) -> None:
     server.set_route("/test", lambda request: request.transport.loseConnection())
     with pytest.raises(Error, match="socket hang up"):
         await context.request.fetch(server.PREFIX + "/test")
@@ -58,7 +62,7 @@ async def test_should_throw_on_network_error(context: BrowserContext, server: Se
 
 async def test_should_add_session_cookies_to_request(
     context: BrowserContext, server: Server
-):
+) -> None:
     await context.add_cookies(
         [
             {
@@ -84,7 +88,7 @@ async def test_should_add_session_cookies_to_request(
 )
 async def test_should_support_query_params(
     context: BrowserContext, server: Server, method: str
-):
+) -> None:
     expected_params = {"p1": "v1", "парам2": "знач2"}
     [server_req, _] = await asyncio.gather(
         server.wait_for_request("/empty.html"),
@@ -102,7 +106,7 @@ async def test_should_support_query_params(
 )
 async def test_should_support_fail_on_status_code(
     context: BrowserContext, server: Server, method: str
-):
+) -> None:
     with pytest.raises(Error, match="404 Not Found"):
         await getattr(context.request, method)(
             server.PREFIX + "/this-does-clearly-not-exist.html",
@@ -115,7 +119,7 @@ async def test_should_support_fail_on_status_code(
 )
 async def test_should_support_ignore_https_errors_option(
     context: BrowserContext, https_server: Server, method: str
-):
+) -> None:
     response = await getattr(context.request, method)(
         https_server.EMPTY_PAGE, ignore_https_errors=True
     )
@@ -125,7 +129,7 @@ async def test_should_support_ignore_https_errors_option(
 
 async def test_should_not_add_context_cookie_if_cookie_header_passed_as_parameter(
     context: BrowserContext, server: Server
-):
+) -> None:
     await context.add_cookies(
         [
             {
@@ -149,8 +153,8 @@ async def test_should_not_add_context_cookie_if_cookie_header_passed_as_paramete
 @pytest.mark.parametrize("method", ["delete", "patch", "post", "put"])
 async def test_should_support_post_data(
     context: BrowserContext, method: str, server: Server
-):
-    async def support_post_data(fetch_data, request_post_data):
+) -> None:
+    async def support_post_data(fetch_data: Any, request_post_data: Any) -> None:
         [request, response] = await asyncio.gather(
             server.wait_for_request("/simple.json"),
             getattr(context.request, method)(
@@ -161,23 +165,19 @@ async def test_should_support_post_data(
         assert request.post_body == request_post_data
         assert response.status == 200
         assert response.url == server.PREFIX + "/simple.json"
-        assert request.getHeader("Content-Length") == str(len(request.post_body))
+        assert request.getHeader("Content-Length") == str(len(must(request.post_body)))
 
     await support_post_data("My request", "My request".encode())
     await support_post_data(b"My request", "My request".encode())
-    await support_post_data(
-        ["my", "request"], json.dumps(["my", "request"], separators=(",", ":")).encode()
-    )
-    await support_post_data(
-        {"my": "request"}, json.dumps({"my": "request"}, separators=(",", ":")).encode()
-    )
+    await support_post_data(["my", "request"], json.dumps(["my", "request"]).encode())
+    await support_post_data({"my": "request"}, json.dumps({"my": "request"}).encode())
     with pytest.raises(Error, match="Unsupported 'data' type: <class 'function'>"):
         await support_post_data(lambda: None, None)
 
 
 async def test_should_support_application_x_www_form_urlencoded(
     context: BrowserContext, server: Server
-):
+) -> None:
     [request, response] = await asyncio.gather(
         server.wait_for_request("/empty.html"),
         context.request.post(
@@ -191,6 +191,7 @@ async def test_should_support_application_x_www_form_urlencoded(
     )
     assert request.method == b"POST"
     assert request.getHeader("Content-Type") == "application/x-www-form-urlencoded"
+    assert request.post_body
     body = request.post_body.decode()
     assert request.getHeader("Content-Length") == str(len(body))
     params = parse_qs(request.post_body)
@@ -201,13 +202,13 @@ async def test_should_support_application_x_www_form_urlencoded(
 
 async def test_should_support_multipart_form_data(
     context: BrowserContext, server: Server
-):
-    file = {
+) -> None:
+    file: FilePayload = {
         "name": "f.js",
         "mimeType": "text/javascript",
         "buffer": b"var x = 10;\r\n;console.log(x);",
     }
-    [request, response] = await asyncio.gather(
+    [request, _] = await asyncio.gather(
         server.wait_for_request("/empty.html"),
         context.request.post(
             server.PREFIX + "/empty.html",
@@ -219,8 +220,12 @@ async def test_should_support_multipart_form_data(
         ),
     )
     assert request.method == b"POST"
-    assert request.getHeader("Content-Type").startswith("multipart/form-data; ")
-    assert request.getHeader("Content-Length") == str(len(request.post_body))
+    assert cast(str, request.getHeader("Content-Type")).startswith(
+        "multipart/form-data; "
+    )
+    assert must(request.getHeader("Content-Length")) == str(
+        len(must(request.post_body))
+    )
     assert request.args[b"firstName"] == [b"John"]
     assert request.args[b"lastName"] == [b"Doe"]
     assert request.args[b"file"][0] == file["buffer"]
@@ -228,7 +233,7 @@ async def test_should_support_multipart_form_data(
 
 async def test_should_add_default_headers(
     context: BrowserContext, page: Page, server: Server
-):
+) -> None:
     [request, response] = await asyncio.gather(
         server.wait_for_request("/empty.html"),
         context.request.get(server.EMPTY_PAGE),

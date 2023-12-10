@@ -19,7 +19,7 @@ from typing import Any
 import objgraph
 import pytest
 
-from playwright.async_api import async_playwright
+from undetected_playwright.async_api import async_playwright
 from tests.server import Server
 
 

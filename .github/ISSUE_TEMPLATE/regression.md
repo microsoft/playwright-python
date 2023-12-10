@@ -19,7 +19,8 @@ Help us help you! Put down a short code snippet that illustrates your bug and
 that we can run and debug locally. For example:
 
 ```python
-from playwright.sync_api import sync_playwright
+from undetected_playwright.sync_api import sync_playwright
+
 with sync_playwright() as p:
     browser = p.chromium.launch()
     page = browser.new_page()

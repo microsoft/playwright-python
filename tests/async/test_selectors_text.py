@@ -15,7 +15,7 @@ import re
 
 import pytest
 
-from playwright.async_api import Error, Page, expect
+from undetected_playwright.async_api import Error, Page, expect
 
 
 async def test_has_text_and_internal_text_should_match_full_node_text_in_strict_mode(
@@ -50,7 +50,7 @@ async def test_has_text_and_internal_text_should_match_full_node_text_in_strict_
     await expect(page.locator("div", has_text=re.compile("^hello$"))).to_have_id("div2")
 
 
-async def test_should_work(page: Page, server) -> None:
+async def test_should_work(page: Page) -> None:
     await page.set_content(
         """
         <div>yo</div><div>ya</div><div>\nye  </div>

@@ -17,7 +17,7 @@ from typing import Dict, Generator
 
 import pytest
 
-from playwright.sync_api import (
+from undetected_playwright.sync_api import (
     Browser,
     BrowserContext,
     BrowserType,

@@ -1,5 +1,5 @@
 package:
-  name: playwright
+  name: undetected_playwright
   version: "{{ environ.get('GIT_DESCRIBE_TAG') | replace('v', '') }}"
 
 source:
@@ -12,7 +12,7 @@ build:
   binary_relocation: False
   missing_dso_whitelist: "*"
   entry_points:
-    - playwright = playwright.__main__:main
+    - undetected_playwright = undetected_playwright.__main__:main
 
 requirements:
   host:
@@ -23,18 +23,18 @@ requirements:
     - setuptools_scm
   run:
     - python
-    - greenlet ==3.0.0
+    - greenlet ==3.0.1
     - pyee ==11.0.1
     - typing_extensions # [py<39]
 test:
   requires:
     - pip
   imports:
-    - playwright
-    - playwright.sync_api
-    - playwright.async_api
+    - undetected_playwright
+    - undetected_playwright.sync_api
+    - undetected_playwright.async_api
   commands:
-    - playwright --help
+    - undetected_playwright --help
 
 about:
   home: https://github.com/microsoft/playwright-python

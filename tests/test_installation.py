@@ -27,11 +27,11 @@ def test_install(tmp_path: Path, browser_name: str) -> None:
     context = env.ensure_directories(env_dir)
     root = Path(__file__).parent.parent.resolve()
     if sys.platform == "win32":
-        wheelpath = list((root / "dist").glob("playwright*win_amd64*.whl"))[0]
+        wheelpath = list((root / "dist").glob("undetected_playwright*win_amd64*.whl"))[0]
     elif sys.platform == "linux":
-        wheelpath = list((root / "dist").glob("playwright*manylinux1*.whl"))[0]
+        wheelpath = list((root / "dist").glob("undetected_playwright*manylinux1*.whl"))[0]
     elif sys.platform == "darwin":
-        wheelpath = list((root / "dist").glob("playwright*macosx_*.whl"))[0]
+        wheelpath = list((root / "dist").glob("undetected_playwright*macosx_*.whl"))[0]
     subprocess.check_output(
         [
             context.env_exe,
@@ -44,7 +44,7 @@ def test_install(tmp_path: Path, browser_name: str) -> None:
     environ = os.environ.copy()
     environ["PLAYWRIGHT_BROWSERS_PATH"] = str(tmp_path)
     subprocess.check_output(
-        [context.env_exe, "-m", "playwright", "install", browser_name], env=environ
+        [context.env_exe, "-m", "undetected_playwright", "install", browser_name], env=environ
     )
     shutil.copyfile(root / "tests" / "assets" / "client.py", tmp_path / "main.py")
     subprocess.check_output(

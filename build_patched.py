@@ -1,5 +1,5 @@
 import sys
-import playwright
+import undetected_playwright
 import os
 import pathlib
 import re
@@ -71,7 +71,7 @@ def patch_driver(path: str):
 
     with open(frames_path, "r") as f:
         frames_js = f.read()
-        frames_js = "// undetected-playwright-patch - custom imports\n" \
+        frames_js = "// undetected-undetected_playwright-patch - custom imports\n" \
                     "var _crExecutionContext = require('./chromium/crExecutionContext')\n" \
                     "var _dom =  require('./dom')\n" \
                     + "\n" + frames_js
@@ -92,9 +92,9 @@ def main(build: bool = True, build_all: bool = False, ):
         os.system(cmd)
     else:
         rel_path = "/driver"
-        module_path = pathlib.Path(os.path.dirname(playwright.__file__) + rel_path)
+        module_path = pathlib.Path(os.path.dirname(undetected_playwright.__file__) + rel_path)
         patch_driver(str(module_path))
-        path = pathlib.Path(os.getcwd() + "/playwright" + rel_path)
+        path = pathlib.Path(os.getcwd() + "/undetected_playwright" + rel_path)
         if module_path.resolve() != path.resolve():
             patch_driver(str(path))
 
@@ -102,5 +102,4 @@ def main(build: bool = True, build_all: bool = False, ):
 if __name__ == "__main__":
     main(build=True, build_all=False)
 
-    loop = asyncio.ProactorEventLoop()
-    loop.run_until_complete(patch_check_main())
+    asyncio.run(patch_check_main())

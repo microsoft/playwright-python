@@ -15,7 +15,7 @@ from pathlib import Path
 
 import pytest
 
-from playwright.sync_api import Browser, Error, Page, Selectors
+from undetected_playwright.sync_api import Browser, Error, Page, Selectors
 
 from .utils import Utils
 

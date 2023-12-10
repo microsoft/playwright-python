@@ -12,17 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright.async_api import Page, Route
+from undetected_playwright.async_api import Page, Route
 from tests.server import Server
 
 
-async def test_should_fetch_original_request_and_fulfill(page: Page, server: Server):
-    async def handle(route: Route):
+async def test_should_fetch_original_request_and_fulfill(
+    page: Page, server: Server
+) -> None:
+    async def handle(route: Route) -> None:
         response = await page.request.fetch(route.request)
         await route.fulfill(response=response)
 
     await page.route("**/*", handle)
     response = await page.goto(server.PREFIX + "/title.html")
+    assert response
     assert response.status == 200
     assert await page.title() == "Woof-Woof"
 

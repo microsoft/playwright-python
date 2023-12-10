@@ -16,7 +16,7 @@ import re
 from pathlib import Path
 from typing import Any, Dict, List
 
-from playwright.sync_api import Browser, BrowserContext, BrowserType, Page
+from undetected_playwright.sync_api import Browser, BrowserContext, BrowserType, Page
 from tests.server import Server
 from tests.utils import get_trace_actions, parse_trace
 

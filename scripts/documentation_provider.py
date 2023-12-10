@@ -16,19 +16,10 @@ import json
 import re
 import subprocess
 from sys import stderr
-from typing import (  # type: ignore
-    Any,
-    Dict,
-    List,
-    Set,
-    Union,
-    get_args,
-    get_origin,
-    get_type_hints,
-)
+from typing import Any, Dict, List, Set, Union, get_args, get_origin, get_type_hints
 from urllib.parse import urljoin
 
-from playwright._impl._helper import to_snake_case
+from undetected_playwright._impl._helper import to_snake_case
 
 enum_regex = r"^\"[^\"]+\"(?:\|\"[^\"]+\")+$"
 union_regex = r"^[^\|]+(?:\|[^\|]+)+$"
@@ -41,7 +32,7 @@ class DocumentationProvider:
         self.links: Dict[str, str] = {}
         self.printed_entries: List[str] = []
         process_output = subprocess.run(
-            ["python", "-m", "playwright", "print-api-json"],
+            ["python", "-m", "undetected_playwright", "print-api-json"],
             check=True,
             capture_output=True,
         )
@@ -172,7 +163,7 @@ class DocumentationProvider:
                 if not doc_value:
                     self.errors.add(f"Parameter not documented: {fqname}({name}=)")
                 else:
-                    code_type = self.serialize_python_type(value)
+                    code_type = self.serialize_python_type(value, "in")
 
                     print(f"{indent}{to_snake_case(original_name)} : {code_type}")
                     if doc_value.get("comment"):
@@ -195,7 +186,7 @@ class DocumentationProvider:
             print("")
             print("        Returns")
             print("        -------")
-            print(f"        {self.serialize_python_type(value)}")
+            print(f"        {self.serialize_python_type(value, 'out')}")
         print(f'{indent}"""')
 
         for name in args:
@@ -309,7 +300,7 @@ class DocumentationProvider:
     ) -> None:
         if "(arg=)" in fqname or "(pageFunction=)" in fqname:
             return
-        code_type = self.serialize_python_type(value)
+        code_type = self.serialize_python_type(value, direction)
         doc_type = self.serialize_doc_type(doc_value["type"], direction)
         if not doc_value["required"]:
             doc_type = self.make_optional(doc_type)
@@ -319,11 +310,11 @@ class DocumentationProvider:
                 f"Parameter type mismatch in {fqname}: documented as {doc_type}, code has {code_type}"
             )
 
-    def serialize_python_type(self, value: Any) -> str:
+    def serialize_python_type(self, value: Any, direction: str) -> str:
         str_value = str(value)
         if isinstance(value, list):
-            return f"[{', '.join(list(map(lambda a: self.serialize_python_type(a), value)))}]"
-        if str_value == "<class 'playwright._impl._api_types.Error'>":
+            return f"[{', '.join(list(map(lambda a: self.serialize_python_type(a, direction), value)))}]"
+        if str_value == "<class 'undetected_playwright._impl._errors.Error'>":
             return "Error"
         if str_value == "<class 'NoneType'>":
             return "None"
@@ -331,17 +322,13 @@ class DocumentationProvider:
         if match:
             return match.group(1)
         match = re.match(
-            r"playwright._impl._event_context_manager.EventContextManagerImpl\[playwright._impl.[^.]+.(.*)\]",
+            r"undetected_playwright._impl._event_context_manager.EventContextManagerImpl\[undetected_playwright._impl.[^.]+.(.*)\]",
             str_value,
         )
         if match:
             return "EventContextManager[" + match.group(1) + "]"
-        match = re.match(r"^<class 'playwright\._impl\.[\w_]+\.([^']+)'>$", str_value)
-        if (
-            match
-            and "_api_structures" not in str_value
-            and "_api_types" not in str_value
-        ):
+        match = re.match(r"^<class 'undetected_playwright\._impl\.[\w_]+\.([^']+)'>$", str_value)
+        if match and "_api_structures" not in str_value and "_errors" not in str_value:
             if match.group(1) == "EventContextManagerImpl":
                 return "EventContextManager"
             return match.group(1)
@@ -360,32 +347,45 @@ class DocumentationProvider:
         if hints:
             signature: List[str] = []
             for [name, value] in hints.items():
-                signature.append(f"{name}: {self.serialize_python_type(value)}")
+                signature.append(
+                    f"{name}: {self.serialize_python_type(value, direction)}"
+                )
             return f"{{{', '.join(signature)}}}"
         if origin == Union:
             args = get_args(value)
             if len(args) == 2 and str(args[1]) == "<class 'NoneType'>":
-                return self.make_optional(self.serialize_python_type(args[0]))
-            ll = list(map(lambda a: self.serialize_python_type(a), args))
+                return self.make_optional(
+                    self.serialize_python_type(args[0], direction)
+                )
+            ll = list(map(lambda a: self.serialize_python_type(a, direction), args))
             ll.sort(key=lambda item: "}" if item == "None" else item)
             return f"Union[{', '.join(ll)}]"
         if str(origin) == "<class 'dict'>":
             args = get_args(value)
-            return f"Dict[{', '.join(list(map(lambda a: self.serialize_python_type(a), args)))}]"
+            return f"Dict[{', '.join(list(map(lambda a: self.serialize_python_type(a, direction), args)))}]"
+        if str(origin) == "<class 'collections.abc.Sequence'>":
+            args = get_args(value)
+            return f"Sequence[{', '.join(list(map(lambda a: self.serialize_python_type(a, direction), args)))}]"
         if str(origin) == "<class 'list'>":
             args = get_args(value)
-            return f"List[{', '.join(list(map(lambda a: self.serialize_python_type(a), args)))}]"
+            list_type = "Sequence" if direction == "in" else "List"
+            return f"{list_type}[{', '.join(list(map(lambda a: self.serialize_python_type(a, direction), args)))}]"
         if str(origin) == "<class 'collections.abc.Callable'>":
             args = get_args(value)
-            return f"Callable[{', '.join(list(map(lambda a: self.serialize_python_type(a), args)))}]"
+            return f"Callable[{', '.join(list(map(lambda a: self.serialize_python_type(a, direction), args)))}]"
         if str(origin) == "<class 're.Pattern'>":
             return "Pattern[str]"
         if str(origin) == "typing.Literal":
             args = get_args(value)
             if len(args) == 1:
-                return '"' + self.serialize_python_type(args[0]) + '"'
+                return '"' + self.serialize_python_type(args[0], direction) + '"'
             body = ", ".join(
-                list(map(lambda a: '"' + self.serialize_python_type(a) + '"', args))
+                list(
+                    map(
+                        lambda a: '"' + self.serialize_python_type(a, direction) + '"',
+                        args,
+                    )
+                )
             )
             return f"Union[{body}]"
         return str_value
@@ -425,7 +425,7 @@ class DocumentationProvider:
         if "templates" in type:
             base = type_name
             if type_name == "Array":
-                base = "List"
+                base = "Sequence" if direction == "in" else "List"
             if type_name == "Object" or type_name == "Map":
                 base = "Dict"
             return f"{base}[{', '.join(self.serialize_doc_type(t, direction) for t in type['templates'])}]"

@@ -9,7 +9,7 @@ jobs:
   publish-canary:
     name: "Publish canary Docker"
     runs-on: ubuntu-20.04
-    if: github.repository == 'microsoft/playwright-python'
+    if: github.repository == 'microsoft/undetected_playwright-python'
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python
@@ -23,8 +23,8 @@ jobs:
         pip install -e .
     - uses: azure/docker-login@v1
       with:
-        login-server: playwright.azurecr.io
-        username: playwright
+        login-server: undetected_playwright.azurecr.io
+        username: undetected_playwright
         password: ${{ secrets.DOCKER_PASSWORD }}
     - name: Set up Docker QEMU for arm64 docker builds
       uses: docker/setup-qemu-action@v2

@@ -15,55 +15,45 @@
 import re
 import sys
 from types import FunctionType
-from typing import (  # type: ignore
-    Any,
-    Dict,
-    List,
-    Match,
-    Optional,
-    Union,
-    cast,
-    get_args,
-    get_origin,
-)
+from typing import Any, Dict, List, Match, Optional, Union, cast, get_args, get_origin
 from typing import get_type_hints as typing_get_type_hints
 
-from playwright._impl._accessibility import Accessibility
-from playwright._impl._assertions import (
+from undetected_playwright._impl._accessibility import Accessibility
+from undetected_playwright._impl._assertions import (
     APIResponseAssertions,
     LocatorAssertions,
     PageAssertions,
 )
-from playwright._impl._browser import Browser
-from playwright._impl._browser_context import BrowserContext
-from playwright._impl._browser_type import BrowserType
-from playwright._impl._cdp_session import CDPSession
-from playwright._impl._console_message import ConsoleMessage
-from playwright._impl._dialog import Dialog
-from playwright._impl._download import Download
-from playwright._impl._element_handle import ElementHandle
-from playwright._impl._fetch import APIRequest, APIRequestContext, APIResponse
-from playwright._impl._file_chooser import FileChooser
-from playwright._impl._frame import Frame
-from playwright._impl._helper import Error, to_snake_case
-from playwright._impl._input import Keyboard, Mouse, Touchscreen
-from playwright._impl._js_handle import JSHandle, Serializable
-from playwright._impl._locator import FrameLocator, Locator
-from playwright._impl._network import Request, Response, Route, WebSocket
-from playwright._impl._page import Page, Worker
-from playwright._impl._playwright import Playwright
-from playwright._impl._selectors import Selectors
-from playwright._impl._tracing import Tracing
-from playwright._impl._video import Video
-from playwright._impl._web_error import WebError
+from undetected_playwright._impl._browser import Browser
+from undetected_playwright._impl._browser_context import BrowserContext
+from undetected_playwright._impl._browser_type import BrowserType
+from undetected_playwright._impl._cdp_session import CDPSession
+from undetected_playwright._impl._console_message import ConsoleMessage
+from undetected_playwright._impl._dialog import Dialog
+from undetected_playwright._impl._download import Download
+from undetected_playwright._impl._element_handle import ElementHandle
+from undetected_playwright._impl._fetch import APIRequest, APIRequestContext, APIResponse
+from undetected_playwright._impl._file_chooser import FileChooser
+from undetected_playwright._impl._frame import Frame
+from undetected_playwright._impl._helper import Error, to_snake_case
+from undetected_playwright._impl._input import Keyboard, Mouse, Touchscreen
+from undetected_playwright._impl._js_handle import JSHandle, Serializable
+from undetected_playwright._impl._locator import FrameLocator, Locator
+from undetected_playwright._impl._network import Request, Response, Route, WebSocket
+from undetected_playwright._impl._page import Page, Worker
+from undetected_playwright._impl._playwright import Playwright
+from undetected_playwright._impl._selectors import Selectors
+from undetected_playwright._impl._tracing import Tracing
+from undetected_playwright._impl._video import Video
+from undetected_playwright._impl._web_error import WebError
 
 
 def process_type(value: Any, param: bool = False) -> str:
     value = str(value)
     value = re.sub(r"<class '([^']+)'>", r"\1", value)
     value = re.sub(r"NoneType", "None", value)
-    value = re.sub(r"playwright\._impl\._api_structures.([\w]+)", r"\1", value)
-    value = re.sub(r"playwright\._impl\.[\w]+\.([\w]+)", r'"\1"', value)
+    value = re.sub(r"undetected_playwright\._impl\._api_structures.([\w]+)", r"\1", value)
+    value = re.sub(r"undetected_playwright\._impl\.[\w]+\.([\w]+)", r'"\1"', value)
     value = re.sub(r"typing.Literal", "Literal", value)
     if param:
         value = re.sub(r"^typing.Union\[([^,]+), None\]$", r"\1 = None", value)
@@ -148,17 +138,17 @@ def arguments(func: FunctionType, indent: int) -> str:
         elif (
             "typing.Any" in value_str
             or "typing.Dict" in value_str
-            or "typing.List" in value_str
+            or "typing.Sequence" in value_str
             or "Handle" in value_str
         ):
             tokens.append(f"{name}=mapping.to_impl({to_snake_case(name)})")
         elif (
-            re.match(r"<class 'playwright\._impl\.[\w]+\.[\w]+", value_str)
+            re.match(r"<class 'undetected_playwright\._impl\.[\w]+\.[\w]+", value_str)
             and "_api_structures" not in value_str
         ):
             tokens.append(f"{name}={to_snake_case(name)}._impl_obj")
         elif (
-            re.match(r"typing\.Optional\[playwright\._impl\.[\w]+\.[\w]+\]", value_str)
+            re.match(r"typing\.Optional\[undetected_playwright\._impl\.[\w]+\.[\w]+\]", value_str)
             and "_api_structures" not in value_str
         ):
             tokens.append(
@@ -176,14 +166,14 @@ def return_type(func: FunctionType) -> str:
 
 def short_name(t: Any) -> str:
     match = cast(
-        Match[str], re.compile(r"playwright\._impl\.[^.]+\.([^']+)").search(str(t))
+        Match[str], re.compile(r"undetected_playwright\._impl\.[^.]+\.([^']+)").search(str(t))
     )
     return match.group(1)
 
 
 def return_value(value: Any) -> List[str]:
     value_str = str(value)
-    if "playwright" not in value_str:
+    if "undetected_playwright" not in value_str:
         return ["mapping.from_maybe_impl(", ")"]
     if (
         get_origin(value) == Union
@@ -191,7 +181,10 @@ def return_value(value: Any) -> List[str]:
         and str(get_args(value)[1]) == "<class 'NoneType'>"
     ):
         return ["mapping.from_impl_nullable(", ")"]
-    if str(get_origin(value)) == "<class 'list'>":
+    if str(get_origin(value)) in [
+        "<class 'list'>",
+        "<class 'collections.abc.Sequence'>",
+    ]:
         return ["mapping.from_impl_list(", ")"]
     if str(get_origin(value)) == "<class 'dict'>":
         return ["mapping.from_impl_dict(", ")"]
@@ -224,31 +217,31 @@ else:  # pragma: no cover
     from typing_extensions import Literal
 
 
-from playwright._impl._accessibility import Accessibility as AccessibilityImpl
-from playwright._impl._api_structures import Cookie, SetCookieParam, FloatRect, FilePayload, Geolocation, HttpCredentials, PdfMargins, Position, ProxySettings, ResourceTiming, SourceLocation, StorageState, ViewportSize, RemoteAddr, SecurityDetails, RequestSizes, NameValue
-from playwright._impl._browser import Browser as BrowserImpl
-from playwright._impl._browser_context import BrowserContext as BrowserContextImpl
-from playwright._impl._browser_type import BrowserType as BrowserTypeImpl
-from playwright._impl._cdp_session import CDPSession as CDPSessionImpl
-from playwright._impl._console_message import ConsoleMessage as ConsoleMessageImpl
-from playwright._impl._dialog import Dialog as DialogImpl
-from playwright._impl._download import Download as DownloadImpl
-from playwright._impl._element_handle import ElementHandle as ElementHandleImpl
-from playwright._impl._file_chooser import FileChooser as FileChooserImpl
-from playwright._impl._frame import Frame as FrameImpl
-from playwright._impl._input import Keyboard as KeyboardImpl, Mouse as MouseImpl, Touchscreen as TouchscreenImpl
-from playwright._impl._js_handle import JSHandle as JSHandleImpl
-from playwright._impl._network import Request as RequestImpl, Response as ResponseImpl, Route as RouteImpl, WebSocket as WebSocketImpl
-from playwright._impl._page import Page as PageImpl, Worker as WorkerImpl
-from playwright._impl._web_error import WebError as WebErrorImpl
-from playwright._impl._playwright import Playwright as PlaywrightImpl
-from playwright._impl._selectors import Selectors as SelectorsImpl
-from playwright._impl._video import Video as VideoImpl
-from playwright._impl._tracing import Tracing as TracingImpl
-from playwright._impl._locator import Locator as LocatorImpl, FrameLocator as FrameLocatorImpl
-from playwright._impl._api_types import Error
-from playwright._impl._fetch import APIRequest as APIRequestImpl, APIResponse as APIResponseImpl, APIRequestContext as APIRequestContextImpl
-from playwright._impl._assertions import PageAssertions as PageAssertionsImpl, LocatorAssertions as LocatorAssertionsImpl, APIResponseAssertions as APIResponseAssertionsImpl
+from undetected_playwright._impl._accessibility import Accessibility as AccessibilityImpl
+from undetected_playwright._impl._api_structures import Cookie, SetCookieParam, FloatRect, FilePayload, Geolocation, HttpCredentials, PdfMargins, Position, ProxySettings, ResourceTiming, SourceLocation, StorageState, ViewportSize, RemoteAddr, SecurityDetails, RequestSizes, NameValue
+from undetected_playwright._impl._browser import Browser as BrowserImpl
+from undetected_playwright._impl._browser_context import BrowserContext as BrowserContextImpl
+from undetected_playwright._impl._browser_type import BrowserType as BrowserTypeImpl
+from undetected_playwright._impl._cdp_session import CDPSession as CDPSessionImpl
+from undetected_playwright._impl._console_message import ConsoleMessage as ConsoleMessageImpl
+from undetected_playwright._impl._dialog import Dialog as DialogImpl
+from undetected_playwright._impl._download import Download as DownloadImpl
+from undetected_playwright._impl._element_handle import ElementHandle as ElementHandleImpl
+from undetected_playwright._impl._file_chooser import FileChooser as FileChooserImpl
+from undetected_playwright._impl._frame import Frame as FrameImpl
+from undetected_playwright._impl._input import Keyboard as KeyboardImpl, Mouse as MouseImpl, Touchscreen as TouchscreenImpl
+from undetected_playwright._impl._js_handle import JSHandle as JSHandleImpl
+from undetected_playwright._impl._network import Request as RequestImpl, Response as ResponseImpl, Route as RouteImpl, WebSocket as WebSocketImpl
+from undetected_playwright._impl._page import Page as PageImpl, Worker as WorkerImpl
+from undetected_playwright._impl._web_error import WebError as WebErrorImpl
+from undetected_playwright._impl._playwright import Playwright as PlaywrightImpl
+from undetected_playwright._impl._selectors import Selectors as SelectorsImpl
+from undetected_playwright._impl._video import Video as VideoImpl
+from undetected_playwright._impl._tracing import Tracing as TracingImpl
+from undetected_playwright._impl._locator import Locator as LocatorImpl, FrameLocator as FrameLocatorImpl
+from undetected_playwright._impl._errors import Error
+from undetected_playwright._impl._fetch import APIRequest as APIRequestImpl, APIResponse as APIResponseImpl, APIRequestContext as APIRequestContextImpl
+from undetected_playwright._impl._assertions import PageAssertions as PageAssertionsImpl, LocatorAssertions as LocatorAssertionsImpl, APIResponseAssertions as APIResponseAssertionsImpl
 """
 
 

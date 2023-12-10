@@ -14,7 +14,7 @@
 
 import pytest
 
-from playwright.sync_api import Browser, Page, Playwright, Route
+from undetected_playwright.sync_api import Browser, Page, Playwright, Route
 from tests.server import Server
 
 
