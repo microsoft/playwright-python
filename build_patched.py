@@ -84,7 +84,7 @@ def patch_driver(path: str):
         f.write(frames_js)
 
 
-def main(build: bool = True, build_all: bool = False, ):
+def main(build: bool = True, build_all: bool = False):
     cmd = "python setup.py bdist_wheel"
     if build_all:
         cmd += " --all"
