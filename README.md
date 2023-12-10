@@ -38,6 +38,26 @@ python -m pip install -r local-requirements.txt
 python build_patched.py
 ```
 
+#### Note for linux
+If you run on linux with a virtual enviroment and get an error saying
+```
+Permission denied: '...3.11.6/lib/python3.11/site-packages/playwright/driver/playwright.sh'
+```
+
+Then you need to run
+```
+chmod +x <The path your terminal tells you>.sh
+```
+
+If the same error is given for node
+```
+...python3.11/site-packages/playwright/driver/node: Permission denied
+```
+Then you need to run
+```
+chmod +x <The path your terminal tells you for node>
+```
+
 ## Example
 
 ```python
