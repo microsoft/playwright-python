@@ -30,32 +30,40 @@ execute in your shell console
 pip install undetected-playwright-patch
 ```
 
+#### Installation note for UNIX//Linux
+
+<details>
+
+<summary>Resolve "Permission Denied" error (click to expand)</summary>
+
+On UNIX-based OS, you might run into the following errors
+```
+Permission denied: '...python3.**/site-packages/undetected_playwright/driver/playwright.sh'
+```
+and
+```
+...python3.**/site-packages/undetected_playwright/driver/node: Permission denied
+```
+
+To resolve them, simply run
+```shell
+chmod +x <The path your terminal tells you>.sh
+# so smth like: ...python3.**/site-packages/undetected_playwright/driver/playwright.sh
+```
+and
+```
+chmod +x <The path your terminal tells you for node>
+# so smth like: ...python3.**/site-packages/undetected_playwright/driver/node
+```
+
+</details>
+
 #### Build from this repo:
 ```
 git clone https://github.com/kaliiiiiiiiii/undetected-playwright-python
 cd undetected-playwright-python
 python -m pip install -r local-requirements.txt
 python build_patched.py
-```
-
-#### Note for linux
-If you run on linux with a virtual enviroment and get an error saying
-```
-Permission denied: '...3.11.6/lib/python3.11/site-packages/playwright/driver/playwright.sh'
-```
-
-Then you need to run
-```
-chmod +x <The path your terminal tells you>.sh
-```
-
-If the same error is given for node
-```
-...python3.11/site-packages/playwright/driver/node: Permission denied
-```
-Then you need to run
-```
-chmod +x <The path your terminal tells you for node>
 ```
 
 ## Example
