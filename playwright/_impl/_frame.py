@@ -175,12 +175,12 @@ class Frame(ChannelOwner):
     def expect_navigation(
         self,
         url: URLMatch = None,
-        wait_until: DocumentLoadState = None,
+        waitUntil: DocumentLoadState = None,
         timeout: float = None,
     ) -> EventContextManagerImpl[Response]:
         assert self._page
-        if not wait_until:
-            wait_until = "load"
+        if not waitUntil:
+            waitUntil = "load"
 
         if timeout is None:
             timeout = self._page._timeout_settings.navigation_timeout()
@@ -188,7 +188,7 @@ class Frame(ChannelOwner):
         waiter = self._setup_navigation_waiter("expect_navigation", timeout)
 
         to_url = f' to "{url}"' if url else ""
-        waiter.log(f"waiting for navigation{to_url} until '{wait_until}'")
+        waiter.log(f"waiting for navigation{to_url} until '{waitUntil}'")
         matcher = (
             URLMatcher(self._page._browser_context._options.get("baseURL"), url)
             if url
@@ -212,10 +212,10 @@ class Frame(ChannelOwner):
             event = await waiter.result()
             if "error" in event:
                 raise Error(event["error"])
-            if wait_until not in self._load_states:
+            if waitUntil not in self._load_states:
                 t = deadline - monotonic_time()
                 if t > 0:
-                    await self._wait_for_load_state_impl(state=wait_until, timeout=t)
+                    await self._wait_for_load_state_impl(state=waitUntil, timeout=t)
             if "newDocument" in event and "request" in event["newDocument"]:
                 request = from_channel(event["newDocument"]["request"])
                 return await request.response()
@@ -226,16 +226,16 @@ class Frame(ChannelOwner):
     async def wait_for_url(
         self,
         url: URLMatch,
-        wait_until: DocumentLoadState = None,
+        waitUntil: DocumentLoadState = None,
         timeout: float = None,
     ) -> None:
         assert self._page
         matcher = URLMatcher(self._page._browser_context._options.get("baseURL"), url)
         if matcher.matches(self.url):
-            await self._wait_for_load_state_impl(state=wait_until, timeout=timeout)
+            await self._wait_for_load_state_impl(state=waitUntil, timeout=timeout)
             return
         async with self.expect_navigation(
-            url=url, wait_until=wait_until, timeout=timeout
+            url=url, waitUntil=waitUntil, timeout=timeout
         ):
             pass
 
@@ -535,18 +535,18 @@ class Frame(ChannelOwner):
     def locator(
         self,
         selector: str,
-        has_text: Union[str, Pattern[str]] = None,
-        has_not_text: Union[str, Pattern[str]] = None,
+        hasText: Union[str, Pattern[str]] = None,
+        hasNotText: Union[str, Pattern[str]] = None,
         has: Locator = None,
-        has_not: Locator = None,
+        hasNot: Locator = None,
     ) -> Locator:
         return Locator(
             self,
             selector,
-            has_text=has_text,
-            has_not_text=has_not_text,
+            has_text=hasText,
+            has_not_text=hasNotText,
             has=has,
-            has_not=has_not,
+            has_not=hasNot,
         )
 
     def get_by_alt_text(

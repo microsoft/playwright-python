@@ -3500,7 +3500,7 @@ class Frame(SyncBase):
         return EventContextManager(
             self,
             self._impl_obj.expect_navigation(
-                url=self._wrap_handler(url), wait_until=wait_until, timeout=timeout
+                url=self._wrap_handler(url), waitUntil=wait_until, timeout=timeout
             ).future,
         )
 
@@ -3553,7 +3553,7 @@ class Frame(SyncBase):
         return mapping.from_maybe_impl(
             self._sync(
                 self._impl_obj.wait_for_url(
-                    url=self._wrap_handler(url), wait_until=wait_until, timeout=timeout
+                    url=self._wrap_handler(url), waitUntil=wait_until, timeout=timeout
                 )
             )
         )
@@ -4817,10 +4817,10 @@ class Frame(SyncBase):
         return mapping.from_impl(
             self._impl_obj.locator(
                 selector=selector,
-                has_text=has_text,
-                has_not_text=has_not_text,
+                hasText=has_text,
+                hasNotText=has_not_text,
                 has=has._impl_obj if has else None,
-                has_not=has_not._impl_obj if has_not else None,
+                hasNot=has_not._impl_obj if has_not else None,
             )
         )
 
@@ -6382,11 +6382,11 @@ class FrameLocator(SyncBase):
 
         return mapping.from_impl(
             self._impl_obj.locator(
-                selector_or_locator=selector_or_locator,
-                has_text=has_text,
-                has_not_text=has_not_text,
+                selectorOrLocator=selector_or_locator,
+                hasText=has_text,
+                hasNotText=has_not_text,
                 has=has._impl_obj if has else None,
-                has_not=has_not._impl_obj if has_not else None,
+                hasNot=has_not._impl_obj if has_not else None,
             )
         )
 
@@ -7159,7 +7159,7 @@ class Selectors(SyncBase):
         """
 
         return mapping.from_maybe_impl(
-            self._impl_obj.set_test_id_attribute(attribute_name=attribute_name)
+            self._impl_obj.set_test_id_attribute(attributeName=attribute_name)
         )
 
 
@@ -9470,7 +9470,7 @@ class Page(SyncContextManager):
         return mapping.from_maybe_impl(
             self._sync(
                 self._impl_obj.wait_for_url(
-                    url=self._wrap_handler(url), wait_until=wait_until, timeout=timeout
+                    url=self._wrap_handler(url), waitUntil=wait_until, timeout=timeout
                 )
             )
         )
@@ -9970,10 +9970,10 @@ class Page(SyncContextManager):
                 self._impl_obj.route_from_har(
                     har=har,
                     url=url,
-                    not_found=not_found,
+                    notFound=not_found,
                     update=update,
-                    update_content=update_content,
-                    update_mode=update_mode,
+                    updateContent=update_content,
+                    updateMode=update_mode,
                 )
             )
         )
@@ -10460,10 +10460,10 @@ class Page(SyncContextManager):
         return mapping.from_impl(
             self._impl_obj.locator(
                 selector=selector,
-                has_text=has_text,
-                has_not_text=has_not_text,
+                hasText=has_text,
+                hasNotText=has_not_text,
                 has=has._impl_obj if has else None,
-                has_not=has_not._impl_obj if has_not else None,
+                hasNot=has_not._impl_obj if has_not else None,
             )
         )
 
@@ -12295,7 +12295,7 @@ class Page(SyncContextManager):
         return EventContextManager(
             self,
             self._impl_obj.expect_navigation(
-                url=self._wrap_handler(url), wait_until=wait_until, timeout=timeout
+                url=self._wrap_handler(url), waitUntil=wait_until, timeout=timeout
             ).future,
         )
 
@@ -12384,7 +12384,7 @@ class Page(SyncContextManager):
         return EventContextManager(
             self,
             self._impl_obj.expect_request(
-                url_or_predicate=self._wrap_handler(url_or_predicate), timeout=timeout
+                urlOrPredicate=self._wrap_handler(url_or_predicate), timeout=timeout
             ).future,
         )
 
@@ -12477,7 +12477,7 @@ class Page(SyncContextManager):
         return EventContextManager(
             self,
             self._impl_obj.expect_response(
-                url_or_predicate=self._wrap_handler(url_or_predicate), timeout=timeout
+                urlOrPredicate=self._wrap_handler(url_or_predicate), timeout=timeout
             ).future,
         )
 
@@ -13747,10 +13747,10 @@ class BrowserContext(SyncContextManager):
                 self._impl_obj.route_from_har(
                     har=har,
                     url=url,
-                    not_found=not_found,
+                    notFound=not_found,
                     update=update,
-                    update_content=update_content,
-                    update_mode=update_mode,
+                    updateContent=update_content,
+                    updateMode=update_mode,
                 )
             )
         )
@@ -15226,11 +15226,11 @@ class BrowserType(SyncBase):
         return mapping.from_impl(
             self._sync(
                 self._impl_obj.connect(
-                    ws_endpoint=ws_endpoint,
+                    wsEndpoint=ws_endpoint,
                     timeout=timeout,
-                    slow_mo=slow_mo,
+                    slowMo=slow_mo,
                     headers=mapping.to_impl(headers),
-                    expose_network=expose_network,
+                    exposeNetwork=expose_network,
                 )
             )
         )
@@ -16255,11 +16255,11 @@ class Locator(SyncBase):
 
         return mapping.from_impl(
             self._impl_obj.locator(
-                selector_or_locator=selector_or_locator,
-                has_text=has_text,
-                has_not_text=has_not_text,
+                selectorOrLocator=selector_or_locator,
+                hasText=has_text,
+                hasNotText=has_not_text,
                 has=has._impl_obj if has else None,
-                has_not=has_not._impl_obj if has_not else None,
+                hasNot=has_not._impl_obj if has_not else None,
             )
         )
 
@@ -16919,10 +16919,10 @@ class Locator(SyncBase):
 
         return mapping.from_impl(
             self._impl_obj.filter(
-                has_text=has_text,
-                has_not_text=has_not_text,
+                hasText=has_text,
+                hasNotText=has_not_text,
                 has=has._impl_obj if has else None,
-                has_not=has_not._impl_obj if has_not else None,
+                hasNot=has_not._impl_obj if has_not else None,
             )
         )
 
@@ -19326,7 +19326,7 @@ class PageAssertions(SyncBase):
         return mapping.from_maybe_impl(
             self._sync(
                 self._impl_obj.to_have_title(
-                    title_or_reg_exp=title_or_reg_exp, timeout=timeout
+                    titleOrRegExp=title_or_reg_exp, timeout=timeout
                 )
             )
         )
@@ -19353,7 +19353,7 @@ class PageAssertions(SyncBase):
         return mapping.from_maybe_impl(
             self._sync(
                 self._impl_obj.not_to_have_title(
-                    title_or_reg_exp=title_or_reg_exp, timeout=timeout
+                    titleOrRegExp=title_or_reg_exp, timeout=timeout
                 )
             )
         )
@@ -19397,9 +19397,7 @@ class PageAssertions(SyncBase):
 
         return mapping.from_maybe_impl(
             self._sync(
-                self._impl_obj.to_have_url(
-                    url_or_reg_exp=url_or_reg_exp, timeout=timeout
-                )
+                self._impl_obj.to_have_url(urlOrRegExp=url_or_reg_exp, timeout=timeout)
             )
         )
 
@@ -19425,7 +19423,7 @@ class PageAssertions(SyncBase):
         return mapping.from_maybe_impl(
             self._sync(
                 self._impl_obj.not_to_have_url(
-                    url_or_reg_exp=url_or_reg_exp, timeout=timeout
+                    urlOrRegExp=url_or_reg_exp, timeout=timeout
                 )
             )
         )
@@ -19547,9 +19545,9 @@ class LocatorAssertions(SyncBase):
             self._sync(
                 self._impl_obj.to_contain_text(
                     expected=mapping.to_impl(expected),
-                    use_inner_text=use_inner_text,
+                    useInnerText=use_inner_text,
                     timeout=timeout,
-                    ignore_case=ignore_case,
+                    ignoreCase=ignore_case,
                 )
             )
         )
@@ -19590,9 +19588,9 @@ class LocatorAssertions(SyncBase):
             self._sync(
                 self._impl_obj.not_to_contain_text(
                     expected=mapping.to_impl(expected),
-                    use_inner_text=use_inner_text,
+                    useInnerText=use_inner_text,
                     timeout=timeout,
-                    ignore_case=ignore_case,
+                    ignoreCase=ignore_case,
                 )
             )
         )
@@ -19642,7 +19640,7 @@ class LocatorAssertions(SyncBase):
         return mapping.from_maybe_impl(
             self._sync(
                 self._impl_obj.to_have_attribute(
-                    name=name, value=value, ignore_case=ignore_case, timeout=timeout
+                    name=name, value=value, ignoreCase=ignore_case, timeout=timeout
                 )
             )
         )
@@ -19676,7 +19674,7 @@ class LocatorAssertions(SyncBase):
         return mapping.from_maybe_impl(
             self._sync(
                 self._impl_obj.not_to_have_attribute(
-                    name=name, value=value, ignore_case=ignore_case, timeout=timeout
+                    name=name, value=value, ignoreCase=ignore_case, timeout=timeout
                 )
             )
         )
@@ -20314,9 +20312,9 @@ class LocatorAssertions(SyncBase):
             self._sync(
                 self._impl_obj.to_have_text(
                     expected=mapping.to_impl(expected),
-                    use_inner_text=use_inner_text,
+                    useInnerText=use_inner_text,
                     timeout=timeout,
-                    ignore_case=ignore_case,
+                    ignoreCase=ignore_case,
                 )
             )
         )
@@ -20357,9 +20355,9 @@ class LocatorAssertions(SyncBase):
             self._sync(
                 self._impl_obj.not_to_have_text(
                     expected=mapping.to_impl(expected),
-                    use_inner_text=use_inner_text,
+                    useInnerText=use_inner_text,
                     timeout=timeout,
-                    ignore_case=ignore_case,
+                    ignoreCase=ignore_case,
                 )
             )
         )
