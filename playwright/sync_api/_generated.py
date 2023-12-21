@@ -15171,7 +15171,7 @@ class BrowserType(SyncBase):
                 self._impl_obj.connect_over_cdp(
                     endpointURL=endpoint_url,
                     timeout=timeout,
-                    slow_mo=slow_mo,
+                    slowMo=slow_mo,
                     headers=mapping.to_impl(headers),
                 )
             )
