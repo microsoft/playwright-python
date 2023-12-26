@@ -6,7 +6,17 @@ jobs:
   deploy-conda:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            target-platform: linux-64
+          - os: ubuntu-latest
+            target-platform: linux-aarch64
+          - os: windows-latest
+            target-platform: win-64
+          - os: macos-latest
+            target-platform: osx-64
+          - os: macos-latest
+            target-platform: osx-arm64
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -24,4 +34,4 @@ jobs:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |
           conda config --set anaconda_upload yes
-          conda build --user microsoft .
+          conda build --target-platform=${{ matrix.target-platform }} --user microsoft .
