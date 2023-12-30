@@ -156,7 +156,7 @@ class Frame(ChannelOwner):
         waiter.reject_on_event(
             self._page,
             "close",
-            lambda: cast(Page, self._page)._close_error_with_reason(),
+            lambda: cast("Page", self._page)._close_error_with_reason(),
         )
         waiter.reject_on_event(
             self._page, "crash", Error("Navigation failed because page crashed!")
