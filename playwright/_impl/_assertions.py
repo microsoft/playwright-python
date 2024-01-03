@@ -18,6 +18,7 @@ from urllib.parse import urljoin
 
 from playwright._impl._api_structures import ExpectedTextValue, FrameExpectOptions
 from playwright._impl._connection import format_call_log
+from playwright._impl._errors import Error
 from playwright._impl._fetch import APIResponse
 from playwright._impl._helper import is_textual_mime_type
 from playwright._impl._locator import Locator
@@ -795,4 +796,6 @@ def to_expected_text_values(
                     item, match_substring, normalize_white_space, ignore_case
                 )
             )
+        else:
+            raise Error("value must be a string or regular expression")
     return out
