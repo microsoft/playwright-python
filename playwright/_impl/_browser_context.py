@@ -399,24 +399,24 @@ class BrowserContext(ChannelOwner):
         self,
         har: Union[Path, str],
         url: Union[Pattern[str], str] = None,
-        not_found: RouteFromHarNotFoundPolicy = None,
+        notFound: RouteFromHarNotFoundPolicy = None,
         update: bool = None,
-        update_content: Literal["attach", "embed"] = None,
-        update_mode: HarMode = None,
+        updateContent: Literal["attach", "embed"] = None,
+        updateMode: HarMode = None,
     ) -> None:
         if update:
             await self._record_into_har(
                 har=har,
                 page=None,
                 url=url,
-                update_content=update_content,
-                update_mode=update_mode,
+                update_content=updateContent,
+                update_mode=updateMode,
             )
             return
         router = await HarRouter.create(
             local_utils=self._connection.local_utils,
             file=str(har),
-            not_found_action=not_found or "abort",
+            not_found_action=notFound or "abort",
             url_matcher=url,
         )
         await router.add_context_route(self)

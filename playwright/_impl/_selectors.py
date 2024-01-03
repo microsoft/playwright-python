@@ -47,11 +47,11 @@ class Selectors:
             await channel._channel.send("register", params)
         self._registrations.append(params)
 
-    def set_test_id_attribute(self, attribute_name: str) -> None:
-        set_test_id_attribute_name(attribute_name)
+    def set_test_id_attribute(self, attributeName: str) -> None:
+        set_test_id_attribute_name(attributeName)
         for channel in self._channels:
             channel._channel.send_no_reply(
-                "setTestIdAttributeName", {"testIdAttributeName": attribute_name}
+                "setTestIdAttributeName", {"testIdAttributeName": attributeName}
             )
 
     def _add_channel(self, channel: "SelectorsOwner") -> None:
