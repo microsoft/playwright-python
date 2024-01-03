@@ -2837,7 +2837,7 @@ class ElementHandle(JSHandle):
                 caret=caret,
                 scale=scale,
                 mask=mapping.to_impl(mask),
-                mask_color=mask_color,
+                maskColor=mask_color,
             )
         )
 
@@ -9992,7 +9992,7 @@ class Page(AsyncContextManager):
                 caret=caret,
                 scale=scale,
                 mask=mapping.to_impl(mask),
-                mask_color=mask_color,
+                maskColor=mask_color,
             )
         )
 
@@ -15100,7 +15100,7 @@ class BrowserType(AsyncBase):
             await self._impl_obj.connect_over_cdp(
                 endpointURL=endpoint_url,
                 timeout=timeout,
-                slow_mo=slow_mo,
+                slowMo=slow_mo,
                 headers=mapping.to_impl(headers),
             )
         )
@@ -17602,7 +17602,7 @@ class Locator(AsyncBase):
                 caret=caret,
                 scale=scale,
                 mask=mapping.to_impl(mask),
-                mask_color=mask_color,
+                maskColor=mask_color,
             )
         )
 

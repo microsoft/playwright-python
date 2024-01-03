@@ -522,7 +522,7 @@ class Locator:
         caret: Literal["hide", "initial"] = None,
         scale: Literal["css", "device"] = None,
         mask: Sequence["Locator"] = None,
-        mask_color: str = None,
+        maskColor: str = None,
     ) -> bytes:
         params = locals_to_params(locals())
         return await self._with_element(
