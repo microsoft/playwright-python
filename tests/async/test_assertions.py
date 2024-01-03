@@ -96,6 +96,13 @@ async def test_assertions_locator_to_contain_text(page: Page, server: Server) ->
     await expect(page.locator("div")).to_contain_text(["ext     1", re.compile("ext3")])
 
 
+async def test_assertions_locator_to_contain_text_should_throw_if_arg_is_unsupported_type(
+    page: Page,
+) -> None:
+    with pytest.raises(Error, match="value must be a string or regular expression"):
+        await expect(page.locator("div")).to_contain_text(1)  # type: ignore
+
+
 async def test_assertions_locator_to_have_attribute(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content("<div id=foobar>kek</div>")
