@@ -23,7 +23,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Get conda
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           python-version: 3.9
           channels: conda-forge
@@ -34,4 +34,10 @@ jobs:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |
           conda config --set anaconda_upload yes
-          conda build --target-platform=${{ matrix.target-platform }} --user microsoft .
+          if [ "${{ matrix.target-platform }}" == "osx-arm64" ]; then
+            conda build --user microsoft . -m conda_build_config.yaml -m conda_build_config_osx_arm64.yaml
+          elif [ "${{ matrix.target-platform }}" == "linux-aarch64" ]; then
+            conda build --user microsoft . -m conda_build_config.yaml -m conda_build_config_linux_aarch64.yaml
+          else
+            conda build --user microsoft . -m conda_build_config.yaml
+          fi
