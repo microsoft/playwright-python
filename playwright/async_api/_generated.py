@@ -2837,7 +2837,7 @@ class ElementHandle(JSHandle):
                 caret=caret,
                 scale=scale,
                 mask=mapping.to_impl(mask),
-                mask_color=mask_color,
+                maskColor=mask_color,
             )
         )
 
@@ -3448,7 +3448,7 @@ class Frame(AsyncBase):
 
         return AsyncEventContextManager(
             self._impl_obj.expect_navigation(
-                url=self._wrap_handler(url), wait_until=wait_until, timeout=timeout
+                url=self._wrap_handler(url), waitUntil=wait_until, timeout=timeout
             ).future
         )
 
@@ -3500,7 +3500,7 @@ class Frame(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.wait_for_url(
-                url=self._wrap_handler(url), wait_until=wait_until, timeout=timeout
+                url=self._wrap_handler(url), waitUntil=wait_until, timeout=timeout
             )
         )
 
@@ -4727,10 +4727,10 @@ class Frame(AsyncBase):
         return mapping.from_impl(
             self._impl_obj.locator(
                 selector=selector,
-                has_text=has_text,
-                has_not_text=has_not_text,
+                hasText=has_text,
+                hasNotText=has_not_text,
                 has=has._impl_obj if has else None,
-                has_not=has_not._impl_obj if has_not else None,
+                hasNot=has_not._impl_obj if has_not else None,
             )
         )
 
@@ -6262,11 +6262,11 @@ class FrameLocator(AsyncBase):
 
         return mapping.from_impl(
             self._impl_obj.locator(
-                selector_or_locator=selector_or_locator,
-                has_text=has_text,
-                has_not_text=has_not_text,
+                selectorOrLocator=selector_or_locator,
+                hasText=has_text,
+                hasNotText=has_not_text,
                 has=has._impl_obj if has else None,
-                has_not=has_not._impl_obj if has_not else None,
+                hasNot=has_not._impl_obj if has_not else None,
             )
         )
 
@@ -7039,7 +7039,7 @@ class Selectors(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            self._impl_obj.set_test_id_attribute(attribute_name=attribute_name)
+            self._impl_obj.set_test_id_attribute(attributeName=attribute_name)
         )
 
 
@@ -9415,7 +9415,7 @@ class Page(AsyncContextManager):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.wait_for_url(
-                url=self._wrap_handler(url), wait_until=wait_until, timeout=timeout
+                url=self._wrap_handler(url), waitUntil=wait_until, timeout=timeout
             )
         )
 
@@ -9903,10 +9903,10 @@ class Page(AsyncContextManager):
             await self._impl_obj.route_from_har(
                 har=har,
                 url=url,
-                not_found=not_found,
+                notFound=not_found,
                 update=update,
-                update_content=update_content,
-                update_mode=update_mode,
+                updateContent=update_content,
+                updateMode=update_mode,
             )
         )
 
@@ -9992,7 +9992,7 @@ class Page(AsyncContextManager):
                 caret=caret,
                 scale=scale,
                 mask=mapping.to_impl(mask),
-                mask_color=mask_color,
+                maskColor=mask_color,
             )
         )
 
@@ -10380,10 +10380,10 @@ class Page(AsyncContextManager):
         return mapping.from_impl(
             self._impl_obj.locator(
                 selector=selector,
-                has_text=has_text,
-                has_not_text=has_not_text,
+                hasText=has_text,
+                hasNotText=has_not_text,
                 has=has._impl_obj if has else None,
-                has_not=has_not._impl_obj if has_not else None,
+                hasNot=has_not._impl_obj if has_not else None,
             )
         )
 
@@ -12185,7 +12185,7 @@ class Page(AsyncContextManager):
 
         return AsyncEventContextManager(
             self._impl_obj.expect_navigation(
-                url=self._wrap_handler(url), wait_until=wait_until, timeout=timeout
+                url=self._wrap_handler(url), waitUntil=wait_until, timeout=timeout
             ).future
         )
 
@@ -12274,7 +12274,7 @@ class Page(AsyncContextManager):
 
         return AsyncEventContextManager(
             self._impl_obj.expect_request(
-                url_or_predicate=self._wrap_handler(url_or_predicate), timeout=timeout
+                urlOrPredicate=self._wrap_handler(url_or_predicate), timeout=timeout
             ).future
         )
 
@@ -12367,7 +12367,7 @@ class Page(AsyncContextManager):
 
         return AsyncEventContextManager(
             self._impl_obj.expect_response(
-                url_or_predicate=self._wrap_handler(url_or_predicate), timeout=timeout
+                urlOrPredicate=self._wrap_handler(url_or_predicate), timeout=timeout
             ).future
         )
 
@@ -13688,10 +13688,10 @@ class BrowserContext(AsyncContextManager):
             await self._impl_obj.route_from_har(
                 har=har,
                 url=url,
-                not_found=not_found,
+                notFound=not_found,
                 update=update,
-                update_content=update_content,
-                update_mode=update_mode,
+                updateContent=update_content,
+                updateMode=update_mode,
             )
         )
 
@@ -15100,7 +15100,7 @@ class BrowserType(AsyncBase):
             await self._impl_obj.connect_over_cdp(
                 endpointURL=endpoint_url,
                 timeout=timeout,
-                slow_mo=slow_mo,
+                slowMo=slow_mo,
                 headers=mapping.to_impl(headers),
             )
         )
@@ -15153,11 +15153,11 @@ class BrowserType(AsyncBase):
 
         return mapping.from_impl(
             await self._impl_obj.connect(
-                ws_endpoint=ws_endpoint,
+                wsEndpoint=ws_endpoint,
                 timeout=timeout,
-                slow_mo=slow_mo,
+                slowMo=slow_mo,
                 headers=mapping.to_impl(headers),
-                expose_network=expose_network,
+                exposeNetwork=expose_network,
             )
         )
 
@@ -16161,11 +16161,11 @@ class Locator(AsyncBase):
 
         return mapping.from_impl(
             self._impl_obj.locator(
-                selector_or_locator=selector_or_locator,
-                has_text=has_text,
-                has_not_text=has_not_text,
+                selectorOrLocator=selector_or_locator,
+                hasText=has_text,
+                hasNotText=has_not_text,
                 has=has._impl_obj if has else None,
-                has_not=has_not._impl_obj if has_not else None,
+                hasNot=has_not._impl_obj if has_not else None,
             )
         )
 
@@ -16823,10 +16823,10 @@ class Locator(AsyncBase):
 
         return mapping.from_impl(
             self._impl_obj.filter(
-                has_text=has_text,
-                has_not_text=has_not_text,
+                hasText=has_text,
+                hasNotText=has_not_text,
                 has=has._impl_obj if has else None,
-                has_not=has_not._impl_obj if has_not else None,
+                hasNot=has_not._impl_obj if has_not else None,
             )
         )
 
@@ -17602,7 +17602,7 @@ class Locator(AsyncBase):
                 caret=caret,
                 scale=scale,
                 mask=mapping.to_impl(mask),
-                mask_color=mask_color,
+                maskColor=mask_color,
             )
         )
 
@@ -19175,7 +19175,7 @@ class PageAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.to_have_title(
-                title_or_reg_exp=title_or_reg_exp, timeout=timeout
+                titleOrRegExp=title_or_reg_exp, timeout=timeout
             )
         )
 
@@ -19200,7 +19200,7 @@ class PageAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.not_to_have_title(
-                title_or_reg_exp=title_or_reg_exp, timeout=timeout
+                titleOrRegExp=title_or_reg_exp, timeout=timeout
             )
         )
 
@@ -19243,7 +19243,7 @@ class PageAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.to_have_url(
-                url_or_reg_exp=url_or_reg_exp, timeout=timeout
+                urlOrRegExp=url_or_reg_exp, timeout=timeout
             )
         )
 
@@ -19268,7 +19268,7 @@ class PageAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.not_to_have_url(
-                url_or_reg_exp=url_or_reg_exp, timeout=timeout
+                urlOrRegExp=url_or_reg_exp, timeout=timeout
             )
         )
 
@@ -19388,9 +19388,9 @@ class LocatorAssertions(AsyncBase):
         return mapping.from_maybe_impl(
             await self._impl_obj.to_contain_text(
                 expected=mapping.to_impl(expected),
-                use_inner_text=use_inner_text,
+                useInnerText=use_inner_text,
                 timeout=timeout,
-                ignore_case=ignore_case,
+                ignoreCase=ignore_case,
             )
         )
 
@@ -19429,9 +19429,9 @@ class LocatorAssertions(AsyncBase):
         return mapping.from_maybe_impl(
             await self._impl_obj.not_to_contain_text(
                 expected=mapping.to_impl(expected),
-                use_inner_text=use_inner_text,
+                useInnerText=use_inner_text,
                 timeout=timeout,
-                ignore_case=ignore_case,
+                ignoreCase=ignore_case,
             )
         )
 
@@ -19479,7 +19479,7 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.to_have_attribute(
-                name=name, value=value, ignore_case=ignore_case, timeout=timeout
+                name=name, value=value, ignoreCase=ignore_case, timeout=timeout
             )
         )
 
@@ -19511,7 +19511,7 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.not_to_have_attribute(
-                name=name, value=value, ignore_case=ignore_case, timeout=timeout
+                name=name, value=value, ignoreCase=ignore_case, timeout=timeout
             )
         )
 
@@ -20133,9 +20133,9 @@ class LocatorAssertions(AsyncBase):
         return mapping.from_maybe_impl(
             await self._impl_obj.to_have_text(
                 expected=mapping.to_impl(expected),
-                use_inner_text=use_inner_text,
+                useInnerText=use_inner_text,
                 timeout=timeout,
-                ignore_case=ignore_case,
+                ignoreCase=ignore_case,
             )
         )
 
@@ -20174,9 +20174,9 @@ class LocatorAssertions(AsyncBase):
         return mapping.from_maybe_impl(
             await self._impl_obj.not_to_have_text(
                 expected=mapping.to_impl(expected),
-                use_inner_text=use_inner_text,
+                useInnerText=use_inner_text,
                 timeout=timeout,
-                ignore_case=ignore_case,
+                ignoreCase=ignore_case,
             )
         )
 

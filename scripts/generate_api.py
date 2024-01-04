@@ -133,6 +133,9 @@ def arguments(func: FunctionType, indent: int) -> str:
         value_str = str(value)
         if name == "return":
             continue
+        assert (
+            "_" not in name
+        ), f"Underscore in impl classes is not allowed, use camel case, func={func}, name={name}"
         if "Callable" in value_str:
             tokens.append(f"{name}=self._wrap_handler({to_snake_case(name)})")
         elif (

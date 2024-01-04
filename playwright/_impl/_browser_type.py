@@ -163,7 +163,7 @@ class BrowserType(ChannelOwner):
         self,
         endpointURL: str,
         timeout: float = None,
-        slow_mo: float = None,
+        slowMo: float = None,
         headers: Dict[str, str] = None,
     ) -> Browser:
         params = locals_to_params(locals())
@@ -183,16 +183,16 @@ class BrowserType(ChannelOwner):
 
     async def connect(
         self,
-        ws_endpoint: str,
+        wsEndpoint: str,
         timeout: float = None,
-        slow_mo: float = None,
+        slowMo: float = None,
         headers: Dict[str, str] = None,
-        expose_network: str = None,
+        exposeNetwork: str = None,
     ) -> Browser:
         if timeout is None:
             timeout = 30000
-        if slow_mo is None:
-            slow_mo = 0
+        if slowMo is None:
+            slowMo = 0
 
         headers = {**(headers if headers else {}), "x-playwright-browser": self.name}
         local_utils = self._connection.local_utils
@@ -200,11 +200,11 @@ class BrowserType(ChannelOwner):
             await local_utils._channel.send_return_as_dict(
                 "connect",
                 {
-                    "wsEndpoint": ws_endpoint,
+                    "wsEndpoint": wsEndpoint,
                     "headers": headers,
-                    "slowMo": slow_mo,
+                    "slowMo": slowMo,
                     "timeout": timeout,
-                    "exposeNetwork": expose_network,
+                    "exposeNetwork": exposeNetwork,
                 },
             )
         )["pipe"]
