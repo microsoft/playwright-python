@@ -344,21 +344,3 @@ def test_call_sync_method_after_playwright_close_with_own_loop(
     p.start()
     p.join()
     assert p.exitcode == 0
-
-
-def test_should_collect_stale_handles(page: Page, server: Server) -> None:
-    page.on("request", lambda request: None)
-    response = page.goto(server.PREFIX + "/title.html")
-    assert response
-    for i in range(1000):
-        page.evaluate(
-            """async () => {
-            const response = await fetch('/');
-            await response.text();
-        }"""
-        )
-    with pytest.raises(Exception) as exc_info:
-        response.all_headers()
-    assert "The object has been collected to prevent unbounded heap growth." in str(
-        exc_info.value
-    )

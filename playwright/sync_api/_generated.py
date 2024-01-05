@@ -2803,7 +2803,8 @@ class ElementHandle(JSHandle):
         caret: typing.Optional[Literal["hide", "initial"]] = None,
         scale: typing.Optional[Literal["css", "device"]] = None,
         mask: typing.Optional[typing.Sequence["Locator"]] = None,
-        mask_color: typing.Optional[str] = None
+        mask_color: typing.Optional[str] = None,
+        style: typing.Optional[str] = None
     ) -> bytes:
         """ElementHandle.screenshot
 
@@ -2854,6 +2855,10 @@ class ElementHandle(JSHandle):
         mask_color : Union[str, None]
             Specify the color of the overlay box for masked elements, in
             [CSS color format](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value). Default color is pink `#FF00FF`.
+        style : Union[str, None]
+            Text of the stylesheet to apply while making the screenshot. This is where you can hide dynamic elements, make
+            elements invisible or change their properties to help you creating repeatable screenshots. This stylesheet pierces
+            the Shadow DOM and applies to the inner frames.
 
         Returns
         -------
@@ -2873,6 +2878,7 @@ class ElementHandle(JSHandle):
                     scale=scale,
                     mask=mapping.to_impl(mask),
                     maskColor=mask_color,
+                    style=style,
                 )
             )
         )
@@ -4799,8 +4805,13 @@ class Frame(SyncBase):
             Matches elements that do not contain specified text somewhere inside, possibly in a child or a descendant element.
             When passed a [string], matching is case-insensitive and searches for a substring.
         has : Union[Locator, None]
-            Matches elements containing an element that matches an inner locator. Inner locator is queried against the outer
-            one. For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+            Narrows down the results of the method to those which contain elements matching this relative locator. For example,
+            `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+
+            Inner locator **must be relative** to the outer locator and is queried starting with the outer locator match, not
+            the document root. For example, you can find `content` that has `div` in
+            `<article><content><div>Playwright</div></content></article>`. However, looking for `content` that has `article
+            div` will fail, because the inner locator must be relative and should not use any elements outside the `content`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
         has_not : Union[Locator, None]
@@ -6365,8 +6376,13 @@ class FrameLocator(SyncBase):
             Matches elements that do not contain specified text somewhere inside, possibly in a child or a descendant element.
             When passed a [string], matching is case-insensitive and searches for a substring.
         has : Union[Locator, None]
-            Matches elements containing an element that matches an inner locator. Inner locator is queried against the outer
-            one. For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+            Narrows down the results of the method to those which contain elements matching this relative locator. For example,
+            `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+
+            Inner locator **must be relative** to the outer locator and is queried starting with the outer locator match, not
+            the document root. For example, you can find `content` that has `div` in
+            `<article><content><div>Playwright</div></content></article>`. However, looking for `content` that has `article
+            div` will fail, because the inner locator must be relative and should not use any elements outside the `content`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
         has_not : Union[Locator, None]
@@ -9922,6 +9938,30 @@ class Page(SyncContextManager):
             )
         )
 
+    def unroute_all(
+        self,
+        *,
+        behavior: typing.Optional[Literal["default", "ignoreErrors", "wait"]] = None
+    ) -> None:
+        """Page.unroute_all
+
+        Removes all routes created with `page.route()` and `page.route_from_har()`.
+
+        Parameters
+        ----------
+        behavior : Union["default", "ignoreErrors", "wait", None]
+            Specifies wether to wait for already running handlers and what to do if they throw errors:
+            - `'default'` - do not wait for current handler calls (if any) to finish, if unrouted handler throws, it may
+              result in unhandled error
+            - `'wait'` - wait for current handler calls (if any) to finish
+            - `'ignoreErrors'` - do not wait for current handler calls (if any) to finish, all errors thrown by the handlers
+              after unrouting are silently caught
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(self._impl_obj.unroute_all(behavior=behavior))
+        )
+
     def route_from_har(
         self,
         har: typing.Union[pathlib.Path, str],
@@ -9992,7 +10032,8 @@ class Page(SyncContextManager):
         caret: typing.Optional[Literal["hide", "initial"]] = None,
         scale: typing.Optional[Literal["css", "device"]] = None,
         mask: typing.Optional[typing.Sequence["Locator"]] = None,
-        mask_color: typing.Optional[str] = None
+        mask_color: typing.Optional[str] = None,
+        style: typing.Optional[str] = None
     ) -> bytes:
         """Page.screenshot
 
@@ -10041,6 +10082,10 @@ class Page(SyncContextManager):
         mask_color : Union[str, None]
             Specify the color of the overlay box for masked elements, in
             [CSS color format](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value). Default color is pink `#FF00FF`.
+        style : Union[str, None]
+            Text of the stylesheet to apply while making the screenshot. This is where you can hide dynamic elements, make
+            elements invisible or change their properties to help you creating repeatable screenshots. This stylesheet pierces
+            the Shadow DOM and applies to the inner frames.
 
         Returns
         -------
@@ -10062,6 +10107,7 @@ class Page(SyncContextManager):
                     scale=scale,
                     mask=mapping.to_impl(mask),
                     maskColor=mask_color,
+                    style=style,
                 )
             )
         )
@@ -10442,8 +10488,13 @@ class Page(SyncContextManager):
             Matches elements that do not contain specified text somewhere inside, possibly in a child or a descendant element.
             When passed a [string], matching is case-insensitive and searches for a substring.
         has : Union[Locator, None]
-            Matches elements containing an element that matches an inner locator. Inner locator is queried against the outer
-            one. For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+            Narrows down the results of the method to those which contain elements matching this relative locator. For example,
+            `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+
+            Inner locator **must be relative** to the outer locator and is queried starting with the outer locator match, not
+            the document root. For example, you can find `content` that has `div` in
+            `<article><content><div>Playwright</div></content></article>`. However, looking for `content` that has `article
+            div` will fail, because the inner locator must be relative and should not use any elements outside the `content`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
         has_not : Union[Locator, None]
@@ -13698,6 +13749,30 @@ class BrowserContext(SyncContextManager):
             )
         )
 
+    def unroute_all(
+        self,
+        *,
+        behavior: typing.Optional[Literal["default", "ignoreErrors", "wait"]] = None
+    ) -> None:
+        """BrowserContext.unroute_all
+
+        Removes all routes created with `browser_context.route()` and `browser_context.route_from_har()`.
+
+        Parameters
+        ----------
+        behavior : Union["default", "ignoreErrors", "wait", None]
+            Specifies wether to wait for already running handlers and what to do if they throw errors:
+            - `'default'` - do not wait for current handler calls (if any) to finish, if unrouted handler throws, it may
+              result in unhandled error
+            - `'wait'` - wait for current handler calls (if any) to finish
+            - `'ignoreErrors'` - do not wait for current handler calls (if any) to finish, all errors thrown by the handlers
+              after unrouting are silently caught
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(self._impl_obj.unroute_all(behavior=behavior))
+        )
+
     def route_from_har(
         self,
         har: typing.Union[pathlib.Path, str],
@@ -14756,8 +14831,10 @@ class BrowserType(SyncBase):
             "msedge", "msedge-beta", "msedge-dev", "msedge-canary". Read more about using
             [Google Chrome and Microsoft Edge](../browsers.md#google-chrome--microsoft-edge).
         args : Union[Sequence[str], None]
+            **NOTE** Use custom browser args at your own risk, as some of them may break Playwright functionality.
+
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found
-            [here](http://peter.sh/experiments/chromium-command-line-switches/).
+            [here](https://peter.sh/experiments/chromium-command-line-switches/).
         ignore_default_args : Union[Sequence[str], bool, None]
             If `true`, Playwright does not pass its own configurations args and only uses the ones from `args`. If an array is
             given, then filters out the given default arguments. Dangerous option; use with care. Defaults to `false`.
@@ -14913,8 +14990,10 @@ class BrowserType(SyncBase):
             resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium,
             Firefox or WebKit, use at your own risk.
         args : Union[Sequence[str], None]
+            **NOTE** Use custom browser args at your own risk, as some of them may break Playwright functionality.
+
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found
-            [here](http://peter.sh/experiments/chromium-command-line-switches/).
+            [here](https://peter.sh/experiments/chromium-command-line-switches/).
         ignore_default_args : Union[Sequence[str], bool, None]
             If `true`, Playwright does not pass its own configurations args and only uses the ones from `args`. If an array is
             given, then filters out the given default arguments. Dangerous option; use with care. Defaults to `false`.
@@ -16238,8 +16317,13 @@ class Locator(SyncBase):
             Matches elements that do not contain specified text somewhere inside, possibly in a child or a descendant element.
             When passed a [string], matching is case-insensitive and searches for a substring.
         has : Union[Locator, None]
-            Matches elements containing an element that matches an inner locator. Inner locator is queried against the outer
-            one. For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+            Narrows down the results of the method to those which contain elements matching this relative locator. For example,
+            `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+
+            Inner locator **must be relative** to the outer locator and is queried starting with the outer locator match, not
+            the document root. For example, you can find `content` that has `div` in
+            `<article><content><div>Playwright</div></content></article>`. However, looking for `content` that has `article
+            div` will fail, because the inner locator must be relative and should not use any elements outside the `content`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
         has_not : Union[Locator, None]
@@ -16902,8 +16986,13 @@ class Locator(SyncBase):
             Matches elements that do not contain specified text somewhere inside, possibly in a child or a descendant element.
             When passed a [string], matching is case-insensitive and searches for a substring.
         has : Union[Locator, None]
-            Matches elements containing an element that matches an inner locator. Inner locator is queried against the outer
-            one. For example, `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+            Narrows down the results of the method to those which contain elements matching this relative locator. For example,
+            `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
+
+            Inner locator **must be relative** to the outer locator and is queried starting with the outer locator match, not
+            the document root. For example, you can find `content` that has `div` in
+            `<article><content><div>Playwright</div></content></article>`. However, looking for `content` that has `article
+            div` will fail, because the inner locator must be relative and should not use any elements outside the `content`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
         has_not : Union[Locator, None]
@@ -17626,7 +17715,8 @@ class Locator(SyncBase):
         caret: typing.Optional[Literal["hide", "initial"]] = None,
         scale: typing.Optional[Literal["css", "device"]] = None,
         mask: typing.Optional[typing.Sequence["Locator"]] = None,
-        mask_color: typing.Optional[str] = None
+        mask_color: typing.Optional[str] = None,
+        style: typing.Optional[str] = None
     ) -> bytes:
         """Locator.screenshot
 
@@ -17701,6 +17791,10 @@ class Locator(SyncBase):
         mask_color : Union[str, None]
             Specify the color of the overlay box for masked elements, in
             [CSS color format](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value). Default color is pink `#FF00FF`.
+        style : Union[str, None]
+            Text of the stylesheet to apply while making the screenshot. This is where you can hide dynamic elements, make
+            elements invisible or change their properties to help you creating repeatable screenshots. This stylesheet pierces
+            the Shadow DOM and applies to the inner frames.
 
         Returns
         -------
@@ -17720,6 +17814,7 @@ class Locator(SyncBase):
                     scale=scale,
                     mask=mapping.to_impl(mask),
                     maskColor=mask_color,
+                    style=style,
                 )
             )
         )

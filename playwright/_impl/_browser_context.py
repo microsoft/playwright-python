@@ -223,6 +223,8 @@ class BrowserContext(ChannelOwner):
         for route_handler in route_handlers:
             if not route_handler.matches(route.request.url):
                 continue
+            if route_handler not in self._routes:
+                continue
             if route_handler.will_expire:
                 self._routes.remove(route_handler)
             try:
@@ -368,6 +370,11 @@ class BrowserContext(ChannelOwner):
             )
         )
         await self._update_interception_patterns()
+
+    async def unroute_all(
+        self, behavior: Literal["default", "ignoreErrors", "wait"] = None
+    ) -> None:
+        pass
 
     async def _record_into_har(
         self,

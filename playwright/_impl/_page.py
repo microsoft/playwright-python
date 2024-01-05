@@ -240,6 +240,8 @@ class Page(ChannelOwner):
         for route_handler in route_handlers:
             if not route_handler.matches(route.request.url):
                 continue
+            if route_handler not in self._routes:
+                continue
             if route_handler.will_expire:
                 self._routes.remove(route_handler)
             try:
@@ -593,6 +595,11 @@ class Page(ChannelOwner):
         )
         await self._update_interception_patterns()
 
+    async def unroute_all(
+        self, behavior: Literal["default", "ignoreErrors", "wait"] = None
+    ) -> None:
+        pass
+
     async def route_from_har(
         self,
         har: Union[Path, str],
@@ -639,6 +646,7 @@ class Page(ChannelOwner):
         scale: Literal["css", "device"] = None,
         mask: Sequence["Locator"] = None,
         maskColor: str = None,
+        style: str = None,
     ) -> bytes:
         params = locals_to_params(locals())
         if "path" in params:

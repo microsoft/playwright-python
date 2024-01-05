@@ -62,12 +62,14 @@ async def convert_input_files(
                 assert isinstance(item, (str, Path))
                 last_modified_ms = int(os.path.getmtime(item) * 1000)
                 stream: WritableStream = from_channel(
-                    await context._channel.send(
-                        "createTempFile",
-                        {
-                            "name": os.path.basename(item),
-                            "lastModifiedMs": last_modified_ms,
-                        },
+                    await context._connection.wrap_api_call(
+                        lambda: context._channel.send(
+                            "createTempFile",
+                            {
+                                "name": os.path.basename(cast(str, item)),
+                                "lastModifiedMs": last_modified_ms,
+                            },
+                        )
                     )
                 )
                 await stream.copy(item)
