@@ -218,7 +218,7 @@ setup(
     ],
     include_package_data=True,
     install_requires=[
-        "greenlet==3.0.1",
+        "greenlet==3.0.3",
         "pyee==11.0.1",
         "typing-extensions;python_version<='3.8'",
     ],
