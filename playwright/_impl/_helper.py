@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
-import fnmatch
 import inspect
 import math
 import os
@@ -41,6 +40,7 @@ from greenlet import greenlet
 
 from playwright._impl._api_structures import NameValue
 from playwright._impl._errors import Error, TargetClosedError, TimeoutError
+from playwright._impl._glob import glob_to_regex
 from playwright._impl._str_utils import escape_regex_flags
 
 if sys.version_info >= (3, 8):  # pragma: no cover
@@ -149,7 +149,7 @@ class URLMatcher:
         if isinstance(match, str):
             if base_url and not match.startswith("*"):
                 match = urljoin(base_url, match)
-            regex = fnmatch.translate(match)
+            regex = glob_to_regex(match)
             self._regex_obj = re.compile(regex)
         elif isinstance(match, Pattern):
             self._regex_obj = match
