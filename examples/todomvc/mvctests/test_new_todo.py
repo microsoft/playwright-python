@@ -64,7 +64,7 @@ def test_new_todo_test_should_clear_text_input_field_when_an_item_is_added(
     assert_number_of_todos_in_local_storage(page, 1)
 
 
-def test_new_todo_test_should_append_new_items_to_the_ottom_of_the_list(
+def test_new_todo_test_should_append_new_items_to_the_bottom_of_the_list(
     page: Page,
 ) -> None:
     # Create 3 items.
