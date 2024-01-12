@@ -30,6 +30,7 @@ from typing import (
     List,
     Optional,
     Pattern,
+    Set,
     TypeVar,
     Union,
     cast,
@@ -257,6 +258,15 @@ def monotonic_time() -> int:
     return math.floor(time.monotonic() * 1000)
 
 
+class RouteHandlerInvocation:
+    complete: "asyncio.Future"
+    route: "Route"
+
+    def __init__(self, complete: "asyncio.Future", route: "Route") -> None:
+        self.complete = complete
+        self.route = route
+
+
 class RouteHandler:
     def __init__(
         self,
@@ -270,11 +280,29 @@ class RouteHandler:
         self._times = times if times else math.inf
         self._handled_count = 0
         self._is_sync = is_sync
+        self._ignore_exception = False
+        self._active_invocations: Set[RouteHandlerInvocation] = set()
 
     def matches(self, request_url: str) -> bool:
         return self.matcher.matches(request_url)
 
     async def handle(self, route: "Route") -> bool:
+        handler_invocation = RouteHandlerInvocation(
+            asyncio.get_running_loop().create_future(), route
+        )
+        self._active_invocations.add(handler_invocation)
+        try:
+            return await self._handle_internal(route)
+        except Exception as e:
+            # If the handler was stopped (without waiting for completion), we ignore all exceptions.
+            if self._ignore_exception:
+                return False
+            raise e
+        finally:
+            handler_invocation.complete.set_result(None)
+            self._active_invocations.remove(handler_invocation)
+
+    async def _handle_internal(self, route: "Route") -> bool:
         handled_future = route._start_handling()
         handler_task = []
 
@@ -296,6 +324,20 @@ class RouteHandler:
 
         [handled, *_] = await asyncio.gather(handled_future, *handler_task)
         return handled
+
+    async def stop(self, behavior: Literal["ignoreErrors", "wait"]) -> None:
+        # When a handler is manually unrouted or its page/context is closed we either
+        # - wait for the current handler invocations to finish
+        # - or do not wait, if the user opted out of it, but swallow all exceptions
+        #   that happen after the unroute/close.
+        if behavior == "ignoreErrors":
+            self._ignore_exception = True
+        else:
+            tasks = []
+            for activation in self._active_invocations:
+                if not activation.route._did_throw:
+                    tasks.append(activation.complete)
+            await asyncio.gather(*tasks)
 
     @property
     def will_expire(self) -> bool:

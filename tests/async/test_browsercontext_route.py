@@ -227,7 +227,7 @@ async def test_should_use_set_cookie_header_in_future_requests(
 
     def _handle_request(request: TestServerRequest) -> None:
         nonlocal cookie
-        cookie = request.getHeader("cookie")
+        cookie = must(request.getHeader("cookie"))
         request.finish()
 
     server.set_route("/foo.html", _handle_request)
@@ -331,7 +331,7 @@ async def test_should_override_post_body_with_empty_string(
         ),
     )
 
-    assert req[0].post_body is None
+    assert req[0].post_body == ""
 
 
 async def test_should_chain_fallback(
