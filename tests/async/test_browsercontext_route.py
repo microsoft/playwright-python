@@ -331,7 +331,7 @@ async def test_should_override_post_body_with_empty_string(
         ),
     )
 
-    assert req[0].post_body == ""
+    assert req[0].post_body == b""
 
 
 async def test_should_chain_fallback(

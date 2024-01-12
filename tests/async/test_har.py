@@ -651,9 +651,9 @@ async def test_should_update_har_zip_for_context(
 async def test_page_unroute_all_should_stop_page_route_from_har(
     context_factory: Callable[[], Awaitable[BrowserContext]],
     server: Server,
-    asset: Path,
+    assetdir: Path,
 ) -> None:
-    har_path = asset / "har-fulfill.har"
+    har_path = assetdir / "har-fulfill.har"
     context1 = await context_factory()
     page1 = await context1.new_page()
     # The har file contains requests for another domain, so the router
@@ -670,9 +670,9 @@ async def test_page_unroute_all_should_stop_page_route_from_har(
 async def test_context_unroute_call_should_stop_context_route_from_har(
     context_factory: Callable[[], Awaitable[BrowserContext]],
     server: Server,
-    asset: Path,
+    assetdir: Path,
 ) -> None:
-    har_path = asset / "har-fulfill.har"
+    har_path = assetdir / "har-fulfill.har"
     context1 = await context_factory()
     page1 = await context1.new_page()
     # The har file contains requests for another domain, so the router
