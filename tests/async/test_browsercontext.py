@@ -612,12 +612,17 @@ async def test_should_fail_with_correct_credentials_and_mismatching_port(
 
 
 async def test_offline_should_work_with_initial_option(
-    browser: Browser, server: Server
+    browser: Browser,
+    server: Server,
+    browser_name: str,
 ) -> None:
     context = await browser.new_context(offline=True)
     page = await context.new_page()
+    frame_navigated_task = asyncio.create_task(page.wait_for_event("framenavigated"))
     with pytest.raises(Error) as exc_info:
         await page.goto(server.EMPTY_PAGE)
+    if browser_name == "firefox":
+        await frame_navigated_task
     assert exc_info.value
     await context.set_offline(False)
     response = await page.goto(server.EMPTY_PAGE)

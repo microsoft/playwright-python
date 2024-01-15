@@ -3003,9 +3003,8 @@ class ElementHandle(JSHandle):
         Depending on the `state` parameter, this method waits for one of the [actionability](https://playwright.dev/python/docs/actionability) checks to
         pass. This method throws when the element is detached while waiting, unless waiting for the `\"hidden\"` state.
         - `\"visible\"` Wait until the element is [visible](https://playwright.dev/python/docs/actionability#visible).
-        - `\"hidden\"` Wait until the element is [not visible](https://playwright.dev/python/docs/actionability#visible) or
-          [not attached](https://playwright.dev/python/docs/actionability#attached). Note that waiting for hidden does not throw when the element
-          detaches.
+        - `\"hidden\"` Wait until the element is [not visible](https://playwright.dev/python/docs/actionability#visible) or not attached. Note that
+          waiting for hidden does not throw when the element detaches.
         - `\"stable\"` Wait until the element is both [visible](https://playwright.dev/python/docs/actionability#visible) and
           [stable](https://playwright.dev/python/docs/actionability#stable).
         - `\"enabled\"` Wait until the element is [enabled](https://playwright.dev/python/docs/actionability#enabled).
@@ -15402,14 +15401,14 @@ class Tracing(AsyncBase):
         **Usage**
 
         ```py
-        await context.tracing.start(name=\"trace\", screenshots=True, snapshots=True)
+        await context.tracing.start(screenshots=True, snapshots=True)
         page = await context.new_page()
         await page.goto(\"https://playwright.dev\")
         await context.tracing.stop(path = \"trace.zip\")
         ```
 
         ```py
-        context.tracing.start(name=\"trace\", screenshots=True, snapshots=True)
+        context.tracing.start(screenshots=True, snapshots=True)
         page = context.new_page()
         page.goto(\"https://playwright.dev\")
         context.tracing.stop(path = \"trace.zip\")
@@ -15418,8 +15417,9 @@ class Tracing(AsyncBase):
         Parameters
         ----------
         name : Union[str, None]
-            If specified, the trace is going to be saved into the file with the given name inside the `tracesDir` folder
-            specified in `browser_type.launch()`.
+            If specified, intermediate trace files are going to be saved into the files with the given name prefix inside the
+            `tracesDir` folder specified in `browser_type.launch()`. To specify the final trace zip file name, you need
+            to pass `path` option to `tracing.stop()` instead.
         title : Union[str, None]
             Trace name to be shown in the Trace Viewer.
         snapshots : Union[bool, None]
@@ -15454,7 +15454,7 @@ class Tracing(AsyncBase):
         **Usage**
 
         ```py
-        await context.tracing.start(name=\"trace\", screenshots=True, snapshots=True)
+        await context.tracing.start(screenshots=True, snapshots=True)
         page = await context.new_page()
         await page.goto(\"https://playwright.dev\")
 
@@ -15470,7 +15470,7 @@ class Tracing(AsyncBase):
         ```
 
         ```py
-        context.tracing.start(name=\"trace\", screenshots=True, snapshots=True)
+        context.tracing.start(screenshots=True, snapshots=True)
         page = context.new_page()
         page.goto(\"https://playwright.dev\")
 
@@ -15490,8 +15490,9 @@ class Tracing(AsyncBase):
         title : Union[str, None]
             Trace name to be shown in the Trace Viewer.
         name : Union[str, None]
-            If specified, the trace is going to be saved into the file with the given name inside the `tracesDir` folder
-            specified in `browser_type.launch()`.
+            If specified, intermediate trace files are going to be saved into the files with the given name prefix inside the
+            `tracesDir` folder specified in `browser_type.launch()`. To specify the final trace zip file name, you need
+            to pass `path` option to `tracing.stop_chunk()` instead.
         """
 
         return mapping.from_maybe_impl(
@@ -19388,8 +19389,8 @@ class LocatorAssertions(AsyncBase):
     ) -> None:
         """LocatorAssertions.to_contain_text
 
-        Ensures the `Locator` points to an element that contains the given text. You can use regular expressions for the
-        value as well.
+        Ensures the `Locator` points to an element that contains the given text. All nested elements will be considered
+        when computing the text content of the element. You can use regular expressions for the value as well.
 
         **Details**
 
@@ -20134,8 +20135,8 @@ class LocatorAssertions(AsyncBase):
     ) -> None:
         """LocatorAssertions.to_have_text
 
-        Ensures the `Locator` points to an element with the given text. You can use regular expressions for the value as
-        well.
+        Ensures the `Locator` points to an element with the given text. All nested elements will be considered when
+        computing the text content of the element. You can use regular expressions for the value as well.
 
         **Details**
 
@@ -20283,7 +20284,8 @@ class LocatorAssertions(AsyncBase):
     ) -> None:
         """LocatorAssertions.to_be_attached
 
-        Ensures that `Locator` points to an [attached](https://playwright.dev/python/docs/actionability#attached) DOM node.
+        Ensures that `Locator` points to an element that is
+        [connected](https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected) to a Document or a ShadowRoot.
 
         **Usage**
 
@@ -20664,8 +20666,7 @@ class LocatorAssertions(AsyncBase):
     ) -> None:
         """LocatorAssertions.to_be_visible
 
-        Ensures that `Locator` points to an [attached](https://playwright.dev/python/docs/actionability#attached) and
-        [visible](https://playwright.dev/python/docs/actionability#visible) DOM node.
+        Ensures that `Locator` points to an attached and [visible](https://playwright.dev/python/docs/actionability#visible) DOM node.
 
         To check that at least one element from the list is visible, use `locator.first()`.
 
