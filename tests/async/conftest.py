@@ -100,6 +100,17 @@ async def context_factory(
         await context.close()
 
 
+@pytest.fixture(scope="session")
+async def default_same_site_cookie_value(browser_name: str) -> str:
+    if browser_name == "chromium":
+        return "Lax"
+    if browser_name == "firefox":
+        return "None"
+    if browser_name == "webkit":
+        return "None"
+    raise Exception(f"Invalid browser_name: {browser_name}")
+
+
 @pytest.fixture
 async def context(
     context_factory: "Callable[..., asyncio.Future[BrowserContext]]",

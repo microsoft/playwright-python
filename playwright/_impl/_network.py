@@ -267,6 +267,9 @@ class Request(ChannelOwner):
             return asyncio.Future()
         return page._closed_or_crashed_future
 
+    def _safe_page(self) -> "Optional[Page]":
+        return cast("Frame", from_channel(self._initializer["frame"]))._page
+
 
 class Route(ChannelOwner):
     def __init__(
@@ -275,6 +278,7 @@ class Route(ChannelOwner):
         super().__init__(parent, type, guid, initializer)
         self._handling_future: Optional[asyncio.Future["bool"]] = None
         self._context: "BrowserContext" = cast("BrowserContext", None)
+        self._did_throw = False
 
     def _start_handling(self) -> "asyncio.Future[bool]":
         self._handling_future = asyncio.Future()
@@ -298,17 +302,17 @@ class Route(ChannelOwner):
         return from_channel(self._initializer["request"])
 
     async def abort(self, errorCode: str = None) -> None:
-        self._check_not_handled()
-        await self._race_with_page_close(
-            self._channel.send(
-                "abort",
-                {
-                    "errorCode": errorCode,
-                    "requestUrl": self.request._initializer["url"],
-                },
+        await self._handle_route(
+            lambda: self._race_with_page_close(
+                self._channel.send(
+                    "abort",
+                    {
+                        "errorCode": errorCode,
+                        "requestUrl": self.request._initializer["url"],
+                    },
+                )
             )
         )
-        self._report_handled(True)
 
     async def fulfill(
         self,
@@ -320,7 +324,22 @@ class Route(ChannelOwner):
         contentType: str = None,
         response: "APIResponse" = None,
     ) -> None:
-        self._check_not_handled()
+        await self._handle_route(
+            lambda: self._inner_fulfill(
+                status, headers, body, json, path, contentType, response
+            )
+        )
+
+    async def _inner_fulfill(
+        self,
+        status: int = None,
+        headers: Dict[str, str] = None,
+        body: Union[str, bytes] = None,
+        json: Any = None,
+        path: Union[str, Path] = None,
+        contentType: str = None,
+        response: "APIResponse" = None,
+    ) -> None:
         params = locals_to_params(locals())
 
         if json is not None:
@@ -375,7 +394,15 @@ class Route(ChannelOwner):
         params["requestUrl"] = self.request._initializer["url"]
 
         await self._race_with_page_close(self._channel.send("fulfill", params))
-        self._report_handled(True)
+
+    async def _handle_route(self, callback: Callable) -> None:
+        self._check_not_handled()
+        try:
+            await callback()
+            self._report_handled(True)
+        except Exception as e:
+            self._did_throw = True
+            raise e
 
     async def fetch(
         self,
@@ -418,10 +445,12 @@ class Route(ChannelOwner):
         postData: Union[Any, str, bytes] = None,
     ) -> None:
         overrides = cast(FallbackOverrideParameters, locals_to_params(locals()))
-        self._check_not_handled()
-        self.request._apply_fallback_overrides(overrides)
-        await self._internal_continue()
-        self._report_handled(True)
+
+        async def _inner() -> None:
+            self.request._apply_fallback_overrides(overrides)
+            await self._internal_continue()
+
+        return await self._handle_route(_inner)
 
     def _internal_continue(
         self, is_internal: bool = False
@@ -458,11 +487,11 @@ class Route(ChannelOwner):
         return continue_route()
 
     async def _redirected_navigation_request(self, url: str) -> None:
-        self._check_not_handled()
-        await self._race_with_page_close(
-            self._channel.send("redirectNavigationRequest", {"url": url})
+        await self._handle_route(
+            lambda: self._race_with_page_close(
+                self._channel.send("redirectNavigationRequest", {"url": url})
+            )
         )
-        self._report_handled(True)
 
     async def _race_with_page_close(self, future: Coroutine) -> None:
         fut = asyncio.create_task(future)

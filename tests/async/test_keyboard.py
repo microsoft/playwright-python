@@ -519,27 +519,16 @@ async def test_should_support_macos_shortcuts(
     )
 
 
-async def test_should_press_the_meta_key(
-    page: Page, server: Server, is_firefox: bool, is_mac: bool
-) -> None:
+async def test_should_press_the_meta_key(page: Page) -> None:
     lastEvent = await captureLastKeydown(page)
     await page.keyboard.press("Meta")
     v = await lastEvent.json_value()
     metaKey = v["metaKey"]
     key = v["key"]
     code = v["code"]
-    if is_firefox and not is_mac:
-        assert key == "OS"
-    else:
-        assert key == "Meta"
-
-    if is_firefox:
-        assert code == "MetaLeft"
-
-    if is_firefox and not is_mac:
-        assert metaKey is False
-    else:
-        assert metaKey
+    assert key == "Meta"
+    assert code == "MetaLeft"
+    assert metaKey
 
 
 async def test_should_work_after_a_cross_origin_navigation(

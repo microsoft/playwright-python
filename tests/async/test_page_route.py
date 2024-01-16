@@ -1010,21 +1010,28 @@ async def test_page_route_should_support_times_parameter(
     assert len(intercepted) == 1
 
 
-async def test_context_route_should_support_times_parameter(
+async def test_should_work_if_handler_with_times_parameter_was_removed_from_another_handler(
     context: BrowserContext, page: Page, server: Server
 ) -> None:
     intercepted = []
 
-    async def handle_request(route: Route) -> None:
+    async def handler(route: Route) -> None:
+        intercepted.append("first")
         await route.continue_()
-        intercepted.append(True)
 
-    await context.route("**/empty.html", handle_request, times=1)
+    await page.route("**/*", handler, times=1)
 
+    async def handler2(route: Route) -> None:
+        intercepted.append("second")
+        await page.unroute("**/*", handler)
+        await route.fallback()
+
+    await page.route("**/*", handler2)
     await page.goto(server.EMPTY_PAGE)
+    assert intercepted == ["second"]
+    intercepted.clear()
     await page.goto(server.EMPTY_PAGE)
-    await page.goto(server.EMPTY_PAGE)
-    assert len(intercepted) == 1
+    assert intercepted == ["second"]
 
 
 async def test_should_fulfill_with_global_fetch_result(

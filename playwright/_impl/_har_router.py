@@ -102,16 +102,14 @@ class HarRouter:
             url=self._options_url_match or "**/*",
             handler=lambda route, _: asyncio.create_task(self._handle(route)),
         )
-        context.once("close", lambda _: self._dispose())
 
     async def add_page_route(self, page: "Page") -> None:
         await page.route(
             url=self._options_url_match or "**/*",
             handler=lambda route, _: asyncio.create_task(self._handle(route)),
         )
-        page.once("close", lambda _: self._dispose())
 
-    def _dispose(self) -> None:
+    def dispose(self) -> None:
         asyncio.create_task(
             self._local_utils._channel.send("harClose", {"harId": self._har_id})
         )

@@ -152,6 +152,8 @@ class Page(ChannelOwner):
         self._video: Optional[Video] = None
         self._opener = cast("Page", from_nullable_channel(initializer.get("opener")))
         self._close_reason: Optional[str] = None
+        self._close_was_called = False
+        self._har_routers: List[HarRouter] = []
 
         self._channel.on(
             "bindingCall",
@@ -238,7 +240,12 @@ class Page(ChannelOwner):
         route._context = self.context
         route_handlers = self._routes.copy()
         for route_handler in route_handlers:
+            # If the page was closed we stall all requests right away.
+            if self._close_was_called or self.context._close_was_called:
+                return
             if not route_handler.matches(route.request.url):
+                continue
+            if route_handler not in self._routes:
                 continue
             if route_handler.will_expire:
                 self._routes.remove(route_handler)
@@ -272,6 +279,7 @@ class Page(ChannelOwner):
             self._browser_context._pages.remove(self)
         if self in self._browser_context._background_pages:
             self._browser_context._background_pages.remove(self)
+        self._dispose_har_routers()
         self.emit(Page.Events.Close, self)
 
     def _on_crash(self) -> None:
@@ -585,13 +593,42 @@ class Page(ChannelOwner):
     async def unroute(
         self, url: URLMatch, handler: Optional[RouteHandlerCallback] = None
     ) -> None:
-        self._routes = list(
-            filter(
-                lambda r: r.matcher.match != url or (handler and r.handler != handler),
-                self._routes,
+        removed = []
+        remaining = []
+        for route in self._routes:
+            if route.matcher.match != url or (handler and route.handler != handler):
+                remaining.append(route)
+            else:
+                removed.append(route)
+        await self._unroute_internal(removed, remaining, "default")
+
+    async def _unroute_internal(
+        self,
+        removed: List[RouteHandler],
+        remaining: List[RouteHandler],
+        behavior: Literal["default", "ignoreErrors", "wait"] = None,
+    ) -> None:
+        self._routes = remaining
+        await self._update_interception_patterns()
+        if behavior is None or behavior == "default":
+            return
+        await asyncio.gather(
+            *map(
+                lambda route: route.stop(behavior),  # type: ignore
+                removed,
             )
         )
-        await self._update_interception_patterns()
+
+    def _dispose_har_routers(self) -> None:
+        for router in self._har_routers:
+            router.dispose()
+        self._har_routers = []
+
+    async def unroute_all(
+        self, behavior: Literal["default", "ignoreErrors", "wait"] = None
+    ) -> None:
+        await self._unroute_internal(self._routes, [], behavior)
+        self._dispose_har_routers()
 
     async def route_from_har(
         self,
@@ -617,6 +654,7 @@ class Page(ChannelOwner):
             not_found_action=notFound or "abort",
             url_matcher=url,
         )
+        self._har_routers.append(router)
         await router.add_page_route(self)
 
     async def _update_interception_patterns(self) -> None:
@@ -639,6 +677,7 @@ class Page(ChannelOwner):
         scale: Literal["css", "device"] = None,
         mask: Sequence["Locator"] = None,
         maskColor: str = None,
+        style: str = None,
     ) -> bytes:
         params = locals_to_params(locals())
         if "path" in params:
@@ -667,6 +706,7 @@ class Page(ChannelOwner):
 
     async def close(self, runBeforeUnload: bool = None, reason: str = None) -> None:
         self._close_reason = reason
+        self._close_was_called = True
         try:
             await self._channel.send("close", locals_to_params(locals()))
             if self._owned_context:

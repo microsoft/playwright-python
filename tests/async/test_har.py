@@ -18,12 +18,13 @@ import os
 import re
 import zipfile
 from pathlib import Path
-from typing import cast
+from typing import Awaitable, Callable, cast
 
 import pytest
 
 from playwright.async_api import Browser, BrowserContext, Error, Page, Route, expect
 from tests.server import Server
+from tests.utils import must
 
 
 async def test_should_work(browser: Browser, server: Server, tmpdir: Path) -> None:
@@ -645,6 +646,44 @@ async def test_should_update_har_zip_for_context(
     await expect(page_2.locator("body")).to_have_css(
         "background-color", "rgb(255, 192, 203)"
     )
+
+
+async def test_page_unroute_all_should_stop_page_route_from_har(
+    context_factory: Callable[[], Awaitable[BrowserContext]],
+    server: Server,
+    assetdir: Path,
+) -> None:
+    har_path = assetdir / "har-fulfill.har"
+    context1 = await context_factory()
+    page1 = await context1.new_page()
+    # The har file contains requests for another domain, so the router
+    # is expected to abort all requests.
+    await page1.route_from_har(har_path, not_found="abort")
+    with pytest.raises(Error) as exc_info:
+        await page1.goto(server.EMPTY_PAGE)
+    assert exc_info.value
+    await page1.unroute_all(behavior="wait")
+    response = must(await page1.goto(server.EMPTY_PAGE))
+    assert response.ok
+
+
+async def test_context_unroute_call_should_stop_context_route_from_har(
+    context_factory: Callable[[], Awaitable[BrowserContext]],
+    server: Server,
+    assetdir: Path,
+) -> None:
+    har_path = assetdir / "har-fulfill.har"
+    context1 = await context_factory()
+    page1 = await context1.new_page()
+    # The har file contains requests for another domain, so the router
+    # is expected to abort all requests.
+    await context1.route_from_har(har_path, not_found="abort")
+    with pytest.raises(Error) as exc_info:
+        await page1.goto(server.EMPTY_PAGE)
+    assert exc_info.value
+    await context1.unroute_all(behavior="wait")
+    response = must(await page1.goto(server.EMPTY_PAGE))
+    assert must(response).ok
 
 
 async def test_should_update_har_zip_for_page(

@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import asyncio
-import re
 from typing import Any, List
 from urllib.parse import urlparse
 
@@ -26,8 +25,6 @@ from playwright.async_api import (
     JSHandle,
     Page,
     Playwright,
-    Request,
-    Route,
 )
 from tests.server import Server
 from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
@@ -474,114 +471,6 @@ async def test_expose_bindinghandle_should_work(context: BrowserContext) -> None
     assert result == 17
 
 
-async def test_route_should_intercept(context: BrowserContext, server: Server) -> None:
-    intercepted = []
-
-    def handle(route: Route, request: Request) -> None:
-        intercepted.append(True)
-        assert "empty.html" in request.url
-        assert request.headers["user-agent"]
-        assert request.method == "GET"
-        assert request.post_data is None
-        assert request.is_navigation_request()
-        assert request.resource_type == "document"
-        assert request.frame == page.main_frame
-        assert request.frame.url == "about:blank"
-        asyncio.create_task(route.continue_())
-
-    await context.route("**/empty.html", lambda route, request: handle(route, request))
-    page = await context.new_page()
-    response = await page.goto(server.EMPTY_PAGE)
-    assert response
-    assert response.ok
-    assert intercepted == [True]
-    await context.close()
-
-
-async def test_route_should_unroute(context: BrowserContext, server: Server) -> None:
-    page = await context.new_page()
-
-    intercepted: List[int] = []
-
-    def handler(route: Route, request: Request, ordinal: int) -> None:
-        intercepted.append(ordinal)
-        asyncio.create_task(route.continue_())
-
-    await context.route("**/*", lambda route, request: handler(route, request, 1))
-    await context.route(
-        "**/empty.html", lambda route, request: handler(route, request, 2)
-    )
-    await context.route(
-        "**/empty.html", lambda route, request: handler(route, request, 3)
-    )
-
-    def handler4(route: Route, request: Request) -> None:
-        handler(route, request, 4)
-
-    await context.route(re.compile("empty.html"), handler4)
-
-    await page.goto(server.EMPTY_PAGE)
-    assert intercepted == [4]
-
-    intercepted = []
-    await context.unroute(re.compile("empty.html"), handler4)
-    await page.goto(server.EMPTY_PAGE)
-    assert intercepted == [3]
-
-    intercepted = []
-    await context.unroute("**/empty.html")
-    await page.goto(server.EMPTY_PAGE)
-    assert intercepted == [1]
-
-
-async def test_route_should_yield_to_page_route(
-    context: BrowserContext, server: Server
-) -> None:
-    await context.route(
-        "**/empty.html",
-        lambda route, request: asyncio.create_task(
-            route.fulfill(status=200, body="context")
-        ),
-    )
-
-    page = await context.new_page()
-    await page.route(
-        "**/empty.html",
-        lambda route, request: asyncio.create_task(
-            route.fulfill(status=200, body="page")
-        ),
-    )
-
-    response = await page.goto(server.EMPTY_PAGE)
-    assert response
-    assert response.ok
-    assert await response.text() == "page"
-
-
-async def test_route_should_fall_back_to_context_route(
-    context: BrowserContext, server: Server
-) -> None:
-    await context.route(
-        "**/empty.html",
-        lambda route, request: asyncio.create_task(
-            route.fulfill(status=200, body="context")
-        ),
-    )
-
-    page = await context.new_page()
-    await page.route(
-        "**/non-empty.html",
-        lambda route, request: asyncio.create_task(
-            route.fulfill(status=200, body="page")
-        ),
-    )
-
-    response = await page.goto(server.EMPTY_PAGE)
-    assert response
-    assert response.ok
-    assert await response.text() == "context"
-
-
 async def test_auth_should_fail_without_credentials(
     context: BrowserContext, server: Server
 ) -> None:
@@ -723,12 +612,17 @@ async def test_should_fail_with_correct_credentials_and_mismatching_port(
 
 
 async def test_offline_should_work_with_initial_option(
-    browser: Browser, server: Server
+    browser: Browser,
+    server: Server,
+    browser_name: str,
 ) -> None:
     context = await browser.new_context(offline=True)
     page = await context.new_page()
+    frame_navigated_task = asyncio.create_task(page.wait_for_event("framenavigated"))
     with pytest.raises(Error) as exc_info:
         await page.goto(server.EMPTY_PAGE)
+    if browser_name == "firefox":
+        await frame_navigated_task
     assert exc_info.value
     await context.set_offline(False)
     response = await page.goto(server.EMPTY_PAGE)

@@ -14,7 +14,7 @@
 
 import pytest
 
-from playwright.async_api import Page, expect
+from playwright.async_api import Page, TimeoutError, expect
 from tests.server import Server
 
 
@@ -72,3 +72,9 @@ async def test_to_be_in_viewport_should_report_intersection_even_if_fully_covere
     """
     )
     await expect(page.locator("h1")).to_be_in_viewport()
+
+
+async def test_should_have_timeout_error_name(page: Page) -> None:
+    with pytest.raises(TimeoutError) as exc_info:
+        await page.wait_for_selector("#not-found", timeout=1)
+    assert exc_info.value.name == "TimeoutError"
