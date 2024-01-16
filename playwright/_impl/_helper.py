@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
-import inspect
 import math
 import os
 import re
@@ -25,7 +24,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Coroutine,
     Dict,
     List,
     Optional,
@@ -304,26 +302,19 @@ class RouteHandler:
 
     async def _handle_internal(self, route: "Route") -> bool:
         handled_future = route._start_handling()
-        handler_task = []
 
-        def impl() -> None:
-            self._handled_count += 1
-            result = cast(
-                Callable[["Route", "Request"], Union[Coroutine, Any]], self.handler
-            )(route, route.request)
-            if inspect.iscoroutine(result):
-                handler_task.append(asyncio.create_task(result))
-
-        # As with event handlers, each route handler is a potentially blocking context
-        # so it needs a fiber.
+        self._handled_count += 1
         if self._is_sync:
-            g = greenlet(impl)
+            # As with event handlers, each route handler is a potentially blocking context
+            # so it needs a fiber.
+            g = greenlet(lambda: self.handler(route, route.request))  # type: ignore
             g.switch()
         else:
-            impl()
-
-        [handled, *_] = await asyncio.gather(handled_future, *handler_task)
-        return handled
+            coro_or_future = self.handler(route, route.request)  # type: ignore
+            if coro_or_future:
+                # separate task so that we get a proper stack trace for exceptions / tracing api_name extraction
+                await asyncio.ensure_future(coro_or_future)
+        return await handled_future
 
     async def stop(self, behavior: Literal["ignoreErrors", "wait"]) -> None:
         # When a handler is manually unrouted or its page/context is closed we either
