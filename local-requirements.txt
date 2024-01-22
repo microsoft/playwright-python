@@ -5,7 +5,7 @@ flake8==6.1.0
 flaky==3.7.0
 mypy==1.8.0
 objgraph==3.6.0
-Pillow==10.0.1
+Pillow==10.2.0
 pixelmatch==0.3.0
 pre-commit==3.4.0
 pyOpenSSL==23.2.0
