@@ -222,7 +222,7 @@ class DocumentationProvider:
                         f"    def {event_type}(self, event: Literal['{event['name'].lower()}'], f: typing.Callable[['{func_arg}'], '{return_type}']) -> None:"
                     )
                     doc.append(
-                        f'        """{self.beautify_method_comment(event["comment"]," " * 8)}"""'
+                        f'        """{self.beautify_method_comment(event["comment"], " " * 8)}"""'
                     )
                     doc.append(impl)
                 if len(events) > 1:
@@ -240,6 +240,7 @@ class DocumentationProvider:
         return "\n".join(result)
 
     def beautify_method_comment(self, comment: str, indent: str) -> str:
+        comment = self.filter_out_redudant_python_code_snippets(comment)
         comment = comment.replace("\\", "\\\\")
         comment = comment.replace('"', '\\"')
         lines = comment.split("\n")
@@ -269,6 +270,37 @@ class DocumentationProvider:
                 skip_example = False
         comment = self.indent_paragraph("\n".join(result), indent)
         return self.resolve_playwright_dev_links(comment)
+
+    def filter_out_redudant_python_code_snippets(self, comment: str) -> str:
+        groups = []
+        current_group = []
+        lines = comment.split("\n")
+        start_pos = None
+        for i in range(len(lines)):
+            line = lines[i].strip()
+            if line.startswith("```py"):
+                start_pos = i
+            elif line == "```" and start_pos is not None:
+                current_group.append((start_pos, i))
+                start_pos = None
+            elif (
+                (line.startswith("```") or i == len(lines) - 1)
+                and start_pos is None
+                and len(current_group) == 2
+            ):
+                groups.append(current_group)
+                current_group = []
+        groups.reverse()
+        for first_pos, second_pos in groups:
+            # flake8: noqa: E203
+            second_snippet_is_async = "await" in lines[second_pos[0] : second_pos[1]]
+            if second_snippet_is_async == self.is_async:
+                # flake8: noqa: E203
+                del lines[first_pos[0] : first_pos[1] + 1]
+            else:
+                # flake8: noqa: E203
+                del lines[second_pos[0] : second_pos[1] + 1]
+        return "\n".join(lines)
 
     def resolve_playwright_dev_links(self, comment: str) -> str:
         def replace_callback(m: re.Match) -> str:
