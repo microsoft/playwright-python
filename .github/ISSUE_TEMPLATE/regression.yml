@@ -44,7 +44,7 @@ body:
     attributes:
       label: Steps to reproduce
       description: Please link to a repository with a minimal reproduction and describe accurately how we can reproduce/verify the bug.
-      placeholder: |
+      value: |
         Example steps (replace with your own):
         1. Clone my repo at https://github.com/<myuser>/example
         2. pip -r requirements.txt
