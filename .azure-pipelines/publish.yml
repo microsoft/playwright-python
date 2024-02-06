@@ -1,5 +1,9 @@
-trigger: none
 pr: none
+
+trigger:
+  tags:
+    include:
+    - '*'
 
 resources:
   repositories:
