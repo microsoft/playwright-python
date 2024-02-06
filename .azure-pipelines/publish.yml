@@ -24,6 +24,8 @@ extends:
         # The image must be windows-based due to restrictions of the SDL tools. See: https://aka.ms/AAo6v8e
         # In the case of a windows build, this can be the same as the above pool image.
         os: windows
+      suppression:
+        suppressionFile: $(Build.SourcesDirectory)\.azure-pipelines\guardian\SDL\.gdnsuppress
     stages:
     - stage: Stage
       jobs:
