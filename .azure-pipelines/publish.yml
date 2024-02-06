@@ -12,9 +12,14 @@ extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1esPipelines
   parameters:
     pool:
-      name: Azure-Pipelines-1ESPT-ExDShared
-      image: ubuntu-latest
+      name: DevDivPlaywrightAzurePipelinesUbuntu2204
       os: linux
+    sdl:
+      sourceAnalysisPool:
+        name: DevDivPlaywrightAzurePipelinesWindows2022
+        # The image must be windows-based due to restrictions of the SDL tools. See: https://aka.ms/AAo6v8e
+        # In the case of a windows build, this can be the same as the above pool image.
+        os: windows
     stages:
     - stage: Stage
       jobs:
