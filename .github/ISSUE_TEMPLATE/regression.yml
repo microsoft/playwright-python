@@ -81,7 +81,7 @@ body:
       label: Environment
       description: |
         Please provide information about the environment you are running in.
-      placeholder: |
+      value: |
         - Operating System: [Ubuntu 22.04]
         - CPU: [arm64]
         - Browser: [All, Chromium, Firefox, WebKit]
