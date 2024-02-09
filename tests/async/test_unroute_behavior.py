@@ -351,6 +351,7 @@ async def test_page_unroute_all_should_not_wait_for_pending_handlers_to_complete
 async def test_page_close_does_not_wait_for_active_route_handlers(
     page: Page, server: Server
 ) -> None:
+    stalling_future: "asyncio.Future[None]" = asyncio.Future()
     second_handler_called = False
 
     def _handler1(route: Route) -> None:
@@ -365,7 +366,7 @@ async def test_page_close_does_not_wait_for_active_route_handlers(
 
     async def _handler2(route: Route) -> None:
         route_future.set_result(route)
-        await asyncio.Future()
+        await stalling_future
 
     await page.route(
         "**/*",
@@ -383,6 +384,7 @@ async def test_page_close_does_not_wait_for_active_route_handlers(
     await page.close()
     await asyncio.sleep(0.5)
     assert not second_handler_called
+    stalling_future.cancel()
 
 
 async def test_route_continue_should_not_throw_if_page_has_been_closed(
