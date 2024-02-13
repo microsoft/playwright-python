@@ -16,6 +16,7 @@
 # stable API.
 
 
+from builtins import TimeoutError as TimeoutErrorBuiltin
 from typing import Optional
 
 
@@ -43,7 +44,7 @@ class Error(Exception):
         return self._stack
 
 
-class TimeoutError(Error):
+class TimeoutError(Error, TimeoutErrorBuiltin):
     pass
 
 
