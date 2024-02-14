@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+import builtins
 from typing import Optional
 
 import pytest
@@ -638,6 +639,9 @@ async def test_timeout_waiting_for_hit_target(page: Page, server: Server) -> Non
     assert "Timeout 5000ms exceeded." in error.message
     assert '<div id="blocker"></div> intercepts pointer events' in error.message
     assert "retrying click action" in error.message
+    assert isinstance(error, Error)
+    assert isinstance(error, TimeoutError)
+    assert isinstance(error, builtins.TimeoutError)
 
 
 async def test_fail_when_obscured_and_not_waiting_for_hit_target(
