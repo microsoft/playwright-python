@@ -14,7 +14,6 @@
 
 import json
 import pathlib
-import sys
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -22,6 +21,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    Literal,
     Optional,
     Pattern,
     Sequence,
@@ -52,11 +52,6 @@ from playwright._impl._str_utils import (
     escape_for_attribute_selector,
     escape_for_text_selector,
 )
-
-if sys.version_info >= (3, 8):  # pragma: no cover
-    from typing import Literal
-else:  # pragma: no cover
-    from typing_extensions import Literal
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._frame import Frame

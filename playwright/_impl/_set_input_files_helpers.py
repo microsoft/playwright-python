@@ -14,14 +14,8 @@
 import base64
 import collections.abc
 import os
-import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Union, cast
-
-if sys.version_info >= (3, 8):  # pragma: no cover
-    from typing import TypedDict
-else:  # pragma: no cover
-    from typing_extensions import TypedDict
+from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, TypedDict, Union, cast
 
 from playwright._impl._connection import Channel, from_channel
 from playwright._impl._helper import Error

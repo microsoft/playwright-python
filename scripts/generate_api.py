@@ -211,13 +211,9 @@ header = """
 
 
 import typing
-import sys
 import pathlib
 
-if sys.version_info >= (3, 8):  # pragma: no cover
-    from typing import Literal
-else:  # pragma: no cover
-    from typing_extensions import Literal
+from typing import Literal
 
 
 from playwright._impl._accessibility import Accessibility as AccessibilityImpl

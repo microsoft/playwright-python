@@ -220,7 +220,6 @@ setup(
     install_requires=[
         "greenlet==3.0.3",
         "pyee==11.0.1",
-        "typing-extensions;python_version<='3.8'",
     ],
     # TODO: Can be removed once we migrate to pypa/build or pypa/installer.
     setup_requires=["setuptools-scm==8.0.4", "wheel==0.41.2"],

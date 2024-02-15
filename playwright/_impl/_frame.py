@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import asyncio
-import sys
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
@@ -43,6 +42,7 @@ from playwright._impl._helper import (
     DocumentLoadState,
     FrameNavigatedEvent,
     KeyboardModifier,
+    Literal,
     MouseButton,
     URLMatch,
     URLMatcher,
@@ -71,11 +71,6 @@ from playwright._impl._locator import (
 from playwright._impl._network import Response
 from playwright._impl._set_input_files_helpers import convert_input_files
 from playwright._impl._waiter import Waiter
-
-if sys.version_info >= (3, 8):  # pragma: no cover
-    from typing import Literal
-else:  # pragma: no cover
-    from typing_extensions import Literal
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._page import Page

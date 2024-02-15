@@ -25,7 +25,6 @@ requirements:
     - python
     - greenlet ==3.0.3
     - pyee ==11.0.1
-    - typing_extensions # [py<39]
 test:
   requires:
     - pip

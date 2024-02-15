@@ -15,7 +15,6 @@ import asyncio
 import math
 import os
 import re
-import sys
 import time
 import traceback
 from pathlib import Path
@@ -26,9 +25,11 @@ from typing import (
     Callable,
     Dict,
     List,
+    Literal,
     Optional,
     Pattern,
     Set,
+    TypedDict,
     TypeVar,
     Union,
     cast,
@@ -41,12 +42,6 @@ from playwright._impl._api_structures import NameValue
 from playwright._impl._errors import Error, TargetClosedError, TimeoutError
 from playwright._impl._glob import glob_to_regex
 from playwright._impl._str_utils import escape_regex_flags
-
-if sys.version_info >= (3, 8):  # pragma: no cover
-    from typing import Literal, TypedDict
-else:  # pragma: no cover
-    from typing_extensions import Literal, TypedDict
-
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._api_structures import HeadersArray
