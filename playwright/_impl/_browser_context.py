@@ -548,14 +548,14 @@ class BrowserContext(ChannelOwner):
 
     def expect_console_message(
         self,
-        predicate: Callable[[ConsoleMessage], bool] = None,
+        predicate: Optional[Callable[[ConsoleMessage], bool]] = None,
         timeout: Optional[float] = None,
     ) -> EventContextManagerImpl[ConsoleMessage]:
         return self.expect_event(Page.Events.Console, predicate, timeout)
 
     def expect_page(
         self,
-        predicate: Callable[[Page], bool] = None,
+        predicate: Optional[Callable[[Page], bool]] = None,
         timeout: Optional[float] = None,
     ) -> EventContextManagerImpl[Page]:
         return self.expect_event(BrowserContext.Events.Page, predicate, timeout)

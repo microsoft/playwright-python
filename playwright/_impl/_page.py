@@ -1142,21 +1142,21 @@ class Page(ChannelOwner):
 
     def expect_console_message(
         self,
-        predicate: Callable[[ConsoleMessage], bool] = None,
+        predicate: Optional[Callable[[ConsoleMessage], bool]] = None,
         timeout: Optional[float] = None,
     ) -> EventContextManagerImpl[ConsoleMessage]:
         return self.expect_event(Page.Events.Console, predicate, timeout)
 
     def expect_download(
         self,
-        predicate: Callable[[Download], bool] = None,
+        predicate: Optional[Callable[[Download], bool]] = None,
         timeout: Optional[float] = None,
     ) -> EventContextManagerImpl[Download]:
         return self.expect_event(Page.Events.Download, predicate, timeout)
 
     def expect_file_chooser(
         self,
-        predicate: Callable[[FileChooser], bool] = None,
+        predicate: Optional[Callable[[FileChooser], bool]] = None,
         timeout: Optional[float] = None,
     ) -> EventContextManagerImpl[FileChooser]:
         return self.expect_event(Page.Events.FileChooser, predicate, timeout)
@@ -1171,7 +1171,7 @@ class Page(ChannelOwner):
 
     def expect_popup(
         self,
-        predicate: Callable[["Page"], bool] = None,
+        predicate: Optional[Callable[["Page"], bool]] = None,
         timeout: Optional[float] = None,
     ) -> EventContextManagerImpl["Page"]:
         return self.expect_event(Page.Events.Popup, predicate, timeout)
@@ -1208,7 +1208,7 @@ class Page(ChannelOwner):
 
     def expect_request_finished(
         self,
-        predicate: Callable[["Request"], bool] = None,
+        predicate: Optional[Callable[["Request"], bool]] = None,
         timeout: Optional[float] = None,
     ) -> EventContextManagerImpl[Request]:
         return self.expect_event(
@@ -1247,14 +1247,14 @@ class Page(ChannelOwner):
 
     def expect_websocket(
         self,
-        predicate: Callable[["WebSocket"], bool] = None,
+        predicate: Optional[Callable[["WebSocket"], bool]] = None,
         timeout: Optional[float] = None,
     ) -> EventContextManagerImpl["WebSocket"]:
         return self.expect_event("websocket", predicate, timeout)
 
     def expect_worker(
         self,
-        predicate: Callable[["Worker"], bool] = None,
+        predicate: Optional[Callable[["Worker"], bool]] = None,
         timeout: Optional[float] = None,
     ) -> EventContextManagerImpl["Worker"]:
         return self.expect_event("worker", predicate, timeout)
