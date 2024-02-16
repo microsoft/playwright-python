@@ -216,7 +216,7 @@ class DocumentationProvider:
             for event_type in ["on", "once"]:
                 for event in events:
                     return_type = (
-                        "Union[Awaitable[None], None]" if self.is_async else "None"
+                        "Optional[Awaitable[None]]" if self.is_async else "None"
                     )
                     func_arg = self.serialize_doc_type(event["type"], "")
                     if func_arg.startswith("{"):
@@ -335,7 +335,7 @@ class DocumentationProvider:
             if text.endswith("None]"):
                 return text
             return text[:-1] + ", None]"
-        return f"Union[{text}, None]"
+        return f"Optional[{text}]"
 
     def compare_types(
         self, value: Any, doc_value: Any, fqname: str, direction: str

@@ -954,7 +954,7 @@ class WebSocket(AsyncBase):
     def on(
         self,
         event: Literal["close"],
-        f: Callable[["WebSocket"], "Union[Awaitable[None], None]"],
+        f: Callable[["WebSocket"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Fired when the websocket closes."""
@@ -963,7 +963,7 @@ class WebSocket(AsyncBase):
     def on(
         self,
         event: Literal["framereceived"],
-        f: Callable[["Union[bytes, str]"], "Union[Awaitable[None], None]"],
+        f: Callable[["Union[bytes, str]"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Fired when the websocket receives a frame."""
@@ -972,7 +972,7 @@ class WebSocket(AsyncBase):
     def on(
         self,
         event: Literal["framesent"],
-        f: Callable[["Union[bytes, str]"], "Union[Awaitable[None], None]"],
+        f: Callable[["Union[bytes, str]"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Fired when the websocket sends a frame."""
@@ -981,7 +981,7 @@ class WebSocket(AsyncBase):
     def on(
         self,
         event: Literal["socketerror"],
-        f: Callable[["str"], "Union[Awaitable[None], None]"],
+        f: Callable[["str"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Fired when the websocket has an error."""
@@ -989,7 +989,7 @@ class WebSocket(AsyncBase):
     def on(
         self,
         event: str,
-        f: Callable[..., Union[Awaitable[None], None]],
+        f: Callable[..., Optional[Awaitable[None]]],
     ) -> None:
         return super().on(event=event, f=f)
 
@@ -997,7 +997,7 @@ class WebSocket(AsyncBase):
     def once(
         self,
         event: Literal["close"],
-        f: Callable[["WebSocket"], "Union[Awaitable[None], None]"],
+        f: Callable[["WebSocket"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Fired when the websocket closes."""
@@ -1006,7 +1006,7 @@ class WebSocket(AsyncBase):
     def once(
         self,
         event: Literal["framereceived"],
-        f: Callable[["Union[bytes, str]"], "Union[Awaitable[None], None]"],
+        f: Callable[["Union[bytes, str]"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Fired when the websocket receives a frame."""
@@ -1015,7 +1015,7 @@ class WebSocket(AsyncBase):
     def once(
         self,
         event: Literal["framesent"],
-        f: Callable[["Union[bytes, str]"], "Union[Awaitable[None], None]"],
+        f: Callable[["Union[bytes, str]"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Fired when the websocket sends a frame."""
@@ -1024,7 +1024,7 @@ class WebSocket(AsyncBase):
     def once(
         self,
         event: Literal["socketerror"],
-        f: Callable[["str"], "Union[Awaitable[None], None]"],
+        f: Callable[["str"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Fired when the websocket has an error."""
@@ -1032,7 +1032,7 @@ class WebSocket(AsyncBase):
     def once(
         self,
         event: str,
-        f: Callable[..., Union[Awaitable[None], None]],
+        f: Callable[..., Optional[Awaitable[None]]],
     ) -> None:
         return super().once(event=event, f=f)
 
@@ -2660,7 +2660,7 @@ class ElementHandle(JSHandle):
             screenshots of high-dpi devices will be twice as large or even larger.
 
             Defaults to `"device"`.
-        mask : Union[Sequence[Locator], None]
+        mask : Optional[Sequence[Locator]]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
             box `#FF00FF` (customized by `maskColor`) that completely covers its bounding box.
         mask_color : Optional[str]
@@ -6375,7 +6375,7 @@ class Worker(AsyncBase):
     def on(
         self,
         event: Literal["close"],
-        f: Callable[["Worker"], "Union[Awaitable[None], None]"],
+        f: Callable[["Worker"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when this dedicated [WebWorker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API) is
@@ -6385,7 +6385,7 @@ class Worker(AsyncBase):
     def once(
         self,
         event: Literal["close"],
-        f: Callable[["Worker"], "Union[Awaitable[None], None]"],
+        f: Callable[["Worker"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when this dedicated [WebWorker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API) is
@@ -6861,7 +6861,7 @@ class Page(AsyncContextManager):
     def on(
         self,
         event: Literal["close"],
-        f: Callable[["Page"], "Union[Awaitable[None], None]"],
+        f: Callable[["Page"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when the page closes."""
@@ -6870,7 +6870,7 @@ class Page(AsyncContextManager):
     def on(
         self,
         event: Literal["console"],
-        f: Callable[["ConsoleMessage"], "Union[Awaitable[None], None]"],
+        f: Callable[["ConsoleMessage"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when JavaScript within the page calls one of console API methods, e.g. `console.log` or `console.dir`. Also
@@ -6895,7 +6895,7 @@ class Page(AsyncContextManager):
     def on(
         self,
         event: Literal["crash"],
-        f: Callable[["Page"], "Union[Awaitable[None], None]"],
+        f: Callable[["Page"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when the page crashes. Browser pages might crash if they try to allocate too much memory. When the page
@@ -6918,7 +6918,7 @@ class Page(AsyncContextManager):
     def on(
         self,
         event: Literal["dialog"],
-        f: Callable[["Dialog"], "Union[Awaitable[None], None]"],
+        f: Callable[["Dialog"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a JavaScript dialog appears, such as `alert`, `prompt`, `confirm` or `beforeunload`. Listener **must**
@@ -6939,7 +6939,7 @@ class Page(AsyncContextManager):
     def on(
         self,
         event: Literal["domcontentloaded"],
-        f: Callable[["Page"], "Union[Awaitable[None], None]"],
+        f: Callable[["Page"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when the JavaScript
@@ -6950,7 +6950,7 @@ class Page(AsyncContextManager):
     def on(
         self,
         event: Literal["download"],
-        f: Callable[["Download"], "Union[Awaitable[None], None]"],
+        f: Callable[["Download"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when attachment download started. User can access basic file operations on downloaded content via the
@@ -6960,7 +6960,7 @@ class Page(AsyncContextManager):
     def on(
         self,
         event: Literal["filechooser"],
-        f: Callable[["FileChooser"], "Union[Awaitable[None], None]"],
+        f: Callable[["FileChooser"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a file chooser is supposed to appear, such as after clicking the  `<input type=file>`. Playwright can
@@ -6974,7 +6974,7 @@ class Page(AsyncContextManager):
     def on(
         self,
         event: Literal["frameattached"],
-        f: Callable[["Frame"], "Union[Awaitable[None], None]"],
+        f: Callable[["Frame"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a frame is attached."""
@@ -6983,7 +6983,7 @@ class Page(AsyncContextManager):
     def on(
         self,
         event: Literal["framedetached"],
-        f: Callable[["Frame"], "Union[Awaitable[None], None]"],
+        f: Callable[["Frame"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a frame is detached."""
@@ -6992,7 +6992,7 @@ class Page(AsyncContextManager):
     def on(
         self,
         event: Literal["framenavigated"],
-        f: Callable[["Frame"], "Union[Awaitable[None], None]"],
+        f: Callable[["Frame"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a frame is navigated to a new url."""
@@ -7001,7 +7001,7 @@ class Page(AsyncContextManager):
     def on(
         self,
         event: Literal["load"],
-        f: Callable[["Page"], "Union[Awaitable[None], None]"],
+        f: Callable[["Page"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when the JavaScript [`load`](https://developer.mozilla.org/en-US/docs/Web/Events/load) event is dispatched.
@@ -7011,7 +7011,7 @@ class Page(AsyncContextManager):
     def on(
         self,
         event: Literal["pageerror"],
-        f: Callable[["Error"], "Union[Awaitable[None], None]"],
+        f: Callable[["Error"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when an uncaught exception happens within the page.
@@ -7028,7 +7028,7 @@ class Page(AsyncContextManager):
     def on(
         self,
         event: Literal["popup"],
-        f: Callable[["Page"], "Union[Awaitable[None], None]"],
+        f: Callable[["Page"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when the page opens a new tab or window. This event is emitted in addition to the
@@ -7052,7 +7052,7 @@ class Page(AsyncContextManager):
     def on(
         self,
         event: Literal["request"],
-        f: Callable[["Request"], "Union[Awaitable[None], None]"],
+        f: Callable[["Request"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a page issues a request. The [request] object is read-only. In order to intercept and mutate requests,
@@ -7062,7 +7062,7 @@ class Page(AsyncContextManager):
     def on(
         self,
         event: Literal["requestfailed"],
-        f: Callable[["Request"], "Union[Awaitable[None], None]"],
+        f: Callable[["Request"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a request fails, for example by timing out.
@@ -7080,7 +7080,7 @@ class Page(AsyncContextManager):
     def on(
         self,
         event: Literal["requestfinished"],
-        f: Callable[["Request"], "Union[Awaitable[None], None]"],
+        f: Callable[["Request"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a request finishes successfully after downloading the response body. For a successful response, the
@@ -7090,7 +7090,7 @@ class Page(AsyncContextManager):
     def on(
         self,
         event: Literal["response"],
-        f: Callable[["Response"], "Union[Awaitable[None], None]"],
+        f: Callable[["Response"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when [response] status and headers are received for a request. For a successful response, the sequence of
@@ -7100,7 +7100,7 @@ class Page(AsyncContextManager):
     def on(
         self,
         event: Literal["websocket"],
-        f: Callable[["WebSocket"], "Union[Awaitable[None], None]"],
+        f: Callable[["WebSocket"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when `WebSocket` request is sent."""
@@ -7109,7 +7109,7 @@ class Page(AsyncContextManager):
     def on(
         self,
         event: Literal["worker"],
-        f: Callable[["Worker"], "Union[Awaitable[None], None]"],
+        f: Callable[["Worker"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a dedicated [WebWorker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API) is spawned
@@ -7118,7 +7118,7 @@ class Page(AsyncContextManager):
     def on(
         self,
         event: str,
-        f: Callable[..., Union[Awaitable[None], None]],
+        f: Callable[..., Optional[Awaitable[None]]],
     ) -> None:
         return super().on(event=event, f=f)
 
@@ -7126,7 +7126,7 @@ class Page(AsyncContextManager):
     def once(
         self,
         event: Literal["close"],
-        f: Callable[["Page"], "Union[Awaitable[None], None]"],
+        f: Callable[["Page"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when the page closes."""
@@ -7135,7 +7135,7 @@ class Page(AsyncContextManager):
     def once(
         self,
         event: Literal["console"],
-        f: Callable[["ConsoleMessage"], "Union[Awaitable[None], None]"],
+        f: Callable[["ConsoleMessage"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when JavaScript within the page calls one of console API methods, e.g. `console.log` or `console.dir`. Also
@@ -7160,7 +7160,7 @@ class Page(AsyncContextManager):
     def once(
         self,
         event: Literal["crash"],
-        f: Callable[["Page"], "Union[Awaitable[None], None]"],
+        f: Callable[["Page"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when the page crashes. Browser pages might crash if they try to allocate too much memory. When the page
@@ -7183,7 +7183,7 @@ class Page(AsyncContextManager):
     def once(
         self,
         event: Literal["dialog"],
-        f: Callable[["Dialog"], "Union[Awaitable[None], None]"],
+        f: Callable[["Dialog"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a JavaScript dialog appears, such as `alert`, `prompt`, `confirm` or `beforeunload`. Listener **must**
@@ -7204,7 +7204,7 @@ class Page(AsyncContextManager):
     def once(
         self,
         event: Literal["domcontentloaded"],
-        f: Callable[["Page"], "Union[Awaitable[None], None]"],
+        f: Callable[["Page"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when the JavaScript
@@ -7215,7 +7215,7 @@ class Page(AsyncContextManager):
     def once(
         self,
         event: Literal["download"],
-        f: Callable[["Download"], "Union[Awaitable[None], None]"],
+        f: Callable[["Download"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when attachment download started. User can access basic file operations on downloaded content via the
@@ -7225,7 +7225,7 @@ class Page(AsyncContextManager):
     def once(
         self,
         event: Literal["filechooser"],
-        f: Callable[["FileChooser"], "Union[Awaitable[None], None]"],
+        f: Callable[["FileChooser"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a file chooser is supposed to appear, such as after clicking the  `<input type=file>`. Playwright can
@@ -7239,7 +7239,7 @@ class Page(AsyncContextManager):
     def once(
         self,
         event: Literal["frameattached"],
-        f: Callable[["Frame"], "Union[Awaitable[None], None]"],
+        f: Callable[["Frame"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a frame is attached."""
@@ -7248,7 +7248,7 @@ class Page(AsyncContextManager):
     def once(
         self,
         event: Literal["framedetached"],
-        f: Callable[["Frame"], "Union[Awaitable[None], None]"],
+        f: Callable[["Frame"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a frame is detached."""
@@ -7257,7 +7257,7 @@ class Page(AsyncContextManager):
     def once(
         self,
         event: Literal["framenavigated"],
-        f: Callable[["Frame"], "Union[Awaitable[None], None]"],
+        f: Callable[["Frame"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a frame is navigated to a new url."""
@@ -7266,7 +7266,7 @@ class Page(AsyncContextManager):
     def once(
         self,
         event: Literal["load"],
-        f: Callable[["Page"], "Union[Awaitable[None], None]"],
+        f: Callable[["Page"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when the JavaScript [`load`](https://developer.mozilla.org/en-US/docs/Web/Events/load) event is dispatched.
@@ -7276,7 +7276,7 @@ class Page(AsyncContextManager):
     def once(
         self,
         event: Literal["pageerror"],
-        f: Callable[["Error"], "Union[Awaitable[None], None]"],
+        f: Callable[["Error"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when an uncaught exception happens within the page.
@@ -7293,7 +7293,7 @@ class Page(AsyncContextManager):
     def once(
         self,
         event: Literal["popup"],
-        f: Callable[["Page"], "Union[Awaitable[None], None]"],
+        f: Callable[["Page"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when the page opens a new tab or window. This event is emitted in addition to the
@@ -7317,7 +7317,7 @@ class Page(AsyncContextManager):
     def once(
         self,
         event: Literal["request"],
-        f: Callable[["Request"], "Union[Awaitable[None], None]"],
+        f: Callable[["Request"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a page issues a request. The [request] object is read-only. In order to intercept and mutate requests,
@@ -7327,7 +7327,7 @@ class Page(AsyncContextManager):
     def once(
         self,
         event: Literal["requestfailed"],
-        f: Callable[["Request"], "Union[Awaitable[None], None]"],
+        f: Callable[["Request"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a request fails, for example by timing out.
@@ -7345,7 +7345,7 @@ class Page(AsyncContextManager):
     def once(
         self,
         event: Literal["requestfinished"],
-        f: Callable[["Request"], "Union[Awaitable[None], None]"],
+        f: Callable[["Request"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a request finishes successfully after downloading the response body. For a successful response, the
@@ -7355,7 +7355,7 @@ class Page(AsyncContextManager):
     def once(
         self,
         event: Literal["response"],
-        f: Callable[["Response"], "Union[Awaitable[None], None]"],
+        f: Callable[["Response"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when [response] status and headers are received for a request. For a successful response, the sequence of
@@ -7365,7 +7365,7 @@ class Page(AsyncContextManager):
     def once(
         self,
         event: Literal["websocket"],
-        f: Callable[["WebSocket"], "Union[Awaitable[None], None]"],
+        f: Callable[["WebSocket"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when `WebSocket` request is sent."""
@@ -7374,7 +7374,7 @@ class Page(AsyncContextManager):
     def once(
         self,
         event: Literal["worker"],
-        f: Callable[["Worker"], "Union[Awaitable[None], None]"],
+        f: Callable[["Worker"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a dedicated [WebWorker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API) is spawned
@@ -7383,7 +7383,7 @@ class Page(AsyncContextManager):
     def once(
         self,
         event: str,
-        f: Callable[..., Union[Awaitable[None], None]],
+        f: Callable[..., Optional[Awaitable[None]]],
     ) -> None:
         return super().once(event=event, f=f)
 
@@ -9192,7 +9192,7 @@ class Page(AsyncContextManager):
             screenshots of high-dpi devices will be twice as large or even larger.
 
             Defaults to `"device"`.
-        mask : Union[Sequence[Locator], None]
+        mask : Optional[Sequence[Locator]]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
             box `#FF00FF` (customized by `maskColor`) that completely covers its bounding box.
         mask_color : Optional[str]
@@ -11595,7 +11595,7 @@ class BrowserContext(AsyncContextManager):
     def on(
         self,
         event: Literal["backgroundpage"],
-        f: Callable[["Page"], "Union[Awaitable[None], None]"],
+        f: Callable[["Page"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         **NOTE** Only works with Chromium browser's persistent context.
@@ -11610,7 +11610,7 @@ class BrowserContext(AsyncContextManager):
     def on(
         self,
         event: Literal["close"],
-        f: Callable[["BrowserContext"], "Union[Awaitable[None], None]"],
+        f: Callable[["BrowserContext"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when Browser context gets closed. This might happen because of one of the following:
@@ -11622,7 +11622,7 @@ class BrowserContext(AsyncContextManager):
     def on(
         self,
         event: Literal["console"],
-        f: Callable[["ConsoleMessage"], "Union[Awaitable[None], None]"],
+        f: Callable[["ConsoleMessage"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when JavaScript within the page calls one of console API methods, e.g. `console.log` or `console.dir`. Also
@@ -11647,7 +11647,7 @@ class BrowserContext(AsyncContextManager):
     def on(
         self,
         event: Literal["dialog"],
-        f: Callable[["Dialog"], "Union[Awaitable[None], None]"],
+        f: Callable[["Dialog"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a JavaScript dialog appears, such as `alert`, `prompt`, `confirm` or `beforeunload`. Listener **must**
@@ -11668,7 +11668,7 @@ class BrowserContext(AsyncContextManager):
     def on(
         self,
         event: Literal["page"],
-        f: Callable[["Page"], "Union[Awaitable[None], None]"],
+        f: Callable[["Page"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         The event is emitted when a new Page is created in the BrowserContext. The page may still be loading. The event
@@ -11693,7 +11693,7 @@ class BrowserContext(AsyncContextManager):
     def on(
         self,
         event: Literal["weberror"],
-        f: Callable[["WebError"], "Union[Awaitable[None], None]"],
+        f: Callable[["WebError"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when exception is unhandled in any of the pages in this context. To listen for errors from a particular
@@ -11703,7 +11703,7 @@ class BrowserContext(AsyncContextManager):
     def on(
         self,
         event: Literal["request"],
-        f: Callable[["Request"], "Union[Awaitable[None], None]"],
+        f: Callable[["Request"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a request is issued from any pages created through this context. The [request] object is read-only. To
@@ -11716,7 +11716,7 @@ class BrowserContext(AsyncContextManager):
     def on(
         self,
         event: Literal["requestfailed"],
-        f: Callable[["Request"], "Union[Awaitable[None], None]"],
+        f: Callable[["Request"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a request fails, for example by timing out. To only listen for failed requests from a particular page,
@@ -11730,7 +11730,7 @@ class BrowserContext(AsyncContextManager):
     def on(
         self,
         event: Literal["requestfinished"],
-        f: Callable[["Request"], "Union[Awaitable[None], None]"],
+        f: Callable[["Request"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a request finishes successfully after downloading the response body. For a successful response, the
@@ -11741,7 +11741,7 @@ class BrowserContext(AsyncContextManager):
     def on(
         self,
         event: Literal["response"],
-        f: Callable[["Response"], "Union[Awaitable[None], None]"],
+        f: Callable[["Response"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when [response] status and headers are received for a request. For a successful response, the sequence of
@@ -11752,7 +11752,7 @@ class BrowserContext(AsyncContextManager):
     def on(
         self,
         event: Literal["serviceworker"],
-        f: Callable[["Worker"], "Union[Awaitable[None], None]"],
+        f: Callable[["Worker"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         **NOTE** Service workers are only supported on Chromium-based browsers.
@@ -11762,7 +11762,7 @@ class BrowserContext(AsyncContextManager):
     def on(
         self,
         event: str,
-        f: Callable[..., Union[Awaitable[None], None]],
+        f: Callable[..., Optional[Awaitable[None]]],
     ) -> None:
         return super().on(event=event, f=f)
 
@@ -11770,7 +11770,7 @@ class BrowserContext(AsyncContextManager):
     def once(
         self,
         event: Literal["backgroundpage"],
-        f: Callable[["Page"], "Union[Awaitable[None], None]"],
+        f: Callable[["Page"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         **NOTE** Only works with Chromium browser's persistent context.
@@ -11785,7 +11785,7 @@ class BrowserContext(AsyncContextManager):
     def once(
         self,
         event: Literal["close"],
-        f: Callable[["BrowserContext"], "Union[Awaitable[None], None]"],
+        f: Callable[["BrowserContext"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when Browser context gets closed. This might happen because of one of the following:
@@ -11797,7 +11797,7 @@ class BrowserContext(AsyncContextManager):
     def once(
         self,
         event: Literal["console"],
-        f: Callable[["ConsoleMessage"], "Union[Awaitable[None], None]"],
+        f: Callable[["ConsoleMessage"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when JavaScript within the page calls one of console API methods, e.g. `console.log` or `console.dir`. Also
@@ -11822,7 +11822,7 @@ class BrowserContext(AsyncContextManager):
     def once(
         self,
         event: Literal["dialog"],
-        f: Callable[["Dialog"], "Union[Awaitable[None], None]"],
+        f: Callable[["Dialog"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a JavaScript dialog appears, such as `alert`, `prompt`, `confirm` or `beforeunload`. Listener **must**
@@ -11843,7 +11843,7 @@ class BrowserContext(AsyncContextManager):
     def once(
         self,
         event: Literal["page"],
-        f: Callable[["Page"], "Union[Awaitable[None], None]"],
+        f: Callable[["Page"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         The event is emitted when a new Page is created in the BrowserContext. The page may still be loading. The event
@@ -11868,7 +11868,7 @@ class BrowserContext(AsyncContextManager):
     def once(
         self,
         event: Literal["weberror"],
-        f: Callable[["WebError"], "Union[Awaitable[None], None]"],
+        f: Callable[["WebError"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when exception is unhandled in any of the pages in this context. To listen for errors from a particular
@@ -11878,7 +11878,7 @@ class BrowserContext(AsyncContextManager):
     def once(
         self,
         event: Literal["request"],
-        f: Callable[["Request"], "Union[Awaitable[None], None]"],
+        f: Callable[["Request"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a request is issued from any pages created through this context. The [request] object is read-only. To
@@ -11891,7 +11891,7 @@ class BrowserContext(AsyncContextManager):
     def once(
         self,
         event: Literal["requestfailed"],
-        f: Callable[["Request"], "Union[Awaitable[None], None]"],
+        f: Callable[["Request"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a request fails, for example by timing out. To only listen for failed requests from a particular page,
@@ -11905,7 +11905,7 @@ class BrowserContext(AsyncContextManager):
     def once(
         self,
         event: Literal["requestfinished"],
-        f: Callable[["Request"], "Union[Awaitable[None], None]"],
+        f: Callable[["Request"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when a request finishes successfully after downloading the response body. For a successful response, the
@@ -11916,7 +11916,7 @@ class BrowserContext(AsyncContextManager):
     def once(
         self,
         event: Literal["response"],
-        f: Callable[["Response"], "Union[Awaitable[None], None]"],
+        f: Callable[["Response"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when [response] status and headers are received for a request. For a successful response, the sequence of
@@ -11927,7 +11927,7 @@ class BrowserContext(AsyncContextManager):
     def once(
         self,
         event: Literal["serviceworker"],
-        f: Callable[["Worker"], "Union[Awaitable[None], None]"],
+        f: Callable[["Worker"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         **NOTE** Service workers are only supported on Chromium-based browsers.
@@ -11937,7 +11937,7 @@ class BrowserContext(AsyncContextManager):
     def once(
         self,
         event: str,
-        f: Callable[..., Union[Awaitable[None], None]],
+        f: Callable[..., Optional[Awaitable[None]]],
     ) -> None:
         return super().once(event=event, f=f)
 
@@ -12840,7 +12840,7 @@ class Browser(AsyncContextManager):
     def on(
         self,
         event: Literal["disconnected"],
-        f: Callable[["Browser"], "Union[Awaitable[None], None]"],
+        f: Callable[["Browser"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when Browser gets disconnected from the browser application. This might happen because of one of the
@@ -12852,7 +12852,7 @@ class Browser(AsyncContextManager):
     def once(
         self,
         event: Literal["disconnected"],
-        f: Callable[["Browser"], "Union[Awaitable[None], None]"],
+        f: Callable[["Browser"], "Optional[Awaitable[None]]"],
     ) -> None:
         """
         Emitted when Browser gets disconnected from the browser application. This might happen because of one of the
@@ -13010,7 +13010,7 @@ class Browser(AsyncContextManager):
             [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
             for a list of supported timezone IDs. Defaults to the system timezone.
         geolocation : Union[{latitude: float, longitude: float, accuracy: Optional[float]}, None]
-        permissions : Union[Sequence[str], None]
+        permissions : Optional[Sequence[str]]
             A list of permissions to grant to all pages in this context. See `browser_context.grant_permissions()` for
             more details. Defaults to none.
         extra_http_headers : Union[Dict[str, str], None]
@@ -13218,7 +13218,7 @@ class Browser(AsyncContextManager):
             [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
             for a list of supported timezone IDs. Defaults to the system timezone.
         geolocation : Union[{latitude: float, longitude: float, accuracy: Optional[float]}, None]
-        permissions : Union[Sequence[str], None]
+        permissions : Optional[Sequence[str]]
             A list of permissions to grant to all pages in this context. See `browser_context.grant_permissions()` for
             more details. Defaults to none.
         extra_http_headers : Union[Dict[str, str], None]
@@ -13421,7 +13421,7 @@ class Browser(AsyncContextManager):
             A path to write the trace file to.
         screenshots : Optional[bool]
             captures screenshots in the trace.
-        categories : Union[Sequence[str], None]
+        categories : Optional[Sequence[str]]
             specify custom categories to use instead of default.
         """
 
@@ -13540,7 +13540,7 @@ class BrowserType(AsyncBase):
             Browser distribution channel.  Supported values are "chrome", "chrome-beta", "chrome-dev", "chrome-canary",
             "msedge", "msedge-beta", "msedge-dev", "msedge-canary". Read more about using
             [Google Chrome and Microsoft Edge](../browsers.md#google-chrome--microsoft-edge).
-        args : Union[Sequence[str], None]
+        args : Optional[Sequence[str]]
             **NOTE** Use custom browser args at your own risk, as some of them may break Playwright functionality.
 
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found
@@ -13689,7 +13689,7 @@ class BrowserType(AsyncBase):
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is
             resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium,
             Firefox or WebKit, use at your own risk.
-        args : Union[Sequence[str], None]
+        args : Optional[Sequence[str]]
             **NOTE** Use custom browser args at your own risk, as some of them may break Playwright functionality.
 
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found
@@ -13751,7 +13751,7 @@ class BrowserType(AsyncBase):
             [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
             for a list of supported timezone IDs. Defaults to the system timezone.
         geolocation : Union[{latitude: float, longitude: float, accuracy: Optional[float]}, None]
-        permissions : Union[Sequence[str], None]
+        permissions : Optional[Sequence[str]]
             A list of permissions to grant to all pages in this context. See `browser_context.grant_permissions()` for
             more details. Defaults to none.
         extra_http_headers : Union[Dict[str, str], None]
@@ -16179,7 +16179,7 @@ class Locator(AsyncBase):
             screenshots of high-dpi devices will be twice as large or even larger.
 
             Defaults to `"device"`.
-        mask : Union[Sequence[Locator], None]
+        mask : Optional[Sequence[Locator]]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
             box `#FF00FF` (customized by `maskColor`) that completely covers its bounding box.
         mask_color : Optional[str]

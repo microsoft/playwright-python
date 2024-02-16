@@ -2689,7 +2689,7 @@ class ElementHandle(JSHandle):
             screenshots of high-dpi devices will be twice as large or even larger.
 
             Defaults to `"device"`.
-        mask : Union[Sequence[Locator], None]
+        mask : Optional[Sequence[Locator]]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
             box `#FF00FF` (customized by `maskColor`) that completely covers its bounding box.
         mask_color : Optional[str]
@@ -9201,7 +9201,7 @@ class Page(SyncContextManager):
             screenshots of high-dpi devices will be twice as large or even larger.
 
             Defaults to `"device"`.
-        mask : Union[Sequence[Locator], None]
+        mask : Optional[Sequence[Locator]]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
             box `#FF00FF` (customized by `maskColor`) that completely covers its bounding box.
         mask_color : Optional[str]
@@ -12995,7 +12995,7 @@ class Browser(SyncContextManager):
             [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
             for a list of supported timezone IDs. Defaults to the system timezone.
         geolocation : Union[{latitude: float, longitude: float, accuracy: Optional[float]}, None]
-        permissions : Union[Sequence[str], None]
+        permissions : Optional[Sequence[str]]
             A list of permissions to grant to all pages in this context. See `browser_context.grant_permissions()` for
             more details. Defaults to none.
         extra_http_headers : Union[Dict[str, str], None]
@@ -13205,7 +13205,7 @@ class Browser(SyncContextManager):
             [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
             for a list of supported timezone IDs. Defaults to the system timezone.
         geolocation : Union[{latitude: float, longitude: float, accuracy: Optional[float]}, None]
-        permissions : Union[Sequence[str], None]
+        permissions : Optional[Sequence[str]]
             A list of permissions to grant to all pages in this context. See `browser_context.grant_permissions()` for
             more details. Defaults to none.
         extra_http_headers : Union[Dict[str, str], None]
@@ -13410,7 +13410,7 @@ class Browser(SyncContextManager):
             A path to write the trace file to.
         screenshots : Optional[bool]
             captures screenshots in the trace.
-        categories : Union[Sequence[str], None]
+        categories : Optional[Sequence[str]]
             specify custom categories to use instead of default.
         """
 
@@ -13531,7 +13531,7 @@ class BrowserType(SyncBase):
             Browser distribution channel.  Supported values are "chrome", "chrome-beta", "chrome-dev", "chrome-canary",
             "msedge", "msedge-beta", "msedge-dev", "msedge-canary". Read more about using
             [Google Chrome and Microsoft Edge](../browsers.md#google-chrome--microsoft-edge).
-        args : Union[Sequence[str], None]
+        args : Optional[Sequence[str]]
             **NOTE** Use custom browser args at your own risk, as some of them may break Playwright functionality.
 
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found
@@ -13682,7 +13682,7 @@ class BrowserType(SyncBase):
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is
             resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium,
             Firefox or WebKit, use at your own risk.
-        args : Union[Sequence[str], None]
+        args : Optional[Sequence[str]]
             **NOTE** Use custom browser args at your own risk, as some of them may break Playwright functionality.
 
             Additional arguments to pass to the browser instance. The list of Chromium flags can be found
@@ -13744,7 +13744,7 @@ class BrowserType(SyncBase):
             [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
             for a list of supported timezone IDs. Defaults to the system timezone.
         geolocation : Union[{latitude: float, longitude: float, accuracy: Optional[float]}, None]
-        permissions : Union[Sequence[str], None]
+        permissions : Optional[Sequence[str]]
             A list of permissions to grant to all pages in this context. See `browser_context.grant_permissions()` for
             more details. Defaults to none.
         extra_http_headers : Union[Dict[str, str], None]
@@ -16210,7 +16210,7 @@ class Locator(SyncBase):
             screenshots of high-dpi devices will be twice as large or even larger.
 
             Defaults to `"device"`.
-        mask : Union[Sequence[Locator], None]
+        mask : Optional[Sequence[Locator]]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
             box `#FF00FF` (customized by `maskColor`) that completely covers its bounding box.
         mask_color : Optional[str]
