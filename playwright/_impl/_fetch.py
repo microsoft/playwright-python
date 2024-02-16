@@ -62,7 +62,7 @@ class APIRequest:
     async def new_context(
         self,
         baseURL: Optional[str] = None,
-        extraHTTPHeaders: Dict[str, str] = None,
+        extraHTTPHeaders: Optional[Dict[str, str]] = None,
         httpCredentials: Optional[HttpCredentials] = None,
         ignoreHTTPSErrors: Optional[bool] = None,
         proxy: Optional[ProxySettings] = None,
@@ -184,7 +184,9 @@ class APIRequestContext(ChannelOwner):
         headers: Optional[Headers] = None,
         data: Optional[DataType] = None,
         form: Optional[FormType] = None,
-        multipart: Dict[str, Union[bytes, bool, float, str, FilePayload]] = None,
+        multipart: Optional[
+            Dict[str, Union[bytes, bool, float, str, FilePayload]]
+        ] = None,
         timeout: Optional[float] = None,
         failOnStatusCode: Optional[bool] = None,
         ignoreHTTPSErrors: Optional[bool] = None,
@@ -211,7 +213,9 @@ class APIRequestContext(ChannelOwner):
         headers: Optional[Headers] = None,
         data: Optional[DataType] = None,
         form: Optional[FormType] = None,
-        multipart: Dict[str, Union[bytes, bool, float, str, FilePayload]] = None,
+        multipart: Optional[
+            Dict[str, Union[bytes, bool, float, str, FilePayload]]
+        ] = None,
         timeout: Optional[float] = None,
         failOnStatusCode: Optional[bool] = None,
         ignoreHTTPSErrors: Optional[bool] = None,
@@ -238,7 +242,9 @@ class APIRequestContext(ChannelOwner):
         headers: Optional[Headers] = None,
         data: Optional[DataType] = None,
         form: Optional[FormType] = None,
-        multipart: Dict[str, Union[bytes, bool, float, str, FilePayload]] = None,
+        multipart: Optional[
+            Dict[str, Union[bytes, bool, float, str, FilePayload]]
+        ] = None,
         timeout: Optional[float] = None,
         failOnStatusCode: Optional[bool] = None,
         ignoreHTTPSErrors: Optional[bool] = None,
@@ -266,7 +272,9 @@ class APIRequestContext(ChannelOwner):
         headers: Optional[Headers] = None,
         data: Optional[DataType] = None,
         form: Optional[FormType] = None,
-        multipart: Dict[str, Union[bytes, bool, float, str, FilePayload]] = None,
+        multipart: Optional[
+            Dict[str, Union[bytes, bool, float, str, FilePayload]]
+        ] = None,
         timeout: Optional[float] = None,
         failOnStatusCode: Optional[bool] = None,
         ignoreHTTPSErrors: Optional[bool] = None,
@@ -305,7 +313,9 @@ class APIRequestContext(ChannelOwner):
         data: Optional[DataType] = None,
         params: Optional[ParamsType] = None,
         form: Optional[FormType] = None,
-        multipart: Dict[str, Union[bytes, bool, float, str, FilePayload]] = None,
+        multipart: Optional[
+            Dict[str, Union[bytes, bool, float, str, FilePayload]]
+        ] = None,
         timeout: Optional[float] = None,
         failOnStatusCode: Optional[bool] = None,
         ignoreHTTPSErrors: Optional[bool] = None,

@@ -22,6 +22,7 @@ from typing import (
     Dict,
     List,
     Literal,
+    Optional,
     Set,
     Union,
     get_args,
@@ -119,7 +120,7 @@ class DocumentationProvider:
         self,
         class_name: str,
         method_name: str,
-        signature: Dict[str, Any] = None,
+        signature: Optional[Dict[str, Any]] = None,
         is_property: bool = False,
     ) -> None:
         if class_name in ["BindingCall"] or method_name in [

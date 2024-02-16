@@ -317,7 +317,7 @@ class Route(ChannelOwner):
     async def fulfill(
         self,
         status: Optional[int] = None,
-        headers: Dict[str, str] = None,
+        headers: Optional[Dict[str, str]] = None,
         body: Union[str, bytes] = None,
         json: Optional[Any] = None,
         path: Union[str, Path] = None,
@@ -333,7 +333,7 @@ class Route(ChannelOwner):
     async def _inner_fulfill(
         self,
         status: Optional[int] = None,
-        headers: Dict[str, str] = None,
+        headers: Optional[Dict[str, str]] = None,
         body: Union[str, bytes] = None,
         json: Optional[Any] = None,
         path: Union[str, Path] = None,
@@ -408,7 +408,7 @@ class Route(ChannelOwner):
         self,
         url: Optional[str] = None,
         method: Optional[str] = None,
-        headers: Dict[str, str] = None,
+        headers: Optional[Dict[str, str]] = None,
         postData: Union[Any, str, bytes] = None,
         maxRedirects: Optional[int] = None,
         timeout: Optional[float] = None,
@@ -429,7 +429,7 @@ class Route(ChannelOwner):
         self,
         url: Optional[str] = None,
         method: Optional[str] = None,
-        headers: Dict[str, str] = None,
+        headers: Optional[Dict[str, str]] = None,
         postData: Union[Any, str, bytes] = None,
     ) -> None:
         overrides = cast(FallbackOverrideParameters, locals_to_params(locals()))
@@ -441,7 +441,7 @@ class Route(ChannelOwner):
         self,
         url: Optional[str] = None,
         method: Optional[str] = None,
-        headers: Dict[str, str] = None,
+        headers: Optional[Dict[str, str]] = None,
         postData: Union[Any, str, bytes] = None,
     ) -> None:
         overrides = cast(FallbackOverrideParameters, locals_to_params(locals()))

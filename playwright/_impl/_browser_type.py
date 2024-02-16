@@ -86,7 +86,7 @@ class BrowserType(ChannelOwner):
         slowMo: Optional[float] = None,
         tracesDir: Union[pathlib.Path, str] = None,
         chromiumSandbox: Optional[bool] = None,
-        firefoxUserPrefs: Dict[str, Union[str, float, bool]] = None,
+        firefoxUserPrefs: Optional[Dict[str, Union[str, float, bool]]] = None,
     ) -> Browser:
         params = locals_to_params(locals())
         normalize_launch_params(params)
@@ -124,7 +124,7 @@ class BrowserType(ChannelOwner):
         timezoneId: Optional[str] = None,
         geolocation: Optional[Geolocation] = None,
         permissions: Sequence[str] = None,
-        extraHTTPHeaders: Dict[str, str] = None,
+        extraHTTPHeaders: Optional[Dict[str, str]] = None,
         offline: Optional[bool] = None,
         httpCredentials: Optional[HttpCredentials] = None,
         deviceScaleFactor: Optional[float] = None,
@@ -136,7 +136,7 @@ class BrowserType(ChannelOwner):
         acceptDownloads: Optional[bool] = None,
         tracesDir: Union[pathlib.Path, str] = None,
         chromiumSandbox: Optional[bool] = None,
-        firefoxUserPrefs: Dict[str, Union[str, float, bool]] = None,
+        firefoxUserPrefs: Optional[Dict[str, Union[str, float, bool]]] = None,
         recordHarPath: Union[Path, str] = None,
         recordHarOmitContent: Optional[bool] = None,
         recordVideoDir: Union[Path, str] = None,
@@ -164,7 +164,7 @@ class BrowserType(ChannelOwner):
         endpointURL: str,
         timeout: Optional[float] = None,
         slowMo: Optional[float] = None,
-        headers: Dict[str, str] = None,
+        headers: Optional[Dict[str, str]] = None,
     ) -> Browser:
         params = locals_to_params(locals())
         if params.get("headers"):
@@ -186,7 +186,7 @@ class BrowserType(ChannelOwner):
         wsEndpoint: str,
         timeout: Optional[float] = None,
         slowMo: Optional[float] = None,
-        headers: Dict[str, str] = None,
+        headers: Optional[Dict[str, str]] = None,
         exposeNetwork: Optional[str] = None,
     ) -> Browser:
         if timeout is None:
