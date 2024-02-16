@@ -54,20 +54,14 @@ def process_type(value: Any, param: bool = False) -> str:
     value = re.sub(r"NoneType", "None", value)
     value = re.sub(r"playwright\._impl\._api_structures.([\w]+)", r"\1", value)
     value = re.sub(r"playwright\._impl\.[\w]+\.([\w]+)", r'"\1"', value)
-    value = re.sub(r"typing.Literal", "Literal", value)
+    value = re.sub(r"Literal", "Literal", value)
     if param:
-        value = re.sub(r"^typing.Union\[([^,]+), None\]$", r"\1 = None", value)
-        value = re.sub(
-            r"typing.Union\[(Literal\[[^\]]+\]), None\]", r"\1 = None", value
-        )
-        value = re.sub(
-            r"^typing.Union\[(.+), None\]$", r"typing.Union[\1] = None", value
-        )
-        value = re.sub(
-            r"^typing.Optional\[(.+)\]$", r"typing.Optional[\1] = None", value
-        )
-        if not re.match(r"typing.Optional\[.*\] = None", value):
-            value = re.sub(r"(.*) = None", r"typing.Optional[\1] = None", value)
+        value = re.sub(r"^Union\[([^,]+), None\]$", r"\1 = None", value)
+        value = re.sub(r"Union\[(Literal\[[^\]]+\]), None\]", r"\1 = None", value)
+        value = re.sub(r"^Union\[(.+), None\]$", r"Union[\1] = None", value)
+        value = re.sub(r"^Optional\[(.+)\]$", r"Optional[\1] = None", value)
+        if not re.match(r"Optional\[.*\] = None", value):
+            value = re.sub(r"(.*) = None", r"Optional[\1] = None", value)
     return value
 
 
@@ -117,7 +111,7 @@ def signature(func: FunctionType, indent: int) -> str:
         if (
             not positional_exception
             and not saw_optional
-            and processed.startswith("typing.Optional")
+            and processed.startswith("Optional")
         ):
             saw_optional = True
             tokens.append("*")
@@ -139,9 +133,9 @@ def arguments(func: FunctionType, indent: int) -> str:
         if "Callable" in value_str:
             tokens.append(f"{name}=self._wrap_handler({to_snake_case(name)})")
         elif (
-            "typing.Any" in value_str
-            or "typing.Dict" in value_str
-            or "typing.Sequence" in value_str
+            "Any" in value_str
+            or "Dict" in value_str
+            or "Sequence" in value_str
             or "Handle" in value_str
         ):
             tokens.append(f"{name}=mapping.to_impl({to_snake_case(name)})")

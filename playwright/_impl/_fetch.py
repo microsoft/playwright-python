@@ -15,9 +15,8 @@
 import base64
 import json
 import pathlib
-import typing
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union, cast
 
 import playwright._impl._network as network
 from playwright._impl._api_structures import (
@@ -44,7 +43,7 @@ from playwright._impl._helper import (
 from playwright._impl._network import serialize_headers
 from playwright._impl._tracing import Tracing
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from playwright._impl._playwright import Playwright
 
 

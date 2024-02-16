@@ -16,7 +16,18 @@ import json
 import re
 import subprocess
 from sys import stderr
-from typing import Any, Dict, List, Set, Union, get_args, get_origin, get_type_hints
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Literal,
+    Set,
+    Union,
+    get_args,
+    get_origin,
+    get_type_hints,
+)
 from urllib.parse import urljoin
 
 from playwright._impl._helper import to_snake_case
@@ -204,22 +215,20 @@ class DocumentationProvider:
             for event_type in ["on", "once"]:
                 for event in events:
                     return_type = (
-                        "typing.Union[typing.Awaitable[None], None]"
-                        if self.is_async
-                        else "None"
+                        "Union[Awaitable[None], None]" if self.is_async else "None"
                     )
                     func_arg = self.serialize_doc_type(event["type"], "")
                     if func_arg.startswith("{"):
-                        func_arg = "typing.Dict"
+                        func_arg = "Dict"
                     if "Union[" in func_arg:
-                        func_arg = func_arg.replace("Union[", "typing.Union[")
+                        func_arg = func_arg.replace("Union[", "Union[")
                     if len(events) > 1:
-                        doc.append("    @typing.overload")
+                        doc.append("    @overload")
                     impl = ""
                     if len(events) == 1:
                         impl = f"        return super().{event_type}(event=event,f=f)"
                     doc.append(
-                        f"    def {event_type}(self, event: Literal['{event['name'].lower()}'], f: typing.Callable[['{func_arg}'], '{return_type}']) -> None:"
+                        f"    def {event_type}(self, event: Literal['{event['name'].lower()}'], f: Callable[['{func_arg}'], '{return_type}']) -> None:"
                     )
                     doc.append(
                         f'        """{self.beautify_method_comment(event["comment"], " " * 8)}"""'
@@ -227,7 +236,7 @@ class DocumentationProvider:
                     doc.append(impl)
                 if len(events) > 1:
                     doc.append(
-                        f"    def {event_type}(self, event: str, f: typing.Callable[...,{return_type}]) -> None:"
+                        f"    def {event_type}(self, event: str, f: Callable[...,{return_type}]) -> None:"
                     )
                     doc.append(f"        return super().{event_type}(event=event,f=f)")
             print("\n".join(doc))
@@ -407,7 +416,7 @@ class DocumentationProvider:
             return f"Callable[{', '.join(list(map(lambda a: self.serialize_python_type(a, direction), args)))}]"
         if str(origin) == "<class 're.Pattern'>":
             return "Pattern[str]"
-        if str(origin) == "typing.Literal":
+        if str(origin) == "Literal":
             args = get_args(value)
             if len(args) == 1:
                 return '"' + self.serialize_python_type(args[0], direction) + '"'
