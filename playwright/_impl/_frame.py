@@ -473,7 +473,7 @@ class Frame(ChannelOwner):
     async def add_script_tag(
         self,
         url: Optional[str] = None,
-        path: Union[str, Path] = None,
+        path: Optional[Union[str, Path]] = None,
         content: Optional[str] = None,
         type: Optional[str] = None,
     ) -> ElementHandle:
@@ -490,7 +490,7 @@ class Frame(ChannelOwner):
     async def add_style_tag(
         self,
         url: Optional[str] = None,
-        path: Union[str, Path] = None,
+        path: Optional[Union[str, Path]] = None,
         content: Optional[str] = None,
     ) -> ElementHandle:
         params = locals_to_params(locals())
@@ -562,8 +562,8 @@ class Frame(ChannelOwner):
     def locator(
         self,
         selector: str,
-        hasText: Union[str, Pattern[str]] = None,
-        hasNotText: Union[str, Pattern[str]] = None,
+        hasText: Optional[Union[str, Pattern[str]]] = None,
+        hasNotText: Optional[Union[str, Pattern[str]]] = None,
         has: Optional[Locator] = None,
         hasNot: Optional[Locator] = None,
     ) -> Locator:
@@ -599,7 +599,7 @@ class Frame(ChannelOwner):
         expanded: Optional[bool] = None,
         includeHidden: Optional[bool] = None,
         level: Optional[int] = None,
-        name: Union[str, Pattern[str]] = None,
+        name: Optional[Union[str, Pattern[str]]] = None,
         pressed: Optional[bool] = None,
         selected: Optional[bool] = None,
         exact: Optional[bool] = None,
@@ -706,10 +706,10 @@ class Frame(ChannelOwner):
     async def select_option(
         self,
         selector: str,
-        value: Union[str, Sequence[str]] = None,
-        index: Union[int, Sequence[int]] = None,
-        label: Union[str, Sequence[str]] = None,
-        element: Union["ElementHandle", Sequence["ElementHandle"]] = None,
+        value: Optional[Union[str, Sequence[str]]] = None,
+        index: Optional[Union[int, Sequence[int]]] = None,
+        label: Optional[Union[str, Sequence[str]]] = None,
+        element: Optional[Union["ElementHandle", Sequence["ElementHandle"]]] = None,
         timeout: Optional[float] = None,
         noWaitAfter: Optional[bool] = None,
         strict: Optional[bool] = None,
@@ -811,7 +811,7 @@ class Frame(ChannelOwner):
         expression: str,
         arg: Optional[Serializable] = None,
         timeout: Optional[float] = None,
-        polling: Union[float, Literal["raf"]] = None,
+        polling: Optional[Union[float, Literal["raf"]]] = None,
     ) -> JSHandle:
         if isinstance(polling, str) and polling != "raf":
             raise Error(f"Unknown polling option: {polling}")

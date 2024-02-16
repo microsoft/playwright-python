@@ -33,7 +33,7 @@ class Selectors:
         self,
         name: str,
         script: Optional[str] = None,
-        path: Union[str, Path] = None,
+        path: Optional[Union[str, Path]] = None,
         contentScript: Optional[bool] = None,
     ) -> None:
         if not script and not path:

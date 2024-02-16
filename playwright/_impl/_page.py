@@ -448,7 +448,7 @@ class Page(ChannelOwner):
     async def add_script_tag(
         self,
         url: Optional[str] = None,
-        path: Union[str, Path] = None,
+        path: Optional[Union[str, Path]] = None,
         content: Optional[str] = None,
         type: Optional[str] = None,
     ) -> ElementHandle:
@@ -457,7 +457,7 @@ class Page(ChannelOwner):
     async def add_style_tag(
         self,
         url: Optional[str] = None,
-        path: Union[str, Path] = None,
+        path: Optional[Union[str, Path]] = None,
         content: Optional[str] = None,
     ) -> ElementHandle:
         return await self._main_frame.add_style_tag(**locals_to_params(locals()))
@@ -661,7 +661,7 @@ class Page(ChannelOwner):
     async def route_from_har(
         self,
         har: Union[Path, str],
-        url: Union[Pattern[str], str] = None,
+        url: Optional[Union[Pattern[str], str]] = None,
         notFound: Optional[RouteFromHarNotFoundPolicy] = None,
         update: Optional[bool] = None,
         updateContent: Optional[Literal["attach", "embed"]] = None,
@@ -695,7 +695,7 @@ class Page(ChannelOwner):
         self,
         timeout: Optional[float] = None,
         type: Optional[Literal["jpeg", "png"]] = None,
-        path: Union[str, Path] = None,
+        path: Optional[Union[str, Path]] = None,
         quality: Optional[int] = None,
         omitBackground: Optional[bool] = None,
         fullPage: Optional[bool] = None,
@@ -806,8 +806,8 @@ class Page(ChannelOwner):
     def locator(
         self,
         selector: str,
-        hasText: Union[str, Pattern[str]] = None,
-        hasNotText: Union[str, Pattern[str]] = None,
+        hasText: Optional[Union[str, Pattern[str]]] = None,
+        hasNotText: Optional[Union[str, Pattern[str]]] = None,
         has: "Locator" = None,
         hasNot: "Locator" = None,
     ) -> "Locator":
@@ -842,7 +842,7 @@ class Page(ChannelOwner):
         expanded: Optional[bool] = None,
         includeHidden: Optional[bool] = None,
         level: Optional[int] = None,
-        name: Union[str, Pattern[str]] = None,
+        name: Optional[Union[str, Pattern[str]]] = None,
         pressed: Optional[bool] = None,
         selected: Optional[bool] = None,
         exact: Optional[bool] = None,
@@ -947,10 +947,10 @@ class Page(ChannelOwner):
     async def select_option(
         self,
         selector: str,
-        value: Union[str, Sequence[str]] = None,
-        index: Union[int, Sequence[int]] = None,
-        label: Union[str, Sequence[str]] = None,
-        element: Union["ElementHandle", Sequence["ElementHandle"]] = None,
+        value: Optional[Union[str, Sequence[str]]] = None,
+        index: Optional[Union[int, Sequence[int]]] = None,
+        label: Optional[Union[str, Sequence[str]]] = None,
+        element: Optional[Union["ElementHandle", Sequence["ElementHandle"]]] = None,
         timeout: Optional[float] = None,
         noWaitAfter: Optional[bool] = None,
         force: Optional[bool] = None,
@@ -1034,7 +1034,7 @@ class Page(ChannelOwner):
         expression: str,
         arg: Optional[Serializable] = None,
         timeout: Optional[float] = None,
-        polling: Union[float, Literal["raf"]] = None,
+        polling: Optional[Union[float, Literal["raf"]]] = None,
     ) -> JSHandle:
         return await self._main_frame.wait_for_function(**locals_to_params(locals()))
 
@@ -1077,11 +1077,11 @@ class Page(ChannelOwner):
         landscape: Optional[bool] = None,
         pageRanges: Optional[str] = None,
         format: Optional[str] = None,
-        width: Union[str, float] = None,
-        height: Union[str, float] = None,
+        width: Optional[Union[str, float]] = None,
+        height: Optional[Union[str, float]] = None,
         preferCSSPageSize: Optional[bool] = None,
         margin: Optional[PdfMargins] = None,
-        path: Union[str, Path] = None,
+        path: Optional[Union[str, Path]] = None,
     ) -> bytes:
         params = locals_to_params(locals())
         if "path" in params:

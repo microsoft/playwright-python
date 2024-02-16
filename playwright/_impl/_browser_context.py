@@ -409,7 +409,7 @@ class BrowserContext(ChannelOwner):
         self,
         har: Union[Path, str],
         page: Optional[Page] = None,
-        url: Union[Pattern[str], str] = None,
+        url: Optional[Union[Pattern[str], str]] = None,
         update_content: Optional[HarContentPolicy] = None,
         update_mode: Optional[HarMode] = None,
     ) -> None:
@@ -434,7 +434,7 @@ class BrowserContext(ChannelOwner):
     async def route_from_har(
         self,
         har: Union[Path, str],
-        url: Union[Pattern[str], str] = None,
+        url: Optional[Union[Pattern[str], str]] = None,
         notFound: Optional[RouteFromHarNotFoundPolicy] = None,
         update: Optional[bool] = None,
         updateContent: Optional[Literal["attach", "embed"]] = None,

@@ -68,7 +68,7 @@ class APIRequest:
         proxy: Optional[ProxySettings] = None,
         userAgent: Optional[str] = None,
         timeout: Optional[float] = None,
-        storageState: Union[StorageState, str, Path] = None,
+        storageState: Optional[Union[StorageState, str, Path]] = None,
     ) -> "APIRequestContext":
         params = locals_to_params(locals())
         if "storageState" in params:

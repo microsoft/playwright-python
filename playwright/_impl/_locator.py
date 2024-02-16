@@ -71,8 +71,8 @@ class Locator:
         self,
         frame: "Frame",
         selector: str,
-        has_text: Union[str, Pattern[str]] = None,
-        has_not_text: Union[str, Pattern[str]] = None,
+        has_text: Optional[Union[str, Pattern[str]]] = None,
+        has_not_text: Optional[Union[str, Pattern[str]]] = None,
         has: "Locator" = None,
         has_not: "Locator" = None,
     ) -> None:
@@ -230,8 +230,8 @@ class Locator:
     def locator(
         self,
         selectorOrLocator: Union[str, "Locator"],
-        hasText: Union[str, Pattern[str]] = None,
-        hasNotText: Union[str, Pattern[str]] = None,
+        hasText: Optional[Union[str, Pattern[str]]] = None,
+        hasNotText: Optional[Union[str, Pattern[str]]] = None,
         has: "Locator" = None,
         hasNot: "Locator" = None,
     ) -> "Locator":
@@ -279,7 +279,7 @@ class Locator:
         expanded: Optional[bool] = None,
         includeHidden: Optional[bool] = None,
         level: Optional[int] = None,
-        name: Union[str, Pattern[str]] = None,
+        name: Optional[Union[str, Pattern[str]]] = None,
         pressed: Optional[bool] = None,
         selected: Optional[bool] = None,
         exact: Optional[bool] = None,
@@ -342,8 +342,8 @@ class Locator:
 
     def filter(
         self,
-        hasText: Union[str, Pattern[str]] = None,
-        hasNotText: Union[str, Pattern[str]] = None,
+        hasText: Optional[Union[str, Pattern[str]]] = None,
+        hasNotText: Optional[Union[str, Pattern[str]]] = None,
         has: "Locator" = None,
         hasNot: "Locator" = None,
     ) -> "Locator":
@@ -527,7 +527,7 @@ class Locator:
         self,
         timeout: Optional[float] = None,
         type: Optional[Literal["jpeg", "png"]] = None,
-        path: Union[str, pathlib.Path] = None,
+        path: Optional[Union[str, pathlib.Path]] = None,
         quality: Optional[int] = None,
         omitBackground: Optional[bool] = None,
         animations: Optional[Literal["allow", "disabled"]] = None,
@@ -555,10 +555,10 @@ class Locator:
 
     async def select_option(
         self,
-        value: Union[str, Sequence[str]] = None,
-        index: Union[int, Sequence[int]] = None,
-        label: Union[str, Sequence[str]] = None,
-        element: Union["ElementHandle", Sequence["ElementHandle"]] = None,
+        value: Optional[Union[str, Sequence[str]]] = None,
+        index: Optional[Union[int, Sequence[int]]] = None,
+        label: Optional[Union[str, Sequence[str]]] = None,
+        element: Optional[Union["ElementHandle", Sequence["ElementHandle"]]] = None,
         timeout: Optional[float] = None,
         noWaitAfter: Optional[bool] = None,
         force: Optional[bool] = None,
@@ -740,8 +740,8 @@ class FrameLocator:
     def locator(
         self,
         selectorOrLocator: Union["Locator", str],
-        hasText: Union[str, Pattern[str]] = None,
-        hasNotText: Union[str, Pattern[str]] = None,
+        hasText: Optional[Union[str, Pattern[str]]] = None,
+        hasNotText: Optional[Union[str, Pattern[str]]] = None,
         has: Optional[Locator] = None,
         hasNot: Optional[Locator] = None,
     ) -> Locator:
@@ -789,7 +789,7 @@ class FrameLocator:
         expanded: Optional[bool] = None,
         includeHidden: Optional[bool] = None,
         level: Optional[int] = None,
-        name: Union[str, Pattern[str]] = None,
+        name: Optional[Union[str, Pattern[str]]] = None,
         pressed: Optional[bool] = None,
         selected: Optional[bool] = None,
         exact: Optional[bool] = None,
@@ -908,7 +908,7 @@ def get_by_role_selector(
     expanded: Optional[bool] = None,
     includeHidden: Optional[bool] = None,
     level: Optional[int] = None,
-    name: Union[str, Pattern[str]] = None,
+    name: Optional[Union[str, Pattern[str]]] = None,
     pressed: Optional[bool] = None,
     selected: Optional[bool] = None,
     exact: Optional[bool] = None,

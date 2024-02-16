@@ -151,10 +151,10 @@ class ElementHandle(JSHandle):
 
     async def select_option(
         self,
-        value: Union[str, Sequence[str]] = None,
-        index: Union[int, Sequence[int]] = None,
-        label: Union[str, Sequence[str]] = None,
-        element: Union["ElementHandle", Sequence["ElementHandle"]] = None,
+        value: Optional[Union[str, Sequence[str]]] = None,
+        index: Optional[Union[int, Sequence[int]]] = None,
+        label: Optional[Union[str, Sequence[str]]] = None,
+        element: Optional[Union["ElementHandle", Sequence["ElementHandle"]]] = None,
         timeout: Optional[float] = None,
         force: Optional[bool] = None,
         noWaitAfter: Optional[bool] = None,
@@ -292,7 +292,7 @@ class ElementHandle(JSHandle):
         self,
         timeout: Optional[float] = None,
         type: Optional[Literal["jpeg", "png"]] = None,
-        path: Union[str, Path] = None,
+        path: Optional[Union[str, Path]] = None,
         quality: Optional[int] = None,
         omitBackground: Optional[bool] = None,
         animations: Optional[Literal["allow", "disabled"]] = None,
@@ -393,10 +393,10 @@ class ElementHandle(JSHandle):
 
 
 def convert_select_option_values(
-    value: Union[str, Sequence[str]] = None,
-    index: Union[int, Sequence[int]] = None,
-    label: Union[str, Sequence[str]] = None,
-    element: Union["ElementHandle", Sequence["ElementHandle"]] = None,
+    value: Optional[Union[str, Sequence[str]]] = None,
+    index: Optional[Union[int, Sequence[int]]] = None,
+    label: Optional[Union[str, Sequence[str]]] = None,
+    element: Optional[Union["ElementHandle", Sequence["ElementHandle"]]] = None,
 ) -> Any:
     if value is None and index is None and label is None and element is None:
         return {}

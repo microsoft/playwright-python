@@ -318,9 +318,9 @@ class Route(ChannelOwner):
         self,
         status: Optional[int] = None,
         headers: Optional[Dict[str, str]] = None,
-        body: Union[str, bytes] = None,
+        body: Optional[Union[str, bytes]] = None,
         json: Optional[Any] = None,
-        path: Union[str, Path] = None,
+        path: Optional[Union[str, Path]] = None,
         contentType: Optional[str] = None,
         response: "APIResponse" = None,
     ) -> None:
@@ -334,9 +334,9 @@ class Route(ChannelOwner):
         self,
         status: Optional[int] = None,
         headers: Optional[Dict[str, str]] = None,
-        body: Union[str, bytes] = None,
+        body: Optional[Union[str, bytes]] = None,
         json: Optional[Any] = None,
-        path: Union[str, Path] = None,
+        path: Optional[Union[str, Path]] = None,
         contentType: Optional[str] = None,
         response: "APIResponse" = None,
     ) -> None:
@@ -409,7 +409,7 @@ class Route(ChannelOwner):
         url: Optional[str] = None,
         method: Optional[str] = None,
         headers: Optional[Dict[str, str]] = None,
-        postData: Union[Any, str, bytes] = None,
+        postData: Optional[Union[Any, str, bytes]] = None,
         maxRedirects: Optional[int] = None,
         timeout: Optional[float] = None,
     ) -> "APIResponse":
@@ -430,7 +430,7 @@ class Route(ChannelOwner):
         url: Optional[str] = None,
         method: Optional[str] = None,
         headers: Optional[Dict[str, str]] = None,
-        postData: Union[Any, str, bytes] = None,
+        postData: Optional[Union[Any, str, bytes]] = None,
     ) -> None:
         overrides = cast(FallbackOverrideParameters, locals_to_params(locals()))
         self._check_not_handled()
@@ -442,7 +442,7 @@ class Route(ChannelOwner):
         url: Optional[str] = None,
         method: Optional[str] = None,
         headers: Optional[Dict[str, str]] = None,
-        postData: Union[Any, str, bytes] = None,
+        postData: Optional[Union[Any, str, bytes]] = None,
     ) -> None:
         overrides = cast(FallbackOverrideParameters, locals_to_params(locals()))
 
