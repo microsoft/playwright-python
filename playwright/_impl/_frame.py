@@ -245,7 +245,7 @@ class Frame(ChannelOwner):
 
     async def wait_for_load_state(
         self,
-        state: Literal["domcontentloaded", "load", "networkidle"] = None,
+        state: Optional[Literal["domcontentloaded", "load", "networkidle"]] = None,
         timeout: Optional[float] = None,
     ) -> None:
         return await self._wait_for_load_state_impl(state, timeout)
@@ -327,7 +327,7 @@ class Frame(ChannelOwner):
         selector: str,
         strict: Optional[bool] = None,
         timeout: Optional[float] = None,
-        state: Literal["attached", "detached", "hidden", "visible"] = None,
+        state: Optional[Literal["attached", "detached", "hidden", "visible"]] = None,
     ) -> Optional[ElementHandle]:
         return from_nullable_channel(
             await self._channel.send("waitForSelector", locals_to_params(locals()))

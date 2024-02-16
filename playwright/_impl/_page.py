@@ -353,7 +353,7 @@ class Page(ChannelOwner):
         self,
         selector: str,
         timeout: Optional[float] = None,
-        state: Literal["attached", "detached", "hidden", "visible"] = None,
+        state: Optional[Literal["attached", "detached", "hidden", "visible"]] = None,
         strict: Optional[bool] = None,
     ) -> Optional[ElementHandle]:
         return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
@@ -519,7 +519,7 @@ class Page(ChannelOwner):
 
     async def wait_for_load_state(
         self,
-        state: Literal["domcontentloaded", "load", "networkidle"] = None,
+        state: Optional[Literal["domcontentloaded", "load", "networkidle"]] = None,
         timeout: Optional[float] = None,
     ) -> None:
         return await self._main_frame.wait_for_load_state(**locals_to_params(locals()))
@@ -562,7 +562,7 @@ class Page(ChannelOwner):
 
     async def emulate_media(
         self,
-        media: Literal["null", "print", "screen"] = None,
+        media: Optional[Literal["null", "print", "screen"]] = None,
         colorScheme: Optional[ColorScheme] = None,
         reducedMotion: Optional[ReducedMotion] = None,
         forcedColors: Optional[ForcedColors] = None,
@@ -634,7 +634,7 @@ class Page(ChannelOwner):
         self,
         removed: List[RouteHandler],
         remaining: List[RouteHandler],
-        behavior: Literal["default", "ignoreErrors", "wait"] = None,
+        behavior: Optional[Literal["default", "ignoreErrors", "wait"]] = None,
     ) -> None:
         self._routes = remaining
         await self._update_interception_patterns()
@@ -653,7 +653,7 @@ class Page(ChannelOwner):
         self._har_routers = []
 
     async def unroute_all(
-        self, behavior: Literal["default", "ignoreErrors", "wait"] = None
+        self, behavior: Optional[Literal["default", "ignoreErrors", "wait"]] = None
     ) -> None:
         await self._unroute_internal(self._routes, [], behavior)
         self._dispose_har_routers()
@@ -664,7 +664,7 @@ class Page(ChannelOwner):
         url: Union[Pattern[str], str] = None,
         notFound: Optional[RouteFromHarNotFoundPolicy] = None,
         update: Optional[bool] = None,
-        updateContent: Literal["attach", "embed"] = None,
+        updateContent: Optional[Literal["attach", "embed"]] = None,
         updateMode: Optional[HarMode] = None,
     ) -> None:
         if update:
@@ -694,15 +694,15 @@ class Page(ChannelOwner):
     async def screenshot(
         self,
         timeout: Optional[float] = None,
-        type: Literal["jpeg", "png"] = None,
+        type: Optional[Literal["jpeg", "png"]] = None,
         path: Union[str, Path] = None,
         quality: Optional[int] = None,
         omitBackground: Optional[bool] = None,
         fullPage: Optional[bool] = None,
         clip: Optional[FloatRect] = None,
-        animations: Literal["allow", "disabled"] = None,
-        caret: Literal["hide", "initial"] = None,
-        scale: Literal["css", "device"] = None,
+        animations: Optional[Literal["allow", "disabled"]] = None,
+        caret: Optional[Literal["hide", "initial"]] = None,
+        scale: Optional[Literal["css", "device"]] = None,
         mask: Sequence["Locator"] = None,
         maskColor: Optional[str] = None,
         style: Optional[str] = None,

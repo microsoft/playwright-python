@@ -526,13 +526,13 @@ class Locator:
     async def screenshot(
         self,
         timeout: Optional[float] = None,
-        type: Literal["jpeg", "png"] = None,
+        type: Optional[Literal["jpeg", "png"]] = None,
         path: Union[str, pathlib.Path] = None,
         quality: Optional[int] = None,
         omitBackground: Optional[bool] = None,
-        animations: Literal["allow", "disabled"] = None,
-        caret: Literal["hide", "initial"] = None,
-        scale: Literal["css", "device"] = None,
+        animations: Optional[Literal["allow", "disabled"]] = None,
+        caret: Optional[Literal["hide", "initial"]] = None,
+        scale: Optional[Literal["css", "device"]] = None,
         mask: Sequence["Locator"] = None,
         maskColor: Optional[str] = None,
         style: Optional[str] = None,
@@ -677,7 +677,7 @@ class Locator:
     async def wait_for(
         self,
         timeout: Optional[float] = None,
-        state: Literal["attached", "detached", "hidden", "visible"] = None,
+        state: Optional[Literal["attached", "detached", "hidden", "visible"]] = None,
     ) -> None:
         await self._frame.wait_for_selector(
             self._selector, strict=True, timeout=timeout, state=state

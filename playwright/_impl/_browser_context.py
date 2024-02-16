@@ -386,7 +386,7 @@ class BrowserContext(ChannelOwner):
         self,
         removed: List[RouteHandler],
         remaining: List[RouteHandler],
-        behavior: Literal["default", "ignoreErrors", "wait"] = None,
+        behavior: Optional[Literal["default", "ignoreErrors", "wait"]] = None,
     ) -> None:
         self._routes = remaining
         await self._update_interception_patterns()
@@ -400,7 +400,7 @@ class BrowserContext(ChannelOwner):
         self._har_routers = []
 
     async def unroute_all(
-        self, behavior: Literal["default", "ignoreErrors", "wait"] = None
+        self, behavior: Optional[Literal["default", "ignoreErrors", "wait"]] = None
     ) -> None:
         await self._unroute_internal(self._routes, [], behavior)
         self._dispose_har_routers()
@@ -437,7 +437,7 @@ class BrowserContext(ChannelOwner):
         url: Union[Pattern[str], str] = None,
         notFound: Optional[RouteFromHarNotFoundPolicy] = None,
         update: Optional[bool] = None,
-        updateContent: Literal["attach", "embed"] = None,
+        updateContent: Optional[Literal["attach", "embed"]] = None,
         updateMode: Optional[HarMode] = None,
     ) -> None:
         if update:

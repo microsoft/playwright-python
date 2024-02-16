@@ -291,13 +291,13 @@ class ElementHandle(JSHandle):
     async def screenshot(
         self,
         timeout: Optional[float] = None,
-        type: Literal["jpeg", "png"] = None,
+        type: Optional[Literal["jpeg", "png"]] = None,
         path: Union[str, Path] = None,
         quality: Optional[int] = None,
         omitBackground: Optional[bool] = None,
-        animations: Literal["allow", "disabled"] = None,
-        caret: Literal["hide", "initial"] = None,
-        scale: Literal["css", "device"] = None,
+        animations: Optional[Literal["allow", "disabled"]] = None,
+        caret: Optional[Literal["hide", "initial"]] = None,
+        scale: Optional[Literal["css", "device"]] = None,
         mask: Sequence["Locator"] = None,
         maskColor: Optional[str] = None,
         style: Optional[str] = None,
@@ -383,7 +383,7 @@ class ElementHandle(JSHandle):
     async def wait_for_selector(
         self,
         selector: str,
-        state: Literal["attached", "detached", "hidden", "visible"] = None,
+        state: Optional[Literal["attached", "detached", "hidden", "visible"]] = None,
         timeout: Optional[float] = None,
         strict: Optional[bool] = None,
     ) -> Optional["ElementHandle"]:
