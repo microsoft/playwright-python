@@ -113,7 +113,7 @@ class ElementHandle(JSHandle):
 
     async def hover(
         self,
-        modifiers: Sequence[KeyboardModifier] = None,
+        modifiers: Optional[Sequence[KeyboardModifier]] = None,
         position: Optional[Position] = None,
         timeout: Optional[float] = None,
         noWaitAfter: Optional[bool] = None,
@@ -124,7 +124,7 @@ class ElementHandle(JSHandle):
 
     async def click(
         self,
-        modifiers: Sequence[KeyboardModifier] = None,
+        modifiers: Optional[Sequence[KeyboardModifier]] = None,
         position: Optional[Position] = None,
         delay: Optional[float] = None,
         button: Optional[MouseButton] = None,
@@ -138,7 +138,7 @@ class ElementHandle(JSHandle):
 
     async def dblclick(
         self,
-        modifiers: Sequence[KeyboardModifier] = None,
+        modifiers: Optional[Sequence[KeyboardModifier]] = None,
         position: Optional[Position] = None,
         delay: Optional[float] = None,
         button: Optional[MouseButton] = None,
@@ -171,7 +171,7 @@ class ElementHandle(JSHandle):
 
     async def tap(
         self,
-        modifiers: Sequence[KeyboardModifier] = None,
+        modifiers: Optional[Sequence[KeyboardModifier]] = None,
         position: Optional[Position] = None,
         timeout: Optional[float] = None,
         force: Optional[bool] = None,
@@ -298,7 +298,7 @@ class ElementHandle(JSHandle):
         animations: Optional[Literal["allow", "disabled"]] = None,
         caret: Optional[Literal["hide", "initial"]] = None,
         scale: Optional[Literal["css", "device"]] = None,
-        mask: Sequence["Locator"] = None,
+        mask: Optional[Sequence["Locator"]] = None,
         maskColor: Optional[str] = None,
         style: Optional[str] = None,
     ) -> bytes:

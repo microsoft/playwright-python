@@ -507,7 +507,7 @@ class Frame(ChannelOwner):
     async def click(
         self,
         selector: str,
-        modifiers: Sequence[KeyboardModifier] = None,
+        modifiers: Optional[Sequence[KeyboardModifier]] = None,
         position: Optional[Position] = None,
         delay: Optional[float] = None,
         button: Optional[MouseButton] = None,
@@ -523,7 +523,7 @@ class Frame(ChannelOwner):
     async def dblclick(
         self,
         selector: str,
-        modifiers: Sequence[KeyboardModifier] = None,
+        modifiers: Optional[Sequence[KeyboardModifier]] = None,
         position: Optional[Position] = None,
         delay: Optional[float] = None,
         button: Optional[MouseButton] = None,
@@ -538,7 +538,7 @@ class Frame(ChannelOwner):
     async def tap(
         self,
         selector: str,
-        modifiers: Sequence[KeyboardModifier] = None,
+        modifiers: Optional[Sequence[KeyboardModifier]] = None,
         position: Optional[Position] = None,
         timeout: Optional[float] = None,
         force: Optional[bool] = None,
@@ -679,7 +679,7 @@ class Frame(ChannelOwner):
     async def hover(
         self,
         selector: str,
-        modifiers: Sequence[KeyboardModifier] = None,
+        modifiers: Optional[Sequence[KeyboardModifier]] = None,
         position: Optional[Position] = None,
         timeout: Optional[float] = None,
         noWaitAfter: Optional[bool] = None,

@@ -96,7 +96,7 @@ class Browser(ChannelOwner):
         locale: Optional[str] = None,
         timezoneId: Optional[str] = None,
         geolocation: Optional[Geolocation] = None,
-        permissions: Sequence[str] = None,
+        permissions: Optional[Sequence[str]] = None,
         extraHTTPHeaders: Optional[Dict[str, str]] = None,
         offline: Optional[bool] = None,
         httpCredentials: Optional[HttpCredentials] = None,
@@ -141,7 +141,7 @@ class Browser(ChannelOwner):
         locale: Optional[str] = None,
         timezoneId: Optional[str] = None,
         geolocation: Optional[Geolocation] = None,
-        permissions: Sequence[str] = None,
+        permissions: Optional[Sequence[str]] = None,
         extraHTTPHeaders: Optional[Dict[str, str]] = None,
         offline: Optional[bool] = None,
         httpCredentials: Optional[HttpCredentials] = None,
@@ -200,7 +200,7 @@ class Browser(ChannelOwner):
         page: Optional[Page] = None,
         path: Union[str, Path] = None,
         screenshots: Optional[bool] = None,
-        categories: Sequence[str] = None,
+        categories: Optional[Sequence[str]] = None,
     ) -> None:
         params = locals_to_params(locals())
         if page:

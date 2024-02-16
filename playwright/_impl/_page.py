@@ -703,7 +703,7 @@ class Page(ChannelOwner):
         animations: Optional[Literal["allow", "disabled"]] = None,
         caret: Optional[Literal["hide", "initial"]] = None,
         scale: Optional[Literal["css", "device"]] = None,
-        mask: Sequence["Locator"] = None,
+        mask: Optional[Sequence["Locator"]] = None,
         maskColor: Optional[str] = None,
         style: Optional[str] = None,
     ) -> bytes:
@@ -751,7 +751,7 @@ class Page(ChannelOwner):
     async def click(
         self,
         selector: str,
-        modifiers: Sequence[KeyboardModifier] = None,
+        modifiers: Optional[Sequence[KeyboardModifier]] = None,
         position: Optional[Position] = None,
         delay: Optional[float] = None,
         button: Optional[MouseButton] = None,
@@ -767,7 +767,7 @@ class Page(ChannelOwner):
     async def dblclick(
         self,
         selector: str,
-        modifiers: Sequence[KeyboardModifier] = None,
+        modifiers: Optional[Sequence[KeyboardModifier]] = None,
         position: Optional[Position] = None,
         delay: Optional[float] = None,
         button: Optional[MouseButton] = None,
@@ -782,7 +782,7 @@ class Page(ChannelOwner):
     async def tap(
         self,
         selector: str,
-        modifiers: Sequence[KeyboardModifier] = None,
+        modifiers: Optional[Sequence[KeyboardModifier]] = None,
         position: Optional[Position] = None,
         timeout: Optional[float] = None,
         force: Optional[bool] = None,
@@ -920,7 +920,7 @@ class Page(ChannelOwner):
     async def hover(
         self,
         selector: str,
-        modifiers: Sequence[KeyboardModifier] = None,
+        modifiers: Optional[Sequence[KeyboardModifier]] = None,
         position: Optional[Position] = None,
         timeout: Optional[float] = None,
         noWaitAfter: Optional[bool] = None,
