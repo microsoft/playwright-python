@@ -133,7 +133,7 @@ class Request(AsyncBase):
 
         Returns
         -------
-        Union[str, None]
+        Optional[str]
         """
         return mapping.from_maybe_impl(self._impl_obj.post_data)
 
@@ -148,7 +148,7 @@ class Request(AsyncBase):
 
         Returns
         -------
-        Union[Any, None]
+        Optional[Any]
         """
         return mapping.from_maybe_impl(self._impl_obj.post_data_json)
 
@@ -160,7 +160,7 @@ class Request(AsyncBase):
 
         Returns
         -------
-        Union[bytes, None]
+        Optional[bytes]
         """
         return mapping.from_maybe_impl(self._impl_obj.post_data_buffer)
 
@@ -219,7 +219,7 @@ class Request(AsyncBase):
 
         Returns
         -------
-        Union[Request, None]
+        Optional[Request]
         """
         return mapping.from_impl_nullable(self._impl_obj.redirected_from)
 
@@ -239,7 +239,7 @@ class Request(AsyncBase):
 
         Returns
         -------
-        Union[Request, None]
+        Optional[Request]
         """
         return mapping.from_impl_nullable(self._impl_obj.redirected_to)
 
@@ -259,7 +259,7 @@ class Request(AsyncBase):
 
         Returns
         -------
-        Union[str, None]
+        Optional[str]
         """
         return mapping.from_maybe_impl(self._impl_obj.failure)
 
@@ -319,7 +319,7 @@ class Request(AsyncBase):
 
         Returns
         -------
-        Union[Response, None]
+        Optional[Response]
         """
 
         return mapping.from_impl_nullable(await self._impl_obj.response())
@@ -377,7 +377,7 @@ class Request(AsyncBase):
 
         Returns
         -------
-        Union[str, None]
+        Optional[str]
         """
 
         return mapping.from_maybe_impl(await self._impl_obj.header_value(name=name))
@@ -526,7 +526,7 @@ class Response(AsyncBase):
 
         Returns
         -------
-        Union[str, None]
+        Optional[str]
         """
 
         return mapping.from_maybe_impl(await self._impl_obj.header_value(name=name))
@@ -567,7 +567,7 @@ class Response(AsyncBase):
 
         Returns
         -------
-        Union[{issuer: Union[str, None], protocol: Union[str, None], subjectName: Union[str, None], validFrom: Union[float, None], validTo: Union[float, None]}, None]
+        Union[{issuer: Optional[str], protocol: Optional[str], subjectName: Optional[str], validFrom: Optional[float], validTo: Optional[float]}, None]
         """
 
         return mapping.from_impl_nullable(await self._impl_obj.security_details())
@@ -642,7 +642,7 @@ class Route(AsyncBase):
 
         Parameters
         ----------
-        error_code : Union[str, None]
+        error_code : Optional[str]
             Optional error code. Defaults to `failed`, could be one of the following:
             - `'aborted'` - An operation was aborted (due to user action)
             - `'accessdenied'` - Permission to access a resource, other than the network, was denied
@@ -698,20 +698,20 @@ class Route(AsyncBase):
 
         Parameters
         ----------
-        status : Union[int, None]
+        status : Optional[int]
             Response status code, defaults to `200`.
         headers : Union[Dict[str, str], None]
             Response headers. Header values will be converted to a string.
         body : Union[bytes, str, None]
             Response body.
-        json : Union[Any, None]
+        json : Optional[Any]
             JSON response. This method will set the content type to `application/json` if not set.
         path : Union[pathlib.Path, str, None]
             File path to respond with. The content type will be inferred from file extension. If `path` is a relative path,
             then it is resolved relative to the current working directory.
-        content_type : Union[str, None]
+        content_type : Optional[str]
             If set, equals to setting `Content-Type` response header.
-        response : Union[APIResponse, None]
+        response : Optional[APIResponse]
             `APIResponse` to fulfill route's request with. Individual fields of the response (such as headers) can be
             overridden using fulfill options.
         """
@@ -763,9 +763,9 @@ class Route(AsyncBase):
 
         Parameters
         ----------
-        url : Union[str, None]
+        url : Optional[str]
             If set changes the request URL. New URL must have same protocol as original one.
-        method : Union[str, None]
+        method : Optional[str]
             If set changes the request method (e.g. GET or POST).
         headers : Union[Dict[str, str], None]
             If set changes the request HTTP headers. Header values will be converted to a string.
@@ -773,10 +773,10 @@ class Route(AsyncBase):
             Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
             and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type`
             header will be set to `application/octet-stream` if not explicitly set.
-        max_redirects : Union[int, None]
+        max_redirects : Optional[int]
             Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
             exceeded. Defaults to `20`. Pass `0` to not follow redirects.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
 
         Returns
@@ -860,10 +860,10 @@ class Route(AsyncBase):
 
         Parameters
         ----------
-        url : Union[str, None]
+        url : Optional[str]
             If set changes the request URL. New URL must have same protocol as original one. Changing the URL won't affect the
             route matching, all the routes are matched using the original request URL.
-        method : Union[str, None]
+        method : Optional[str]
             If set changes the request method (e.g. GET or POST).
         headers : Union[Dict[str, str], None]
             If set changes the request HTTP headers. Header values will be converted to a string.
@@ -915,9 +915,9 @@ class Route(AsyncBase):
 
         Parameters
         ----------
-        url : Union[str, None]
+        url : Optional[str]
             If set changes the request URL. New URL must have same protocol as original one.
-        method : Union[str, None]
+        method : Optional[str]
             If set changes the request method (e.g. GET or POST).
         headers : Union[Dict[str, str], None]
             If set changes the request HTTP headers. Header values will be converted to a string.
@@ -1061,9 +1061,9 @@ class WebSocket(AsyncBase):
         ----------
         event : str
             Event name, same one would pass into `webSocket.on(event)`.
-        predicate : Union[Callable, None]
+        predicate : Optional[Callable]
             Receives the event data and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
             default value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -1097,9 +1097,9 @@ class WebSocket(AsyncBase):
         ----------
         event : str
             Event name, same one typically passed into `*.on(event)`.
-        predicate : Union[Callable, None]
+        predicate : Optional[Callable]
             Receives the event data and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
             default value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -1229,7 +1229,7 @@ class Keyboard(AsyncBase):
         ----------
         text : str
             A text to type into a focused element.
-        delay : Union[float, None]
+        delay : Optional[float]
             Time to wait between key presses in milliseconds. Defaults to 0.
         """
 
@@ -1281,7 +1281,7 @@ class Keyboard(AsyncBase):
         ----------
         key : str
             Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
-        delay : Union[float, None]
+        delay : Optional[float]
             Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
         """
 
@@ -1303,7 +1303,7 @@ class Mouse(AsyncBase):
         ----------
         x : float
         y : float
-        steps : Union[int, None]
+        steps : Optional[int]
             Defaults to 1. Sends intermediate `mousemove` events.
         """
 
@@ -1323,7 +1323,7 @@ class Mouse(AsyncBase):
         ----------
         button : Union["left", "middle", "right", None]
             Defaults to `left`.
-        click_count : Union[int, None]
+        click_count : Optional[int]
             defaults to 1. See [UIEvent.detail].
         """
 
@@ -1345,7 +1345,7 @@ class Mouse(AsyncBase):
         ----------
         button : Union["left", "middle", "right", None]
             Defaults to `left`.
-        click_count : Union[int, None]
+        click_count : Optional[int]
             defaults to 1. See [UIEvent.detail].
         """
 
@@ -1370,11 +1370,11 @@ class Mouse(AsyncBase):
         ----------
         x : float
         y : float
-        delay : Union[float, None]
+        delay : Optional[float]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         button : Union["left", "middle", "right", None]
             Defaults to `left`.
-        click_count : Union[int, None]
+        click_count : Optional[int]
             defaults to 1. See [UIEvent.detail].
         """
 
@@ -1401,7 +1401,7 @@ class Mouse(AsyncBase):
         ----------
         x : float
         y : float
-        delay : Union[float, None]
+        delay : Optional[float]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         button : Union["left", "middle", "right", None]
             Defaults to `left`.
@@ -1480,7 +1480,7 @@ class JSHandle(AsyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
             function is automatically invoked.
-        arg : Union[Any, None]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -1516,7 +1516,7 @@ class JSHandle(AsyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
             function is automatically invoked.
-        arg : Union[Any, None]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -1578,7 +1578,7 @@ class JSHandle(AsyncBase):
 
         Returns
         -------
-        Union[ElementHandle, None]
+        Optional[ElementHandle]
         """
 
         return mapping.from_impl_nullable(self._impl_obj.as_element())
@@ -1618,7 +1618,7 @@ class ElementHandle(JSHandle):
 
         Returns
         -------
-        Union[ElementHandle, None]
+        Optional[ElementHandle]
         """
 
         return mapping.from_impl_nullable(self._impl_obj.as_element())
@@ -1630,7 +1630,7 @@ class ElementHandle(JSHandle):
 
         Returns
         -------
-        Union[Frame, None]
+        Optional[Frame]
         """
 
         return mapping.from_impl_nullable(await self._impl_obj.owner_frame())
@@ -1642,7 +1642,7 @@ class ElementHandle(JSHandle):
 
         Returns
         -------
-        Union[Frame, None]
+        Optional[Frame]
         """
 
         return mapping.from_impl_nullable(await self._impl_obj.content_frame())
@@ -1659,7 +1659,7 @@ class ElementHandle(JSHandle):
 
         Returns
         -------
-        Union[str, None]
+        Optional[str]
         """
 
         return mapping.from_maybe_impl(await self._impl_obj.get_attribute(name=name))
@@ -1671,7 +1671,7 @@ class ElementHandle(JSHandle):
 
         Returns
         -------
-        Union[str, None]
+        Optional[str]
         """
 
         return mapping.from_maybe_impl(await self._impl_obj.text_content())
@@ -1814,7 +1814,7 @@ class ElementHandle(JSHandle):
         ----------
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
-        event_init : Union[Dict, None]
+        event_init : Optional[Dict]
             Optional event-specific initialization properties.
         """
 
@@ -1838,7 +1838,7 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
@@ -1880,16 +1880,16 @@ class ElementHandle(JSHandle):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -1941,22 +1941,22 @@ class ElementHandle(JSHandle):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        delay : Union[float, None]
+        delay : Optional[float]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         button : Union["left", "middle", "right", None]
             Defaults to `left`.
-        click_count : Union[int, None]
+        click_count : Optional[int]
             defaults to 1. See [UIEvent.detail].
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -2013,20 +2013,20 @@ class ElementHandle(JSHandle):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        delay : Union[float, None]
+        delay : Optional[float]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         button : Union["left", "middle", "right", None]
             Defaults to `left`.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -2094,12 +2094,12 @@ class ElementHandle(JSHandle):
             otherwise only the first option matching one of the passed options is selected. Optional.
         element : Union[ElementHandle, Sequence[ElementHandle], None]
             Option elements to select. Optional.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
@@ -2156,16 +2156,16 @@ class ElementHandle(JSHandle):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -2205,14 +2205,14 @@ class ElementHandle(JSHandle):
         ----------
         value : str
             Value to set for the `<input>`, `<textarea>` or `[contenteditable]` element.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         """
 
@@ -2239,9 +2239,9 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
@@ -2261,7 +2261,7 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -2300,10 +2300,10 @@ class ElementHandle(JSHandle):
         Parameters
         ----------
         files : Union[Sequence[Union[pathlib.Path, str]], Sequence[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
@@ -2344,12 +2344,12 @@ class ElementHandle(JSHandle):
         ----------
         text : str
             A text to type into a focused element.
-        delay : Union[float, None]
+        delay : Optional[float]
             Time to wait between key presses in milliseconds. Defaults to 0.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
@@ -2396,12 +2396,12 @@ class ElementHandle(JSHandle):
         ----------
         key : str
             Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
-        delay : Union[float, None]
+        delay : Optional[float]
             Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
@@ -2445,16 +2445,16 @@ class ElementHandle(JSHandle):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -2500,16 +2500,16 @@ class ElementHandle(JSHandle):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -2554,16 +2554,16 @@ class ElementHandle(JSHandle):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -2636,7 +2636,7 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         type : Union["jpeg", "png", None]
@@ -2645,9 +2645,9 @@ class ElementHandle(JSHandle):
             The file path to save the image to. The screenshot type will be inferred from file extension. If `path` is a
             relative path, then it is resolved relative to the current working directory. If no path is provided, the image
             won't be saved to the disk.
-        quality : Union[int, None]
+        quality : Optional[int]
             The quality of the image, between 0-100. Not applicable to `png` images.
-        omit_background : Union[bool, None]
+        omit_background : Optional[bool]
             Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images.
             Defaults to `false`.
         animations : Union["allow", "disabled", None]
@@ -2669,10 +2669,10 @@ class ElementHandle(JSHandle):
         mask : Union[Sequence[Locator], None]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
             box `#FF00FF` (customized by `maskColor`) that completely covers its bounding box.
-        mask_color : Union[str, None]
+        mask_color : Optional[str]
             Specify the color of the overlay box for masked elements, in
             [CSS color format](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value). Default color is pink `#FF00FF`.
-        style : Union[str, None]
+        style : Optional[str]
             Text of the stylesheet to apply while making the screenshot. This is where you can hide dynamic elements, make
             elements invisible or change their properties to help you creating repeatable screenshots. This stylesheet pierces
             the Shadow DOM and applies to the inner frames.
@@ -2711,7 +2711,7 @@ class ElementHandle(JSHandle):
 
         Returns
         -------
-        Union[ElementHandle, None]
+        Optional[ElementHandle]
         """
 
         return mapping.from_impl_nullable(
@@ -2766,7 +2766,7 @@ class ElementHandle(JSHandle):
         expression : str
             JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
             function is automatically invoked.
-        arg : Union[Any, None]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -2814,7 +2814,7 @@ class ElementHandle(JSHandle):
         expression : str
             JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
             function is automatically invoked.
-        arg : Union[Any, None]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -2857,7 +2857,7 @@ class ElementHandle(JSHandle):
         ----------
         state : Union["disabled", "editable", "enabled", "hidden", "stable", "visible"]
             A state to wait for, see below for more details.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
@@ -2909,16 +2909,16 @@ class ElementHandle(JSHandle):
               without any content or with `display:none` has an empty bounding box and is not considered visible.
             - `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or
               `visibility:hidden`. This is opposite to the `'visible'` option.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
 
         Returns
         -------
-        Union[ElementHandle, None]
+        Optional[ElementHandle]
         """
 
         return mapping.from_impl_nullable(
@@ -2976,14 +2976,14 @@ class Accessibility(AsyncBase):
 
         Parameters
         ----------
-        interesting_only : Union[bool, None]
+        interesting_only : Optional[bool]
             Prune uninteresting nodes from the tree. Defaults to `true`.
-        root : Union[ElementHandle, None]
+        root : Optional[ElementHandle]
             The root DOM element for the snapshot. Defaults to the whole page.
 
         Returns
         -------
-        Union[Dict, None]
+        Optional[Dict]
         """
 
         return mapping.from_maybe_impl(
@@ -3054,10 +3054,10 @@ class FileChooser(AsyncBase):
         Parameters
         ----------
         files : Union[Sequence[Union[pathlib.Path, str]], Sequence[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
@@ -3123,7 +3123,7 @@ class Frame(AsyncBase):
 
         Returns
         -------
-        Union[Frame, None]
+        Optional[Frame]
         """
         return mapping.from_impl_nullable(self._impl_obj.parent_frame)
 
@@ -3173,7 +3173,7 @@ class Frame(AsyncBase):
         ----------
         url : str
             URL to navigate frame to. The url should include scheme, e.g. `https://`.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
@@ -3186,13 +3186,13 @@ class Frame(AsyncBase):
               at least `500` ms. Don't use this method for testing, rely on web assertions to assess readiness instead.
             - `'commit'` - consider operation to be finished when network response is received and the document started
               loading.
-        referer : Union[str, None]
+        referer : Optional[str]
             Referer header value. If provided it will take preference over the referer header value set by
             `page.set_extra_http_headers()`.
 
         Returns
         -------
-        Union[Response, None]
+        Optional[Response]
         """
 
         return mapping.from_impl_nullable(
@@ -3246,7 +3246,7 @@ class Frame(AsyncBase):
               at least `500` ms. Don't use this method for testing, rely on web assertions to assess readiness instead.
             - `'commit'` - consider operation to be finished when network response is received and the document started
               loading.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
@@ -3297,7 +3297,7 @@ class Frame(AsyncBase):
               at least `500` ms. Don't use this method for testing, rely on web assertions to assess readiness instead.
             - `'commit'` - consider operation to be finished when network response is received and the document started
               loading.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
@@ -3342,7 +3342,7 @@ class Frame(AsyncBase):
             - `'domcontentloaded'` - wait for the `DOMContentLoaded` event to be fired.
             - `'networkidle'` - **DISCOURAGED** wait until there are no network connections for at least `500` ms. Don't use
               this method for testing, rely on web assertions to assess readiness instead.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
@@ -3420,7 +3420,7 @@ class Frame(AsyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
             function is automatically invoked.
-        arg : Union[Any, None]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -3474,7 +3474,7 @@ class Frame(AsyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
             function is automatically invoked.
-        arg : Union[Any, None]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -3504,13 +3504,13 @@ class Frame(AsyncBase):
         ----------
         selector : str
             A selector to query for.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
 
         Returns
         -------
-        Union[ElementHandle, None]
+        Optional[ElementHandle]
         """
 
         return mapping.from_impl_nullable(
@@ -3591,10 +3591,10 @@ class Frame(AsyncBase):
         ----------
         selector : str
             A selector to query for.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         state : Union["attached", "detached", "hidden", "visible", None]
@@ -3608,7 +3608,7 @@ class Frame(AsyncBase):
 
         Returns
         -------
-        Union[ElementHandle, None]
+        Optional[ElementHandle]
         """
 
         return mapping.from_impl_nullable(
@@ -3633,10 +3633,10 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -3667,10 +3667,10 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -3701,10 +3701,10 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -3735,10 +3735,10 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -3770,10 +3770,10 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Deprecated: This option is ignored. `frame.is_hidden()` does not wait for the element to become hidden and returns immediately.
 
         Returns
@@ -3804,10 +3804,10 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Deprecated: This option is ignored. `frame.is_visible()` does not wait for the element to become visible and returns immediately.
 
         Returns
@@ -3872,12 +3872,12 @@ class Frame(AsyncBase):
             used.
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
-        event_init : Union[Dict, None]
+        event_init : Optional[Dict]
             Optional event-specific initialization properties.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
@@ -3925,9 +3925,9 @@ class Frame(AsyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
             function is automatically invoked.
-        arg : Union[Any, None]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
 
@@ -3971,7 +3971,7 @@ class Frame(AsyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
             function is automatically invoked.
-        arg : Union[Any, None]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -4015,7 +4015,7 @@ class Frame(AsyncBase):
         ----------
         html : str
             HTML markup to assign to the page.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
@@ -4064,14 +4064,14 @@ class Frame(AsyncBase):
 
         Parameters
         ----------
-        url : Union[str, None]
+        url : Optional[str]
             URL of a script to be added.
         path : Union[pathlib.Path, str, None]
             Path to the JavaScript file to be injected into frame. If `path` is a relative path, then it is resolved relative
             to the current working directory.
-        content : Union[str, None]
+        content : Optional[str]
             Raw JavaScript content to be injected into frame.
-        type : Union[str, None]
+        type : Optional[str]
             Script type. Use 'module' in order to load a Javascript ES6 module. See
             [script](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script) for more details.
 
@@ -4102,12 +4102,12 @@ class Frame(AsyncBase):
 
         Parameters
         ----------
-        url : Union[str, None]
+        url : Optional[str]
             URL of the `<link>` tag.
         path : Union[pathlib.Path, str, None]
             Path to the CSS file to be injected into frame. If `path` is a relative path, then it is resolved relative to the
             current working directory.
-        content : Union[str, None]
+        content : Optional[str]
             Raw CSS content to be injected into frame.
 
         Returns
@@ -4160,25 +4160,25 @@ class Frame(AsyncBase):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        delay : Union[float, None]
+        delay : Optional[float]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         button : Union["left", "middle", "right", None]
             Defaults to `left`.
-        click_count : Union[int, None]
+        click_count : Optional[int]
             defaults to 1. See [UIEvent.detail].
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -4242,23 +4242,23 @@ class Frame(AsyncBase):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        delay : Union[float, None]
+        delay : Optional[float]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         button : Union["left", "middle", "right", None]
             Defaults to `left`.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -4318,19 +4318,19 @@ class Frame(AsyncBase):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -4378,17 +4378,17 @@ class Frame(AsyncBase):
             used.
         value : str
             Value to fill for the `<input>`, `<textarea>` or `[contenteditable]` element.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         """
 
@@ -4433,7 +4433,7 @@ class Frame(AsyncBase):
         has_not_text : Union[Pattern[str], str, None]
             Matches elements that do not contain specified text somewhere inside, possibly in a child or a descendant element.
             When passed a [string], matching is case-insensitive and searches for a substring.
-        has : Union[Locator, None]
+        has : Optional[Locator]
             Narrows down the results of the method to those which contain elements matching this relative locator. For example,
             `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
 
@@ -4443,7 +4443,7 @@ class Frame(AsyncBase):
             div` will fail, because the inner locator must be relative and should not use any elements outside the `content`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        has_not : Union[Locator, None]
+        has_not : Optional[Locator]
             Matches elements that do not contain an element that matches an inner locator. Inner locator is queried against the
             outer one. For example, `article` that does not have `div` matches `<article><span>Playwright</span></article>`.
 
@@ -4490,7 +4490,7 @@ class Frame(AsyncBase):
         ----------
         text : Union[Pattern[str], str]
             Text to locate the element for.
-        exact : Union[bool, None]
+        exact : Optional[bool]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
             regular expression. Note that exact match still trims whitespace.
 
@@ -4531,7 +4531,7 @@ class Frame(AsyncBase):
         ----------
         text : Union[Pattern[str], str]
             Text to locate the element for.
-        exact : Union[bool, None]
+        exact : Optional[bool]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
             regular expression. Note that exact match still trims whitespace.
 
@@ -4570,7 +4570,7 @@ class Frame(AsyncBase):
         ----------
         text : Union[Pattern[str], str]
             Text to locate the element for.
-        exact : Union[bool, None]
+        exact : Optional[bool]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
             regular expression. Note that exact match still trims whitespace.
 
@@ -4723,25 +4723,25 @@ class Frame(AsyncBase):
         ----------
         role : Union["alert", "alertdialog", "application", "article", "banner", "blockquote", "button", "caption", "cell", "checkbox", "code", "columnheader", "combobox", "complementary", "contentinfo", "definition", "deletion", "dialog", "directory", "document", "emphasis", "feed", "figure", "form", "generic", "grid", "gridcell", "group", "heading", "img", "insertion", "link", "list", "listbox", "listitem", "log", "main", "marquee", "math", "menu", "menubar", "menuitem", "menuitemcheckbox", "menuitemradio", "meter", "navigation", "none", "note", "option", "paragraph", "presentation", "progressbar", "radio", "radiogroup", "region", "row", "rowgroup", "rowheader", "scrollbar", "search", "searchbox", "separator", "slider", "spinbutton", "status", "strong", "subscript", "superscript", "switch", "tab", "table", "tablist", "tabpanel", "term", "textbox", "time", "timer", "toolbar", "tooltip", "tree", "treegrid", "treeitem"]
             Required aria role.
-        checked : Union[bool, None]
+        checked : Optional[bool]
             An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls.
 
             Learn more about [`aria-checked`](https://www.w3.org/TR/wai-aria-1.2/#aria-checked).
-        disabled : Union[bool, None]
+        disabled : Optional[bool]
             An attribute that is usually set by `aria-disabled` or `disabled`.
 
             **NOTE** Unlike most other attributes, `disabled` is inherited through the DOM hierarchy. Learn more about
             [`aria-disabled`](https://www.w3.org/TR/wai-aria-1.2/#aria-disabled).
-        expanded : Union[bool, None]
+        expanded : Optional[bool]
             An attribute that is usually set by `aria-expanded`.
 
             Learn more about [`aria-expanded`](https://www.w3.org/TR/wai-aria-1.2/#aria-expanded).
-        include_hidden : Union[bool, None]
+        include_hidden : Optional[bool]
             Option that controls whether hidden elements are matched. By default, only non-hidden elements, as
             [defined by ARIA](https://www.w3.org/TR/wai-aria-1.2/#tree_exclusion), are matched by role selector.
 
             Learn more about [`aria-hidden`](https://www.w3.org/TR/wai-aria-1.2/#aria-hidden).
-        level : Union[int, None]
+        level : Optional[int]
             A number attribute that is usually present for roles `heading`, `listitem`, `row`, `treeitem`, with default values
             for `<h1>-<h6>` elements.
 
@@ -4751,15 +4751,15 @@ class Frame(AsyncBase):
             case-insensitive and searches for a substring, use `exact` to control this behavior.
 
             Learn more about [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
-        pressed : Union[bool, None]
+        pressed : Optional[bool]
             An attribute that is usually set by `aria-pressed`.
 
             Learn more about [`aria-pressed`](https://www.w3.org/TR/wai-aria-1.2/#aria-pressed).
-        selected : Union[bool, None]
+        selected : Optional[bool]
             An attribute that is usually set by `aria-selected`.
 
             Learn more about [`aria-selected`](https://www.w3.org/TR/wai-aria-1.2/#aria-selected).
-        exact : Union[bool, None]
+        exact : Optional[bool]
             Whether `name` is matched exactly: case-sensitive and whole-string. Defaults to false. Ignored when `name` is a
             regular expression. Note that exact match still trims whitespace.
 
@@ -4874,7 +4874,7 @@ class Frame(AsyncBase):
         ----------
         text : Union[Pattern[str], str]
             Text to locate the element for.
-        exact : Union[bool, None]
+        exact : Optional[bool]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
             regular expression. Note that exact match still trims whitespace.
 
@@ -4913,7 +4913,7 @@ class Frame(AsyncBase):
         ----------
         text : Union[Pattern[str], str]
             Text to locate the element for.
-        exact : Union[bool, None]
+        exact : Optional[bool]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
             regular expression. Note that exact match still trims whitespace.
 
@@ -4969,10 +4969,10 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
@@ -4999,16 +4999,16 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
-        Union[str, None]
+        Optional[str]
         """
 
         return mapping.from_maybe_impl(
@@ -5033,10 +5033,10 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -5067,10 +5067,10 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -5104,16 +5104,16 @@ class Frame(AsyncBase):
             used.
         name : str
             Attribute name to get the value for.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
-        Union[str, None]
+        Optional[str]
         """
 
         return mapping.from_maybe_impl(
@@ -5160,19 +5160,19 @@ class Frame(AsyncBase):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -5219,19 +5219,19 @@ class Frame(AsyncBase):
         target_position : Union[{x: float, y: float}, None]
             Drops on the target element at this point relative to the top-left corner of the element's padding box. If not
             specified, some visible point of the element is used.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -5304,17 +5304,17 @@ class Frame(AsyncBase):
             otherwise only the first option matching one of the passed options is selected. Optional.
         element : Union[ElementHandle, Sequence[ElementHandle], None]
             Option elements to select. Optional.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 
         Returns
@@ -5356,10 +5356,10 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -5405,13 +5405,13 @@ class Frame(AsyncBase):
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
         files : Union[Sequence[Union[pathlib.Path, str]], Sequence[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
@@ -5453,15 +5453,15 @@ class Frame(AsyncBase):
             used.
         text : str
             A text to type into a focused element.
-        delay : Union[float, None]
+        delay : Optional[float]
             Time to wait between key presses in milliseconds. Defaults to 0.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
@@ -5516,15 +5516,15 @@ class Frame(AsyncBase):
             used.
         key : str
             Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
-        delay : Union[float, None]
+        delay : Optional[float]
             Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
@@ -5576,19 +5576,19 @@ class Frame(AsyncBase):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -5640,19 +5640,19 @@ class Frame(AsyncBase):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -5733,9 +5733,9 @@ class Frame(AsyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
             function is automatically invoked.
-        arg : Union[Any, None]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
             default value can be changed by using the `browser_context.set_default_timeout()` or
             `page.set_default_timeout()` methods.
@@ -5808,19 +5808,19 @@ class Frame(AsyncBase):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -5894,7 +5894,7 @@ class FrameLocator(AsyncBase):
         has_not_text : Union[Pattern[str], str, None]
             Matches elements that do not contain specified text somewhere inside, possibly in a child or a descendant element.
             When passed a [string], matching is case-insensitive and searches for a substring.
-        has : Union[Locator, None]
+        has : Optional[Locator]
             Narrows down the results of the method to those which contain elements matching this relative locator. For example,
             `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
 
@@ -5904,7 +5904,7 @@ class FrameLocator(AsyncBase):
             div` will fail, because the inner locator must be relative and should not use any elements outside the `content`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        has_not : Union[Locator, None]
+        has_not : Optional[Locator]
             Matches elements that do not contain an element that matches an inner locator. Inner locator is queried against the
             outer one. For example, `article` that does not have `div` matches `<article><span>Playwright</span></article>`.
 
@@ -5951,7 +5951,7 @@ class FrameLocator(AsyncBase):
         ----------
         text : Union[Pattern[str], str]
             Text to locate the element for.
-        exact : Union[bool, None]
+        exact : Optional[bool]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
             regular expression. Note that exact match still trims whitespace.
 
@@ -5992,7 +5992,7 @@ class FrameLocator(AsyncBase):
         ----------
         text : Union[Pattern[str], str]
             Text to locate the element for.
-        exact : Union[bool, None]
+        exact : Optional[bool]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
             regular expression. Note that exact match still trims whitespace.
 
@@ -6031,7 +6031,7 @@ class FrameLocator(AsyncBase):
         ----------
         text : Union[Pattern[str], str]
             Text to locate the element for.
-        exact : Union[bool, None]
+        exact : Optional[bool]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
             regular expression. Note that exact match still trims whitespace.
 
@@ -6184,25 +6184,25 @@ class FrameLocator(AsyncBase):
         ----------
         role : Union["alert", "alertdialog", "application", "article", "banner", "blockquote", "button", "caption", "cell", "checkbox", "code", "columnheader", "combobox", "complementary", "contentinfo", "definition", "deletion", "dialog", "directory", "document", "emphasis", "feed", "figure", "form", "generic", "grid", "gridcell", "group", "heading", "img", "insertion", "link", "list", "listbox", "listitem", "log", "main", "marquee", "math", "menu", "menubar", "menuitem", "menuitemcheckbox", "menuitemradio", "meter", "navigation", "none", "note", "option", "paragraph", "presentation", "progressbar", "radio", "radiogroup", "region", "row", "rowgroup", "rowheader", "scrollbar", "search", "searchbox", "separator", "slider", "spinbutton", "status", "strong", "subscript", "superscript", "switch", "tab", "table", "tablist", "tabpanel", "term", "textbox", "time", "timer", "toolbar", "tooltip", "tree", "treegrid", "treeitem"]
             Required aria role.
-        checked : Union[bool, None]
+        checked : Optional[bool]
             An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls.
 
             Learn more about [`aria-checked`](https://www.w3.org/TR/wai-aria-1.2/#aria-checked).
-        disabled : Union[bool, None]
+        disabled : Optional[bool]
             An attribute that is usually set by `aria-disabled` or `disabled`.
 
             **NOTE** Unlike most other attributes, `disabled` is inherited through the DOM hierarchy. Learn more about
             [`aria-disabled`](https://www.w3.org/TR/wai-aria-1.2/#aria-disabled).
-        expanded : Union[bool, None]
+        expanded : Optional[bool]
             An attribute that is usually set by `aria-expanded`.
 
             Learn more about [`aria-expanded`](https://www.w3.org/TR/wai-aria-1.2/#aria-expanded).
-        include_hidden : Union[bool, None]
+        include_hidden : Optional[bool]
             Option that controls whether hidden elements are matched. By default, only non-hidden elements, as
             [defined by ARIA](https://www.w3.org/TR/wai-aria-1.2/#tree_exclusion), are matched by role selector.
 
             Learn more about [`aria-hidden`](https://www.w3.org/TR/wai-aria-1.2/#aria-hidden).
-        level : Union[int, None]
+        level : Optional[int]
             A number attribute that is usually present for roles `heading`, `listitem`, `row`, `treeitem`, with default values
             for `<h1>-<h6>` elements.
 
@@ -6212,15 +6212,15 @@ class FrameLocator(AsyncBase):
             case-insensitive and searches for a substring, use `exact` to control this behavior.
 
             Learn more about [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
-        pressed : Union[bool, None]
+        pressed : Optional[bool]
             An attribute that is usually set by `aria-pressed`.
 
             Learn more about [`aria-pressed`](https://www.w3.org/TR/wai-aria-1.2/#aria-pressed).
-        selected : Union[bool, None]
+        selected : Optional[bool]
             An attribute that is usually set by `aria-selected`.
 
             Learn more about [`aria-selected`](https://www.w3.org/TR/wai-aria-1.2/#aria-selected).
-        exact : Union[bool, None]
+        exact : Optional[bool]
             Whether `name` is matched exactly: case-sensitive and whole-string. Defaults to false. Ignored when `name` is a
             regular expression. Note that exact match still trims whitespace.
 
@@ -6335,7 +6335,7 @@ class FrameLocator(AsyncBase):
         ----------
         text : Union[Pattern[str], str]
             Text to locate the element for.
-        exact : Union[bool, None]
+        exact : Optional[bool]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
             regular expression. Note that exact match still trims whitespace.
 
@@ -6374,7 +6374,7 @@ class FrameLocator(AsyncBase):
         ----------
         text : Union[Pattern[str], str]
             Text to locate the element for.
-        exact : Union[bool, None]
+        exact : Optional[bool]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
             regular expression. Note that exact match still trims whitespace.
 
@@ -6473,7 +6473,7 @@ class Worker(AsyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
             function is automatically invoked.
-        arg : Union[Any, None]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -6505,7 +6505,7 @@ class Worker(AsyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
             function is automatically invoked.
-        arg : Union[Any, None]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -6584,12 +6584,12 @@ class Selectors(AsyncBase):
         name : str
             Name that is used in selectors as a prefix, e.g. `{name: 'foo'}` enables `foo=myselectorbody` selectors. May only
             contain `[a-zA-Z0-9_]` characters.
-        script : Union[str, None]
+        script : Optional[str]
             Raw script content.
         path : Union[pathlib.Path, str, None]
             Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the current working
             directory.
-        content_script : Union[bool, None]
+        content_script : Optional[bool]
             Whether to run this selector engine in isolated JavaScript environment. This environment has access to the same
             DOM, but not any JavaScript objects from the frame's scripts. Defaults to `false`. Note that running as a content
             script is not guaranteed when this engine is used together with other registered engines.
@@ -6677,7 +6677,7 @@ class ConsoleMessage(AsyncBase):
 
         Returns
         -------
-        Union[Page, None]
+        Optional[Page]
         """
         return mapping.from_impl_nullable(self._impl_obj.page)
 
@@ -6730,7 +6730,7 @@ class Dialog(AsyncBase):
 
         Returns
         -------
-        Union[Page, None]
+        Optional[Page]
         """
         return mapping.from_impl_nullable(self._impl_obj.page)
 
@@ -6741,7 +6741,7 @@ class Dialog(AsyncBase):
 
         Parameters
         ----------
-        prompt_text : Union[str, None]
+        prompt_text : Optional[str]
             A text to enter in prompt. Does not cause any effects if the dialog's `type` is not prompt. Optional.
         """
 
@@ -6816,7 +6816,7 @@ class Download(AsyncBase):
 
         Returns
         -------
-        Union[str, None]
+        Optional[str]
         """
 
         return mapping.from_maybe_impl(await self._impl_obj.failure())
@@ -7582,7 +7582,7 @@ class Page(AsyncContextManager):
 
         Returns
         -------
-        Union[Video, None]
+        Optional[Video]
         """
         return mapping.from_impl_nullable(self._impl_obj.video)
 
@@ -7593,7 +7593,7 @@ class Page(AsyncContextManager):
 
         Returns
         -------
-        Union[Page, None]
+        Optional[Page]
         """
 
         return mapping.from_impl_nullable(await self._impl_obj.opener())
@@ -7618,14 +7618,14 @@ class Page(AsyncContextManager):
 
         Parameters
         ----------
-        name : Union[str, None]
+        name : Optional[str]
             Frame name specified in the `iframe`'s `name` attribute. Optional.
         url : Union[Callable[[str], bool], Pattern[str], str, None]
             A glob pattern, regex pattern or predicate receiving frame's `url` as a [URL] object. Optional.
 
         Returns
         -------
-        Union[Frame, None]
+        Optional[Frame]
         """
 
         return mapping.from_impl_nullable(
@@ -7686,13 +7686,13 @@ class Page(AsyncContextManager):
         ----------
         selector : str
             A selector to query for.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
 
         Returns
         -------
-        Union[ElementHandle, None]
+        Optional[ElementHandle]
         """
 
         return mapping.from_impl_nullable(
@@ -7769,7 +7769,7 @@ class Page(AsyncContextManager):
         ----------
         selector : str
             A selector to query for.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         state : Union["attached", "detached", "hidden", "visible", None]
@@ -7780,13 +7780,13 @@ class Page(AsyncContextManager):
               without any content or with `display:none` has an empty bounding box and is not considered visible.
             - `'hidden'` - wait for element to be either detached from DOM, or have an empty bounding box or
               `visibility:hidden`. This is opposite to the `'visible'` option.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
 
         Returns
         -------
-        Union[ElementHandle, None]
+        Optional[ElementHandle]
         """
 
         return mapping.from_impl_nullable(
@@ -7811,10 +7811,10 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -7845,10 +7845,10 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -7879,10 +7879,10 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -7913,10 +7913,10 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -7948,10 +7948,10 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Deprecated: This option is ignored. `page.is_hidden()` does not wait for the↵element to become hidden and returns immediately.
 
         Returns
@@ -7982,10 +7982,10 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Deprecated: This option is ignored. `page.is_visible()` does not wait↵for the element to become visible and returns immediately.
 
         Returns
@@ -8050,12 +8050,12 @@ class Page(AsyncContextManager):
             used.
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
-        event_init : Union[Dict, None]
+        event_init : Optional[Dict]
             Optional event-specific initialization properties.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         """
@@ -8114,7 +8114,7 @@ class Page(AsyncContextManager):
         expression : str
             JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
             function is automatically invoked.
-        arg : Union[Any, None]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -8168,7 +8168,7 @@ class Page(AsyncContextManager):
         expression : str
             JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
             function is automatically invoked.
-        arg : Union[Any, None]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -8213,9 +8213,9 @@ class Page(AsyncContextManager):
         expression : str
             JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
             function is automatically invoked.
-        arg : Union[Any, None]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
 
@@ -8257,7 +8257,7 @@ class Page(AsyncContextManager):
         expression : str
             JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
             function is automatically invoked.
-        arg : Union[Any, None]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -8286,14 +8286,14 @@ class Page(AsyncContextManager):
 
         Parameters
         ----------
-        url : Union[str, None]
+        url : Optional[str]
             URL of a script to be added.
         path : Union[pathlib.Path, str, None]
             Path to the JavaScript file to be injected into frame. If `path` is a relative path, then it is resolved relative
             to the current working directory.
-        content : Union[str, None]
+        content : Optional[str]
             Raw JavaScript content to be injected into frame.
-        type : Union[str, None]
+        type : Optional[str]
             Script type. Use 'module' in order to load a Javascript ES6 module. See
             [script](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script) for more details.
 
@@ -8322,12 +8322,12 @@ class Page(AsyncContextManager):
 
         Parameters
         ----------
-        url : Union[str, None]
+        url : Optional[str]
             URL of the `<link>` tag.
         path : Union[pathlib.Path, str, None]
             Path to the CSS file to be injected into frame. If `path` is a relative path, then it is resolved relative to the
             current working directory.
-        content : Union[str, None]
+        content : Optional[str]
             Raw CSS content to be injected into frame.
 
         Returns
@@ -8474,7 +8474,7 @@ class Page(AsyncContextManager):
             Name of the function on the window object.
         callback : Callable
             Callback function that will be called in the Playwright's context.
-        handle : Union[bool, None]
+        handle : Optional[bool]
             Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is
             supported. When passing by value, multiple arguments are supported.
         """
@@ -8534,7 +8534,7 @@ class Page(AsyncContextManager):
         ----------
         html : str
             HTML markup to assign to the page.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
@@ -8593,7 +8593,7 @@ class Page(AsyncContextManager):
             URL to navigate page to. The url should include scheme, e.g. `https://`. When a `baseURL` via the context options
             was provided and the passed URL is a path, it gets merged via the
             [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
@@ -8606,13 +8606,13 @@ class Page(AsyncContextManager):
               at least `500` ms. Don't use this method for testing, rely on web assertions to assess readiness instead.
             - `'commit'` - consider operation to be finished when network response is received and the document started
               loading.
-        referer : Union[str, None]
+        referer : Optional[str]
             Referer header value. If provided it will take preference over the referer header value set by
             `page.set_extra_http_headers()`.
 
         Returns
         -------
-        Union[Response, None]
+        Optional[Response]
         """
 
         return mapping.from_impl_nullable(
@@ -8637,7 +8637,7 @@ class Page(AsyncContextManager):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
@@ -8653,7 +8653,7 @@ class Page(AsyncContextManager):
 
         Returns
         -------
-        Union[Response, None]
+        Optional[Response]
         """
 
         return mapping.from_impl_nullable(
@@ -8701,7 +8701,7 @@ class Page(AsyncContextManager):
             - `'domcontentloaded'` - wait for the `DOMContentLoaded` event to be fired.
             - `'networkidle'` - **DISCOURAGED** wait until there are no network connections for at least `500` ms. Don't use
               this method for testing, rely on web assertions to assess readiness instead.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
@@ -8746,7 +8746,7 @@ class Page(AsyncContextManager):
               at least `500` ms. Don't use this method for testing, rely on web assertions to assess readiness instead.
             - `'commit'` - consider operation to be finished when network response is received and the document started
               loading.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
@@ -8778,9 +8778,9 @@ class Page(AsyncContextManager):
         ----------
         event : str
             Event name, same one typically passed into `*.on(event)`.
-        predicate : Union[Callable, None]
+        predicate : Optional[Callable]
             Receives the event data and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
             default value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -8812,7 +8812,7 @@ class Page(AsyncContextManager):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
@@ -8828,7 +8828,7 @@ class Page(AsyncContextManager):
 
         Returns
         -------
-        Union[Response, None]
+        Optional[Response]
         """
 
         return mapping.from_impl_nullable(
@@ -8852,7 +8852,7 @@ class Page(AsyncContextManager):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
@@ -8868,7 +8868,7 @@ class Page(AsyncContextManager):
 
         Returns
         -------
-        Union[Response, None]
+        Optional[Response]
         """
 
         return mapping.from_impl_nullable(
@@ -9012,7 +9012,7 @@ class Page(AsyncContextManager):
 
         Parameters
         ----------
-        script : Union[str, None]
+        script : Optional[str]
             Script to be evaluated in all pages in the browser context. Optional.
         path : Union[pathlib.Path, str, None]
             Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the current working
@@ -9093,7 +9093,7 @@ class Page(AsyncContextManager):
             [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
         handler : Union[Callable[[Route, Request], Any], Callable[[Route], Any]]
             handler function to route the request.
-        times : Union[int, None]
+        times : Optional[int]
             How often a route should be used. By default it will be used every time.
         """
 
@@ -9190,7 +9190,7 @@ class Page(AsyncContextManager):
             - If set to 'fallback' missing requests will be sent to the network.
 
             Defaults to abort.
-        update : Union[bool, None]
+        update : Optional[bool]
             If specified, updates the given HAR with the actual network information instead of serving from file. The file is
             written to disk when `browser_context.close()` is called.
         update_content : Union["attach", "embed", None]
@@ -9235,7 +9235,7 @@ class Page(AsyncContextManager):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         type : Union["jpeg", "png", None]
@@ -9244,12 +9244,12 @@ class Page(AsyncContextManager):
             The file path to save the image to. The screenshot type will be inferred from file extension. If `path` is a
             relative path, then it is resolved relative to the current working directory. If no path is provided, the image
             won't be saved to the disk.
-        quality : Union[int, None]
+        quality : Optional[int]
             The quality of the image, between 0-100. Not applicable to `png` images.
-        omit_background : Union[bool, None]
+        omit_background : Optional[bool]
             Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images.
             Defaults to `false`.
-        full_page : Union[bool, None]
+        full_page : Optional[bool]
             When true, takes a screenshot of the full scrollable page, instead of the currently visible viewport. Defaults to
             `false`.
         clip : Union[{x: float, y: float, width: float, height: float}, None]
@@ -9273,10 +9273,10 @@ class Page(AsyncContextManager):
         mask : Union[Sequence[Locator], None]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
             box `#FF00FF` (customized by `maskColor`) that completely covers its bounding box.
-        mask_color : Union[str, None]
+        mask_color : Optional[str]
             Specify the color of the overlay box for masked elements, in
             [CSS color format](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value). Default color is pink `#FF00FF`.
-        style : Union[str, None]
+        style : Optional[str]
             Text of the stylesheet to apply while making the screenshot. This is where you can hide dynamic elements, make
             elements invisible or change their properties to help you creating repeatable screenshots. This stylesheet pierces
             the Shadow DOM and applies to the inner frames.
@@ -9334,10 +9334,10 @@ class Page(AsyncContextManager):
 
         Parameters
         ----------
-        run_before_unload : Union[bool, None]
+        run_before_unload : Optional[bool]
             Defaults to `false`. Whether to run the
             [before unload](https://developer.mozilla.org/en-US/docs/Web/Events/beforeunload) page handlers.
-        reason : Union[str, None]
+        reason : Optional[str]
             The reason to be reported to the operations interrupted by the page closure.
         """
 
@@ -9398,25 +9398,25 @@ class Page(AsyncContextManager):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        delay : Union[float, None]
+        delay : Optional[float]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         button : Union["left", "middle", "right", None]
             Defaults to `left`.
-        click_count : Union[int, None]
+        click_count : Optional[int]
             defaults to 1. See [UIEvent.detail].
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         """
@@ -9480,23 +9480,23 @@ class Page(AsyncContextManager):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        delay : Union[float, None]
+        delay : Optional[float]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         button : Union["left", "middle", "right", None]
             Defaults to `left`.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -9556,19 +9556,19 @@ class Page(AsyncContextManager):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -9616,17 +9616,17 @@ class Page(AsyncContextManager):
             used.
         value : str
             Value to fill for the `<input>`, `<textarea>` or `[contenteditable]` element.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         """
 
@@ -9669,7 +9669,7 @@ class Page(AsyncContextManager):
         has_not_text : Union[Pattern[str], str, None]
             Matches elements that do not contain specified text somewhere inside, possibly in a child or a descendant element.
             When passed a [string], matching is case-insensitive and searches for a substring.
-        has : Union[Locator, None]
+        has : Optional[Locator]
             Narrows down the results of the method to those which contain elements matching this relative locator. For example,
             `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
 
@@ -9679,7 +9679,7 @@ class Page(AsyncContextManager):
             div` will fail, because the inner locator must be relative and should not use any elements outside the `content`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        has_not : Union[Locator, None]
+        has_not : Optional[Locator]
             Matches elements that do not contain an element that matches an inner locator. Inner locator is queried against the
             outer one. For example, `article` that does not have `div` matches `<article><span>Playwright</span></article>`.
 
@@ -9726,7 +9726,7 @@ class Page(AsyncContextManager):
         ----------
         text : Union[Pattern[str], str]
             Text to locate the element for.
-        exact : Union[bool, None]
+        exact : Optional[bool]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
             regular expression. Note that exact match still trims whitespace.
 
@@ -9767,7 +9767,7 @@ class Page(AsyncContextManager):
         ----------
         text : Union[Pattern[str], str]
             Text to locate the element for.
-        exact : Union[bool, None]
+        exact : Optional[bool]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
             regular expression. Note that exact match still trims whitespace.
 
@@ -9806,7 +9806,7 @@ class Page(AsyncContextManager):
         ----------
         text : Union[Pattern[str], str]
             Text to locate the element for.
-        exact : Union[bool, None]
+        exact : Optional[bool]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
             regular expression. Note that exact match still trims whitespace.
 
@@ -9959,25 +9959,25 @@ class Page(AsyncContextManager):
         ----------
         role : Union["alert", "alertdialog", "application", "article", "banner", "blockquote", "button", "caption", "cell", "checkbox", "code", "columnheader", "combobox", "complementary", "contentinfo", "definition", "deletion", "dialog", "directory", "document", "emphasis", "feed", "figure", "form", "generic", "grid", "gridcell", "group", "heading", "img", "insertion", "link", "list", "listbox", "listitem", "log", "main", "marquee", "math", "menu", "menubar", "menuitem", "menuitemcheckbox", "menuitemradio", "meter", "navigation", "none", "note", "option", "paragraph", "presentation", "progressbar", "radio", "radiogroup", "region", "row", "rowgroup", "rowheader", "scrollbar", "search", "searchbox", "separator", "slider", "spinbutton", "status", "strong", "subscript", "superscript", "switch", "tab", "table", "tablist", "tabpanel", "term", "textbox", "time", "timer", "toolbar", "tooltip", "tree", "treegrid", "treeitem"]
             Required aria role.
-        checked : Union[bool, None]
+        checked : Optional[bool]
             An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls.
 
             Learn more about [`aria-checked`](https://www.w3.org/TR/wai-aria-1.2/#aria-checked).
-        disabled : Union[bool, None]
+        disabled : Optional[bool]
             An attribute that is usually set by `aria-disabled` or `disabled`.
 
             **NOTE** Unlike most other attributes, `disabled` is inherited through the DOM hierarchy. Learn more about
             [`aria-disabled`](https://www.w3.org/TR/wai-aria-1.2/#aria-disabled).
-        expanded : Union[bool, None]
+        expanded : Optional[bool]
             An attribute that is usually set by `aria-expanded`.
 
             Learn more about [`aria-expanded`](https://www.w3.org/TR/wai-aria-1.2/#aria-expanded).
-        include_hidden : Union[bool, None]
+        include_hidden : Optional[bool]
             Option that controls whether hidden elements are matched. By default, only non-hidden elements, as
             [defined by ARIA](https://www.w3.org/TR/wai-aria-1.2/#tree_exclusion), are matched by role selector.
 
             Learn more about [`aria-hidden`](https://www.w3.org/TR/wai-aria-1.2/#aria-hidden).
-        level : Union[int, None]
+        level : Optional[int]
             A number attribute that is usually present for roles `heading`, `listitem`, `row`, `treeitem`, with default values
             for `<h1>-<h6>` elements.
 
@@ -9987,15 +9987,15 @@ class Page(AsyncContextManager):
             case-insensitive and searches for a substring, use `exact` to control this behavior.
 
             Learn more about [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
-        pressed : Union[bool, None]
+        pressed : Optional[bool]
             An attribute that is usually set by `aria-pressed`.
 
             Learn more about [`aria-pressed`](https://www.w3.org/TR/wai-aria-1.2/#aria-pressed).
-        selected : Union[bool, None]
+        selected : Optional[bool]
             An attribute that is usually set by `aria-selected`.
 
             Learn more about [`aria-selected`](https://www.w3.org/TR/wai-aria-1.2/#aria-selected).
-        exact : Union[bool, None]
+        exact : Optional[bool]
             Whether `name` is matched exactly: case-sensitive and whole-string. Defaults to false. Ignored when `name` is a
             regular expression. Note that exact match still trims whitespace.
 
@@ -10110,7 +10110,7 @@ class Page(AsyncContextManager):
         ----------
         text : Union[Pattern[str], str]
             Text to locate the element for.
-        exact : Union[bool, None]
+        exact : Optional[bool]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
             regular expression. Note that exact match still trims whitespace.
 
@@ -10149,7 +10149,7 @@ class Page(AsyncContextManager):
         ----------
         text : Union[Pattern[str], str]
             Text to locate the element for.
-        exact : Union[bool, None]
+        exact : Optional[bool]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
             regular expression. Note that exact match still trims whitespace.
 
@@ -10205,10 +10205,10 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
@@ -10235,16 +10235,16 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
-        Union[str, None]
+        Optional[str]
         """
 
         return mapping.from_maybe_impl(
@@ -10269,10 +10269,10 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -10303,10 +10303,10 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -10340,16 +10340,16 @@ class Page(AsyncContextManager):
             used.
         name : str
             Attribute name to get the value for.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
-        Union[str, None]
+        Optional[str]
         """
 
         return mapping.from_maybe_impl(
@@ -10396,19 +10396,19 @@ class Page(AsyncContextManager):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -10471,19 +10471,19 @@ class Page(AsyncContextManager):
         target_position : Union[{x: float, y: float}, None]
             Drops on the target element at this point relative to the top-left corner of the element's padding box. If not
             specified, some visible point of the element is used.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -10557,16 +10557,16 @@ class Page(AsyncContextManager):
             otherwise only the first option matching one of the passed options is selected. Optional.
         element : Union[ElementHandle, Sequence[ElementHandle], None]
             Option elements to select. Optional.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
 
@@ -10609,10 +10609,10 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -10658,13 +10658,13 @@ class Page(AsyncContextManager):
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
         files : Union[Sequence[Union[pathlib.Path, str]], Sequence[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
@@ -10706,16 +10706,16 @@ class Page(AsyncContextManager):
             used.
         text : str
             A text to type into a focused element.
-        delay : Union[float, None]
+        delay : Optional[float]
             Time to wait between key presses in milliseconds. Defaults to 0.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         """
@@ -10785,16 +10785,16 @@ class Page(AsyncContextManager):
             used.
         key : str
             Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
-        delay : Union[float, None]
+        delay : Optional[float]
             Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         """
@@ -10845,19 +10845,19 @@ class Page(AsyncContextManager):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -10909,19 +10909,19 @@ class Page(AsyncContextManager):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -11009,9 +11009,9 @@ class Page(AsyncContextManager):
         expression : str
             JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
             function is automatically invoked.
-        arg : Union[Any, None]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
             default value can be changed by using the `browser_context.set_default_timeout()` or
             `page.set_default_timeout()` methods.
@@ -11119,11 +11119,11 @@ class Page(AsyncContextManager):
 
         Parameters
         ----------
-        scale : Union[float, None]
+        scale : Optional[float]
             Scale of the webpage rendering. Defaults to `1`. Scale amount must be between 0.1 and 2.
-        display_header_footer : Union[bool, None]
+        display_header_footer : Optional[bool]
             Display header and footer. Defaults to `false`.
-        header_template : Union[str, None]
+        header_template : Optional[str]
             HTML template for the print header. Should be valid HTML markup with following classes used to inject printing
             values into them:
             - `'date'` formatted print date
@@ -11131,21 +11131,21 @@ class Page(AsyncContextManager):
             - `'url'` document location
             - `'pageNumber'` current page number
             - `'totalPages'` total pages in the document
-        footer_template : Union[str, None]
+        footer_template : Optional[str]
             HTML template for the print footer. Should use the same format as the `headerTemplate`.
-        print_background : Union[bool, None]
+        print_background : Optional[bool]
             Print background graphics. Defaults to `false`.
-        landscape : Union[bool, None]
+        landscape : Optional[bool]
             Paper orientation. Defaults to `false`.
-        page_ranges : Union[str, None]
+        page_ranges : Optional[str]
             Paper ranges to print, e.g., '1-5, 8, 11-13'. Defaults to the empty string, which means print all pages.
-        format : Union[str, None]
+        format : Optional[str]
             Paper format. If set, takes priority over `width` or `height` options. Defaults to 'Letter'.
         width : Union[float, str, None]
             Paper width, accepts values labeled with units.
         height : Union[float, str, None]
             Paper height, accepts values labeled with units.
-        prefer_css_page_size : Union[bool, None]
+        prefer_css_page_size : Optional[bool]
             Give any CSS `@page` size declared in the page priority over what is declared in `width` and `height` or `format`
             options. Defaults to `false`, which will scale the content to fit the paper size.
         margin : Union[{top: Union[float, str, None], right: Union[float, str, None], bottom: Union[float, str, None], left: Union[float, str, None]}, None]
@@ -11201,9 +11201,9 @@ class Page(AsyncContextManager):
         ----------
         event : str
             Event name, same one typically passed into `*.on(event)`.
-        predicate : Union[Callable, None]
+        predicate : Optional[Callable]
             Receives the event data and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
             default value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -11234,7 +11234,7 @@ class Page(AsyncContextManager):
         ----------
         predicate : Union[Callable[[ConsoleMessage], bool], None]
             Receives the `ConsoleMessage` object and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
             default value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -11265,7 +11265,7 @@ class Page(AsyncContextManager):
         ----------
         predicate : Union[Callable[[Download], bool], None]
             Receives the `Download` object and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
             default value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -11296,7 +11296,7 @@ class Page(AsyncContextManager):
         ----------
         predicate : Union[Callable[[FileChooser], bool], None]
             Receives the `FileChooser` object and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
             default value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -11358,7 +11358,7 @@ class Page(AsyncContextManager):
               at least `500` ms. Don't use this method for testing, rely on web assertions to assess readiness instead.
             - `'commit'` - consider operation to be finished when network response is received and the document started
               loading.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum operation time in milliseconds, defaults to 30 seconds, pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_navigation_timeout()`,
             `browser_context.set_default_timeout()`, `page.set_default_navigation_timeout()` or
@@ -11391,7 +11391,7 @@ class Page(AsyncContextManager):
         ----------
         predicate : Union[Callable[[Page], bool], None]
             Receives the `Page` object and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
             default value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -11438,7 +11438,7 @@ class Page(AsyncContextManager):
             Request URL string, regex or predicate receiving `Request` object. When a `baseURL` via the context options was
             provided and the passed URL is a path, it gets merged via the
             [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can
             be changed by using the `page.set_default_timeout()` method.
 
@@ -11469,7 +11469,7 @@ class Page(AsyncContextManager):
         ----------
         predicate : Union[Callable[[Request], bool], None]
             Receives the `Request` object and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
             default value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -11518,7 +11518,7 @@ class Page(AsyncContextManager):
             Request URL string, regex or predicate receiving `Response` object. When a `baseURL` via the context options was
             provided and the passed URL is a path, it gets merged via the
             [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum wait time in milliseconds, defaults to 30 seconds, pass `0` to disable the timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -11549,7 +11549,7 @@ class Page(AsyncContextManager):
         ----------
         predicate : Union[Callable[[WebSocket], bool], None]
             Receives the `WebSocket` object and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
             default value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -11580,7 +11580,7 @@ class Page(AsyncContextManager):
         ----------
         predicate : Union[Callable[[Worker], bool], None]
             Receives the `Worker` object and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
             default value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -11633,19 +11633,19 @@ class Page(AsyncContextManager):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        strict : Union[bool, None]
+        strict : Optional[bool]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -11676,7 +11676,7 @@ class WebError(AsyncBase):
 
         Returns
         -------
-        Union[Page, None]
+        Optional[Page]
         """
         return mapping.from_impl_nullable(self._impl_obj.page)
 
@@ -12075,7 +12075,7 @@ class BrowserContext(AsyncContextManager):
 
         Returns
         -------
-        Union[Browser, None]
+        Optional[Browser]
         """
         return mapping.from_impl_nullable(self._impl_obj.browser)
 
@@ -12220,7 +12220,7 @@ class BrowserContext(AsyncContextManager):
 
         Parameters
         ----------
-        cookies : Sequence[{name: str, value: str, url: Union[str, None], domain: Union[str, None], path: Union[str, None], expires: Union[float, None], httpOnly: Union[bool, None], secure: Union[bool, None], sameSite: Union["Lax", "None", "Strict", None]}]
+        cookies : Sequence[{name: str, value: str, url: Optional[str], domain: Optional[str], path: Optional[str], expires: Optional[float], httpOnly: Optional[bool], secure: Optional[bool], sameSite: Union["Lax", "None", "Strict", None]}]
             Adds cookies to the browser context.
 
             For the cookie to apply to all subdomains as well, prefix domain with a dot, like this: ".example.com".
@@ -12265,7 +12265,7 @@ class BrowserContext(AsyncContextManager):
             - `'clipboard-read'`
             - `'clipboard-write'`
             - `'payment-handler'`
-        origin : Union[str, None]
+        origin : Optional[str]
             The [origin] to grant permissions to, e.g. "https://example.com".
         """
 
@@ -12310,7 +12310,7 @@ class BrowserContext(AsyncContextManager):
 
         Parameters
         ----------
-        geolocation : Union[{latitude: float, longitude: float, accuracy: Union[float, None]}, None]
+        geolocation : Union[{latitude: float, longitude: float, accuracy: Optional[float]}, None]
         """
 
         return mapping.from_maybe_impl(
@@ -12382,7 +12382,7 @@ class BrowserContext(AsyncContextManager):
 
         Parameters
         ----------
-        script : Union[str, None]
+        script : Optional[str]
             Script to be evaluated in all pages in the browser context. Optional.
         path : Union[pathlib.Path, str, None]
             Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the current working
@@ -12464,7 +12464,7 @@ class BrowserContext(AsyncContextManager):
             Name of the function on the window object.
         callback : Callable
             Callback function that will be called in the Playwright's context.
-        handle : Union[bool, None]
+        handle : Optional[bool]
             Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is
             supported. When passing by value, multiple arguments are supported.
         """
@@ -12605,7 +12605,7 @@ class BrowserContext(AsyncContextManager):
             [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
         handler : Union[Callable[[Route, Request], Any], Callable[[Route], Any]]
             handler function to route the request.
-        times : Union[int, None]
+        times : Optional[int]
             How often a route should be used. By default it will be used every time.
         """
 
@@ -12703,7 +12703,7 @@ class BrowserContext(AsyncContextManager):
             - If set to 'fallback' falls through to the next route handler in the handler chain.
 
             Defaults to abort.
-        update : Union[bool, None]
+        update : Optional[bool]
             If specified, updates the given HAR with the actual network information instead of serving from file. The file is
             written to disk when `browser_context.close()` is called.
         update_content : Union["attach", "embed", None]
@@ -12750,9 +12750,9 @@ class BrowserContext(AsyncContextManager):
         ----------
         event : str
             Event name, same one would pass into `browserContext.on(event)`.
-        predicate : Union[Callable, None]
+        predicate : Optional[Callable]
             Receives the event data and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
             default value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -12776,7 +12776,7 @@ class BrowserContext(AsyncContextManager):
 
         Parameters
         ----------
-        reason : Union[str, None]
+        reason : Optional[str]
             The reason to be reported to the operations interrupted by the context closure.
         """
 
@@ -12821,9 +12821,9 @@ class BrowserContext(AsyncContextManager):
         ----------
         event : str
             Event name, same one typically passed into `*.on(event)`.
-        predicate : Union[Callable, None]
+        predicate : Optional[Callable]
             Receives the event data and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
             default value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -12855,7 +12855,7 @@ class BrowserContext(AsyncContextManager):
         ----------
         predicate : Union[Callable[[ConsoleMessage], bool], None]
             Receives the `ConsoleMessage` object and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
             default value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -12886,7 +12886,7 @@ class BrowserContext(AsyncContextManager):
         ----------
         predicate : Union[Callable[[Page], bool], None]
             Receives the `Page` object and resolves to truthy value when the waiting should resolve.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
             default value can be changed by using the `browser_context.set_default_timeout()`.
 
@@ -12937,7 +12937,7 @@ class CDPSession(AsyncBase):
         ----------
         method : str
             Protocol method name.
-        params : Union[Dict, None]
+        params : Optional[Dict]
             Optional method parameters.
 
         Returns
@@ -13122,45 +13122,45 @@ class Browser(AsyncContextManager):
         screen : Union[{width: int, height: int}, None]
             Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the
             `viewport` is set.
-        no_viewport : Union[bool, None]
+        no_viewport : Optional[bool]
             Does not enforce fixed viewport, allows resizing window in the headed mode.
-        ignore_https_errors : Union[bool, None]
+        ignore_https_errors : Optional[bool]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
-        java_script_enabled : Union[bool, None]
+        java_script_enabled : Optional[bool]
             Whether or not to enable JavaScript in the context. Defaults to `true`. Learn more about
             [disabling JavaScript](../emulation.md#javascript-enabled).
-        bypass_csp : Union[bool, None]
+        bypass_csp : Optional[bool]
             Toggles bypassing page's Content-Security-Policy. Defaults to `false`.
-        user_agent : Union[str, None]
+        user_agent : Optional[str]
             Specific user agent to use in this context.
-        locale : Union[str, None]
+        locale : Optional[str]
             Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value,
             `Accept-Language` request header value as well as number and date formatting rules. Defaults to the system default
             locale. Learn more about emulation in our [emulation guide](../emulation.md#locale--timezone).
-        timezone_id : Union[str, None]
+        timezone_id : Optional[str]
             Changes the timezone of the context. See
             [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
             for a list of supported timezone IDs. Defaults to the system timezone.
-        geolocation : Union[{latitude: float, longitude: float, accuracy: Union[float, None]}, None]
+        geolocation : Union[{latitude: float, longitude: float, accuracy: Optional[float]}, None]
         permissions : Union[Sequence[str], None]
             A list of permissions to grant to all pages in this context. See `browser_context.grant_permissions()` for
             more details. Defaults to none.
         extra_http_headers : Union[Dict[str, str], None]
             An object containing additional HTTP headers to be sent with every request. Defaults to none.
-        offline : Union[bool, None]
+        offline : Optional[bool]
             Whether to emulate network being offline. Defaults to `false`. Learn more about
             [network emulation](../emulation.md#offline).
-        http_credentials : Union[{username: str, password: str, origin: Union[str, None]}, None]
+        http_credentials : Union[{username: str, password: str, origin: Optional[str]}, None]
             Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication). If no
             origin is specified, the username and password are sent to any servers upon unauthorized responses.
-        device_scale_factor : Union[float, None]
+        device_scale_factor : Optional[float]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`. Learn more about
             [emulating devices with device scale factor](../emulation.md#devices).
-        is_mobile : Union[bool, None]
+        is_mobile : Optional[bool]
             Whether the `meta viewport` tag is taken into account and touch events are enabled. isMobile is a part of device,
             so you don't actually need to set it manually. Defaults to `false` and is not supported in Firefox. Learn more
             about [mobile emulation](../emulation.md#ismobile).
-        has_touch : Union[bool, None]
+        has_touch : Optional[bool]
             Specifies if viewport supports touch events. Defaults to false. Learn more about
             [mobile emulation](../emulation.md#devices).
         color_scheme : Union["dark", "light", "no-preference", "null", None]
@@ -13175,9 +13175,9 @@ class Browser(AsyncContextManager):
             Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See
             `page.emulate_media()` for more details. Passing `'null'` resets emulation to system defaults. Defaults to
             `'none'`.
-        accept_downloads : Union[bool, None]
+        accept_downloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `true` where all the downloads are accepted.
-        proxy : Union[{server: str, bypass: Union[str, None], username: Union[str, None], password: Union[str, None]}, None]
+        proxy : Union[{server: str, bypass: Optional[str], username: Optional[str], password: Optional[str]}, None]
             Network proxy settings to use with this context. Defaults to none.
 
             **NOTE** For Chromium on Windows the browser needs to be launched with the global proxy for this option to work. If
@@ -13187,7 +13187,7 @@ class Browser(AsyncContextManager):
             Enables [HAR](http://www.softwareishard.com/blog/har-12-spec) recording for all pages into the specified HAR file
             on the filesystem. If not specified, the HAR is not recorded. Make sure to call `browser_context.close()`
             for the HAR to be saved.
-        record_har_omit_content : Union[bool, None]
+        record_har_omit_content : Optional[bool]
             Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
         record_video_dir : Union[pathlib.Path, str, None]
             Enables video recording for all pages into the specified directory. If not specified videos are not recorded. Make
@@ -13201,7 +13201,7 @@ class Browser(AsyncContextManager):
 
             Populates context with given storage state. This option can be used to initialize context with logged-in
             information obtained via `browser_context.storage_state()`.
-        base_url : Union[str, None]
+        base_url : Optional[str]
             When using `page.goto()`, `page.route()`, `page.wait_for_url()`,
             `page.expect_request()`, or `page.expect_response()` it takes the base URL in consideration by
             using the [`URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor for building the
@@ -13211,7 +13211,7 @@ class Browser(AsyncContextManager):
               `http://localhost:3000/foo/bar.html`
             - baseURL: `http://localhost:3000/foo` (without trailing slash) and navigating to `./bar.html` results in
               `http://localhost:3000/bar.html`
-        strict_selectors : Union[bool, None]
+        strict_selectors : Optional[bool]
             If set to true, enables strict selectors mode for this context. In the strict selectors mode all operations on
             selectors that imply single target DOM element will throw when more than one element matches the selector. This
             option does not affect any Locator APIs (Locators are always strict). Defaults to `false`. See `Locator` to learn
@@ -13336,45 +13336,45 @@ class Browser(AsyncContextManager):
         screen : Union[{width: int, height: int}, None]
             Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the
             `viewport` is set.
-        no_viewport : Union[bool, None]
+        no_viewport : Optional[bool]
             Does not enforce fixed viewport, allows resizing window in the headed mode.
-        ignore_https_errors : Union[bool, None]
+        ignore_https_errors : Optional[bool]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
-        java_script_enabled : Union[bool, None]
+        java_script_enabled : Optional[bool]
             Whether or not to enable JavaScript in the context. Defaults to `true`. Learn more about
             [disabling JavaScript](../emulation.md#javascript-enabled).
-        bypass_csp : Union[bool, None]
+        bypass_csp : Optional[bool]
             Toggles bypassing page's Content-Security-Policy. Defaults to `false`.
-        user_agent : Union[str, None]
+        user_agent : Optional[str]
             Specific user agent to use in this context.
-        locale : Union[str, None]
+        locale : Optional[str]
             Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value,
             `Accept-Language` request header value as well as number and date formatting rules. Defaults to the system default
             locale. Learn more about emulation in our [emulation guide](../emulation.md#locale--timezone).
-        timezone_id : Union[str, None]
+        timezone_id : Optional[str]
             Changes the timezone of the context. See
             [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
             for a list of supported timezone IDs. Defaults to the system timezone.
-        geolocation : Union[{latitude: float, longitude: float, accuracy: Union[float, None]}, None]
+        geolocation : Union[{latitude: float, longitude: float, accuracy: Optional[float]}, None]
         permissions : Union[Sequence[str], None]
             A list of permissions to grant to all pages in this context. See `browser_context.grant_permissions()` for
             more details. Defaults to none.
         extra_http_headers : Union[Dict[str, str], None]
             An object containing additional HTTP headers to be sent with every request. Defaults to none.
-        offline : Union[bool, None]
+        offline : Optional[bool]
             Whether to emulate network being offline. Defaults to `false`. Learn more about
             [network emulation](../emulation.md#offline).
-        http_credentials : Union[{username: str, password: str, origin: Union[str, None]}, None]
+        http_credentials : Union[{username: str, password: str, origin: Optional[str]}, None]
             Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication). If no
             origin is specified, the username and password are sent to any servers upon unauthorized responses.
-        device_scale_factor : Union[float, None]
+        device_scale_factor : Optional[float]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`. Learn more about
             [emulating devices with device scale factor](../emulation.md#devices).
-        is_mobile : Union[bool, None]
+        is_mobile : Optional[bool]
             Whether the `meta viewport` tag is taken into account and touch events are enabled. isMobile is a part of device,
             so you don't actually need to set it manually. Defaults to `false` and is not supported in Firefox. Learn more
             about [mobile emulation](../emulation.md#ismobile).
-        has_touch : Union[bool, None]
+        has_touch : Optional[bool]
             Specifies if viewport supports touch events. Defaults to false. Learn more about
             [mobile emulation](../emulation.md#devices).
         color_scheme : Union["dark", "light", "no-preference", "null", None]
@@ -13389,9 +13389,9 @@ class Browser(AsyncContextManager):
             Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See
             `page.emulate_media()` for more details. Passing `'null'` resets emulation to system defaults. Defaults to
             `'no-preference'`.
-        accept_downloads : Union[bool, None]
+        accept_downloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `true` where all the downloads are accepted.
-        proxy : Union[{server: str, bypass: Union[str, None], username: Union[str, None], password: Union[str, None]}, None]
+        proxy : Union[{server: str, bypass: Optional[str], username: Optional[str], password: Optional[str]}, None]
             Network proxy settings to use with this context. Defaults to none.
 
             **NOTE** For Chromium on Windows the browser needs to be launched with the global proxy for this option to work. If
@@ -13401,7 +13401,7 @@ class Browser(AsyncContextManager):
             Enables [HAR](http://www.softwareishard.com/blog/har-12-spec) recording for all pages into the specified HAR file
             on the filesystem. If not specified, the HAR is not recorded. Make sure to call `browser_context.close()`
             for the HAR to be saved.
-        record_har_omit_content : Union[bool, None]
+        record_har_omit_content : Optional[bool]
             Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
         record_video_dir : Union[pathlib.Path, str, None]
             Enables video recording for all pages into the specified directory. If not specified videos are not recorded. Make
@@ -13415,7 +13415,7 @@ class Browser(AsyncContextManager):
 
             Populates context with given storage state. This option can be used to initialize context with logged-in
             information obtained via `browser_context.storage_state()`.
-        base_url : Union[str, None]
+        base_url : Optional[str]
             When using `page.goto()`, `page.route()`, `page.wait_for_url()`,
             `page.expect_request()`, or `page.expect_response()` it takes the base URL in consideration by
             using the [`URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor for building the
@@ -13425,7 +13425,7 @@ class Browser(AsyncContextManager):
               `http://localhost:3000/foo/bar.html`
             - baseURL: `http://localhost:3000/foo` (without trailing slash) and navigating to `./bar.html` results in
               `http://localhost:3000/bar.html`
-        strict_selectors : Union[bool, None]
+        strict_selectors : Optional[bool]
             If set to true, enables strict selectors mode for this context. In the strict selectors mode all operations on
             selectors that imply single target DOM element will throw when more than one element matches the selector. This
             option does not affect any Locator APIs (Locators are always strict). Defaults to `false`. See `Locator` to learn
@@ -13505,7 +13505,7 @@ class Browser(AsyncContextManager):
 
         Parameters
         ----------
-        reason : Union[str, None]
+        reason : Optional[str]
             The reason to be reported to the operations interrupted by the browser closure.
         """
 
@@ -13553,11 +13553,11 @@ class Browser(AsyncContextManager):
 
         Parameters
         ----------
-        page : Union[Page, None]
+        page : Optional[Page]
             Optional, if specified, tracing includes screenshots of the given page.
         path : Union[pathlib.Path, str, None]
             A path to write the trace file to.
-        screenshots : Union[bool, None]
+        screenshots : Optional[bool]
             captures screenshots in the trace.
         categories : Union[Sequence[str], None]
             specify custom categories to use instead of default.
@@ -13678,7 +13678,7 @@ class BrowserType(AsyncBase):
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is
             resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium,
             Firefox or WebKit, use at your own risk.
-        channel : Union[str, None]
+        channel : Optional[str]
             Browser distribution channel.  Supported values are "chrome", "chrome-beta", "chrome-dev", "chrome-canary",
             "msedge", "msedge-beta", "msedge-dev", "msedge-canary". Read more about using
             [Google Chrome and Microsoft Edge](../browsers.md#google-chrome--microsoft-edge).
@@ -13690,37 +13690,37 @@ class BrowserType(AsyncBase):
         ignore_default_args : Union[Sequence[str], bool, None]
             If `true`, Playwright does not pass its own configurations args and only uses the ones from `args`. If an array is
             given, then filters out the given default arguments. Dangerous option; use with care. Defaults to `false`.
-        handle_sigint : Union[bool, None]
+        handle_sigint : Optional[bool]
             Close the browser process on Ctrl-C. Defaults to `true`.
-        handle_sigterm : Union[bool, None]
+        handle_sigterm : Optional[bool]
             Close the browser process on SIGTERM. Defaults to `true`.
-        handle_sighup : Union[bool, None]
+        handle_sighup : Optional[bool]
             Close the browser process on SIGHUP. Defaults to `true`.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds to wait for the browser instance to start. Defaults to `30000` (30 seconds). Pass `0`
             to disable timeout.
         env : Union[Dict[str, Union[bool, float, str]], None]
             Specify environment variables that will be visible to the browser. Defaults to `process.env`.
-        headless : Union[bool, None]
+        headless : Optional[bool]
             Whether to run browser in headless mode. More details for
             [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and
             [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode). Defaults to `true` unless the
             `devtools` option is `true`.
-        devtools : Union[bool, None]
+        devtools : Optional[bool]
             **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the
             `headless` option will be set `false`.
-        proxy : Union[{server: str, bypass: Union[str, None], username: Union[str, None], password: Union[str, None]}, None]
+        proxy : Union[{server: str, bypass: Optional[str], username: Optional[str], password: Optional[str]}, None]
             Network proxy settings.
         downloads_path : Union[pathlib.Path, str, None]
             If specified, accepted downloads are downloaded into this directory. Otherwise, temporary directory is created and
             is deleted when browser is closed. In either case, the downloads are deleted when the browser context they were
             created in is closed.
-        slow_mo : Union[float, None]
+        slow_mo : Optional[float]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going
             on.
         traces_dir : Union[pathlib.Path, str, None]
             If specified, traces are saved into this directory.
-        chromium_sandbox : Union[bool, None]
+        chromium_sandbox : Optional[bool]
             Enable Chromium sandboxing. Defaults to `false`.
         firefox_user_prefs : Union[Dict[str, Union[bool, float, str]], None]
             Firefox user preferences. Learn more about the Firefox user preferences at
@@ -13831,7 +13831,7 @@ class BrowserType(AsyncBase):
             [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options#User_Profile). Note that Chromium's
             user data directory is the **parent** directory of the "Profile Path" seen at `chrome://version`. Pass an empty
             string to use a temporary directory instead.
-        channel : Union[str, None]
+        channel : Optional[str]
             Browser distribution channel.  Supported values are "chrome", "chrome-beta", "chrome-dev", "chrome-canary",
             "msedge", "msedge-beta", "msedge-dev", "msedge-canary". Read more about using
             [Google Chrome and Microsoft Edge](../browsers.md#google-chrome--microsoft-edge).
@@ -13847,32 +13847,32 @@ class BrowserType(AsyncBase):
         ignore_default_args : Union[Sequence[str], bool, None]
             If `true`, Playwright does not pass its own configurations args and only uses the ones from `args`. If an array is
             given, then filters out the given default arguments. Dangerous option; use with care. Defaults to `false`.
-        handle_sigint : Union[bool, None]
+        handle_sigint : Optional[bool]
             Close the browser process on Ctrl-C. Defaults to `true`.
-        handle_sigterm : Union[bool, None]
+        handle_sigterm : Optional[bool]
             Close the browser process on SIGTERM. Defaults to `true`.
-        handle_sighup : Union[bool, None]
+        handle_sighup : Optional[bool]
             Close the browser process on SIGHUP. Defaults to `true`.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds to wait for the browser instance to start. Defaults to `30000` (30 seconds). Pass `0`
             to disable timeout.
         env : Union[Dict[str, Union[bool, float, str]], None]
             Specify environment variables that will be visible to the browser. Defaults to `process.env`.
-        headless : Union[bool, None]
+        headless : Optional[bool]
             Whether to run browser in headless mode. More details for
             [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and
             [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode). Defaults to `true` unless the
             `devtools` option is `true`.
-        devtools : Union[bool, None]
+        devtools : Optional[bool]
             **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the
             `headless` option will be set `false`.
-        proxy : Union[{server: str, bypass: Union[str, None], username: Union[str, None], password: Union[str, None]}, None]
+        proxy : Union[{server: str, bypass: Optional[str], username: Optional[str], password: Optional[str]}, None]
             Network proxy settings.
         downloads_path : Union[pathlib.Path, str, None]
             If specified, accepted downloads are downloaded into this directory. Otherwise, temporary directory is created and
             is deleted when browser is closed. In either case, the downloads are deleted when the browser context they were
             created in is closed.
-        slow_mo : Union[float, None]
+        slow_mo : Optional[float]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going
             on.
         viewport : Union[{width: int, height: int}, None]
@@ -13881,45 +13881,45 @@ class BrowserType(AsyncBase):
         screen : Union[{width: int, height: int}, None]
             Emulates consistent window screen size available inside web page via `window.screen`. Is only used when the
             `viewport` is set.
-        no_viewport : Union[bool, None]
+        no_viewport : Optional[bool]
             Does not enforce fixed viewport, allows resizing window in the headed mode.
-        ignore_https_errors : Union[bool, None]
+        ignore_https_errors : Optional[bool]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
-        java_script_enabled : Union[bool, None]
+        java_script_enabled : Optional[bool]
             Whether or not to enable JavaScript in the context. Defaults to `true`. Learn more about
             [disabling JavaScript](../emulation.md#javascript-enabled).
-        bypass_csp : Union[bool, None]
+        bypass_csp : Optional[bool]
             Toggles bypassing page's Content-Security-Policy. Defaults to `false`.
-        user_agent : Union[str, None]
+        user_agent : Optional[str]
             Specific user agent to use in this context.
-        locale : Union[str, None]
+        locale : Optional[str]
             Specify user locale, for example `en-GB`, `de-DE`, etc. Locale will affect `navigator.language` value,
             `Accept-Language` request header value as well as number and date formatting rules. Defaults to the system default
             locale. Learn more about emulation in our [emulation guide](../emulation.md#locale--timezone).
-        timezone_id : Union[str, None]
+        timezone_id : Optional[str]
             Changes the timezone of the context. See
             [ICU's metaZones.txt](https://cs.chromium.org/chromium/src/third_party/icu/source/data/misc/metaZones.txt?rcl=faee8bc70570192d82d2978a71e2a615788597d1)
             for a list of supported timezone IDs. Defaults to the system timezone.
-        geolocation : Union[{latitude: float, longitude: float, accuracy: Union[float, None]}, None]
+        geolocation : Union[{latitude: float, longitude: float, accuracy: Optional[float]}, None]
         permissions : Union[Sequence[str], None]
             A list of permissions to grant to all pages in this context. See `browser_context.grant_permissions()` for
             more details. Defaults to none.
         extra_http_headers : Union[Dict[str, str], None]
             An object containing additional HTTP headers to be sent with every request. Defaults to none.
-        offline : Union[bool, None]
+        offline : Optional[bool]
             Whether to emulate network being offline. Defaults to `false`. Learn more about
             [network emulation](../emulation.md#offline).
-        http_credentials : Union[{username: str, password: str, origin: Union[str, None]}, None]
+        http_credentials : Union[{username: str, password: str, origin: Optional[str]}, None]
             Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication). If no
             origin is specified, the username and password are sent to any servers upon unauthorized responses.
-        device_scale_factor : Union[float, None]
+        device_scale_factor : Optional[float]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`. Learn more about
             [emulating devices with device scale factor](../emulation.md#devices).
-        is_mobile : Union[bool, None]
+        is_mobile : Optional[bool]
             Whether the `meta viewport` tag is taken into account and touch events are enabled. isMobile is a part of device,
             so you don't actually need to set it manually. Defaults to `false` and is not supported in Firefox. Learn more
             about [mobile emulation](../emulation.md#ismobile).
-        has_touch : Union[bool, None]
+        has_touch : Optional[bool]
             Specifies if viewport supports touch events. Defaults to false. Learn more about
             [mobile emulation](../emulation.md#devices).
         color_scheme : Union["dark", "light", "no-preference", "null", None]
@@ -13934,11 +13934,11 @@ class BrowserType(AsyncBase):
             Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See
             `page.emulate_media()` for more details. Passing `'null'` resets emulation to system defaults. Defaults to
             `'none'`.
-        accept_downloads : Union[bool, None]
+        accept_downloads : Optional[bool]
             Whether to automatically download all the attachments. Defaults to `true` where all the downloads are accepted.
         traces_dir : Union[pathlib.Path, str, None]
             If specified, traces are saved into this directory.
-        chromium_sandbox : Union[bool, None]
+        chromium_sandbox : Optional[bool]
             Enable Chromium sandboxing. Defaults to `false`.
         firefox_user_prefs : Union[Dict[str, Union[bool, float, str]], None]
             Firefox user preferences. Learn more about the Firefox user preferences at
@@ -13947,7 +13947,7 @@ class BrowserType(AsyncBase):
             Enables [HAR](http://www.softwareishard.com/blog/har-12-spec) recording for all pages into the specified HAR file
             on the filesystem. If not specified, the HAR is not recorded. Make sure to call `browser_context.close()`
             for the HAR to be saved.
-        record_har_omit_content : Union[bool, None]
+        record_har_omit_content : Optional[bool]
             Optional setting to control whether to omit request content from the HAR. Defaults to `false`.
         record_video_dir : Union[pathlib.Path, str, None]
             Enables video recording for all pages into the specified directory. If not specified videos are not recorded. Make
@@ -13956,7 +13956,7 @@ class BrowserType(AsyncBase):
             Dimensions of the recorded videos. If not specified the size will be equal to `viewport` scaled down to fit into
             800x800. If `viewport` is not configured explicitly the video size defaults to 800x450. Actual picture of each page
             will be scaled down if necessary to fit the specified size.
-        base_url : Union[str, None]
+        base_url : Optional[str]
             When using `page.goto()`, `page.route()`, `page.wait_for_url()`,
             `page.expect_request()`, or `page.expect_response()` it takes the base URL in consideration by
             using the [`URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor for building the
@@ -13966,7 +13966,7 @@ class BrowserType(AsyncBase):
               `http://localhost:3000/foo/bar.html`
             - baseURL: `http://localhost:3000/foo` (without trailing slash) and navigating to `./bar.html` results in
               `http://localhost:3000/bar.html`
-        strict_selectors : Union[bool, None]
+        strict_selectors : Optional[bool]
             If set to true, enables strict selectors mode for this context. In the strict selectors mode all operations on
             selectors that imply single target DOM element will throw when more than one element matches the selector. This
             option does not affect any Locator APIs (Locators are always strict). Defaults to `false`. See `Locator` to learn
@@ -14073,10 +14073,10 @@ class BrowserType(AsyncBase):
         endpoint_url : str
             A CDP websocket endpoint or http url to connect to. For example `http://localhost:9222/` or
             `ws://127.0.0.1:9222/devtools/browser/387adf4c-243f-4051-a181-46798f4a46f4`.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds to wait for the connection to be established. Defaults to `30000` (30 seconds). Pass
             `0` to disable timeout.
-        slow_mo : Union[float, None]
+        slow_mo : Optional[float]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going
             on. Defaults to 0.
         headers : Union[Dict[str, str], None]
@@ -14115,14 +14115,14 @@ class BrowserType(AsyncBase):
         ----------
         ws_endpoint : str
             A browser websocket endpoint to connect to.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds to wait for the connection to be established. Defaults to `0` (no timeout).
-        slow_mo : Union[float, None]
+        slow_mo : Optional[float]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going
             on. Defaults to 0.
         headers : Union[Dict[str, str], None]
             Additional HTTP headers to be sent with web socket connect request. Optional.
-        expose_network : Union[str, None]
+        expose_network : Optional[str]
             This option exposes network available on the connecting client to the browser being connected to. Consists of a
             list of rules separated by comma.
 
@@ -14305,19 +14305,19 @@ class Tracing(AsyncBase):
 
         Parameters
         ----------
-        name : Union[str, None]
+        name : Optional[str]
             If specified, intermediate trace files are going to be saved into the files with the given name prefix inside the
             `tracesDir` folder specified in `browser_type.launch()`. To specify the final trace zip file name, you need
             to pass `path` option to `tracing.stop()` instead.
-        title : Union[str, None]
+        title : Optional[str]
             Trace name to be shown in the Trace Viewer.
-        snapshots : Union[bool, None]
+        snapshots : Optional[bool]
             If this option is true tracing will
             - capture DOM snapshot on every action
             - record network activity
-        screenshots : Union[bool, None]
+        screenshots : Optional[bool]
             Whether to capture screenshots during tracing. Screenshots are used to build a timeline preview.
-        sources : Union[bool, None]
+        sources : Optional[bool]
             Whether to include source files for trace actions.
         """
 
@@ -14360,9 +14360,9 @@ class Tracing(AsyncBase):
 
         Parameters
         ----------
-        title : Union[str, None]
+        title : Optional[str]
             Trace name to be shown in the Trace Viewer.
-        name : Union[str, None]
+        name : Optional[str]
             If specified, intermediate trace files are going to be saved into the files with the given name prefix inside the
             `tracesDir` folder specified in `browser_type.launch()`. To specify the final trace zip file name, you need
             to pass `path` option to `tracing.stop_chunk()` instead.
@@ -14479,7 +14479,7 @@ class Locator(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -14532,16 +14532,16 @@ class Locator(AsyncBase):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -14612,22 +14612,22 @@ class Locator(AsyncBase):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        delay : Union[float, None]
+        delay : Optional[float]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         button : Union["left", "middle", "right", None]
             Defaults to `left`.
-        click_count : Union[int, None]
+        click_count : Optional[int]
             defaults to 1. See [UIEvent.detail].
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -14688,20 +14688,20 @@ class Locator(AsyncBase):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        delay : Union[float, None]
+        delay : Optional[float]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         button : Union["left", "middle", "right", None]
             Defaults to `left`.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -14769,9 +14769,9 @@ class Locator(AsyncBase):
         ----------
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
-        event_init : Union[Dict, None]
+        event_init : Optional[Dict]
             Optional event-specific initialization properties.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
@@ -14814,9 +14814,9 @@ class Locator(AsyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
             function is automatically invoked.
-        arg : Union[Any, None]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -14859,7 +14859,7 @@ class Locator(AsyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
             function is automatically invoked.
-        arg : Union[Any, None]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
 
         Returns
@@ -14904,9 +14904,9 @@ class Locator(AsyncBase):
         expression : str
             JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
             function is automatically invoked.
-        arg : Union[Any, None]
+        arg : Optional[Any]
             Optional argument to pass to `expression`.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -14955,14 +14955,14 @@ class Locator(AsyncBase):
         ----------
         value : str
             Value to set for the `<input>`, `<textarea>` or `[contenteditable]` element.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         """
 
@@ -15001,14 +15001,14 @@ class Locator(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         """
 
@@ -15045,7 +15045,7 @@ class Locator(AsyncBase):
         has_not_text : Union[Pattern[str], str, None]
             Matches elements that do not contain specified text somewhere inside, possibly in a child or a descendant element.
             When passed a [string], matching is case-insensitive and searches for a substring.
-        has : Union[Locator, None]
+        has : Optional[Locator]
             Narrows down the results of the method to those which contain elements matching this relative locator. For example,
             `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
 
@@ -15055,7 +15055,7 @@ class Locator(AsyncBase):
             div` will fail, because the inner locator must be relative and should not use any elements outside the `content`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        has_not : Union[Locator, None]
+        has_not : Optional[Locator]
             Matches elements that do not contain an element that matches an inner locator. Inner locator is queried against the
             outer one. For example, `article` that does not have `div` matches `<article><span>Playwright</span></article>`.
 
@@ -15102,7 +15102,7 @@ class Locator(AsyncBase):
         ----------
         text : Union[Pattern[str], str]
             Text to locate the element for.
-        exact : Union[bool, None]
+        exact : Optional[bool]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
             regular expression. Note that exact match still trims whitespace.
 
@@ -15143,7 +15143,7 @@ class Locator(AsyncBase):
         ----------
         text : Union[Pattern[str], str]
             Text to locate the element for.
-        exact : Union[bool, None]
+        exact : Optional[bool]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
             regular expression. Note that exact match still trims whitespace.
 
@@ -15182,7 +15182,7 @@ class Locator(AsyncBase):
         ----------
         text : Union[Pattern[str], str]
             Text to locate the element for.
-        exact : Union[bool, None]
+        exact : Optional[bool]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
             regular expression. Note that exact match still trims whitespace.
 
@@ -15335,25 +15335,25 @@ class Locator(AsyncBase):
         ----------
         role : Union["alert", "alertdialog", "application", "article", "banner", "blockquote", "button", "caption", "cell", "checkbox", "code", "columnheader", "combobox", "complementary", "contentinfo", "definition", "deletion", "dialog", "directory", "document", "emphasis", "feed", "figure", "form", "generic", "grid", "gridcell", "group", "heading", "img", "insertion", "link", "list", "listbox", "listitem", "log", "main", "marquee", "math", "menu", "menubar", "menuitem", "menuitemcheckbox", "menuitemradio", "meter", "navigation", "none", "note", "option", "paragraph", "presentation", "progressbar", "radio", "radiogroup", "region", "row", "rowgroup", "rowheader", "scrollbar", "search", "searchbox", "separator", "slider", "spinbutton", "status", "strong", "subscript", "superscript", "switch", "tab", "table", "tablist", "tabpanel", "term", "textbox", "time", "timer", "toolbar", "tooltip", "tree", "treegrid", "treeitem"]
             Required aria role.
-        checked : Union[bool, None]
+        checked : Optional[bool]
             An attribute that is usually set by `aria-checked` or native `<input type=checkbox>` controls.
 
             Learn more about [`aria-checked`](https://www.w3.org/TR/wai-aria-1.2/#aria-checked).
-        disabled : Union[bool, None]
+        disabled : Optional[bool]
             An attribute that is usually set by `aria-disabled` or `disabled`.
 
             **NOTE** Unlike most other attributes, `disabled` is inherited through the DOM hierarchy. Learn more about
             [`aria-disabled`](https://www.w3.org/TR/wai-aria-1.2/#aria-disabled).
-        expanded : Union[bool, None]
+        expanded : Optional[bool]
             An attribute that is usually set by `aria-expanded`.
 
             Learn more about [`aria-expanded`](https://www.w3.org/TR/wai-aria-1.2/#aria-expanded).
-        include_hidden : Union[bool, None]
+        include_hidden : Optional[bool]
             Option that controls whether hidden elements are matched. By default, only non-hidden elements, as
             [defined by ARIA](https://www.w3.org/TR/wai-aria-1.2/#tree_exclusion), are matched by role selector.
 
             Learn more about [`aria-hidden`](https://www.w3.org/TR/wai-aria-1.2/#aria-hidden).
-        level : Union[int, None]
+        level : Optional[int]
             A number attribute that is usually present for roles `heading`, `listitem`, `row`, `treeitem`, with default values
             for `<h1>-<h6>` elements.
 
@@ -15363,15 +15363,15 @@ class Locator(AsyncBase):
             case-insensitive and searches for a substring, use `exact` to control this behavior.
 
             Learn more about [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
-        pressed : Union[bool, None]
+        pressed : Optional[bool]
             An attribute that is usually set by `aria-pressed`.
 
             Learn more about [`aria-pressed`](https://www.w3.org/TR/wai-aria-1.2/#aria-pressed).
-        selected : Union[bool, None]
+        selected : Optional[bool]
             An attribute that is usually set by `aria-selected`.
 
             Learn more about [`aria-selected`](https://www.w3.org/TR/wai-aria-1.2/#aria-selected).
-        exact : Union[bool, None]
+        exact : Optional[bool]
             Whether `name` is matched exactly: case-sensitive and whole-string. Defaults to false. Ignored when `name` is a
             regular expression. Note that exact match still trims whitespace.
 
@@ -15486,7 +15486,7 @@ class Locator(AsyncBase):
         ----------
         text : Union[Pattern[str], str]
             Text to locate the element for.
-        exact : Union[bool, None]
+        exact : Optional[bool]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
             regular expression. Note that exact match still trims whitespace.
 
@@ -15525,7 +15525,7 @@ class Locator(AsyncBase):
         ----------
         text : Union[Pattern[str], str]
             Text to locate the element for.
-        exact : Union[bool, None]
+        exact : Optional[bool]
             Whether to find an exact match: case-sensitive and whole-string. Default to false. Ignored when locating by a
             regular expression. Note that exact match still trims whitespace.
 
@@ -15571,7 +15571,7 @@ class Locator(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -15649,7 +15649,7 @@ class Locator(AsyncBase):
         has_not_text : Union[Pattern[str], str, None]
             Matches elements that do not contain specified text somewhere inside, possibly in a child or a descendant element.
             When passed a [string], matching is case-insensitive and searches for a substring.
-        has : Union[Locator, None]
+        has : Optional[Locator]
             Narrows down the results of the method to those which contain elements matching this relative locator. For example,
             `article` that has `text=Playwright` matches `<article><div>Playwright</div></article>`.
 
@@ -15659,7 +15659,7 @@ class Locator(AsyncBase):
             div` will fail, because the inner locator must be relative and should not use any elements outside the `content`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
-        has_not : Union[Locator, None]
+        has_not : Optional[Locator]
             Matches elements that do not contain an element that matches an inner locator. Inner locator is queried against the
             outer one. For example, `article` that does not have `div` matches `<article><span>Playwright</span></article>`.
 
@@ -15742,7 +15742,7 @@ class Locator(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
@@ -15756,7 +15756,7 @@ class Locator(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
@@ -15848,16 +15848,16 @@ class Locator(AsyncBase):
         ----------
         target : Locator
             Locator of the element to drag to.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         source_position : Union[{x: float, y: float}, None]
@@ -15894,13 +15894,13 @@ class Locator(AsyncBase):
         ----------
         name : str
             Attribute name to get the value for.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
-        Union[str, None]
+        Optional[str]
         """
 
         return mapping.from_maybe_impl(
@@ -15950,16 +15950,16 @@ class Locator(AsyncBase):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -15982,7 +15982,7 @@ class Locator(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -16003,7 +16003,7 @@ class Locator(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -16037,7 +16037,7 @@ class Locator(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -16066,7 +16066,7 @@ class Locator(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -16093,7 +16093,7 @@ class Locator(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -16122,7 +16122,7 @@ class Locator(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -16151,7 +16151,7 @@ class Locator(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
@@ -16178,7 +16178,7 @@ class Locator(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Deprecated: This option is ignored. `locator.is_hidden()` does not wait for the element to become hidden and returns immediately.
 
         Returns
@@ -16204,7 +16204,7 @@ class Locator(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Deprecated: This option is ignored. `locator.is_visible()` does not wait for the element to become visible and returns immediately.
 
         Returns
@@ -16259,12 +16259,12 @@ class Locator(AsyncBase):
         ----------
         key : str
             Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
-        delay : Union[float, None]
+        delay : Optional[float]
             Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
@@ -16320,7 +16320,7 @@ class Locator(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         type : Union["jpeg", "png", None]
@@ -16329,9 +16329,9 @@ class Locator(AsyncBase):
             The file path to save the image to. The screenshot type will be inferred from file extension. If `path` is a
             relative path, then it is resolved relative to the current working directory. If no path is provided, the image
             won't be saved to the disk.
-        quality : Union[int, None]
+        quality : Optional[int]
             The quality of the image, between 0-100. Not applicable to `png` images.
-        omit_background : Union[bool, None]
+        omit_background : Optional[bool]
             Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images.
             Defaults to `false`.
         animations : Union["allow", "disabled", None]
@@ -16353,10 +16353,10 @@ class Locator(AsyncBase):
         mask : Union[Sequence[Locator], None]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
             box `#FF00FF` (customized by `maskColor`) that completely covers its bounding box.
-        mask_color : Union[str, None]
+        mask_color : Optional[str]
             Specify the color of the overlay box for masked elements, in
             [CSS color format](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value). Default color is pink `#FF00FF`.
-        style : Union[str, None]
+        style : Optional[str]
             Text of the stylesheet to apply while making the screenshot. This is where you can hide dynamic elements, make
             elements invisible or change their properties to help you creating repeatable screenshots. This stylesheet pierces
             the Shadow DOM and applies to the inner frames.
@@ -16393,7 +16393,7 @@ class Locator(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
@@ -16464,14 +16464,14 @@ class Locator(AsyncBase):
             otherwise only the first option matching one of the passed options is selected. Optional.
         element : Union[ElementHandle, Sequence[ElementHandle], None]
             Option elements to select. Optional.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 
         Returns
@@ -16508,9 +16508,9 @@ class Locator(AsyncBase):
 
         Parameters
         ----------
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
@@ -16569,10 +16569,10 @@ class Locator(AsyncBase):
         Parameters
         ----------
         files : Union[Sequence[Union[pathlib.Path, str]], Sequence[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}]
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
@@ -16623,16 +16623,16 @@ class Locator(AsyncBase):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -16660,13 +16660,13 @@ class Locator(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
 
         Returns
         -------
-        Union[str, None]
+        Optional[str]
         """
 
         return mapping.from_maybe_impl(
@@ -16694,12 +16694,12 @@ class Locator(AsyncBase):
         ----------
         text : str
             A text to type into a focused element.
-        delay : Union[float, None]
+        delay : Optional[float]
             Time to wait between key presses in milliseconds. Defaults to 0.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
@@ -16748,12 +16748,12 @@ class Locator(AsyncBase):
         ----------
         text : str
             String of characters to sequentially press into a focused element.
-        delay : Union[float, None]
+        delay : Optional[float]
             Time to wait between key presses in milliseconds. Defaults to 0.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
@@ -16805,16 +16805,16 @@ class Locator(AsyncBase):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -16895,7 +16895,7 @@ class Locator(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         state : Union["attached", "detached", "hidden", "visible", None]
@@ -16954,16 +16954,16 @@ class Locator(AsyncBase):
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        force : Union[bool, None]
+        force : Optional[bool]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
-        no_wait_after : Union[bool, None]
+        no_wait_after : Optional[bool]
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
-        trial : Union[bool, None]
+        trial : Optional[bool]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
         """
@@ -17174,14 +17174,14 @@ class APIRequestContext(AsyncBase):
             explicitly provided. File values can be passed either as
             [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream) or as file-like object containing file
             name, mime-type and its content.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
-        fail_on_status_code : Union[bool, None]
+        fail_on_status_code : Optional[bool]
             Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status
             codes.
-        ignore_https_errors : Union[bool, None]
+        ignore_https_errors : Optional[bool]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
-        max_redirects : Union[int, None]
+        max_redirects : Optional[int]
             Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
             exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 
@@ -17252,14 +17252,14 @@ class APIRequestContext(AsyncBase):
             explicitly provided. File values can be passed either as
             [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream) or as file-like object containing file
             name, mime-type and its content.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
-        fail_on_status_code : Union[bool, None]
+        fail_on_status_code : Optional[bool]
             Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status
             codes.
-        ignore_https_errors : Union[bool, None]
+        ignore_https_errors : Optional[bool]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
-        max_redirects : Union[int, None]
+        max_redirects : Optional[int]
             Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
             exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 
@@ -17342,14 +17342,14 @@ class APIRequestContext(AsyncBase):
             explicitly provided. File values can be passed either as
             [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream) or as file-like object containing file
             name, mime-type and its content.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
-        fail_on_status_code : Union[bool, None]
+        fail_on_status_code : Optional[bool]
             Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status
             codes.
-        ignore_https_errors : Union[bool, None]
+        ignore_https_errors : Optional[bool]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
-        max_redirects : Union[int, None]
+        max_redirects : Optional[int]
             Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
             exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 
@@ -17420,14 +17420,14 @@ class APIRequestContext(AsyncBase):
             explicitly provided. File values can be passed either as
             [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream) or as file-like object containing file
             name, mime-type and its content.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
-        fail_on_status_code : Union[bool, None]
+        fail_on_status_code : Optional[bool]
             Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status
             codes.
-        ignore_https_errors : Union[bool, None]
+        ignore_https_errors : Optional[bool]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
-        max_redirects : Union[int, None]
+        max_redirects : Optional[int]
             Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
             exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 
@@ -17498,14 +17498,14 @@ class APIRequestContext(AsyncBase):
             explicitly provided. File values can be passed either as
             [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream) or as file-like object containing file
             name, mime-type and its content.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
-        fail_on_status_code : Union[bool, None]
+        fail_on_status_code : Optional[bool]
             Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status
             codes.
-        ignore_https_errors : Union[bool, None]
+        ignore_https_errors : Optional[bool]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
-        max_redirects : Union[int, None]
+        max_redirects : Optional[int]
             Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
             exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 
@@ -17607,14 +17607,14 @@ class APIRequestContext(AsyncBase):
             explicitly provided. File values can be passed either as
             [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream) or as file-like object containing file
             name, mime-type and its content.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
-        fail_on_status_code : Union[bool, None]
+        fail_on_status_code : Optional[bool]
             Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status
             codes.
-        ignore_https_errors : Union[bool, None]
+        ignore_https_errors : Optional[bool]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
-        max_redirects : Union[int, None]
+        max_redirects : Optional[int]
             Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
             exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 
@@ -17682,7 +17682,7 @@ class APIRequestContext(AsyncBase):
             Target URL or Request to get all parameters from.
         params : Union[Dict[str, Union[bool, float, str]], None]
             Query parameters to be sent with the URL.
-        method : Union[str, None]
+        method : Optional[str]
             If set changes the fetch method (e.g. [PUT](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT) or
             [POST](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST)). If not specified, GET method is used.
         headers : Union[Dict[str, str], None]
@@ -17702,14 +17702,14 @@ class APIRequestContext(AsyncBase):
             explicitly provided. File values can be passed either as
             [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream) or as file-like object containing file
             name, mime-type and its content.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
-        fail_on_status_code : Union[bool, None]
+        fail_on_status_code : Optional[bool]
             Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status
             codes.
-        ignore_https_errors : Union[bool, None]
+        ignore_https_errors : Optional[bool]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
-        max_redirects : Union[int, None]
+        max_redirects : Optional[int]
             Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
             exceeded. Defaults to `20`. Pass `0` to not follow redirects.
 
@@ -17780,7 +17780,7 @@ class APIRequest(AsyncBase):
 
         Parameters
         ----------
-        base_url : Union[str, None]
+        base_url : Optional[str]
             Methods like `a_pi_request_context.get()` take the base URL into consideration by using the
             [`URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor for building the corresponding URL.
             Examples:
@@ -17791,16 +17791,16 @@ class APIRequest(AsyncBase):
               `http://localhost:3000/bar.html`
         extra_http_headers : Union[Dict[str, str], None]
             An object containing additional HTTP headers to be sent with every request. Defaults to none.
-        http_credentials : Union[{username: str, password: str, origin: Union[str, None]}, None]
+        http_credentials : Union[{username: str, password: str, origin: Optional[str]}, None]
             Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication). If no
             origin is specified, the username and password are sent to any servers upon unauthorized responses.
-        ignore_https_errors : Union[bool, None]
+        ignore_https_errors : Optional[bool]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
-        proxy : Union[{server: str, bypass: Union[str, None], username: Union[str, None], password: Union[str, None]}, None]
+        proxy : Union[{server: str, bypass: Optional[str], username: Optional[str], password: Optional[str]}, None]
             Network proxy settings.
-        user_agent : Union[str, None]
+        user_agent : Optional[str]
             Specific user agent to use in this context.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Maximum time in milliseconds to wait for the response. Defaults to `30000` (30 seconds). Pass `0` to disable
             timeout.
         storage_state : Union[pathlib.Path, str, {cookies: Sequence[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: Sequence[{origin: str, localStorage: Sequence[{name: str, value: str}]}]}, None]
@@ -17856,7 +17856,7 @@ class PageAssertions(AsyncBase):
         ----------
         title_or_reg_exp : Union[Pattern[str], str]
             Expected title or RegExp.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -17881,7 +17881,7 @@ class PageAssertions(AsyncBase):
         ----------
         title_or_reg_exp : Union[Pattern[str], str]
             Expected title or RegExp.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -17916,7 +17916,7 @@ class PageAssertions(AsyncBase):
         ----------
         url_or_reg_exp : Union[Pattern[str], str]
             Expected URL string or RegExp.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -17941,7 +17941,7 @@ class PageAssertions(AsyncBase):
         ----------
         url_or_reg_exp : Union[Pattern[str], str]
             Expected URL string or RegExp.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -18030,11 +18030,11 @@ class LocatorAssertions(AsyncBase):
         ----------
         expected : Union[Pattern[str], Sequence[Pattern[str]], Sequence[Union[Pattern[str], str]], Sequence[str], str]
             Expected substring or RegExp or a list of those.
-        use_inner_text : Union[bool, None]
+        use_inner_text : Optional[bool]
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
-        ignore_case : Union[bool, None]
+        ignore_case : Optional[bool]
             Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
             expression flag if specified.
         """
@@ -18071,11 +18071,11 @@ class LocatorAssertions(AsyncBase):
         ----------
         expected : Union[Pattern[str], Sequence[Pattern[str]], Sequence[Union[Pattern[str], str]], Sequence[str], str]
             Expected substring or RegExp or a list of those.
-        use_inner_text : Union[bool, None]
+        use_inner_text : Optional[bool]
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
-        ignore_case : Union[bool, None]
+        ignore_case : Optional[bool]
             Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
             expression flag if specified.
         """
@@ -18117,10 +18117,10 @@ class LocatorAssertions(AsyncBase):
             Attribute name.
         value : Union[Pattern[str], str]
             Expected attribute value.
-        ignore_case : Union[bool, None]
+        ignore_case : Optional[bool]
             Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
             expression flag if specified.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -18149,10 +18149,10 @@ class LocatorAssertions(AsyncBase):
             Attribute name.
         value : Union[Pattern[str], str]
             Expected attribute value.
-        ignore_case : Union[bool, None]
+        ignore_case : Optional[bool]
             Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
             expression flag if specified.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -18207,7 +18207,7 @@ class LocatorAssertions(AsyncBase):
         ----------
         expected : Union[Pattern[str], Sequence[Pattern[str]], Sequence[Union[Pattern[str], str]], Sequence[str], str]
             Expected class or RegExp or a list of those.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -18238,7 +18238,7 @@ class LocatorAssertions(AsyncBase):
         ----------
         expected : Union[Pattern[str], Sequence[Pattern[str]], Sequence[Union[Pattern[str], str]], Sequence[str], str]
             Expected class or RegExp or a list of those.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -18269,7 +18269,7 @@ class LocatorAssertions(AsyncBase):
         ----------
         count : int
             Expected count.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -18289,7 +18289,7 @@ class LocatorAssertions(AsyncBase):
         ----------
         count : int
             Expected count.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -18324,7 +18324,7 @@ class LocatorAssertions(AsyncBase):
             CSS property name.
         value : Union[Pattern[str], str]
             CSS property value.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -18350,7 +18350,7 @@ class LocatorAssertions(AsyncBase):
             CSS property name.
         value : Union[Pattern[str], str]
             CSS property value.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -18384,7 +18384,7 @@ class LocatorAssertions(AsyncBase):
         ----------
         id : Union[Pattern[str], str]
             Element id.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -18407,7 +18407,7 @@ class LocatorAssertions(AsyncBase):
         ----------
         id : Union[Pattern[str], str]
             Element id.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -18439,7 +18439,7 @@ class LocatorAssertions(AsyncBase):
             Property name.
         value : Any
             Property value.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -18463,7 +18463,7 @@ class LocatorAssertions(AsyncBase):
             Property name.
         value : Any
             Property value.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -18499,7 +18499,7 @@ class LocatorAssertions(AsyncBase):
         ----------
         value : Union[Pattern[str], str]
             Expected value.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -18522,7 +18522,7 @@ class LocatorAssertions(AsyncBase):
         ----------
         value : Union[Pattern[str], str]
             Expected value.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -18571,7 +18571,7 @@ class LocatorAssertions(AsyncBase):
         ----------
         values : Union[Sequence[Pattern[str]], Sequence[Union[Pattern[str], str]], Sequence[str]]
             Expected options currently selected.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -18600,7 +18600,7 @@ class LocatorAssertions(AsyncBase):
         ----------
         values : Union[Sequence[Pattern[str]], Sequence[Union[Pattern[str], str]], Sequence[str]]
             Expected options currently selected.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -18683,11 +18683,11 @@ class LocatorAssertions(AsyncBase):
         ----------
         expected : Union[Pattern[str], Sequence[Pattern[str]], Sequence[Union[Pattern[str], str]], Sequence[str], str]
             Expected string or RegExp or a list of those.
-        use_inner_text : Union[bool, None]
+        use_inner_text : Optional[bool]
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
-        ignore_case : Union[bool, None]
+        ignore_case : Optional[bool]
             Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
             expression flag if specified.
         """
@@ -18724,11 +18724,11 @@ class LocatorAssertions(AsyncBase):
         ----------
         expected : Union[Pattern[str], Sequence[Pattern[str]], Sequence[Union[Pattern[str], str]], Sequence[str], str]
             Expected string or RegExp or a list of those.
-        use_inner_text : Union[bool, None]
+        use_inner_text : Optional[bool]
             Whether to use `element.innerText` instead of `element.textContent` when retrieving DOM node text.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
-        ignore_case : Union[bool, None]
+        ignore_case : Optional[bool]
             Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
             expression flag if specified.
         """
@@ -18762,8 +18762,8 @@ class LocatorAssertions(AsyncBase):
 
         Parameters
         ----------
-        attached : Union[bool, None]
-        timeout : Union[float, None]
+        attached : Optional[bool]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -18793,9 +18793,9 @@ class LocatorAssertions(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
-        checked : Union[bool, None]
+        checked : Optional[bool]
         """
         __tracebackhide__ = True
 
@@ -18815,8 +18815,8 @@ class LocatorAssertions(AsyncBase):
 
         Parameters
         ----------
-        attached : Union[bool, None]
-        timeout : Union[float, None]
+        attached : Optional[bool]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -18834,7 +18834,7 @@ class LocatorAssertions(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -18863,7 +18863,7 @@ class LocatorAssertions(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -18881,7 +18881,7 @@ class LocatorAssertions(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -18911,8 +18911,8 @@ class LocatorAssertions(AsyncBase):
 
         Parameters
         ----------
-        editable : Union[bool, None]
-        timeout : Union[float, None]
+        editable : Optional[bool]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -18933,8 +18933,8 @@ class LocatorAssertions(AsyncBase):
 
         Parameters
         ----------
-        editable : Union[bool, None]
-        timeout : Union[float, None]
+        editable : Optional[bool]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -18959,7 +18959,7 @@ class LocatorAssertions(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -18975,7 +18975,7 @@ class LocatorAssertions(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -19005,8 +19005,8 @@ class LocatorAssertions(AsyncBase):
 
         Parameters
         ----------
-        enabled : Union[bool, None]
-        timeout : Union[float, None]
+        enabled : Optional[bool]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -19027,8 +19027,8 @@ class LocatorAssertions(AsyncBase):
 
         Parameters
         ----------
-        enabled : Union[bool, None]
-        timeout : Union[float, None]
+        enabled : Optional[bool]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -19054,7 +19054,7 @@ class LocatorAssertions(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -19070,7 +19070,7 @@ class LocatorAssertions(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -19110,8 +19110,8 @@ class LocatorAssertions(AsyncBase):
 
         Parameters
         ----------
-        visible : Union[bool, None]
-        timeout : Union[float, None]
+        visible : Optional[bool]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -19132,8 +19132,8 @@ class LocatorAssertions(AsyncBase):
 
         Parameters
         ----------
-        visible : Union[bool, None]
-        timeout : Union[float, None]
+        visible : Optional[bool]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -19158,7 +19158,7 @@ class LocatorAssertions(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -19176,7 +19176,7 @@ class LocatorAssertions(AsyncBase):
 
         Parameters
         ----------
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -19212,10 +19212,10 @@ class LocatorAssertions(AsyncBase):
 
         Parameters
         ----------
-        ratio : Union[float, None]
+        ratio : Optional[float]
             The minimal ratio of the element to intersect viewport. If equals to `0`, then element should intersect viewport at
             any positive ratio. Defaults to `0`.
-        timeout : Union[float, None]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True
@@ -19236,8 +19236,8 @@ class LocatorAssertions(AsyncBase):
 
         Parameters
         ----------
-        ratio : Union[float, None]
-        timeout : Union[float, None]
+        ratio : Optional[float]
+        timeout : Optional[float]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
         __tracebackhide__ = True

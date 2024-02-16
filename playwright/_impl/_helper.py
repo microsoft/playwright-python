@@ -142,7 +142,7 @@ Env = Dict[str, Union[str, float, bool]]
 
 
 class URLMatcher:
-    def __init__(self, base_url: Union[str, None], match: URLMatch) -> None:
+    def __init__(self, base_url: Optional[str], match: URLMatch) -> None:
         self._callback: Optional[Callable[[str], bool]] = None
         self._regex_obj: Optional[Pattern[str]] = None
         if isinstance(match, str):
