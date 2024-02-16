@@ -14,7 +14,7 @@
 
 import asyncio
 from pathlib import Path
-from typing import Any, Dict, List, Set, Union
+from typing import Any, Dict, List, Optional, Set, Union
 
 from playwright._impl._connection import ChannelOwner
 from playwright._impl._errors import Error
@@ -32,9 +32,9 @@ class Selectors:
     async def register(
         self,
         name: str,
-        script: str = None,
+        script: Optional[str] = None,
         path: Union[str, Path] = None,
-        contentScript: bool = None,
+        contentScript: Optional[bool] = None,
     ) -> None:
         if not script and not path:
             raise Error("Either source or path should be specified")

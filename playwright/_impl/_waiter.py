@@ -16,7 +16,7 @@ import asyncio
 import math
 import uuid
 from asyncio.tasks import Task
-from typing import Any, Callable, List, Tuple, Union
+from typing import Any, Callable, List, Optional, Tuple, Union
 
 from pyee import EventEmitter
 
@@ -47,7 +47,9 @@ class Waiter:
             },
         )
 
-    def _wait_for_event_info_after(self, wait_id: str, error: Exception = None) -> None:
+    def _wait_for_event_info_after(
+        self, wait_id: str, error: Optional[Exception] = None
+    ) -> None:
         self._channel._connection.wrap_api_call_sync(
             lambda: self._channel.send_no_reply(
                 "waitForEventInfo",
@@ -67,9 +69,9 @@ class Waiter:
         emitter: EventEmitter,
         event: str,
         error: Union[Error, Callable[..., Error]],
-        predicate: Callable = None,
+        predicate: Optional[Callable] = None,
     ) -> None:
-        def listener(event_data: Any = None) -> None:
+        def listener(event_data: Optional[Any] = None) -> None:
             if not predicate or predicate(event_data):
                 self._reject(error() if callable(error) else error)
 
@@ -112,9 +114,9 @@ class Waiter:
         self,
         emitter: EventEmitter,
         event: str,
-        predicate: Callable = None,
+        predicate: Optional[Callable] = None,
     ) -> None:
-        def listener(event_data: Any = None) -> None:
+        def listener(event_data: Optional[Any] = None) -> None:
             if not predicate or predicate(event_data):
                 self._fulfill(event_data)
 

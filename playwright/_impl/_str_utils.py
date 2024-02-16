@@ -14,7 +14,7 @@
 
 import json
 import re
-from typing import Pattern, Union
+from typing import Optional, Pattern, Union
 
 
 def escape_regex_flags(pattern: Pattern) -> str:
@@ -52,7 +52,9 @@ def escape_regex_for_selector(text: Pattern) -> str:
 
 
 def escape_for_text_selector(
-    text: Union[str, Pattern[str]], exact: bool = None, case_sensitive: bool = None
+    text: Union[str, Pattern[str]],
+    exact: Optional[bool] = None,
+    case_sensitive: Optional[bool] = None,
 ) -> str:
     if isinstance(text, Pattern):
         return escape_regex_for_selector(text)
@@ -60,7 +62,7 @@ def escape_for_text_selector(
 
 
 def escape_for_attribute_selector(
-    value: Union[str, Pattern], exact: bool = None
+    value: Union[str, Pattern], exact: Optional[bool] = None
 ) -> str:
     if isinstance(value, Pattern):
         return escape_regex_for_selector(value)

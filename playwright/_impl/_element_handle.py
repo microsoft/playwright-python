@@ -103,49 +103,49 @@ class ElementHandle(JSHandle):
     async def is_visible(self) -> bool:
         return await self._channel.send("isVisible")
 
-    async def dispatch_event(self, type: str, eventInit: Dict = None) -> None:
+    async def dispatch_event(self, type: str, eventInit: Optional[Dict] = None) -> None:
         await self._channel.send(
             "dispatchEvent", dict(type=type, eventInit=serialize_argument(eventInit))
         )
 
-    async def scroll_into_view_if_needed(self, timeout: float = None) -> None:
+    async def scroll_into_view_if_needed(self, timeout: Optional[float] = None) -> None:
         await self._channel.send("scrollIntoViewIfNeeded", locals_to_params(locals()))
 
     async def hover(
         self,
         modifiers: Sequence[KeyboardModifier] = None,
-        position: Position = None,
-        timeout: float = None,
-        noWaitAfter: bool = None,
-        force: bool = None,
-        trial: bool = None,
+        position: Optional[Position] = None,
+        timeout: Optional[float] = None,
+        noWaitAfter: Optional[bool] = None,
+        force: Optional[bool] = None,
+        trial: Optional[bool] = None,
     ) -> None:
         await self._channel.send("hover", locals_to_params(locals()))
 
     async def click(
         self,
         modifiers: Sequence[KeyboardModifier] = None,
-        position: Position = None,
-        delay: float = None,
-        button: MouseButton = None,
-        clickCount: int = None,
-        timeout: float = None,
-        force: bool = None,
-        noWaitAfter: bool = None,
-        trial: bool = None,
+        position: Optional[Position] = None,
+        delay: Optional[float] = None,
+        button: Optional[MouseButton] = None,
+        clickCount: Optional[int] = None,
+        timeout: Optional[float] = None,
+        force: Optional[bool] = None,
+        noWaitAfter: Optional[bool] = None,
+        trial: Optional[bool] = None,
     ) -> None:
         await self._channel.send("click", locals_to_params(locals()))
 
     async def dblclick(
         self,
         modifiers: Sequence[KeyboardModifier] = None,
-        position: Position = None,
-        delay: float = None,
-        button: MouseButton = None,
-        timeout: float = None,
-        force: bool = None,
-        noWaitAfter: bool = None,
-        trial: bool = None,
+        position: Optional[Position] = None,
+        delay: Optional[float] = None,
+        button: Optional[MouseButton] = None,
+        timeout: Optional[float] = None,
+        force: Optional[bool] = None,
+        noWaitAfter: Optional[bool] = None,
+        trial: Optional[bool] = None,
     ) -> None:
         await self._channel.send("dblclick", locals_to_params(locals()))
 
@@ -155,9 +155,9 @@ class ElementHandle(JSHandle):
         index: Union[int, Sequence[int]] = None,
         label: Union[str, Sequence[str]] = None,
         element: Union["ElementHandle", Sequence["ElementHandle"]] = None,
-        timeout: float = None,
-        force: bool = None,
-        noWaitAfter: bool = None,
+        timeout: Optional[float] = None,
+        force: Optional[bool] = None,
+        noWaitAfter: Optional[bool] = None,
     ) -> List[str]:
         params = locals_to_params(
             dict(
@@ -172,27 +172,29 @@ class ElementHandle(JSHandle):
     async def tap(
         self,
         modifiers: Sequence[KeyboardModifier] = None,
-        position: Position = None,
-        timeout: float = None,
-        force: bool = None,
-        noWaitAfter: bool = None,
-        trial: bool = None,
+        position: Optional[Position] = None,
+        timeout: Optional[float] = None,
+        force: Optional[bool] = None,
+        noWaitAfter: Optional[bool] = None,
+        trial: Optional[bool] = None,
     ) -> None:
         await self._channel.send("tap", locals_to_params(locals()))
 
     async def fill(
         self,
         value: str,
-        timeout: float = None,
-        noWaitAfter: bool = None,
-        force: bool = None,
+        timeout: Optional[float] = None,
+        noWaitAfter: Optional[bool] = None,
+        force: Optional[bool] = None,
     ) -> None:
         await self._channel.send("fill", locals_to_params(locals()))
 
-    async def select_text(self, force: bool = None, timeout: float = None) -> None:
+    async def select_text(
+        self, force: Optional[bool] = None, timeout: Optional[float] = None
+    ) -> None:
         await self._channel.send("selectText", locals_to_params(locals()))
 
-    async def input_value(self, timeout: float = None) -> str:
+    async def input_value(self, timeout: Optional[float] = None) -> str:
         return await self._channel.send("inputValue", locals_to_params(locals()))
 
     async def set_input_files(
@@ -200,8 +202,8 @@ class ElementHandle(JSHandle):
         files: Union[
             str, Path, FilePayload, Sequence[Union[str, Path]], Sequence[FilePayload]
         ],
-        timeout: float = None,
-        noWaitAfter: bool = None,
+        timeout: Optional[float] = None,
+        noWaitAfter: Optional[bool] = None,
     ) -> None:
         frame = await self.owner_frame()
         if not frame:
@@ -222,29 +224,29 @@ class ElementHandle(JSHandle):
     async def type(
         self,
         text: str,
-        delay: float = None,
-        timeout: float = None,
-        noWaitAfter: bool = None,
+        delay: Optional[float] = None,
+        timeout: Optional[float] = None,
+        noWaitAfter: Optional[bool] = None,
     ) -> None:
         await self._channel.send("type", locals_to_params(locals()))
 
     async def press(
         self,
         key: str,
-        delay: float = None,
-        timeout: float = None,
-        noWaitAfter: bool = None,
+        delay: Optional[float] = None,
+        timeout: Optional[float] = None,
+        noWaitAfter: Optional[bool] = None,
     ) -> None:
         await self._channel.send("press", locals_to_params(locals()))
 
     async def set_checked(
         self,
         checked: bool,
-        position: Position = None,
-        timeout: float = None,
-        force: bool = None,
-        noWaitAfter: bool = None,
-        trial: bool = None,
+        position: Optional[Position] = None,
+        timeout: Optional[float] = None,
+        force: Optional[bool] = None,
+        noWaitAfter: Optional[bool] = None,
+        trial: Optional[bool] = None,
     ) -> None:
         if checked:
             await self.check(
@@ -265,21 +267,21 @@ class ElementHandle(JSHandle):
 
     async def check(
         self,
-        position: Position = None,
-        timeout: float = None,
-        force: bool = None,
-        noWaitAfter: bool = None,
-        trial: bool = None,
+        position: Optional[Position] = None,
+        timeout: Optional[float] = None,
+        force: Optional[bool] = None,
+        noWaitAfter: Optional[bool] = None,
+        trial: Optional[bool] = None,
     ) -> None:
         await self._channel.send("check", locals_to_params(locals()))
 
     async def uncheck(
         self,
-        position: Position = None,
-        timeout: float = None,
-        force: bool = None,
-        noWaitAfter: bool = None,
-        trial: bool = None,
+        position: Optional[Position] = None,
+        timeout: Optional[float] = None,
+        force: Optional[bool] = None,
+        noWaitAfter: Optional[bool] = None,
+        trial: Optional[bool] = None,
     ) -> None:
         await self._channel.send("uncheck", locals_to_params(locals()))
 
@@ -288,17 +290,17 @@ class ElementHandle(JSHandle):
 
     async def screenshot(
         self,
-        timeout: float = None,
+        timeout: Optional[float] = None,
         type: Literal["jpeg", "png"] = None,
         path: Union[str, Path] = None,
-        quality: int = None,
-        omitBackground: bool = None,
+        quality: Optional[int] = None,
+        omitBackground: Optional[bool] = None,
         animations: Literal["allow", "disabled"] = None,
         caret: Literal["hide", "initial"] = None,
         scale: Literal["css", "device"] = None,
         mask: Sequence["Locator"] = None,
-        maskColor: str = None,
-        style: str = None,
+        maskColor: Optional[str] = None,
+        style: Optional[str] = None,
     ) -> bytes:
         params = locals_to_params(locals())
         if "path" in params:
@@ -339,7 +341,7 @@ class ElementHandle(JSHandle):
         self,
         selector: str,
         expression: str,
-        arg: Serializable = None,
+        arg: Optional[Serializable] = None,
     ) -> Any:
         return parse_result(
             await self._channel.send(
@@ -356,7 +358,7 @@ class ElementHandle(JSHandle):
         self,
         selector: str,
         expression: str,
-        arg: Serializable = None,
+        arg: Optional[Serializable] = None,
     ) -> Any:
         return parse_result(
             await self._channel.send(
@@ -374,7 +376,7 @@ class ElementHandle(JSHandle):
         state: Literal[
             "disabled", "editable", "enabled", "hidden", "stable", "visible"
         ],
-        timeout: float = None,
+        timeout: Optional[float] = None,
     ) -> None:
         await self._channel.send("waitForElementState", locals_to_params(locals()))
 
@@ -382,8 +384,8 @@ class ElementHandle(JSHandle):
         self,
         selector: str,
         state: Literal["attached", "detached", "hidden", "visible"] = None,
-        timeout: float = None,
-        strict: bool = None,
+        timeout: Optional[float] = None,
+        strict: Optional[bool] = None,
     ) -> Optional["ElementHandle"]:
         return from_nullable_channel(
             await self._channel.send("waitForSelector", locals_to_params(locals()))
@@ -399,8 +401,8 @@ def convert_select_option_values(
     if value is None and index is None and label is None and element is None:
         return {}
 
-    options: Any = None
-    elements: Any = None
+    options: Optional[Any] = None
+    elements: Optional[Any] = None
     if value:
         if isinstance(value, str):
             value = [value]

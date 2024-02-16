@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Optional
+
 from playwright._impl._connection import Channel
 from playwright._impl._helper import MouseButton, locals_to_params
 
@@ -31,10 +33,10 @@ class Keyboard:
     async def insert_text(self, text: str) -> None:
         await self._channel.send("keyboardInsertText", locals_to_params(locals()))
 
-    async def type(self, text: str, delay: float = None) -> None:
+    async def type(self, text: str, delay: Optional[float] = None) -> None:
         await self._channel.send("keyboardType", locals_to_params(locals()))
 
-    async def press(self, key: str, delay: float = None) -> None:
+    async def press(self, key: str, delay: Optional[float] = None) -> None:
         await self._channel.send("keyboardPress", locals_to_params(locals()))
 
 
@@ -44,20 +46,20 @@ class Mouse:
         self._loop = channel._connection._loop
         self._dispatcher_fiber = channel._connection._dispatcher_fiber
 
-    async def move(self, x: float, y: float, steps: int = None) -> None:
+    async def move(self, x: float, y: float, steps: Optional[int] = None) -> None:
         await self._channel.send("mouseMove", locals_to_params(locals()))
 
     async def down(
         self,
-        button: MouseButton = None,
-        clickCount: int = None,
+        button: Optional[MouseButton] = None,
+        clickCount: Optional[int] = None,
     ) -> None:
         await self._channel.send("mouseDown", locals_to_params(locals()))
 
     async def up(
         self,
-        button: MouseButton = None,
-        clickCount: int = None,
+        button: Optional[MouseButton] = None,
+        clickCount: Optional[int] = None,
     ) -> None:
         await self._channel.send("mouseUp", locals_to_params(locals()))
 
@@ -65,9 +67,9 @@ class Mouse:
         self,
         x: float,
         y: float,
-        delay: float = None,
-        button: MouseButton = None,
-        clickCount: int = None,
+        delay: Optional[float] = None,
+        button: Optional[MouseButton] = None,
+        clickCount: Optional[int] = None,
     ) -> None:
         await self._channel.send("mouseClick", locals_to_params(locals()))
 
@@ -75,8 +77,8 @@ class Mouse:
         self,
         x: float,
         y: float,
-        delay: float = None,
-        button: MouseButton = None,
+        delay: Optional[float] = None,
+        button: Optional[MouseButton] = None,
     ) -> None:
         await self.click(x, y, delay=delay, button=button, clickCount=2)
 

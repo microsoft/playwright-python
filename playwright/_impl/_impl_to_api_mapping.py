@@ -78,7 +78,7 @@ class ImplToApiMapping:
         assert result
         return result
 
-    def from_impl_nullable(self, obj: Any = None) -> Optional[Any]:
+    def from_impl_nullable(self, obj: Optional[Any] = None) -> Optional[Any]:
         return self.from_impl(obj) if obj else None
 
     def from_impl_list(self, items: Sequence[Any]) -> List[Any]:

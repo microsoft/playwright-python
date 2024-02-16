@@ -59,17 +59,19 @@ class Channel(AsyncIOEventEmitter):
         self._guid = object._guid
         self._object = object
 
-    async def send(self, method: str, params: Dict = None) -> Any:
+    async def send(self, method: str, params: Optional[Dict] = None) -> Any:
         return await self._connection.wrap_api_call(
             lambda: self.inner_send(method, params, False)
         )
 
-    async def send_return_as_dict(self, method: str, params: Dict = None) -> Any:
+    async def send_return_as_dict(
+        self, method: str, params: Optional[Dict] = None
+    ) -> Any:
         return await self._connection.wrap_api_call(
             lambda: self.inner_send(method, params, True)
         )
 
-    def send_no_reply(self, method: str, params: Dict = None) -> None:
+    def send_no_reply(self, method: str, params: Optional[Dict] = None) -> None:
         # No reply messages are used to e.g. waitForEventInfo(after).
         self._connection.wrap_api_call_sync(
             lambda: self._connection._send_message_to_server(
@@ -288,7 +290,7 @@ class Connection(EventEmitter):
         await self._transport.wait_until_stopped()
         self.cleanup()
 
-    def cleanup(self, cause: Exception = None) -> None:
+    def cleanup(self, cause: Optional[Exception] = None) -> None:
         self._closed_error = (
             TargetClosedError(str(cause)) if cause else TargetClosedError()
         )

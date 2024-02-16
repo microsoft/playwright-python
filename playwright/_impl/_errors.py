@@ -49,5 +49,5 @@ class TimeoutError(Error, TimeoutErrorBuiltin):
 
 
 class TargetClosedError(Error):
-    def __init__(self, message: str = None) -> None:
+    def __init__(self, message: Optional[str] = None) -> None:
         super().__init__(message or "Target page, context or browser has been closed")

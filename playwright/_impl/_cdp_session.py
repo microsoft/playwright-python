@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from playwright._impl._connection import ChannelOwner
 from playwright._impl._helper import locals_to_params
@@ -28,7 +28,7 @@ class CDPSession(ChannelOwner):
     def _on_event(self, params: Any) -> None:
         self.emit(params["method"], params["params"])
 
-    async def send(self, method: str, params: Dict = None) -> Dict:
+    async def send(self, method: str, params: Optional[Dict] = None) -> Dict:
         return await self._channel.send("send", locals_to_params(locals()))
 
     async def detach(self) -> None:

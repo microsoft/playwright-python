@@ -182,7 +182,7 @@ class TimeoutSettings:
     def set_default_timeout(self, timeout: Optional[float]) -> None:
         self._default_timeout = timeout
 
-    def timeout(self, timeout: float = None) -> float:
+    def timeout(self, timeout: Optional[float] = None) -> float:
         if timeout is not None:
             return timeout
         if self._default_timeout is not None:

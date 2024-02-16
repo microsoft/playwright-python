@@ -311,14 +311,14 @@ class BrowserContext(ChannelOwner):
         await self._channel.send("clearCookies")
 
     async def grant_permissions(
-        self, permissions: Sequence[str], origin: str = None
+        self, permissions: Sequence[str], origin: Optional[str] = None
     ) -> None:
         await self._channel.send("grantPermissions", locals_to_params(locals()))
 
     async def clear_permissions(self) -> None:
         await self._channel.send("clearPermissions")
 
-    async def set_geolocation(self, geolocation: Geolocation = None) -> None:
+    async def set_geolocation(self, geolocation: Optional[Geolocation] = None) -> None:
         await self._channel.send("setGeolocation", locals_to_params(locals()))
 
     async def set_extra_http_headers(self, headers: Dict[str, str]) -> None:
@@ -330,7 +330,7 @@ class BrowserContext(ChannelOwner):
         await self._channel.send("setOffline", dict(offline=offline))
 
     async def add_init_script(
-        self, script: str = None, path: Union[str, Path] = None
+        self, script: Optional[str] = None, path: Union[str, Path] = None
     ) -> None:
         if path:
             script = (await async_readfile(path)).decode()
@@ -339,7 +339,7 @@ class BrowserContext(ChannelOwner):
         await self._channel.send("addInitScript", dict(source=script))
 
     async def expose_binding(
-        self, name: str, callback: Callable, handle: bool = None
+        self, name: str, callback: Callable, handle: Optional[bool] = None
     ) -> None:
         for page in self._pages:
             if name in page._bindings:
@@ -357,7 +357,7 @@ class BrowserContext(ChannelOwner):
         await self.expose_binding(name, lambda source, *args: callback(*args))
 
     async def route(
-        self, url: URLMatch, handler: RouteHandlerCallback, times: int = None
+        self, url: URLMatch, handler: RouteHandlerCallback, times: Optional[int] = None
     ) -> None:
         self._routes.insert(
             0,
@@ -410,8 +410,8 @@ class BrowserContext(ChannelOwner):
         har: Union[Path, str],
         page: Optional[Page] = None,
         url: Union[Pattern[str], str] = None,
-        update_content: HarContentPolicy = None,
-        update_mode: HarMode = None,
+        update_content: Optional[HarContentPolicy] = None,
+        update_mode: Optional[HarMode] = None,
     ) -> None:
         params: Dict[str, Any] = {
             "options": prepare_record_har_options(
@@ -435,10 +435,10 @@ class BrowserContext(ChannelOwner):
         self,
         har: Union[Path, str],
         url: Union[Pattern[str], str] = None,
-        notFound: RouteFromHarNotFoundPolicy = None,
-        update: bool = None,
+        notFound: Optional[RouteFromHarNotFoundPolicy] = None,
+        update: Optional[bool] = None,
         updateContent: Literal["attach", "embed"] = None,
-        updateMode: HarMode = None,
+        updateMode: Optional[HarMode] = None,
     ) -> None:
         if update:
             await self._record_into_har(
@@ -467,8 +467,8 @@ class BrowserContext(ChannelOwner):
     def expect_event(
         self,
         event: str,
-        predicate: Callable = None,
-        timeout: float = None,
+        predicate: Optional[Callable] = None,
+        timeout: Optional[float] = None,
     ) -> EventContextManagerImpl:
         if timeout is None:
             timeout = self._timeout_settings.timeout()
@@ -490,7 +490,7 @@ class BrowserContext(ChannelOwner):
         self._dispose_har_routers()
         self.emit(BrowserContext.Events.Close, self)
 
-    async def close(self, reason: str = None) -> None:
+    async def close(self, reason: Optional[str] = None) -> None:
         if self._close_was_called:
             return
         self._close_reason = reason
@@ -537,7 +537,10 @@ class BrowserContext(ChannelOwner):
         return None
 
     async def wait_for_event(
-        self, event: str, predicate: Callable = None, timeout: float = None
+        self,
+        event: str,
+        predicate: Optional[Callable] = None,
+        timeout: Optional[float] = None,
     ) -> Any:
         async with self.expect_event(event, predicate, timeout) as event_info:
             pass
@@ -546,14 +549,14 @@ class BrowserContext(ChannelOwner):
     def expect_console_message(
         self,
         predicate: Callable[[ConsoleMessage], bool] = None,
-        timeout: float = None,
+        timeout: Optional[float] = None,
     ) -> EventContextManagerImpl[ConsoleMessage]:
         return self.expect_event(Page.Events.Console, predicate, timeout)
 
     def expect_page(
         self,
         predicate: Callable[[Page], bool] = None,
-        timeout: float = None,
+        timeout: Optional[float] = None,
     ) -> EventContextManagerImpl[Page]:
         return self.expect_event(BrowserContext.Events.Page, predicate, timeout)
 

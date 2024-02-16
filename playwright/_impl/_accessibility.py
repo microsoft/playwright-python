@@ -60,7 +60,9 @@ class Accessibility:
         self._dispatcher_fiber = channel._connection._dispatcher_fiber
 
     async def snapshot(
-        self, interestingOnly: bool = None, root: ElementHandle = None
+        self,
+        interestingOnly: Optional[bool] = None,
+        root: Optional[ElementHandle] = None,
     ) -> Optional[Dict]:
         params = locals_to_params(locals())
         if root:

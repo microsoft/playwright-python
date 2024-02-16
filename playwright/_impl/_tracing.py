@@ -32,11 +32,11 @@ class Tracing(ChannelOwner):
 
     async def start(
         self,
-        name: str = None,
-        title: str = None,
-        snapshots: bool = None,
-        screenshots: bool = None,
-        sources: bool = None,
+        name: Optional[str] = None,
+        title: Optional[str] = None,
+        snapshots: Optional[bool] = None,
+        screenshots: Optional[bool] = None,
+        sources: Optional[bool] = None,
     ) -> None:
         params = locals_to_params(locals())
         self._include_sources = bool(sources)
@@ -50,7 +50,9 @@ class Tracing(ChannelOwner):
         trace_name = await self._connection.wrap_api_call(_inner_start, True)
         await self._start_collecting_stacks(trace_name)
 
-    async def start_chunk(self, title: str = None, name: str = None) -> None:
+    async def start_chunk(
+        self, title: Optional[str] = None, name: Optional[str] = None
+    ) -> None:
         params = locals_to_params(locals())
         trace_name = await self._channel.send("tracingStartChunk", params)
         await self._start_collecting_stacks(trace_name)

@@ -301,7 +301,7 @@ class Route(ChannelOwner):
     def request(self) -> Request:
         return from_channel(self._initializer["request"])
 
-    async def abort(self, errorCode: str = None) -> None:
+    async def abort(self, errorCode: Optional[str] = None) -> None:
         await self._handle_route(
             lambda: self._race_with_page_close(
                 self._channel.send(
@@ -316,12 +316,12 @@ class Route(ChannelOwner):
 
     async def fulfill(
         self,
-        status: int = None,
+        status: Optional[int] = None,
         headers: Dict[str, str] = None,
         body: Union[str, bytes] = None,
-        json: Any = None,
+        json: Optional[Any] = None,
         path: Union[str, Path] = None,
-        contentType: str = None,
+        contentType: Optional[str] = None,
         response: "APIResponse" = None,
     ) -> None:
         await self._handle_route(
@@ -332,12 +332,12 @@ class Route(ChannelOwner):
 
     async def _inner_fulfill(
         self,
-        status: int = None,
+        status: Optional[int] = None,
         headers: Dict[str, str] = None,
         body: Union[str, bytes] = None,
-        json: Any = None,
+        json: Optional[Any] = None,
         path: Union[str, Path] = None,
-        contentType: str = None,
+        contentType: Optional[str] = None,
         response: "APIResponse" = None,
     ) -> None:
         params = locals_to_params(locals())
@@ -406,12 +406,12 @@ class Route(ChannelOwner):
 
     async def fetch(
         self,
-        url: str = None,
-        method: str = None,
+        url: Optional[str] = None,
+        method: Optional[str] = None,
         headers: Dict[str, str] = None,
         postData: Union[Any, str, bytes] = None,
-        maxRedirects: int = None,
-        timeout: float = None,
+        maxRedirects: Optional[int] = None,
+        timeout: Optional[float] = None,
     ) -> "APIResponse":
         return await self._connection.wrap_api_call(
             lambda: self._context.request._inner_fetch(
@@ -427,8 +427,8 @@ class Route(ChannelOwner):
 
     async def fallback(
         self,
-        url: str = None,
-        method: str = None,
+        url: Optional[str] = None,
+        method: Optional[str] = None,
         headers: Dict[str, str] = None,
         postData: Union[Any, str, bytes] = None,
     ) -> None:
@@ -439,8 +439,8 @@ class Route(ChannelOwner):
 
     async def continue_(
         self,
-        url: str = None,
-        method: str = None,
+        url: Optional[str] = None,
+        method: Optional[str] = None,
         headers: Dict[str, str] = None,
         postData: Union[Any, str, bytes] = None,
     ) -> None:
@@ -662,8 +662,8 @@ class WebSocket(ChannelOwner):
     def expect_event(
         self,
         event: str,
-        predicate: Callable = None,
-        timeout: float = None,
+        predicate: Optional[Callable] = None,
+        timeout: Optional[float] = None,
     ) -> EventContextManagerImpl:
         if timeout is None:
             timeout = cast(Any, self._parent)._timeout_settings.timeout()
@@ -683,7 +683,10 @@ class WebSocket(ChannelOwner):
         return EventContextManagerImpl(waiter.result())
 
     async def wait_for_event(
-        self, event: str, predicate: Callable = None, timeout: float = None
+        self,
+        event: str,
+        predicate: Optional[Callable] = None,
+        timeout: Optional[float] = None,
     ) -> Any:
         async with self.expect_event(event, predicate, timeout) as event_info:
             pass

@@ -62,13 +62,13 @@ class APIRequest:
 
     async def new_context(
         self,
-        baseURL: str = None,
+        baseURL: Optional[str] = None,
         extraHTTPHeaders: Dict[str, str] = None,
-        httpCredentials: HttpCredentials = None,
-        ignoreHTTPSErrors: bool = None,
-        proxy: ProxySettings = None,
-        userAgent: str = None,
-        timeout: float = None,
+        httpCredentials: Optional[HttpCredentials] = None,
+        ignoreHTTPSErrors: Optional[bool] = None,
+        proxy: Optional[ProxySettings] = None,
+        userAgent: Optional[str] = None,
+        timeout: Optional[float] = None,
         storageState: Union[StorageState, str, Path] = None,
     ) -> "APIRequestContext":
         params = locals_to_params(locals())
@@ -100,15 +100,15 @@ class APIRequestContext(ChannelOwner):
     async def delete(
         self,
         url: str,
-        params: ParamsType = None,
-        headers: Headers = None,
-        data: DataType = None,
-        form: FormType = None,
-        multipart: MultipartType = None,
-        timeout: float = None,
-        failOnStatusCode: bool = None,
-        ignoreHTTPSErrors: bool = None,
-        maxRedirects: int = None,
+        params: Optional[ParamsType] = None,
+        headers: Optional[Headers] = None,
+        data: Optional[DataType] = None,
+        form: Optional[FormType] = None,
+        multipart: Optional[MultipartType] = None,
+        timeout: Optional[float] = None,
+        failOnStatusCode: Optional[bool] = None,
+        ignoreHTTPSErrors: Optional[bool] = None,
+        maxRedirects: Optional[int] = None,
     ) -> "APIResponse":
         return await self.fetch(
             url,
@@ -127,15 +127,15 @@ class APIRequestContext(ChannelOwner):
     async def head(
         self,
         url: str,
-        params: ParamsType = None,
-        headers: Headers = None,
-        data: DataType = None,
-        form: FormType = None,
-        multipart: MultipartType = None,
-        timeout: float = None,
-        failOnStatusCode: bool = None,
-        ignoreHTTPSErrors: bool = None,
-        maxRedirects: int = None,
+        params: Optional[ParamsType] = None,
+        headers: Optional[Headers] = None,
+        data: Optional[DataType] = None,
+        form: Optional[FormType] = None,
+        multipart: Optional[MultipartType] = None,
+        timeout: Optional[float] = None,
+        failOnStatusCode: Optional[bool] = None,
+        ignoreHTTPSErrors: Optional[bool] = None,
+        maxRedirects: Optional[int] = None,
     ) -> "APIResponse":
         return await self.fetch(
             url,
@@ -154,15 +154,15 @@ class APIRequestContext(ChannelOwner):
     async def get(
         self,
         url: str,
-        params: ParamsType = None,
-        headers: Headers = None,
-        data: DataType = None,
-        form: FormType = None,
-        multipart: MultipartType = None,
-        timeout: float = None,
-        failOnStatusCode: bool = None,
-        ignoreHTTPSErrors: bool = None,
-        maxRedirects: int = None,
+        params: Optional[ParamsType] = None,
+        headers: Optional[Headers] = None,
+        data: Optional[DataType] = None,
+        form: Optional[FormType] = None,
+        multipart: Optional[MultipartType] = None,
+        timeout: Optional[float] = None,
+        failOnStatusCode: Optional[bool] = None,
+        ignoreHTTPSErrors: Optional[bool] = None,
+        maxRedirects: Optional[int] = None,
     ) -> "APIResponse":
         return await self.fetch(
             url,
@@ -181,15 +181,15 @@ class APIRequestContext(ChannelOwner):
     async def patch(
         self,
         url: str,
-        params: ParamsType = None,
-        headers: Headers = None,
-        data: DataType = None,
-        form: FormType = None,
+        params: Optional[ParamsType] = None,
+        headers: Optional[Headers] = None,
+        data: Optional[DataType] = None,
+        form: Optional[FormType] = None,
         multipart: Dict[str, Union[bytes, bool, float, str, FilePayload]] = None,
-        timeout: float = None,
-        failOnStatusCode: bool = None,
-        ignoreHTTPSErrors: bool = None,
-        maxRedirects: int = None,
+        timeout: Optional[float] = None,
+        failOnStatusCode: Optional[bool] = None,
+        ignoreHTTPSErrors: Optional[bool] = None,
+        maxRedirects: Optional[int] = None,
     ) -> "APIResponse":
         return await self.fetch(
             url,
@@ -208,15 +208,15 @@ class APIRequestContext(ChannelOwner):
     async def put(
         self,
         url: str,
-        params: ParamsType = None,
-        headers: Headers = None,
-        data: DataType = None,
-        form: FormType = None,
+        params: Optional[ParamsType] = None,
+        headers: Optional[Headers] = None,
+        data: Optional[DataType] = None,
+        form: Optional[FormType] = None,
         multipart: Dict[str, Union[bytes, bool, float, str, FilePayload]] = None,
-        timeout: float = None,
-        failOnStatusCode: bool = None,
-        ignoreHTTPSErrors: bool = None,
-        maxRedirects: int = None,
+        timeout: Optional[float] = None,
+        failOnStatusCode: Optional[bool] = None,
+        ignoreHTTPSErrors: Optional[bool] = None,
+        maxRedirects: Optional[int] = None,
     ) -> "APIResponse":
         return await self.fetch(
             url,
@@ -235,15 +235,15 @@ class APIRequestContext(ChannelOwner):
     async def post(
         self,
         url: str,
-        params: ParamsType = None,
-        headers: Headers = None,
-        data: DataType = None,
-        form: FormType = None,
+        params: Optional[ParamsType] = None,
+        headers: Optional[Headers] = None,
+        data: Optional[DataType] = None,
+        form: Optional[FormType] = None,
         multipart: Dict[str, Union[bytes, bool, float, str, FilePayload]] = None,
-        timeout: float = None,
-        failOnStatusCode: bool = None,
-        ignoreHTTPSErrors: bool = None,
-        maxRedirects: int = None,
+        timeout: Optional[float] = None,
+        failOnStatusCode: Optional[bool] = None,
+        ignoreHTTPSErrors: Optional[bool] = None,
+        maxRedirects: Optional[int] = None,
     ) -> "APIResponse":
         return await self.fetch(
             url,
@@ -262,16 +262,16 @@ class APIRequestContext(ChannelOwner):
     async def fetch(
         self,
         urlOrRequest: Union[str, network.Request],
-        params: ParamsType = None,
-        method: str = None,
-        headers: Headers = None,
-        data: DataType = None,
-        form: FormType = None,
+        params: Optional[ParamsType] = None,
+        method: Optional[str] = None,
+        headers: Optional[Headers] = None,
+        data: Optional[DataType] = None,
+        form: Optional[FormType] = None,
         multipart: Dict[str, Union[bytes, bool, float, str, FilePayload]] = None,
-        timeout: float = None,
-        failOnStatusCode: bool = None,
-        ignoreHTTPSErrors: bool = None,
-        maxRedirects: int = None,
+        timeout: Optional[float] = None,
+        failOnStatusCode: Optional[bool] = None,
+        ignoreHTTPSErrors: Optional[bool] = None,
+        maxRedirects: Optional[int] = None,
     ) -> "APIResponse":
         url = urlOrRequest if isinstance(urlOrRequest, str) else None
         request = (
@@ -301,16 +301,16 @@ class APIRequestContext(ChannelOwner):
         self,
         request: Optional[network.Request],
         url: Optional[str],
-        method: str = None,
-        headers: Headers = None,
-        data: DataType = None,
-        params: ParamsType = None,
-        form: FormType = None,
+        method: Optional[str] = None,
+        headers: Optional[Headers] = None,
+        data: Optional[DataType] = None,
+        params: Optional[ParamsType] = None,
+        form: Optional[FormType] = None,
         multipart: Dict[str, Union[bytes, bool, float, str, FilePayload]] = None,
-        timeout: float = None,
-        failOnStatusCode: bool = None,
-        ignoreHTTPSErrors: bool = None,
-        maxRedirects: int = None,
+        timeout: Optional[float] = None,
+        failOnStatusCode: Optional[bool] = None,
+        ignoreHTTPSErrors: Optional[bool] = None,
+        maxRedirects: Optional[int] = None,
     ) -> "APIResponse":
         assert (
             (1 if data else 0) + (1 if form else 0) + (1 if multipart else 0)
@@ -323,7 +323,7 @@ class APIRequestContext(ChannelOwner):
         # Cannot call allHeaders() here as the request may be paused inside route handler.
         headers_obj = headers or (request.headers if request else None)
         serialized_headers = serialize_headers(headers_obj) if headers_obj else None
-        json_data: Any = None
+        json_data: Optional[Any] = None
         form_data: Optional[List[NameValue]] = None
         multipart_data: Optional[List[FormField]] = None
         post_data_buffer: Optional[bytes] = None

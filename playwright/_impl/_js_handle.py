@@ -62,7 +62,9 @@ class JSHandle(ChannelOwner):
     def _on_preview_updated(self, preview: str) -> None:
         self._preview = preview
 
-    async def evaluate(self, expression: str, arg: Serializable = None) -> Any:
+    async def evaluate(
+        self, expression: str, arg: Optional[Serializable] = None
+    ) -> Any:
         return parse_result(
             await self._channel.send(
                 "evaluateExpression",
@@ -74,7 +76,7 @@ class JSHandle(ChannelOwner):
         )
 
     async def evaluate_handle(
-        self, expression: str, arg: Serializable = None
+        self, expression: str, arg: Optional[Serializable] = None
     ) -> "JSHandle":
         return from_channel(
             await self._channel.send(
@@ -159,7 +161,7 @@ def serialize_value(
     return dict(v="undefined")
 
 
-def serialize_argument(arg: Serializable = None) -> Any:
+def serialize_argument(arg: Optional[Serializable] = None) -> Any:
     handles: List[Channel] = []
     value = serialize_value(arg, handles)
     return dict(value=value, handles=handles)
