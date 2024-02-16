@@ -14,7 +14,6 @@
 
 import asyncio
 import json
-import sys
 from pathlib import Path
 from types import SimpleNamespace
 from typing import (
@@ -23,6 +22,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    Literal,
     Optional,
     Pattern,
     Sequence,
@@ -76,11 +76,6 @@ from playwright._impl._web_error import WebError
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser import Browser
-
-if sys.version_info >= (3, 8):  # pragma: no cover
-    from typing import Literal
-else:  # pragma: no cover
-    from typing_extensions import Literal
 
 
 class BrowserContext(ChannelOwner):

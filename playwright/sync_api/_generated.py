@@ -14,23 +14,18 @@
 
 
 import pathlib
-import sys
 from typing import (
     Any,
     Callable,
     Dict,
     List,
+    Literal,
     Optional,
     Pattern,
     Sequence,
     Union,
     overload,
 )
-
-if sys.version_info >= (3, 8):  # pragma: no cover
-    from typing import Literal
-else:  # pragma: no cover
-    from typing_extensions import Literal
 
 from playwright._impl._accessibility import Accessibility as AccessibilityImpl
 from playwright._impl._api_structures import (

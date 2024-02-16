@@ -12,13 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import sys
-from typing import Any, Dict, List, Optional, Sequence, Union
-
-if sys.version_info >= (3, 8):  # pragma: no cover
-    from typing import Literal, TypedDict
-else:  # pragma: no cover
-    from typing_extensions import Literal, TypedDict
+from typing import Any, Dict, List, Literal, Optional, Sequence, TypedDict, Union
 
 # These are the structures that we like keeping in a JSON form for their potential
 # reuse between SDKs / services. They are public and are a part of the

@@ -25,6 +25,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    Literal,
     Optional,
     Pattern,
     Sequence,
@@ -87,11 +88,6 @@ from playwright._impl._js_handle import (
 from playwright._impl._network import Request, Response, Route, serialize_headers
 from playwright._impl._video import Video
 from playwright._impl._waiter import Waiter
-
-if sys.version_info >= (3, 8):  # pragma: no cover
-    from typing import Literal
-else:  # pragma: no cover
-    from typing_extensions import Literal
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser_context import BrowserContext

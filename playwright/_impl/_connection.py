@@ -28,6 +28,7 @@ from typing import (
     List,
     Mapping,
     Optional,
+    TypedDict,
     Union,
     cast,
 )
@@ -44,12 +45,6 @@ from playwright._impl._transport import Transport
 if TYPE_CHECKING:
     from playwright._impl._local_utils import LocalUtils
     from playwright._impl._playwright import Playwright
-
-
-if sys.version_info >= (3, 8):  # pragma: no cover
-    from typing import TypedDict
-else:  # pragma: no cover
-    from typing_extensions import TypedDict
 
 
 class Channel(AsyncIOEventEmitter):

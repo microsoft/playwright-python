@@ -18,7 +18,6 @@ import inspect
 import json
 import json as json_utils
 import mimetypes
-import sys
 from collections import defaultdict
 from pathlib import Path
 from types import SimpleNamespace
@@ -30,15 +29,10 @@ from typing import (
     Dict,
     List,
     Optional,
+    TypedDict,
     Union,
     cast,
 )
-
-if sys.version_info >= (3, 8):  # pragma: no cover
-    from typing import TypedDict
-else:  # pragma: no cover
-    from typing_extensions import TypedDict
-
 from urllib import parse
 
 from playwright._impl._api_structures import (

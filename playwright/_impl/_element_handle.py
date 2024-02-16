@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import base64
-import sys
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
@@ -21,6 +20,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    Literal,
     Optional,
     Sequence,
     Union,
@@ -44,11 +44,6 @@ from playwright._impl._js_handle import (
     serialize_argument,
 )
 from playwright._impl._set_input_files_helpers import convert_input_files
-
-if sys.version_info >= (3, 8):  # pragma: no cover
-    from typing import Literal
-else:  # pragma: no cover
-    from typing_extensions import Literal
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._frame import Frame
