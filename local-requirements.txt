@@ -1,6 +1,6 @@
 auditwheel==6.0.0
 autobahn==23.1.2
-black==24.1.1
+black==24.2.0
 flake8==6.1.0
 flaky==3.7.0
 mypy==1.8.0
