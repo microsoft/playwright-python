@@ -20,10 +20,10 @@ import sys
 from pathlib import Path
 from types import SimpleNamespace
 from typing import (
-    Coroutine,
     TYPE_CHECKING,
     Any,
     Callable,
+    Coroutine,
     Dict,
     List,
     Literal,
@@ -33,6 +33,7 @@ from typing import (
     Union,
     cast,
 )
+
 from greenlet import greenlet
 
 from playwright._impl._accessibility import Accessibility
@@ -84,9 +85,9 @@ from playwright._impl._input import Keyboard, Mouse, Touchscreen
 from playwright._impl._js_handle import (
     JSHandle,
     Serializable,
+    add_source_url_to_script,
     parse_result,
     serialize_argument,
-    add_source_url_to_script,
 )
 from playwright._impl._network import Request, Response, Route, serialize_headers
 from playwright._impl._video import Video
@@ -181,7 +182,9 @@ class Page(ChannelOwner):
         )
         self._channel.on(
             "locatorHandlerTriggered",
-            lambda params: asyncio.create_task(self._on_locator_handler_triggered(params["uid"])),
+            lambda params: asyncio.create_task(
+                self._on_locator_handler_triggered(params["uid"])
+            ),
         )
         self._channel.on(
             "route",
@@ -202,17 +205,21 @@ class Page(ChannelOwner):
         self._closed_or_crashed_future: asyncio.Future = asyncio.Future()
         self.on(
             Page.Events.Close,
-            lambda _: self._closed_or_crashed_future.set_result(
-                self._close_error_with_reason()
-            )
-            if not self._closed_or_crashed_future.done()
-            else None,
+            lambda _: (
+                self._closed_or_crashed_future.set_result(
+                    self._close_error_with_reason()
+                )
+                if not self._closed_or_crashed_future.done()
+                else None
+            ),
         )
         self.on(
             Page.Events.Crash,
-            lambda _: self._closed_or_crashed_future.set_result(TargetClosedError())
-            if not self._closed_or_crashed_future.done()
-            else None,
+            lambda _: (
+                self._closed_or_crashed_future.set_result(TargetClosedError())
+                if not self._closed_or_crashed_future.done()
+                else None
+            ),
         )
 
         self._set_event_to_subscription_mapping(
@@ -575,7 +582,9 @@ class Page(ChannelOwner):
         self, script: str = None, path: Union[str, Path] = None
     ) -> None:
         if path:
-            script = add_source_url_to_script((await async_readfile(path)).decode(), path)
+            script = add_source_url_to_script(
+                (await async_readfile(path)).decode(), path
+            )
         if not isinstance(script, str):
             raise Error("Either path or script parameter must be specified")
         await self._channel.send("addInitScript", dict(source=script))
@@ -1248,14 +1257,19 @@ class Page(ChannelOwner):
                 trial=trial,
             )
 
-    async def add_locator_handler(self, locator: "Locator", handler: Callable[[], Any]) -> None:
+    async def add_locator_handler(
+        self, locator: "Locator", handler: Callable[[], Any]
+    ) -> None:
         if locator._frame != self._main_frame:
             raise Error("Locator must belong to the main frame of this page")
-        uid = await self._channel.send("registerLocatorHandler", {
-            "selector": locator._selector,
-        })
+        uid = await self._channel.send(
+            "registerLocatorHandler",
+            {
+                "selector": locator._selector,
+            },
+        )
         self._locator_handlers[uid] = handler
-    
+
     async def _on_locator_handler_triggered(self, uid: str) -> None:
         try:
             if self._dispatcher_fiber:
@@ -1267,9 +1281,13 @@ class Page(ChannelOwner):
             else:
                 await self._locator_handlers[uid]()
         finally:
-            await self._connection.wrap_api_call(lambda: self._channel.send("resolveLocatorHandlerNoReply", {
-                "uid": uid
-            }), is_internal=True)
+            await self._connection.wrap_api_call(
+                lambda: self._channel.send(
+                    "resolveLocatorHandlerNoReply", {"uid": uid}
+                ),
+                is_internal=True,
+            )
+
 
 class Worker(ChannelOwner):
     Events = SimpleNamespace(Close="close")

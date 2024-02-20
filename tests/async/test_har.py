@@ -753,8 +753,11 @@ async def test_should_update_extracted_har_zip_for_page(
         "background-color", "rgb(255, 192, 203)"
     )
 
+
 async def test_should_ignore_aborted_requests(
-    context_factory: Callable[[], Awaitable[BrowserContext]], server: Server, tmpdir: Path
+    context_factory: Callable[[], Awaitable[BrowserContext]],
+    server: Server,
+    tmpdir: Path,
 ) -> None:
     path = tmpdir / "test.har"
     server.set_route("/x", lambda request: request.transport.loseConnection())
@@ -763,32 +766,41 @@ async def test_should_ignore_aborted_requests(
     page1 = await context1.new_page()
     await page1.goto(server.EMPTY_PAGE)
     req_promise = asyncio.create_task(server.wait_for_request("/x"))
-    eval_task = asyncio.create_task(page1.evaluate(
-        "url => fetch(url).catch(e => 'cancelled')", server.PREFIX + "/x"
-    ))
+    eval_task = asyncio.create_task(
+        page1.evaluate(
+            "url => fetch(url).catch(e => 'cancelled')", server.PREFIX + "/x"
+        )
+    )
     await req_promise
     req = await eval_task
     assert req == "cancelled"
     await context1.close()
 
     server.reset()
+
     def _handle_route(req: TestServerRequest) -> None:
         req.setHeader("Content-Type", "text/plain")
         req.write(b"test")
         req.finish()
+
     server.set_route("/x", _handle_route)
     context2 = await context_factory()
     await context2.route_from_har(path)
     page2 = await context2.new_page()
     await page2.goto(server.EMPTY_PAGE)
-    eval_task = asyncio.create_task(page2.evaluate(
-        "url => fetch(url).catch(e => 'cancelled')", server.PREFIX + "/x"
-    ))
+    eval_task = asyncio.create_task(
+        page2.evaluate(
+            "url => fetch(url).catch(e => 'cancelled')", server.PREFIX + "/x"
+        )
+    )
+
     async def _timeout() -> str:
         await asyncio.sleep(1)
         return "timeout"
+
     done, _ = await asyncio.wait(
-        [eval_task, asyncio.create_task(_timeout())], return_when=asyncio.FIRST_COMPLETED
+        [eval_task, asyncio.create_task(_timeout())],
+        return_when=asyncio.FIRST_COMPLETED,
     )
     assert next(iter(done)).result() == "timeout"
     eval_task.cancel()

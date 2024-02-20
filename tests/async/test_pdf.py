@@ -18,16 +18,30 @@ from pathlib import Path
 import pytest
 
 from playwright.async_api import Page
+from tests.server import Server
+
+pytestmark = pytest.mark.only_browser("chromium")
 
 
-@pytest.mark.only_browser("chromium")
 async def test_should_be_able_to_save_pdf_file(page: Page, tmpdir: Path) -> None:
     output_file = tmpdir / "foo.png"
     await page.pdf(path=str(output_file))
     assert os.path.getsize(output_file) > 0
 
 
-@pytest.mark.only_browser("chromium")
 async def test_should_be_able_capture_pdf_without_path(page: Page) -> None:
     buffer = await page.pdf()
     assert buffer
+
+
+async def test_should_be_able_to_generate_outline(
+    page: Page, server: Server, tmpdir: Path
+) -> None:
+    await page.goto(server.PREFIX + "/headings.html")
+    output_file_no_outline = tmpdir / "outputNoOutline.pdf"
+    output_file_outline = tmpdir / "outputOutline.pdf"
+    await page.pdf(path=output_file_no_outline)
+    await page.pdf(path=output_file_outline, tagged=True, outline=True)
+    assert os.path.getsize(output_file_outline) > os.path.getsize(
+        output_file_no_outline
+    )

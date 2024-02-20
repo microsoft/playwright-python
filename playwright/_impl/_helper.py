@@ -54,10 +54,6 @@ RouteHandlerCallback = Union[
     Callable[["Route"], Any], Callable[["Route", "Request"], Any]
 ]
 
-# Parameter type mismatch in Page.route(handler=): 
-# documented as Callable[[Route, Request], Union[Any, Coroutine]], code has 
-# Union[Callable[[Route, Request], Any], Callable[[Route], Any]]
-
 ColorScheme = Literal["dark", "light", "no-preference", "null"]
 ForcedColors = Literal["active", "none", "null"]
 ReducedMotion = Literal["no-preference", "null", "reduce"]
