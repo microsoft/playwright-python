@@ -1273,9 +1273,7 @@ class Page(ChannelOwner):
     async def _on_locator_handler_triggered(self, uid: str) -> None:
         try:
             if self._dispatcher_fiber:
-                breakpoint()
                 coro = self._locator_handlers[uid]()
-                breakpoint()
                 g = greenlet(coro)
                 g.switch()
             else:
