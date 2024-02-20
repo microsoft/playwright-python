@@ -20,6 +20,7 @@ import sys
 from pathlib import Path
 from types import SimpleNamespace
 from typing import (
+    Coroutine,
     TYPE_CHECKING,
     Any,
     Callable,
@@ -32,6 +33,7 @@ from typing import (
     Union,
     cast,
 )
+from greenlet import greenlet
 
 from playwright._impl._accessibility import Accessibility
 from playwright._impl._api_structures import (
@@ -84,6 +86,7 @@ from playwright._impl._js_handle import (
     Serializable,
     parse_result,
     serialize_argument,
+    add_source_url_to_script,
 )
 from playwright._impl._network import Request, Response, Route, serialize_headers
 from playwright._impl._video import Video
@@ -150,6 +153,7 @@ class Page(ChannelOwner):
         self._close_reason: Optional[str] = None
         self._close_was_called = False
         self._har_routers: List[HarRouter] = []
+        self._locator_handlers: Dict[str, Callable[[], Coroutine]] = {}
 
         self._channel.on(
             "bindingCall",
@@ -174,6 +178,10 @@ class Page(ChannelOwner):
         self._channel.on(
             "frameDetached",
             lambda params: self._on_frame_detached(from_channel(params["frame"])),
+        )
+        self._channel.on(
+            "locatorHandlerTriggered",
+            lambda params: asyncio.create_task(self._on_locator_handler_triggered(params["uid"])),
         )
         self._channel.on(
             "route",
@@ -567,7 +575,7 @@ class Page(ChannelOwner):
         self, script: str = None, path: Union[str, Path] = None
     ) -> None:
         if path:
-            script = (await async_readfile(path)).decode()
+            script = add_source_url_to_script((await async_readfile(path)).decode(), path)
         if not isinstance(script, str):
             raise Error("Either path or script parameter must be specified")
         await self._channel.send("addInitScript", dict(source=script))
@@ -1029,6 +1037,8 @@ class Page(ChannelOwner):
         preferCSSPageSize: bool = None,
         margin: PdfMargins = None,
         path: Union[str, Path] = None,
+        outline: bool = None,
+        tagged: bool = None,
     ) -> bytes:
         params = locals_to_params(locals())
         if "path" in params:
@@ -1238,6 +1248,28 @@ class Page(ChannelOwner):
                 trial=trial,
             )
 
+    async def add_locator_handler(self, locator: "Locator", handler: Callable[[], Any]) -> None:
+        if locator._frame != self._main_frame:
+            raise Error("Locator must belong to the main frame of this page")
+        uid = await self._channel.send("registerLocatorHandler", {
+            "selector": locator._selector,
+        })
+        self._locator_handlers[uid] = handler
+    
+    async def _on_locator_handler_triggered(self, uid: str) -> None:
+        try:
+            if self._dispatcher_fiber:
+                breakpoint()
+                coro = self._locator_handlers[uid]()
+                breakpoint()
+                g = greenlet(coro)
+                g.switch()
+            else:
+                await self._locator_handlers[uid]()
+        finally:
+            await self._connection.wrap_api_call(lambda: self._channel.send("resolveLocatorHandlerNoReply", {
+                "uid": uid
+            }), is_internal=True)
 
 class Worker(ChannelOwner):
     Events = SimpleNamespace(Close="close")

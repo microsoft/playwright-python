@@ -55,6 +55,7 @@ from playwright._impl._js_handle import (
     Serializable,
     parse_result,
     serialize_argument,
+    add_source_url_to_script,
 )
 from playwright._impl._locator import (
     FrameLocator,
@@ -450,11 +451,7 @@ class Frame(ChannelOwner):
     ) -> ElementHandle:
         params = locals_to_params(locals())
         if path:
-            params["content"] = (
-                (await async_readfile(path)).decode()
-                + "\n//# sourceURL="
-                + str(Path(path))
-            )
+            params["content"] = add_source_url_to_script((await async_readfile(path)).decode(), path)
             del params["path"]
         return from_channel(await self._channel.send("addScriptTag", params))
 
