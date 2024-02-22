@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import asyncio
-
 import pytest
 
 from playwright.sync_api import Error, Page, expect
@@ -147,13 +145,15 @@ def test_should_throw_when_handler_times_out(page: Page, server: Server) -> None
     page.goto(server.PREFIX + "/input/handle-locator.html")
 
     called = 0
-    stall_future: asyncio.Future[None] = asyncio.Future()
 
     def handler() -> None:
         nonlocal called
         called += 1
         # Deliberately timeout.
-        stall_future
+        try:
+            page.wait_for_timeout(9999999)
+        except Error:
+            pass
 
     page.add_locator_handler(
         page.get_by_text("This interstitial covers the button"), handler
@@ -173,7 +173,6 @@ def test_should_throw_when_handler_times_out(page: Page, server: Server) -> None
 
     # Should not enter the same handler while it is still running.
     assert called == 1
-    stall_future.cancel()
 
 
 def test_should_work_with_to_be_visible(page: Page, server: Server) -> None:

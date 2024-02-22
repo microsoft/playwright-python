@@ -34,8 +34,6 @@ from typing import (
     cast,
 )
 
-from greenlet import greenlet
-
 from playwright._impl._accessibility import Accessibility
 from playwright._impl._api_structures import (
     AriaRole,
@@ -58,6 +56,7 @@ from playwright._impl._errors import Error, TargetClosedError, is_target_closed_
 from playwright._impl._event_context_manager import EventContextManagerImpl
 from playwright._impl._file_chooser import FileChooser
 from playwright._impl._frame import Frame
+from playwright._impl._greenlets import LocatorHandlerGreenlet
 from playwright._impl._har_router import HarRouter
 from playwright._impl._helper import (
     ColorScheme,
@@ -1273,18 +1272,30 @@ class Page(ChannelOwner):
     async def _on_locator_handler_triggered(self, uid: str) -> None:
         try:
             if self._dispatcher_fiber:
-                coro = self._locator_handlers[uid]()
-                g = greenlet(coro)
+                handler_finished_future = self._loop.create_future()
+
+                def _handler() -> None:
+                    try:
+                        self._locator_handlers[uid]()  # type: ignore
+                        handler_finished_future.set_result(None)
+                    except Exception as e:
+                        handler_finished_future.set_exception(e)
+
+                g = LocatorHandlerGreenlet(_handler)
                 g.switch()
+                await handler_finished_future
             else:
                 await self._locator_handlers[uid]()
         finally:
-            await self._connection.wrap_api_call(
-                lambda: self._channel.send(
-                    "resolveLocatorHandlerNoReply", {"uid": uid}
-                ),
-                is_internal=True,
-            )
+            try:
+                await self._connection.wrap_api_call(
+                    lambda: self._channel.send(
+                        "resolveLocatorHandlerNoReply", {"uid": uid}
+                    ),
+                    is_internal=True,
+                )
+            except Error:
+                pass
 
 
 class Worker(ChannelOwner):

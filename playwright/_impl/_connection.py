@@ -33,12 +33,12 @@ from typing import (
     cast,
 )
 
-from greenlet import greenlet
 from pyee import EventEmitter
 from pyee.asyncio import AsyncIOEventEmitter
 
 import playwright
 from playwright._impl._errors import TargetClosedError
+from playwright._impl._greenlets import EventGreenlet
 from playwright._impl._helper import Error, ParsedMessagePayload, parse_error
 from playwright._impl._transport import Transport
 
@@ -417,7 +417,7 @@ class Connection(EventEmitter):
                     # Each event handler is a potentilly blocking context, create a fiber for each
                     # and switch to them in order, until they block inside and pass control to each
                     # other and then eventually back to dispatcher as listener functions return.
-                    g = greenlet(listener)
+                    g = EventGreenlet(listener)
                     if should_replace_guids_with_channels:
                         g.switch(self._replace_guids_with_channels(params))
                     else:
