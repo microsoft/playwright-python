@@ -23,7 +23,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Coroutine,
     Dict,
     List,
     Literal,
@@ -153,7 +152,7 @@ class Page(ChannelOwner):
         self._close_reason: Optional[str] = None
         self._close_was_called = False
         self._har_routers: List[HarRouter] = []
-        self._locator_handlers: Dict[str, Callable[[], Coroutine]] = {}
+        self._locator_handlers: Dict[str, Callable] = {}
 
         self._channel.on(
             "bindingCall",
@@ -1256,9 +1255,7 @@ class Page(ChannelOwner):
                 trial=trial,
             )
 
-    async def add_locator_handler(
-        self, locator: "Locator", handler: Callable[[], Any]
-    ) -> None:
+    async def add_locator_handler(self, locator: "Locator", handler: Callable) -> None:
         if locator._frame != self._main_frame:
             raise Error("Locator must belong to the main frame of this page")
         uid = await self._channel.send(
@@ -1276,7 +1273,7 @@ class Page(ChannelOwner):
 
                 def _handler() -> None:
                     try:
-                        self._locator_handlers[uid]()  # type: ignore
+                        self._locator_handlers[uid]()
                         handler_finished_future.set_result(None)
                     except Exception as e:
                         handler_finished_future.set_exception(e)
@@ -1285,7 +1282,10 @@ class Page(ChannelOwner):
                 g.switch()
                 await handler_finished_future
             else:
-                await self._locator_handlers[uid]()
+                coro_or_future = self._locator_handlers[uid]()
+                if coro_or_future:
+                    await coro_or_future
+
         finally:
             try:
                 await self._connection.wrap_api_call(

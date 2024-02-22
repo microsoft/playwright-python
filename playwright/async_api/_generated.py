@@ -11665,7 +11665,7 @@ class Page(AsyncContextManager):
         )
 
     async def add_locator_handler(
-        self, locator: "Locator", handler: typing.Callable[[], typing.Any]
+        self, locator: "Locator", handler: typing.Callable
     ) -> None:
         """Page.add_locator_handler
 
@@ -11741,7 +11741,7 @@ class Page(AsyncContextManager):
         ----------
         locator : Locator
             Locator that triggers the handler.
-        handler : Callable[[], Any]
+        handler : Callable
             Function that should be run once `locator` appears. This function should get rid of the element that blocks actions
             like click.
         """

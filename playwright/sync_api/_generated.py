@@ -11749,9 +11749,7 @@ class Page(SyncContextManager):
             )
         )
 
-    def add_locator_handler(
-        self, locator: "Locator", handler: typing.Callable[[], typing.Any]
-    ) -> None:
+    def add_locator_handler(self, locator: "Locator", handler: typing.Callable) -> None:
         """Page.add_locator_handler
 
         Sometimes, the web page can show an overlay that obstructs elements behind it and prevents certain actions, like
@@ -11826,7 +11824,7 @@ class Page(SyncContextManager):
         ----------
         locator : Locator
             Locator that triggers the handler.
-        handler : Callable[[], Any]
+        handler : Callable
             Function that should be run once `locator` appears. This function should get rid of the element that blocks actions
             like click.
         """
