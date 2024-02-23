@@ -55,7 +55,7 @@ def browser_type(
         browser_type = playwright.firefox
     elif browser_name == "webkit":
         browser_type = playwright.webkit
-    assert browser_type
+    assert browser_type, f"Unkown browser name '{browser_name}'"
     yield browser_type
 
 

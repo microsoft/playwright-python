@@ -15,7 +15,8 @@
 import collections.abc
 import math
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from urllib.parse import ParseResult, urlparse, urlunparse
 
 from playwright._impl._connection import Channel, ChannelOwner, from_channel
@@ -226,3 +227,7 @@ def parse_value(value: Any, refs: Optional[Dict[int, Any]] = None) -> Any:
 
 def parse_result(result: Any) -> Any:
     return parse_value(result)
+
+
+def add_source_url_to_script(source: str, path: Union[str, Path]) -> str:
+    return source + "\n//# sourceURL=" + str(path).replace("\n", "")

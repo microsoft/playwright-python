@@ -36,11 +36,10 @@ from typing import (
 )
 from urllib.parse import urljoin
 
-from greenlet import greenlet
-
 from playwright._impl._api_structures import NameValue
 from playwright._impl._errors import Error, TargetClosedError, TimeoutError
 from playwright._impl._glob import glob_to_regex
+from playwright._impl._greenlets import RouteGreenlet
 from playwright._impl._str_utils import escape_regex_flags
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -302,7 +301,7 @@ class RouteHandler:
         if self._is_sync:
             # As with event handlers, each route handler is a potentially blocking context
             # so it needs a fiber.
-            g = greenlet(lambda: self.handler(route, route.request))  # type: ignore
+            g = RouteGreenlet(lambda: self.handler(route, route.request))  # type: ignore
             g.switch()
         else:
             coro_or_future = self.handler(route, route.request)  # type: ignore

@@ -16,7 +16,8 @@ import asyncio
 import json
 from pathlib import Path
 
-from playwright.async_api import Browser, BrowserContext
+from playwright.async_api import Browser, BrowserContext, Page
+from tests.server import Server
 
 
 async def test_should_capture_local_storage(context: BrowserContext) -> None:
@@ -99,3 +100,15 @@ async def test_should_round_trip_through_the_file(
     cookie = await page2.evaluate("document.cookie")
     assert cookie == "username=John Doe"
     await context2.close()
+
+
+async def test_should_serialiser_storage_state_with_lone_surrogates(
+    page: Page, context: BrowserContext, server: Server
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+    await page.evaluate(
+        """chars => window.localStorage.setItem('foo', String.fromCharCode(55934))"""
+    )
+    storage_state = await context.storage_state()
+    # 65533 is the Unicode replacement character
+    assert storage_state["origins"][0]["localStorage"][0]["value"] == chr(65533)
