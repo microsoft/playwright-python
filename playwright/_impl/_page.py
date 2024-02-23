@@ -262,9 +262,16 @@ class Page(ChannelOwner):
                 handled = await route_handler.handle(route)
             finally:
                 if len(self._routes) == 0:
+
+                    async def _update_interceptor_patterns_ignore_exceptions() -> None:
+                        try:
+                            await self._update_interception_patterns()
+                        except Error:
+                            pass
+
                     asyncio.create_task(
                         self._connection.wrap_api_call(
-                            lambda: self._update_interception_patterns(), True
+                            _update_interceptor_patterns_ignore_exceptions, True
                         )
                     )
             if handled:
