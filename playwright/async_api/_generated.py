@@ -15,7 +15,7 @@
 
 import pathlib
 import typing
-from typing import Literal
+from typing import AsyncIterator, Literal
 
 from playwright._impl._accessibility import Accessibility as AccessibilityImpl
 from playwright._impl._api_structures import (
@@ -6851,6 +6851,15 @@ class Download(AsyncBase):
         """
 
         return mapping.from_maybe_impl(await self._impl_obj.save_as(path=path))
+
+    async def read_stream(self) -> AsyncIterator[bytes]:
+        """Download.read_stream
+
+        Yields a readable stream chunks for a successful download, or throws for a failed/canceled download.
+        """
+
+        async for chunk in mapping.from_maybe_impl(self._impl_obj.read_stream()):
+            yield chunk
 
     async def cancel(self) -> None:
         """Download.cancel
