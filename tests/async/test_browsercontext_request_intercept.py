@@ -189,5 +189,6 @@ async def test_should_show_exception_after_fulfill(page: Page, server: Server) -
 
     await page.route("*/**", _handle)
     await page.goto(server.EMPTY_PAGE)
+    # Any next API call should throw because handler did throw during previous goto()
     with pytest.raises(Exception, match="Exception text!?"):
         await page.goto(server.EMPTY_PAGE)

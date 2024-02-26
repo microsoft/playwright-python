@@ -451,6 +451,7 @@ class Connection(EventEmitter):
     def _on_event_listener_error(self, exc: BaseException) -> None:
         print("Error occurred in event listener", file=sys.stderr)
         traceback.print_exception(type(exc), exc, exc.__traceback__, file=sys.stderr)
+        # Save the error to throw at the next API call. This "replicates" unhandled rejection in Node.js.
         self._error = exc
 
     def _create_remote_object(
