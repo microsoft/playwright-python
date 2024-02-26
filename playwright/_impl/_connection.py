@@ -334,20 +334,22 @@ class Connection(EventEmitter):
                 "line": frames[0]["line"],
                 "column": frames[0]["column"],
             }
-            if len(frames) > 0
+            if frames
             else None
         )
+        metadata = {
+            "wallTime": int(datetime.datetime.now().timestamp() * 1000),
+            "apiName": stack_trace_information["apiName"],
+            "internal": not stack_trace_information["apiName"],
+        }
+        if location:
+            metadata["location"] = location  # type: ignore
         message = {
             "id": id,
             "guid": object._guid,
             "method": method,
             "params": self._replace_channels_with_guids(params),
-            "metadata": {
-                "wallTime": int(datetime.datetime.now().timestamp() * 1000),
-                "apiName": stack_trace_information["apiName"],
-                "location": location,
-                "internal": not stack_trace_information["apiName"],
-            },
+            "metadata": metadata,
         }
         if self._tracing_count > 0 and frames and object._guid != "localUtils":
             self.local_utils.add_stack_to_tracing_no_reply(id, frames)
