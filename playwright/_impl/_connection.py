@@ -78,14 +78,13 @@ class Channel(AsyncIOEventEmitter):
     ) -> Any:
         if params is None:
             params = {}
-        callback = self._connection._send_message_to_server(
-            self._object, method, _filter_none(params)
-        )
         if self._connection._error:
             error = self._connection._error
             self._connection._error = None
-            callback.future.cancel()
             raise error
+        callback = self._connection._send_message_to_server(
+            self._object, method, _filter_none(params)
+        )
         done, _ = await asyncio.wait(
             {
                 self._connection._transport.on_error_future,
