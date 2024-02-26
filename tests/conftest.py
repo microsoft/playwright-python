@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import asyncio
 import inspect
 import io
 import json
@@ -39,13 +38,6 @@ def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
     if "browser_name" in metafunc.fixturenames:
         browsers = metafunc.config.option.browser or ["chromium", "firefox", "webkit"]
         metafunc.parametrize("browser_name", browsers, scope="session")
-
-
-@pytest.fixture(scope="session")
-def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
-    loop = asyncio.get_event_loop()
-    yield loop
-    loop.close()
 
 
 @pytest.fixture(scope="session")

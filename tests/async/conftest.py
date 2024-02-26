@@ -31,6 +31,13 @@ from .utils import Utils
 from .utils import utils as utils_object
 
 
+@pytest.fixture(scope="session")
+def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
+    loop = asyncio.get_event_loop()
+    yield loop
+    loop.close()
+
+
 @pytest.fixture
 def utils() -> Generator[Utils, None, None]:
     yield utils_object
