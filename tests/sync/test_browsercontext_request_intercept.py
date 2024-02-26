@@ -14,6 +14,7 @@
 
 from pathlib import Path
 
+import pytest
 from twisted.web import http
 
 from playwright.sync_api import BrowserContext, Page, Route
@@ -121,3 +122,15 @@ def test_should_support_fulfill_after_intercept(
     assert request.uri.decode() == "/title.html"
     original = (assetdir / "title.html").read_text()
     assert response.text() == original
+
+
+def test_should_show_exception_after_fulfill(page: Page, server: Server) -> None:
+    def _handle(route: Route) -> None:
+        route.continue_()
+        raise Exception("Exception text!?")
+
+    page.route("*/**", _handle)
+    page.goto(server.EMPTY_PAGE)
+    # Any next API call should throw because handler did throw during previous goto()
+    with pytest.raises(Exception, match="Exception text!?"):
+        page.goto(server.EMPTY_PAGE)

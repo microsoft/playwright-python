@@ -53,6 +53,7 @@ class Channel(AsyncIOEventEmitter):
         self._connection = connection
         self._guid = object._guid
         self._object = object
+        self.on("error", lambda exc: self._connection._on_event_listener_error(exc))
 
     async def send(self, method: str, params: Dict = None) -> Any:
         return await self._connection.wrap_api_call(
@@ -77,13 +78,13 @@ class Channel(AsyncIOEventEmitter):
     ) -> Any:
         if params is None:
             params = {}
-        callback = self._connection._send_message_to_server(
-            self._object, method, _filter_none(params)
-        )
         if self._connection._error:
             error = self._connection._error
             self._connection._error = None
             raise error
+        callback = self._connection._send_message_to_server(
+            self._object, method, _filter_none(params)
+        )
         done, _ = await asyncio.wait(
             {
                 self._connection._transport.on_error_future,
@@ -416,10 +417,22 @@ class Connection(EventEmitter):
         try:
             if self._is_sync:
                 for listener in object._channel.listeners(method):
+                    # Event handlers like route/locatorHandlerTriggered require us to perform async work.
+                    # In order to report their potential errors to the user, we need to catch it and store it in the connection
+                    def _done_callback(future: asyncio.Future) -> None:
+                        exc = future.exception()
+                        if exc:
+                            self._on_event_listener_error(exc)
+
+                    def _listener_with_error_handler_attached(params: Any) -> None:
+                        potential_future = listener(params)
+                        if asyncio.isfuture(potential_future):
+                            potential_future.add_done_callback(_done_callback)
+
                     # Each event handler is a potentilly blocking context, create a fiber for each
                     # and switch to them in order, until they block inside and pass control to each
                     # other and then eventually back to dispatcher as listener functions return.
-                    g = EventGreenlet(listener)
+                    g = EventGreenlet(_listener_with_error_handler_attached)
                     if should_replace_guids_with_channels:
                         g.switch(self._replace_guids_with_channels(params))
                     else:
@@ -432,9 +445,13 @@ class Connection(EventEmitter):
                 else:
                     object._channel.emit(method, params)
         except BaseException as exc:
-            print("Error occurred in event listener", file=sys.stderr)
-            traceback.print_exc()
-            self._error = exc
+            self._on_event_listener_error(exc)
+
+    def _on_event_listener_error(self, exc: BaseException) -> None:
+        print("Error occurred in event listener", file=sys.stderr)
+        traceback.print_exception(type(exc), exc, exc.__traceback__, file=sys.stderr)
+        # Save the error to throw at the next API call. This "replicates" unhandled rejection in Node.js.
+        self._error = exc
 
     def _create_remote_object(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
