@@ -343,7 +343,7 @@ class Connection(EventEmitter):
             "internal": not stack_trace_information["apiName"],
         }
         if location:
-            metadata["location"] = location # type: ignore
+            metadata["location"] = location  # type: ignore
         message = {
             "id": id,
             "guid": object._guid,
