@@ -760,7 +760,7 @@ async def test_should_ignore_aborted_requests(
     tmpdir: Path,
 ) -> None:
     path = tmpdir / "test.har"
-    server.set_route("/x", lambda request: request.transport.loseConnection())
+    server.set_route("/x", lambda request: request.loseConnection())
     context1 = await context_factory()
     await context1.route_from_har(har=path, update=True)
     page1 = await context1.new_page()

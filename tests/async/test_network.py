@@ -633,7 +633,7 @@ async def test_network_events_request_failed(
 ) -> None:
     def handle_request(request: TestServerRequest) -> None:
         request.setHeader("Content-Type", "text/css")
-        request.transport.loseConnection()
+        request.loseConnection()
 
     server.set_route("/one-style.css", handle_request)
 
