@@ -129,7 +129,7 @@ def serialize_value(
         if math.isnan(value):
             return dict(v="NaN")
     if isinstance(value, datetime):
-        return dict(d=value.isoformat())
+        return dict(d=value.isoformat() + "Z")
     if isinstance(value, bool):
         return {"b": value}
     if isinstance(value, (int, float)):
