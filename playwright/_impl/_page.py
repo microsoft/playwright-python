@@ -55,6 +55,7 @@ from playwright._impl._errors import Error, TargetClosedError, is_target_closed_
 from playwright._impl._event_context_manager import EventContextManagerImpl
 from playwright._impl._file_chooser import FileChooser
 from playwright._impl._frame import Frame
+from playwright._impl._greenlets import LocatorHandlerGreenlet
 from playwright._impl._har_router import HarRouter
 from playwright._impl._helper import (
     ColorScheme,
@@ -82,6 +83,7 @@ from playwright._impl._input import Keyboard, Mouse, Touchscreen
 from playwright._impl._js_handle import (
     JSHandle,
     Serializable,
+    add_source_url_to_script,
     parse_result,
     serialize_argument,
 )
@@ -150,6 +152,7 @@ class Page(ChannelOwner):
         self._close_reason: Optional[str] = None
         self._close_was_called = False
         self._har_routers: List[HarRouter] = []
+        self._locator_handlers: Dict[str, Callable] = {}
 
         self._channel.on(
             "bindingCall",
@@ -176,8 +179,14 @@ class Page(ChannelOwner):
             lambda params: self._on_frame_detached(from_channel(params["frame"])),
         )
         self._channel.on(
+            "locatorHandlerTriggered",
+            lambda params: self._loop.create_task(
+                self._on_locator_handler_triggered(params["uid"])
+            ),
+        )
+        self._channel.on(
             "route",
-            lambda params: asyncio.create_task(
+            lambda params: self._loop.create_task(
                 self._on_route(from_channel(params["route"]))
             ),
         )
@@ -194,17 +203,21 @@ class Page(ChannelOwner):
         self._closed_or_crashed_future: asyncio.Future = asyncio.Future()
         self.on(
             Page.Events.Close,
-            lambda _: self._closed_or_crashed_future.set_result(
-                self._close_error_with_reason()
-            )
-            if not self._closed_or_crashed_future.done()
-            else None,
+            lambda _: (
+                self._closed_or_crashed_future.set_result(
+                    self._close_error_with_reason()
+                )
+                if not self._closed_or_crashed_future.done()
+                else None
+            ),
         )
         self.on(
             Page.Events.Crash,
-            lambda _: self._closed_or_crashed_future.set_result(TargetClosedError())
-            if not self._closed_or_crashed_future.done()
-            else None,
+            lambda _: (
+                self._closed_or_crashed_future.set_result(TargetClosedError())
+                if not self._closed_or_crashed_future.done()
+                else None
+            ),
         )
 
         self._set_event_to_subscription_mapping(
@@ -249,9 +262,16 @@ class Page(ChannelOwner):
                 handled = await route_handler.handle(route)
             finally:
                 if len(self._routes) == 0:
+
+                    async def _update_interceptor_patterns_ignore_exceptions() -> None:
+                        try:
+                            await self._update_interception_patterns()
+                        except Error:
+                            pass
+
                     asyncio.create_task(
                         self._connection.wrap_api_call(
-                            lambda: self._update_interception_patterns(), True
+                            _update_interceptor_patterns_ignore_exceptions, True
                         )
                     )
             if handled:
@@ -567,7 +587,9 @@ class Page(ChannelOwner):
         self, script: str = None, path: Union[str, Path] = None
     ) -> None:
         if path:
-            script = (await async_readfile(path)).decode()
+            script = add_source_url_to_script(
+                (await async_readfile(path)).decode(), path
+            )
         if not isinstance(script, str):
             raise Error("Either path or script parameter must be specified")
         await self._channel.send("addInitScript", dict(source=script))
@@ -1029,6 +1051,8 @@ class Page(ChannelOwner):
         preferCSSPageSize: bool = None,
         margin: PdfMargins = None,
         path: Union[str, Path] = None,
+        outline: bool = None,
+        tagged: bool = None,
     ) -> bytes:
         params = locals_to_params(locals())
         if "path" in params:
@@ -1237,6 +1261,48 @@ class Page(ChannelOwner):
                 strict=strict,
                 trial=trial,
             )
+
+    async def add_locator_handler(self, locator: "Locator", handler: Callable) -> None:
+        if locator._frame != self._main_frame:
+            raise Error("Locator must belong to the main frame of this page")
+        uid = await self._channel.send(
+            "registerLocatorHandler",
+            {
+                "selector": locator._selector,
+            },
+        )
+        self._locator_handlers[uid] = handler
+
+    async def _on_locator_handler_triggered(self, uid: str) -> None:
+        try:
+            if self._dispatcher_fiber:
+                handler_finished_future = self._loop.create_future()
+
+                def _handler() -> None:
+                    try:
+                        self._locator_handlers[uid]()
+                        handler_finished_future.set_result(None)
+                    except Exception as e:
+                        handler_finished_future.set_exception(e)
+
+                g = LocatorHandlerGreenlet(_handler)
+                g.switch()
+                await handler_finished_future
+            else:
+                coro_or_future = self._locator_handlers[uid]()
+                if coro_or_future:
+                    await coro_or_future
+
+        finally:
+            try:
+                await self._connection.wrap_api_call(
+                    lambda: self._channel.send(
+                        "resolveLocatorHandlerNoReply", {"uid": uid}
+                    ),
+                    is_internal=True,
+                )
+            except Error:
+                pass
 
 
 class Worker(ChannelOwner):

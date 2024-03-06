@@ -1251,8 +1251,8 @@ class Keyboard(SyncBase):
         If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
         texts.
 
-        Shortcuts such as `key: \"Control+o\"` or `key: \"Control+Shift+T\"` are supported as well. When specified with the
-        modifier, modifier is pressed and being held while the subsequent key is being pressed.
+        Shortcuts such as `key: \"Control+o\"`, `key: \"Control++` or `key: \"Control+Shift+T\"` are supported as well. When
+        specified with the modifier, modifier is pressed and being held while the subsequent key is being pressed.
 
         **Usage**
 
@@ -2410,8 +2410,8 @@ class ElementHandle(JSHandle):
         If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
         texts.
 
-        Shortcuts such as `key: \"Control+o\"` or `key: \"Control+Shift+T\"` are supported as well. When specified with the
-        modifier, modifier is pressed and being held while the subsequent key is being pressed.
+        Shortcuts such as `key: \"Control+o\"`, `key: \"Control++` or `key: \"Control+Shift+T\"` are supported as well. When
+        specified with the modifier, modifier is pressed and being held while the subsequent key is being pressed.
 
         Parameters
         ----------
@@ -5608,8 +5608,8 @@ class Frame(SyncBase):
         If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
         texts.
 
-        Shortcuts such as `key: \"Control+o\"` or `key: \"Control+Shift+T\"` are supported as well. When specified with the
-        modifier, modifier is pressed and being held while the subsequent key is being pressed.
+        Shortcuts such as `key: \"Control+o\"`, `key: \"Control++` or `key: \"Control+Shift+T\"` are supported as well. When
+        specified with the modifier, modifier is pressed and being held while the subsequent key is being pressed.
 
         Parameters
         ----------
@@ -7026,8 +7026,7 @@ class Page(SyncContextManager):
         self, event: Literal["console"], f: typing.Callable[["ConsoleMessage"], "None"]
     ) -> None:
         """
-        Emitted when JavaScript within the page calls one of console API methods, e.g. `console.log` or `console.dir`. Also
-        emitted if the page throws an error or a warning.
+        Emitted when JavaScript within the page calls one of console API methods, e.g. `console.log` or `console.dir`.
 
         The arguments passed into `console.log` are available on the `ConsoleMessage` event handler argument.
 
@@ -7241,8 +7240,7 @@ class Page(SyncContextManager):
         self, event: Literal["console"], f: typing.Callable[["ConsoleMessage"], "None"]
     ) -> None:
         """
-        Emitted when JavaScript within the page calls one of console API methods, e.g. `console.log` or `console.dir`. Also
-        emitted if the page throws an error or a warning.
+        Emitted when JavaScript within the page calls one of console API methods, e.g. `console.log` or `console.dir`.
 
         The arguments passed into `console.log` are available on the `ConsoleMessage` event handler argument.
 
@@ -9103,7 +9101,7 @@ class Page(SyncContextManager):
         some post data, and leaving all other requests as is:
 
         ```py
-        def handle_route(route):
+        def handle_route(route: Route):
           if (\"my-string\" in route.request.post_data):
             route.fulfill(body=\"mocked-data\")
           else:
@@ -10832,8 +10830,8 @@ class Page(SyncContextManager):
         If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
         texts.
 
-        Shortcuts such as `key: \"Control+o\"` or `key: \"Control+Shift+T\"` are supported as well. When specified with the
-        modifier, modifier is pressed and being held while the subsequent key is being pressed.
+        Shortcuts such as `key: \"Control+o\"`, `key: \"Control++` or `key: \"Control+Shift+T\"` are supported as well. When
+        specified with the modifier, modifier is pressed and being held while the subsequent key is being pressed.
 
         **Usage**
 
@@ -11140,7 +11138,9 @@ class Page(SyncContextManager):
         height: typing.Optional[typing.Union[str, float]] = None,
         prefer_css_page_size: typing.Optional[bool] = None,
         margin: typing.Optional[PdfMargins] = None,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None
+        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        outline: typing.Optional[bool] = None,
+        tagged: typing.Optional[bool] = None
     ) -> bytes:
         """Page.pdf
 
@@ -11229,6 +11229,10 @@ class Page(SyncContextManager):
         path : Union[pathlib.Path, str, None]
             The file path to save the PDF to. If `path` is a relative path, then it is resolved relative to the current working
             directory. If no path is provided, the PDF won't be saved to the disk.
+        outline : Union[bool, None]
+            Whether or not to embed the document outline into the PDF. Defaults to `false`.
+        tagged : Union[bool, None]
+            Whether or not to generate tagged (accessible) PDF. Defaults to `false`.
 
         Returns
         -------
@@ -11251,6 +11255,8 @@ class Page(SyncContextManager):
                     preferCSSPageSize=prefer_css_page_size,
                     margin=margin,
                     path=path,
+                    outline=outline,
+                    tagged=tagged,
                 )
             )
         )
@@ -11743,6 +11749,96 @@ class Page(SyncContextManager):
             )
         )
 
+    def add_locator_handler(self, locator: "Locator", handler: typing.Callable) -> None:
+        """Page.add_locator_handler
+
+        When testing a web page, sometimes unexpected overlays like a coookie consent dialog appear and block actions you
+        want to automate, e.g. clicking a button. These overlays don't always show up in the same way or at the same time,
+        making them tricky to handle in automated tests.
+
+        This method lets you set up a special function, called a handler, that activates when it detects that overlay is
+        visible. The handler's job is to remove the overlay, allowing your test to continue as if the overlay wasn't there.
+
+        Things to keep in mind:
+        - When an overlay is shown predictably, we recommend explicitly waiting for it in your test and dismissing it as
+          a part of your normal test flow, instead of using `page.add_locator_handler()`.
+        - Playwright checks for the overlay every time before executing or retrying an action that requires an
+          [actionability check](https://playwright.dev/python/docs/actionability), or before performing an auto-waiting assertion check. When overlay
+          is visible, Playwright calls the handler first, and then proceeds with the action/assertion.
+        - The execution time of the handler counts towards the timeout of the action/assertion that executed the handler.
+          If your handler takes too long, it might cause timeouts.
+        - You can register multiple handlers. However, only a single handler will be running at a time. Make sure the
+          actions within a handler don't depend on another handler.
+
+        **NOTE** Running the handler will alter your page state mid-test. For example it will change the currently focused
+        element and move the mouse. Make sure that actions that run after the handler are self-contained and do not rely on
+        the focus and mouse state being unchanged. <br /> <br /> For example, consider a test that calls
+        `locator.focus()` followed by `keyboard.press()`. If your handler clicks a button between these two
+        actions, the focused element most likely will be wrong, and key press will happen on the unexpected element. Use
+        `locator.press()` instead to avoid this problem. <br /> <br /> Another example is a series of mouse
+        actions, where `mouse.move()` is followed by `mouse.down()`. Again, when the handler runs between
+        these two actions, the mouse position will be wrong during the mouse down. Prefer self-contained actions like
+        `locator.click()` that do not rely on the state being unchanged by a handler.
+
+        **Usage**
+
+        An example that closes a cookie consent dialog when it appears:
+
+        ```py
+        # Setup the handler.
+        def handler():
+          await page.get_by_role(\"button\", name=\"Reject all cookies\").click()
+        await page.add_locator_handler(page.get_by_role(\"button\", name=\"Accept all cookies\"), handler)
+
+        # Write the test as usual.
+        await page.goto(\"https://example.com\")
+        await page.get_by_role(\"button\", name=\"Start here\").click()
+        ```
+
+        An example that skips the \"Confirm your security details\" page when it is shown:
+
+        ```py
+        # Setup the handler.
+        def handler():
+          await page.get_by_role(\"button\", name=\"Remind me later\").click()
+        await page.add_locator_handler(page.get_by_text(\"Confirm your security details\"), handler)
+
+        # Write the test as usual.
+        await page.goto(\"https://example.com\")
+        await page.get_by_role(\"button\", name=\"Start here\").click()
+        ```
+
+        An example with a custom callback on every actionability check. It uses a `<body>` locator that is always visible,
+        so the handler is called before every actionability check:
+
+        ```py
+        # Setup the handler.
+        def handler():
+          await page.evaluate(\"window.removeObstructionsForTestIfNeeded()\")
+        await page.add_locator_handler(page.locator(\"body\"), handler)
+
+        # Write the test as usual.
+        await page.goto(\"https://example.com\")
+        await page.get_by_role(\"button\", name=\"Start here\").click()
+        ```
+
+        Parameters
+        ----------
+        locator : Locator
+            Locator that triggers the handler.
+        handler : Callable
+            Function that should be run once `locator` appears. This function should get rid of the element that blocks actions
+            like click.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.add_locator_handler(
+                    locator=locator._impl_obj, handler=self._wrap_handler(handler)
+                )
+            )
+        )
+
 
 mapping.register(PageImpl, Page)
 
@@ -11805,8 +11901,7 @@ class BrowserContext(SyncContextManager):
         self, event: Literal["console"], f: typing.Callable[["ConsoleMessage"], "None"]
     ) -> None:
         """
-        Emitted when JavaScript within the page calls one of console API methods, e.g. `console.log` or `console.dir`. Also
-        emitted if the page throws an error or a warning.
+        Emitted when JavaScript within the page calls one of console API methods, e.g. `console.log` or `console.dir`.
 
         The arguments passed into `console.log` and the page are available on the `ConsoleMessage` event handler argument.
 
@@ -11950,8 +12045,7 @@ class BrowserContext(SyncContextManager):
         self, event: Literal["console"], f: typing.Callable[["ConsoleMessage"], "None"]
     ) -> None:
         """
-        Emitted when JavaScript within the page calls one of console API methods, e.g. `console.log` or `console.dir`. Also
-        emitted if the page throws an error or a warning.
+        Emitted when JavaScript within the page calls one of console API methods, e.g. `console.log` or `console.dir`.
 
         The arguments passed into `console.log` and the page are available on the `ConsoleMessage` event handler argument.
 
@@ -12595,7 +12689,7 @@ class BrowserContext(SyncContextManager):
         some post data, and leaving all other requests as is:
 
         ```py
-        def handle_route(route):
+        def handle_route(route: Route):
           if (\"my-string\" in route.request.post_data):
             route.fulfill(body=\"mocked-data\")
           else:
@@ -16321,8 +16415,8 @@ class Locator(SyncBase):
         If `key` is a single character, it is case-sensitive, so the values `a` and `A` will generate different respective
         texts.
 
-        Shortcuts such as `key: \"Control+o\"` or `key: \"Control+Shift+T\"` are supported as well. When specified with the
-        modifier, modifier is pressed and being held while the subsequent key is being pressed.
+        Shortcuts such as `key: \"Control+o\"`, `key: \"Control++` or `key: \"Control+Shift+T\"` are supported as well. When
+        specified with the modifier, modifier is pressed and being held while the subsequent key is being pressed.
 
         Parameters
         ----------

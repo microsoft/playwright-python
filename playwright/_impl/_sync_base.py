@@ -20,10 +20,8 @@ from typing import (
     Any,
     Callable,
     Coroutine,
-    Dict,
     Generator,
     Generic,
-    List,
     Type,
     TypeVar,
     Union,
@@ -132,38 +130,6 @@ class SyncBase(ImplWrapper):
     def remove_listener(self, event: Any, f: Any) -> None:
         """Removes the function ``f`` from ``event``."""
         self._impl_obj.remove_listener(event, self._wrap_handler(f))
-
-    def _gather(self, *actions: Callable) -> List[Any]:
-        g_self = greenlet.getcurrent()
-        results: Dict[Callable, Any] = {}
-        exceptions: List[Exception] = []
-
-        def action_wrapper(action: Callable) -> Callable:
-            def body() -> Any:
-                try:
-                    results[action] = action()
-                except Exception as e:
-                    results[action] = e
-                    exceptions.append(e)
-                g_self.switch()
-
-            return body
-
-        async def task() -> None:
-            for action in actions:
-                g = greenlet.greenlet(action_wrapper(action))
-                g.switch()
-
-        self._loop.create_task(task())
-
-        while len(results) < len(actions):
-            self._dispatcher_fiber.switch()
-
-        asyncio._set_running_loop(self._loop)
-        if exceptions:
-            raise exceptions[0]
-
-        return list(map(lambda action: results[action], actions))
 
 
 class SyncContextManager(SyncBase):

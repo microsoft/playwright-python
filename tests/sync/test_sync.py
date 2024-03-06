@@ -14,7 +14,7 @@
 
 import multiprocessing
 import os
-from typing import Any, Dict
+from typing import Any, Callable, Dict
 
 import pytest
 
@@ -266,10 +266,12 @@ def test_sync_set_default_timeout(page: Page) -> None:
     assert "Timeout 1ms exceeded." in exc.value.message
 
 
-def test_close_should_reject_all_promises(context: BrowserContext) -> None:
+def test_close_should_reject_all_promises(
+    context: BrowserContext, sync_gather: Callable
+) -> None:
     new_page = context.new_page()
     with pytest.raises(Error) as exc_info:
-        new_page._gather(
+        sync_gather(
             lambda: new_page.evaluate("() => new Promise(r => {})"),
             lambda: new_page.close(),
         )

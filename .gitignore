@@ -18,5 +18,3 @@ coverage.xml
 junit/
 htmldocs/
 utils/docker/dist/
-.venv/
-Pipfile*
