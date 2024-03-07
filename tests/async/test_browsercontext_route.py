@@ -54,6 +54,7 @@ async def test_route_should_intercept(context: BrowserContext, server: Server) -
     assert intercepted == [True]
     await context.close()
 
+
 async def test_route_should_unroute(context: BrowserContext, server: Server) -> None:
     page = await context.new_page()
 
