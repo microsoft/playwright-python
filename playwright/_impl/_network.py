@@ -262,7 +262,10 @@ class Request(ChannelOwner):
         return page._closed_or_crashed_future
 
     def _safe_page(self) -> "Optional[Page]":
-        return cast("Frame", from_channel(self._initializer["frame"]))._page
+        frame = from_nullable_channel(self._initializer.get("frame"))
+        if not frame:
+            return None
+        return cast("Frame", frame)._page
 
 
 class Route(ChannelOwner):
