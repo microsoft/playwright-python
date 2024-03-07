@@ -204,6 +204,10 @@ class Request(ChannelOwner):
         return self._initializer["isNavigationRequest"]
 
     @property
+    def from_service_worker(self) -> bool:
+        return "serviceWorker" in self._initializer
+
+    @property
     def redirected_from(self) -> Optional["Request"]:
         return self._redirected_from
 
@@ -262,6 +266,8 @@ class Request(ChannelOwner):
         return page._closed_or_crashed_future
 
     def _safe_page(self) -> "Optional[Page]":
+        if self.from_service_worker:
+            return None
         return cast("Frame", from_channel(self._initializer["frame"]))._page
 
 

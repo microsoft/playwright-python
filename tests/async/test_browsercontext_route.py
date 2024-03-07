@@ -53,6 +53,28 @@ async def test_route_should_intercept(context: BrowserContext, server: Server) -
     assert response.ok
     assert intercepted == [True]
     await context.close()
+    
+
+async def test_route_should_intercept_service_worker_request(context: BrowserContext, server: Server) -> None:
+    intercepted = []
+
+    def handle(route: Route, request: Request) -> None:
+        intercepted.append(True)
+        assert "empty.html" in request.url
+        assert request.headers["user-agent"]
+        assert request.method == "GET"
+        assert request.post_data is None
+        assert not request.is_navigation_request()
+        assert not request.frame
+        asyncio.create_task(route.continue_())
+
+    await context.route("**/empty.html", lambda route, request: handle(route, request))
+    page = await context.new_page()
+    await page.goto(server.PREFIX + "/serviceworkers/sendfetchrequest/sw.html")
+    await asyncio.sleep(0.1)
+
+    assert intercepted == [True]
+    await context.close()
 
 
 async def test_route_should_unroute(context: BrowserContext, server: Server) -> None:
