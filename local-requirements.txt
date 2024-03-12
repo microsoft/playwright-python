@@ -9,7 +9,7 @@ Pillow==10.2.0
 pixelmatch==0.3.0
 pre-commit==3.4.0
 pyOpenSSL==24.0.0
-pytest==8.0.0
+pytest==8.1.1
 pytest-asyncio==0.21.1
 pytest-cov==4.1.0
 pytest-repeat==0.9.3
