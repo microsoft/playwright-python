@@ -2,14 +2,14 @@ auditwheel==6.0.0
 autobahn==23.1.2
 black==24.2.0
 flake8==7.0.0
-flaky==3.7.0
+flaky==3.8.0
 mypy==1.8.0
 objgraph==3.6.1
 Pillow==10.2.0
 pixelmatch==0.3.0
 pre-commit==3.4.0
 pyOpenSSL==24.0.0
-pytest==8.0.0
+pytest==8.1.1
 pytest-asyncio==0.21.1
 pytest-cov==4.1.0
 pytest-repeat==0.9.3
