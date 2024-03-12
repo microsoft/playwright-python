@@ -223,10 +223,18 @@ async def test_evaluate_evaluate_date(page: Page) -> None:
     }
 
 
-async def test_evaluate_roundtrip_date(page: Page) -> None:
+async def test_evaluate_roundtrip_date_without_tzinfo(page: Page) -> None:
     date = datetime.fromisoformat("2020-05-27T01:31:38.506")
     result = await page.evaluate("date => date", date)
     assert result.timestamp() == date.timestamp()
+
+
+async def test_evaluate_roundtrip_date(page: Page) -> None:
+    date = datetime.fromisoformat("2020-05-27T01:31:38.506").replace(
+        tzinfo=timezone.utc
+    )
+    result = await page.evaluate("date => date", date)
+    assert result == date
 
 
 async def test_evaluate_roundtrip_date_with_tzinfo(page: Page) -> None:
