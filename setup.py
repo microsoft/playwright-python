@@ -222,7 +222,7 @@ setup(
         "pyee==11.1.0",
     ],
     # TODO: Can be removed once we migrate to pypa/build or pypa/installer.
-    setup_requires=["setuptools-scm==8.0.4", "wheel==0.42.0"],
+    setup_requires=["setuptools-scm==8.0.4", "wheel==0.43.0"],
     classifiers=[
         "Topic :: Software Development :: Testing",
         "Topic :: Internet :: WWW/HTTP :: Browsers",
