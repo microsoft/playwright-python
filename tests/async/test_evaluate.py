@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import math
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from urllib.parse import ParseResult, urlparse
 
@@ -216,17 +216,38 @@ async def test_evaluate_evaluate_date(page: Page) -> None:
     result = await page.evaluate(
         '() => ({ date: new Date("2020-05-27T01:31:38.506Z") })'
     )
-    assert result == {"date": datetime.fromisoformat("2020-05-27T01:31:38.506")}
+    assert result == {
+        "date": datetime.fromisoformat("2020-05-27T01:31:38.506").replace(
+            tzinfo=timezone.utc
+        )
+    }
+
+
+async def test_evaluate_roundtrip_date_without_tzinfo(page: Page) -> None:
+    date = datetime.fromisoformat("2020-05-27T01:31:38.506")
+    result = await page.evaluate("date => date", date)
+    assert result.timestamp() == date.timestamp()
 
 
 async def test_evaluate_roundtrip_date(page: Page) -> None:
+    date = datetime.fromisoformat("2020-05-27T01:31:38.506").replace(
+        tzinfo=timezone.utc
+    )
+    result = await page.evaluate("date => date", date)
+    assert result == date
+
+
+async def test_evaluate_roundtrip_date_with_tzinfo(page: Page) -> None:
     date = datetime.fromisoformat("2020-05-27T01:31:38.506")
+    date = date.astimezone(timezone(timedelta(hours=4)))
     result = await page.evaluate("date => date", date)
     assert result == date
 
 
 async def test_evaluate_jsonvalue_date(page: Page) -> None:
-    date = datetime.fromisoformat("2020-05-27T01:31:38.506")
+    date = datetime.fromisoformat("2020-05-27T01:31:38.506").replace(
+        tzinfo=timezone.utc
+    )
     result = await page.evaluate(
         '() => ({ date: new Date("2020-05-27T01:31:38.506Z") })'
     )

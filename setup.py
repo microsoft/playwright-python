@@ -30,7 +30,7 @@ except ImportError:
     InWheel = None
 from wheel.bdist_wheel import bdist_wheel as BDistWheelCommand
 
-driver_version = "1.42.0-alpha-2024-02-19"
+driver_version = "1.42.1"
 
 
 def extractall(zip: zipfile.ZipFile, path: str) -> None:
@@ -219,10 +219,10 @@ setup(
     include_package_data=True,
     install_requires=[
         "greenlet==3.0.3",
-        "pyee==11.0.1",
+        "pyee==11.1.0",
     ],
     # TODO: Can be removed once we migrate to pypa/build or pypa/installer.
-    setup_requires=["setuptools-scm==8.0.4", "wheel==0.41.2"],
+    setup_requires=["setuptools-scm==8.0.4", "wheel==0.42.0"],
     classifiers=[
         "Topic :: Software Development :: Testing",
         "Topic :: Internet :: WWW/HTTP :: Browsers",

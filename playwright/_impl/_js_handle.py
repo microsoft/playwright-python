@@ -13,8 +13,8 @@
 # limitations under the License.
 
 import collections.abc
+import datetime
 import math
-from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from urllib.parse import ParseResult, urlparse, urlunparse
@@ -128,8 +128,13 @@ def serialize_value(
             return dict(v="-0")
         if math.isnan(value):
             return dict(v="NaN")
-    if isinstance(value, datetime):
-        return dict(d=value.isoformat())
+    if isinstance(value, datetime.datetime):
+        # Node.js Date objects are always in UTC.
+        return {
+            "d": datetime.datetime.strftime(
+                value.astimezone(datetime.timezone.utc), "%Y-%m-%dT%H:%M:%S.%fZ"
+            )
+        }
     if isinstance(value, bool):
         return {"b": value}
     if isinstance(value, (int, float)):
@@ -205,7 +210,10 @@ def parse_value(value: Any, refs: Optional[Dict[int, Any]] = None) -> Any:
             return a
 
         if "d" in value:
-            return datetime.fromisoformat(value["d"][:-1])
+            # Node.js Date objects are always in UTC.
+            return datetime.datetime.strptime(
+                value["d"], "%Y-%m-%dT%H:%M:%S.%fZ"
+            ).replace(tzinfo=datetime.timezone.utc)
 
         if "o" in value:
             o: Dict = {}

@@ -15,6 +15,7 @@
 import asyncio
 from pathlib import Path
 
+import pytest
 from twisted.web import http
 
 from playwright.async_api import BrowserContext, Page, Route
@@ -179,3 +180,15 @@ async def test_should_give_access_to_the_intercepted_response_body(
         route.fulfill(response=response),
         eval_task,
     )
+
+
+async def test_should_show_exception_after_fulfill(page: Page, server: Server) -> None:
+    async def _handle(route: Route) -> None:
+        await route.continue_()
+        raise Exception("Exception text!?")
+
+    await page.route("*/**", _handle)
+    await page.goto(server.EMPTY_PAGE)
+    # Any next API call should throw because handler did throw during previous goto()
+    with pytest.raises(Exception, match="Exception text!?"):
+        await page.goto(server.EMPTY_PAGE)

@@ -123,7 +123,7 @@ class BrowserContext(ChannelOwner):
         )
         self._channel.on(
             "route",
-            lambda params: asyncio.create_task(
+            lambda params: self._loop.create_task(
                 self._on_route(
                     from_channel(params.get("route")),
                 )
