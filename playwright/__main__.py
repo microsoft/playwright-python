@@ -19,9 +19,9 @@ from playwright._impl._driver import compute_driver_executable, get_driver_env
 
 
 def main() -> None:
-    driver_executable = compute_driver_executable()
+    driver_executable, driver_cli = compute_driver_executable()
     completed_process = subprocess.run(
-        [str(driver_executable), *sys.argv[1:]], env=get_driver_env()
+        [driver_executable, driver_cli, *sys.argv[1:]], env=get_driver_env()
     )
     sys.exit(completed_process.returncode)
 

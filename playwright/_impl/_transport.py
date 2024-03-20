@@ -19,10 +19,9 @@ import os
 import subprocess
 import sys
 from abc import ABC, abstractmethod
-from pathlib import Path
 from typing import Callable, Dict, Optional, Union
 
-from playwright._impl._driver import get_driver_env
+from playwright._impl._driver import compute_driver_executable, get_driver_env
 from playwright._impl._helper import ParsedMessagePayload
 
 
@@ -90,12 +89,9 @@ class Transport(ABC):
 
 
 class PipeTransport(Transport):
-    def __init__(
-        self, loop: asyncio.AbstractEventLoop, driver_executable: Path
-    ) -> None:
+    def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
         super().__init__(loop)
         self._stopped = False
-        self._driver_executable = driver_executable
 
     def request_stop(self) -> None:
         assert self._output
@@ -120,8 +116,10 @@ class PipeTransport(Transport):
                 startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
                 startupinfo.wShowWindow = subprocess.SW_HIDE
 
+            executable_path, entrypoint_path = compute_driver_executable()
             self._proc = await asyncio.create_subprocess_exec(
-                str(self._driver_executable),
+                executable_path,
+                entrypoint_path,
                 "run-driver",
                 stdin=asyncio.subprocess.PIPE,
                 stdout=asyncio.subprocess.PIPE,
