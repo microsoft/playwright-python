@@ -18,7 +18,6 @@ from typing import TYPE_CHECKING, Any, Optional, cast
 from greenlet import greenlet
 
 from playwright._impl._connection import ChannelOwner, Connection
-from playwright._impl._driver import compute_driver_executable
 from playwright._impl._errors import Error
 from playwright._impl._greenlets import MainGreenlet
 from playwright._impl._object_factory import create_remote_object
@@ -61,7 +60,7 @@ Please use the Async API instead."""
         self._connection = Connection(
             dispatcher_fiber,
             create_remote_object,
-            PipeTransport(self._loop, compute_driver_executable()),
+            PipeTransport(self._loop),
             self._loop,
         )
 
