@@ -1090,7 +1090,7 @@ async def test_locator_click_timeout_error_should_contain_call_log(page: Page) -
     with pytest.raises(Error) as exc_info:
         await page.get_by_role("button", name="Hello Python").click(timeout=42)
     formatted_exception = "".join(
-        traceback.format_exception(exc_info.value)  # type: ignore
+        traceback.format_exception(type(exc_info.value), value=exc_info.value, tb=None)
     )
     assert "Locator.click: Timeout 42ms exceeded." in formatted_exception
     assert (

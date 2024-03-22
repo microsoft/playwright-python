@@ -424,15 +424,15 @@ async def test_should_press_enter(page: Page) -> None:
 async def test_should_throw_unknown_keys(page: Page, server: Server) -> None:
     with pytest.raises(Error) as exc:
         await page.keyboard.press("NotARealKey")
-    assert exc.value.message == 'Unknown key: "NotARealKey"'
+    assert exc.value.message == 'Keyboard.press: Unknown key: "NotARealKey"'
 
     with pytest.raises(Error) as exc:
         await page.keyboard.press("ё")
-    assert exc.value.message == 'Unknown key: "ё"'
+    assert exc.value.message == 'Keyboard.press: Unknown key: "ё"'
 
     with pytest.raises(Error) as exc:
         await page.keyboard.press("😊")
-    assert exc.value.message == 'Unknown key: "😊"'
+    assert exc.value.message == 'Keyboard.press: Unknown key: "😊"'
 
 
 async def test_should_type_emoji(page: Page, server: Server) -> None:
