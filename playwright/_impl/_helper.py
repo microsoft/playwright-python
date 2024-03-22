@@ -210,26 +210,24 @@ def serialize_error(ex: Exception, tb: Optional[TracebackType]) -> ErrorPayload:
     )
 
 
-def parse_error(error: ErrorPayload) -> Error:
+def parse_error(error: ErrorPayload, log: Optional[str] = None) -> Error:
     base_error_class = Error
     if error.get("name") == "TimeoutError":
         base_error_class = TimeoutError
     if error.get("name") == "TargetClosedError":
         base_error_class = TargetClosedError
-    exc = base_error_class(cast(str, patch_error_message(error.get("message"))))
+    if not log:
+        log = ""
+    exc = base_error_class(patch_error_message(error["message"]) + log)
     exc._name = error["name"]
     exc._stack = error["stack"]
     return exc
 
 
-def patch_error_message(message: Optional[str]) -> Optional[str]:
-    if message is None:
-        return None
-
+def patch_error_message(message: str) -> str:
     match = re.match(r"(\w+)(: expected .*)", message)
     if match:
         message = to_snake_case(match.group(1)) + match.group(2)
-    assert message is not None
     message = message.replace(
         "Pass { acceptDownloads: true }", "Pass { accept_downloads: True }"
     )
