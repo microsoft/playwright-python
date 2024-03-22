@@ -830,7 +830,10 @@ async def test_set_extra_http_headers_should_throw_for_non_string_header_values(
     except Error as exc:
         error = exc
     assert error
-    assert error.message == "headers[0].value: expected string, got number"
+    assert (
+        error.message
+        == "Page.set_extra_http_headers: headers[0].value: expected string, got number"
+    )
 
 
 async def test_response_server_addr(page: Page, server: Server) -> None:

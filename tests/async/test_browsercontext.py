@@ -126,7 +126,7 @@ async def test_page_event_should_not_allow_device_scale_factor_with_null_viewpor
         await browser.new_context(no_viewport=True, device_scale_factor=1)
     assert (
         exc_info.value.message
-        == '"deviceScaleFactor" option is not supported with null "viewport"'
+        == 'Browser.new_context: "deviceScaleFactor" option is not supported with null "viewport"'
     )
 
 
@@ -137,7 +137,7 @@ async def test_page_event_should_not_allow_is_mobile_with_null_viewport(
         await browser.new_context(no_viewport=True, is_mobile=True)
     assert (
         exc_info.value.message
-        == '"isMobile" option is not supported with null "viewport"'
+        == 'Browser.new_context: "isMobile" option is not supported with null "viewport"'
     )
 
 

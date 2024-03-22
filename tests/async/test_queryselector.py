@@ -182,7 +182,7 @@ async def test_selectors_register_should_handle_errors(
         await selectors.register("$", dummy_selector_engine_script)
     assert (
         exc.value.message
-        == "Selector engine name may only contain [a-zA-Z0-9_] characters"
+        == "Selectors.register: Selector engine name may only contain [a-zA-Z0-9_] characters"
     )
 
     # Selector names are case-sensitive.
@@ -195,11 +195,16 @@ async def test_selectors_register_should_handle_errors(
 
     with pytest.raises(Error) as exc:
         await selectors.register("dummy", dummy_selector_engine_script)
-    assert exc.value.message == '"dummy" selector engine has been already registered'
+    assert (
+        exc.value.message
+        == 'Selectors.register: "dummy" selector engine has been already registered'
+    )
 
     with pytest.raises(Error) as exc:
         await selectors.register("css", dummy_selector_engine_script)
-    assert exc.value.message == '"css" is a predefined selector engine'
+    assert (
+        exc.value.message == 'Selectors.register: "css" is a predefined selector engine'
+    )
 
 
 async def test_should_work_with_layout_selectors(page: Page) -> None:

@@ -14,6 +14,7 @@
 
 import os
 import re
+import traceback
 from typing import Callable
 from urllib.parse import urlparse
 
@@ -937,3 +938,19 @@ def test_locator_all_should_work(page: Page) -> None:
     for p in page.locator("p").all():
         texts.append(p.text_content())
     assert texts == ["A", "B", "C"]
+
+
+def test_locator_click_timeout_error_should_contain_call_log(page: Page) -> None:
+    with pytest.raises(Error) as exc_info:
+        page.get_by_role("button", name="Hello Python").click(timeout=42)
+    formatted_exception = "".join(
+        traceback.format_exception(type(exc_info.value), value=exc_info.value, tb=None)
+    )
+    assert "Locator.click: Timeout 42ms exceeded." in formatted_exception
+    assert (
+        'waiting for get_by_role("button", name="Hello Python")' in formatted_exception
+    )
+    assert (
+        "During handling of the above exception, another exception occurred"
+        not in formatted_exception
+    )
