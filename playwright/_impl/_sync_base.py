@@ -15,6 +15,7 @@
 import asyncio
 import inspect
 import traceback
+from contextlib import AbstractContextManager
 from types import TracebackType
 from typing import (
     Any,
@@ -22,6 +23,7 @@ from typing import (
     Coroutine,
     Generator,
     Generic,
+    Optional,
     Type,
     TypeVar,
     Union,
@@ -64,7 +66,7 @@ class EventInfo(Generic[T]):
         return self._future.done()
 
 
-class EventContextManager(Generic[T]):
+class EventContextManager(Generic[T], AbstractContextManager):
     def __init__(self, sync_base: "SyncBase", future: "asyncio.Future[T]") -> None:
         self._event = EventInfo[T](sync_base, future)
 
@@ -73,9 +75,9 @@ class EventContextManager(Generic[T]):
 
     def __exit__(
         self,
-        exc_type: Type[BaseException],
-        exc_val: BaseException,
-        exc_tb: TracebackType,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
     ) -> None:
         if exc_val:
             self._event._cancel()
