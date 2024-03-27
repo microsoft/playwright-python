@@ -784,3 +784,11 @@ async def test_set_checked(page: Page) -> None:
     assert await page.evaluate("checkbox.checked")
     await input.set_checked(False)
     assert await page.evaluate("checkbox.checked") is False
+
+
+async def test_should_allow_disposing_twice(page: Page) -> None:
+    await page.set_content("<section>39</section>")
+    element = await page.query_selector("section")
+    assert element
+    await element.dispose()
+    await element.dispose()

@@ -530,7 +530,8 @@ def route_iframe(page: Page) -> None:
     page.route(
         "**/empty.html",
         lambda route: route.fulfill(
-            body='<iframe src="iframe.html"></iframe>', content_type="text/html"
+            body='<iframe src="iframe.html" name="frame1"></iframe>',
+            content_type="text/html",
         ),
     )
     page.route(
@@ -589,6 +590,26 @@ def test_locators_frame_should_work_with_locator_frame_locator(
     button.wait_for()
     assert button.inner_text() == "Hello iframe"
     button.click()
+
+
+def test_locator_content_frame_should_work(page: Page, server: Server) -> None:
+    route_iframe(page)
+    page.goto(server.EMPTY_PAGE)
+    locator = page.locator("iframe")
+    frame_locator = locator.content_frame
+    button = frame_locator.locator("button")
+    assert button.inner_text() == "Hello iframe"
+    expect(button).to_have_text("Hello iframe")
+    button.click()
+
+
+def test_frame_locator_owner_should_work(page: Page, server: Server) -> None:
+    route_iframe(page)
+    page.goto(server.EMPTY_PAGE)
+    frame_locator = page.frame_locator("iframe")
+    locator = frame_locator.owner
+    expect(locator).to_be_visible()
+    assert locator.get_attribute("name") == "frame1"
 
 
 def route_ambiguous(page: Page) -> None:

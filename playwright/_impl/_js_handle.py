@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from urllib.parse import ParseResult, urlparse, urlunparse
 
 from playwright._impl._connection import Channel, ChannelOwner, from_channel
+from playwright._impl._errors import is_target_closed_error
 from playwright._impl._map import Map
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -102,7 +103,11 @@ class JSHandle(ChannelOwner):
         return None
 
     async def dispose(self) -> None:
-        await self._channel.send("dispose")
+        try:
+            await self._channel.send("dispose")
+        except Exception as e:
+            if not is_target_closed_error(e):
+                raise e
 
     async def json_value(self) -> Any:
         return parse_result(await self._channel.send("jsonValue"))
