@@ -5862,6 +5862,32 @@ class FrameLocator(AsyncBase):
         """
         return mapping.from_impl(self._impl_obj.last)
 
+    @property
+    def owner(self) -> "Locator":
+        """FrameLocator.owner
+
+        Returns a `Locator` object pointing to the same `iframe` as this frame locator.
+
+        Useful when you have a `FrameLocator` object obtained somewhere, and later on would like to interact with the
+        `iframe` element.
+
+        For a reverse operation, use `locator.content_frame()`.
+
+        **Usage**
+
+        ```py
+        frame_locator = page.frame_locator(\"iframe[name=\\\"embedded\\\"]\")
+        # ...
+        locator = frame_locator.owner
+        await expect(locator).to_be_visible()
+        ```
+
+        Returns
+        -------
+        Locator
+        """
+        return mapping.from_impl(self._impl_obj.owner)
+
     def locator(
         self,
         selector_or_locator: typing.Union["Locator", str],
@@ -11669,9 +11695,11 @@ class Page(AsyncContextManager):
     ) -> None:
         """Page.add_locator_handler
 
-        When testing a web page, sometimes unexpected overlays like a coookie consent dialog appear and block actions you
-        want to automate, e.g. clicking a button. These overlays don't always show up in the same way or at the same time,
-        making them tricky to handle in automated tests.
+        **NOTE** This method is experimental and its behavior may change in the upcoming releases.
+
+        When testing a web page, sometimes unexpected overlays like a \"Sign up\" dialog appear and block actions you want to
+        automate, e.g. clicking a button. These overlays don't always show up in the same way or at the same time, making
+        them tricky to handle in automated tests.
 
         This method lets you set up a special function, called a handler, that activates when it detects that overlay is
         visible. The handler's job is to remove the overlay, allowing your test to continue as if the overlay wasn't there.
@@ -11681,7 +11709,9 @@ class Page(AsyncContextManager):
           a part of your normal test flow, instead of using `page.add_locator_handler()`.
         - Playwright checks for the overlay every time before executing or retrying an action that requires an
           [actionability check](https://playwright.dev/python/docs/actionability), or before performing an auto-waiting assertion check. When overlay
-          is visible, Playwright calls the handler first, and then proceeds with the action/assertion.
+          is visible, Playwright calls the handler first, and then proceeds with the action/assertion. Note that the
+          handler is only called when you perform an action/assertion - if the overlay becomes visible but you don't
+          perform any actions, the handler will not be triggered.
         - The execution time of the handler counts towards the timeout of the action/assertion that executed the handler.
           If your handler takes too long, it might cause timeouts.
         - You can register multiple handlers. However, only a single handler will be running at a time. Make sure the
@@ -11699,13 +11729,13 @@ class Page(AsyncContextManager):
 
         **Usage**
 
-        An example that closes a cookie consent dialog when it appears:
+        An example that closes a \"Sign up to the newsletter\" dialog when it appears:
 
         ```py
         # Setup the handler.
         def handler():
-          page.get_by_role(\"button\", name=\"Reject all cookies\").click()
-        page.add_locator_handler(page.get_by_role(\"button\", name=\"Accept all cookies\"), handler)
+          page.get_by_role(\"button\", name=\"No thanks\").click()
+        page.add_locator_handler(page.get_by_text(\"Sign up to the newsletter\"), handler)
 
         # Write the test as usual.
         page.goto(\"https://example.com\")
@@ -12319,13 +12349,40 @@ class BrowserContext(AsyncContextManager):
             await self._impl_obj.add_cookies(cookies=mapping.to_impl(cookies))
         )
 
-    async def clear_cookies(self) -> None:
+    async def clear_cookies(
+        self,
+        *,
+        name: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        domain: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        path: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None
+    ) -> None:
         """BrowserContext.clear_cookies
 
-        Clears context cookies.
+        Removes cookies from context. Accepts optional filter.
+
+        **Usage**
+
+        ```py
+        await context.clear_cookies()
+        await context.clear_cookies(name=\"session-id\")
+        await context.clear_cookies(domain=\"my-origin.com\")
+        await context.clear_cookies(path=\"/api/v1\")
+        await context.clear_cookies(name=\"session-id\", domain=\"my-origin.com\")
+        ```
+
+        Parameters
+        ----------
+        name : Union[Pattern[str], str, None]
+            Only removes cookies with the given name.
+        domain : Union[Pattern[str], str, None]
+            Only removes cookies with the given domain.
+        path : Union[Pattern[str], str, None]
+            Only removes cookies with the given path.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.clear_cookies())
+        return mapping.from_maybe_impl(
+            await self._impl_obj.clear_cookies(name=name, domain=domain, path=path)
+        )
 
     async def grant_permissions(
         self, permissions: typing.Sequence[str], *, origin: typing.Optional[str] = None
@@ -13798,6 +13855,7 @@ class BrowserType(AsyncBase):
         devtools : Union[bool, None]
             **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the
             `headless` option will be set `false`.
+            Deprecated: Use [debugging tools](../debug.md) instead.
         proxy : Union[{server: str, bypass: Union[str, None], username: Union[str, None], password: Union[str, None]}, None]
             Network proxy settings.
         downloads_path : Union[pathlib.Path, str, None]
@@ -13955,6 +14013,7 @@ class BrowserType(AsyncBase):
         devtools : Union[bool, None]
             **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the
             `headless` option will be set `false`.
+            Deprecated: Use [debugging tools](../debug.md) instead.
         proxy : Union[{server: str, bypass: Union[str, None], username: Union[str, None], password: Union[str, None]}, None]
             Network proxy settings.
         downloads_path : Union[pathlib.Path, str, None]
@@ -14537,6 +14596,32 @@ class Locator(AsyncBase):
         Locator
         """
         return mapping.from_impl(self._impl_obj.last)
+
+    @property
+    def content_frame(self) -> "FrameLocator":
+        """Locator.content_frame
+
+        Returns a `FrameLocator` object pointing to the same `iframe` as this locator.
+
+        Useful when you have a `Locator` object obtained somewhere, and later on would like to interact with the content
+        inside the frame.
+
+        For a reverse operation, use `frame_locator.owner()`.
+
+        **Usage**
+
+        ```py
+        locator = page.locator(\"iframe[name=\\\"embedded\\\"]\")
+        # ...
+        frame_locator = locator.content_frame
+        await frame_locator.get_by_role(\"button\").click()
+        ```
+
+        Returns
+        -------
+        FrameLocator
+        """
+        return mapping.from_impl(self._impl_obj.content_frame)
 
     async def bounding_box(
         self, *, timeout: typing.Optional[float] = None

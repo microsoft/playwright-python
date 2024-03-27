@@ -325,6 +325,10 @@ class Locator:
     def nth(self, index: int) -> "Locator":
         return Locator(self._frame, f"{self._selector} >> nth={index}")
 
+    @property
+    def content_frame(self) -> "FrameLocator":
+        return FrameLocator(self._frame, self._selector)
+
     def filter(
         self,
         hasText: Union[str, Pattern[str]] = None,
@@ -816,6 +820,10 @@ class FrameLocator:
     @property
     def last(self) -> "FrameLocator":
         return FrameLocator(self._frame, f"{self._frame_selector} >> nth=-1")
+
+    @property
+    def owner(self) -> "Locator":
+        return Locator(self._frame, self._frame_selector)
 
     def nth(self, index: int) -> "FrameLocator":
         return FrameLocator(self._frame, f"{self._frame_selector} >> nth={index}")

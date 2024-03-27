@@ -661,3 +661,11 @@ def test_set_checked(page: Page) -> None:
     assert page.evaluate("checkbox.checked")
     input.set_checked(False)
     assert page.evaluate("checkbox.checked") is False
+
+
+def test_should_allow_disposing_twice(page: Page) -> None:
+    page.set_content("<section>39</section>")
+    element = page.query_selector("section")
+    assert element
+    element.dispose()
+    element.dispose()

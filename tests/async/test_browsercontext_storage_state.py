@@ -34,12 +34,12 @@ async def test_should_capture_local_storage(context: BrowserContext) -> None:
     origins = state["origins"]
     assert len(origins) == 2
     assert origins[0] == {
-        "origin": "https://www.example.com",
-        "localStorage": [{"name": "name1", "value": "value1"}],
-    }
-    assert origins[1] == {
         "origin": "https://www.domain.com",
         "localStorage": [{"name": "name2", "value": "value2"}],
+    }
+    assert origins[1] == {
+        "origin": "https://www.example.com",
+        "localStorage": [{"name": "name1", "value": "value1"}],
     }
 
 
