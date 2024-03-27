@@ -83,6 +83,9 @@ Please use the Async API instead."""
     def start(self) -> SyncPlaywright:
         return self.__enter__()
 
+    def stop(self):
+        self.__exit__()
+
     def __exit__(self, *args: Any) -> None:
         if self._exit_was_called:
             return
