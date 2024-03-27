@@ -6,14 +6,24 @@ jobs:
   deploy-conda:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            target-platform: linux-64
+          - os: ubuntu-latest
+            target-platform: linux-aarch64
+          - os: windows-latest
+            target-platform: win-64
+          - os: macos-latest
+            target-platform: osx-64
+          - os: macos-latest
+            target-platform: osx-arm64
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Get conda
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           python-version: 3.9
           channels: conda-forge
@@ -24,4 +34,10 @@ jobs:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |
           conda config --set anaconda_upload yes
-          conda build --user microsoft .
+          if [ "${{ matrix.target-platform }}" == "osx-arm64" ]; then
+            conda build --user microsoft . -m conda_build_config.yaml -m conda_build_config_osx_arm64.yaml
+          elif [ "${{ matrix.target-platform }}" == "linux-aarch64" ]; then
+            conda build --user microsoft . -m conda_build_config.yaml -m conda_build_config_linux_aarch64.yaml
+          else
+            conda build --user microsoft . -m conda_build_config.yaml
+          fi
