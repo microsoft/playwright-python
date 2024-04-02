@@ -36,6 +36,7 @@ jobs:
           miniconda-version: latest
       - name: Prepare
         run: conda install anaconda-client conda-build conda-verify
+        shell: bash
       - name: Build and Upload
         shell: bash
         run: |
