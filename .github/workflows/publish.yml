@@ -40,7 +40,7 @@ jobs:
           channels: conda-forge
           miniconda-version: latest
       - name: Prepare
-        run: conda install anaconda-client conda-build=24.1.2 conda-verify
+        run: conda install anaconda-client conda-build=24.1.2 conda-verify py-lief=0.12.3 
       - name: Build and Upload
         run: |
           if [ "${{ matrix.target-platform }}" == "osx-arm64" ]; then
