@@ -36,9 +36,11 @@ jobs:
           miniconda-version: latest
       - name: Prepare
         run: conda install conda-build conda-verify
-        shell: bash
+        # Required for conda-incubator/setup-miniconda@v3
+        shell: bash -l {0}
       - name: Build and Upload
-        shell: bash
+        # Required for conda-incubator/setup-miniconda@v3
+        shell: bash -l {0}
         run: |
           if [ "${{ matrix.target-platform }}" == "osx-arm64" ]; then
             conda build . -m conda_build_config.yaml -m conda_build_config_osx_arm64.yaml
