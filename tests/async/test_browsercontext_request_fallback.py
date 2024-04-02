@@ -15,9 +15,7 @@
 import asyncio
 from typing import Any, Callable, Coroutine, cast
 
-import pytest
-
-from playwright.async_api import BrowserContext, Error, Page, Request, Route
+from playwright.async_api import BrowserContext, Page, Request, Route
 from tests.server import Server
 
 
@@ -96,61 +94,6 @@ async def test_should_chain_once(
     assert body == b"fulfilled one"
 
 
-async def test_should_not_chain_fulfill(
-    page: Page, context: BrowserContext, server: Server
-) -> None:
-    failed = [False]
-
-    def handler(route: Route) -> None:
-        failed[0] = True
-
-    await context.route("**/empty.html", handler)
-    await context.route(
-        "**/empty.html",
-        lambda route: asyncio.create_task(route.fulfill(status=200, body="fulfilled")),
-    )
-    await context.route(
-        "**/empty.html", lambda route: asyncio.create_task(route.fallback())
-    )
-
-    response = await page.goto(server.EMPTY_PAGE)
-    assert response
-    body = await response.body()
-    assert body == b"fulfilled"
-    assert not failed[0]
-
-
-async def test_should_not_chain_abort(
-    page: Page,
-    context: BrowserContext,
-    server: Server,
-    is_webkit: bool,
-    is_firefox: bool,
-) -> None:
-    failed = [False]
-
-    def handler(route: Route) -> None:
-        failed[0] = True
-
-    await context.route("**/empty.html", handler)
-    await context.route(
-        "**/empty.html", lambda route: asyncio.create_task(route.abort())
-    )
-    await context.route(
-        "**/empty.html", lambda route: asyncio.create_task(route.fallback())
-    )
-
-    with pytest.raises(Error) as excinfo:
-        await page.goto(server.EMPTY_PAGE)
-    if is_webkit:
-        assert "Blocked by Web Inspector" in excinfo.value.message
-    elif is_firefox:
-        assert "NS_ERROR_FAILURE" in excinfo.value.message
-    else:
-        assert "net::ERR_FAILED" in excinfo.value.message
-    assert not failed[0]
-
-
 async def test_should_fall_back_after_exception(
     page: Page, context: BrowserContext, server: Server
 ) -> None:
@@ -185,10 +128,9 @@ async def test_should_amend_http_headers(
     await context.route("**/*", handler_with_header_mods)
 
     await page.goto(server.EMPTY_PAGE)
-    async with page.expect_request("/sleep.zzz") as request_info:
+    with server.expect_request("/sleep.zzz") as server_request_info:
         await page.evaluate("() => fetch('/sleep.zzz')")
-    request = await request_info.value
-    values.append(request.headers.get("foo"))
+    values.append(server_request_info.value.getHeader("foo"))
     assert values == ["bar", "bar", "bar"]
 
 
@@ -353,48 +295,3 @@ async def test_should_amend_binary_post_data(
     assert post_data_buffer == ["\x00\x01\x02\x03\x04"]
     assert server_request.method == b"POST"
     assert server_request.post_body == b"\x00\x01\x02\x03\x04"
-
-
-async def test_should_chain_fallback_into_page(
-    context: BrowserContext, page: Page, server: Server
-) -> None:
-    intercepted = []
-
-    def _handler1(route: Route) -> None:
-        intercepted.append(1)
-        asyncio.create_task(route.fallback())
-
-    await context.route("**/empty.html", _handler1)
-
-    def _handler2(route: Route) -> None:
-        intercepted.append(2)
-        asyncio.create_task(route.fallback())
-
-    await context.route("**/empty.html", _handler2)
-
-    def _handler3(route: Route) -> None:
-        intercepted.append(3)
-        asyncio.create_task(route.fallback())
-
-    await context.route("**/empty.html", _handler3)
-
-    def _handler4(route: Route) -> None:
-        intercepted.append(4)
-        asyncio.create_task(route.fallback())
-
-    await page.route("**/empty.html", _handler4)
-
-    def _handler5(route: Route) -> None:
-        intercepted.append(5)
-        asyncio.create_task(route.fallback())
-
-    await page.route("**/empty.html", _handler5)
-
-    def _handler6(route: Route) -> None:
-        intercepted.append(6)
-        asyncio.create_task(route.fallback())
-
-    await page.route("**/empty.html", _handler6)
-
-    await page.goto(server.EMPTY_PAGE)
-    assert intercepted == [6, 5, 4, 3, 2, 1]

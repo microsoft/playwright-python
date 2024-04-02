@@ -12,12 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
-import fnmatch
-import inspect
 import math
 import os
 import re
-import sys
 import time
 import traceback
 from pathlib import Path
@@ -26,28 +23,24 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Coroutine,
     Dict,
     List,
+    Literal,
     Optional,
     Pattern,
+    Set,
+    TypedDict,
     TypeVar,
     Union,
     cast,
 )
 from urllib.parse import urljoin
 
-from greenlet import greenlet
-
 from playwright._impl._api_structures import NameValue
 from playwright._impl._errors import Error, TargetClosedError, TimeoutError
+from playwright._impl._glob import glob_to_regex
+from playwright._impl._greenlets import RouteGreenlet
 from playwright._impl._str_utils import escape_regex_flags
-
-if sys.version_info >= (3, 8):  # pragma: no cover
-    from typing import Literal, TypedDict
-else:  # pragma: no cover
-    from typing_extensions import Literal, TypedDict
-
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._api_structures import HeadersArray
@@ -149,7 +142,7 @@ class URLMatcher:
         if isinstance(match, str):
             if base_url and not match.startswith("*"):
                 match = urljoin(base_url, match)
-            regex = fnmatch.translate(match)
+            regex = glob_to_regex(match)
             self._regex_obj = re.compile(regex)
         elif isinstance(match, Pattern):
             self._regex_obj = match
@@ -217,26 +210,24 @@ def serialize_error(ex: Exception, tb: Optional[TracebackType]) -> ErrorPayload:
     )
 
 
-def parse_error(error: ErrorPayload) -> Error:
+def parse_error(error: ErrorPayload, log: Optional[str] = None) -> Error:
     base_error_class = Error
     if error.get("name") == "TimeoutError":
         base_error_class = TimeoutError
     if error.get("name") == "TargetClosedError":
         base_error_class = TargetClosedError
-    exc = base_error_class(cast(str, patch_error_message(error.get("message"))))
+    if not log:
+        log = ""
+    exc = base_error_class(patch_error_message(error["message"]) + log)
     exc._name = error["name"]
     exc._stack = error["stack"]
     return exc
 
 
-def patch_error_message(message: Optional[str]) -> Optional[str]:
-    if message is None:
-        return None
-
+def patch_error_message(message: str) -> str:
     match = re.match(r"(\w+)(: expected .*)", message)
     if match:
         message = to_snake_case(match.group(1)) + match.group(2)
-    assert message is not None
     message = message.replace(
         "Pass { acceptDownloads: true }", "Pass { accept_downloads: True }"
     )
@@ -257,6 +248,15 @@ def monotonic_time() -> int:
     return math.floor(time.monotonic() * 1000)
 
 
+class RouteHandlerInvocation:
+    complete: "asyncio.Future"
+    route: "Route"
+
+    def __init__(self, complete: "asyncio.Future", route: "Route") -> None:
+        self.complete = complete
+        self.route = route
+
+
 class RouteHandler:
     def __init__(
         self,
@@ -270,32 +270,67 @@ class RouteHandler:
         self._times = times if times else math.inf
         self._handled_count = 0
         self._is_sync = is_sync
+        self._ignore_exception = False
+        self._active_invocations: Set[RouteHandlerInvocation] = set()
 
     def matches(self, request_url: str) -> bool:
         return self.matcher.matches(request_url)
 
     async def handle(self, route: "Route") -> bool:
+        handler_invocation = RouteHandlerInvocation(
+            asyncio.get_running_loop().create_future(), route
+        )
+        self._active_invocations.add(handler_invocation)
+        try:
+            return await self._handle_internal(route)
+        except Exception as e:
+            # If the handler was stopped (without waiting for completion), we ignore all exceptions.
+            if self._ignore_exception:
+                return False
+            raise e
+        finally:
+            handler_invocation.complete.set_result(None)
+            self._active_invocations.remove(handler_invocation)
+
+    async def _handle_internal(self, route: "Route") -> bool:
         handled_future = route._start_handling()
-        handler_task = []
 
-        def impl() -> None:
-            self._handled_count += 1
-            result = cast(
-                Callable[["Route", "Request"], Union[Coroutine, Any]], self.handler
-            )(route, route.request)
-            if inspect.iscoroutine(result):
-                handler_task.append(asyncio.create_task(result))
-
-        # As with event handlers, each route handler is a potentially blocking context
-        # so it needs a fiber.
+        self._handled_count += 1
         if self._is_sync:
-            g = greenlet(impl)
-            g.switch()
-        else:
-            impl()
+            handler_finished_future = route._loop.create_future()
 
-        [handled, *_] = await asyncio.gather(handled_future, *handler_task)
-        return handled
+            def _handler() -> None:
+                try:
+                    self.handler(route, route.request)  # type: ignore
+                    handler_finished_future.set_result(None)
+                except Exception as e:
+                    handler_finished_future.set_exception(e)
+
+            # As with event handlers, each route handler is a potentially blocking context
+            # so it needs a fiber.
+            g = RouteGreenlet(_handler)
+            g.switch()
+            await handler_finished_future
+        else:
+            coro_or_future = self.handler(route, route.request)  # type: ignore
+            if coro_or_future:
+                # separate task so that we get a proper stack trace for exceptions / tracing api_name extraction
+                await asyncio.ensure_future(coro_or_future)
+        return await handled_future
+
+    async def stop(self, behavior: Literal["ignoreErrors", "wait"]) -> None:
+        # When a handler is manually unrouted or its page/context is closed we either
+        # - wait for the current handler invocations to finish
+        # - or do not wait, if the user opted out of it, but swallow all exceptions
+        #   that happen after the unroute/close.
+        if behavior == "ignoreErrors":
+            self._ignore_exception = True
+        else:
+            tasks = []
+            for activation in self._active_invocations:
+                if not activation.route._did_throw:
+                    tasks.append(activation.complete)
+            await asyncio.gather(*tasks)
 
     @property
     def will_expire(self) -> bool:

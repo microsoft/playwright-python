@@ -25,6 +25,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    Literal,
     Optional,
     Pattern,
     Sequence,
@@ -54,6 +55,7 @@ from playwright._impl._errors import Error, TargetClosedError, is_target_closed_
 from playwright._impl._event_context_manager import EventContextManagerImpl
 from playwright._impl._file_chooser import FileChooser
 from playwright._impl._frame import Frame
+from playwright._impl._greenlets import LocatorHandlerGreenlet
 from playwright._impl._har_router import HarRouter
 from playwright._impl._helper import (
     ColorScheme,
@@ -81,17 +83,13 @@ from playwright._impl._input import Keyboard, Mouse, Touchscreen
 from playwright._impl._js_handle import (
     JSHandle,
     Serializable,
+    add_source_url_to_script,
     parse_result,
     serialize_argument,
 )
 from playwright._impl._network import Request, Response, Route, serialize_headers
 from playwright._impl._video import Video
 from playwright._impl._waiter import Waiter
-
-if sys.version_info >= (3, 8):  # pragma: no cover
-    from typing import Literal
-else:  # pragma: no cover
-    from typing_extensions import Literal
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser_context import BrowserContext
@@ -152,6 +150,9 @@ class Page(ChannelOwner):
         self._video: Optional[Video] = None
         self._opener = cast("Page", from_nullable_channel(initializer.get("opener")))
         self._close_reason: Optional[str] = None
+        self._close_was_called = False
+        self._har_routers: List[HarRouter] = []
+        self._locator_handlers: Dict[str, Callable] = {}
 
         self._channel.on(
             "bindingCall",
@@ -178,8 +179,14 @@ class Page(ChannelOwner):
             lambda params: self._on_frame_detached(from_channel(params["frame"])),
         )
         self._channel.on(
+            "locatorHandlerTriggered",
+            lambda params: self._loop.create_task(
+                self._on_locator_handler_triggered(params["uid"])
+            ),
+        )
+        self._channel.on(
             "route",
-            lambda params: asyncio.create_task(
+            lambda params: self._loop.create_task(
                 self._on_route(from_channel(params["route"]))
             ),
         )
@@ -196,17 +203,21 @@ class Page(ChannelOwner):
         self._closed_or_crashed_future: asyncio.Future = asyncio.Future()
         self.on(
             Page.Events.Close,
-            lambda _: self._closed_or_crashed_future.set_result(
-                self._close_error_with_reason()
-            )
-            if not self._closed_or_crashed_future.done()
-            else None,
+            lambda _: (
+                self._closed_or_crashed_future.set_result(
+                    self._close_error_with_reason()
+                )
+                if not self._closed_or_crashed_future.done()
+                else None
+            ),
         )
         self.on(
             Page.Events.Crash,
-            lambda _: self._closed_or_crashed_future.set_result(TargetClosedError())
-            if not self._closed_or_crashed_future.done()
-            else None,
+            lambda _: (
+                self._closed_or_crashed_future.set_result(TargetClosedError())
+                if not self._closed_or_crashed_future.done()
+                else None
+            ),
         )
 
         self._set_event_to_subscription_mapping(
@@ -238,7 +249,12 @@ class Page(ChannelOwner):
         route._context = self.context
         route_handlers = self._routes.copy()
         for route_handler in route_handlers:
+            # If the page was closed we stall all requests right away.
+            if self._close_was_called or self.context._close_was_called:
+                return
             if not route_handler.matches(route.request.url):
+                continue
+            if route_handler not in self._routes:
                 continue
             if route_handler.will_expire:
                 self._routes.remove(route_handler)
@@ -246,9 +262,16 @@ class Page(ChannelOwner):
                 handled = await route_handler.handle(route)
             finally:
                 if len(self._routes) == 0:
+
+                    async def _update_interceptor_patterns_ignore_exceptions() -> None:
+                        try:
+                            await self._update_interception_patterns()
+                        except Error:
+                            pass
+
                     asyncio.create_task(
                         self._connection.wrap_api_call(
-                            lambda: self._update_interception_patterns(), True
+                            _update_interceptor_patterns_ignore_exceptions, True
                         )
                     )
             if handled:
@@ -272,6 +295,7 @@ class Page(ChannelOwner):
             self._browser_context._pages.remove(self)
         if self in self._browser_context._background_pages:
             self._browser_context._background_pages.remove(self)
+        self._dispose_har_routers()
         self.emit(Page.Events.Close, self)
 
     def _on_crash(self) -> None:
@@ -563,7 +587,9 @@ class Page(ChannelOwner):
         self, script: str = None, path: Union[str, Path] = None
     ) -> None:
         if path:
-            script = (await async_readfile(path)).decode()
+            script = add_source_url_to_script(
+                (await async_readfile(path)).decode(), path
+            )
         if not isinstance(script, str):
             raise Error("Either path or script parameter must be specified")
         await self._channel.send("addInitScript", dict(source=script))
@@ -585,13 +611,42 @@ class Page(ChannelOwner):
     async def unroute(
         self, url: URLMatch, handler: Optional[RouteHandlerCallback] = None
     ) -> None:
-        self._routes = list(
-            filter(
-                lambda r: r.matcher.match != url or (handler and r.handler != handler),
-                self._routes,
+        removed = []
+        remaining = []
+        for route in self._routes:
+            if route.matcher.match != url or (handler and route.handler != handler):
+                remaining.append(route)
+            else:
+                removed.append(route)
+        await self._unroute_internal(removed, remaining, "default")
+
+    async def _unroute_internal(
+        self,
+        removed: List[RouteHandler],
+        remaining: List[RouteHandler],
+        behavior: Literal["default", "ignoreErrors", "wait"] = None,
+    ) -> None:
+        self._routes = remaining
+        await self._update_interception_patterns()
+        if behavior is None or behavior == "default":
+            return
+        await asyncio.gather(
+            *map(
+                lambda route: route.stop(behavior),  # type: ignore
+                removed,
             )
         )
-        await self._update_interception_patterns()
+
+    def _dispose_har_routers(self) -> None:
+        for router in self._har_routers:
+            router.dispose()
+        self._har_routers = []
+
+    async def unroute_all(
+        self, behavior: Literal["default", "ignoreErrors", "wait"] = None
+    ) -> None:
+        await self._unroute_internal(self._routes, [], behavior)
+        self._dispose_har_routers()
 
     async def route_from_har(
         self,
@@ -617,6 +672,7 @@ class Page(ChannelOwner):
             not_found_action=notFound or "abort",
             url_matcher=url,
         )
+        self._har_routers.append(router)
         await router.add_page_route(self)
 
     async def _update_interception_patterns(self) -> None:
@@ -639,6 +695,7 @@ class Page(ChannelOwner):
         scale: Literal["css", "device"] = None,
         mask: Sequence["Locator"] = None,
         maskColor: str = None,
+        style: str = None,
     ) -> bytes:
         params = locals_to_params(locals())
         if "path" in params:
@@ -667,6 +724,7 @@ class Page(ChannelOwner):
 
     async def close(self, runBeforeUnload: bool = None, reason: str = None) -> None:
         self._close_reason = reason
+        self._close_was_called = True
         try:
             await self._channel.send("close", locals_to_params(locals()))
             if self._owned_context:
@@ -993,6 +1051,8 @@ class Page(ChannelOwner):
         preferCSSPageSize: bool = None,
         margin: PdfMargins = None,
         path: Union[str, Path] = None,
+        outline: bool = None,
+        tagged: bool = None,
     ) -> bytes:
         params = locals_to_params(locals())
         if "path" in params:
@@ -1201,6 +1261,48 @@ class Page(ChannelOwner):
                 strict=strict,
                 trial=trial,
             )
+
+    async def add_locator_handler(self, locator: "Locator", handler: Callable) -> None:
+        if locator._frame != self._main_frame:
+            raise Error("Locator must belong to the main frame of this page")
+        uid = await self._channel.send(
+            "registerLocatorHandler",
+            {
+                "selector": locator._selector,
+            },
+        )
+        self._locator_handlers[uid] = handler
+
+    async def _on_locator_handler_triggered(self, uid: str) -> None:
+        try:
+            if self._dispatcher_fiber:
+                handler_finished_future = self._loop.create_future()
+
+                def _handler() -> None:
+                    try:
+                        self._locator_handlers[uid]()
+                        handler_finished_future.set_result(None)
+                    except Exception as e:
+                        handler_finished_future.set_exception(e)
+
+                g = LocatorHandlerGreenlet(_handler)
+                g.switch()
+                await handler_finished_future
+            else:
+                coro_or_future = self._locator_handlers[uid]()
+                if coro_or_future:
+                    await coro_or_future
+
+        finally:
+            try:
+                await self._connection.wrap_api_call(
+                    lambda: self._channel.send(
+                        "resolveLocatorHandlerNoReply", {"uid": uid}
+                    ),
+                    is_internal=True,
+                )
+            except Error:
+                pass
 
 
 class Worker(ChannelOwner):

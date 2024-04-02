@@ -75,6 +75,13 @@ class HarRouter:
             return
 
         if action == "fulfill":
+            # If the response status is -1, the request was canceled or stalled, so we just stall it here.
+            # See https://github.com/microsoft/playwright/issues/29311.
+            # TODO: it'd be better to abort such requests, but then we likely need to respect the timing,
+            # because the request might have been stalled for a long time until the very end of the
+            # test when HAR was recorded but we'd abort it immediately.
+            if response.get("status") == -1:
+                return
             body = response["body"]
             assert body is not None
             await route.fulfill(
@@ -102,16 +109,14 @@ class HarRouter:
             url=self._options_url_match or "**/*",
             handler=lambda route, _: asyncio.create_task(self._handle(route)),
         )
-        context.once("close", lambda _: self._dispose())
 
     async def add_page_route(self, page: "Page") -> None:
         await page.route(
             url=self._options_url_match or "**/*",
             handler=lambda route, _: asyncio.create_task(self._handle(route)),
         )
-        page.once("close", lambda _: self._dispose())
 
-    def _dispose(self) -> None:
+    def dispose(self) -> None:
         asyncio.create_task(
             self._local_utils._channel.send("harClose", {"harId": self._har_id})
         )

@@ -52,7 +52,7 @@ def test_fetch_should_work(context: BrowserContext, server: Server) -> None:
 
 
 def test_should_throw_on_network_error(context: BrowserContext, server: Server) -> None:
-    server.set_route("/test", lambda request: request.transport.loseConnection())
+    server.set_route("/test", lambda request: request.loseConnection())
     with pytest.raises(Error, match="socket hang up"):
         context.request.fetch(server.PREFIX + "/test")
 

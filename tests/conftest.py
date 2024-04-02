@@ -233,7 +233,7 @@ class RemoteServer:
             node_executable = driver_dir / "node.exe"
         else:
             node_executable = driver_dir / "node"
-        cli_js = driver_dir / "package" / "lib" / "cli" / "cli.js"
+        cli_js = driver_dir / "package" / "cli.js"
         tmpfile.write_text(json.dumps(launch_server_options))
         self.process = subprocess.Popen(
             [

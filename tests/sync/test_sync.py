@@ -14,7 +14,7 @@
 
 import multiprocessing
 import os
-from typing import Any, Dict
+from typing import Any, Callable, Dict
 
 import pytest
 
@@ -266,10 +266,12 @@ def test_sync_set_default_timeout(page: Page) -> None:
     assert "Timeout 1ms exceeded." in exc.value.message
 
 
-def test_close_should_reject_all_promises(context: BrowserContext) -> None:
+def test_close_should_reject_all_promises(
+    context: BrowserContext, sync_gather: Callable
+) -> None:
     new_page = context.new_page()
     with pytest.raises(Error) as exc_info:
-        new_page._gather(
+        sync_gather(
             lambda: new_page.evaluate("() => new Promise(r => {})"),
             lambda: new_page.close(),
         )
@@ -344,21 +346,3 @@ def test_call_sync_method_after_playwright_close_with_own_loop(
     p.start()
     p.join()
     assert p.exitcode == 0
-
-
-def test_should_collect_stale_handles(page: Page, server: Server) -> None:
-    page.on("request", lambda request: None)
-    response = page.goto(server.PREFIX + "/title.html")
-    assert response
-    for i in range(1000):
-        page.evaluate(
-            """async () => {
-            const response = await fetch('/');
-            await response.text();
-        }"""
-        )
-    with pytest.raises(Exception) as exc_info:
-        response.all_headers()
-    assert "The object has been collected to prevent unbounded heap growth." in str(
-        exc_info.value
-    )

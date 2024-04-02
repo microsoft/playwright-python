@@ -13,12 +13,14 @@
 # limitations under the License.
 
 import collections.abc
+import datetime
 import math
-from datetime import datetime
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from urllib.parse import ParseResult, urlparse, urlunparse
 
 from playwright._impl._connection import Channel, ChannelOwner, from_channel
+from playwright._impl._errors import is_target_closed_error
 from playwright._impl._map import Map
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -101,7 +103,11 @@ class JSHandle(ChannelOwner):
         return None
 
     async def dispose(self) -> None:
-        await self._channel.send("dispose")
+        try:
+            await self._channel.send("dispose")
+        except Exception as e:
+            if not is_target_closed_error(e):
+                raise e
 
     async def json_value(self) -> Any:
         return parse_result(await self._channel.send("jsonValue"))
@@ -127,8 +133,13 @@ def serialize_value(
             return dict(v="-0")
         if math.isnan(value):
             return dict(v="NaN")
-    if isinstance(value, datetime):
-        return dict(d=value.isoformat() + "Z")
+    if isinstance(value, datetime.datetime):
+        # Node.js Date objects are always in UTC.
+        return {
+            "d": datetime.datetime.strftime(
+                value.astimezone(datetime.timezone.utc), "%Y-%m-%dT%H:%M:%S.%fZ"
+            )
+        }
     if isinstance(value, bool):
         return {"b": value}
     if isinstance(value, (int, float)):
@@ -204,7 +215,10 @@ def parse_value(value: Any, refs: Optional[Dict[int, Any]] = None) -> Any:
             return a
 
         if "d" in value:
-            return datetime.fromisoformat(value["d"][:-1])
+            # Node.js Date objects are always in UTC.
+            return datetime.datetime.strptime(
+                value["d"], "%Y-%m-%dT%H:%M:%S.%fZ"
+            ).replace(tzinfo=datetime.timezone.utc)
 
         if "o" in value:
             o: Dict = {}
@@ -226,3 +240,7 @@ def parse_value(value: Any, refs: Optional[Dict[int, Any]] = None) -> Any:
 
 def parse_result(result: Any) -> Any:
     return parse_value(result)
+
+
+def add_source_url_to_script(source: str, path: Union[str, Path]) -> str:
+    return source + "\n//# sourceURL=" + str(path).replace("\n", "")

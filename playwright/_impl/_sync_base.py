@@ -15,15 +15,15 @@
 import asyncio
 import inspect
 import traceback
+from contextlib import AbstractContextManager
 from types import TracebackType
 from typing import (
     Any,
     Callable,
     Coroutine,
-    Dict,
     Generator,
     Generic,
-    List,
+    Optional,
     Type,
     TypeVar,
     Union,
@@ -66,7 +66,7 @@ class EventInfo(Generic[T]):
         return self._future.done()
 
 
-class EventContextManager(Generic[T]):
+class EventContextManager(Generic[T], AbstractContextManager):
     def __init__(self, sync_base: "SyncBase", future: "asyncio.Future[T]") -> None:
         self._event = EventInfo[T](sync_base, future)
 
@@ -75,9 +75,9 @@ class EventContextManager(Generic[T]):
 
     def __exit__(
         self,
-        exc_type: Type[BaseException],
-        exc_val: BaseException,
-        exc_tb: TracebackType,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
     ) -> None:
         if exc_val:
             self._event._cancel()
@@ -132,38 +132,6 @@ class SyncBase(ImplWrapper):
     def remove_listener(self, event: Any, f: Any) -> None:
         """Removes the function ``f`` from ``event``."""
         self._impl_obj.remove_listener(event, self._wrap_handler(f))
-
-    def _gather(self, *actions: Callable) -> List[Any]:
-        g_self = greenlet.getcurrent()
-        results: Dict[Callable, Any] = {}
-        exceptions: List[Exception] = []
-
-        def action_wrapper(action: Callable) -> Callable:
-            def body() -> Any:
-                try:
-                    results[action] = action()
-                except Exception as e:
-                    results[action] = e
-                    exceptions.append(e)
-                g_self.switch()
-
-            return body
-
-        async def task() -> None:
-            for action in actions:
-                g = greenlet.greenlet(action_wrapper(action))
-                g.switch()
-
-        self._loop.create_task(task())
-
-        while len(results) < len(actions):
-            self._dispatcher_fiber.switch()
-
-        asyncio._set_running_loop(self._loop)
-        if exceptions:
-            raise exceptions[0]
-
-        return list(map(lambda action: results[action], actions))
 
 
 class SyncContextManager(SyncBase):

@@ -633,7 +633,7 @@ async def test_network_events_request_failed(
 ) -> None:
     def handle_request(request: TestServerRequest) -> None:
         request.setHeader("Content-Type", "text/css")
-        request.transport.loseConnection()
+        request.loseConnection()
 
     server.set_route("/one-style.css", handle_request)
 
@@ -830,7 +830,10 @@ async def test_set_extra_http_headers_should_throw_for_non_string_header_values(
     except Error as exc:
         error = exc
     assert error
-    assert error.message == "headers[0].value: expected string, got number"
+    assert (
+        error.message
+        == "Page.set_extra_http_headers: headers[0].value: expected string, got number"
+    )
 
 
 async def test_response_server_addr(page: Page, server: Server) -> None:

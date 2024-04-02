@@ -14,7 +14,6 @@
 
 import asyncio
 import json
-import sys
 from pathlib import Path
 from types import SimpleNamespace
 from typing import (
@@ -23,6 +22,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    Literal,
     Optional,
     Pattern,
     Sequence,
@@ -70,17 +70,13 @@ from playwright._impl._helper import (
 )
 from playwright._impl._network import Request, Response, Route, serialize_headers
 from playwright._impl._page import BindingCall, Page, Worker
+from playwright._impl._str_utils import escape_regex_flags
 from playwright._impl._tracing import Tracing
 from playwright._impl._waiter import Waiter
 from playwright._impl._web_error import WebError
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser import Browser
-
-if sys.version_info >= (3, 8):  # pragma: no cover
-    from typing import Literal
-else:  # pragma: no cover
-    from typing_extensions import Literal
 
 
 class BrowserContext(ChannelOwner):
@@ -128,7 +124,7 @@ class BrowserContext(ChannelOwner):
         )
         self._channel.on(
             "route",
-            lambda params: asyncio.create_task(
+            lambda params: self._loop.create_task(
                 self._on_route(
                     from_channel(params.get("route")),
                 )
@@ -196,6 +192,7 @@ class BrowserContext(ChannelOwner):
             self.Events.Close, lambda context: self._closed_future.set_result(True)
         )
         self._close_reason: Optional[str] = None
+        self._har_routers: List[HarRouter] = []
         self._set_event_to_subscription_mapping(
             {
                 BrowserContext.Events.Console: "console",
@@ -219,9 +216,15 @@ class BrowserContext(ChannelOwner):
 
     async def _on_route(self, route: Route) -> None:
         route._context = self
+        page = route.request._safe_page()
         route_handlers = self._routes.copy()
         for route_handler in route_handlers:
+            # If the page or the context was closed we stall all requests right away.
+            if (page and page._close_was_called) or self._close_was_called:
+                return
             if not route_handler.matches(route.request.url):
+                continue
+            if route_handler not in self._routes:
                 continue
             if route_handler.will_expire:
                 self._routes.remove(route_handler)
@@ -236,7 +239,12 @@ class BrowserContext(ChannelOwner):
                     )
             if handled:
                 return
-        await route._internal_continue(is_internal=True)
+        try:
+            # If the page is closed or unrouteAll() was called without waiting and interception disabled,
+            # the method will throw an error - silence it.
+            await route._internal_continue(is_internal=True)
+        except Exception:
+            pass
 
     def _on_binding(self, binding_call: BindingCall) -> None:
         func = self._bindings.get(binding_call._initializer["name"])
@@ -295,8 +303,34 @@ class BrowserContext(ChannelOwner):
     async def add_cookies(self, cookies: Sequence[SetCookieParam]) -> None:
         await self._channel.send("addCookies", dict(cookies=cookies))
 
-    async def clear_cookies(self) -> None:
-        await self._channel.send("clearCookies")
+    async def clear_cookies(
+        self,
+        name: Union[str, Pattern[str]] = None,
+        domain: Union[str, Pattern[str]] = None,
+        path: Union[str, Pattern[str]] = None,
+    ) -> None:
+        await self._channel.send(
+            "clearCookies",
+            {
+                "name": name if isinstance(name, str) else None,
+                "nameRegexSource": name.pattern if isinstance(name, Pattern) else None,
+                "nameRegexFlags": escape_regex_flags(name)
+                if isinstance(name, Pattern)
+                else None,
+                "domain": domain if isinstance(domain, str) else None,
+                "domainRegexSource": domain.pattern
+                if isinstance(domain, Pattern)
+                else None,
+                "domainRegexFlags": escape_regex_flags(domain)
+                if isinstance(domain, Pattern)
+                else None,
+                "path": path if isinstance(path, str) else None,
+                "pathRegexSource": path.pattern if isinstance(path, Pattern) else None,
+                "pathRegexFlags": escape_regex_flags(path)
+                if isinstance(path, Pattern)
+                else None,
+            },
+        )
 
     async def grant_permissions(
         self, permissions: Sequence[str], origin: str = None
@@ -361,13 +395,37 @@ class BrowserContext(ChannelOwner):
     async def unroute(
         self, url: URLMatch, handler: Optional[RouteHandlerCallback] = None
     ) -> None:
-        self._routes = list(
-            filter(
-                lambda r: r.matcher.match != url or (handler and r.handler != handler),
-                self._routes,
-            )
-        )
+        removed = []
+        remaining = []
+        for route in self._routes:
+            if route.matcher.match != url or (handler and route.handler != handler):
+                remaining.append(route)
+            else:
+                removed.append(route)
+        await self._unroute_internal(removed, remaining, "default")
+
+    async def _unroute_internal(
+        self,
+        removed: List[RouteHandler],
+        remaining: List[RouteHandler],
+        behavior: Literal["default", "ignoreErrors", "wait"] = None,
+    ) -> None:
+        self._routes = remaining
         await self._update_interception_patterns()
+        if behavior is None or behavior == "default":
+            return
+        await asyncio.gather(*map(lambda router: router.stop(behavior), removed))  # type: ignore
+
+    def _dispose_har_routers(self) -> None:
+        for router in self._har_routers:
+            router.dispose()
+        self._har_routers = []
+
+    async def unroute_all(
+        self, behavior: Literal["default", "ignoreErrors", "wait"] = None
+    ) -> None:
+        await self._unroute_internal(self._routes, [], behavior)
+        self._dispose_har_routers()
 
     async def _record_into_har(
         self,
@@ -419,6 +477,7 @@ class BrowserContext(ChannelOwner):
             not_found_action=notFound or "abort",
             url_matcher=url,
         )
+        self._har_routers.append(router)
         await router.add_context_route(self)
 
     async def _update_interception_patterns(self) -> None:
@@ -450,6 +509,7 @@ class BrowserContext(ChannelOwner):
         if self._browser:
             self._browser._contexts.remove(self)
 
+        self._dispose_har_routers()
         self.emit(BrowserContext.Events.Close, self)
 
     async def close(self, reason: str = None) -> None:

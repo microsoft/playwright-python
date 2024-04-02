@@ -13,8 +13,8 @@
 # limitations under the License.
 
 import asyncio
+import datetime
 import re
-from datetime import datetime
 
 import pytest
 
@@ -183,7 +183,11 @@ async def test_assertions_locator_to_have_js_property(
     )
     await expect(page.locator("div")).to_have_js_property(
         "foo",
-        {"a": 1, "b": "string", "c": datetime.utcfromtimestamp(1627503992000 / 1000)},
+        {
+            "a": 1,
+            "b": "string",
+            "c": datetime.datetime.fromtimestamp(1627503992000 / 1000),
+        },
     )
 
 

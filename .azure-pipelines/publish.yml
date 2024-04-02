@@ -1,4 +1,3 @@
-# don't trigger for Pull Requests
 pr: none
 
 trigger:
@@ -6,33 +5,53 @@ trigger:
     include:
     - '*'
 
-pool:
-  vmImage: ubuntu-latest
+resources:
+  repositories:
+  - repository: 1esPipelines
+    type: git
+    name: 1ESPipelineTemplates/1ESPipelineTemplates
+    ref: refs/tags/release
 
-steps:
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '3.8'
-  displayName: 'Use Python'
-
-- script: |
-    python -m pip install --upgrade pip
-    pip install -r local-requirements.txt
-    pip install -e .
-    python setup.py bdist_wheel --all
-  displayName: 'Install & Build'
-
-- task: EsrpRelease@4
-  inputs:
-    ConnectedServiceName: 'Playwright-ESRP'
-    Intent: 'PackageDistribution'
-    ContentType: 'PyPi'
-    ContentSource: 'Folder'
-    FolderLocation: './dist/'
-    WaitForReleaseCompletion: true
-    Owners: 'maxschmitt@microsoft.com'
-    Approvers: 'maxschmitt@microsoft.com'
-    ServiceEndpointUrl: 'https://api.esrp.microsoft.com'
-    MainPublisher: 'Playwright'
-    DomainTenantId: '72f988bf-86f1-41af-91ab-2d7cd011db47'
-  displayName: 'ESRP Release to PIP'
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1esPipelines
+  parameters:
+    pool:
+      name: DevDivPlaywrightAzurePipelinesUbuntu2204
+      os: linux
+    sdl:
+      sourceAnalysisPool:
+        name: DevDivPlaywrightAzurePipelinesWindows2022
+        # The image must be windows-based due to restrictions of the SDL tools. See: https://aka.ms/AAo6v8e
+        # In the case of a windows build, this can be the same as the above pool image.
+        os: windows
+      suppression:
+        suppressionFile: $(Build.SourcesDirectory)\.azure-pipelines\guardian\SDL\.gdnsuppress
+    stages:
+    - stage: Stage
+      jobs:
+      - job: HostJob
+        steps:
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '3.8'
+          displayName: 'Use Python'
+        - script: |
+            python -m pip install --upgrade pip
+            pip install -r local-requirements.txt
+            pip install -e .
+            python setup.py bdist_wheel --all
+          displayName: 'Install & Build'
+        - task: EsrpRelease@4
+          inputs:
+            ConnectedServiceName: 'Playwright-ESRP'
+            Intent: 'PackageDistribution'
+            ContentType: 'PyPi'
+            ContentSource: 'Folder'
+            FolderLocation: './dist/'
+            WaitForReleaseCompletion: true
+            Owners: 'maxschmitt@microsoft.com'
+            Approvers: 'maxschmitt@microsoft.com'
+            ServiceEndpointUrl: 'https://api.esrp.microsoft.com'
+            MainPublisher: 'Playwright'
+            DomainTenantId: '72f988bf-86f1-41af-91ab-2d7cd011db47'
+          displayName: 'ESRP Release to PIP'

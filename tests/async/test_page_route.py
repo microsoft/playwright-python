@@ -20,6 +20,7 @@ from typing import Callable, List, Optional
 
 import pytest
 
+from playwright._impl._glob import glob_to_regex
 from playwright.async_api import (
     Browser,
     BrowserContext,
@@ -1009,21 +1010,28 @@ async def test_page_route_should_support_times_parameter(
     assert len(intercepted) == 1
 
 
-async def test_context_route_should_support_times_parameter(
+async def test_should_work_if_handler_with_times_parameter_was_removed_from_another_handler(
     context: BrowserContext, page: Page, server: Server
 ) -> None:
     intercepted = []
 
-    async def handle_request(route: Route) -> None:
+    async def handler(route: Route) -> None:
+        intercepted.append("first")
         await route.continue_()
-        intercepted.append(True)
 
-    await context.route("**/empty.html", handle_request, times=1)
+    await page.route("**/*", handler, times=1)
 
+    async def handler2(route: Route) -> None:
+        intercepted.append("second")
+        await page.unroute("**/*", handler)
+        await route.fallback()
+
+    await page.route("**/*", handler2)
     await page.goto(server.EMPTY_PAGE)
+    assert intercepted == ["second"]
+    intercepted.clear()
     await page.goto(server.EMPTY_PAGE)
-    await page.goto(server.EMPTY_PAGE)
-    assert len(intercepted) == 1
+    assert intercepted == ["second"]
 
 
 async def test_should_fulfill_with_global_fetch_result(
@@ -1041,3 +1049,47 @@ async def test_should_fulfill_with_global_fetch_result(
     assert response
     assert response.status == 200
     assert await response.json() == {"foo": "bar"}
+
+
+async def test_glob_to_regex() -> None:
+    assert glob_to_regex("**/*.js").match("https://localhost:8080/foo.js")
+    assert not glob_to_regex("**/*.css").match("https://localhost:8080/foo.js")
+    assert not glob_to_regex("*.js").match("https://localhost:8080/foo.js")
+    assert glob_to_regex("https://**/*.js").match("https://localhost:8080/foo.js")
+    assert glob_to_regex("http://localhost:8080/simple/path.js").match(
+        "http://localhost:8080/simple/path.js"
+    )
+    assert glob_to_regex("http://localhost:8080/?imple/path.js").match(
+        "http://localhost:8080/Simple/path.js"
+    )
+    assert glob_to_regex("**/{a,b}.js").match("https://localhost:8080/a.js")
+    assert glob_to_regex("**/{a,b}.js").match("https://localhost:8080/b.js")
+    assert not glob_to_regex("**/{a,b}.js").match("https://localhost:8080/c.js")
+
+    assert glob_to_regex("**/*.{png,jpg,jpeg}").match("https://localhost:8080/c.jpg")
+    assert glob_to_regex("**/*.{png,jpg,jpeg}").match("https://localhost:8080/c.jpeg")
+    assert glob_to_regex("**/*.{png,jpg,jpeg}").match("https://localhost:8080/c.png")
+    assert not glob_to_regex("**/*.{png,jpg,jpeg}").match(
+        "https://localhost:8080/c.css"
+    )
+    assert glob_to_regex("foo*").match("foo.js")
+    assert not glob_to_regex("foo*").match("foo/bar.js")
+    assert not glob_to_regex("http://localhost:3000/signin-oidc*").match(
+        "http://localhost:3000/signin-oidc/foo"
+    )
+    assert glob_to_regex("http://localhost:3000/signin-oidc*").match(
+        "http://localhost:3000/signin-oidcnice"
+    )
+
+    assert glob_to_regex("**/three-columns/settings.html?**id=[a-z]**").match(
+        "http://mydomain:8080/blah/blah/three-columns/settings.html?id=settings-e3c58efe-02e9-44b0-97ac-dd138100cf7c&blah"
+    )
+
+    assert glob_to_regex("\\?") == re.compile(r"^\?$")
+    assert glob_to_regex("\\") == re.compile(r"^\\$")
+    assert glob_to_regex("\\\\") == re.compile(r"^\\$")
+    assert glob_to_regex("\\[") == re.compile(r"^\[$")
+    assert glob_to_regex("[a-z]") == re.compile(r"^[a-z]$")
+    assert glob_to_regex("$^+.\\*()|\\?\\{\\}\\[\\]") == re.compile(
+        r"^\$\^\+\.\*\(\)\|\?\{\}\[\]$"
+    )

@@ -401,7 +401,8 @@ def test_should_timeout_waiting_for_visible(page: Page) -> None:
     assert div
     with pytest.raises(Error) as exc_info:
         div.scroll_into_view_if_needed(timeout=3000)
-    assert "element is not displayed, retrying in 100ms" in exc_info.value.message
+    assert "element is not visible" in exc_info.value.message
+    assert "retrying scroll into view action" in exc_info.value.message
 
 
 def test_fill_input(page: Page, server: Server) -> None:
@@ -660,3 +661,11 @@ def test_set_checked(page: Page) -> None:
     assert page.evaluate("checkbox.checked")
     input.set_checked(False)
     assert page.evaluate("checkbox.checked") is False
+
+
+def test_should_allow_disposing_twice(page: Page) -> None:
+    page.set_content("<section>39</section>")
+    element = page.query_selector("section")
+    assert element
+    element.dispose()
+    element.dispose()

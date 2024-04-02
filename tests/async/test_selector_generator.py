@@ -21,27 +21,30 @@ async def test_should_use_data_test_id_in_strict_errors(
     page: Page, playwright: Playwright
 ) -> None:
     playwright.selectors.set_test_id_attribute("data-custom-id")
-    await page.set_content(
+    try:
+        await page.set_content(
+            """
+          <div>
+            <div></div>
+            <div>
+              <div></div>
+              <div></div>
+            </div>
+          </div>
+          <div>
+            <div class='foo bar:0' data-custom-id='One'>
+            </div>
+            <div class='foo bar:1' data-custom-id='Two'>
+            </div>
+          </div>
         """
-      <div>
-        <div></div>
-        <div>
-          <div></div>
-          <div></div>
-        </div>
-      </div>
-      <div>
-        <div class='foo bar:0' data-custom-id='One'>
-        </div>
-        <div class='foo bar:1' data-custom-id='Two'>
-        </div>
-      </div>
-    """
-    )
-    with pytest.raises(Error) as exc_info:
-        await page.locator(".foo").hover(timeout=200)
-    assert "strict mode violation" in exc_info.value.message
-    assert '<div class="foo bar:0' in exc_info.value.message
-    assert '<div class="foo bar:1' in exc_info.value.message
-    assert 'aka get_by_test_id("One")' in exc_info.value.message
-    assert 'aka get_by_test_id("Two")' in exc_info.value.message
+        )
+        with pytest.raises(Error) as exc_info:
+            await page.locator(".foo").hover(timeout=200)
+        assert "strict mode violation" in exc_info.value.message
+        assert '<div class="foo bar:0' in exc_info.value.message
+        assert '<div class="foo bar:1' in exc_info.value.message
+        assert 'aka get_by_test_id("One")' in exc_info.value.message
+        assert 'aka get_by_test_id("Two")' in exc_info.value.message
+    finally:
+        playwright.selectors.set_test_id_attribute("data-testid")

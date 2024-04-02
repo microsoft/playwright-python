@@ -14,7 +14,6 @@
 
 import json
 import pathlib
-import sys
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -22,6 +21,7 @@ from typing import (
     Callable,
     Dict,
     List,
+    Literal,
     Optional,
     Pattern,
     Sequence,
@@ -52,11 +52,6 @@ from playwright._impl._str_utils import (
     escape_for_attribute_selector,
     escape_for_text_selector,
 )
-
-if sys.version_info >= (3, 8):  # pragma: no cover
-    from typing import Literal
-else:  # pragma: no cover
-    from typing_extensions import Literal
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._frame import Frame
@@ -330,6 +325,10 @@ class Locator:
     def nth(self, index: int) -> "Locator":
         return Locator(self._frame, f"{self._selector} >> nth={index}")
 
+    @property
+    def content_frame(self) -> "FrameLocator":
+        return FrameLocator(self._frame, self._selector)
+
     def filter(
         self,
         hasText: Union[str, Pattern[str]] = None,
@@ -523,6 +522,7 @@ class Locator:
         scale: Literal["css", "device"] = None,
         mask: Sequence["Locator"] = None,
         maskColor: str = None,
+        style: str = None,
     ) -> bytes:
         params = locals_to_params(locals())
         return await self._with_element(
@@ -820,6 +820,10 @@ class FrameLocator:
     @property
     def last(self) -> "FrameLocator":
         return FrameLocator(self._frame, f"{self._frame_selector} >> nth=-1")
+
+    @property
+    def owner(self) -> "Locator":
+        return Locator(self._frame, self._frame_selector)
 
     def nth(self, index: int) -> "FrameLocator":
         return FrameLocator(self._frame, f"{self._frame_selector} >> nth={index}")

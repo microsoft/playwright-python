@@ -14,14 +14,8 @@
 import base64
 import collections.abc
 import os
-import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, Union, cast
-
-if sys.version_info >= (3, 8):  # pragma: no cover
-    from typing import TypedDict
-else:  # pragma: no cover
-    from typing_extensions import TypedDict
+from typing import TYPE_CHECKING, Dict, List, Optional, Sequence, TypedDict, Union, cast
 
 from playwright._impl._connection import Channel, from_channel
 from playwright._impl._helper import Error
@@ -62,12 +56,14 @@ async def convert_input_files(
                 assert isinstance(item, (str, Path))
                 last_modified_ms = int(os.path.getmtime(item) * 1000)
                 stream: WritableStream = from_channel(
-                    await context._channel.send(
-                        "createTempFile",
-                        {
-                            "name": os.path.basename(item),
-                            "lastModifiedMs": last_modified_ms,
-                        },
+                    await context._connection.wrap_api_call(
+                        lambda: context._channel.send(
+                            "createTempFile",
+                            {
+                                "name": os.path.basename(cast(str, item)),
+                                "lastModifiedMs": last_modified_ms,
+                            },
+                        )
                     )
                 )
                 await stream.copy(item)

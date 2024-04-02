@@ -13,9 +13,11 @@
 # limitations under the License.
 
 
-from typing import Dict, Generator
+import asyncio
+from typing import Any, Callable, Dict, Generator, List
 
 import pytest
+from greenlet import greenlet
 
 from playwright.sync_api import (
     Browser,
@@ -53,7 +55,7 @@ def browser_type(
         browser_type = playwright.firefox
     elif browser_name == "webkit":
         browser_type = playwright.webkit
-    assert browser_type
+    assert browser_type, f"Unkown browser name '{browser_name}'"
     yield browser_type
 
 
@@ -83,3 +85,39 @@ def page(context: BrowserContext) -> Generator[Page, None, None]:
 @pytest.fixture(scope="session")
 def selectors(playwright: Playwright) -> Selectors:
     return playwright.selectors
+
+
+@pytest.fixture(scope="session")
+def sync_gather(playwright: Playwright) -> Generator[Callable, None, None]:
+    def _sync_gather_impl(*actions: Callable) -> List[Any]:
+        g_self = greenlet.getcurrent()
+        results: Dict[Callable, Any] = {}
+        exceptions: List[Exception] = []
+
+        def action_wrapper(action: Callable) -> Callable:
+            def body() -> Any:
+                try:
+                    results[action] = action()
+                except Exception as e:
+                    results[action] = e
+                    exceptions.append(e)
+                g_self.switch()
+
+            return body
+
+        async def task() -> None:
+            for action in actions:
+                g = greenlet(action_wrapper(action))
+                g.switch()
+
+        asyncio.create_task(task())
+
+        while len(results) < len(actions):
+            playwright._dispatcher_fiber.switch()
+
+        if exceptions:
+            raise exceptions[0]
+
+        return list(map(lambda action: results[action], actions))
+
+    yield _sync_gather_impl

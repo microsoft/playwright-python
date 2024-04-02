@@ -174,10 +174,9 @@ def test_should_amend_http_headers(
     context.route("**/*", handler_with_header_mods)
 
     page.goto(server.EMPTY_PAGE)
-    with page.expect_request("/sleep.zzz") as request_info:
+    with server.expect_request("/sleep.zzz") as server_request_info:
         page.evaluate("() => fetch('/sleep.zzz')")
-    request = request_info.value
-    values.append(request.headers.get("foo"))
+    values.append(server_request_info.value.getHeader("foo"))
     assert values == ["bar", "bar", "bar"]
 
 

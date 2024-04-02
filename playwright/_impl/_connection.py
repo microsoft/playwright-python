@@ -28,16 +28,17 @@ from typing import (
     List,
     Mapping,
     Optional,
+    TypedDict,
     Union,
     cast,
 )
 
-from greenlet import greenlet
 from pyee import EventEmitter
 from pyee.asyncio import AsyncIOEventEmitter
 
 import playwright
-from playwright._impl._errors import TargetClosedError
+from playwright._impl._errors import TargetClosedError, rewrite_error
+from playwright._impl._greenlets import EventGreenlet
 from playwright._impl._helper import Error, ParsedMessagePayload, parse_error
 from playwright._impl._transport import Transport
 
@@ -46,18 +47,13 @@ if TYPE_CHECKING:
     from playwright._impl._playwright import Playwright
 
 
-if sys.version_info >= (3, 8):  # pragma: no cover
-    from typing import TypedDict
-else:  # pragma: no cover
-    from typing_extensions import TypedDict
-
-
 class Channel(AsyncIOEventEmitter):
     def __init__(self, connection: "Connection", object: "ChannelOwner") -> None:
         super().__init__()
         self._connection = connection
         self._guid = object._guid
         self._object = object
+        self.on("error", lambda exc: self._connection._on_event_listener_error(exc))
 
     async def send(self, method: str, params: Dict = None) -> Any:
         return await self._connection.wrap_api_call(
@@ -82,13 +78,13 @@ class Channel(AsyncIOEventEmitter):
     ) -> Any:
         if params is None:
             params = {}
-        callback = self._connection._send_message_to_server(
-            self._object, method, _filter_none(params)
-        )
         if self._connection._error:
             error = self._connection._error
             self._connection._error = None
             raise error
+        callback = self._connection._send_message_to_server(
+            self._object, method, _filter_none(params)
+        )
         done, _ = await asyncio.wait(
             {
                 self._connection._transport.on_error_future,
@@ -339,20 +335,22 @@ class Connection(EventEmitter):
                 "line": frames[0]["line"],
                 "column": frames[0]["column"],
             }
-            if len(frames) > 0
+            if frames
             else None
         )
+        metadata = {
+            "wallTime": int(datetime.datetime.now().timestamp() * 1000),
+            "apiName": stack_trace_information["apiName"],
+            "internal": not stack_trace_information["apiName"],
+        }
+        if location:
+            metadata["location"] = location  # type: ignore
         message = {
             "id": id,
             "guid": object._guid,
             "method": method,
             "params": self._replace_channels_with_guids(params),
-            "metadata": {
-                "wallTime": int(datetime.datetime.now().timestamp() * 1000),
-                "apiName": stack_trace_information["apiName"],
-                "location": location,
-                "internal": not stack_trace_information["apiName"],
-            },
+            "metadata": metadata,
         }
         if self._tracing_count > 0 and frames and object._guid != "localUtils":
             self.local_utils.add_stack_to_tracing_no_reply(id, frames)
@@ -376,11 +374,12 @@ class Connection(EventEmitter):
                 return
             error = msg.get("error")
             if error and not msg.get("result"):
-                parsed_error = parse_error(error["error"])  # type: ignore
+                parsed_error = parse_error(
+                    error["error"], format_call_log(msg.get("log"))  # type: ignore
+                )
                 parsed_error._stack = "".join(
                     traceback.format_list(callback.stack_trace)[-10:]
                 )
-                parsed_error._message += format_call_log(msg.get("log"))  # type: ignore
                 callback.future.set_exception(parsed_error)
             else:
                 result = self._replace_guids_with_channels(msg.get("result"))
@@ -419,10 +418,22 @@ class Connection(EventEmitter):
         try:
             if self._is_sync:
                 for listener in object._channel.listeners(method):
+                    # Event handlers like route/locatorHandlerTriggered require us to perform async work.
+                    # In order to report their potential errors to the user, we need to catch it and store it in the connection
+                    def _done_callback(future: asyncio.Future) -> None:
+                        exc = future.exception()
+                        if exc:
+                            self._on_event_listener_error(exc)
+
+                    def _listener_with_error_handler_attached(params: Any) -> None:
+                        potential_future = listener(params)
+                        if asyncio.isfuture(potential_future):
+                            potential_future.add_done_callback(_done_callback)
+
                     # Each event handler is a potentilly blocking context, create a fiber for each
                     # and switch to them in order, until they block inside and pass control to each
                     # other and then eventually back to dispatcher as listener functions return.
-                    g = greenlet(listener)
+                    g = EventGreenlet(_listener_with_error_handler_attached)
                     if should_replace_guids_with_channels:
                         g.switch(self._replace_guids_with_channels(params))
                     else:
@@ -435,9 +446,13 @@ class Connection(EventEmitter):
                 else:
                     object._channel.emit(method, params)
         except BaseException as exc:
-            print("Error occurred in event listener", file=sys.stderr)
-            traceback.print_exc()
-            self._error = exc
+            self._on_event_listener_error(exc)
+
+    def _on_event_listener_error(self, exc: BaseException) -> None:
+        print("Error occurred in event listener", file=sys.stderr)
+        traceback.print_exception(type(exc), exc, exc.__traceback__, file=sys.stderr)
+        # Save the error to throw at the next API call. This "replicates" unhandled rejection in Node.js.
+        self._error = exc
 
     def _create_remote_object(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
@@ -490,9 +505,12 @@ class Connection(EventEmitter):
             return await cb()
         task = asyncio.current_task(self._loop)
         st: List[inspect.FrameInfo] = getattr(task, "__pw_stack__", inspect.stack())
-        self._api_zone.set(_extract_stack_trace_information_from_stack(st, is_internal))
+        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal)
+        self._api_zone.set(parsed_st)
         try:
             return await cb()
+        except Exception as error:
+            raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
         finally:
             self._api_zone.set(None)
 
@@ -503,9 +521,12 @@ class Connection(EventEmitter):
             return cb()
         task = asyncio.current_task(self._loop)
         st: List[inspect.FrameInfo] = getattr(task, "__pw_stack__", inspect.stack())
-        self._api_zone.set(_extract_stack_trace_information_from_stack(st, is_internal))
+        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal)
+        self._api_zone.set(parsed_st)
         try:
             return cb()
+        except Exception as error:
+            raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
         finally:
             self._api_zone.set(None)
 
@@ -532,7 +553,7 @@ class ParsedStackTrace(TypedDict):
 
 def _extract_stack_trace_information_from_stack(
     st: List[inspect.FrameInfo], is_internal: bool
-) -> Optional[ParsedStackTrace]:
+) -> ParsedStackTrace:
     playwright_module_path = str(Path(playwright.__file__).parents[0])
     last_internal_api_name = ""
     api_name = ""
