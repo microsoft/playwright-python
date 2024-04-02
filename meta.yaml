@@ -29,7 +29,7 @@ requirements:
     - python
     - greenlet ==3.0.3
     - pyee ==11.0.1
-test:
+test: # [build_platform == target_platform]
   requires:
     - pip
   imports:
@@ -37,7 +37,7 @@ test:
     - playwright.sync_api
     - playwright.async_api
   commands:
-    - playwright --help # [build_platform == target_platform]
+    - playwright --help
 
 about:
   home: https://github.com/microsoft/playwright-python
