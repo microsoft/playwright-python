@@ -1,0 +1,136 @@
+From c139df7cbc23cf90d517183263b92ccdbc25a066 Mon Sep 17 00:00:00 2001
+From: Tobias Fischer <info@tobiasfischer.info>
+Date: Tue, 26 Dec 2023 20:28:36 +1000
+Subject: [PATCH 1/5] Add osx-arm64 and linux-aarch64 conda package builds
+
+---
+ .github/workflows/publish.yml | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/.github/workflows/publish.yml b/.github/workflows/publish.yml
+index cc729ae1e..4a0a6e6c9 100644
+--- a/.github/workflows/publish.yml
++++ b/.github/workflows/publish.yml
+@@ -6,7 +6,17 @@ jobs:
+   deploy-conda:
+     strategy:
+       matrix:
+-        os: [ubuntu-latest, windows-latest, macos-latest]
++        include:
++          - os: ubuntu-latest
++            target-platform: linux-64
++          - os: ubuntu-latest
++            target-platform: linux-aarch64
++          - os: windows-latest
++            target-platform: win-64
++          - os: macos-latest
++            target-platform: osx-64
++          - os: macos-latest
++            target-platform: osx-arm64
+     runs-on: ${{ matrix.os }}
+     steps:
+       - uses: actions/checkout@v3
+@@ -24,4 +34,4 @@ jobs:
+           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+         run: |
+           conda config --set anaconda_upload yes
+-          conda build --user microsoft .
++          conda build --target-platform=${{ matrix.target-platform }} --user microsoft .
+
+From d95b875ec438ebfbee7775381e272e71d23d0bee Mon Sep 17 00:00:00 2001
+From: Tobias Fischer <info@tobiasfischer.info>
+Date: Tue, 26 Dec 2023 20:32:06 +1000
+Subject: [PATCH 2/5] Add cross-compile build requirements
+
+---
+ meta.yaml | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/meta.yaml b/meta.yaml
+index 8eb97274f..49e2260b0 100644
+--- a/meta.yaml
++++ b/meta.yaml
+@@ -15,6 +15,10 @@ build:
+     - playwright = playwright.__main__:main
+ 
+ requirements:
++  build:
++    - python                              # [build_platform != target_platform]
++    - pip                                 # [build_platform != target_platform]
++    - cross-python_{{ target_platform }}  # [build_platform != target_platform]
+   host:
+     - python
+     - wheel
+
+From 48267bb3ffb4d4cd61828cd055e6a7f106372772 Mon Sep 17 00:00:00 2001
+From: Tobias Fischer <info@tobiasfischer.info>
+Date: Thu, 4 Jan 2024 11:28:42 +1000
+Subject: [PATCH 3/5] Create conda_build_config_osx_arm64.yaml
+
+---
+ conda_build_config_osx_arm64.yaml | 2 ++
+ 1 file changed, 2 insertions(+)
+ create mode 100644 conda_build_config_osx_arm64.yaml
+
+diff --git a/conda_build_config_osx_arm64.yaml b/conda_build_config_osx_arm64.yaml
+new file mode 100644
+index 000000000..d535f7252
+--- /dev/null
++++ b/conda_build_config_osx_arm64.yaml
+@@ -0,0 +1,2 @@
++target_platform:
++- osx-arm64
+
+From 21fcde25f831e121492243656f5a644eb76bd1da Mon Sep 17 00:00:00 2001
+From: Tobias Fischer <info@tobiasfischer.info>
+Date: Thu, 4 Jan 2024 11:28:59 +1000
+Subject: [PATCH 4/5] Create conda_build_config_linux_aarch64.yaml
+
+---
+ conda_build_config_linux_aarch64.yaml | 2 ++
+ 1 file changed, 2 insertions(+)
+ create mode 100644 conda_build_config_linux_aarch64.yaml
+
+diff --git a/conda_build_config_linux_aarch64.yaml b/conda_build_config_linux_aarch64.yaml
+new file mode 100644
+index 000000000..68dceb2e3
+--- /dev/null
++++ b/conda_build_config_linux_aarch64.yaml
+@@ -0,0 +1,2 @@
++target_platform:
++- linux-aarch64
+
+From 8944ff82e7340b987de4854747aab161d606e30b Mon Sep 17 00:00:00 2001
+From: Tobias Fischer <info@tobiasfischer.info>
+Date: Thu, 4 Jan 2024 13:32:12 +1000
+Subject: [PATCH 5/5] Fixup target platform using build configs
+
+---
+ .github/workflows/publish.yml | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/.github/workflows/publish.yml b/.github/workflows/publish.yml
+index 4a0a6e6c9..168d92dc0 100644
+--- a/.github/workflows/publish.yml
++++ b/.github/workflows/publish.yml
+@@ -23,7 +23,7 @@ jobs:
+         with:
+           fetch-depth: 0
+       - name: Get conda
+-        uses: conda-incubator/setup-miniconda@v2
++        uses: conda-incubator/setup-miniconda@v3
+         with:
+           python-version: 3.9
+           channels: conda-forge
+@@ -34,4 +34,10 @@ jobs:
+           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+         run: |
+           conda config --set anaconda_upload yes
+-          conda build --target-platform=${{ matrix.target-platform }} --user microsoft .
++          if [ "${{ matrix.target-platform }}" == "osx-arm64" ]; then
++            conda build --user microsoft . -m conda_build_config.yaml -m conda_build_config_osx_arm64.yaml
++          elif [ "${{ matrix.target-platform }}" == "linux-aarch64" ]; then
++            conda build --user microsoft . -m conda_build_config.yaml -m conda_build_config_linux_aarch64.yaml
++          else
++            conda build --user microsoft . -m conda_build_config.yaml
++          fi
