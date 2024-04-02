@@ -13,9 +13,9 @@ jobs:
             target-platform: linux-aarch64
           - os: windows-latest
             target-platform: win-64
-          - os: macos-latest
+          - os: macos-latest-large
             target-platform: osx-64
-          - os: macos-latest
+          - os: macos-latest-xlarge
             target-platform: osx-arm64
     runs-on: ${{ matrix.os }}
     steps:
@@ -37,6 +37,7 @@ jobs:
           if [ "${{ matrix.target-platform }}" == "osx-arm64" ]; then
             conda build --user microsoft . -m conda_build_config.yaml -m conda_build_config_osx_arm64.yaml
           elif [ "${{ matrix.target-platform }}" == "linux-aarch64" ]; then
+            conda install cross-python_linux-aarch64
             conda build --user microsoft . -m conda_build_config.yaml -m conda_build_config_linux_aarch64.yaml
           else
             conda build --user microsoft . -m conda_build_config.yaml
