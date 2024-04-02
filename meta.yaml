@@ -30,7 +30,7 @@ requirements:
     - greenlet ==3.0.1
     - pyee ==11.0.1
     - typing_extensions # [py<39]
-test:
+test: # [build_platform == target_platform]
   requires:
     - pip
   imports:
