@@ -39,6 +39,7 @@ jobs:
           python-version: 3.12
           channels: conda-forge
           miniconda-version: latest
+          conda-version: 24.1.2
       - name: Prepare
         run: conda install anaconda-client conda-build conda-verify
       - name: Build and Upload
