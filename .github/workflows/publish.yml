@@ -38,7 +38,6 @@ jobs:
         run: conda install anaconda-client conda-build conda-verify
       - name: Build and Upload
         run: |
-          conda config --set anaconda_upload yes
           if [ "${{ matrix.target-platform }}" == "osx-arm64" ]; then
             conda build . -m conda_build_config.yaml -m conda_build_config_osx_arm64.yaml
           elif [ "${{ matrix.target-platform }}" == "linux-aarch64" ]; then
