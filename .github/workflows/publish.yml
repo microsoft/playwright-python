@@ -24,6 +24,10 @@ jobs:
           - os: macos-latest-xlarge
             target-platform: osx-arm64
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        # Required for conda-incubator/setup-miniconda@v3
+        shell: bash -el {0}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -31,16 +35,12 @@ jobs:
       - name: Get conda
         uses: conda-incubator/setup-miniconda@v3
         with:
-          python-version: 3.9
+          python-version: 3.12
           channels: conda-forge
           miniconda-version: latest
       - name: Prepare
         run: conda install conda-build conda-verify
-        # Required for conda-incubator/setup-miniconda@v3
-        shell: bash -l {0}
       - name: Build and Upload
-        # Required for conda-incubator/setup-miniconda@v3
-        shell: bash -l {0}
         run: |
           if [ "${{ matrix.target-platform }}" == "osx-arm64" ]; then
             conda build . -m conda_build_config.yaml -m conda_build_config_osx_arm64.yaml
