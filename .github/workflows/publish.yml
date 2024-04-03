@@ -41,10 +41,10 @@ jobs:
         run: |
           conda config --set anaconda_upload yes
           if [ "${{ matrix.target-platform }}" == "osx-arm64" ]; then
-            conda build --user microsoft . -m conda_build_config.yaml -m conda_build_config_osx_arm64.yaml
+            conda build --user microsoft . -m conda_build_config_osx_arm64.yaml
           elif [ "${{ matrix.target-platform }}" == "linux-aarch64" ]; then
             conda install cross-python_linux-aarch64
-            conda build --user microsoft . -m conda_build_config.yaml -m conda_build_config_linux_aarch64.yaml
+            conda build --user microsoft . -m conda_build_config_linux_aarch64.yaml
           else
-            conda build --user microsoft . -m conda_build_config.yaml
+            conda build --user microsoft .
           fi
