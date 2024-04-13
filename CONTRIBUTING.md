@@ -2,7 +2,7 @@
 
 ## How to Contribute
 
-### Configuring python environment
+### Configuring the Python environment
 
 The project development requires Python version 3.9+. To set it as default in the environment run the following commands:
 
