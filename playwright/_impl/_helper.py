@@ -229,7 +229,7 @@ def patch_error_message(message: str) -> str:
     if match:
         message = to_snake_case(match.group(1)) + match.group(2)
     message = message.replace(
-        "Pass { acceptDownloads: true }", "Pass { accept_downloads: True }"
+        "Pass { acceptDownloads: true }", "Pass 'accept_downloads=True'"
     )
     return message
 
