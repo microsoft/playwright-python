@@ -311,7 +311,7 @@ class Page(ChannelOwner):
 
     def _on_video(self, params: Any) -> None:
         artifact = from_channel(params["artifact"])
-        cast(Video, self.video)._artifact_ready(artifact)
+        self._force_video()._artifact_ready(artifact)
 
     @property
     def context(self) -> "BrowserContext":
@@ -1064,13 +1064,21 @@ class Page(ChannelOwner):
             await async_writefile(path, decoded_binary)
         return decoded_binary
 
+    def _force_video(self) -> Video:
+        if not self._video:
+            self._video = Video(self)
+        return self._video
+
     @property
     def video(
         self,
     ) -> Optional[Video]:
-        if not self._video:
-            self._video = Video(self)
-        return self._video
+        # Note: we are creating Video object lazily, because we do not know
+        # BrowserContextOptions when constructing the page - it is assigned
+        # too late during launchPersistentContext.
+        if not self._browser_context._options.get("recordVideo"):
+            return None
+        return self._force_video()
 
     def _close_error_with_reason(self) -> TargetClosedError:
         return TargetClosedError(
