@@ -76,3 +76,11 @@ async def test_should_not_error_if_page_not_closed_before_save_as(
     await saved
     await page.context.close()
     assert os.path.exists(out_path)
+
+
+async def test_should_be_None_if_not_recording(
+    browser: Browser, tmpdir: Path, server: Server
+) -> None:
+    page = await browser.new_page()
+    assert page.video is None
+    await page.close()
