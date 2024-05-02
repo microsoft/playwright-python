@@ -293,6 +293,9 @@ class Connection(EventEmitter):
         for ws_connection in self._child_ws_connections:
             ws_connection._transport.dispose()
         for callback in self._callbacks.values():
+            # To prevent 'Future exception was never retrieved' we ignore all callbacks that are no_reply.
+            if callback.no_reply:
+                continue
             callback.future.set_exception(self._closed_error)
         self._callbacks.clear()
         self.emit("close")
