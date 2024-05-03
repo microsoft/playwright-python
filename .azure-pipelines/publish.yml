@@ -50,7 +50,9 @@ extends:
             clientid: '13434a40-7de4-4c23-81a3-d843dc81c2c5'
             intent: 'PackageDistribution'
             contenttype: 'PyPi'
-            contentsource: 'folder'
+            # Keeping it commented out as a workaround for:
+            # https://portal.microsofticm.com/imp/v3/incidents/incident/499972482/summary
+            # contentsource: 'folder'
             folderlocation: './dist/'
             waitforreleasecompletion: true
             owners: 'maxschmitt@microsoft.com'
