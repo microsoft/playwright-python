@@ -41,17 +41,21 @@ extends:
             pip install -e .
             python setup.py bdist_wheel --all
           displayName: 'Install & Build'
-        - task: EsrpRelease@4
-          inputs:
-            ConnectedServiceName: 'Playwright-ESRP'
-            Intent: 'PackageDistribution'
-            ContentType: 'PyPi'
-            ContentSource: 'Folder'
-            FolderLocation: './dist/'
-            WaitForReleaseCompletion: true
-            Owners: 'maxschmitt@microsoft.com'
-            Approvers: 'maxschmitt@microsoft.com'
-            ServiceEndpointUrl: 'https://api.esrp.microsoft.com'
-            MainPublisher: 'Playwright'
-            DomainTenantId: '72f988bf-86f1-41af-91ab-2d7cd011db47'
-          displayName: 'ESRP Release to PIP'
+      - task: EsrpRelease@7
+        inputs:
+          connectedservicename: 'Playwright-ESRP-Azure'
+          keyvaultname: 'pw-publishing-secrets'
+          authcertname: 'ESRP-Release-Auth'
+          signcertname: 'ESRP-Release-Sign'
+          clientid: '13434a40-7de4-4c23-81a3-d843dc81c2c5'
+          intent: 'PackageDistribution'
+          contenttype: 'PyPi'
+          contentsource: 'folder'
+          folderlocation: './dist/'
+          waitforreleasecompletion: true
+          owners: 'maxschmitt@microsoft.com'
+          approvers: 'maxschmitt@microsoft.com'
+          serviceendpointurl: 'https://api.esrp.microsoft.com'
+          mainpublisher: 'Playwright'
+          domaintenantid: '72f988bf-86f1-41af-91ab-2d7cd011db47'
+        displayName: 'ESRP Release to PIP'
