@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import asyncio
-from typing import Dict, cast
+from typing import Dict, Optional, cast
 
 from pyee.asyncio import AsyncIOEventEmitter
 
@@ -54,9 +54,10 @@ class JsonPipeTransport(AsyncIOEventEmitter, Transport):
                 return
             self.on_message(cast(ParsedMessagePayload, message))
 
-        def handle_closed(reason: str) -> None:
+        def handle_closed(reason: Optional[str]) -> None:
             self.emit("close", reason)
-            self.on_error_future.set_exception(TargetClosedError(reason))
+            if reason:
+                self.on_error_future.set_exception(TargetClosedError(reason))
             self._stopped_future.set_result(None)
 
         self._pipe_channel.on(
@@ -65,7 +66,7 @@ class JsonPipeTransport(AsyncIOEventEmitter, Transport):
         )
         self._pipe_channel.on(
             "closed",
-            lambda params: handle_closed(params["reason"]),
+            lambda params: handle_closed(params.get("reason")),
         )
 
     async def run(self) -> None:

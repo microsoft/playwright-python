@@ -11723,7 +11723,9 @@ class Page(AsyncContextManager):
     async def add_locator_handler(
         self,
         locator: "Locator",
-        handler: typing.Callable,
+        handler: typing.Union[
+            typing.Callable[["Locator"], typing.Any], typing.Callable[[], typing.Any]
+        ],
         *,
         no_wait_after: typing.Optional[bool] = None,
         times: typing.Optional[int] = None
@@ -11818,7 +11820,7 @@ class Page(AsyncContextManager):
         ----------
         locator : Locator
             Locator that triggers the handler.
-        handler : Callable
+        handler : Union[Callable[[Locator], Any], Callable[[], Any]]
             Function that should be run once `locator` appears. This function should get rid of the element that blocks actions
             like click.
         no_wait_after : Union[bool, None]

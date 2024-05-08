@@ -1292,7 +1292,7 @@ class Page(ChannelOwner):
     async def add_locator_handler(
         self,
         locator: "Locator",
-        handler: Callable,
+        handler: Union[Callable[["Locator"], Any], Callable[[], Any]],
         noWaitAfter: bool = None,
         times: int = None,
     ) -> None:

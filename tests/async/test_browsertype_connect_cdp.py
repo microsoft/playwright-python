@@ -92,6 +92,7 @@ async def test_conect_over_a_ws_endpoint(
 async def test_connect_over_cdp_passing_header_works(
     browser_type: BrowserType, server: Server
 ) -> None:
+    server.send_on_web_socket_connection(b"incoming")
     request = asyncio.create_task(server.wait_for_request("/ws"))
     with pytest.raises(Error):
         await browser_type.connect_over_cdp(

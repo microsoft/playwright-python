@@ -86,16 +86,16 @@ class TestServerRequest(http.Request):
         uri = urlparse(self.uri.decode())
         path = uri.path
 
-        if path == "/ws":
-            server._ws_resource.render(self)
-            return
-
         request_subscriber = server.request_subscribers.get(path)
         if request_subscriber:
             request_subscriber._loop.call_soon_threadsafe(
                 request_subscriber.set_result, self
             )
             server.request_subscribers.pop(path)
+
+        if path == "/ws":
+            server._ws_resource.render(self)
+            return
 
         if server.auth.get(path):
             authorization_header = self.requestHeaders.getRawHeaders("authorization")
