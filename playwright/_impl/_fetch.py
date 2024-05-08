@@ -96,6 +96,7 @@ class APIRequestContext(ChannelOwner):
 
     async def dispose(self) -> None:
         await self._channel.send("dispose")
+        self._tracing._reset_stack_counter()
 
     async def delete(
         self,

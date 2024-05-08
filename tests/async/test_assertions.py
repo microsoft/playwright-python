@@ -84,6 +84,11 @@ async def test_assertions_page_to_have_url_with_base_url(
     await page.close()
 
 
+async def test_assertions_page_to_have_url_support_ignore_case(page: Page) -> None:
+    await page.goto("data:text/html,<div>A</div>")
+    await expect(page).to_have_url("DATA:teXT/HTml,<div>a</div>", ignore_case=True)
+
+
 async def test_assertions_locator_to_contain_text(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     await page.set_content("<div id=foobar>kek</div>")
@@ -828,3 +833,52 @@ async def test_should_be_able_to_set_custom_global_timeout(page: Page) -> None:
         )
     finally:
         expect.set_options(timeout=None)
+
+
+async def test_to_have_accessible_name(page: Page) -> None:
+    await page.set_content('<div role="button" aria-label="Hello"></div>')
+    locator = page.locator("div")
+    await expect(locator).to_have_accessible_name("Hello")
+    await expect(locator).not_to_have_accessible_name("hello")
+    await expect(locator).to_have_accessible_name("hello", ignore_case=True)
+    await expect(locator).to_have_accessible_name(re.compile(r"ell\w"))
+    await expect(locator).not_to_have_accessible_name(re.compile(r"hello"))
+    await expect(locator).to_have_accessible_name(
+        re.compile(r"hello"), ignore_case=True
+    )
+
+
+async def test_to_have_accessible_description(page: Page) -> None:
+    await page.set_content('<div role="button" aria-description="Hello"></div>')
+    locator = page.locator("div")
+    await expect(locator).to_have_accessible_description("Hello")
+    await expect(locator).not_to_have_accessible_description("hello")
+    await expect(locator).to_have_accessible_description("hello", ignore_case=True)
+    await expect(locator).to_have_accessible_description(re.compile(r"ell\w"))
+    await expect(locator).not_to_have_accessible_description(re.compile(r"hello"))
+    await expect(locator).to_have_accessible_description(
+        re.compile(r"hello"), ignore_case=True
+    )
+
+
+# test('toHaveRole', async ({ page }) => {
+#   await page.setContent(`<div role="button">Button!</div>`);
+#   await expect(page.locator('div')).toHaveRole('button');
+#   await expect(page.locator('div')).not.toHaveRole('checkbox');
+#   try {
+#     // @ts-expect-error
+#     await expect(page.locator('div')).toHaveRole(/button|checkbox/);
+#     expect(1, 'Must throw when given a regular expression').toBe(2);
+#   } catch (error) {
+#     expect(error.message).toBe(`"role" argument in toHaveRole must be a string`);
+#   }
+# });
+
+
+async def test_to_have_role(page: Page) -> None:
+    await page.set_content('<div role="button">Button!</div>')
+    await expect(page.locator("div")).to_have_role("button")
+    await expect(page.locator("div")).not_to_have_role("checkbox")
+    with pytest.raises(Error) as excinfo:
+        await expect(page.locator("div")).to_have_role(re.compile(r"button|checkbox"))  # type: ignore
+    assert '"role" argument in toHaveRole must be a string' in str(excinfo.value)

@@ -23,8 +23,22 @@ from flaky import flaky
 
 from playwright.async_api import BrowserType, Error, Playwright, Route
 from tests.conftest import RemoteServer
-from tests.server import Server, TestServerRequest
+from tests.server import Server, TestServerRequest, WebSocketProtocol
 from tests.utils import parse_trace
+
+
+async def test_should_print_custom_ws_close_error(
+    server: Server, browser_type: BrowserType
+) -> None:
+    def _handle_ws(ws: WebSocketProtocol) -> None:
+        def _onMessage(payload: bytes, isBinary: bool) -> None:
+            ws.sendClose(code=4123, reason="Oh my!")
+
+        setattr(ws, "onMessage", _onMessage)
+
+    server.once_web_socket_connection(_handle_ws)
+    with pytest.raises(Error, match="Oh my!"):
+        await browser_type.connect(f"ws://localhost:{server.PORT}/ws")
 
 
 async def test_browser_type_connect_should_be_able_to_reconnect_to_a_browser(

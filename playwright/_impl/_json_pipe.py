@@ -53,8 +53,9 @@ class JsonPipeTransport(AsyncIOEventEmitter, Transport):
                 return
             self.on_message(cast(ParsedMessagePayload, message))
 
-        def handle_closed() -> None:
-            self.emit("close")
+        def handle_closed(reason: str) -> None:
+            self.emit("close", reason)
+            self.on_error_future.set_exception(Error(reason))
             self._stopped_future.set_result(None)
 
         self._pipe_channel.on(
@@ -63,7 +64,7 @@ class JsonPipeTransport(AsyncIOEventEmitter, Transport):
         )
         self._pipe_channel.on(
             "closed",
-            lambda _: handle_closed(),
+            lambda params: handle_closed(params["reason"]),
         )
 
     async def run(self) -> None:

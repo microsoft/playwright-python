@@ -1140,7 +1140,8 @@ class Keyboard(AsyncBase):
         `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`,
         etc.
 
-        Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`.
+        Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`,
+        `ControlOrMeta`. `ControlOrMeta` resolves to `Control` on Windows and Linux and to `Meta` on macOS.
 
         Holding down `Shift` will type the text that corresponds to the `key` in the upper case.
 
@@ -1246,7 +1247,8 @@ class Keyboard(AsyncBase):
         `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`,
         etc.
 
-        Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`.
+        Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`,
+        `ControlOrMeta`. `ControlOrMeta` resolves to `Control` on Windows and Linux and to `Meta` on macOS.
 
         Holding down `Shift` will type the text that corresponds to the `key` in the upper case.
 
@@ -1846,7 +1848,7 @@ class ElementHandle(JSHandle):
         self,
         *,
         modifiers: typing.Optional[
-            typing.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
+            typing.Sequence[Literal["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         timeout: typing.Optional[float] = None,
@@ -1869,9 +1871,10 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-            current modifiers back. If not specified, currently pressed modifiers are used.
+            current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+            "Control" on Windows and Linux and to "Meta" on macOS.
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
@@ -1904,7 +1907,7 @@ class ElementHandle(JSHandle):
         self,
         *,
         modifiers: typing.Optional[
-            typing.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
+            typing.Sequence[Literal["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         delay: typing.Optional[float] = None,
@@ -1930,9 +1933,10 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-            current modifiers back. If not specified, currently pressed modifiers are used.
+            current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+            "Control" on Windows and Linux and to "Meta" on macOS.
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
@@ -1974,7 +1978,7 @@ class ElementHandle(JSHandle):
         self,
         *,
         modifiers: typing.Optional[
-            typing.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
+            typing.Sequence[Literal["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         delay: typing.Optional[float] = None,
@@ -2002,9 +2006,10 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-            current modifiers back. If not specified, currently pressed modifiers are used.
+            current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+            "Control" on Windows and Linux and to "Meta" on macOS.
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
@@ -2120,7 +2125,7 @@ class ElementHandle(JSHandle):
         self,
         *,
         modifiers: typing.Optional[
-            typing.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
+            typing.Sequence[Literal["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         timeout: typing.Optional[float] = None,
@@ -2145,9 +2150,10 @@ class ElementHandle(JSHandle):
 
         Parameters
         ----------
-        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-            current modifiers back. If not specified, currently pressed modifiers are used.
+            current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+            "Control" on Windows and Linux and to "Meta" on macOS.
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
@@ -2377,7 +2383,8 @@ class ElementHandle(JSHandle):
         `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`,
         etc.
 
-        Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`.
+        Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`,
+        `ControlOrMeta`.
 
         Holding down `Shift` will type the text that corresponds to the `key` in the upper case.
 
@@ -3321,6 +3328,9 @@ class Frame(AsyncBase):
         committed when this method is called. If current document has already reached the required state, resolves
         immediately.
 
+        **NOTE** Most of the time, this method is not needed because Playwright
+        [auto-waits before every action](https://playwright.dev/python/docs/actionability).
+
         **Usage**
 
         ```py
@@ -4119,7 +4129,7 @@ class Frame(AsyncBase):
         selector: str,
         *,
         modifiers: typing.Optional[
-            typing.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
+            typing.Sequence[Literal["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         delay: typing.Optional[float] = None,
@@ -4149,9 +4159,10 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-            current modifiers back. If not specified, currently pressed modifiers are used.
+            current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+            "Control" on Windows and Linux and to "Meta" on macOS.
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
@@ -4199,7 +4210,7 @@ class Frame(AsyncBase):
         selector: str,
         *,
         modifiers: typing.Optional[
-            typing.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
+            typing.Sequence[Literal["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         delay: typing.Optional[float] = None,
@@ -4231,9 +4242,10 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-            current modifiers back. If not specified, currently pressed modifiers are used.
+            current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+            "Control" on Windows and Linux and to "Meta" on macOS.
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
@@ -4278,7 +4290,7 @@ class Frame(AsyncBase):
         selector: str,
         *,
         modifiers: typing.Optional[
-            typing.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
+            typing.Sequence[Literal["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         timeout: typing.Optional[float] = None,
@@ -4307,9 +4319,10 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-            current modifiers back. If not specified, currently pressed modifiers are used.
+            current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+            "Control" on Windows and Linux and to "Meta" on macOS.
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
@@ -5122,7 +5135,7 @@ class Frame(AsyncBase):
         selector: str,
         *,
         modifiers: typing.Optional[
-            typing.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
+            typing.Sequence[Literal["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         timeout: typing.Optional[float] = None,
@@ -5149,9 +5162,10 @@ class Frame(AsyncBase):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-            current modifiers back. If not specified, currently pressed modifiers are used.
+            current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+            "Control" on Windows and Linux and to "Meta" on macOS.
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
@@ -5494,7 +5508,8 @@ class Frame(AsyncBase):
         `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`,
         etc.
 
-        Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`.
+        Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`,
+        `ControlOrMeta`. `ControlOrMeta` resolves to `Control` on Windows and Linux and to `Meta` on macOS.
 
         Holding down `Shift` will type the text that corresponds to the `key` in the upper case.
 
@@ -7114,7 +7129,9 @@ class Page(AsyncContextManager):
 
         The earliest moment that page is available is when it has navigated to the initial url. For example, when opening a
         popup with `window.open('http://example.com')`, this event will fire when the network request to
-        \"http://example.com\" is done and its response has started loading in the popup.
+        \"http://example.com\" is done and its response has started loading in the popup. If you would like to route/listen
+        to this network request, use `browser_context.route()` and `browser_context.on('request')` respectively
+        instead of similar methods on the `Page`.
 
         ```py
         async with page.expect_event(\"popup\") as page_info:
@@ -7382,7 +7399,9 @@ class Page(AsyncContextManager):
 
         The earliest moment that page is available is when it has navigated to the initial url. For example, when opening a
         popup with `window.open('http://example.com')`, this event will fire when the network request to
-        \"http://example.com\" is done and its response has started loading in the popup.
+        \"http://example.com\" is done and its response has started loading in the popup. If you would like to route/listen
+        to this network request, use `browser_context.route()` and `browser_context.on('request')` respectively
+        instead of similar methods on the `Page`.
 
         ```py
         async with page.expect_event(\"popup\") as page_info:
@@ -8695,6 +8714,9 @@ class Page(AsyncContextManager):
         committed when this method is called. If current document has already reached the required state, resolves
         immediately.
 
+        **NOTE** Most of the time, this method is not needed because Playwright
+        [auto-waits before every action](https://playwright.dev/python/docs/actionability).
+
         **Usage**
 
         ```py
@@ -9065,6 +9087,9 @@ class Page(AsyncContextManager):
         [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when
         using request interception by setting `Browser.newContext.serviceWorkers` to `'block'`.
 
+        **NOTE** `page.route()` will not intercept the first request of a popup page. Use
+        `browser_context.route()` instead.
+
         **Usage**
 
         An example of a naive handler that aborts all image requests:
@@ -9381,7 +9406,7 @@ class Page(AsyncContextManager):
         selector: str,
         *,
         modifiers: typing.Optional[
-            typing.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
+            typing.Sequence[Literal["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         delay: typing.Optional[float] = None,
@@ -9411,9 +9436,10 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-            current modifiers back. If not specified, currently pressed modifiers are used.
+            current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+            "Control" on Windows and Linux and to "Meta" on macOS.
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
@@ -9461,7 +9487,7 @@ class Page(AsyncContextManager):
         selector: str,
         *,
         modifiers: typing.Optional[
-            typing.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
+            typing.Sequence[Literal["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         delay: typing.Optional[float] = None,
@@ -9493,9 +9519,10 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-            current modifiers back. If not specified, currently pressed modifiers are used.
+            current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+            "Control" on Windows and Linux and to "Meta" on macOS.
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
@@ -9540,7 +9567,7 @@ class Page(AsyncContextManager):
         selector: str,
         *,
         modifiers: typing.Optional[
-            typing.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
+            typing.Sequence[Literal["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         timeout: typing.Optional[float] = None,
@@ -9569,9 +9596,10 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-            current modifiers back. If not specified, currently pressed modifiers are used.
+            current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+            "Control" on Windows and Linux and to "Meta" on macOS.
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
@@ -10382,7 +10410,7 @@ class Page(AsyncContextManager):
         selector: str,
         *,
         modifiers: typing.Optional[
-            typing.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
+            typing.Sequence[Literal["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         timeout: typing.Optional[float] = None,
@@ -10409,9 +10437,10 @@ class Page(AsyncContextManager):
         selector : str
             A selector to search for an element. If there are multiple elements satisfying the selector, the first will be
             used.
-        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-            current modifiers back. If not specified, currently pressed modifiers are used.
+            current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+            "Control" on Windows and Linux and to "Meta" on macOS.
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
@@ -10773,7 +10802,8 @@ class Page(AsyncContextManager):
         `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`,
         etc.
 
-        Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`.
+        Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`,
+        `ControlOrMeta`. `ControlOrMeta` resolves to `Control` on Windows and Linux and to `Meta` on macOS.
 
         Holding down `Shift` will type the text that corresponds to the `key` in the upper case.
 
@@ -11691,11 +11721,14 @@ class Page(AsyncContextManager):
         )
 
     async def add_locator_handler(
-        self, locator: "Locator", handler: typing.Callable
+        self,
+        locator: "Locator",
+        handler: typing.Callable,
+        *,
+        no_wait_after: typing.Optional[bool] = None,
+        times: typing.Optional[int] = None
     ) -> None:
         """Page.add_locator_handler
-
-        **NOTE** This method is experimental and its behavior may change in the upcoming releases.
 
         When testing a web page, sometimes unexpected overlays like a \"Sign up\" dialog appear and block actions you want to
         automate, e.g. clicking a button. These overlays don't always show up in the same way or at the same time, making
@@ -11712,6 +11745,8 @@ class Page(AsyncContextManager):
           is visible, Playwright calls the handler first, and then proceeds with the action/assertion. Note that the
           handler is only called when you perform an action/assertion - if the overlay becomes visible but you don't
           perform any actions, the handler will not be triggered.
+        - After executing the handler, Playwright will ensure that overlay that triggered the handler is not visible
+          anymore. You can opt-out of this behavior with `noWaitAfter`.
         - The execution time of the handler counts towards the timeout of the action/assertion that executed the handler.
           If your handler takes too long, it might cause timeouts.
         - You can register multiple handlers. However, only a single handler will be running at a time. Make sure the
@@ -11756,17 +11791,27 @@ class Page(AsyncContextManager):
         ```
 
         An example with a custom callback on every actionability check. It uses a `<body>` locator that is always visible,
-        so the handler is called before every actionability check:
+        so the handler is called before every actionability check. It is important to specify `noWaitAfter`, because the
+        handler does not hide the `<body>` element.
 
         ```py
         # Setup the handler.
         def handler():
           page.evaluate(\"window.removeObstructionsForTestIfNeeded()\")
-        page.add_locator_handler(page.locator(\"body\"), handler)
+        page.add_locator_handler(page.locator(\"body\"), handler, no_wait_after=True)
 
         # Write the test as usual.
         page.goto(\"https://example.com\")
         page.get_by_role(\"button\", name=\"Start here\").click()
+        ```
+
+        Handler takes the original locator as an argument. You can also automatically remove the handler after a number of
+        invocations by setting `times`:
+
+        ```py
+        def handler(locator):
+          locator.click()
+        page.add_locator_handler(page.get_by_label(\"Close\"), handler, times=1)
         ```
 
         Parameters
@@ -11776,12 +11821,36 @@ class Page(AsyncContextManager):
         handler : Callable
             Function that should be run once `locator` appears. This function should get rid of the element that blocks actions
             like click.
+        no_wait_after : Union[bool, None]
+            By default, after calling the handler Playwright will wait until the overlay becomes hidden, and only then
+            Playwright will continue with the action/assertion that triggered the handler. This option allows to opt-out of
+            this behavior, so that overlay can stay visible after the handler has run.
+        times : Union[int, None]
+            Specifies the maximum number of times this handler should be called. Unlimited by default.
         """
 
         return mapping.from_maybe_impl(
             await self._impl_obj.add_locator_handler(
-                locator=locator._impl_obj, handler=self._wrap_handler(handler)
+                locator=locator._impl_obj,
+                handler=self._wrap_handler(handler),
+                noWaitAfter=no_wait_after,
+                times=times,
             )
+        )
+
+    async def remove_locator_handler(self, locator: "Locator") -> None:
+        """Page.remove_locator_handler
+
+        Removes all locator handlers added by `page.add_locator_handler()` for a specific locator.
+
+        Parameters
+        ----------
+        locator : Locator
+            Locator passed to `page.add_locator_handler()`.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.remove_locator_handler(locator=locator._impl_obj)
         )
 
 
@@ -11907,7 +11976,9 @@ class BrowserContext(AsyncContextManager):
 
         The earliest moment that page is available is when it has navigated to the initial url. For example, when opening a
         popup with `window.open('http://example.com')`, this event will fire when the network request to
-        \"http://example.com\" is done and its response has started loading in the popup.
+        \"http://example.com\" is done and its response has started loading in the popup. If you would like to route/listen
+        to this network request, use `browser_context.route()` and `browser_context.on('request')` respectively
+        instead of similar methods on the `Page`.
 
         ```py
         async with context.expect_page() as page_info:
@@ -12085,7 +12156,9 @@ class BrowserContext(AsyncContextManager):
 
         The earliest moment that page is available is when it has navigated to the initial url. For example, when opening a
         popup with `window.open('http://example.com')`, this event will fire when the network request to
-        \"http://example.com\" is done and its response has started loading in the popup.
+        \"http://example.com\" is done and its response has started loading in the popup. If you would like to route/listen
+        to this network request, use `browser_context.route()` and `browser_context.on('request')` respectively
+        instead of similar methods on the `Page`.
 
         ```py
         async with context.expect_page() as page_info:
@@ -14734,7 +14807,7 @@ class Locator(AsyncBase):
         self,
         *,
         modifiers: typing.Optional[
-            typing.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
+            typing.Sequence[Literal["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         delay: typing.Optional[float] = None,
@@ -14780,9 +14853,10 @@ class Locator(AsyncBase):
 
         Parameters
         ----------
-        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-            current modifiers back. If not specified, currently pressed modifiers are used.
+            current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+            "Control" on Windows and Linux and to "Meta" on macOS.
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
@@ -14824,7 +14898,7 @@ class Locator(AsyncBase):
         self,
         *,
         modifiers: typing.Optional[
-            typing.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
+            typing.Sequence[Literal["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         delay: typing.Optional[float] = None,
@@ -14856,9 +14930,10 @@ class Locator(AsyncBase):
 
         Parameters
         ----------
-        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-            current modifiers back. If not specified, currently pressed modifiers are used.
+            current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+            "Control" on Windows and Linux and to "Meta" on macOS.
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
@@ -16085,7 +16160,7 @@ class Locator(AsyncBase):
         self,
         *,
         modifiers: typing.Optional[
-            typing.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
+            typing.Sequence[Literal["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         timeout: typing.Optional[float] = None,
@@ -16118,9 +16193,10 @@ class Locator(AsyncBase):
 
         Parameters
         ----------
-        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-            current modifiers back. If not specified, currently pressed modifiers are used.
+            current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+            "Control" on Windows and Linux and to "Meta" on macOS.
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
@@ -16419,7 +16495,8 @@ class Locator(AsyncBase):
         `Delete`, `Escape`, `ArrowDown`, `End`, `Enter`, `Home`, `Insert`, `PageDown`, `PageUp`, `ArrowRight`, `ArrowUp`,
         etc.
 
-        Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`.
+        Following modification shortcuts are also supported: `Shift`, `Control`, `Alt`, `Meta`, `ShiftLeft`,
+        `ControlOrMeta`. `ControlOrMeta` resolves to `Control` on Windows and Linux and to `Meta` on macOS.
 
         Holding down `Shift` will type the text that corresponds to the `key` in the upper case.
 
@@ -16762,7 +16839,7 @@ class Locator(AsyncBase):
         self,
         *,
         modifiers: typing.Optional[
-            typing.Sequence[Literal["Alt", "Control", "Meta", "Shift"]]
+            typing.Sequence[Literal["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
         timeout: typing.Optional[float] = None,
@@ -16791,9 +16868,10 @@ class Locator(AsyncBase):
 
         Parameters
         ----------
-        modifiers : Union[Sequence[Union["Alt", "Control", "Meta", "Shift"]], None]
+        modifiers : Union[Sequence[Union["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]], None]
             Modifier keys to press. Ensures that only these modifiers are pressed during the operation, and then restores
-            current modifiers back. If not specified, currently pressed modifiers are used.
+            current modifiers back. If not specified, currently pressed modifiers are used. "ControlOrMeta" resolves to
+            "Control" on Windows and Linux and to "Meta" on macOS.
         position : Union[{x: float, y: float}, None]
             A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
             the element.
@@ -17345,9 +17423,7 @@ class APIRequestContext(AsyncBase):
         multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
             Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
             request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
-            explicitly provided. File values can be passed either as
-            [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream) or as file-like object containing file
-            name, mime-type and its content.
+            explicitly provided. File values can be passed as file-like object containing file name, mime-type and its content.
         timeout : Union[float, None]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
         fail_on_status_code : Union[bool, None]
@@ -17423,9 +17499,7 @@ class APIRequestContext(AsyncBase):
         multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
             Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
             request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
-            explicitly provided. File values can be passed either as
-            [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream) or as file-like object containing file
-            name, mime-type and its content.
+            explicitly provided. File values can be passed as file-like object containing file name, mime-type and its content.
         timeout : Union[float, None]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
         fail_on_status_code : Union[bool, None]
@@ -17513,9 +17587,7 @@ class APIRequestContext(AsyncBase):
         multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
             Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
             request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
-            explicitly provided. File values can be passed either as
-            [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream) or as file-like object containing file
-            name, mime-type and its content.
+            explicitly provided. File values can be passed as file-like object containing file name, mime-type and its content.
         timeout : Union[float, None]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
         fail_on_status_code : Union[bool, None]
@@ -17591,9 +17663,7 @@ class APIRequestContext(AsyncBase):
         multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
             Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
             request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
-            explicitly provided. File values can be passed either as
-            [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream) or as file-like object containing file
-            name, mime-type and its content.
+            explicitly provided. File values can be passed as file-like object containing file name, mime-type and its content.
         timeout : Union[float, None]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
         fail_on_status_code : Union[bool, None]
@@ -17669,9 +17739,7 @@ class APIRequestContext(AsyncBase):
         multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
             Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
             request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
-            explicitly provided. File values can be passed either as
-            [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream) or as file-like object containing file
-            name, mime-type and its content.
+            explicitly provided. File values can be passed as file-like object containing file name, mime-type and its content.
         timeout : Union[float, None]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
         fail_on_status_code : Union[bool, None]
@@ -17744,11 +17812,11 @@ class APIRequestContext(AsyncBase):
         files):
 
         The common way to send file(s) in the body of a request is to upload them as form fields with `multipart/form-data`
-        encoding. You can achieve that with Playwright API like this:
+        encoding. Use `FormData` to construct request body and pass it to the request as `multipart` parameter:
 
         ```python
         api_request_context.post(
-          \"https://example.com/api/uploadScrip'\",
+          \"https://example.com/api/uploadScript'\",
           multipart={
             \"fileField\": {
               \"name\": \"f.js\",
@@ -17778,9 +17846,7 @@ class APIRequestContext(AsyncBase):
         multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
             Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
             request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
-            explicitly provided. File values can be passed either as
-            [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream) or as file-like object containing file
-            name, mime-type and its content.
+            explicitly provided. File values can be passed as file-like object containing file name, mime-type and its content.
         timeout : Union[float, None]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
         fail_on_status_code : Union[bool, None]
@@ -17834,10 +17900,11 @@ class APIRequestContext(AsyncBase):
         """APIRequestContext.fetch
 
         Sends HTTP(S) request and returns its response. The method will populate request cookies from the context and
-        update context cookies from the response. The method will automatically follow redirects. JSON objects can be
-        passed directly to the request.
+        update context cookies from the response. The method will automatically follow redirects.
 
         **Usage**
+
+        JSON objects can be passed directly to the request:
 
         ```python
         data = {
@@ -17847,8 +17914,8 @@ class APIRequestContext(AsyncBase):
         api_request_context.fetch(\"https://example.com/api/createBook\", method=\"post\", data=data)
         ```
 
-        The common way to send file(s) in the body of a request is to encode it as form fields with `multipart/form-data`
-        encoding. You can achieve that with Playwright API like this:
+        The common way to send file(s) in the body of a request is to upload them as form fields with `multipart/form-data`
+        encoding. Use `FormData` to construct request body and pass it to the request as `multipart` parameter:
 
         Parameters
         ----------
@@ -17873,9 +17940,7 @@ class APIRequestContext(AsyncBase):
         multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
             Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
             request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
-            explicitly provided. File values can be passed either as
-            [`fs.ReadStream`](https://nodejs.org/api/fs.html#fs_class_fs_readstream) or as file-like object containing file
-            name, mime-type and its content.
+            explicitly provided. File values can be passed as file-like object containing file name, mime-type and its content.
         timeout : Union[float, None]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
         fail_on_status_code : Union[bool, None]
@@ -18070,7 +18135,8 @@ class PageAssertions(AsyncBase):
         self,
         url_or_reg_exp: typing.Union[str, typing.Pattern[str]],
         *,
-        timeout: typing.Optional[float] = None
+        timeout: typing.Optional[float] = None,
+        ignore_case: typing.Optional[bool] = None
     ) -> None:
         """PageAssertions.to_have_url
 
@@ -18092,12 +18158,15 @@ class PageAssertions(AsyncBase):
             Expected URL string or RegExp.
         timeout : Union[float, None]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
+        ignore_case : Union[bool, None]
+            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            expression flag if specified.
         """
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._impl_obj.to_have_url(
-                urlOrRegExp=url_or_reg_exp, timeout=timeout
+                urlOrRegExp=url_or_reg_exp, timeout=timeout, ignoreCase=ignore_case
             )
         )
 
@@ -18105,7 +18174,8 @@ class PageAssertions(AsyncBase):
         self,
         url_or_reg_exp: typing.Union[typing.Pattern[str], str],
         *,
-        timeout: typing.Optional[float] = None
+        timeout: typing.Optional[float] = None,
+        ignore_case: typing.Optional[bool] = None
     ) -> None:
         """PageAssertions.not_to_have_url
 
@@ -18117,12 +18187,15 @@ class PageAssertions(AsyncBase):
             Expected URL string or RegExp.
         timeout : Union[float, None]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
+        ignore_case : Union[bool, None]
+            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            expression flag if specified.
         """
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
             await self._impl_obj.not_to_have_url(
-                urlOrRegExp=url_or_reg_exp, timeout=timeout
+                urlOrRegExp=url_or_reg_exp, timeout=timeout, ignoreCase=ignore_case
             )
         )
 
@@ -19418,6 +19491,360 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.not_to_be_in_viewport(ratio=ratio, timeout=timeout)
+        )
+
+    async def to_have_accessible_description(
+        self,
+        description: typing.Union[str, typing.Pattern[str]],
+        *,
+        ignore_case: typing.Optional[bool] = None,
+        timeout: typing.Optional[float] = None
+    ) -> None:
+        """LocatorAssertions.to_have_accessible_description
+
+        Ensures the `Locator` points to an element with a given
+        [accessible description](https://w3c.github.io/accname/#dfn-accessible-description).
+
+        **Usage**
+
+        ```py
+        locator = page.get_by_test_id(\"save-button\")
+        await expect(locator).to_have_accessible_description(\"Save results to disk\")
+        ```
+
+        Parameters
+        ----------
+        description : Union[Pattern[str], str]
+            Expected accessible description.
+        ignore_case : Union[bool, None]
+            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            expression flag if specified.
+        timeout : Union[float, None]
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.to_have_accessible_description(
+                description=description, ignoreCase=ignore_case, timeout=timeout
+            )
+        )
+
+    async def not_to_have_accessible_description(
+        self,
+        name: typing.Union[str, typing.Pattern[str]],
+        *,
+        ignore_case: typing.Optional[bool] = None,
+        timeout: typing.Optional[float] = None
+    ) -> None:
+        """LocatorAssertions.not_to_have_accessible_description
+
+        The opposite of `locator_assertions.to_have_accessible_description()`.
+
+        Parameters
+        ----------
+        name : Union[Pattern[str], str]
+            Expected accessible description.
+        ignore_case : Union[bool, None]
+            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            expression flag if specified.
+        timeout : Union[float, None]
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.not_to_have_accessible_description(
+                name=name, ignoreCase=ignore_case, timeout=timeout
+            )
+        )
+
+    async def to_have_accessible_name(
+        self,
+        name: typing.Union[str, typing.Pattern[str]],
+        *,
+        ignore_case: typing.Optional[bool] = None,
+        timeout: typing.Optional[float] = None
+    ) -> None:
+        """LocatorAssertions.to_have_accessible_name
+
+        Ensures the `Locator` points to an element with a given
+        [accessible name](https://w3c.github.io/accname/#dfn-accessible-name).
+
+        **Usage**
+
+        ```py
+        locator = page.get_by_test_id(\"save-button\")
+        await expect(locator).to_have_accessible_name(\"Save to disk\")
+        ```
+
+        Parameters
+        ----------
+        name : Union[Pattern[str], str]
+            Expected accessible name.
+        ignore_case : Union[bool, None]
+            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            expression flag if specified.
+        timeout : Union[float, None]
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.to_have_accessible_name(
+                name=name, ignoreCase=ignore_case, timeout=timeout
+            )
+        )
+
+    async def not_to_have_accessible_name(
+        self,
+        name: typing.Union[str, typing.Pattern[str]],
+        *,
+        ignore_case: typing.Optional[bool] = None,
+        timeout: typing.Optional[float] = None
+    ) -> None:
+        """LocatorAssertions.not_to_have_accessible_name
+
+        The opposite of `locator_assertions.to_have_accessible_name()`.
+
+        Parameters
+        ----------
+        name : Union[Pattern[str], str]
+            Expected accessible name.
+        ignore_case : Union[bool, None]
+            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            expression flag if specified.
+        timeout : Union[float, None]
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.not_to_have_accessible_name(
+                name=name, ignoreCase=ignore_case, timeout=timeout
+            )
+        )
+
+    async def to_have_role(
+        self,
+        role: Literal[
+            "alert",
+            "alertdialog",
+            "application",
+            "article",
+            "banner",
+            "blockquote",
+            "button",
+            "caption",
+            "cell",
+            "checkbox",
+            "code",
+            "columnheader",
+            "combobox",
+            "complementary",
+            "contentinfo",
+            "definition",
+            "deletion",
+            "dialog",
+            "directory",
+            "document",
+            "emphasis",
+            "feed",
+            "figure",
+            "form",
+            "generic",
+            "grid",
+            "gridcell",
+            "group",
+            "heading",
+            "img",
+            "insertion",
+            "link",
+            "list",
+            "listbox",
+            "listitem",
+            "log",
+            "main",
+            "marquee",
+            "math",
+            "menu",
+            "menubar",
+            "menuitem",
+            "menuitemcheckbox",
+            "menuitemradio",
+            "meter",
+            "navigation",
+            "none",
+            "note",
+            "option",
+            "paragraph",
+            "presentation",
+            "progressbar",
+            "radio",
+            "radiogroup",
+            "region",
+            "row",
+            "rowgroup",
+            "rowheader",
+            "scrollbar",
+            "search",
+            "searchbox",
+            "separator",
+            "slider",
+            "spinbutton",
+            "status",
+            "strong",
+            "subscript",
+            "superscript",
+            "switch",
+            "tab",
+            "table",
+            "tablist",
+            "tabpanel",
+            "term",
+            "textbox",
+            "time",
+            "timer",
+            "toolbar",
+            "tooltip",
+            "tree",
+            "treegrid",
+            "treeitem",
+        ],
+        *,
+        timeout: typing.Optional[float] = None
+    ) -> None:
+        """LocatorAssertions.to_have_role
+
+        Ensures the `Locator` points to an element with a given [ARIA role](https://www.w3.org/TR/wai-aria-1.2/#roles).
+
+        Note that role is matched as a string, disregarding the ARIA role hierarchy. For example, asserting  a superclass
+        role `\"checkbox\"` on an element with a subclass role `\"switch\"` will fail.
+
+        **Usage**
+
+        ```py
+        locator = page.get_by_test_id(\"save-button\")
+        await expect(locator).to_have_role(\"button\")
+        ```
+
+        Parameters
+        ----------
+        role : Union["alert", "alertdialog", "application", "article", "banner", "blockquote", "button", "caption", "cell", "checkbox", "code", "columnheader", "combobox", "complementary", "contentinfo", "definition", "deletion", "dialog", "directory", "document", "emphasis", "feed", "figure", "form", "generic", "grid", "gridcell", "group", "heading", "img", "insertion", "link", "list", "listbox", "listitem", "log", "main", "marquee", "math", "menu", "menubar", "menuitem", "menuitemcheckbox", "menuitemradio", "meter", "navigation", "none", "note", "option", "paragraph", "presentation", "progressbar", "radio", "radiogroup", "region", "row", "rowgroup", "rowheader", "scrollbar", "search", "searchbox", "separator", "slider", "spinbutton", "status", "strong", "subscript", "superscript", "switch", "tab", "table", "tablist", "tabpanel", "term", "textbox", "time", "timer", "toolbar", "tooltip", "tree", "treegrid", "treeitem"]
+            Required aria role.
+        timeout : Union[float, None]
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.to_have_role(role=role, timeout=timeout)
+        )
+
+    async def not_to_have_role(
+        self,
+        role: Literal[
+            "alert",
+            "alertdialog",
+            "application",
+            "article",
+            "banner",
+            "blockquote",
+            "button",
+            "caption",
+            "cell",
+            "checkbox",
+            "code",
+            "columnheader",
+            "combobox",
+            "complementary",
+            "contentinfo",
+            "definition",
+            "deletion",
+            "dialog",
+            "directory",
+            "document",
+            "emphasis",
+            "feed",
+            "figure",
+            "form",
+            "generic",
+            "grid",
+            "gridcell",
+            "group",
+            "heading",
+            "img",
+            "insertion",
+            "link",
+            "list",
+            "listbox",
+            "listitem",
+            "log",
+            "main",
+            "marquee",
+            "math",
+            "menu",
+            "menubar",
+            "menuitem",
+            "menuitemcheckbox",
+            "menuitemradio",
+            "meter",
+            "navigation",
+            "none",
+            "note",
+            "option",
+            "paragraph",
+            "presentation",
+            "progressbar",
+            "radio",
+            "radiogroup",
+            "region",
+            "row",
+            "rowgroup",
+            "rowheader",
+            "scrollbar",
+            "search",
+            "searchbox",
+            "separator",
+            "slider",
+            "spinbutton",
+            "status",
+            "strong",
+            "subscript",
+            "superscript",
+            "switch",
+            "tab",
+            "table",
+            "tablist",
+            "tabpanel",
+            "term",
+            "textbox",
+            "time",
+            "timer",
+            "toolbar",
+            "tooltip",
+            "tree",
+            "treegrid",
+            "treeitem",
+        ],
+        *,
+        timeout: typing.Optional[float] = None
+    ) -> None:
+        """LocatorAssertions.not_to_have_role
+
+        The opposite of `locator_assertions.to_have_role()`.
+
+        Parameters
+        ----------
+        role : Union["alert", "alertdialog", "application", "article", "banner", "blockquote", "button", "caption", "cell", "checkbox", "code", "columnheader", "combobox", "complementary", "contentinfo", "definition", "deletion", "dialog", "directory", "document", "emphasis", "feed", "figure", "form", "generic", "grid", "gridcell", "group", "heading", "img", "insertion", "link", "list", "listbox", "listitem", "log", "main", "marquee", "math", "menu", "menubar", "menuitem", "menuitemcheckbox", "menuitemradio", "meter", "navigation", "none", "note", "option", "paragraph", "presentation", "progressbar", "radio", "radiogroup", "region", "row", "rowgroup", "rowheader", "scrollbar", "search", "searchbox", "separator", "slider", "spinbutton", "status", "strong", "subscript", "superscript", "switch", "tab", "table", "tablist", "tabpanel", "term", "textbox", "time", "timer", "toolbar", "tooltip", "tree", "treegrid", "treeitem"]
+            Required aria role.
+        timeout : Union[float, None]
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.not_to_have_role(role=role, timeout=timeout)
         )
 
 

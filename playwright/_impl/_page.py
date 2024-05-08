@@ -98,6 +98,25 @@ if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._network import WebSocket
 
 
+class LocatorHandler:
+    locator: "Locator"
+    handler: Union[Callable[["Locator"], Any], Callable[..., Any]]
+    times: Union[int, None]
+
+    def __init__(
+        self, locator: "Locator", handler: Callable[..., Any], times: Union[int, None]
+    ) -> None:
+        self.locator = locator
+        self._handler = handler
+        self.times = times
+
+    def __call__(self) -> Any:
+        arg_count = len(inspect.signature(self._handler).parameters)
+        if arg_count == 0:
+            return self._handler()
+        return self._handler(self.locator)
+
+
 class Page(ChannelOwner):
     Events = SimpleNamespace(
         Close="close",
@@ -152,7 +171,7 @@ class Page(ChannelOwner):
         self._close_reason: Optional[str] = None
         self._close_was_called = False
         self._har_routers: List[HarRouter] = []
-        self._locator_handlers: Dict[str, Callable] = {}
+        self._locator_handlers: Dict[str, LocatorHandler] = {}
 
         self._channel.on(
             "bindingCall",
@@ -1270,47 +1289,71 @@ class Page(ChannelOwner):
                 trial=trial,
             )
 
-    async def add_locator_handler(self, locator: "Locator", handler: Callable) -> None:
+    async def add_locator_handler(
+        self,
+        locator: "Locator",
+        handler: Callable,
+        noWaitAfter: bool = None,
+        times: int = None,
+    ) -> None:
         if locator._frame != self._main_frame:
             raise Error("Locator must belong to the main frame of this page")
+        if times == 0:
+            return
         uid = await self._channel.send(
             "registerLocatorHandler",
             {
                 "selector": locator._selector,
+                "noWaitAfter": noWaitAfter,
             },
         )
-        self._locator_handlers[uid] = handler
+        self._locator_handlers[uid] = LocatorHandler(
+            handler=handler, times=times, locator=locator
+        )
 
     async def _on_locator_handler_triggered(self, uid: str) -> None:
+        remove = False
         try:
-            if self._dispatcher_fiber:
-                handler_finished_future = self._loop.create_future()
+            handler = self._locator_handlers.get(uid)
+            if handler and handler.times != 0:
+                if handler.times is not None:
+                    handler.times -= 1
+                if self._dispatcher_fiber:
+                    handler_finished_future = self._loop.create_future()
 
-                def _handler() -> None:
-                    try:
-                        self._locator_handlers[uid]()
-                        handler_finished_future.set_result(None)
-                    except Exception as e:
-                        handler_finished_future.set_exception(e)
+                    def _handler() -> None:
+                        try:
+                            handler()
+                            handler_finished_future.set_result(None)
+                        except Exception as e:
+                            handler_finished_future.set_exception(e)
 
-                g = LocatorHandlerGreenlet(_handler)
-                g.switch()
-                await handler_finished_future
-            else:
-                coro_or_future = self._locator_handlers[uid]()
-                if coro_or_future:
-                    await coro_or_future
-
+                    g = LocatorHandlerGreenlet(_handler)
+                    g.switch()
+                    await handler_finished_future
+                else:
+                    coro_or_future = handler()
+                    if coro_or_future:
+                        await coro_or_future
+                remove = handler.times == 0
         finally:
+            if remove:
+                del self._locator_handlers[uid]
             try:
                 await self._connection.wrap_api_call(
                     lambda: self._channel.send(
-                        "resolveLocatorHandlerNoReply", {"uid": uid}
+                        "resolveLocatorHandlerNoReply", {"uid": uid, "remove": remove}
                     ),
                     is_internal=True,
                 )
             except Error:
                 pass
+
+    async def remove_locator_handler(self, locator: "Locator") -> None:
+        for uid, data in self._locator_handlers.copy().items():
+            if data.locator._equals(locator):
+                del self._locator_handlers[uid]
+                self._channel.send_no_reply("unregisterLocatorHandler", {"uid": uid})
 
 
 class Worker(ChannelOwner):

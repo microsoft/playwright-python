@@ -14,3 +14,9 @@
 * generate API: `./scripts/update_api.sh`
 * commit changes & send PR
 * wait for bots to pass & merge the PR
+
+
+## `api.json` fixes
+
+1. `API_JSON_MODE=1 node utils/doclint/generateApiJson.js > ../playwright-python/playwright/driver/package/api.json`
+2. `./scripts/update_api.sh`

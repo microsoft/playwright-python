@@ -284,10 +284,8 @@ class Connection(EventEmitter):
         await self._transport.wait_until_stopped()
         self.cleanup()
 
-    def cleanup(self, cause: Exception = None) -> None:
-        self._closed_error = (
-            TargetClosedError(str(cause)) if cause else TargetClosedError()
-        )
+    def cleanup(self, cause: str = None) -> None:
+        self._closed_error = TargetClosedError(cause) if cause else TargetClosedError()
         if self._init_task and not self._init_task.done():
             self._init_task.cancel()
         for ws_connection in self._child_ws_connections:
@@ -305,7 +303,7 @@ class Connection(EventEmitter):
     ) -> None:
         self._waiting_for_object[guid] = callback
 
-    def set_in_tracing(self, is_tracing: bool) -> None:
+    def set_is_tracing(self, is_tracing: bool) -> None:
         if is_tracing:
             self._tracing_count += 1
         else:
@@ -529,6 +527,7 @@ class Connection(EventEmitter):
         try:
             return cb()
         except Exception as error:
+            breakpoint()
             raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
         finally:
             self._api_zone.set(None)

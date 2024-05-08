@@ -466,10 +466,9 @@ async def test_should_handle_select_all(
     textarea = await page.query_selector("textarea")
     assert textarea
     await textarea.type("some text")
-    modifier = "Meta" if is_mac else "Control"
-    await page.keyboard.down(modifier)
+    await page.keyboard.down("ControlOrMeta")
     await page.keyboard.press("a")
-    await page.keyboard.up(modifier)
+    await page.keyboard.up("ControlOrMeta")
     await page.keyboard.press("Backspace")
     assert await page.eval_on_selector("textarea", "textarea => textarea.value") == ""
 
@@ -491,10 +490,9 @@ async def test_should_be_able_to_prevent_select_all(
   }""",
     )
 
-    modifier = "Meta" if is_mac else "Control"
-    await page.keyboard.down(modifier)
+    await page.keyboard.down("ControlOrMeta")
     await page.keyboard.press("a")
-    await page.keyboard.up(modifier)
+    await page.keyboard.up("ControlOrMeta")
     await page.keyboard.press("Backspace")
     assert (
         await page.eval_on_selector("textarea", "textarea => textarea.value")
