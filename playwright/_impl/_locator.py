@@ -116,6 +116,9 @@ class Locator:
         finally:
             await handle.dispose()
 
+    def _equals(self, locator: "Locator") -> bool:
+        return self._frame == locator._frame and self._selector == locator._selector
+
     @property
     def page(self) -> "Page":
         return self._frame.page

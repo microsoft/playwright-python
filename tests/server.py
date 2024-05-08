@@ -27,6 +27,7 @@ from typing import (
     Dict,
     Generator,
     Generic,
+    List,
     Optional,
     Set,
     Tuple,
@@ -35,6 +36,7 @@ from typing import (
 )
 from urllib.parse import urlparse
 
+from autobahn.twisted.resource import WebSocketResource
 from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerProtocol
 from OpenSSL import crypto
 from twisted.internet import reactor as _twisted_reactor
@@ -90,6 +92,10 @@ class TestServerRequest(http.Request):
                 request_subscriber.set_result, self
             )
             server.request_subscribers.pop(path)
+
+        if path == "/ws":
+            server._ws_resource.render(self)
+            return
 
         if server.auth.get(path):
             authorization_header = self.requestHeaders.getRawHeaders("authorization")
@@ -171,10 +177,17 @@ class Server:
         self.auth = auth
         self.csp = csp
         self.routes = routes
+        self._ws_handlers: List[Callable[["WebSocketProtocol"], None]] = []
         self.gzip_routes = gzip_routes
         self.static_path = _dirname / "assets"
         factory = TestServerFactory()
         factory.server_instance = self
+
+        ws_factory = WebSocketServerFactory()
+        ws_factory.protocol = WebSocketProtocol
+        ws_factory.server_instance = self
+        self._ws_resource = WebSocketResource(ws_factory)
+
         self.listen(factory)
 
     async def wait_for_request(self, path: str) -> TestServerRequest:
@@ -210,6 +223,7 @@ class Server:
         self.csp.clear()
         self.gzip_routes.clear()
         self.routes.clear()
+        self._ws_handlers.clear()
 
     def set_route(
         self, path: str, callback: Callable[[TestServerRequest], Any]
@@ -226,6 +240,14 @@ class Server:
             request.finish()
 
         self.set_route(from_, handle_redirect)
+
+    def send_on_web_socket_connection(self, data: bytes) -> None:
+        self.once_web_socket_connection(lambda ws: ws.sendMessage(data))
+
+    def once_web_socket_connection(
+        self, handler: Callable[["WebSocketProtocol"], None]
+    ) -> None:
+        self._ws_handlers.append(handler)
 
 
 class HTTPServer(Server):
@@ -257,48 +279,21 @@ class HTTPSServer(Server):
             pass
 
 
-class WebSocketServerServer(WebSocketServerProtocol):
-    def __init__(self) -> None:
-        super().__init__()
-        self.PORT = find_free_port()
-
-    def start(self) -> None:
-        ws = WebSocketServerFactory("ws://127.0.0.1:" + str(self.PORT))
-        ws.protocol = WebSocketProtocol
-        reactor.listenTCP(self.PORT, ws)
-
-
 class WebSocketProtocol(WebSocketServerProtocol):
-    def onConnect(self, request: Any) -> None:
-        pass
-
     def onOpen(self) -> None:
-        self.sendMessage(b"incoming")
-
-    def onMessage(self, payload: bytes, isBinary: bool) -> None:
-        if payload == b"echo-bin":
-            self.sendMessage(b"\x04\x02", True)
-            self.sendClose()
-        if payload == b"echo-text":
-            self.sendMessage(b"text", False)
-            self.sendClose()
-        if payload == b"close":
-            self.sendClose()
-
-    def onClose(self, wasClean: Any, code: Any, reason: Any) -> None:
-        pass
+        for handler in self.factory.server_instance._ws_handlers.copy():
+            self.factory.server_instance._ws_handlers.remove(handler)
+            handler(self)
 
 
 class TestServer:
     def __init__(self) -> None:
         self.server = HTTPServer()
         self.https_server = HTTPSServer()
-        self.ws_server = WebSocketServerServer()
 
     def start(self) -> None:
         self.server.start()
         self.https_server.start()
-        self.ws_server.start()
         self.thread = threading.Thread(
             target=lambda: reactor.run(installSignalHandlers=False)
         )

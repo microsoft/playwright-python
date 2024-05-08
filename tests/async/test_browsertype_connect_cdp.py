@@ -19,7 +19,7 @@ import pytest
 import requests
 
 from playwright.async_api import BrowserType, Error
-from tests.server import Server, find_free_port
+from tests.server import Server, WebSocketProtocol, find_free_port
 
 pytestmark = pytest.mark.only_browser("chromium")
 
@@ -92,9 +92,26 @@ async def test_conect_over_a_ws_endpoint(
 async def test_connect_over_cdp_passing_header_works(
     browser_type: BrowserType, server: Server
 ) -> None:
+    server.send_on_web_socket_connection(b"incoming")
     request = asyncio.create_task(server.wait_for_request("/ws"))
     with pytest.raises(Error):
         await browser_type.connect_over_cdp(
             f"ws://127.0.0.1:{server.PORT}/ws", headers={"foo": "bar"}
         )
     assert (await request).getHeader("foo") == "bar"
+
+
+async def test_should_print_custom_ws_close_error(
+    browser_type: BrowserType, server: Server
+) -> None:
+    def _handle_ws(ws: WebSocketProtocol) -> None:
+        def _onMessage(payload: bytes, isBinary: bool) -> None:
+            ws.sendClose(code=4123, reason="Oh my!")
+
+        setattr(ws, "onMessage", _onMessage)
+
+    server.once_web_socket_connection(_handle_ws)
+    with pytest.raises(Error, match="Browser logs:\n\nOh my!\n"):
+        await browser_type.connect_over_cdp(
+            f"ws://127.0.0.1:{server.PORT}/ws", headers={"foo": "bar"}
+        )

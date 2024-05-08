@@ -774,7 +774,7 @@ async def test_page_event_should_work_with_shift_clicking(
 
 @pytest.mark.only_browser("chromium")
 async def test_page_event_should_work_with_ctrl_clicking(
-    context: BrowserContext, server: Server, is_mac: bool
+    context: BrowserContext, server: Server
 ) -> None:
     # Firefox: reports an opener in this case.
     # WebKit: Ctrl+Click does not open a new tab.
@@ -782,7 +782,7 @@ async def test_page_event_should_work_with_ctrl_clicking(
     await page.goto(server.EMPTY_PAGE)
     await page.set_content('<a href="/one-style.html">yo</a>')
     async with context.expect_page() as popup_info:
-        await page.click("a", modifiers=["Meta" if is_mac else "Control"])
+        await page.click("a", modifiers=["ControlOrMeta"])
     popup = await popup_info.value
     assert await popup.opener() is None
 

@@ -58,7 +58,7 @@ class Tracing(ChannelOwner):
     async def _start_collecting_stacks(self, trace_name: str) -> None:
         if not self._is_tracing:
             self._is_tracing = True
-            self._connection.set_in_tracing(True)
+            self._connection.set_is_tracing(True)
         self._stacks_id = await self._connection.local_utils.tracing_started(
             self._traces_dir, trace_name
         )
@@ -74,9 +74,7 @@ class Tracing(ChannelOwner):
         await self._connection.wrap_api_call(_inner, True)
 
     async def _do_stop_chunk(self, file_path: Union[pathlib.Path, str] = None) -> None:
-        if self._is_tracing:
-            self._is_tracing = False
-            self._connection.set_in_tracing(False)
+        self._reset_stack_counter()
 
         if not file_path:
             # Not interested in any artifacts
@@ -133,3 +131,8 @@ class Tracing(ChannelOwner):
                 "includeSources": self._include_sources,
             }
         )
+
+    def _reset_stack_counter(self) -> None:
+        if self._is_tracing:
+            self._is_tracing = False
+            self._connection.set_is_tracing(False)

@@ -510,6 +510,7 @@ class BrowserContext(ChannelOwner):
             self._browser._contexts.remove(self)
 
         self._dispose_har_routers()
+        self._tracing._reset_stack_counter()
         self.emit(BrowserContext.Events.Close, self)
 
     async def close(self, reason: str = None) -> None:
