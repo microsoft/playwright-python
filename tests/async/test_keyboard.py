@@ -459,9 +459,7 @@ async def test_should_type_emoji_into_an_iframe(
     )
 
 
-async def test_should_handle_select_all(
-    page: Page, server: Server, is_mac: bool
-) -> None:
+async def test_should_handle_select_all(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/textarea.html")
     textarea = await page.query_selector("textarea")
     assert textarea
@@ -473,9 +471,7 @@ async def test_should_handle_select_all(
     assert await page.eval_on_selector("textarea", "textarea => textarea.value") == ""
 
 
-async def test_should_be_able_to_prevent_select_all(
-    page: Page, server: Server, is_mac: bool
-) -> None:
+async def test_should_be_able_to_prevent_select_all(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/textarea.html")
     textarea = await page.query_selector("textarea")
     assert textarea

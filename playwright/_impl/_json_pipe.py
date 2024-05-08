@@ -18,6 +18,7 @@ from typing import Dict, cast
 from pyee.asyncio import AsyncIOEventEmitter
 
 from playwright._impl._connection import Channel
+from playwright._impl._errors import TargetClosedError
 from playwright._impl._helper import Error, ParsedMessagePayload
 from playwright._impl._transport import Transport
 
@@ -55,7 +56,7 @@ class JsonPipeTransport(AsyncIOEventEmitter, Transport):
 
         def handle_closed(reason: str) -> None:
             self.emit("close", reason)
-            self.on_error_future.set_exception(Error(reason))
+            self.on_error_future.set_exception(TargetClosedError(reason))
             self._stopped_future.set_result(None)
 
         self._pipe_channel.on(

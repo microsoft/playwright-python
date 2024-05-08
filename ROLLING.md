@@ -16,7 +16,8 @@
 * wait for bots to pass & merge the PR
 
 
-## `api.json` fixes
+## Fix typing issues with Playwright ToT
 
+1. `cd playwright`
 1. `API_JSON_MODE=1 node utils/doclint/generateApiJson.js > ../playwright-python/playwright/driver/package/api.json`
-2. `./scripts/update_api.sh`
+1. `./scripts/update_api.sh`

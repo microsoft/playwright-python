@@ -861,24 +861,10 @@ async def test_to_have_accessible_description(page: Page) -> None:
     )
 
 
-# test('toHaveRole', async ({ page }) => {
-#   await page.setContent(`<div role="button">Button!</div>`);
-#   await expect(page.locator('div')).toHaveRole('button');
-#   await expect(page.locator('div')).not.toHaveRole('checkbox');
-#   try {
-#     // @ts-expect-error
-#     await expect(page.locator('div')).toHaveRole(/button|checkbox/);
-#     expect(1, 'Must throw when given a regular expression').toBe(2);
-#   } catch (error) {
-#     expect(error.message).toBe(`"role" argument in toHaveRole must be a string`);
-#   }
-# });
-
-
 async def test_to_have_role(page: Page) -> None:
     await page.set_content('<div role="button">Button!</div>')
     await expect(page.locator("div")).to_have_role("button")
     await expect(page.locator("div")).not_to_have_role("checkbox")
     with pytest.raises(Error) as excinfo:
         await expect(page.locator("div")).to_have_role(re.compile(r"button|checkbox"))  # type: ignore
-    assert '"role" argument in toHaveRole must be a string' in str(excinfo.value)
+    assert '"role" argument in to_have_role must be a string' in str(excinfo.value)

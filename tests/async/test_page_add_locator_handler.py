@@ -350,38 +350,6 @@ async def test_should_work_with_noWaitAfter(page: Page, server: Server) -> None:
     assert called == 2
 
 
-# test('should removeLocatorHandler', async ({ page, server }) => {
-#   await page.goto(server.PREFIX + '/input/handle-locator.html');
-
-#   let called = 0;
-#   await page.addLocatorHandler(page.getByRole('button', { name: 'close' }), async locator => {
-#     ++called;
-#     await locator.click();
-#   });
-
-#   await page.evaluate(() => {
-#     (window as any).clicked = 0;
-#     (window as any).setupAnnoyingInterstitial('hide', 1);
-#   });
-#   await page.locator('#target').click();
-#   expect(called).toBe(1);
-#   expect(await page.evaluate('window.clicked')).toBe(1);
-#   await expect(page.locator('#interstitial')).not.toBeVisible();
-
-#   await page.evaluate(() => {
-#     (window as any).clicked = 0;
-#     (window as any).setupAnnoyingInterstitial('hide', 1);
-#   });
-#   await page.removeLocatorHandler(page.getByRole('button', { name: 'close' }));
-
-#   const error = await page.locator('#target').click({ timeout: 3000 }).catch(e => e);
-#   expect(called).toBe(1);
-#   expect(await page.evaluate('window.clicked')).toBe(0);
-#   await expect(page.locator('#interstitial')).toBeVisible();
-#   expect(error.message).toContain('Timeout 3000ms exceeded');
-# });
-
-
 async def test_should_removeLocatorHandler(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/handle-locator.html")
     called = 0

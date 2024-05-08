@@ -765,7 +765,7 @@ class LocatorAssertions(AssertionsBase):
     async def to_have_role(self, role: AriaRole, timeout: float = None) -> None:
         __tracebackhide__ = True
         if isinstance(role, Pattern):
-            raise Error('"role" argument in toHaveRole must be a string')
+            raise Error('"role" argument in to_have_role must be a string')
         expected_values = to_expected_text_values([role])
         await self._expect_impl(
             "to.have.role",

@@ -527,7 +527,6 @@ class Connection(EventEmitter):
         try:
             return cb()
         except Exception as error:
-            breakpoint()
             raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
         finally:
             self._api_zone.set(None)
