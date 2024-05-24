@@ -105,9 +105,9 @@ class PipeTransport(Transport):
         self._stopped_future: asyncio.Future = asyncio.Future()
 
         try:
-            # For pyinstaller
+            # For pyinstaller and Nuitka
             env = get_driver_env()
-            if getattr(sys, "frozen", False):
+            if getattr(sys, "frozen", False) or globals().get("_compiled__"):
                 env.setdefault("PLAYWRIGHT_BROWSERS_PATH", "0")
 
             startupinfo = None
