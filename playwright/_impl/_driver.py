@@ -16,11 +16,10 @@ import inspect
 import os
 import sys
 from pathlib import Path
-from typing import Tuple, Union
+from typing import Tuple
 
 import playwright
 from playwright._repo_version import version
-import pathlib
 
 
 def compute_driver_executable() -> Tuple[str, str]:
