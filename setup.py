@@ -30,7 +30,7 @@ except ImportError:
     InWheel = None
 from wheel.bdist_wheel import bdist_wheel as BDistWheelCommand
 
-driver_version = "1.44.0-beta-1715189091000"
+driver_version = "1.44.0-beta-1715802478000"
 
 
 def extractall(zip: zipfile.ZipFile, path: str) -> None:
@@ -222,7 +222,7 @@ setup(
         "pyee==11.1.0",
     ],
     # TODO: Can be removed once we migrate to pypa/build or pypa/installer.
-    setup_requires=["setuptools-scm==8.0.4", "wheel==0.42.0"],
+    setup_requires=["setuptools-scm==8.1.0", "wheel==0.42.0"],
     classifiers=[
         "Topic :: Software Development :: Testing",
         "Topic :: Internet :: WWW/HTTP :: Browsers",
