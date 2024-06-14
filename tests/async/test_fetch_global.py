@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+import base64
 import json
 import sys
 from pathlib import Path
@@ -54,6 +55,15 @@ async def test_should_dispose_global_request(
     await response.dispose()
     with pytest.raises(Error, match="Response has been disposed"):
         await response.body()
+
+
+async def test_should_dispose_with_custom_error_message(
+    playwright: Playwright, server: Server
+) -> None:
+    request = await playwright.request.new_context()
+    await request.dispose(reason="My reason")
+    with pytest.raises(Error, match="My reason"):
+        await request.get(server.EMPTY_PAGE)
 
 
 async def test_should_support_global_user_agent_option(
@@ -202,6 +212,35 @@ async def test_should_return_error_with_correct_credentials_and_mismatching_port
     response = await request.get(server.EMPTY_PAGE)
     assert response.status == 401
     await response.dispose()
+
+
+async def test_support_http_credentials_send_immediately(
+    playwright: Playwright, server: Server
+) -> None:
+    request = await playwright.request.new_context(
+        http_credentials={
+            "username": "user",
+            "password": "pass",
+            "origin": server.PREFIX.upper(),
+            "send": "always",
+        }
+    )
+    server_request, response = await asyncio.gather(
+        server.wait_for_request("/empty.html"), request.get(server.EMPTY_PAGE)
+    )
+    assert (
+        server_request.getHeader("authorization")
+        == "Basic " + base64.b64encode(b"user:pass").decode()
+    )
+    assert response.status == 200
+
+    server_request, response = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        request.get(server.CROSS_PROCESS_PREFIX + "/empty.html"),
+    )
+    # Not sent to another origin.
+    assert server_request.getHeader("authorization") is None
+    assert response.status == 200
 
 
 async def test_should_support_global_ignore_https_errors_option(

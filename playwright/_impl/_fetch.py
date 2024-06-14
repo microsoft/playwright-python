@@ -34,6 +34,7 @@ from playwright._impl._errors import is_target_closed_error
 from playwright._impl._helper import (
     Error,
     NameValue,
+    TargetClosedError,
     async_readfile,
     async_writefile,
     is_file_payload,
@@ -93,9 +94,16 @@ class APIRequestContext(ChannelOwner):
     ) -> None:
         super().__init__(parent, type, guid, initializer)
         self._tracing: Tracing = from_channel(initializer["tracing"])
+        self._close_reason: Optional[str] = None
 
-    async def dispose(self) -> None:
-        await self._channel.send("dispose")
+    async def dispose(self, reason: str = None) -> None:
+        self._close_reason = reason
+        try:
+            await self._channel.send("dispose", {"reason": reason})
+        except Error as e:
+            if is_target_closed_error(e):
+                return
+            raise e
         self._tracing._reset_stack_counter()
 
     async def delete(
@@ -313,6 +321,8 @@ class APIRequestContext(ChannelOwner):
         ignoreHTTPSErrors: bool = None,
         maxRedirects: int = None,
     ) -> "APIResponse":
+        if self._close_reason:
+            raise TargetClosedError(self._close_reason)
         assert (
             (1 if data else 0) + (1 if form else 0) + (1 if multipart else 0)
         ) <= 1, "Only one of 'data', 'form' or 'multipart' can be specified"

@@ -39,6 +39,7 @@ from playwright._impl._api_structures import (
 )
 from playwright._impl._artifact import Artifact
 from playwright._impl._cdp_session import CDPSession
+from playwright._impl._clock import Clock
 from playwright._impl._connection import (
     ChannelOwner,
     from_channel,
@@ -114,6 +115,7 @@ class BrowserContext(ChannelOwner):
         self._tracing = cast(Tracing, from_channel(initializer["tracing"]))
         self._har_recorders: Dict[str, HarRecordingMetadata] = {}
         self._request: APIRequestContext = from_channel(initializer["requestContext"])
+        self._clock = Clock(self)
         self._channel.on(
             "bindingCall",
             lambda params: self._on_binding(from_channel(params["binding"])),
@@ -519,6 +521,10 @@ class BrowserContext(ChannelOwner):
         self._close_reason = reason
         self._close_was_called = True
 
+        await self._channel._connection.wrap_api_call(
+            lambda: self.request.dispose(reason=reason), True
+        )
+
         async def _inner_close() -> None:
             for har_id, params in self._har_recorders.items():
                 har = cast(
@@ -679,3 +685,7 @@ class BrowserContext(ChannelOwner):
     @property
     def request(self) -> "APIRequestContext":
         return self._request
+
+    @property
+    def clock(self) -> Clock:
+        return self._clock

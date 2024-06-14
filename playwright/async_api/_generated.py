@@ -13,6 +13,7 @@
 # limitations under the License.
 
 
+import datetime
 import pathlib
 import typing
 from typing import Literal
@@ -52,6 +53,7 @@ from playwright._impl._browser import Browser as BrowserImpl
 from playwright._impl._browser_context import BrowserContext as BrowserContextImpl
 from playwright._impl._browser_type import BrowserType as BrowserTypeImpl
 from playwright._impl._cdp_session import CDPSession as CDPSessionImpl
+from playwright._impl._clock import Clock as ClockImpl
 from playwright._impl._console_message import ConsoleMessage as ConsoleMessageImpl
 from playwright._impl._dialog import Dialog as DialogImpl
 from playwright._impl._download import Download as DownloadImpl
@@ -1411,7 +1413,8 @@ class Mouse(AsyncBase):
     async def wheel(self, delta_x: float, delta_y: float) -> None:
         """Mouse.wheel
 
-        Dispatches a `wheel` event.
+        Dispatches a `wheel` event. This method is usually used to manually scroll the page. See
+        [scrolling](https://playwright.dev/python/docs/input#scrolling) for alternative ways to scroll.
 
         **NOTE** Wheel events may cause scrolling if they are not handled, and this method does not wait for the scrolling
         to finish before returning.
@@ -1832,6 +1835,8 @@ class ElementHandle(JSHandle):
 
         Throws when `elementHandle` does not point to an element
         [connected](https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected) to a Document or a ShadowRoot.
+
+        See [scrolling](https://playwright.dev/python/docs/input#scrolling) for alternative ways to scroll.
 
         Parameters
         ----------
@@ -2291,7 +2296,8 @@ class ElementHandle(JSHandle):
         """ElementHandle.set_input_files
 
         Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then
-        they are resolved relative to the current working directory. For empty array, clears the selected files.
+        they are resolved relative to the current working directory. For empty array, clears the selected files. For inputs
+        with a `[webkitdirectory]` attribute, only a single directory path is supported.
 
         This method expects `ElementHandle` to point to an
         [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input). However, if the element is inside
@@ -6656,6 +6662,160 @@ class Selectors(AsyncBase):
 mapping.register(SelectorsImpl, Selectors)
 
 
+class Clock(AsyncBase):
+    async def install(
+        self, *, time: typing.Optional[typing.Union[int, str, datetime.datetime]] = None
+    ) -> None:
+        """Clock.install
+
+        Install fake implementations for the following time-related functions:
+        - `Date`
+        - `setTimeout`
+        - `clearTimeout`
+        - `setInterval`
+        - `clearInterval`
+        - `requestAnimationFrame`
+        - `cancelAnimationFrame`
+        - `requestIdleCallback`
+        - `cancelIdleCallback`
+        - `performance`
+
+        Fake timers are used to manually control the flow of time in tests. They allow you to advance time, fire timers,
+        and control the behavior of time-dependent functions. See `clock.run_for()` and
+        `clock.fast_forward()` for more information.
+
+        Parameters
+        ----------
+        time : Union[datetime.datetime, int, str, None]
+            Time to initialize with, current system time by default.
+        """
+
+        return mapping.from_maybe_impl(await self._impl_obj.install(time=time))
+
+    async def fast_forward(self, ticks: typing.Union[int, str]) -> None:
+        """Clock.fast_forward
+
+        Advance the clock by jumping forward in time. Only fires due timers at most once. This is equivalent to user
+        closing the laptop lid for a while and reopening it later, after given time.
+
+        **Usage**
+
+        ```py
+        await page.clock.fast_forward(1000)
+        await page.clock.fast_forward(\"30:00\")
+        ```
+
+        Parameters
+        ----------
+        ticks : Union[int, str]
+            Time may be the number of milliseconds to advance the clock by or a human-readable string. Valid string formats are
+            "08" for eight seconds, "01:00" for one minute and "02:34:10" for two hours, 34 minutes and ten seconds.
+        """
+
+        return mapping.from_maybe_impl(await self._impl_obj.fast_forward(ticks=ticks))
+
+    async def pause_at(self, time: typing.Union[int, str, datetime.datetime]) -> None:
+        """Clock.pause_at
+
+        Advance the clock by jumping forward in time and pause the time. Once this method is called, no timers are fired
+        unless `clock.run_for()`, `clock.fast_forward()`, `clock.pause_at()` or
+        `clock.resume()` is called.
+
+        Only fires due timers at most once. This is equivalent to user closing the laptop lid for a while and reopening it
+        at the specified time and pausing.
+
+        **Usage**
+
+        ```py
+        await page.clock.pause_at(datetime.datetime(2020, 2, 2))
+        await page.clock.pause_at(\"2020-02-02\")
+        ```
+
+        Parameters
+        ----------
+        time : Union[datetime.datetime, int, str]
+        """
+
+        return mapping.from_maybe_impl(await self._impl_obj.pause_at(time=time))
+
+    async def resume(self) -> None:
+        """Clock.resume
+
+        Resumes timers. Once this method is called, time resumes flowing, timers are fired as usual.
+        """
+
+        return mapping.from_maybe_impl(await self._impl_obj.resume())
+
+    async def run_for(self, ticks: typing.Union[int, str]) -> None:
+        """Clock.run_for
+
+        Advance the clock, firing all the time-related callbacks.
+
+        **Usage**
+
+        ```py
+        await page.clock.run_for(1000);
+        await page.clock.run_for(\"30:00\")
+        ```
+
+        Parameters
+        ----------
+        ticks : Union[int, str]
+            Time may be the number of milliseconds to advance the clock by or a human-readable string. Valid string formats are
+            "08" for eight seconds, "01:00" for one minute and "02:34:10" for two hours, 34 minutes and ten seconds.
+        """
+
+        return mapping.from_maybe_impl(await self._impl_obj.run_for(ticks=ticks))
+
+    async def set_fixed_time(
+        self, time: typing.Union[int, str, datetime.datetime]
+    ) -> None:
+        """Clock.set_fixed_time
+
+        Makes `Date.now` and `new Date()` return fixed fake time at all times, keeps all the timers running.
+
+        **Usage**
+
+        ```py
+        await page.clock.set_fixed_time(datetime.datetime.now())
+        await page.clock.set_fixed_time(datetime.datetime(2020, 2, 2))
+        await page.clock.set_fixed_time(\"2020-02-02\")
+        ```
+
+        Parameters
+        ----------
+        time : Union[datetime.datetime, int, str]
+            Time to be set.
+        """
+
+        return mapping.from_maybe_impl(await self._impl_obj.set_fixed_time(time=time))
+
+    async def set_system_time(
+        self, time: typing.Union[int, str, datetime.datetime]
+    ) -> None:
+        """Clock.set_system_time
+
+        Sets current system time but does not trigger any timers.
+
+        **Usage**
+
+        ```py
+        await page.clock.set_system_time(datetime.datetime.now())
+        await page.clock.set_system_time(datetime.datetime(2020, 2, 2))
+        await page.clock.set_system_time(\"2020-02-02\")
+        ```
+
+        Parameters
+        ----------
+        time : Union[datetime.datetime, int, str]
+        """
+
+        return mapping.from_maybe_impl(await self._impl_obj.set_system_time(time=time))
+
+
+mapping.register(ClockImpl, Clock)
+
+
 class ConsoleMessage(AsyncBase):
     @property
     def type(self) -> str:
@@ -7538,6 +7698,18 @@ class Page(AsyncContextManager):
         BrowserContext
         """
         return mapping.from_impl(self._impl_obj.context)
+
+    @property
+    def clock(self) -> "Clock":
+        """Page.clock
+
+        Playwright has ability to mock clock and passage of time.
+
+        Returns
+        -------
+        Clock
+        """
+        return mapping.from_impl(self._impl_obj.clock)
 
     @property
     def main_frame(self) -> "Frame":
@@ -9190,7 +9362,7 @@ class Page(AsyncContextManager):
         Parameters
         ----------
         behavior : Union["default", "ignoreErrors", "wait", None]
-            Specifies wether to wait for already running handlers and what to do if they throw errors:
+            Specifies whether to wait for already running handlers and what to do if they throw errors:
             - `'default'` - do not wait for current handler calls (if any) to finish, if unrouted handler throws, it may
               result in unhandled error
             - `'wait'` - wait for current handler calls (if any) to finish
@@ -10693,7 +10865,8 @@ class Page(AsyncContextManager):
         """Page.set_input_files
 
         Sets the value of the file input to these file paths or files. If some of the `filePaths` are relative paths, then
-        they are resolved relative to the current working directory. For empty array, clears the selected files.
+        they are resolved relative to the current working directory. For empty array, clears the selected files. For inputs
+        with a `[webkitdirectory]` attribute, only a single directory path is supported.
 
         This method expects `selector` to point to an
         [input element](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input). However, if the element is inside
@@ -11563,7 +11736,7 @@ class Page(AsyncContextManager):
         return response.ok
 
         # or with a lambda
-        async with page.expect_response(lambda response: response.url == \"https://example.com\" and response.status == 200) as response_info:
+        async with page.expect_response(lambda response: response.url == \"https://example.com\" and response.status == 200 and response.request.method == \"get\") as response_info:
             await page.get_by_text(\"trigger response\").click()
         response = await response_info.value
         return response.ok
@@ -12323,6 +12496,18 @@ class BrowserContext(AsyncContextManager):
         """
         return mapping.from_impl(self._impl_obj.request)
 
+    @property
+    def clock(self) -> "Clock":
+        """BrowserContext.clock
+
+        Playwright has ability to mock clock and passage of time.
+
+        Returns
+        -------
+        Clock
+        """
+        return mapping.from_impl(self._impl_obj.clock)
+
     def set_default_navigation_timeout(self, timeout: float) -> None:
         """BrowserContext.set_default_navigation_timeout
 
@@ -12471,21 +12656,22 @@ class BrowserContext(AsyncContextManager):
         ----------
         permissions : Sequence[str]
             A permission or an array of permissions to grant. Permissions can be one of the following values:
-            - `'geolocation'`
-            - `'midi'`
-            - `'midi-sysex'` (system-exclusive midi)
-            - `'notifications'`
-            - `'camera'`
-            - `'microphone'`
-            - `'background-sync'`
-            - `'ambient-light-sensor'`
             - `'accelerometer'`
-            - `'gyroscope'`
-            - `'magnetometer'`
             - `'accessibility-events'`
+            - `'ambient-light-sensor'`
+            - `'background-sync'`
+            - `'camera'`
             - `'clipboard-read'`
             - `'clipboard-write'`
+            - `'geolocation'`
+            - `'gyroscope'`
+            - `'magnetometer'`
+            - `'microphone'`
+            - `'midi-sysex'` (system-exclusive midi)
+            - `'midi'`
+            - `'notifications'`
             - `'payment-handler'`
+            - `'storage-access'`
         origin : Union[str, None]
             The [origin] to grant permissions to, e.g. "https://example.com".
         """
@@ -12880,7 +13066,7 @@ class BrowserContext(AsyncContextManager):
         Parameters
         ----------
         behavior : Union["default", "ignoreErrors", "wait", None]
-            Specifies wether to wait for already running handlers and what to do if they throw errors:
+            Specifies whether to wait for already running handlers and what to do if they throw errors:
             - `'default'` - do not wait for current handler calls (if any) to finish, if unrouted handler throws, it may
               result in unhandled error
             - `'wait'` - wait for current handler calls (if any) to finish
@@ -13218,9 +13404,9 @@ class Browser(AsyncContextManager):
 
         ```py
         browser = await pw.webkit.launch()
-        print(len(browser.contexts())) # prints `0`
+        print(len(browser.contexts)) # prints `0`
         context = await browser.new_context()
-        print(len(browser.contexts())) # prints `1`
+        print(len(browser.contexts)) # prints `1`
         ```
 
         Returns
@@ -13371,7 +13557,7 @@ class Browser(AsyncContextManager):
         offline : Union[bool, None]
             Whether to emulate network being offline. Defaults to `false`. Learn more about
             [network emulation](../emulation.md#offline).
-        http_credentials : Union[{username: str, password: str, origin: Union[str, None]}, None]
+        http_credentials : Union[{username: str, password: str, origin: Union[str, None], send: Union["always", "unauthorized", None]}, None]
             Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication). If no
             origin is specified, the username and password are sent to any servers upon unauthorized responses.
         device_scale_factor : Union[float, None]
@@ -13585,7 +13771,7 @@ class Browser(AsyncContextManager):
         offline : Union[bool, None]
             Whether to emulate network being offline. Defaults to `false`. Learn more about
             [network emulation](../emulation.md#offline).
-        http_credentials : Union[{username: str, password: str, origin: Union[str, None]}, None]
+        http_credentials : Union[{username: str, password: str, origin: Union[str, None], send: Union["always", "unauthorized", None]}, None]
             Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication). If no
             origin is specified, the username and password are sent to any servers upon unauthorized responses.
         device_scale_factor : Union[float, None]
@@ -14132,7 +14318,7 @@ class BrowserType(AsyncBase):
         offline : Union[bool, None]
             Whether to emulate network being offline. Defaults to `false`. Learn more about
             [network emulation](../emulation.md#offline).
-        http_credentials : Union[{username: str, password: str, origin: Union[str, None]}, None]
+        http_credentials : Union[{username: str, password: str, origin: Union[str, None], send: Union["always", "unauthorized", None]}, None]
             Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication). If no
             origin is specified, the username and password are sent to any servers upon unauthorized responses.
         device_scale_factor : Union[float, None]
@@ -16644,6 +16830,8 @@ class Locator(AsyncBase):
         it is completely visible as defined by
         [IntersectionObserver](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)'s `ratio`.
 
+        See [scrolling](https://playwright.dev/python/docs/input#scrolling) for alternative ways to scroll.
+
         Parameters
         ----------
         timeout : Union[float, None]
@@ -16787,7 +16975,8 @@ class Locator(AsyncBase):
     ) -> None:
         """Locator.set_input_files
 
-        Upload file or multiple files into `<input type=file>`.
+        Upload file or multiple files into `<input type=file>`. For inputs with a `[webkitdirectory]` attribute, only a
+        single directory path is supported.
 
         **Usage**
 
@@ -16797,6 +16986,9 @@ class Locator(AsyncBase):
 
         # Select multiple files
         await page.get_by_label(\"Upload files\").set_input_files(['file1.txt', 'file2.txt'])
+
+        # Select a directory
+        await page.get_by_label(\"Upload directory\").set_input_files('mydir')
 
         # Remove all the selected files
         await page.get_by_label(\"Upload file\").set_input_files([])
@@ -17371,15 +17563,20 @@ mapping.register(APIResponseImpl, APIResponse)
 
 
 class APIRequestContext(AsyncBase):
-    async def dispose(self) -> None:
+    async def dispose(self, *, reason: typing.Optional[str] = None) -> None:
         """APIRequestContext.dispose
 
         All responses returned by `a_pi_request_context.get()` and similar methods are stored in the memory, so that
         you can later call `a_pi_response.body()`.This method discards all its resources, calling any method on
         disposed `APIRequestContext` will throw an exception.
+
+        Parameters
+        ----------
+        reason : Union[str, None]
+            The reason to be reported to the operations interrupted by the context disposal.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.dispose())
+        return mapping.from_maybe_impl(await self._impl_obj.dispose(reason=reason))
 
     async def delete(
         self,
@@ -18032,7 +18229,7 @@ class APIRequest(AsyncBase):
               `http://localhost:3000/bar.html`
         extra_http_headers : Union[Dict[str, str], None]
             An object containing additional HTTP headers to be sent with every request. Defaults to none.
-        http_credentials : Union[{username: str, password: str, origin: Union[str, None]}, None]
+        http_credentials : Union[{username: str, password: str, origin: Union[str, None], send: Union["always", "unauthorized", None]}, None]
             Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication). If no
             origin is specified, the username and password are sent to any servers upon unauthorized responses.
         ignore_https_errors : Union[bool, None]

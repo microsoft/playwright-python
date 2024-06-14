@@ -405,3 +405,45 @@ async def test_set_input_files_should_preserve_last_modified_timestamp(
     # rounds it to seconds in WebKit: 1696272058110 -> 1696272058000.
     for i in range(len(timestamps)):
         assert abs(timestamps[i] - expected_timestamps[i]) < 1000
+
+
+async def test_should_upload_a_folder(
+    browser_type: BrowserType,
+    launch_server: Callable[[], RemoteServer],
+    server: Server,
+    tmp_path: Path,
+) -> None:
+    remote = launch_server()
+
+    browser = await browser_type.connect(remote.ws_endpoint)
+    context = await browser.new_context()
+    page = await context.new_page()
+    await page.goto(server.PREFIX + "/input/folderupload.html")
+    input = await page.query_selector("input")
+    assert input
+    dir = tmp_path / "file-upload-test"
+    dir.mkdir()
+    (dir / "file1.txt").write_text("file1 content")
+    (dir / "file2").write_text("file2 content")
+    (dir / "sub-dir").mkdir()
+    (dir / "sub-dir" / "really.txt").write_text("sub-dir file content")
+    await input.set_input_files(dir)
+    assert await input.evaluate("e => [...e.files].map(f => f.webkitRelativePath)") == [
+        "file-upload-test/file1.txt",
+        "file-upload-test/file2",
+        "file-upload-test/sub-dir/really.txt",
+    ]
+    webkit_relative_paths = await input.evaluate(
+        "e => [...e.files].map(f => f.webkitRelativePath)"
+    )
+    for i, webkit_relative_path in enumerate(webkit_relative_paths):
+        content = await input.evaluate(
+            """(e, i) => {
+            const reader = new FileReader();
+            const promise = new Promise(fulfill => reader.onload = fulfill);
+            reader.readAsText(e.files[i]);
+            return promise.then(() => reader.result);
+        }""",
+            i,
+        )
+        assert content == (dir / ".." / webkit_relative_path).read_text()

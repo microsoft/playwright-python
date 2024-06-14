@@ -37,7 +37,13 @@ from typing import (
 from urllib.parse import urljoin
 
 from playwright._impl._api_structures import NameValue
-from playwright._impl._errors import Error, TargetClosedError, TimeoutError
+from playwright._impl._errors import (
+    Error,
+    TargetClosedError,
+    TimeoutError,
+    is_target_closed_error,
+    rewrite_error,
+)
 from playwright._impl._glob import glob_to_regex
 from playwright._impl._greenlets import RouteGreenlet
 from playwright._impl._str_utils import escape_regex_flags
@@ -287,6 +293,13 @@ class RouteHandler:
             # If the handler was stopped (without waiting for completion), we ignore all exceptions.
             if self._ignore_exception:
                 return False
+            if is_target_closed_error(e):
+                # We are failing in the handler because the target close closed.
+                # Give user a hint!
+                raise rewrite_error(
+                    e,
+                    f"\"{str(e)}\" while running route callback.\nConsider awaiting `await page.unroute_all(behavior='ignoreErrors')`\nbefore the end of the test to ignore remaining routes in flight.",
+                )
             raise e
         finally:
             handler_invocation.complete.set_result(None)
