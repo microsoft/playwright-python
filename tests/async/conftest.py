@@ -84,6 +84,11 @@ async def browser(
     await browser.close()
 
 
+@pytest.fixture(scope="session")
+async def browser_version(browser: Browser) -> str:
+    return browser.version
+
+
 @pytest.fixture
 async def context_factory(
     browser: Browser,

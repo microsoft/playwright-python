@@ -65,3 +65,14 @@ MustType = TypeVar("MustType")
 def must(value: Optional[MustType]) -> MustType:
     assert value
     return value
+
+
+def chromium_version_less_than(a: str, b: str) -> bool:
+    left = list(map(int, a.split(".")))
+    right = list(map(int, b.split(".")))
+    for i in range(4):
+        if left[i] > right[i]:
+            return False
+        if left[i] < right[i]:
+            return True
+    return False

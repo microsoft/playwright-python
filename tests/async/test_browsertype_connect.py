@@ -24,7 +24,7 @@ from flaky import flaky
 from playwright.async_api import BrowserType, Error, Playwright, Route
 from tests.conftest import RemoteServer
 from tests.server import Server, TestServerRequest, WebSocketProtocol
-from tests.utils import parse_trace
+from tests.utils import chromium_version_less_than, parse_trace
 
 
 async def test_should_print_custom_ws_close_error(
@@ -412,6 +412,9 @@ async def test_should_upload_a_folder(
     launch_server: Callable[[], RemoteServer],
     server: Server,
     tmp_path: Path,
+    browser_name: str,
+    browser_version: str,
+    headless: bool,
 ) -> None:
     remote = launch_server()
 
@@ -434,7 +437,14 @@ async def test_should_upload_a_folder(
         [
             "file-upload-test/file1.txt",
             "file-upload-test/file2",
-            "file-upload-test/sub-dir/really.txt",
+            # https://issues.chromium.org/issues/345393164
+            *(
+                []
+                if browser_name == "chromium"
+                and headless
+                and chromium_version_less_than(browser_version, "127.0.6533.0")
+                else ["file-upload-test/sub-dir/really.txt"]
+            ),
         ]
     )
     webkit_relative_paths = await input.evaluate(

@@ -147,50 +147,6 @@ async def test_should_amend_binary_post_data(page: Page, server: Server) -> None
     assert server_request.post_body == b"\x00\x01\x02\x03\x04"
 
 
-# it('continue should not change multipart/form-data body', async ({ page, server, browserName }) => {
-#   it.info().annotations.push({ type: 'issue', description: 'https://github.com/microsoft/playwright/issues/19158' });
-#   await page.goto(server.EMPTY_PAGE);
-#   server.setRoute('/upload', (request, response) => {
-#     response.writeHead(200, { 'Content-Type': 'text/plain' });
-#     response.end('done');
-#   });
-#   async function sendFormData() {
-#     const reqPromise = server.waitForRequest('/upload');
-#     const status = await page.evaluate(async () => {
-#       const newFile = new File(['file content'], 'file.txt');
-#       const formData = new FormData();
-#       formData.append('file', newFile);
-#       const response = await fetch('/upload', {
-#         method: 'POST',
-#         credentials: 'include',
-#         body: formData,
-#       });
-#       return response.status;
-#     });
-#     const req = await reqPromise;
-#     expect(status).toBe(200);
-#     return req;
-#   }
-#   const reqBefore = await sendFormData();
-#   await page.route('**/*', async route => {
-#     await route.continue();
-#   });
-#   const reqAfter = await sendFormData();
-#   const fileContent = [
-#     'Content-Disposition: form-data; name=\"file\"; filename=\"file.txt\"',
-#     'Content-Type: application/octet-stream',
-#     '',
-#     'file content',
-#     '------'].join('\r\n');
-#   expect.soft((await reqBefore.postBody).toString('utf8')).toContain(fileContent);
-#   expect.soft((await reqAfter.postBody).toString('utf8')).toContain(fileContent);
-#   // Firefox sends a bit longer boundary.
-#   const expectedLength = browserName === 'firefox' ? '246' : '208';
-#   expect.soft(reqBefore.headers['content-length']).toBe(expectedLength);
-#   expect.soft(reqAfter.headers['content-length']).toBe(expectedLength);
-# });
-
-
 async def test_continue_should_not_change_multipart_form_data_body(
     page: Page, server: Server, browser_name: str
 ) -> None:
@@ -238,7 +194,3 @@ async def test_continue_should_not_change_multipart_form_data_body(
     assert req_after.post_body
     assert file_content in req_before.post_body.decode()
     assert file_content in req_after.post_body.decode()
-    # Firefox sends a bit longer boundary.
-    expected_length = "246" if browser_name == "firefox" else "208"
-    assert req_before.getHeader("content-length") == expected_length
-    assert req_after.getHeader("content-length") == expected_length

@@ -26,7 +26,7 @@ from flaky import flaky
 from playwright._impl._path_utils import get_file_dirname
 from playwright.async_api import Error, FilePayload, Page
 from tests.server import Server
-from tests.utils import must
+from tests.utils import chromium_version_less_than, must
 
 _dirname = get_file_dirname()
 FILE_TO_UPLOAD = _dirname / ".." / "assets/file-to-upload.txt"
@@ -415,7 +415,12 @@ async def test_should_upload_multiple_large_file(
 
 
 async def test_should_upload_a_folder(
-    page: Page, server: Server, tmp_path: Path
+    page: Page,
+    server: Server,
+    tmp_path: Path,
+    browser_name: str,
+    browser_version: str,
+    headless: bool,
 ) -> None:
     await page.goto(server.PREFIX + "/input/folderupload.html")
     input = await page.query_selector("input")
@@ -433,7 +438,14 @@ async def test_should_upload_a_folder(
         [
             "file-upload-test/file1.txt",
             "file-upload-test/file2",
-            "file-upload-test/sub-dir/really.txt",
+            # https://issues.chromium.org/issues/345393164
+            *(
+                []
+                if browser_name == "chromium"
+                and headless
+                and chromium_version_less_than(browser_version, "127.0.6533.0")
+                else ["file-upload-test/sub-dir/really.txt"]
+            ),
         ]
     )
     webkit_relative_paths = await input.evaluate(
