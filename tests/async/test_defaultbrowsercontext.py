@@ -83,7 +83,14 @@ async def test_context_add_cookies_should_work(
     (page, context) = await launch_persistent()
     await page.goto(server.EMPTY_PAGE)
     await page.context.add_cookies(
-        [{"url": server.EMPTY_PAGE, "name": "username", "value": "John Doe"}]
+        [
+            {
+                "url": server.EMPTY_PAGE,
+                "name": "username",
+                "value": "John Doe",
+                "sameSite": "Lax",
+            }
+        ]
     )
     assert await page.evaluate("() => document.cookie") == "username=John Doe"
     assert await page.context.cookies() == [

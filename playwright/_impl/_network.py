@@ -111,11 +111,6 @@ class Request(ChannelOwner):
         self._fallback_overrides: SerializedFallbackOverrides = (
             SerializedFallbackOverrides()
         )
-        base64_post_data = initializer.get("postData")
-        if base64_post_data is not None:
-            self._fallback_overrides.post_data_buffer = base64.b64decode(
-                base64_post_data
-            )
 
     def __repr__(self) -> str:
         return f"<Request url={self.url!r} method={self.method!r}>"
@@ -159,9 +154,12 @@ class Request(ChannelOwner):
     @property
     def post_data(self) -> Optional[str]:
         data = self._fallback_overrides.post_data_buffer
-        if not data:
-            return None
-        return data.decode()
+        if data:
+            return data.decode()
+        base64_post_data = self._initializer.get("postData")
+        if base64_post_data is not None:
+            return base64.b64decode(base64_post_data).decode()
+        return None
 
     @property
     def post_data_json(self) -> Optional[Any]:

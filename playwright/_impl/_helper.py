@@ -294,11 +294,12 @@ class RouteHandler:
             if self._ignore_exception:
                 return False
             if is_target_closed_error(e):
-                # We are failing in the handler because the target close closed.
+                # We are failing in the handler because the target has closed.
                 # Give user a hint!
+                optional_async_prefix = "await " if not self._is_sync else ""
                 raise rewrite_error(
                     e,
-                    f"\"{str(e)}\" while running route callback.\nConsider awaiting `await page.unroute_all(behavior='ignoreErrors')`\nbefore the end of the test to ignore remaining routes in flight.",
+                    f"\"{str(e)}\" while running route callback.\nConsider awaiting `{optional_async_prefix}page.unroute_all(behavior='ignoreErrors')`\nbefore the end of the test to ignore remaining routes in flight.",
                 )
             raise e
         finally:

@@ -427,11 +427,15 @@ async def test_should_upload_a_folder(
     (dir / "sub-dir").mkdir()
     (dir / "sub-dir" / "really.txt").write_text("sub-dir file content")
     await input.set_input_files(dir)
-    assert await input.evaluate("e => [...e.files].map(f => f.webkitRelativePath)") == [
-        "file-upload-test/file1.txt",
-        "file-upload-test/file2",
-        "file-upload-test/sub-dir/really.txt",
-    ]
+    assert set(
+        await input.evaluate("e => [...e.files].map(f => f.webkitRelativePath)")
+    ) == (
+        [
+            "file-upload-test/file1.txt",
+            "file-upload-test/file2",
+            "file-upload-test/sub-dir/really.txt",
+        ]
+    )
     webkit_relative_paths = await input.evaluate(
         "e => [...e.files].map(f => f.webkitRelativePath)"
     )
