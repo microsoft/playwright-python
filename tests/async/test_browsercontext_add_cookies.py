@@ -233,7 +233,9 @@ async def test_should_have_expires_set_to_neg_1_for_session_cookies(
 
 
 async def test_should_set_cookie_with_reasonable_defaults(
-    context: BrowserContext, server: Server, is_chromium: bool
+    context: BrowserContext,
+    server: Server,
+    default_same_site_cookie_value: str,
 ) -> None:
     await context.add_cookies(
         [{"url": server.EMPTY_PAGE, "name": "defaults", "value": "123456"}]
@@ -249,13 +251,16 @@ async def test_should_set_cookie_with_reasonable_defaults(
             "expires": -1,
             "httpOnly": False,
             "secure": False,
-            "sameSite": "Lax" if is_chromium else "None",
+            "sameSite": default_same_site_cookie_value,
         }
     ]
 
 
 async def test_should_set_a_cookie_with_a_path(
-    context: BrowserContext, page: Page, server: Server, is_chromium: bool
+    context: BrowserContext,
+    page: Page,
+    server: Server,
+    default_same_site_cookie_value: str,
 ) -> None:
     await page.goto(server.PREFIX + "/grid.html")
     await context.add_cookies(
@@ -277,7 +282,7 @@ async def test_should_set_a_cookie_with_a_path(
             "expires": -1,
             "httpOnly": False,
             "secure": False,
-            "sameSite": "Lax" if is_chromium else "None",
+            "sameSite": default_same_site_cookie_value,
         }
     ]
     assert await page.evaluate("document.cookie") == "gridcookie=GRID"
@@ -342,7 +347,10 @@ async def test_should_be_able_to_set_unsecure_cookie_for_http_website(
 
 
 async def test_should_set_a_cookie_on_a_different_domain(
-    context: BrowserContext, page: Page, server: Server, is_chromium: bool
+    context: BrowserContext,
+    page: Page,
+    server: Server,
+    default_same_site_cookie_value: str,
 ) -> None:
     await page.goto(server.EMPTY_PAGE)
     await context.add_cookies(
@@ -358,7 +366,7 @@ async def test_should_set_a_cookie_on_a_different_domain(
             "expires": -1,
             "httpOnly": False,
             "secure": True,
-            "sameSite": "Lax" if is_chromium else "None",
+            "sameSite": default_same_site_cookie_value,
         }
     ]
 

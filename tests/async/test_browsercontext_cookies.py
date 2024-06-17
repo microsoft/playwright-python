@@ -27,7 +27,10 @@ async def test_should_return_no_cookies_in_pristine_browser_context(
 
 
 async def test_should_get_a_cookie(
-    context: BrowserContext, page: Page, server: Server, is_chromium: bool
+    context: BrowserContext,
+    page: Page,
+    server: Server,
+    default_same_site_cookie_value: str,
 ) -> None:
     await page.goto(server.EMPTY_PAGE)
     document_cookie = await page.evaluate(
@@ -46,13 +49,16 @@ async def test_should_get_a_cookie(
             "expires": -1,
             "httpOnly": False,
             "secure": False,
-            "sameSite": "Lax" if is_chromium else "None",
+            "sameSite": default_same_site_cookie_value,
         }
     ]
 
 
 async def test_should_get_a_non_session_cookie(
-    context: BrowserContext, page: Page, server: Server, is_chromium: bool
+    context: BrowserContext,
+    page: Page,
+    server: Server,
+    default_same_site_cookie_value: str,
 ) -> None:
     await page.goto(server.EMPTY_PAGE)
     # @see https://en.wikipedia.org/wiki/Year_2038_problem
@@ -85,7 +91,7 @@ async def test_should_get_a_non_session_cookie(
             "path": "/",
             "httpOnly": False,
             "secure": False,
-            "sameSite": "Lax" if is_chromium else "None",
+            "sameSite": default_same_site_cookie_value,
         }
     ]
 
@@ -146,7 +152,10 @@ async def test_should_properly_report_lax_sameSite_cookie(
 
 
 async def test_should_get_multiple_cookies(
-    context: BrowserContext, page: Page, server: Server, is_chromium: bool
+    context: BrowserContext,
+    page: Page,
+    server: Server,
+    default_same_site_cookie_value: str,
 ) -> None:
     await page.goto(server.EMPTY_PAGE)
     document_cookie = await page.evaluate(
@@ -168,7 +177,7 @@ async def test_should_get_multiple_cookies(
             "expires": -1,
             "httpOnly": False,
             "secure": False,
-            "sameSite": "Lax" if is_chromium else "None",
+            "sameSite": default_same_site_cookie_value,
         },
         {
             "name": "username",
@@ -178,13 +187,13 @@ async def test_should_get_multiple_cookies(
             "expires": -1,
             "httpOnly": False,
             "secure": False,
-            "sameSite": "Lax" if is_chromium else "None",
+            "sameSite": default_same_site_cookie_value,
         },
     ]
 
 
 async def test_should_get_cookies_from_multiple_urls(
-    context: BrowserContext, is_chromium: bool
+    context: BrowserContext, default_same_site_cookie_value: str
 ) -> None:
     await context.add_cookies(
         [
@@ -205,7 +214,7 @@ async def test_should_get_cookies_from_multiple_urls(
             "expires": -1,
             "httpOnly": False,
             "secure": True,
-            "sameSite": "Lax" if is_chromium else "None",
+            "sameSite": default_same_site_cookie_value,
         },
         {
             "name": "doggo",
@@ -215,6 +224,6 @@ async def test_should_get_cookies_from_multiple_urls(
             "expires": -1,
             "httpOnly": False,
             "secure": True,
-            "sameSite": "Lax" if is_chromium else "None",
+            "sameSite": default_same_site_cookie_value,
         },
     ]

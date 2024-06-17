@@ -15,7 +15,16 @@
 import asyncio
 import os
 from pathlib import Path
-from typing import Any, AsyncGenerator, Awaitable, Callable, Dict, Optional, Tuple
+from typing import (
+    Any,
+    AsyncGenerator,
+    Awaitable,
+    Callable,
+    Dict,
+    Literal,
+    Optional,
+    Tuple,
+)
 
 import pytest
 
@@ -49,7 +58,7 @@ async def launch_persistent(
 async def test_context_cookies_should_work(
     server: Server,
     launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
-    is_chromium: bool,
+    default_same_site_cookie_value: str,
 ) -> None:
     (page, context) = await launch_persistent()
     await page.goto(server.EMPTY_PAGE)
@@ -70,7 +79,7 @@ async def test_context_cookies_should_work(
             "expires": -1,
             "httpOnly": False,
             "secure": False,
-            "sameSite": "Lax" if is_chromium else "None",
+            "sameSite": default_same_site_cookie_value,
         }
     ]
 
@@ -78,7 +87,7 @@ async def test_context_cookies_should_work(
 async def test_context_add_cookies_should_work(
     server: Server,
     launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
-    is_chromium: bool,
+    default_same_site_cookie_value: Literal["Lax", "None", "Strict"],
 ) -> None:
     (page, context) = await launch_persistent()
     await page.goto(server.EMPTY_PAGE)
@@ -88,7 +97,7 @@ async def test_context_add_cookies_should_work(
                 "url": server.EMPTY_PAGE,
                 "name": "username",
                 "value": "John Doe",
-                "sameSite": "Lax",
+                "sameSite": default_same_site_cookie_value,
             }
         ]
     )
@@ -102,7 +111,7 @@ async def test_context_add_cookies_should_work(
             "expires": -1,
             "httpOnly": False,
             "secure": False,
-            "sameSite": "Lax" if is_chromium else "None",
+            "sameSite": default_same_site_cookie_value,
         }
     ]
 

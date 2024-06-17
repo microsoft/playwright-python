@@ -176,7 +176,11 @@ class Request(ChannelOwner):
 
     @property
     def post_data_buffer(self) -> Optional[bytes]:
-        return self._fallback_overrides.post_data_buffer
+        if self._fallback_overrides.post_data_buffer:
+            return self._fallback_overrides.post_data_buffer
+        if self._initializer.get("postData"):
+            return base64.b64decode(self._initializer["postData"])
+        return None
 
     async def response(self) -> Optional["Response"]:
         return from_nullable_channel(await self._channel.send("response"))

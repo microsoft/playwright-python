@@ -429,7 +429,7 @@ async def test_should_upload_a_folder(
     await input.set_input_files(dir)
     assert set(
         await input.evaluate("e => [...e.files].map(f => f.webkitRelativePath)")
-    ) == (
+    ) == set(
         [
             "file-upload-test/file1.txt",
             "file-upload-test/file2",
