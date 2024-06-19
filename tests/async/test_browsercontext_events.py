@@ -111,10 +111,9 @@ async def test_dialog_event_should_work_in_popup(page: Page) -> None:
 
     async def open_dialog() -> None:
         nonlocal prompt_task
-
-    prompt_task = asyncio.create_task(
-        page.evaluate("() => window.open('').prompt('hey?')")
-    )
+        prompt_task = asyncio.create_task(
+            page.evaluate("() => window.open('').prompt('hey?')")
+        )
 
     [dialog, popup, _] = await asyncio.gather(
         page.context.wait_for_event("dialog"),
