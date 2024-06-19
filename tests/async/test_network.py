@@ -28,6 +28,14 @@ from tests.server import Server, TestServerRequest
 from .utils import Utils
 
 
+def adjust_server_headers(headers: Dict[str, str], browser_name: str) -> Dict[str, str]:
+    if browser_name != "firefox":
+        return headers
+    headers = headers.copy()
+    headers.pop("priority", None)
+    return headers
+
+
 async def test_request_fulfill(page: Page, server: Server) -> None:
     async def handle_request(route: Route, request: Request) -> None:
         headers = await route.request.all_headers()
@@ -193,7 +201,11 @@ async def test_request_headers_should_work(
 
 
 async def test_request_headers_should_get_the_same_headers_as_the_server(
-    page: Page, server: Server, is_webkit: bool, is_win: bool
+    page: Page,
+    server: Server,
+    is_webkit: bool,
+    is_win: bool,
+    browser_name: str,
 ) -> None:
     if is_webkit and is_win:
         pytest.xfail("Curl does not show accept-encoding and accept-language")
@@ -211,12 +223,14 @@ async def test_request_headers_should_get_the_same_headers_as_the_server(
     server.set_route("/empty.html", handle)
     response = await page.goto(server.EMPTY_PAGE)
     assert response
-    server_headers = await server_request_headers_future
+    server_headers = adjust_server_headers(
+        await server_request_headers_future, browser_name
+    )
     assert await response.request.all_headers() == server_headers
 
 
 async def test_request_headers_should_get_the_same_headers_as_the_server_cors(
-    page: Page, server: Server, is_webkit: bool, is_win: bool
+    page: Page, server: Server, is_webkit: bool, is_win: bool, browser_name: str
 ) -> None:
     if is_webkit and is_win:
         pytest.xfail("Curl does not show accept-encoding and accept-language")
@@ -246,7 +260,9 @@ async def test_request_headers_should_get_the_same_headers_as_the_server_cors(
         )
     request = await request_info.value
     assert text == "done"
-    server_headers = await server_request_headers_future
+    server_headers = adjust_server_headers(
+        await server_request_headers_future, browser_name
+    )
     assert await request.all_headers() == server_headers
 
 
@@ -260,6 +276,8 @@ async def test_should_report_request_headers_array(
     def handle(request: http.Request) -> None:
         for name, values in request.requestHeaders.getAllRawHeaders():
             for value in values:
+                if browser_name == "firefox" and name.decode().lower() == "priority":
+                    continue
                 expected_headers.append(
                     {"name": name.decode().lower(), "value": value.decode()}
                 )
