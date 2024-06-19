@@ -164,7 +164,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Get conda
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
           python-version: 3.9
           channels: conda-forge
