@@ -13,13 +13,14 @@
 # limitations under the License.
 
 import asyncio
+import base64
 import json
-from typing import Any, cast
+from typing import Any, Callable, cast
 from urllib.parse import parse_qs
 
 import pytest
 
-from playwright.async_api import BrowserContext, Error, FilePayload, Page
+from playwright.async_api import Browser, BrowserContext, Error, FilePayload, Page
 from tests.server import Server
 from tests.utils import must
 
@@ -150,6 +151,66 @@ async def test_should_not_add_context_cookie_if_cookie_header_passed_as_paramete
     assert server_req.getHeader("Cookie") == "foo=bar"
 
 
+async def test_should_support_http_credentials_send_immediately_for_browser_context(
+    context_factory: "Callable[..., asyncio.Future[BrowserContext]]", server: Server
+) -> None:
+    context = await context_factory(
+        http_credentials={
+            "username": "user",
+            "password": "pass",
+            "origin": server.PREFIX.upper(),
+            "send": "always",
+        }
+    )
+    # First request
+    server_request, response = await asyncio.gather(
+        server.wait_for_request("/empty.html"), context.request.get(server.EMPTY_PAGE)
+    )
+    expected_auth = "Basic " + base64.b64encode(b"user:pass").decode()
+    assert server_request.getHeader("authorization") == expected_auth
+    assert response.status == 200
+
+    # Second request
+    server_request, response = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        context.request.get(server.CROSS_PROCESS_PREFIX + "/empty.html"),
+    )
+    # Not sent to another origin.
+    assert server_request.getHeader("authorization") is None
+    assert response.status == 200
+
+
+async def test_support_http_credentials_send_immediately_for_browser_new_page(
+    server: Server, browser: Browser
+) -> None:
+    page = await browser.new_page(
+        http_credentials={
+            "username": "user",
+            "password": "pass",
+            "origin": server.PREFIX.upper(),
+            "send": "always",
+        }
+    )
+    server_request, response = await asyncio.gather(
+        server.wait_for_request("/empty.html"), page.request.get(server.EMPTY_PAGE)
+    )
+    assert (
+        server_request.getHeader("authorization")
+        == "Basic " + base64.b64encode(b"user:pass").decode()
+    )
+    assert response.status == 200
+
+    server_request, response = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        page.request.get(server.CROSS_PROCESS_PREFIX + "/empty.html"),
+    )
+    # Not sent to another origin.
+    assert server_request.getHeader("authorization") is None
+    assert response.status == 200
+
+    await page.close()
+
+
 @pytest.mark.parametrize("method", ["delete", "patch", "post", "put"])
 async def test_should_support_post_data(
     context: BrowserContext, method: str, server: Server
@@ -243,3 +304,11 @@ async def test_should_add_default_headers(
     assert request.getHeader("User-Agent") == await page.evaluate(
         "() => navigator.userAgent"
     )
+
+
+async def test_should_work_after_context_dispose(
+    context: BrowserContext, server: Server
+) -> None:
+    await context.close(reason="Test ended.")
+    with pytest.raises(Error, match="Test ended."):
+        await context.request.get(server.EMPTY_PAGE)

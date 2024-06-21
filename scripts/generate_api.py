@@ -28,6 +28,7 @@ from playwright._impl._browser import Browser
 from playwright._impl._browser_context import BrowserContext
 from playwright._impl._browser_type import BrowserType
 from playwright._impl._cdp_session import CDPSession
+from playwright._impl._clock import Clock
 from playwright._impl._console_message import ConsoleMessage
 from playwright._impl._dialog import Dialog
 from playwright._impl._download import Download
@@ -212,6 +213,7 @@ header = """
 
 import typing
 import pathlib
+import datetime
 
 from typing import Literal
 
@@ -221,6 +223,7 @@ from playwright._impl._api_structures import Cookie, SetCookieParam, FloatRect, 
 from playwright._impl._browser import Browser as BrowserImpl
 from playwright._impl._browser_context import BrowserContext as BrowserContextImpl
 from playwright._impl._browser_type import BrowserType as BrowserTypeImpl
+from playwright._impl._clock import Clock as ClockImpl
 from playwright._impl._cdp_session import CDPSession as CDPSessionImpl
 from playwright._impl._console_message import ConsoleMessage as ConsoleMessageImpl
 from playwright._impl._dialog import Dialog as DialogImpl
@@ -260,6 +263,7 @@ generated_types = [
     FrameLocator,
     Worker,
     Selectors,
+    Clock,
     ConsoleMessage,
     Dialog,
     Download,

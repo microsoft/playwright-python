@@ -63,6 +63,7 @@ class HttpCredentials(TypedDict, total=False):
     username: str
     password: str
     origin: Optional[str]
+    send: Optional[Literal["always", "unauthorized"]]
 
 
 class LocalStorageEntry(TypedDict):

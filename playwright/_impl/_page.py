@@ -43,6 +43,7 @@ from playwright._impl._api_structures import (
     ViewportSize,
 )
 from playwright._impl._artifact import Artifact
+from playwright._impl._clock import Clock
 from playwright._impl._connection import (
     ChannelOwner,
     from_channel,
@@ -335,6 +336,10 @@ class Page(ChannelOwner):
     @property
     def context(self) -> "BrowserContext":
         return self._browser_context
+
+    @property
+    def clock(self) -> Clock:
+        return self._browser_context.clock
 
     async def opener(self) -> Optional["Page"]:
         if self._opener and self._opener.is_closed():

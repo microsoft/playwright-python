@@ -350,6 +350,8 @@ class DocumentationProvider:
             return "Error"
         if str_value == "<class 'NoneType'>":
             return "None"
+        if str_value == "<class 'datetime.datetime'>":
+            return "datetime.datetime"
         match = re.match(r"^<class '((?:pathlib\.)?\w+)'>$", str_value)
         if match:
             return match.group(1)
@@ -489,6 +491,8 @@ class DocumentationProvider:
             return "Callable"
         if type_name == "Buffer" or type_name == "ReadStream":
             return "bytes"
+        if type_name == "Date":
+            return "datetime.datetime"
         if type_name == "URL":
             return "str"
         if type_name == "RegExp":
