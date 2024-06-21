@@ -23,6 +23,7 @@ class Clock:
     def __init__(self, browser_context: "BrowserContext") -> None:
         self._browser_context = browser_context
         self._loop = browser_context._loop
+        self._dispatcher_fiber = browser_context._dispatcher_fiber
 
     async def install(self, time: Union[int, str, datetime.datetime] = None) -> None:
         await self._browser_context._channel.send(

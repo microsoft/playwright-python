@@ -180,30 +180,6 @@ class TestFastForward:
         assert calls == [[1000 + 110000]]
 
 
-class TestFastForwardTo:
-    @pytest.fixture(autouse=True)
-    async def before_each(self, page: Page) -> AsyncGenerator[None, None]:
-        await page.clock.install(time=0)
-        await page.clock.pause_at(1000)
-        yield
-
-    async def test_ignores_timers_which_wouldnt_be_run(
-        self, page: Page, calls: List[Any]
-    ) -> None:
-        await page.evaluate(
-            "setTimeout(() => { window.stub('should not be logged'); }, 1000)"
-        )
-        await page.clock.fast_forward(500)
-        assert len(calls) == 0
-
-    async def test_pushes_back_execution_time_for_skipped_timers(
-        self, page: Page, calls: List[Any]
-    ) -> None:
-        await page.evaluate("setTimeout(() => { window.stub(Date.now()); }, 1000)")
-        await page.clock.fast_forward(2000)
-        assert calls == [[1000 + 2000]]
-
-
 class TestStubTimers:
     @pytest.fixture(autouse=True)
     async def before_each(self, page: Page) -> AsyncGenerator[None, None]:
@@ -334,6 +310,7 @@ class TestPopup:
             ),
         )
         await page.goto(server.EMPTY_PAGE)
+        # Wait for 2 second in real life to check that it is past in popup.
         await page.wait_for_timeout(2000)
         popup, _ = await asyncio.gather(
             page.wait_for_event("popup"),
@@ -356,6 +333,7 @@ class TestPopup:
         await page.clock.install(time=0)
         await page.clock.pause_at(1000)
         await page.goto(server.EMPTY_PAGE)
+        # Wait for 2 second in real life to check that it is past in popup.
         await page.wait_for_timeout(2000)
         popup, _ = await asyncio.gather(
             page.wait_for_event("popup"),
@@ -368,6 +346,7 @@ class TestPopup:
 class TestSetFixedTime:
     async def test_does_not_fake_methods(self, page: Page) -> None:
         await page.clock.set_fixed_time(0)
+        # Should not stall.
         await page.evaluate("new Promise(f => setTimeout(f, 1))")
 
     async def test_allows_setting_time_multiple_times(self, page: Page) -> None:
