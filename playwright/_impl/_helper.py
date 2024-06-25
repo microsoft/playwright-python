@@ -246,7 +246,11 @@ def locals_to_params(args: Dict) -> Dict:
         if key == "self":
             continue
         if args[key] is not None:
-            copy[key] = args[key]
+            copy[key] = (
+                args[key]
+                if not isinstance(args[key], Dict)
+                else locals_to_params(args[key])
+            )
     return copy
 
 
