@@ -16,7 +16,7 @@
 import datetime
 import pathlib
 import typing
-from typing import Literal
+from typing import Iterable, Literal
 
 from playwright._impl._accessibility import Accessibility as AccessibilityImpl
 from playwright._impl._api_structures import (
@@ -7164,6 +7164,15 @@ class Download(SyncBase):
         """
 
         return mapping.from_maybe_impl(self._sync(self._impl_obj.save_as(path=path)))
+
+    def read_stream(self) -> Iterable[bytes]:
+        """Download.read_stream
+
+        Yields a readable stream chunks for a successful download, or throws for a failed/canceled download.
+        """
+
+        for chunk in mapping.from_maybe_impl(self._sync(self._impl_obj.read_stream())):
+            yield chunk
 
     def cancel(self) -> None:
         """Download.cancel

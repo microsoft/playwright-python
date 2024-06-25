@@ -14,7 +14,7 @@
 
 import pathlib
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, AsyncIterator, Optional, Union
 
 from playwright._impl._artifact import Artifact
 
@@ -59,6 +59,10 @@ class Download:
 
     async def save_as(self, path: Union[str, Path]) -> None:
         await self._artifact.save_as(path)
+
+    async def read_stream(self) -> AsyncIterator[bytes]:
+        async for chunk in self._artifact.read_stream():
+            yield chunk
 
     async def cancel(self) -> None:
         return await self._artifact.cancel()

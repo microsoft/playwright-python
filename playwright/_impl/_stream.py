@@ -14,7 +14,7 @@
 
 import base64
 from pathlib import Path
-from typing import Dict, Union
+from typing import AsyncIterator, Dict, Union
 
 from playwright._impl._connection import ChannelOwner
 
@@ -35,6 +35,13 @@ class Stream(ChannelOwner):
                 None, lambda: file.write(base64.b64decode(binary))
             )
         await self._loop.run_in_executor(None, lambda: file.close())
+
+    async def read_stream(self) -> AsyncIterator[bytes]:
+        while True:
+            binary = await self._channel.send("read", {"size": 1024 * 1024})
+            if not binary:
+                break
+            yield base64.b64decode(binary)
 
     async def read_all(self) -> bytes:
         binary = b""

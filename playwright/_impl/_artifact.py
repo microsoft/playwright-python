@@ -14,7 +14,7 @@
 
 import pathlib
 from pathlib import Path
-from typing import Dict, Optional, Union, cast
+from typing import AsyncIterator, Dict, Optional, Union, cast
 
 from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._helper import Error, make_dirs_for_file, patch_error_message
@@ -40,6 +40,11 @@ class Artifact(ChannelOwner):
         stream = cast(Stream, from_channel(await self._channel.send("saveAsStream")))
         make_dirs_for_file(path)
         await stream.save_as(path)
+
+    async def read_stream(self) -> AsyncIterator[bytes]:
+        stream = cast(Stream, from_channel(await self._channel.send("stream")))
+        async for chunk in stream.read_stream():
+            yield chunk
 
     async def failure(self) -> Optional[str]:
         reason = await self._channel.send("failure")

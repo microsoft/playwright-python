@@ -43,8 +43,16 @@ def after_each_hook(server: Server) -> Generator[None, None, None]:
         request.write(b"Hello world")
         request.finish()
 
+    def handle_download_big_file(request: TestServerRequest) -> None:
+        request.setHeader("Content-Type", "application/octet-stream")
+        request.setHeader("Content-Disposition", "attachment")
+        request.write(b"A" * 1024 * 1024)
+        request.write(b"B")
+        request.finish()
+
     server.set_route("/download", handle_download)
     server.set_route("/downloadWithFilename", handle_download_with_file_name)
+    server.set_route("/downloadBigFile", handle_download_big_file)
     yield
 
 
@@ -385,4 +393,26 @@ async def test_download_cancel_should_work(browser: Browser, server: Server) -> 
     download = await download_info.value
     await download.cancel()
     assert await download.failure() == "canceled"
+    await page.close()
+
+
+async def test_stream_reading(browser: Browser, server: Server) -> None:
+    page = await browser.new_page(accept_downloads=True)
+    await page.set_content(f'<a href="{server.PREFIX}/download">download</a>')
+    async with page.expect_download() as download_info:
+        await page.click("a")
+    download = await download_info.value
+    data = b"".join([chunk async for chunk in download.read_stream()])
+    assert data == b"Hello world"
+    await page.close()
+
+
+async def test_stream_reading_multiple_chunks(browser: Browser, server: Server) -> None:
+    page = await browser.new_page(accept_downloads=True)
+    await page.set_content(f'<a href="{server.PREFIX}/downloadBigFile">download</a>')
+    async with page.expect_download() as download_info:
+        await page.click("a")
+    download = await download_info.value
+    data = b"".join([chunk async for chunk in download.read_stream()])
+    assert data == b"A" * 1024 * 1024 + b"B"
     await page.close()
