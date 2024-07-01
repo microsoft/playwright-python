@@ -32,7 +32,7 @@ class Clock:
 
     async def fast_forward(
         self,
-        ticks: Union[float, str],
+        ticks: Union[int, str],
     ) -> None:
         await self._browser_context._channel.send(
             "clockFastForward", parse_ticks(ticks)
@@ -51,7 +51,7 @@ class Clock:
 
     async def run_for(
         self,
-        ticks: Union[float, str],
+        ticks: Union[int, str],
     ) -> None:
         await self._browser_context._channel.send("clockRunFor", parse_ticks(ticks))
 
@@ -71,16 +71,16 @@ class Clock:
 
 
 def parse_time(
-    time: Union[float, str, datetime.datetime]
+    time: Union[float, int, str, datetime.datetime]
 ) -> Dict[str, Union[int, str]]:
-    if isinstance(time, (int, float)):
+    if isinstance(time, (float, int)):
         return {"timeNumber": int(time)}
     if isinstance(time, str):
         return {"timeString": time}
-    return {"timeNumber": int(time.timestamp())}
+    return {"timeNumber": int(time.timestamp() * 1_000)}
 
 
-def parse_ticks(ticks: Union[float, str]) -> Dict[str, Union[int, str]]:
-    if isinstance(ticks, (float, int)):
-        return {"ticksNumber": int(ticks)}
+def parse_ticks(ticks: Union[int, str]) -> Dict[str, Union[int, str]]:
+    if isinstance(ticks, int):
+        return {"ticksNumber": ticks}
     return {"ticksString": ticks}

@@ -6694,7 +6694,7 @@ class Clock(AsyncBase):
 
         return mapping.from_maybe_impl(await self._impl_obj.install(time=time))
 
-    async def fast_forward(self, ticks: typing.Union[float, str]) -> None:
+    async def fast_forward(self, ticks: typing.Union[int, str]) -> None:
         """Clock.fast_forward
 
         Advance the clock by jumping forward in time. Only fires due timers at most once. This is equivalent to user
@@ -6709,9 +6709,7 @@ class Clock(AsyncBase):
 
         Parameters
         ----------
-        ticks : Union[float, str]
-            Time may be the number of milliseconds to advance the clock by or a human-readable string. Valid string formats are
-            "08" for eight seconds, "01:00" for one minute and "02:34:10" for two hours, 34 minutes and ten seconds.
+        ticks : Union[int, str]
         """
 
         return mapping.from_maybe_impl(await self._impl_obj.fast_forward(ticks=ticks))
@@ -6748,7 +6746,7 @@ class Clock(AsyncBase):
 
         return mapping.from_maybe_impl(await self._impl_obj.resume())
 
-    async def run_for(self, ticks: typing.Union[float, str]) -> None:
+    async def run_for(self, ticks: typing.Union[int, str]) -> None:
         """Clock.run_for
 
         Advance the clock, firing all the time-related callbacks.
@@ -6762,9 +6760,7 @@ class Clock(AsyncBase):
 
         Parameters
         ----------
-        ticks : Union[float, str]
-            Time may be the number of milliseconds to advance the clock by or a human-readable string. Valid string formats are
-            "08" for eight seconds, "01:00" for one minute and "02:34:10" for two hours, 34 minutes and ten seconds.
+        ticks : Union[int, str]
         """
 
         return mapping.from_maybe_impl(await self._impl_obj.run_for(ticks=ticks))
