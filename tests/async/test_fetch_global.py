@@ -448,12 +448,18 @@ async def test_should_throw_an_error_when_max_redirects_is_less_than_0(
         assert "'max_redirects' must be greater than or equal to '0'" in str(exc_info)
 
 
-async def test_should_serialize_null_values_in_json(
+async def test_should_serialize_request_data(
     playwright: Playwright, server: Server
 ) -> None:
     request = await playwright.request.new_context()
     server.set_route("/echo", lambda req: (req.write(req.post_body), req.finish()))
-    response = await request.post(server.PREFIX + "/echo", data={"foo": None})
-    assert response.status == 200
-    assert await response.text() == '{"foo": null}'
+    for data, expected in [
+        ({"foo": None}, '{"foo": null}'),
+        ([], "[]"),
+        ({}, "{}"),
+        ("", ""),
+    ]:
+        response = await request.post(server.PREFIX + "/echo", data=data)
+        assert response.status == 200
+        assert await response.text() == expected
     await request.dispose()

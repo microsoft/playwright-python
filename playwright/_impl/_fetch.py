@@ -338,7 +338,7 @@ class APIRequestContext(ChannelOwner):
         form_data: Optional[List[NameValue]] = None
         multipart_data: Optional[List[FormField]] = None
         post_data_buffer: Optional[bytes] = None
-        if data:
+        if data is not None:
             if isinstance(data, str):
                 if is_json_content_type(serialized_headers):
                     json_data = data if is_json_parsable(data) else json.dumps(data)
