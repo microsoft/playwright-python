@@ -6774,7 +6774,9 @@ mapping.register(SelectorsImpl, Selectors)
 
 class Clock(SyncBase):
     def install(
-        self, *, time: typing.Optional[typing.Union[int, str, datetime.datetime]] = None
+        self,
+        *,
+        time: typing.Optional[typing.Union[float, str, datetime.datetime]] = None
     ) -> None:
         """Clock.install
 
@@ -6796,13 +6798,13 @@ class Clock(SyncBase):
 
         Parameters
         ----------
-        time : Union[datetime.datetime, int, str, None]
+        time : Union[datetime.datetime, float, str, None]
             Time to initialize with, current system time by default.
         """
 
         return mapping.from_maybe_impl(self._sync(self._impl_obj.install(time=time)))
 
-    def fast_forward(self, ticks: typing.Union[int, str]) -> None:
+    def fast_forward(self, ticks: typing.Union[float, str]) -> None:
         """Clock.fast_forward
 
         Advance the clock by jumping forward in time. Only fires due timers at most once. This is equivalent to user
@@ -6817,7 +6819,7 @@ class Clock(SyncBase):
 
         Parameters
         ----------
-        ticks : Union[int, str]
+        ticks : Union[float, str]
             Time may be the number of milliseconds to advance the clock by or a human-readable string. Valid string formats are
             "08" for eight seconds, "01:00" for one minute and "02:34:10" for two hours, 34 minutes and ten seconds.
         """
@@ -6826,7 +6828,7 @@ class Clock(SyncBase):
             self._sync(self._impl_obj.fast_forward(ticks=ticks))
         )
 
-    def pause_at(self, time: typing.Union[int, str, datetime.datetime]) -> None:
+    def pause_at(self, time: typing.Union[float, str, datetime.datetime]) -> None:
         """Clock.pause_at
 
         Advance the clock by jumping forward in time and pause the time. Once this method is called, no timers are fired
@@ -6845,7 +6847,7 @@ class Clock(SyncBase):
 
         Parameters
         ----------
-        time : Union[datetime.datetime, int, str]
+        time : Union[datetime.datetime, float, str]
         """
 
         return mapping.from_maybe_impl(self._sync(self._impl_obj.pause_at(time=time)))
@@ -6858,7 +6860,7 @@ class Clock(SyncBase):
 
         return mapping.from_maybe_impl(self._sync(self._impl_obj.resume()))
 
-    def run_for(self, ticks: typing.Union[int, str]) -> None:
+    def run_for(self, ticks: typing.Union[float, str]) -> None:
         """Clock.run_for
 
         Advance the clock, firing all the time-related callbacks.
@@ -6872,14 +6874,14 @@ class Clock(SyncBase):
 
         Parameters
         ----------
-        ticks : Union[int, str]
+        ticks : Union[float, str]
             Time may be the number of milliseconds to advance the clock by or a human-readable string. Valid string formats are
             "08" for eight seconds, "01:00" for one minute and "02:34:10" for two hours, 34 minutes and ten seconds.
         """
 
         return mapping.from_maybe_impl(self._sync(self._impl_obj.run_for(ticks=ticks)))
 
-    def set_fixed_time(self, time: typing.Union[int, str, datetime.datetime]) -> None:
+    def set_fixed_time(self, time: typing.Union[float, str, datetime.datetime]) -> None:
         """Clock.set_fixed_time
 
         Makes `Date.now` and `new Date()` return fixed fake time at all times, keeps all the timers running.
@@ -6894,7 +6896,7 @@ class Clock(SyncBase):
 
         Parameters
         ----------
-        time : Union[datetime.datetime, int, str]
+        time : Union[datetime.datetime, float, str]
             Time to be set.
         """
 
@@ -6902,7 +6904,9 @@ class Clock(SyncBase):
             self._sync(self._impl_obj.set_fixed_time(time=time))
         )
 
-    def set_system_time(self, time: typing.Union[int, str, datetime.datetime]) -> None:
+    def set_system_time(
+        self, time: typing.Union[float, str, datetime.datetime]
+    ) -> None:
         """Clock.set_system_time
 
         Sets current system time but does not trigger any timers.
@@ -6917,7 +6921,7 @@ class Clock(SyncBase):
 
         Parameters
         ----------
-        time : Union[datetime.datetime, int, str]
+        time : Union[datetime.datetime, float, str]
         """
 
         return mapping.from_maybe_impl(
@@ -8689,22 +8693,6 @@ class Page(SyncContextManager):
             run(playwright)
         ```
 
-        An example of passing an element handle:
-
-        ```py
-        def print(source, element):
-            print(element.text_content())
-
-        page.expose_binding(\"clicked\", print, handle=true)
-        page.set_content(\"\"\"
-          <script>
-            document.addEventListener('click', event => window.clicked(event.target));
-          </script>
-          <div>Click me</div>
-          <div>Or click me</div>
-        \"\"\")
-        ```
-
         Parameters
         ----------
         name : str
@@ -8714,6 +8702,7 @@ class Page(SyncContextManager):
         handle : Union[bool, None]
             Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is
             supported. When passing by value, multiple arguments are supported.
+            Deprecated: This option will be removed in the future.
         """
 
         return mapping.from_maybe_impl(
@@ -12871,22 +12860,6 @@ class BrowserContext(SyncContextManager):
             run(playwright)
         ```
 
-        An example of passing an element handle:
-
-        ```py
-        def print(source, element):
-            print(element.text_content())
-
-        context.expose_binding(\"clicked\", print, handle=true)
-        page.set_content(\"\"\"
-          <script>
-            document.addEventListener('click', event => window.clicked(event.target));
-          </script>
-          <div>Click me</div>
-          <div>Or click me</div>
-        \"\"\")
-        ```
-
         Parameters
         ----------
         name : str
@@ -12896,6 +12869,7 @@ class BrowserContext(SyncContextManager):
         handle : Union[bool, None]
             Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is
             supported. When passing by value, multiple arguments are supported.
+            Deprecated: This option will be removed in the future.
         """
 
         return mapping.from_maybe_impl(
