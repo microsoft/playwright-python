@@ -282,10 +282,10 @@ class TestPopup:
             page.wait_for_event("popup"), page.evaluate("window.open('about:blank')")
         )
         popup_time = await popup.evaluate("Date.now()")
-        assert popup_time == now.timestamp()
+        assert popup_time == now.timestamp() * 1000
         await page.clock.run_for(1000)
         popup_time_after = await popup.evaluate("Date.now()")
-        assert popup_time_after == now.timestamp() + 1000
+        assert popup_time_after == now.timestamp() * 1000 + 1000
 
     async def test_should_tick_before_popup(self, page: Page) -> None:
         await page.clock.install(time=0)
@@ -296,7 +296,8 @@ class TestPopup:
             page.wait_for_event("popup"), page.evaluate("window.open('about:blank')")
         )
         popup_time = await popup.evaluate("Date.now()")
-        assert popup_time == int(now.timestamp() + 1000)
+        assert popup_time == int(now.timestamp() * 1000 + 1000)
+        assert datetime.datetime.fromtimestamp(popup_time / 1_000).year == 2015
 
     async def test_should_run_time_before_popup(
         self, page: Page, server: Server

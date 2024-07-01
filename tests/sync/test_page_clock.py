@@ -265,10 +265,10 @@ class TestPopup:
             page.evaluate("window.open('about:blank')")
         popup = popup_info.value
         popup_time = popup.evaluate("Date.now()")
-        assert popup_time == now.timestamp()
+        assert popup_time == now.timestamp() * 1000
         page.clock.run_for(1000)
         popup_time_after = popup.evaluate("Date.now()")
-        assert popup_time_after == now.timestamp() + 1000
+        assert popup_time_after == now.timestamp() * 1000 + 1000
 
     def test_should_tick_before_popup(self, page: Page) -> None:
         page.clock.install(time=0)
@@ -279,7 +279,8 @@ class TestPopup:
             page.evaluate("window.open('about:blank')")
         popup = popup_info.value
         popup_time = popup.evaluate("Date.now()")
-        assert popup_time == int(now.timestamp() + 1000)
+        assert popup_time == int(now.timestamp() * 1_000 + 1000)
+        assert datetime.datetime.fromtimestamp(popup_time / 1_000).year == 2015
 
     def test_should_run_time_before_popup(self, page: Page, server: Server) -> None:
         server.set_route(
@@ -323,6 +324,12 @@ class TestPopup:
 
 
 class TestSetFixedTime:
+    def test_allows_passing_as_int(self, page: Page) -> None:
+        page.clock.set_fixed_time(100)
+        assert page.evaluate("Date.now()") == 100
+        page.clock.set_fixed_time(int(200))
+        assert page.evaluate("Date.now()") == 200
+
     def test_does_not_fake_methods(self, page: Page) -> None:
         page.clock.set_fixed_time(0)
         # Should not stall.
