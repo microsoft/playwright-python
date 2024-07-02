@@ -6710,6 +6710,8 @@ class Clock(AsyncBase):
         Parameters
         ----------
         ticks : Union[int, str]
+            Time may be the number of milliseconds to advance the clock by or a human-readable string. Valid string formats are
+            "08" for eight seconds, "01:00" for one minute and "02:34:10" for two hours, 34 minutes and ten seconds.
         """
 
         return mapping.from_maybe_impl(await self._impl_obj.fast_forward(ticks=ticks))
@@ -6734,6 +6736,7 @@ class Clock(AsyncBase):
         Parameters
         ----------
         time : Union[datetime.datetime, float, str]
+            Time to pause at.
         """
 
         return mapping.from_maybe_impl(await self._impl_obj.pause_at(time=time))
@@ -6761,6 +6764,8 @@ class Clock(AsyncBase):
         Parameters
         ----------
         ticks : Union[int, str]
+            Time may be the number of milliseconds to advance the clock by or a human-readable string. Valid string formats are
+            "08" for eight seconds, "01:00" for one minute and "02:34:10" for two hours, 34 minutes and ten seconds.
         """
 
         return mapping.from_maybe_impl(await self._impl_obj.run_for(ticks=ticks))
@@ -6806,6 +6811,7 @@ class Clock(AsyncBase):
         Parameters
         ----------
         time : Union[datetime.datetime, float, str]
+            Time to be set.
         """
 
         return mapping.from_maybe_impl(await self._impl_obj.set_system_time(time=time))

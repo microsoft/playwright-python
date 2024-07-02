@@ -483,8 +483,6 @@ class DocumentationProvider:
             return "bool"
         if type_name.lower() == "string":
             return "str"
-        if type_name.lower() == "long":
-            return "float"
         if type_name == "any" or type_name == "Serializable":
             return "Any"
         if type_name == "Object":
