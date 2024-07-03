@@ -481,6 +481,8 @@ class DocumentationProvider:
             return f"{{{', '.join(items)}}}"
         if type_name == "boolean":
             return "bool"
+        if type_name == "long":
+            return "int"
         if type_name.lower() == "string":
             return "str"
         if type_name == "any" or type_name == "Serializable":

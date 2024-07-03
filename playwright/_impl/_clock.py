@@ -25,7 +25,7 @@ class Clock:
         self._loop = browser_context._loop
         self._dispatcher_fiber = browser_context._dispatcher_fiber
 
-    async def install(self, time: Union[int, str, datetime.datetime] = None) -> None:
+    async def install(self, time: Union[float, str, datetime.datetime] = None) -> None:
         await self._browser_context._channel.send(
             "clockInstall", parse_time(time) if time is not None else {}
         )
@@ -40,7 +40,7 @@ class Clock:
 
     async def pause_at(
         self,
-        time: Union[int, str, datetime.datetime],
+        time: Union[float, str, datetime.datetime],
     ) -> None:
         await self._browser_context._channel.send("clockPauseAt", parse_time(time))
 
@@ -57,25 +57,27 @@ class Clock:
 
     async def set_fixed_time(
         self,
-        time: Union[int, str, datetime.datetime],
+        time: Union[float, str, datetime.datetime],
     ) -> None:
         await self._browser_context._channel.send("clockSetFixedTime", parse_time(time))
 
     async def set_system_time(
         self,
-        time: Union[int, str, datetime.datetime],
+        time: Union[float, str, datetime.datetime],
     ) -> None:
         await self._browser_context._channel.send(
             "clockSetSystemTime", parse_time(time)
         )
 
 
-def parse_time(time: Union[int, str, datetime.datetime]) -> Dict[str, Union[int, str]]:
-    if isinstance(time, int):
-        return {"timeNumber": time}
+def parse_time(
+    time: Union[float, str, datetime.datetime]
+) -> Dict[str, Union[int, str]]:
+    if isinstance(time, (float, int)):
+        return {"timeNumber": int(time * 1_000)}
     if isinstance(time, str):
         return {"timeString": time}
-    return {"timeNumber": int(time.timestamp())}
+    return {"timeNumber": int(time.timestamp() * 1_000)}
 
 
 def parse_ticks(ticks: Union[int, str]) -> Dict[str, Union[int, str]]:

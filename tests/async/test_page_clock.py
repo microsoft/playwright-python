@@ -151,7 +151,7 @@ class TestFastForward:
     @pytest.fixture(autouse=True)
     async def before_each(self, page: Page) -> AsyncGenerator[None, None]:
         await page.clock.install(time=0)
-        await page.clock.pause_at(1000)
+        await page.clock.pause_at(1)
         yield
 
     async def test_ignores_timers_which_wouldnt_be_run(
@@ -184,11 +184,11 @@ class TestStubTimers:
     @pytest.fixture(autouse=True)
     async def before_each(self, page: Page) -> AsyncGenerator[None, None]:
         await page.clock.install(time=0)
-        await page.clock.pause_at(1000)
+        await page.clock.pause_at(1)
         yield
 
     async def test_sets_initial_timestamp(self, page: Page) -> None:
-        await page.clock.set_system_time(1400)
+        await page.clock.set_system_time(1.4)
         assert await page.evaluate("Date.now()") == 1400
 
     async def test_replaces_global_setTimeout(
@@ -255,8 +255,8 @@ class TestStubTimers:
 
 class TestStubTimersPerformance:
     async def test_replaces_global_performance_time_origin(self, page: Page) -> None:
-        await page.clock.install(time=1000)
-        await page.clock.pause_at(2000)
+        await page.clock.install(time=1)
+        await page.clock.pause_at(2)
         promise = asyncio.create_task(
             page.evaluate(
                 """async () => {
@@ -282,10 +282,10 @@ class TestPopup:
             page.wait_for_event("popup"), page.evaluate("window.open('about:blank')")
         )
         popup_time = await popup.evaluate("Date.now()")
-        assert popup_time == now.timestamp()
+        assert popup_time == now.timestamp() * 1000
         await page.clock.run_for(1000)
         popup_time_after = await popup.evaluate("Date.now()")
-        assert popup_time_after == now.timestamp() + 1000
+        assert popup_time_after == now.timestamp() * 1000 + 1000
 
     async def test_should_tick_before_popup(self, page: Page) -> None:
         await page.clock.install(time=0)
@@ -296,7 +296,8 @@ class TestPopup:
             page.wait_for_event("popup"), page.evaluate("window.open('about:blank')")
         )
         popup_time = await popup.evaluate("Date.now()")
-        assert popup_time == int(now.timestamp() + 1000)
+        assert popup_time == int(now.timestamp() * 1000 + 1000)
+        assert datetime.datetime.fromtimestamp(popup_time / 1_000).year == 2015
 
     async def test_should_run_time_before_popup(
         self, page: Page, server: Server
@@ -331,7 +332,7 @@ class TestPopup:
             ),
         )
         await page.clock.install(time=0)
-        await page.clock.pause_at(1000)
+        await page.clock.pause_at(1)
         await page.goto(server.EMPTY_PAGE)
         # Wait for 2 second in real life to check that it is past in popup.
         await page.wait_for_timeout(2000)
@@ -350,15 +351,15 @@ class TestSetFixedTime:
         await page.evaluate("new Promise(f => setTimeout(f, 1))")
 
     async def test_allows_setting_time_multiple_times(self, page: Page) -> None:
-        await page.clock.set_fixed_time(100)
+        await page.clock.set_fixed_time(0.1)
         assert await page.evaluate("Date.now()") == 100
-        await page.clock.set_fixed_time(200)
+        await page.clock.set_fixed_time(0.2)
         assert await page.evaluate("Date.now()") == 200
 
     async def test_fixed_time_is_not_affected_by_clock_manipulation(
         self, page: Page
     ) -> None:
-        await page.clock.set_fixed_time(100)
+        await page.clock.set_fixed_time(0.1)
         assert await page.evaluate("Date.now()") == 100
         await page.clock.fast_forward(20)
         assert await page.evaluate("Date.now()") == 100
@@ -366,9 +367,9 @@ class TestSetFixedTime:
     async def test_allows_installing_fake_timers_after_setting_time(
         self, page: Page, calls: List[Any]
     ) -> None:
-        await page.clock.set_fixed_time(100)
+        await page.clock.set_fixed_time(0.1)
         assert await page.evaluate("Date.now()") == 100
-        await page.clock.set_fixed_time(200)
+        await page.clock.set_fixed_time(0.2)
         await page.evaluate("setTimeout(() => window.stub(Date.now()))")
         await page.clock.run_for(0)
         assert calls == [[200]]
@@ -406,7 +407,7 @@ class TestWhileRunning:
     async def test_should_pause(self, page: Page) -> None:
         await page.clock.install(time=0)
         await page.goto("data:text/html,")
-        await page.clock.pause_at(1000)
+        await page.clock.pause_at(1)
         await page.wait_for_timeout(1000)
         await page.clock.resume()
         now = await page.evaluate("Date.now()")
@@ -415,7 +416,7 @@ class TestWhileRunning:
     async def test_should_pause_and_fast_forward(self, page: Page) -> None:
         await page.clock.install(time=0)
         await page.goto("data:text/html,")
-        await page.clock.pause_at(1000)
+        await page.clock.pause_at(1)
         await page.clock.fast_forward(1000)
         now = await page.evaluate("Date.now()")
         assert now == 2000
@@ -423,7 +424,7 @@ class TestWhileRunning:
     async def test_should_set_system_time_on_pause(self, page: Page) -> None:
         await page.clock.install(time=0)
         await page.goto("data:text/html,")
-        await page.clock.pause_at(1000)
+        await page.clock.pause_at(1)
         now = await page.evaluate("Date.now()")
         assert now == 1000
 
