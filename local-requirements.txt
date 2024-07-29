@@ -19,6 +19,6 @@ requests==2.32.3
 service_identity==24.1.0
 setuptools==70.3.0
 twisted==24.3.0
-types-pyOpenSSL==24.1.0.20240425
+types-pyOpenSSL==24.1.0.20240722
 types-requests==2.32.0.20240712
 wheel==0.42.0
