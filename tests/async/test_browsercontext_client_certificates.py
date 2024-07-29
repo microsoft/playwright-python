@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
 import threading
 from pathlib import Path
 from typing import Dict, Generator, cast
@@ -25,6 +26,12 @@ from twisted.web import resource, server
 from playwright.async_api import Browser, BrowserType, Playwright, Request, expect
 
 reactor = cast(SelectReactor, _twisted_reactor)
+
+
+@pytest.fixture(scope="function", autouse=True)
+def _skip_webkit_darwin(browser_name: str) -> None:
+    if browser_name == "webkit" and sys.platform == "darwin":
+        pytest.skip("WebKit does not proxy localhost on macOS")
 
 
 class Simple(resource.Resource):
