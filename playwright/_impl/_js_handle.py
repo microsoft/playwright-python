@@ -15,12 +15,13 @@
 import collections.abc
 import datetime
 import math
+import traceback
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 from urllib.parse import ParseResult, urlparse, urlunparse
 
 from playwright._impl._connection import Channel, ChannelOwner, from_channel
-from playwright._impl._errors import is_target_closed_error
+from playwright._impl._errors import Error, is_target_closed_error
 from playwright._impl._map import Map
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -140,6 +141,18 @@ def serialize_value(
                 value.astimezone(datetime.timezone.utc), "%Y-%m-%dT%H:%M:%S.%fZ"
             )
         }
+    if isinstance(value, Exception):
+        return {
+            "e": {
+                "m": str(value),
+                "n": (value.name or "") if isinstance(value, Error) else "",
+                "s": (value.stack or "")
+                if isinstance(value, Error)
+                else "".join(
+                    traceback.format_exception(type(value), value=value, tb=None)
+                ),
+            }
+        }
     if isinstance(value, bool):
         return {"b": value}
     if isinstance(value, (int, float)):
@@ -206,6 +219,12 @@ def parse_value(value: Any, refs: Optional[Dict[int, Any]] = None) -> Any:
 
         if "bi" in value:
             return int(value["bi"])
+
+        if "e" in value:
+            error = Error(value["e"]["m"])
+            error._name = value["e"]["n"]
+            error._stack = value["e"]["s"]
+            return error
 
         if "a" in value:
             a: List = []

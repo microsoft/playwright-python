@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Sequence, TypedDict, Union
 
 # These are the structures that we like keeping in a JSON form for their potential
@@ -98,6 +99,14 @@ class ProxySettings(TypedDict, total=False):
 class StorageState(TypedDict, total=False):
     cookies: List[Cookie]
     origins: List[OriginState]
+
+
+class ClientCertificate(TypedDict, total=False):
+    origin: str
+    certPath: Optional[Union[str, Path]]
+    keyPath: Optional[Union[str, Path]]
+    pfxPath: Optional[Union[str, Path]]
+    passphrase: Optional[str]
 
 
 class ResourceTiming(TypedDict):

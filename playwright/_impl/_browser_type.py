@@ -15,9 +15,10 @@
 import asyncio
 import pathlib
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, Optional, Pattern, Sequence, Union, cast
+from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Sequence, Union, cast
 
 from playwright._impl._api_structures import (
+    ClientCertificate,
     Geolocation,
     HttpCredentials,
     ProxySettings,
@@ -147,6 +148,7 @@ class BrowserType(ChannelOwner):
         recordHarUrlFilter: Union[Pattern[str], str] = None,
         recordHarMode: HarMode = None,
         recordHarContent: HarContentPolicy = None,
+        clientCertificates: List[ClientCertificate] = None,
     ) -> BrowserContext:
         userDataDir = str(Path(userDataDir)) if userDataDir else ""
         params = locals_to_params(locals())

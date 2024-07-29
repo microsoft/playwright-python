@@ -36,6 +36,7 @@ from typing import (
 from urllib import parse
 
 from playwright._impl._api_structures import (
+    ClientCertificate,
     Headers,
     HeadersArray,
     RemoteAddr,
@@ -50,7 +51,7 @@ from playwright._impl._connection import (
 )
 from playwright._impl._errors import Error
 from playwright._impl._event_context_manager import EventContextManagerImpl
-from playwright._impl._helper import locals_to_params
+from playwright._impl._helper import async_readfile, locals_to_params
 from playwright._impl._waiter import Waiter
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -81,6 +82,34 @@ def serialize_headers(headers: Dict[str, str]) -> HeadersArray:
         for name, value in headers.items()
         if value is not None
     ]
+
+
+async def to_client_certificates_protocol(
+    clientCertificates: Optional[List[ClientCertificate]],
+) -> Optional[List[Dict[str, str]]]:
+    if not clientCertificates:
+        return None
+    out = []
+    for clientCertificate in clientCertificates:
+        out_record = {
+            "origin": clientCertificate["origin"],
+        }
+        if passphrase := clientCertificate.get("passphrase"):
+            out_record["passphrase"] = passphrase
+        if pfx_path := clientCertificate.get("pfxPath"):
+            out_record["pfx"] = base64.b64encode(
+                await async_readfile(pfx_path)
+            ).decode()
+        if cert_path := clientCertificate.get("certPath"):
+            out_record["cert"] = base64.b64encode(
+                await async_readfile(cert_path)
+            ).decode()
+        if key_path := clientCertificate.get("keyPath"):
+            out_record["key"] = base64.b64encode(
+                await async_readfile(key_path)
+            ).decode()
+        out.append(out_record)
+    return out
 
 
 class Request(ChannelOwner):

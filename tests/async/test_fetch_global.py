@@ -23,7 +23,7 @@ from urllib.parse import urlparse
 import pytest
 
 from playwright.async_api import APIResponse, Error, Playwright, StorageState
-from tests.server import Server
+from tests.server import Server, TestServerRequest
 
 
 @pytest.mark.parametrize(
@@ -462,4 +462,27 @@ async def test_should_serialize_request_data(
         response = await request.post(server.PREFIX + "/echo", data=data)
         assert response.status == 200
         assert await response.text() == expected
+    await request.dispose()
+
+
+async def test_should_retry_ECONNRESET(playwright: Playwright, server: Server) -> None:
+    request_count = 0
+
+    def _handle_request(req: TestServerRequest) -> None:
+        nonlocal request_count
+        request_count += 1
+        if request_count <= 3:
+            assert req.transport
+            req.transport.abortConnection()
+            return
+        req.setHeader("content-type", "text/plain")
+        req.write(b"Hello!")
+        req.finish()
+
+    server.set_route("/test", _handle_request)
+    request = await playwright.request.new_context()
+    response = await request.fetch(server.PREFIX + "/test", max_retries=3)
+    assert response.status == 200
+    assert await response.text() == "Hello!"
+    assert request_count == 4
     await request.dispose()

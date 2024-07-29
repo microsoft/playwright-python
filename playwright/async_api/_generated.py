@@ -20,6 +20,7 @@ from typing import Literal
 
 from playwright._impl._accessibility import Accessibility as AccessibilityImpl
 from playwright._impl._api_structures import (
+    ClientCertificate,
     Cookie,
     FilePayload,
     FloatRect,
@@ -365,7 +366,7 @@ class Request(AsyncBase):
     async def header_value(self, name: str) -> typing.Optional[str]:
         """Request.header_value
 
-        Returns the value of the header matching the name. The name is case insensitive.
+        Returns the value of the header matching the name. The name is case-insensitive.
 
         Parameters
         ----------
@@ -512,7 +513,7 @@ class Response(AsyncBase):
     async def header_value(self, name: str) -> typing.Optional[str]:
         """Response.header_value
 
-        Returns the value of the header matching the name. The name is case insensitive. If multiple headers have the same
+        Returns the value of the header matching the name. The name is case-insensitive. If multiple headers have the same
         name (except `set-cookie`), they are returned as a list separated by `, `. For `set-cookie`, the `\\n` separator is
         used. If no headers are found, `null` is returned.
 
@@ -531,7 +532,7 @@ class Response(AsyncBase):
     async def header_values(self, name: str) -> typing.List[str]:
         """Response.header_values
 
-        Returns all values of the headers matching the name, for example `set-cookie`. The name is case insensitive.
+        Returns all values of the headers matching the name, for example `set-cookie`. The name is case-insensitive.
 
         Parameters
         ----------
@@ -1301,7 +1302,9 @@ class Mouse(AsyncBase):
         Parameters
         ----------
         x : float
+            X coordinate relative to the main frame's viewport in CSS pixels.
         y : float
+            Y coordinate relative to the main frame's viewport in CSS pixels.
         steps : Union[int, None]
             Defaults to 1. Sends intermediate `mousemove` events.
         """
@@ -1368,7 +1371,9 @@ class Mouse(AsyncBase):
         Parameters
         ----------
         x : float
+            X coordinate relative to the main frame's viewport in CSS pixels.
         y : float
+            Y coordinate relative to the main frame's viewport in CSS pixels.
         delay : Union[float, None]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         button : Union["left", "middle", "right", None]
@@ -1399,7 +1404,9 @@ class Mouse(AsyncBase):
         Parameters
         ----------
         x : float
+            X coordinate relative to the main frame's viewport in CSS pixels.
         y : float
+            Y coordinate relative to the main frame's viewport in CSS pixels.
         delay : Union[float, None]
             Time to wait between `mousedown` and `mouseup` in milliseconds. Defaults to 0.
         button : Union["left", "middle", "right", None]
@@ -1446,7 +1453,9 @@ class Touchscreen(AsyncBase):
         Parameters
         ----------
         x : float
+            X coordinate relative to the main frame's viewport in CSS pixels.
         y : float
+            Y coordinate relative to the main frame's viewport in CSS pixels.
         """
 
         return mapping.from_maybe_impl(await self._impl_obj.tap(x=x, y=y))
@@ -1867,7 +1876,6 @@ class ElementHandle(JSHandle):
         1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to hover over the center of the element, or the specified `position`.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
         If the element is detached from the DOM at any moment during the action, this method throws.
 
@@ -1887,9 +1895,8 @@ class ElementHandle(JSHandle):
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         trial : Union[bool, None]
@@ -1960,6 +1967,7 @@ class ElementHandle(JSHandle):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
+            Deprecated: This option will default to `true` in the future.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
@@ -1999,8 +2007,6 @@ class ElementHandle(JSHandle):
         1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to double click in the center of the element, or the specified `position`.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if
-           the first click of the `dblclick()` triggers a navigation event, this method will throw.
 
         If the element is detached from the DOM at any moment during the action, this method throws.
 
@@ -2028,9 +2034,8 @@ class ElementHandle(JSHandle):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
@@ -2108,6 +2113,7 @@ class ElementHandle(JSHandle):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
+            Deprecated: This option will default to `true` in the future.
 
         Returns
         -------
@@ -2144,7 +2150,6 @@ class ElementHandle(JSHandle):
         1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.touchscreen` to tap the center of the element, or the specified `position`.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
         If the element is detached from the DOM at any moment during the action, this method throws.
 
@@ -2168,9 +2173,8 @@ class ElementHandle(JSHandle):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
@@ -2215,9 +2219,8 @@ class ElementHandle(JSHandle):
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         """
@@ -2311,9 +2314,8 @@ class ElementHandle(JSHandle):
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         """
 
         return mapping.from_maybe_impl(
@@ -2357,9 +2359,8 @@ class ElementHandle(JSHandle):
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         """
 
         return mapping.from_maybe_impl(
@@ -2413,6 +2414,7 @@ class ElementHandle(JSHandle):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
+            Deprecated: This option will default to `true` in the future.
         """
 
         return mapping.from_maybe_impl(
@@ -2440,7 +2442,6 @@ class ElementHandle(JSHandle):
            the element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
         1. Ensure that the element is now checked or unchecked. If not, this method throws.
 
         When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
@@ -2459,9 +2460,8 @@ class ElementHandle(JSHandle):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
@@ -2495,7 +2495,6 @@ class ElementHandle(JSHandle):
         1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
         1. Ensure that the element is now checked. If not, this method throws.
 
         If the element is detached from the DOM at any moment during the action, this method throws.
@@ -2514,9 +2513,8 @@ class ElementHandle(JSHandle):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
@@ -2549,7 +2547,6 @@ class ElementHandle(JSHandle):
         1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
         1. Ensure that the element is now unchecked. If not, this method throws.
 
         If the element is detached from the DOM at any moment during the action, this method throws.
@@ -2568,9 +2565,8 @@ class ElementHandle(JSHandle):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
@@ -3066,9 +3062,8 @@ class FileChooser(AsyncBase):
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         """
 
         return mapping.from_maybe_impl(
@@ -4083,7 +4078,7 @@ class Frame(AsyncBase):
         content : Union[str, None]
             Raw JavaScript content to be injected into frame.
         type : Union[str, None]
-            Script type. Use 'module' in order to load a Javascript ES6 module. See
+            Script type. Use 'module' in order to load a JavaScript ES6 module. See
             [script](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script) for more details.
 
         Returns
@@ -4187,6 +4182,7 @@ class Frame(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
+            Deprecated: This option will default to `true` in the future.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -4234,8 +4230,7 @@ class Frame(AsyncBase):
         1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the matched element, unless `force` option is set. If
            the element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
-        1. Use `page.mouse` to double click in the center of the element, or the specified `position`.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if
+        1. Use `page.mouse` to double click in the center of the element, or the specified `position`. if
            the first click of the `dblclick()` triggers a navigation event, this method will throw.
 
         When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
@@ -4265,9 +4260,8 @@ class Frame(AsyncBase):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -4313,7 +4307,6 @@ class Frame(AsyncBase):
            the element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.touchscreen` to tap the center of the element, or the specified `position`.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
         When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
         Passing zero timeout disables this.
@@ -4338,9 +4331,8 @@ class Frame(AsyncBase):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -4396,9 +4388,8 @@ class Frame(AsyncBase):
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -5158,7 +5149,6 @@ class Frame(AsyncBase):
            the element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to hover over the center of the element, or the specified `position`.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
         When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
         Passing zero timeout disables this.
@@ -5179,9 +5169,8 @@ class Frame(AsyncBase):
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         strict : Union[bool, None]
@@ -5237,9 +5226,8 @@ class Frame(AsyncBase):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -5326,6 +5314,7 @@ class Frame(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
+            Deprecated: This option will default to `true` in the future.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -5427,9 +5416,8 @@ class Frame(AsyncBase):
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         """
 
         return mapping.from_maybe_impl(
@@ -5477,9 +5465,8 @@ class Frame(AsyncBase):
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         """
 
         return mapping.from_maybe_impl(
@@ -5544,6 +5531,7 @@ class Frame(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
+            Deprecated: This option will default to `true` in the future.
         """
 
         return mapping.from_maybe_impl(
@@ -5578,7 +5566,6 @@ class Frame(AsyncBase):
            the element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
         1. Ensure that the element is now checked. If not, this method throws.
 
         When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
@@ -5598,9 +5585,8 @@ class Frame(AsyncBase):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -5642,7 +5628,6 @@ class Frame(AsyncBase):
            the element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
         1. Ensure that the element is now unchecked. If not, this method throws.
 
         When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
@@ -5662,9 +5647,8 @@ class Frame(AsyncBase):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -5808,7 +5792,6 @@ class Frame(AsyncBase):
            the element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
         1. Ensure that the element is now checked or unchecked. If not, this method throws.
 
         When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
@@ -5830,9 +5813,8 @@ class Frame(AsyncBase):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -8508,7 +8490,7 @@ class Page(AsyncContextManager):
         content : Union[str, None]
             Raw JavaScript content to be injected into frame.
         type : Union[str, None]
-            Script type. Use 'module' in order to load a Javascript ES6 module. See
+            Script type. Use 'module' in order to load a JavaScript ES6 module. See
             [script](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/script) for more details.
 
         Returns
@@ -9008,7 +8990,7 @@ class Page(AsyncContextManager):
         """Page.go_back
 
         Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of
-        the last redirect. If can not go back, returns `null`.
+        the last redirect. If cannot go back, returns `null`.
 
         Navigate to the previous page in history.
 
@@ -9048,7 +9030,7 @@ class Page(AsyncContextManager):
         """Page.go_forward
 
         Returns the main resource response. In case of multiple redirects, the navigation will resolve with the response of
-        the last redirect. If can not go forward, returns `null`.
+        the last redirect. If cannot go forward, returns `null`.
 
         Navigate to the next page in history.
 
@@ -9619,6 +9601,7 @@ class Page(AsyncContextManager):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
+            Deprecated: This option will default to `true` in the future.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
@@ -9667,8 +9650,6 @@ class Page(AsyncContextManager):
            the element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to double click in the center of the element, or the specified `position`.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if
-           the first click of the `dblclick()` triggers a navigation event, this method will throw.
 
         When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
         Passing zero timeout disables this.
@@ -9697,9 +9678,8 @@ class Page(AsyncContextManager):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -9745,7 +9725,6 @@ class Page(AsyncContextManager):
            the element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.touchscreen` to tap the center of the element, or the specified `position`.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
         When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
         Passing zero timeout disables this.
@@ -9770,9 +9749,8 @@ class Page(AsyncContextManager):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -9828,9 +9806,8 @@ class Page(AsyncContextManager):
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -10588,7 +10565,6 @@ class Page(AsyncContextManager):
            the element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to hover over the center of the element, or the specified `position`.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
         When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
         Passing zero timeout disables this.
@@ -10609,9 +10585,8 @@ class Page(AsyncContextManager):
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         strict : Union[bool, None]
@@ -10683,9 +10658,8 @@ class Page(AsyncContextManager):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         timeout : Union[float, None]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -10773,6 +10747,7 @@ class Page(AsyncContextManager):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
+            Deprecated: This option will default to `true` in the future.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         strict : Union[bool, None]
@@ -10875,9 +10850,8 @@ class Page(AsyncContextManager):
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         """
 
         return mapping.from_maybe_impl(
@@ -10922,9 +10896,8 @@ class Page(AsyncContextManager):
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -11005,6 +10978,7 @@ class Page(AsyncContextManager):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
+            Deprecated: This option will default to `true` in the future.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -11042,7 +11016,6 @@ class Page(AsyncContextManager):
            the element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
         1. Ensure that the element is now checked. If not, this method throws.
 
         When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
@@ -11062,9 +11035,8 @@ class Page(AsyncContextManager):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -11106,7 +11078,6 @@ class Page(AsyncContextManager):
            the element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
         1. Ensure that the element is now unchecked. If not, this method throws.
 
         When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
@@ -11126,9 +11097,8 @@ class Page(AsyncContextManager):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -11836,7 +11806,6 @@ class Page(AsyncContextManager):
            the element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
         1. Ensure that the element is now checked or unchecked. If not, this method throws.
 
         When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
@@ -11858,9 +11827,8 @@ class Page(AsyncContextManager):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -12589,9 +12557,6 @@ class BrowserContext(AsyncContextManager):
         Parameters
         ----------
         cookies : Sequence[{name: str, value: str, url: Union[str, None], domain: Union[str, None], path: Union[str, None], expires: Union[float, None], httpOnly: Union[bool, None], secure: Union[bool, None], sameSite: Union["Lax", "None", "Strict", None]}]
-            Adds cookies to the browser context.
-
-            For the cookie to apply to all subdomains as well, prefix domain with a dot, like this: ".example.com".
         """
 
         return mapping.from_maybe_impl(
@@ -13469,7 +13434,8 @@ class Browser(AsyncContextManager):
             typing.Union[str, typing.Pattern[str]]
         ] = None,
         record_har_mode: typing.Optional[Literal["full", "minimal"]] = None,
-        record_har_content: typing.Optional[Literal["attach", "embed", "omit"]] = None
+        record_har_content: typing.Optional[Literal["attach", "embed", "omit"]] = None,
+        client_certificates: typing.Optional[typing.List[ClientCertificate]] = None
     ) -> "BrowserContext":
         """Browser.new_context
 
@@ -13610,6 +13576,20 @@ class Browser(AsyncContextManager):
             Optional setting to control resource content management. If `omit` is specified, content is not persisted. If
             `attach` is specified, resources are persisted as separate files and all of these files are archived along with the
             HAR file. Defaults to `embed`, which stores content inline the HAR file as per HAR specification.
+        client_certificates : Union[Sequence[{origin: str, certPath: Union[str, None], keyPath: Union[str, None], pfxPath: Union[str, None], passphrase: Union[str, None]}], None]
+            TLS Client Authentication allows the server to request a client certificate and verify it.
+
+            **Details**
+
+            An array of client certificates to be used. Each certificate object must have both `certPath` and `keyPath` or a
+            single `pfxPath` to load the client certificate. Optionally, `passphrase` property should be provided if the
+            certficiate is encrypted. The `origin` property should be provided with an exact match to the request origin that
+            the certificate is valid for.
+
+            **NOTE** Using Client Certificates in combination with Proxy Servers is not supported.
+
+            **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
+            work by replacing `localhost` with `local.playwright`.
 
         Returns
         -------
@@ -13652,6 +13632,7 @@ class Browser(AsyncContextManager):
                 recordHarUrlFilter=record_har_url_filter,
                 recordHarMode=record_har_mode,
                 recordHarContent=record_har_content,
+                clientCertificates=client_certificates,
             )
         )
 
@@ -13699,7 +13680,8 @@ class Browser(AsyncContextManager):
             typing.Union[str, typing.Pattern[str]]
         ] = None,
         record_har_mode: typing.Optional[Literal["full", "minimal"]] = None,
-        record_har_content: typing.Optional[Literal["attach", "embed", "omit"]] = None
+        record_har_content: typing.Optional[Literal["attach", "embed", "omit"]] = None,
+        client_certificates: typing.Optional[typing.List[ClientCertificate]] = None
     ) -> "Page":
         """Browser.new_page
 
@@ -13824,6 +13806,20 @@ class Browser(AsyncContextManager):
             Optional setting to control resource content management. If `omit` is specified, content is not persisted. If
             `attach` is specified, resources are persisted as separate files and all of these files are archived along with the
             HAR file. Defaults to `embed`, which stores content inline the HAR file as per HAR specification.
+        client_certificates : Union[Sequence[{origin: str, certPath: Union[str, None], keyPath: Union[str, None], pfxPath: Union[str, None], passphrase: Union[str, None]}], None]
+            TLS Client Authentication allows the server to request a client certificate and verify it.
+
+            **Details**
+
+            An array of client certificates to be used. Each certificate object must have both `certPath` and `keyPath` or a
+            single `pfxPath` to load the client certificate. Optionally, `passphrase` property should be provided if the
+            certficiate is encrypted. The `origin` property should be provided with an exact match to the request origin that
+            the certificate is valid for.
+
+            **NOTE** Using Client Certificates in combination with Proxy Servers is not supported.
+
+            **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
+            work by replacing `localhost` with `local.playwright`.
 
         Returns
         -------
@@ -13866,6 +13862,7 @@ class Browser(AsyncContextManager):
                 recordHarUrlFilter=record_har_url_filter,
                 recordHarMode=record_har_mode,
                 recordHarContent=record_har_content,
+                clientCertificates=client_certificates,
             )
         )
 
@@ -14196,7 +14193,8 @@ class BrowserType(AsyncBase):
             typing.Union[str, typing.Pattern[str]]
         ] = None,
         record_har_mode: typing.Optional[Literal["full", "minimal"]] = None,
-        record_har_content: typing.Optional[Literal["attach", "embed", "omit"]] = None
+        record_har_content: typing.Optional[Literal["attach", "embed", "omit"]] = None,
+        client_certificates: typing.Optional[typing.List[ClientCertificate]] = None
     ) -> "BrowserContext":
         """BrowserType.launch_persistent_context
 
@@ -14367,6 +14365,20 @@ class BrowserType(AsyncBase):
             Optional setting to control resource content management. If `omit` is specified, content is not persisted. If
             `attach` is specified, resources are persisted as separate files and all of these files are archived along with the
             HAR file. Defaults to `embed`, which stores content inline the HAR file as per HAR specification.
+        client_certificates : Union[Sequence[{origin: str, certPath: Union[str, None], keyPath: Union[str, None], pfxPath: Union[str, None], passphrase: Union[str, None]}], None]
+            TLS Client Authentication allows the server to request a client certificate and verify it.
+
+            **Details**
+
+            An array of client certificates to be used. Each certificate object must have both `certPath` and `keyPath` or a
+            single `pfxPath` to load the client certificate. Optionally, `passphrase` property should be provided if the
+            certficiate is encrypted. The `origin` property should be provided with an exact match to the request origin that
+            the certificate is valid for.
+
+            **NOTE** Using Client Certificates in combination with Proxy Servers is not supported.
+
+            **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
+            work by replacing `localhost` with `local.playwright`.
 
         Returns
         -------
@@ -14424,6 +14436,7 @@ class BrowserType(AsyncBase):
                 recordHarUrlFilter=record_har_url_filter,
                 recordHarMode=record_har_mode,
                 recordHarContent=record_har_content,
+                clientCertificates=client_certificates,
             )
         )
 
@@ -14922,7 +14935,6 @@ class Locator(AsyncBase):
         1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
         1. Ensure that the element is now checked. If not, this method throws.
 
         If the element is detached from the DOM at any moment during the action, this method throws.
@@ -14947,9 +14959,8 @@ class Locator(AsyncBase):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
@@ -15037,6 +15048,7 @@ class Locator(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
+            Deprecated: This option will default to `true` in the future.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
@@ -15080,8 +15092,6 @@ class Locator(AsyncBase):
         1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to double click in the center of the element, or the specified `position`.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set. Note that if
-           the first click of the `dblclick()` triggers a navigation event, this method will throw.
 
         If the element is detached from the DOM at any moment during the action, this method throws.
 
@@ -15109,9 +15119,8 @@ class Locator(AsyncBase):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
@@ -15370,9 +15379,8 @@ class Locator(AsyncBase):
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         """
@@ -15416,9 +15424,8 @@ class Locator(AsyncBase):
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         """
@@ -16262,9 +16269,8 @@ class Locator(AsyncBase):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         timeout : Union[float, None]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
@@ -16346,7 +16352,6 @@ class Locator(AsyncBase):
         1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to hover over the center of the element, or the specified `position`.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
         If the element is detached from the DOM at any moment during the action, this method throws.
 
@@ -16366,9 +16371,8 @@ class Locator(AsyncBase):
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         trial : Union[bool, None]
@@ -16681,6 +16685,7 @@ class Locator(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
+            Deprecated: This option will default to `true` in the future.
         """
 
         return mapping.from_maybe_impl(
@@ -16886,6 +16891,7 @@ class Locator(AsyncBase):
             Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
             can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
             navigating to inaccessible pages. Defaults to `false`.
+            Deprecated: This option will default to `true` in the future.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 
@@ -16992,9 +16998,8 @@ class Locator(AsyncBase):
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         """
 
         return mapping.from_maybe_impl(
@@ -17025,7 +17030,6 @@ class Locator(AsyncBase):
         1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.touchscreen` to tap the center of the element, or the specified `position`.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
 
         If the element is detached from the DOM at any moment during the action, this method throws.
 
@@ -17049,9 +17053,8 @@ class Locator(AsyncBase):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
@@ -17120,9 +17123,8 @@ class Locator(AsyncBase):
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         """
 
         return mapping.from_maybe_impl(
@@ -17174,9 +17176,8 @@ class Locator(AsyncBase):
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         """
 
         return mapping.from_maybe_impl(
@@ -17212,7 +17213,6 @@ class Locator(AsyncBase):
         1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
         1. Ensure that the element is now unchecked. If not, this method throws.
 
         If the element is detached from the DOM at any moment during the action, this method throws.
@@ -17231,9 +17231,8 @@ class Locator(AsyncBase):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
@@ -17361,7 +17360,6 @@ class Locator(AsyncBase):
            the element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
         1. Ensure that the element is now checked or unchecked. If not, this method throws.
 
         When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
@@ -17380,9 +17378,8 @@ class Locator(AsyncBase):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
+            This option has no effect.
+            Deprecated: This option has no effect.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
@@ -17568,7 +17565,8 @@ class APIRequestContext(AsyncBase):
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
         ignore_https_errors: typing.Optional[bool] = None,
-        max_redirects: typing.Optional[int] = None
+        max_redirects: typing.Optional[int] = None,
+        max_retries: typing.Optional[int] = None
     ) -> "APIResponse":
         """APIRequestContext.delete
 
@@ -17607,6 +17605,9 @@ class APIRequestContext(AsyncBase):
         max_redirects : Union[int, None]
             Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
             exceeded. Defaults to `20`. Pass `0` to not follow redirects.
+        max_retries : Union[int, None]
+            Maximum number of times network errors should be retried. Currently only `ECONNRESET` error is retried. Does not
+            retry based on HTTP response codes. An error will be thrown if the limit is exceeded. Defaults to `0` - no retries.
 
         Returns
         -------
@@ -17625,6 +17626,7 @@ class APIRequestContext(AsyncBase):
                 failOnStatusCode=fail_on_status_code,
                 ignoreHTTPSErrors=ignore_https_errors,
                 maxRedirects=max_redirects,
+                maxRetries=max_retries,
             )
         )
 
@@ -17644,7 +17646,8 @@ class APIRequestContext(AsyncBase):
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
         ignore_https_errors: typing.Optional[bool] = None,
-        max_redirects: typing.Optional[int] = None
+        max_redirects: typing.Optional[int] = None,
+        max_retries: typing.Optional[int] = None
     ) -> "APIResponse":
         """APIRequestContext.head
 
@@ -17683,6 +17686,9 @@ class APIRequestContext(AsyncBase):
         max_redirects : Union[int, None]
             Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
             exceeded. Defaults to `20`. Pass `0` to not follow redirects.
+        max_retries : Union[int, None]
+            Maximum number of times network errors should be retried. Currently only `ECONNRESET` error is retried. Does not
+            retry based on HTTP response codes. An error will be thrown if the limit is exceeded. Defaults to `0` - no retries.
 
         Returns
         -------
@@ -17701,6 +17707,7 @@ class APIRequestContext(AsyncBase):
                 failOnStatusCode=fail_on_status_code,
                 ignoreHTTPSErrors=ignore_https_errors,
                 maxRedirects=max_redirects,
+                maxRetries=max_retries,
             )
         )
 
@@ -17720,7 +17727,8 @@ class APIRequestContext(AsyncBase):
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
         ignore_https_errors: typing.Optional[bool] = None,
-        max_redirects: typing.Optional[int] = None
+        max_redirects: typing.Optional[int] = None,
+        max_retries: typing.Optional[int] = None
     ) -> "APIResponse":
         """APIRequestContext.get
 
@@ -17771,6 +17779,9 @@ class APIRequestContext(AsyncBase):
         max_redirects : Union[int, None]
             Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
             exceeded. Defaults to `20`. Pass `0` to not follow redirects.
+        max_retries : Union[int, None]
+            Maximum number of times network errors should be retried. Currently only `ECONNRESET` error is retried. Does not
+            retry based on HTTP response codes. An error will be thrown if the limit is exceeded. Defaults to `0` - no retries.
 
         Returns
         -------
@@ -17789,6 +17800,7 @@ class APIRequestContext(AsyncBase):
                 failOnStatusCode=fail_on_status_code,
                 ignoreHTTPSErrors=ignore_https_errors,
                 maxRedirects=max_redirects,
+                maxRetries=max_retries,
             )
         )
 
@@ -17808,7 +17820,8 @@ class APIRequestContext(AsyncBase):
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
         ignore_https_errors: typing.Optional[bool] = None,
-        max_redirects: typing.Optional[int] = None
+        max_redirects: typing.Optional[int] = None,
+        max_retries: typing.Optional[int] = None
     ) -> "APIResponse":
         """APIRequestContext.patch
 
@@ -17847,6 +17860,9 @@ class APIRequestContext(AsyncBase):
         max_redirects : Union[int, None]
             Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
             exceeded. Defaults to `20`. Pass `0` to not follow redirects.
+        max_retries : Union[int, None]
+            Maximum number of times network errors should be retried. Currently only `ECONNRESET` error is retried. Does not
+            retry based on HTTP response codes. An error will be thrown if the limit is exceeded. Defaults to `0` - no retries.
 
         Returns
         -------
@@ -17865,6 +17881,7 @@ class APIRequestContext(AsyncBase):
                 failOnStatusCode=fail_on_status_code,
                 ignoreHTTPSErrors=ignore_https_errors,
                 maxRedirects=max_redirects,
+                maxRetries=max_retries,
             )
         )
 
@@ -17884,7 +17901,8 @@ class APIRequestContext(AsyncBase):
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
         ignore_https_errors: typing.Optional[bool] = None,
-        max_redirects: typing.Optional[int] = None
+        max_redirects: typing.Optional[int] = None,
+        max_retries: typing.Optional[int] = None
     ) -> "APIResponse":
         """APIRequestContext.put
 
@@ -17923,6 +17941,9 @@ class APIRequestContext(AsyncBase):
         max_redirects : Union[int, None]
             Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
             exceeded. Defaults to `20`. Pass `0` to not follow redirects.
+        max_retries : Union[int, None]
+            Maximum number of times network errors should be retried. Currently only `ECONNRESET` error is retried. Does not
+            retry based on HTTP response codes. An error will be thrown if the limit is exceeded. Defaults to `0` - no retries.
 
         Returns
         -------
@@ -17941,6 +17962,7 @@ class APIRequestContext(AsyncBase):
                 failOnStatusCode=fail_on_status_code,
                 ignoreHTTPSErrors=ignore_https_errors,
                 maxRedirects=max_redirects,
+                maxRetries=max_retries,
             )
         )
 
@@ -17960,7 +17982,8 @@ class APIRequestContext(AsyncBase):
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
         ignore_https_errors: typing.Optional[bool] = None,
-        max_redirects: typing.Optional[int] = None
+        max_redirects: typing.Optional[int] = None,
+        max_retries: typing.Optional[int] = None
     ) -> "APIResponse":
         """APIRequestContext.post
 
@@ -18030,6 +18053,9 @@ class APIRequestContext(AsyncBase):
         max_redirects : Union[int, None]
             Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
             exceeded. Defaults to `20`. Pass `0` to not follow redirects.
+        max_retries : Union[int, None]
+            Maximum number of times network errors should be retried. Currently only `ECONNRESET` error is retried. Does not
+            retry based on HTTP response codes. An error will be thrown if the limit is exceeded. Defaults to `0` - no retries.
 
         Returns
         -------
@@ -18048,6 +18074,7 @@ class APIRequestContext(AsyncBase):
                 failOnStatusCode=fail_on_status_code,
                 ignoreHTTPSErrors=ignore_https_errors,
                 maxRedirects=max_redirects,
+                maxRetries=max_retries,
             )
         )
 
@@ -18068,7 +18095,8 @@ class APIRequestContext(AsyncBase):
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
         ignore_https_errors: typing.Optional[bool] = None,
-        max_redirects: typing.Optional[int] = None
+        max_redirects: typing.Optional[int] = None,
+        max_retries: typing.Optional[int] = None
     ) -> "APIResponse":
         """APIRequestContext.fetch
 
@@ -18124,6 +18152,9 @@ class APIRequestContext(AsyncBase):
         max_redirects : Union[int, None]
             Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
             exceeded. Defaults to `20`. Pass `0` to not follow redirects.
+        max_retries : Union[int, None]
+            Maximum number of times network errors should be retried. Currently only `ECONNRESET` error is retried. Does not
+            retry based on HTTP response codes. An error will be thrown if the limit is exceeded. Defaults to `0` - no retries.
 
         Returns
         -------
@@ -18143,6 +18174,7 @@ class APIRequestContext(AsyncBase):
                 failOnStatusCode=fail_on_status_code,
                 ignoreHTTPSErrors=ignore_https_errors,
                 maxRedirects=max_redirects,
+                maxRetries=max_retries,
             )
         )
 
@@ -18184,7 +18216,8 @@ class APIRequest(AsyncBase):
         timeout: typing.Optional[float] = None,
         storage_state: typing.Optional[
             typing.Union[StorageState, str, pathlib.Path]
-        ] = None
+        ] = None,
+        client_certificates: typing.Optional[typing.List[ClientCertificate]] = None
     ) -> "APIRequestContext":
         """APIRequest.new_context
 
@@ -18220,6 +18253,20 @@ class APIRequest(AsyncBase):
             information obtained via `browser_context.storage_state()` or `a_pi_request_context.storage_state()`.
             Either a path to the file with saved storage, or the value returned by one of
             `browser_context.storage_state()` or `a_pi_request_context.storage_state()` methods.
+        client_certificates : Union[Sequence[{origin: str, certPath: Union[str, None], keyPath: Union[str, None], pfxPath: Union[str, None], passphrase: Union[str, None]}], None]
+            TLS Client Authentication allows the server to request a client certificate and verify it.
+
+            **Details**
+
+            An array of client certificates to be used. Each certificate object must have both `certPath` and `keyPath` or a
+            single `pfxPath` to load the client certificate. Optionally, `passphrase` property should be provided if the
+            certficiate is encrypted. The `origin` property should be provided with an exact match to the request origin that
+            the certificate is valid for.
+
+            **NOTE** Using Client Certificates in combination with Proxy Servers is not supported.
+
+            **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
+            work by replacing `localhost` with `local.playwright`.
 
         Returns
         -------
@@ -18236,6 +18283,7 @@ class APIRequest(AsyncBase):
                 userAgent=user_agent,
                 timeout=timeout,
                 storageState=storage_state,
+                clientCertificates=client_certificates,
             )
         )
 

@@ -21,6 +21,7 @@ from typing import Any, Dict, List, Optional, Union, cast
 
 import playwright._impl._network as network
 from playwright._impl._api_structures import (
+    ClientCertificate,
     FilePayload,
     FormField,
     Headers,
@@ -42,7 +43,7 @@ from playwright._impl._helper import (
     object_to_array,
     to_impl,
 )
-from playwright._impl._network import serialize_headers
+from playwright._impl._network import serialize_headers, to_client_certificates_protocol
 from playwright._impl._tracing import Tracing
 
 if typing.TYPE_CHECKING:
@@ -71,6 +72,7 @@ class APIRequest:
         userAgent: str = None,
         timeout: float = None,
         storageState: Union[StorageState, str, Path] = None,
+        clientCertificates: List[ClientCertificate] = None,
     ) -> "APIRequestContext":
         params = locals_to_params(locals())
         if "storageState" in params:
@@ -81,6 +83,9 @@ class APIRequest:
                 )
         if "extraHTTPHeaders" in params:
             params["extraHTTPHeaders"] = serialize_headers(params["extraHTTPHeaders"])
+        params["clientCertificates"] = await to_client_certificates_protocol(
+            params.get("clientCertificates")
+        )
         context = cast(
             APIRequestContext,
             from_channel(await self.playwright._channel.send("newRequest", params)),
@@ -118,6 +123,7 @@ class APIRequestContext(ChannelOwner):
         failOnStatusCode: bool = None,
         ignoreHTTPSErrors: bool = None,
         maxRedirects: int = None,
+        maxRetries: int = None,
     ) -> "APIResponse":
         return await self.fetch(
             url,
@@ -131,6 +137,7 @@ class APIRequestContext(ChannelOwner):
             failOnStatusCode=failOnStatusCode,
             ignoreHTTPSErrors=ignoreHTTPSErrors,
             maxRedirects=maxRedirects,
+            maxRetries=maxRetries,
         )
 
     async def head(
@@ -145,6 +152,7 @@ class APIRequestContext(ChannelOwner):
         failOnStatusCode: bool = None,
         ignoreHTTPSErrors: bool = None,
         maxRedirects: int = None,
+        maxRetries: int = None,
     ) -> "APIResponse":
         return await self.fetch(
             url,
@@ -158,6 +166,7 @@ class APIRequestContext(ChannelOwner):
             failOnStatusCode=failOnStatusCode,
             ignoreHTTPSErrors=ignoreHTTPSErrors,
             maxRedirects=maxRedirects,
+            maxRetries=maxRetries,
         )
 
     async def get(
@@ -172,6 +181,7 @@ class APIRequestContext(ChannelOwner):
         failOnStatusCode: bool = None,
         ignoreHTTPSErrors: bool = None,
         maxRedirects: int = None,
+        maxRetries: int = None,
     ) -> "APIResponse":
         return await self.fetch(
             url,
@@ -185,6 +195,7 @@ class APIRequestContext(ChannelOwner):
             failOnStatusCode=failOnStatusCode,
             ignoreHTTPSErrors=ignoreHTTPSErrors,
             maxRedirects=maxRedirects,
+            maxRetries=maxRetries,
         )
 
     async def patch(
@@ -199,6 +210,7 @@ class APIRequestContext(ChannelOwner):
         failOnStatusCode: bool = None,
         ignoreHTTPSErrors: bool = None,
         maxRedirects: int = None,
+        maxRetries: int = None,
     ) -> "APIResponse":
         return await self.fetch(
             url,
@@ -212,6 +224,7 @@ class APIRequestContext(ChannelOwner):
             failOnStatusCode=failOnStatusCode,
             ignoreHTTPSErrors=ignoreHTTPSErrors,
             maxRedirects=maxRedirects,
+            maxRetries=maxRetries,
         )
 
     async def put(
@@ -226,6 +239,7 @@ class APIRequestContext(ChannelOwner):
         failOnStatusCode: bool = None,
         ignoreHTTPSErrors: bool = None,
         maxRedirects: int = None,
+        maxRetries: int = None,
     ) -> "APIResponse":
         return await self.fetch(
             url,
@@ -239,6 +253,7 @@ class APIRequestContext(ChannelOwner):
             failOnStatusCode=failOnStatusCode,
             ignoreHTTPSErrors=ignoreHTTPSErrors,
             maxRedirects=maxRedirects,
+            maxRetries=maxRetries,
         )
 
     async def post(
@@ -253,6 +268,7 @@ class APIRequestContext(ChannelOwner):
         failOnStatusCode: bool = None,
         ignoreHTTPSErrors: bool = None,
         maxRedirects: int = None,
+        maxRetries: int = None,
     ) -> "APIResponse":
         return await self.fetch(
             url,
@@ -266,6 +282,7 @@ class APIRequestContext(ChannelOwner):
             failOnStatusCode=failOnStatusCode,
             ignoreHTTPSErrors=ignoreHTTPSErrors,
             maxRedirects=maxRedirects,
+            maxRetries=maxRetries,
         )
 
     async def fetch(
@@ -281,6 +298,7 @@ class APIRequestContext(ChannelOwner):
         failOnStatusCode: bool = None,
         ignoreHTTPSErrors: bool = None,
         maxRedirects: int = None,
+        maxRetries: int = None,
     ) -> "APIResponse":
         url = urlOrRequest if isinstance(urlOrRequest, str) else None
         request = (
@@ -304,6 +322,7 @@ class APIRequestContext(ChannelOwner):
             failOnStatusCode,
             ignoreHTTPSErrors,
             maxRedirects,
+            maxRetries,
         )
 
     async def _inner_fetch(
@@ -320,6 +339,7 @@ class APIRequestContext(ChannelOwner):
         failOnStatusCode: bool = None,
         ignoreHTTPSErrors: bool = None,
         maxRedirects: int = None,
+        maxRetries: int = None,
     ) -> "APIResponse":
         if self._close_reason:
             raise TargetClosedError(self._close_reason)
@@ -329,6 +349,9 @@ class APIRequestContext(ChannelOwner):
         assert (
             maxRedirects is None or maxRedirects >= 0
         ), "'max_redirects' must be greater than or equal to '0'"
+        assert (
+            maxRetries is None or maxRetries >= 0
+        ), "'max_retries' must be greater than or equal to '0'"
         url = url or (request.url if request else url)
         method = method or (request.method if request else "GET")
         # Cannot call allHeaders() here as the request may be paused inside route handler.
@@ -392,6 +415,7 @@ class APIRequestContext(ChannelOwner):
                 "failOnStatusCode": failOnStatusCode,
                 "ignoreHTTPSErrors": ignoreHTTPSErrors,
                 "maxRedirects": maxRedirects,
+                "maxRetries": maxRetries,
             },
         )
         return APIResponse(self, response)
