@@ -14,7 +14,7 @@
 
 import threading
 from pathlib import Path
-from typing import Generator, cast
+from typing import Dict, Generator, cast
 
 import pytest
 from twisted.internet import reactor as _twisted_reactor
@@ -84,10 +84,11 @@ def test_should_work_with_new_context(browser: Browser, assetdir: Path) -> None:
 
 
 def test_should_work_with_new_persistent_context(
-    browser_type: BrowserType, assetdir: Path
+    browser_type: BrowserType, assetdir: Path, launch_arguments: Dict
 ) -> None:
     context = browser_type.launch_persistent_context(
         "",
+        **launch_arguments,
         # TODO: Remove this once we can pass a custom CA.
         ignore_https_errors=True,
         client_certificates=[
