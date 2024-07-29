@@ -145,7 +145,9 @@ def serialize_value(
         return {
             "e": {
                 "m": str(value),
-                "n": (value.name or "") if isinstance(value, Error) else "",
+                "n": (value.name or "")
+                if isinstance(value, Error)
+                else value.__class__.__name__,
                 "s": (value.stack or "")
                 if isinstance(value, Error)
                 else "".join(

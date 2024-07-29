@@ -252,7 +252,7 @@ async def test_should_pass_exception_argument(page: Page) -> None:
         _raise_and_get_exception(Exception("error message")),
     )
     assert error["message"] == "error message"
-    assert error["name"] == ""
+    assert error["name"] == "Exception"
     assert "error message" in error["stack"]
 
 

@@ -13608,7 +13608,7 @@ class Browser(SyncContextManager):
             Optional setting to control resource content management. If `omit` is specified, content is not persisted. If
             `attach` is specified, resources are persisted as separate files and all of these files are archived along with the
             HAR file. Defaults to `embed`, which stores content inline the HAR file as per HAR specification.
-        client_certificates : Union[Sequence[{origin: str, certPath: Union[str, None], keyPath: Union[str, None], pfxPath: Union[str, None], passphrase: Union[str, None]}], None]
+        client_certificates : Union[Sequence[{origin: str, certPath: Union[pathlib.Path, str, None], keyPath: Union[pathlib.Path, str, None], pfxPath: Union[pathlib.Path, str, None], passphrase: Union[str, None]}], None]
             TLS Client Authentication allows the server to request a client certificate and verify it.
 
             **Details**
@@ -13840,7 +13840,7 @@ class Browser(SyncContextManager):
             Optional setting to control resource content management. If `omit` is specified, content is not persisted. If
             `attach` is specified, resources are persisted as separate files and all of these files are archived along with the
             HAR file. Defaults to `embed`, which stores content inline the HAR file as per HAR specification.
-        client_certificates : Union[Sequence[{origin: str, certPath: Union[str, None], keyPath: Union[str, None], pfxPath: Union[str, None], passphrase: Union[str, None]}], None]
+        client_certificates : Union[Sequence[{origin: str, certPath: Union[pathlib.Path, str, None], keyPath: Union[pathlib.Path, str, None], pfxPath: Union[pathlib.Path, str, None], passphrase: Union[str, None]}], None]
             TLS Client Authentication allows the server to request a client certificate and verify it.
 
             **Details**
@@ -14405,7 +14405,7 @@ class BrowserType(SyncBase):
             Optional setting to control resource content management. If `omit` is specified, content is not persisted. If
             `attach` is specified, resources are persisted as separate files and all of these files are archived along with the
             HAR file. Defaults to `embed`, which stores content inline the HAR file as per HAR specification.
-        client_certificates : Union[Sequence[{origin: str, certPath: Union[str, None], keyPath: Union[str, None], pfxPath: Union[str, None], passphrase: Union[str, None]}], None]
+        client_certificates : Union[Sequence[{origin: str, certPath: Union[pathlib.Path, str, None], keyPath: Union[pathlib.Path, str, None], pfxPath: Union[pathlib.Path, str, None], passphrase: Union[str, None]}], None]
             TLS Client Authentication allows the server to request a client certificate and verify it.
 
             **Details**
@@ -18375,7 +18375,7 @@ class APIRequest(SyncBase):
             information obtained via `browser_context.storage_state()` or `a_pi_request_context.storage_state()`.
             Either a path to the file with saved storage, or the value returned by one of
             `browser_context.storage_state()` or `a_pi_request_context.storage_state()` methods.
-        client_certificates : Union[Sequence[{origin: str, certPath: Union[str, None], keyPath: Union[str, None], pfxPath: Union[str, None], passphrase: Union[str, None]}], None]
+        client_certificates : Union[Sequence[{origin: str, certPath: Union[pathlib.Path, str, None], keyPath: Union[pathlib.Path, str, None], pfxPath: Union[pathlib.Path, str, None], passphrase: Union[str, None]}], None]
             TLS Client Authentication allows the server to request a client certificate and verify it.
 
             **Details**
