@@ -734,6 +734,7 @@ class Route(AsyncBase):
         headers: typing.Optional[typing.Dict[str, str]] = None,
         post_data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None,
         max_redirects: typing.Optional[int] = None,
+        max_retries: typing.Optional[int] = None,
         timeout: typing.Optional[float] = None
     ) -> "APIResponse":
         """Route.fetch
@@ -774,6 +775,9 @@ class Route(AsyncBase):
         max_redirects : Union[int, None]
             Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
             exceeded. Defaults to `20`. Pass `0` to not follow redirects.
+        max_retries : Union[int, None]
+            Maximum number of times network errors should be retried. Currently only `ECONNRESET` error is retried. Does not
+            retry based on HTTP response codes. An error will be thrown if the limit is exceeded. Defaults to `0` - no retries.
         timeout : Union[float, None]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
 
@@ -789,6 +793,7 @@ class Route(AsyncBase):
                 headers=mapping.to_impl(headers),
                 postData=mapping.to_impl(post_data),
                 maxRedirects=max_redirects,
+                maxRetries=max_retries,
                 timeout=timeout,
             )
         )
