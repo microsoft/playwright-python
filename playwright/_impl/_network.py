@@ -439,6 +439,7 @@ class Route(ChannelOwner):
         headers: Dict[str, str] = None,
         postData: Union[Any, str, bytes] = None,
         maxRedirects: int = None,
+        maxRetries: int = None,
         timeout: float = None,
     ) -> "APIResponse":
         return await self._connection.wrap_api_call(
@@ -449,6 +450,7 @@ class Route(ChannelOwner):
                 headers,
                 postData,
                 maxRedirects=maxRedirects,
+                maxRetries=maxRetries,
                 timeout=timeout,
             )
         )
