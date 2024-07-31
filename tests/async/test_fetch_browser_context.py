@@ -21,7 +21,7 @@ from urllib.parse import parse_qs
 import pytest
 
 from playwright.async_api import Browser, BrowserContext, Error, FilePayload, Page
-from tests.server import Server
+from tests.server import Server, TestServerRequest
 from tests.utils import must
 
 
@@ -312,3 +312,24 @@ async def test_should_work_after_context_dispose(
     await context.close(reason="Test ended.")
     with pytest.raises(Error, match="Test ended."):
         await context.request.get(server.EMPTY_PAGE)
+
+
+async def test_should_retry_ECONNRESET(context: BrowserContext, server: Server) -> None:
+    request_count = 0
+
+    def _handle_request(req: TestServerRequest) -> None:
+        nonlocal request_count
+        request_count += 1
+        if request_count <= 3:
+            assert req.transport
+            req.transport.abortConnection()
+            return
+        req.setHeader("content-type", "text/plain")
+        req.write(b"Hello!")
+        req.finish()
+
+    server.set_route("/test", _handle_request)
+    response = await context.request.fetch(server.PREFIX + "/test", max_retries=3)
+    assert response.status == 200
+    assert await response.text() == "Hello!"
+    assert request_count == 4

@@ -18,6 +18,7 @@ from types import SimpleNamespace
 from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Sequence, Union, cast
 
 from playwright._impl._api_structures import (
+    ClientCertificate,
     Geolocation,
     HttpCredentials,
     ProxySettings,
@@ -41,7 +42,7 @@ from playwright._impl._helper import (
     make_dirs_for_file,
     prepare_record_har_options,
 )
-from playwright._impl._network import serialize_headers
+from playwright._impl._network import serialize_headers, to_client_certificates_protocol
 from playwright._impl._page import Page
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -120,6 +121,7 @@ class Browser(ChannelOwner):
         recordHarUrlFilter: Union[Pattern[str], str] = None,
         recordHarMode: HarMode = None,
         recordHarContent: HarContentPolicy = None,
+        clientCertificates: List[ClientCertificate] = None,
     ) -> BrowserContext:
         params = locals_to_params(locals())
         await prepare_browser_context_params(params)
@@ -165,6 +167,7 @@ class Browser(ChannelOwner):
         recordHarUrlFilter: Union[Pattern[str], str] = None,
         recordHarMode: HarMode = None,
         recordHarContent: HarContentPolicy = None,
+        clientCertificates: List[ClientCertificate] = None,
     ) -> Page:
         params = locals_to_params(locals())
 
@@ -253,3 +256,8 @@ async def prepare_browser_context_params(params: Dict) -> None:
         params["forcedColors"] = "no-override"
     if "acceptDownloads" in params:
         params["acceptDownloads"] = "accept" if params["acceptDownloads"] else "deny"
+
+    if "clientCertificates" in params:
+        params["clientCertificates"] = await to_client_certificates_protocol(
+            params["clientCertificates"]
+        )

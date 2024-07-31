@@ -208,8 +208,52 @@ async def test_evaluate_throw_if_underlying_element_was_disposed(page: Page) -> 
 
 
 async def test_evaluate_evaluate_exception(page: Page) -> None:
-    error = await page.evaluate('new Error("error message")')
-    assert "Error: error message" in error
+    error = await page.evaluate(
+        """() => {
+        function innerFunction() {
+        const e = new Error('error message');
+        e.name = 'foobar';
+        return e;
+        }
+        return innerFunction();
+    }"""
+    )
+    assert isinstance(error, Error)
+    assert error.message == "error message"
+    assert error.name == "foobar"
+    assert error.stack
+    assert "innerFunction" in error.stack
+
+
+async def test_should_pass_exception_argument(page: Page) -> None:
+    def _raise_and_get_exception(exception: Exception) -> Exception:
+        try:
+            raise exception
+        except Exception as e:
+            return e
+
+    error_for_roundtrip = Error("error message")
+    error_for_roundtrip._name = "foobar"
+    error_for_roundtrip._stack = "test stack"
+    error = await page.evaluate(
+        """e => {
+            return { message: e.message, name: e.name, stack: e.stack };
+        }""",
+        error_for_roundtrip,
+    )
+    assert error["message"] == "error message"
+    assert error["name"] == "foobar"
+    assert "test stack" in error["stack"]
+
+    error = await page.evaluate(
+        """e => {
+            return { message: e.message, name: e.name, stack: e.stack };
+        }""",
+        _raise_and_get_exception(Exception("error message")),
+    )
+    assert error["message"] == "error message"
+    assert error["name"] == "Exception"
+    assert "error message" in error["stack"]
 
 
 async def test_evaluate_evaluate_date(page: Page) -> None:
