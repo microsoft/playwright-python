@@ -213,7 +213,7 @@ class Locator:
         noWaitAfter: bool = None,
         force: bool = None,
     ) -> None:
-        await self.fill("", timeout=timeout, noWaitAfter=noWaitAfter, force=force)
+        await self.fill("", timeout=timeout, force=force)
 
     def locator(
         self,
@@ -631,7 +631,7 @@ class Locator:
         timeout: float = None,
         noWaitAfter: bool = None,
     ) -> None:
-        await self.type(text, delay=delay, timeout=timeout, noWaitAfter=noWaitAfter)
+        await self.type(text, delay=delay, timeout=timeout)
 
     async def uncheck(
         self,
@@ -685,7 +685,6 @@ class Locator:
                 position=position,
                 timeout=timeout,
                 force=force,
-                noWaitAfter=noWaitAfter,
                 trial=trial,
             )
         else:
@@ -693,7 +692,6 @@ class Locator:
                 position=position,
                 timeout=timeout,
                 force=force,
-                noWaitAfter=noWaitAfter,
                 trial=trial,
             )
 
