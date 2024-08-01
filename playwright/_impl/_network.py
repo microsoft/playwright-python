@@ -233,6 +233,10 @@ class Request(ChannelOwner):
 
     def is_navigation_request(self) -> bool:
         return self._initializer["isNavigationRequest"]
+    
+    @property
+    def service_worker(self) -> bool:
+        return "serviceWorker" in self._initializer
 
     @property
     def redirected_from(self) -> Optional["Request"]:
