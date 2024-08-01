@@ -1279,7 +1279,6 @@ class Page(ChannelOwner):
                 position=position,
                 timeout=timeout,
                 force=force,
-                noWaitAfter=noWaitAfter,
                 strict=strict,
                 trial=trial,
             )
@@ -1289,7 +1288,6 @@ class Page(ChannelOwner):
                 position=position,
                 timeout=timeout,
                 force=force,
-                noWaitAfter=noWaitAfter,
                 strict=strict,
                 trial=trial,
             )

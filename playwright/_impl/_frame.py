@@ -703,7 +703,6 @@ class Frame(ChannelOwner):
                 "selector": selector,
                 "strict": strict,
                 "timeout": timeout,
-                "noWaitAfter": noWaitAfter,
                 **converted,
             },
         )
@@ -792,7 +791,6 @@ class Frame(ChannelOwner):
                 position=position,
                 timeout=timeout,
                 force=force,
-                noWaitAfter=noWaitAfter,
                 strict=strict,
                 trial=trial,
             )
@@ -802,7 +800,6 @@ class Frame(ChannelOwner):
                 position=position,
                 timeout=timeout,
                 force=force,
-                noWaitAfter=noWaitAfter,
                 strict=strict,
                 trial=trial,
             )
