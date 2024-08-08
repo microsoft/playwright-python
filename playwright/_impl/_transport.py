@@ -107,7 +107,7 @@ class PipeTransport(Transport):
         try:
             # For pyinstaller and Nuitka
             env = get_driver_env()
-            if getattr(sys, "frozen", False) or globals().get("_compiled__"):
+            if getattr(sys, "frozen", False) or globals().get("__compiled__"):
                 env.setdefault("PLAYWRIGHT_BROWSERS_PATH", "0")
 
             startupinfo = None
