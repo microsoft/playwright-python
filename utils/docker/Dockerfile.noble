@@ -8,8 +8,14 @@ ARG DOCKER_IMAGE_NAME_TEMPLATE="mcr.microsoft.com/playwright/python:v%version%-n
 
 RUN apt-get update && \
     # Install Python
-    apt-get install -y python3 python3-pip python3-virtualenv curl && \
+    apt-get install -y python3 curl && \
+    # Align with upstream Python image and don't be externally managed:
+    # https://github.com/docker-library/python/issues/948
+    rm /usr/lib/python3.12/EXTERNALLY-MANAGED && \
     update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
+    curl -sSL https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
+    python get-pip.py && \
+    rm get-pip.py && \
     # Feature-parity with node.js base images.
     apt-get install -y --no-install-recommends git openssh-client gpg && \
     # clean apt cache
@@ -32,7 +38,8 @@ COPY ./dist/*-manylinux*.whl /tmp/
 RUN mkdir /ms-playwright && \
     mkdir /ms-playwright-agent && \
     cd /ms-playwright-agent && \
-    python -m virtualenv venv && \
+    pip install virtualenv && \
+    virtualenv venv && \
     . venv/bin/activate && \
     # if its amd64 then install the manylinux1_x86_64 pip package
     if [ "$(uname -m)" = "x86_64" ]; then pip install /tmp/*manylinux1_x86_64*.whl; fi && \
