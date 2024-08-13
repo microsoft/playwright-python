@@ -1,4 +1,4 @@
-auditwheel==6.0.0
+auditwheel==6.1.0
 autobahn==23.1.2
 black==24.8.0
 flake8==7.1.0
