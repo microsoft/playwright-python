@@ -43,11 +43,11 @@ class Error(Exception):
         return self._stack
 
 
-class TimeoutError(Error):
+class TimeoutError(Error, builtins.TimeoutError):
     pass
 
 
-class TargetClosedError(Error):
+class TargetClosedError(Error, builtins.RuntimeError):
     def __init__(self, message: str = None) -> None:
         super().__init__(message or "Target page, context or browser has been closed")
 
