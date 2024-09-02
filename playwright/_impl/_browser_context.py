@@ -39,6 +39,7 @@ from playwright._impl._api_structures import (
 )
 from playwright._impl._artifact import Artifact
 from playwright._impl._cdp_session import CDPSession
+from playwright._impl._clock import Clock
 from playwright._impl._connection import (
     ChannelOwner,
     from_channel,
@@ -70,6 +71,7 @@ from playwright._impl._helper import (
 )
 from playwright._impl._network import Request, Response, Route, serialize_headers
 from playwright._impl._page import BindingCall, Page, Worker
+from playwright._impl._str_utils import escape_regex_flags
 from playwright._impl._tracing import Tracing
 from playwright._impl._waiter import Waiter
 from playwright._impl._web_error import WebError
@@ -113,6 +115,7 @@ class BrowserContext(ChannelOwner):
         self._tracing = cast(Tracing, from_channel(initializer["tracing"]))
         self._har_recorders: Dict[str, HarRecordingMetadata] = {}
         self._request: APIRequestContext = from_channel(initializer["requestContext"])
+        self._clock = Clock(self)
         self._channel.on(
             "bindingCall",
             lambda params: self._on_binding(from_channel(params["binding"])),
@@ -302,8 +305,34 @@ class BrowserContext(ChannelOwner):
     async def add_cookies(self, cookies: Sequence[SetCookieParam]) -> None:
         await self._channel.send("addCookies", dict(cookies=cookies))
 
-    async def clear_cookies(self) -> None:
-        await self._channel.send("clearCookies")
+    async def clear_cookies(
+        self,
+        name: Union[str, Pattern[str]] = None,
+        domain: Union[str, Pattern[str]] = None,
+        path: Union[str, Pattern[str]] = None,
+    ) -> None:
+        await self._channel.send(
+            "clearCookies",
+            {
+                "name": name if isinstance(name, str) else None,
+                "nameRegexSource": name.pattern if isinstance(name, Pattern) else None,
+                "nameRegexFlags": escape_regex_flags(name)
+                if isinstance(name, Pattern)
+                else None,
+                "domain": domain if isinstance(domain, str) else None,
+                "domainRegexSource": domain.pattern
+                if isinstance(domain, Pattern)
+                else None,
+                "domainRegexFlags": escape_regex_flags(domain)
+                if isinstance(domain, Pattern)
+                else None,
+                "path": path if isinstance(path, str) else None,
+                "pathRegexSource": path.pattern if isinstance(path, Pattern) else None,
+                "pathRegexFlags": escape_regex_flags(path)
+                if isinstance(path, Pattern)
+                else None,
+            },
+        )
 
     async def grant_permissions(
         self, permissions: Sequence[str], origin: str = None
@@ -483,6 +512,7 @@ class BrowserContext(ChannelOwner):
             self._browser._contexts.remove(self)
 
         self._dispose_har_routers()
+        self._tracing._reset_stack_counter()
         self.emit(BrowserContext.Events.Close, self)
 
     async def close(self, reason: str = None) -> None:
@@ -490,6 +520,10 @@ class BrowserContext(ChannelOwner):
             return
         self._close_reason = reason
         self._close_was_called = True
+
+        await self._channel._connection.wrap_api_call(
+            lambda: self.request.dispose(reason=reason), True
+        )
 
         async def _inner_close() -> None:
             for har_id, params in self._har_recorders.items():
@@ -651,3 +685,7 @@ class BrowserContext(ChannelOwner):
     @property
     def request(self) -> "APIRequestContext":
         return self._request
+
+    @property
+    def clock(self) -> Clock:
+        return self._clock

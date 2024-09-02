@@ -12,3 +12,6 @@ Parameter type mismatch in BrowserContext.route(handler=): documented as Callabl
 Parameter type mismatch in BrowserContext.unroute(handler=): documented as Union[Callable[[Route, Request], Union[Any, Any]], None], code has Union[Callable[[Route, Request], Any], Callable[[Route], Any], None]
 Parameter type mismatch in Page.route(handler=): documented as Callable[[Route, Request], Union[Any, Any]], code has Union[Callable[[Route, Request], Any], Callable[[Route], Any]]
 Parameter type mismatch in Page.unroute(handler=): documented as Union[Callable[[Route, Request], Union[Any, Any]], None], code has Union[Callable[[Route, Request], Any], Callable[[Route], Any], None]
+
+# One vs two arguments in the callback, Python explicitly unions.
+Parameter type mismatch in Page.add_locator_handler(handler=): documented as Callable[[Locator], Any], code has Union[Callable[[Locator], Any], Callable[[], Any]]

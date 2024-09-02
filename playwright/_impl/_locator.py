@@ -116,6 +116,9 @@ class Locator:
         finally:
             await handle.dispose()
 
+    def _equals(self, locator: "Locator") -> bool:
+        return self._frame == locator._frame and self._selector == locator._selector
+
     @property
     def page(self) -> "Page":
         return self._frame.page
@@ -210,7 +213,7 @@ class Locator:
         noWaitAfter: bool = None,
         force: bool = None,
     ) -> None:
-        await self.fill("", timeout=timeout, noWaitAfter=noWaitAfter, force=force)
+        await self.fill("", timeout=timeout, force=force)
 
     def locator(
         self,
@@ -324,6 +327,10 @@ class Locator:
 
     def nth(self, index: int) -> "Locator":
         return Locator(self._frame, f"{self._selector} >> nth={index}")
+
+    @property
+    def content_frame(self) -> "FrameLocator":
+        return FrameLocator(self._frame, self._selector)
 
     def filter(
         self,
@@ -624,7 +631,7 @@ class Locator:
         timeout: float = None,
         noWaitAfter: bool = None,
     ) -> None:
-        await self.type(text, delay=delay, timeout=timeout, noWaitAfter=noWaitAfter)
+        await self.type(text, delay=delay, timeout=timeout)
 
     async def uncheck(
         self,
@@ -678,7 +685,6 @@ class Locator:
                 position=position,
                 timeout=timeout,
                 force=force,
-                noWaitAfter=noWaitAfter,
                 trial=trial,
             )
         else:
@@ -686,7 +692,6 @@ class Locator:
                 position=position,
                 timeout=timeout,
                 force=force,
-                noWaitAfter=noWaitAfter,
                 trial=trial,
             )
 
@@ -816,6 +821,10 @@ class FrameLocator:
     @property
     def last(self) -> "FrameLocator":
         return FrameLocator(self._frame, f"{self._frame_selector} >> nth=-1")
+
+    @property
+    def owner(self) -> "Locator":
+        return Locator(self._frame, self._frame_selector)
 
     def nth(self, index: int) -> "FrameLocator":
         return FrameLocator(self._frame, f"{self._frame_selector} >> nth={index}")

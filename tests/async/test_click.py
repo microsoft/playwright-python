@@ -547,6 +547,10 @@ async def test_wait_for_stable_position(page: Page, server: Server) -> None:
             document.body.style.margin = '0';
         }""",
     )
+    # rafraf for Firefox to kick in the animation.
+    await page.evaluate(
+        "() => new Promise(f => requestAnimationFrame(() => requestAnimationFrame(f)))"
+    )
 
     await page.click("button")
     assert await page.evaluate("window.result") == "Clicked"
@@ -563,6 +567,10 @@ async def test_timeout_waiting_for_stable_position(page: Page, server: Server) -
             button.style.transition = 'margin 5s linear 0s'
             button.style.marginLeft = '200px'
         }"""
+    )
+    # rafraf for Firefox to kick in the animation.
+    await page.evaluate(
+        "() => new Promise(f => requestAnimationFrame(() => requestAnimationFrame(f)))"
     )
 
     with pytest.raises(Error) as exc_info:

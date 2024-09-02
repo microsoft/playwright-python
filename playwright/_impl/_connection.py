@@ -37,7 +37,7 @@ from pyee import EventEmitter
 from pyee.asyncio import AsyncIOEventEmitter
 
 import playwright
-from playwright._impl._errors import TargetClosedError
+from playwright._impl._errors import TargetClosedError, rewrite_error
 from playwright._impl._greenlets import EventGreenlet
 from playwright._impl._helper import Error, ParsedMessagePayload, parse_error
 from playwright._impl._transport import Transport
@@ -284,15 +284,16 @@ class Connection(EventEmitter):
         await self._transport.wait_until_stopped()
         self.cleanup()
 
-    def cleanup(self, cause: Exception = None) -> None:
-        self._closed_error = (
-            TargetClosedError(str(cause)) if cause else TargetClosedError()
-        )
+    def cleanup(self, cause: str = None) -> None:
+        self._closed_error = TargetClosedError(cause) if cause else TargetClosedError()
         if self._init_task and not self._init_task.done():
             self._init_task.cancel()
         for ws_connection in self._child_ws_connections:
             ws_connection._transport.dispose()
         for callback in self._callbacks.values():
+            # To prevent 'Future exception was never retrieved' we ignore all callbacks that are no_reply.
+            if callback.no_reply:
+                continue
             callback.future.set_exception(self._closed_error)
         self._callbacks.clear()
         self.emit("close")
@@ -302,7 +303,7 @@ class Connection(EventEmitter):
     ) -> None:
         self._waiting_for_object[guid] = callback
 
-    def set_in_tracing(self, is_tracing: bool) -> None:
+    def set_is_tracing(self, is_tracing: bool) -> None:
         if is_tracing:
             self._tracing_count += 1
         else:
@@ -374,11 +375,12 @@ class Connection(EventEmitter):
                 return
             error = msg.get("error")
             if error and not msg.get("result"):
-                parsed_error = parse_error(error["error"])  # type: ignore
+                parsed_error = parse_error(
+                    error["error"], format_call_log(msg.get("log"))  # type: ignore
+                )
                 parsed_error._stack = "".join(
                     traceback.format_list(callback.stack_trace)[-10:]
                 )
-                parsed_error._message += format_call_log(msg.get("log"))  # type: ignore
                 callback.future.set_exception(parsed_error)
             else:
                 result = self._replace_guids_with_channels(msg.get("result"))
@@ -504,9 +506,12 @@ class Connection(EventEmitter):
             return await cb()
         task = asyncio.current_task(self._loop)
         st: List[inspect.FrameInfo] = getattr(task, "__pw_stack__", inspect.stack())
-        self._api_zone.set(_extract_stack_trace_information_from_stack(st, is_internal))
+        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal)
+        self._api_zone.set(parsed_st)
         try:
             return await cb()
+        except Exception as error:
+            raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
         finally:
             self._api_zone.set(None)
 
@@ -517,9 +522,12 @@ class Connection(EventEmitter):
             return cb()
         task = asyncio.current_task(self._loop)
         st: List[inspect.FrameInfo] = getattr(task, "__pw_stack__", inspect.stack())
-        self._api_zone.set(_extract_stack_trace_information_from_stack(st, is_internal))
+        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal)
+        self._api_zone.set(parsed_st)
         try:
             return cb()
+        except Exception as error:
+            raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
         finally:
             self._api_zone.set(None)
 
@@ -546,7 +554,7 @@ class ParsedStackTrace(TypedDict):
 
 def _extract_stack_trace_information_from_stack(
     st: List[inspect.FrameInfo], is_internal: bool
-) -> Optional[ParsedStackTrace]:
+) -> ParsedStackTrace:
     playwright_module_path = str(Path(playwright.__file__).parents[0])
     last_internal_api_name = ""
     api_name = ""

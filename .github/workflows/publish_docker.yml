@@ -2,12 +2,6 @@ name: "publish release - Docker"
 
 on:
   workflow_dispatch:
-    inputs:
-      is_release:
-        required: false
-        type: boolean
-        description: "Is this a release image?"
-
   release:
     types: [published]
 
@@ -16,17 +10,24 @@ jobs:
     name: "publish to DockerHub"
     runs-on: ubuntu-22.04
     if: github.repository == 'microsoft/playwright-python'
+    permissions:
+      id-token: write   # This is required for OIDC login (azure/login) to succeed
+      contents: read    # This is required for actions/checkout to succeed
+    environment: Docker
     steps:
     - uses: actions/checkout@v3
+    - name: Azure login
+      uses: azure/login@v2
+      with:
+        client-id: ${{ secrets.AZURE_DOCKER_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_DOCKER_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_DOCKER_SUBSCRIPTION_ID }}
+    - name: Login to ACR via OIDC
+      run: az acr login --name playwright
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: "3.10"
-    - uses: azure/docker-login@v1
-      with:
-        login-server: playwright.azurecr.io
-        username: playwright
-        password: ${{ secrets.DOCKER_PASSWORD }}
     - name: Set up Docker QEMU for arm64 docker builds
       uses: docker/setup-qemu-action@v2
       with:
@@ -37,6 +38,3 @@ jobs:
         pip install -r local-requirements.txt
         pip install -e .
     - run: ./utils/docker/publish_docker.sh stable
-      if: (github.event_name != 'workflow_dispatch' && !github.event.release.prerelease) || (github.event_name == 'workflow_dispatch' && github.event.inputs.is_release == 'true')
-    - run: ./utils/docker/publish_docker.sh canary
-      if: (github.event_name != 'workflow_dispatch' && github.event.release.prerelease) || (github.event_name == 'workflow_dispatch' && github.event.inputs.is_release != 'true')

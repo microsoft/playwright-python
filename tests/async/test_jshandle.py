@@ -14,7 +14,7 @@
 
 import json
 import math
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict
 
 from playwright.async_api import Page
@@ -180,7 +180,9 @@ async def test_jshandle_json_value_work(page: Page) -> None:
 async def test_jshandle_json_value_work_with_dates(page: Page) -> None:
     handle = await page.evaluate_handle('() => new Date("2020-05-27T01:31:38.506Z")')
     json = await handle.json_value()
-    assert json == datetime.fromisoformat("2020-05-27T01:31:38.506")
+    assert json == datetime.fromisoformat("2020-05-27T01:31:38.506").replace(
+        tzinfo=timezone.utc
+    )
 
 
 async def test_jshandle_json_value_should_work_for_circular_object(page: Page) -> None:

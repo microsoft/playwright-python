@@ -65,6 +65,7 @@ async def test_should_report_downloads_with_accept_downloads_false(
         == f"<Download url={download.url!r} suggested_filename={download.suggested_filename!r}>"
     )
     assert await download.path()
+    assert await download.failure() is None
 
 
 async def test_should_report_downloads_with_accept_downloads_true(
@@ -180,8 +181,12 @@ async def test_should_error_when_saving_with_downloads_disabled(
     with pytest.raises(Error) as exc:
         await download.save_as(user_path)
     assert (
-        "Pass { accept_downloads: True } when you are creating your browser context"
+        "Pass 'accept_downloads=True' when you are creating your browser context"
         in exc.value.message
+    )
+    assert (
+        "Pass 'accept_downloads=True' when you are creating your browser context."
+        == await download.failure()
     )
     await page.close()
 

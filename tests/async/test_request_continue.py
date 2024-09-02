@@ -16,7 +16,7 @@ import asyncio
 from typing import Optional
 
 from playwright.async_api import Page, Route
-from tests.server import Server
+from tests.server import Server, TestServerRequest
 
 
 async def test_request_continue_should_work(page: Page, server: Server) -> None:
@@ -145,3 +145,52 @@ async def test_should_amend_binary_post_data(page: Page, server: Server) -> None
     )
     assert server_request.method == b"POST"
     assert server_request.post_body == b"\x00\x01\x02\x03\x04"
+
+
+async def test_continue_should_not_change_multipart_form_data_body(
+    page: Page, server: Server, browser_name: str
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+    server.set_route(
+        "/upload",
+        lambda context: (
+            context.write(b"done"),
+            context.setHeader("Content-Type", "text/plain"),
+            context.finish(),
+        ),
+    )
+
+    async def send_form_data() -> TestServerRequest:
+        req_task = asyncio.create_task(server.wait_for_request("/upload"))
+        status = await page.evaluate(
+            """async () => {
+            const newFile = new File(['file content'], 'file.txt');
+            const formData = new FormData();
+            formData.append('file', newFile);
+            const response = await fetch('/upload', {
+                method: 'POST',
+                credentials: 'include',
+                body: formData,
+            });
+            return response.status;
+        }"""
+        )
+        req = await req_task
+        assert status == 200
+        return req
+
+    req_before = await send_form_data()
+    await page.route("**/*", lambda route: route.continue_())
+    req_after = await send_form_data()
+
+    file_content = (
+        'Content-Disposition: form-data; name="file"; filename="file.txt"\r\n'
+        "Content-Type: application/octet-stream\r\n"
+        "\r\n"
+        "file content\r\n"
+        "------"
+    )
+    assert req_before.post_body
+    assert req_after.post_body
+    assert file_content in req_before.post_body.decode()
+    assert file_content in req_after.post_body.decode()

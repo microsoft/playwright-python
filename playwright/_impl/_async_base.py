@@ -13,8 +13,9 @@
 # limitations under the License.
 
 import asyncio
+from contextlib import AbstractAsyncContextManager
 from types import TracebackType
-from typing import Any, Callable, Generic, Type, TypeVar
+from typing import Any, Callable, Generic, Optional, Type, TypeVar
 
 from playwright._impl._impl_to_api_mapping import ImplToApiMapping, ImplWrapper
 
@@ -40,7 +41,7 @@ class AsyncEventInfo(Generic[T]):
         return self._future.done()
 
 
-class AsyncEventContextManager(Generic[T]):
+class AsyncEventContextManager(Generic[T], AbstractAsyncContextManager):
     def __init__(self, future: "asyncio.Future[T]") -> None:
         self._event = AsyncEventInfo[T](future)
 
@@ -49,9 +50,9 @@ class AsyncEventContextManager(Generic[T]):
 
     async def __aexit__(
         self,
-        exc_type: Type[BaseException],
-        exc_val: BaseException,
-        exc_tb: TracebackType,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
     ) -> None:
         if exc_val:
             self._event._cancel()

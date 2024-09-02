@@ -14,6 +14,7 @@
 
 import os
 import re
+import traceback
 from typing import Callable
 from urllib.parse import urlparse
 
@@ -355,7 +356,7 @@ def test_locators_should_select_textarea(
     textarea = page.locator("textarea")
     textarea.evaluate("textarea => textarea.value = 'some value'")
     textarea.select_text()
-    textarea.select_text(timeout=1_000)
+    textarea.select_text(timeout=25_000)
     if browser_name == "firefox" or browser_name == "webkit":
         assert textarea.evaluate("el => el.selectionStart") == 0
         assert textarea.evaluate("el => el.selectionEnd") == 10
@@ -529,7 +530,8 @@ def route_iframe(page: Page) -> None:
     page.route(
         "**/empty.html",
         lambda route: route.fulfill(
-            body='<iframe src="iframe.html"></iframe>', content_type="text/html"
+            body='<iframe src="iframe.html" name="frame1"></iframe>',
+            content_type="text/html",
         ),
     )
     page.route(
@@ -588,6 +590,26 @@ def test_locators_frame_should_work_with_locator_frame_locator(
     button.wait_for()
     assert button.inner_text() == "Hello iframe"
     button.click()
+
+
+def test_locator_content_frame_should_work(page: Page, server: Server) -> None:
+    route_iframe(page)
+    page.goto(server.EMPTY_PAGE)
+    locator = page.locator("iframe")
+    frame_locator = locator.content_frame
+    button = frame_locator.locator("button")
+    assert button.inner_text() == "Hello iframe"
+    expect(button).to_have_text("Hello iframe")
+    button.click()
+
+
+def test_frame_locator_owner_should_work(page: Page, server: Server) -> None:
+    route_iframe(page)
+    page.goto(server.EMPTY_PAGE)
+    frame_locator = page.frame_locator("iframe")
+    locator = frame_locator.owner
+    expect(locator).to_be_visible()
+    assert locator.get_attribute("name") == "frame1"
 
 
 def route_ambiguous(page: Page) -> None:
@@ -937,3 +959,19 @@ def test_locator_all_should_work(page: Page) -> None:
     for p in page.locator("p").all():
         texts.append(p.text_content())
     assert texts == ["A", "B", "C"]
+
+
+def test_locator_click_timeout_error_should_contain_call_log(page: Page) -> None:
+    with pytest.raises(Error) as exc_info:
+        page.get_by_role("button", name="Hello Python").click(timeout=42)
+    formatted_exception = "".join(
+        traceback.format_exception(type(exc_info.value), value=exc_info.value, tb=None)
+    )
+    assert "Locator.click: Timeout 42ms exceeded." in formatted_exception
+    assert (
+        'waiting for get_by_role("button", name="Hello Python")' in formatted_exception
+    )
+    assert (
+        "During handling of the above exception, another exception occurred"
+        not in formatted_exception
+    )

@@ -6,22 +6,45 @@ jobs:
   deploy-conda:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            target-platform: linux-x86_64
+          - os: ubuntu-latest
+            target-platform: linux-aarch64
+          - os: windows-latest
+            target-platform: win-64
+          - os: macos-latest-large
+            target-platform: osx-intel
+          - os: macos-latest-xlarge
+            target-platform: osx-arm64
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        # Required for conda-incubator/setup-miniconda@v3
+        shell: bash -el {0}
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Get conda
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@v3
         with:
-          python-version: 3.9
+          python-version: 3.12
           channels: conda-forge
+          miniconda-version: latest
       - name: Prepare
-        run: conda install anaconda-client conda-build conda-verify
+        # Pinned because of https://github.com/conda/conda-build/issues/5267
+        run: conda install anaconda-client conda-build=24.1.2 conda-verify py-lief=0.12.3
       - name: Build and Upload
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
         run: |
           conda config --set anaconda_upload yes
-          conda build --user microsoft .
+          if [ "${{ matrix.target-platform }}" == "osx-arm64" ]; then
+            conda build --user microsoft . -m conda_build_config_osx_arm64.yaml
+          elif [ "${{ matrix.target-platform }}" == "linux-aarch64" ]; then
+            conda install cross-python_linux-aarch64
+            conda build --user microsoft . -m conda_build_config_linux_aarch64.yaml
+          else
+            conda build --user microsoft .
+          fi

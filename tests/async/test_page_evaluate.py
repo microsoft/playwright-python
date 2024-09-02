@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import math
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from urllib.parse import ParseResult, urlparse
 
@@ -208,25 +208,90 @@ async def test_evaluate_throw_if_underlying_element_was_disposed(page: Page) -> 
 
 
 async def test_evaluate_evaluate_exception(page: Page) -> None:
-    error = await page.evaluate('new Error("error message")')
-    assert "Error: error message" in error
+    error = await page.evaluate(
+        """() => {
+        function innerFunction() {
+        const e = new Error('error message');
+        e.name = 'foobar';
+        return e;
+        }
+        return innerFunction();
+    }"""
+    )
+    assert isinstance(error, Error)
+    assert error.message == "error message"
+    assert error.name == "foobar"
+    assert error.stack
+    assert "innerFunction" in error.stack
+
+
+async def test_should_pass_exception_argument(page: Page) -> None:
+    def _raise_and_get_exception(exception: Exception) -> Exception:
+        try:
+            raise exception
+        except Exception as e:
+            return e
+
+    error_for_roundtrip = Error("error message")
+    error_for_roundtrip._name = "foobar"
+    error_for_roundtrip._stack = "test stack"
+    error = await page.evaluate(
+        """e => {
+            return { message: e.message, name: e.name, stack: e.stack };
+        }""",
+        error_for_roundtrip,
+    )
+    assert error["message"] == "error message"
+    assert error["name"] == "foobar"
+    assert "test stack" in error["stack"]
+
+    error = await page.evaluate(
+        """e => {
+            return { message: e.message, name: e.name, stack: e.stack };
+        }""",
+        _raise_and_get_exception(Exception("error message")),
+    )
+    assert error["message"] == "error message"
+    assert error["name"] == "Exception"
+    assert "error message" in error["stack"]
 
 
 async def test_evaluate_evaluate_date(page: Page) -> None:
     result = await page.evaluate(
         '() => ({ date: new Date("2020-05-27T01:31:38.506Z") })'
     )
-    assert result == {"date": datetime.fromisoformat("2020-05-27T01:31:38.506")}
+    assert result == {
+        "date": datetime.fromisoformat("2020-05-27T01:31:38.506").replace(
+            tzinfo=timezone.utc
+        )
+    }
+
+
+async def test_evaluate_roundtrip_date_without_tzinfo(page: Page) -> None:
+    date = datetime.fromisoformat("2020-05-27T01:31:38.506")
+    result = await page.evaluate("date => date", date)
+    assert result.timestamp() == date.timestamp()
 
 
 async def test_evaluate_roundtrip_date(page: Page) -> None:
+    date = datetime.fromisoformat("2020-05-27T01:31:38.506").replace(
+        tzinfo=timezone.utc
+    )
+    result = await page.evaluate("date => date", date)
+    assert result == date
+
+
+async def test_evaluate_roundtrip_date_with_tzinfo(page: Page) -> None:
     date = datetime.fromisoformat("2020-05-27T01:31:38.506")
+    date = date.astimezone(timezone(timedelta(hours=4)))
     result = await page.evaluate("date => date", date)
     assert result == date
 
 
 async def test_evaluate_jsonvalue_date(page: Page) -> None:
-    date = datetime.fromisoformat("2020-05-27T01:31:38.506")
+    date = datetime.fromisoformat("2020-05-27T01:31:38.506").replace(
+        tzinfo=timezone.utc
+    )
     result = await page.evaluate(
         '() => ({ date: new Date("2020-05-27T01:31:38.506Z") })'
     )

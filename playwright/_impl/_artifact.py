@@ -42,7 +42,10 @@ class Artifact(ChannelOwner):
         await stream.save_as(path)
 
     async def failure(self) -> Optional[str]:
-        return patch_error_message(await self._channel.send("failure"))
+        reason = await self._channel.send("failure")
+        if reason is None:
+            return None
+        return patch_error_message(reason)
 
     async def delete(self) -> None:
         await self._channel.send("delete")

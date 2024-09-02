@@ -24,9 +24,9 @@ import pytest
 from flaky import flaky
 
 from playwright._impl._path_utils import get_file_dirname
-from playwright.async_api import FilePayload, Page
+from playwright.async_api import Error, FilePayload, Page
 from tests.server import Server
-from tests.utils import must
+from tests.utils import chromium_version_less_than, must
 
 _dirname = get_file_dirname()
 FILE_TO_UPLOAD = _dirname / ".." / "assets/file-to-upload.txt"
@@ -412,3 +412,101 @@ async def test_should_upload_multiple_large_file(
     assert files_len == files_count
     for path in upload_files:
         path.unlink()
+
+
+async def test_should_upload_a_folder(
+    page: Page,
+    server: Server,
+    tmp_path: Path,
+    browser_name: str,
+    browser_version: str,
+    headless: bool,
+) -> None:
+    await page.goto(server.PREFIX + "/input/folderupload.html")
+    input = await page.query_selector("input")
+    assert input
+    dir = tmp_path / "file-upload-test"
+    dir.mkdir()
+    (dir / "file1.txt").write_text("file1 content")
+    (dir / "file2").write_text("file2 content")
+    (dir / "sub-dir").mkdir()
+    (dir / "sub-dir" / "really.txt").write_text("sub-dir file content")
+    await input.set_input_files(dir)
+    assert set(
+        await input.evaluate("e => [...e.files].map(f => f.webkitRelativePath)")
+    ) == set(
+        [
+            "file-upload-test/file1.txt",
+            "file-upload-test/file2",
+            # https://issues.chromium.org/issues/345393164
+            *(
+                []
+                if browser_name == "chromium"
+                and headless
+                and chromium_version_less_than(browser_version, "127.0.6533.0")
+                else ["file-upload-test/sub-dir/really.txt"]
+            ),
+        ]
+    )
+    webkit_relative_paths = await input.evaluate(
+        "e => [...e.files].map(f => f.webkitRelativePath)"
+    )
+    for i, webkit_relative_path in enumerate(webkit_relative_paths):
+        content = await input.evaluate(
+            """(e, i) => {
+            const reader = new FileReader();
+            const promise = new Promise(fulfill => reader.onload = fulfill);
+            reader.readAsText(e.files[i]);
+            return promise.then(() => reader.result);
+        }""",
+            i,
+        )
+        assert content == (dir / ".." / webkit_relative_path).read_text()
+
+
+async def test_should_upload_a_folder_and_throw_for_multiple_directories(
+    page: Page, server: Server, tmp_path: Path
+) -> None:
+    await page.goto(server.PREFIX + "/input/folderupload.html")
+    input = page.locator("input")
+    dir = tmp_path / "file-upload-test"
+    dir.mkdir()
+    (dir / "folder1").mkdir()
+    (dir / "folder1" / "file1.txt").write_text("file1 content")
+    (dir / "folder2").mkdir()
+    (dir / "folder2" / "file2.txt").write_text("file2 content")
+    with pytest.raises(Error) as exc_info:
+        await input.set_input_files([dir / "folder1", dir / "folder2"])
+    assert "Multiple directories are not supported" in exc_info.value.message
+
+
+async def test_should_throw_if_a_directory_and_files_are_passed(
+    page: Page, server: Server, tmp_path: Path
+) -> None:
+    await page.goto(server.PREFIX + "/input/folderupload.html")
+    input = page.locator("input")
+    dir = tmp_path / "file-upload-test"
+    dir.mkdir()
+    (dir / "file1.txt").write_text("file1 content")
+    with pytest.raises(Error) as exc_info:
+        await input.set_input_files([dir, dir / "file1.txt"])
+    assert (
+        "File paths must be all files or a single directory" in exc_info.value.message
+    )
+
+
+async def test_should_throw_when_upload_a_folder_in_a_normal_file_upload_input(
+    page: Page, server: Server, tmp_path: Path
+) -> None:
+    await page.goto(server.PREFIX + "/input/fileupload.html")
+    input = await page.query_selector("input")
+    assert input
+    dir = tmp_path / "file-upload-test"
+    dir.mkdir()
+    (dir / "file1.txt").write_text("file1 content")
+    with pytest.raises(Error) as exc_info:
+        await input.set_input_files(dir)
+    assert (
+        "File input does not support directories, pass individual files instead"
+        in exc_info.value.message
+    )

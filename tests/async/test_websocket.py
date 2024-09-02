@@ -19,11 +19,11 @@ import pytest
 from flaky import flaky
 
 from playwright.async_api import Error, Page, WebSocket
-from tests.conftest import WebSocketServerServer
-from tests.server import Server
+from tests.server import Server, WebSocketProtocol
 
 
-async def test_should_work(page: Page, ws_server: WebSocketServerServer) -> None:
+async def test_should_work(page: Page, server: Server) -> None:
+    server.send_on_web_socket_connection(b"incoming")
     value = await page.evaluate(
         """port => {
         let cb;
@@ -32,39 +32,42 @@ async def test_should_work(page: Page, ws_server: WebSocketServerServer) -> None
         ws.addEventListener('message', data => { ws.close(); cb(data.data); });
         return result;
     }""",
-        ws_server.PORT,
+        server.PORT,
     )
     assert value == "incoming"
     pass
 
 
-async def test_should_emit_close_events(
-    page: Page, ws_server: WebSocketServerServer
-) -> None:
+async def test_should_emit_close_events(page: Page, server: Server) -> None:
+    await page.goto(server.EMPTY_PAGE)
+    close_future: asyncio.Future[None] = asyncio.Future()
     async with page.expect_websocket() as ws_info:
         await page.evaluate(
             """port => {
-            let cb;
-            const result = new Promise(f => cb = f);
             const ws = new WebSocket('ws://localhost:' + port + '/ws');
-            ws.addEventListener('message', data => { ws.close(); cb(data.data); });
-            return result;
+            ws.addEventListener('open', data => ws.close());
         }""",
-            ws_server.PORT,
+            server.PORT,
         )
     ws = await ws_info.value
-    assert ws.url == f"ws://localhost:{ws_server.PORT}/ws"
+    ws.on("close", lambda ws: close_future.set_result(None))
+    assert ws.url == f"ws://localhost:{server.PORT}/ws"
     assert repr(ws) == f"<WebSocket url={ws.url!r}>"
-    if not ws.is_closed():
-        await ws.wait_for_event("close")
+    await close_future
     assert ws.is_closed()
 
 
-async def test_should_emit_frame_events(
-    page: Page, ws_server: WebSocketServerServer
-) -> None:
+async def test_should_emit_frame_events(page: Page, server: Server) -> None:
+    def _handle_ws_connection(ws: WebSocketProtocol) -> None:
+        def _onMessage(payload: bytes, isBinary: bool) -> None:
+            ws.sendMessage(b"incoming", False)
+            ws.sendClose()
+
+        setattr(ws, "onMessage", _onMessage)
+
+    server.once_web_socket_connection(_handle_ws_connection)
     log = []
-    socke_close_future: "asyncio.Future[None]" = asyncio.Future()
+    socket_close_future: "asyncio.Future[None]" = asyncio.Future()
 
     def on_web_socket(ws: WebSocket) -> None:
         log.append("open")
@@ -83,7 +86,7 @@ async def test_should_emit_frame_events(
 
         def _handle_close(ws: WebSocket) -> None:
             log.append("close")
-            socke_close_future.set_result(None)
+            socket_close_future.set_result(None)
 
         ws.on("close", _handle_close)
 
@@ -95,18 +98,30 @@ async def test_should_emit_frame_events(
             ws.addEventListener('open', () => ws.send('outgoing'));
             ws.addEventListener('message', () => ws.close())
         }""",
-            ws_server.PORT,
+            server.PORT,
         )
-    await socke_close_future
+    await socket_close_future
     assert log[0] == "open"
     assert log[3] == "close"
     log.sort()
     assert log == ["close", "open", "received<incoming>", "sent<outgoing>"]
 
 
-async def test_should_emit_binary_frame_events(
-    page: Page, ws_server: WebSocketServerServer
-) -> None:
+async def test_should_emit_binary_frame_events(page: Page, server: Server) -> None:
+    def _handle_ws_connection(ws: WebSocketProtocol) -> None:
+        ws.sendMessage(b"incoming")
+
+        def _onMessage(payload: bytes, isBinary: bool) -> None:
+            if payload == b"echo-bin":
+                ws.sendMessage(b"\x04\x02", True)
+                ws.sendClose()
+            if payload == b"echo-text":
+                ws.sendMessage(b"text", False)
+                ws.sendClose()
+
+        setattr(ws, "onMessage", _onMessage)
+
+    server.once_web_socket_connection(_handle_ws_connection)
     done_task: "asyncio.Future[None]" = asyncio.Future()
     sent = []
     received = []
@@ -129,7 +144,7 @@ async def test_should_emit_binary_frame_events(
                 ws.send('echo-bin');
             });
         }""",
-            ws_server.PORT,
+            server.PORT,
         )
     await done_task
     assert sent == [b"\x00\x01\x02\x03\x04", "echo-bin"]
@@ -138,14 +153,15 @@ async def test_should_emit_binary_frame_events(
 
 @flaky
 async def test_should_reject_wait_for_event_on_close_and_error(
-    page: Page, ws_server: WebSocketServerServer
+    page: Page, server: Server
 ) -> None:
+    server.send_on_web_socket_connection(b"incoming")
     async with page.expect_event("websocket") as ws_info:
         await page.evaluate(
             """port => {
             window.ws = new WebSocket('ws://localhost:' + port + '/ws');
         }""",
-            ws_server.PORT,
+            server.PORT,
         )
     ws = await ws_info.value
     await ws.wait_for_event("framereceived")

@@ -16,7 +16,11 @@ import collections.abc
 from typing import Any, List, Optional, Pattern, Sequence, Union
 from urllib.parse import urljoin
 
-from playwright._impl._api_structures import ExpectedTextValue, FrameExpectOptions
+from playwright._impl._api_structures import (
+    AriaRole,
+    ExpectedTextValue,
+    FrameExpectOptions,
+)
 from playwright._impl._connection import format_call_log
 from playwright._impl._errors import Error
 from playwright._impl._fetch import APIResponse
@@ -92,10 +96,10 @@ class PageAssertions(AssertionsBase):
     async def to_have_title(
         self, titleOrRegExp: Union[Pattern[str], str], timeout: float = None
     ) -> None:
+        __tracebackhide__ = True
         expected_values = to_expected_text_values(
             [titleOrRegExp], normalize_white_space=True
         )
-        __tracebackhide__ = True
         await self._expect_impl(
             "to.have.title",
             FrameExpectOptions(expectedText=expected_values, timeout=timeout),
@@ -110,13 +114,16 @@ class PageAssertions(AssertionsBase):
         await self._not.to_have_title(titleOrRegExp, timeout)
 
     async def to_have_url(
-        self, urlOrRegExp: Union[str, Pattern[str]], timeout: float = None
+        self,
+        urlOrRegExp: Union[str, Pattern[str]],
+        timeout: float = None,
+        ignoreCase: bool = None,
     ) -> None:
         __tracebackhide__ = True
         base_url = self._actual_page.context._options.get("baseURL")
         if isinstance(urlOrRegExp, str) and base_url:
             urlOrRegExp = urljoin(base_url, urlOrRegExp)
-        expected_text = to_expected_text_values([urlOrRegExp])
+        expected_text = to_expected_text_values([urlOrRegExp], ignoreCase=ignoreCase)
         await self._expect_impl(
             "to.have.url",
             FrameExpectOptions(expectedText=expected_text, timeout=timeout),
@@ -125,10 +132,13 @@ class PageAssertions(AssertionsBase):
         )
 
     async def not_to_have_url(
-        self, urlOrRegExp: Union[Pattern[str], str], timeout: float = None
+        self,
+        urlOrRegExp: Union[Pattern[str], str],
+        timeout: float = None,
+        ignoreCase: bool = None,
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_have_url(urlOrRegExp, timeout)
+        await self._not.to_have_url(urlOrRegExp, timeout, ignoreCase)
 
 
 class LocatorAssertions(AssertionsBase):
@@ -703,6 +713,70 @@ class LocatorAssertions(AssertionsBase):
     ) -> None:
         __tracebackhide__ = True
         await self._not.to_be_in_viewport(ratio=ratio, timeout=timeout)
+
+    async def to_have_accessible_description(
+        self,
+        description: Union[str, Pattern[str]],
+        ignoreCase: bool = None,
+        timeout: float = None,
+    ) -> None:
+        __tracebackhide__ = True
+        expected_values = to_expected_text_values([description], ignoreCase=ignoreCase)
+        await self._expect_impl(
+            "to.have.accessible.description",
+            FrameExpectOptions(expectedText=expected_values, timeout=timeout),
+            None,
+            "Locator expected to have accessible description",
+        )
+
+    async def not_to_have_accessible_description(
+        self,
+        name: Union[str, Pattern[str]],
+        ignoreCase: bool = None,
+        timeout: float = None,
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_have_accessible_description(name, ignoreCase, timeout)
+
+    async def to_have_accessible_name(
+        self,
+        name: Union[str, Pattern[str]],
+        ignoreCase: bool = None,
+        timeout: float = None,
+    ) -> None:
+        __tracebackhide__ = True
+        expected_values = to_expected_text_values([name], ignoreCase=ignoreCase)
+        await self._expect_impl(
+            "to.have.accessible.name",
+            FrameExpectOptions(expectedText=expected_values, timeout=timeout),
+            None,
+            "Locator expected to have accessible name",
+        )
+
+    async def not_to_have_accessible_name(
+        self,
+        name: Union[str, Pattern[str]],
+        ignoreCase: bool = None,
+        timeout: float = None,
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_have_accessible_name(name, ignoreCase, timeout)
+
+    async def to_have_role(self, role: AriaRole, timeout: float = None) -> None:
+        __tracebackhide__ = True
+        if isinstance(role, Pattern):
+            raise Error('"role" argument in to_have_role must be a string')
+        expected_values = to_expected_text_values([role])
+        await self._expect_impl(
+            "to.have.role",
+            FrameExpectOptions(expectedText=expected_values, timeout=timeout),
+            None,
+            "Locator expected to have accessible role",
+        )
+
+    async def not_to_have_role(self, role: AriaRole, timeout: float = None) -> None:
+        __tracebackhide__ = True
+        await self._not.to_have_role(role, timeout)
 
 
 class APIResponseAssertions:

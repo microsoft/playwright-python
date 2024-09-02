@@ -206,7 +206,6 @@ class ElementHandle(JSHandle):
             "setInputFiles",
             {
                 "timeout": timeout,
-                "noWaitAfter": noWaitAfter,
                 **converted,
             },
         )
@@ -246,7 +245,6 @@ class ElementHandle(JSHandle):
                 position=position,
                 timeout=timeout,
                 force=force,
-                noWaitAfter=noWaitAfter,
                 trial=trial,
             )
         else:
@@ -254,7 +252,6 @@ class ElementHandle(JSHandle):
                 position=position,
                 timeout=timeout,
                 force=force,
-                noWaitAfter=noWaitAfter,
                 trial=trial,
             )
 

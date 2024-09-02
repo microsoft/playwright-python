@@ -71,7 +71,7 @@ async def test_frame_element_throw_when_detached(
     except Error as e:
         error = e
     assert error
-    assert error.message == "Frame has been detached."
+    assert error.message == "Frame.frame_element: Frame has been detached."
 
 
 async def test_evaluate_throw_for_detached_frames(

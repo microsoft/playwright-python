@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+import base64
 import json
 import sys
 from pathlib import Path
@@ -22,7 +23,7 @@ from urllib.parse import urlparse
 import pytest
 
 from playwright.async_api import APIResponse, Error, Playwright, StorageState
-from tests.server import Server
+from tests.server import Server, TestServerRequest
 
 
 @pytest.mark.parametrize(
@@ -54,6 +55,15 @@ async def test_should_dispose_global_request(
     await response.dispose()
     with pytest.raises(Error, match="Response has been disposed"):
         await response.body()
+
+
+async def test_should_dispose_with_custom_error_message(
+    playwright: Playwright, server: Server
+) -> None:
+    request = await playwright.request.new_context()
+    await request.dispose(reason="My reason")
+    with pytest.raises(Error, match="My reason"):
+        await request.get(server.EMPTY_PAGE)
 
 
 async def test_should_support_global_user_agent_option(
@@ -202,6 +212,35 @@ async def test_should_return_error_with_correct_credentials_and_mismatching_port
     response = await request.get(server.EMPTY_PAGE)
     assert response.status == 401
     await response.dispose()
+
+
+async def test_support_http_credentials_send_immediately(
+    playwright: Playwright, server: Server
+) -> None:
+    request = await playwright.request.new_context(
+        http_credentials={
+            "username": "user",
+            "password": "pass",
+            "origin": server.PREFIX.upper(),
+            "send": "always",
+        }
+    )
+    server_request, response = await asyncio.gather(
+        server.wait_for_request("/empty.html"), request.get(server.EMPTY_PAGE)
+    )
+    assert (
+        server_request.getHeader("authorization")
+        == "Basic " + base64.b64encode(b"user:pass").decode()
+    )
+    assert response.status == 200
+
+    server_request, response = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        request.get(server.CROSS_PROCESS_PREFIX + "/empty.html"),
+    )
+    # Not sent to another origin.
+    assert server_request.getHeader("authorization") is None
+    assert response.status == 200
 
 
 async def test_should_support_global_ignore_https_errors_option(
@@ -409,12 +448,41 @@ async def test_should_throw_an_error_when_max_redirects_is_less_than_0(
         assert "'max_redirects' must be greater than or equal to '0'" in str(exc_info)
 
 
-async def test_should_serialize_null_values_in_json(
+async def test_should_serialize_request_data(
     playwright: Playwright, server: Server
 ) -> None:
     request = await playwright.request.new_context()
     server.set_route("/echo", lambda req: (req.write(req.post_body), req.finish()))
-    response = await request.post(server.PREFIX + "/echo", data={"foo": None})
+    for data, expected in [
+        ({"foo": None}, '{"foo": null}'),
+        ([], "[]"),
+        ({}, "{}"),
+        ("", ""),
+    ]:
+        response = await request.post(server.PREFIX + "/echo", data=data)
+        assert response.status == 200
+        assert await response.text() == expected
+    await request.dispose()
+
+
+async def test_should_retry_ECONNRESET(playwright: Playwright, server: Server) -> None:
+    request_count = 0
+
+    def _handle_request(req: TestServerRequest) -> None:
+        nonlocal request_count
+        request_count += 1
+        if request_count <= 3:
+            assert req.transport
+            req.transport.abortConnection()
+            return
+        req.setHeader("content-type", "text/plain")
+        req.write(b"Hello!")
+        req.finish()
+
+    server.set_route("/test", _handle_request)
+    request = await playwright.request.new_context()
+    response = await request.fetch(server.PREFIX + "/test", max_retries=3)
     assert response.status == 200
-    assert await response.text() == '{"foo": null}'
+    assert await response.text() == "Hello!"
+    assert request_count == 4
     await request.dispose()

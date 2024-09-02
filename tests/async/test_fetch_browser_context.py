@@ -13,14 +13,15 @@
 # limitations under the License.
 
 import asyncio
+import base64
 import json
-from typing import Any, cast
+from typing import Any, Callable, cast
 from urllib.parse import parse_qs
 
 import pytest
 
-from playwright.async_api import BrowserContext, Error, FilePayload, Page
-from tests.server import Server
+from playwright.async_api import Browser, BrowserContext, Error, FilePayload, Page
+from tests.server import Server, TestServerRequest
 from tests.utils import must
 
 
@@ -55,7 +56,7 @@ async def test_fetch_should_work(context: BrowserContext, server: Server) -> Non
 async def test_should_throw_on_network_error(
     context: BrowserContext, server: Server
 ) -> None:
-    server.set_route("/test", lambda request: request.transport.loseConnection())
+    server.set_route("/test", lambda request: request.loseConnection())
     with pytest.raises(Error, match="socket hang up"):
         await context.request.fetch(server.PREFIX + "/test")
 
@@ -148,6 +149,66 @@ async def test_should_not_add_context_cookie_if_cookie_header_passed_as_paramete
         context.request.get(server.EMPTY_PAGE, headers={"Cookie": "foo=bar"}),
     )
     assert server_req.getHeader("Cookie") == "foo=bar"
+
+
+async def test_should_support_http_credentials_send_immediately_for_browser_context(
+    context_factory: "Callable[..., asyncio.Future[BrowserContext]]", server: Server
+) -> None:
+    context = await context_factory(
+        http_credentials={
+            "username": "user",
+            "password": "pass",
+            "origin": server.PREFIX.upper(),
+            "send": "always",
+        }
+    )
+    # First request
+    server_request, response = await asyncio.gather(
+        server.wait_for_request("/empty.html"), context.request.get(server.EMPTY_PAGE)
+    )
+    expected_auth = "Basic " + base64.b64encode(b"user:pass").decode()
+    assert server_request.getHeader("authorization") == expected_auth
+    assert response.status == 200
+
+    # Second request
+    server_request, response = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        context.request.get(server.CROSS_PROCESS_PREFIX + "/empty.html"),
+    )
+    # Not sent to another origin.
+    assert server_request.getHeader("authorization") is None
+    assert response.status == 200
+
+
+async def test_support_http_credentials_send_immediately_for_browser_new_page(
+    server: Server, browser: Browser
+) -> None:
+    page = await browser.new_page(
+        http_credentials={
+            "username": "user",
+            "password": "pass",
+            "origin": server.PREFIX.upper(),
+            "send": "always",
+        }
+    )
+    server_request, response = await asyncio.gather(
+        server.wait_for_request("/empty.html"), page.request.get(server.EMPTY_PAGE)
+    )
+    assert (
+        server_request.getHeader("authorization")
+        == "Basic " + base64.b64encode(b"user:pass").decode()
+    )
+    assert response.status == 200
+
+    server_request, response = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        page.request.get(server.CROSS_PROCESS_PREFIX + "/empty.html"),
+    )
+    # Not sent to another origin.
+    assert server_request.getHeader("authorization") is None
+    assert response.status == 200
+
+    await page.close()
 
 
 @pytest.mark.parametrize("method", ["delete", "patch", "post", "put"])
@@ -243,3 +304,32 @@ async def test_should_add_default_headers(
     assert request.getHeader("User-Agent") == await page.evaluate(
         "() => navigator.userAgent"
     )
+
+
+async def test_should_work_after_context_dispose(
+    context: BrowserContext, server: Server
+) -> None:
+    await context.close(reason="Test ended.")
+    with pytest.raises(Error, match="Test ended."):
+        await context.request.get(server.EMPTY_PAGE)
+
+
+async def test_should_retry_ECONNRESET(context: BrowserContext, server: Server) -> None:
+    request_count = 0
+
+    def _handle_request(req: TestServerRequest) -> None:
+        nonlocal request_count
+        request_count += 1
+        if request_count <= 3:
+            assert req.transport
+            req.transport.abortConnection()
+            return
+        req.setHeader("content-type", "text/plain")
+        req.write(b"Hello!")
+        req.finish()
+
+    server.set_route("/test", _handle_request)
+    response = await context.request.fetch(server.PREFIX + "/test", max_retries=3)
+    assert response.status == 200
+    assert await response.text() == "Hello!"
+    assert request_count == 4

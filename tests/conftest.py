@@ -30,7 +30,7 @@ from pixelmatch.contrib.PIL import from_PIL_to_raw_data
 import playwright
 from playwright._impl._path_utils import get_file_dirname
 
-from .server import Server, WebSocketServerServer, test_server
+from .server import Server, test_server
 
 _dirname = get_file_dirname()
 
@@ -74,11 +74,6 @@ def server() -> Generator[Server, None, None]:
 @pytest.fixture
 def https_server() -> Generator[Server, None, None]:
     yield test_server.https_server
-
-
-@pytest.fixture
-def ws_server() -> Generator[WebSocketServerServer, None, None]:
-    yield test_server.ws_server
 
 
 @pytest.fixture(autouse=True, scope="session")

@@ -36,6 +36,7 @@ from typing import (
 from urllib import parse
 
 from playwright._impl._api_structures import (
+    ClientCertificate,
     Headers,
     HeadersArray,
     RemoteAddr,
@@ -50,7 +51,7 @@ from playwright._impl._connection import (
 )
 from playwright._impl._errors import Error
 from playwright._impl._event_context_manager import EventContextManagerImpl
-from playwright._impl._helper import locals_to_params
+from playwright._impl._helper import async_readfile, locals_to_params
 from playwright._impl._waiter import Waiter
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -83,6 +84,34 @@ def serialize_headers(headers: Dict[str, str]) -> HeadersArray:
     ]
 
 
+async def to_client_certificates_protocol(
+    clientCertificates: Optional[List[ClientCertificate]],
+) -> Optional[List[Dict[str, str]]]:
+    if not clientCertificates:
+        return None
+    out = []
+    for clientCertificate in clientCertificates:
+        out_record = {
+            "origin": clientCertificate["origin"],
+        }
+        if passphrase := clientCertificate.get("passphrase"):
+            out_record["passphrase"] = passphrase
+        if pfx_path := clientCertificate.get("pfxPath"):
+            out_record["pfx"] = base64.b64encode(
+                await async_readfile(pfx_path)
+            ).decode()
+        if cert_path := clientCertificate.get("certPath"):
+            out_record["cert"] = base64.b64encode(
+                await async_readfile(cert_path)
+            ).decode()
+        if key_path := clientCertificate.get("keyPath"):
+            out_record["key"] = base64.b64encode(
+                await async_readfile(key_path)
+            ).decode()
+        out.append(out_record)
+    return out
+
+
 class Request(ChannelOwner):
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
@@ -111,11 +140,6 @@ class Request(ChannelOwner):
         self._fallback_overrides: SerializedFallbackOverrides = (
             SerializedFallbackOverrides()
         )
-        base64_post_data = initializer.get("postData")
-        if base64_post_data is not None:
-            self._fallback_overrides.post_data_buffer = base64.b64decode(
-                base64_post_data
-            )
 
     def __repr__(self) -> str:
         return f"<Request url={self.url!r} method={self.method!r}>"
@@ -159,9 +183,12 @@ class Request(ChannelOwner):
     @property
     def post_data(self) -> Optional[str]:
         data = self._fallback_overrides.post_data_buffer
-        if not data:
-            return None
-        return data.decode()
+        if data:
+            return data.decode()
+        base64_post_data = self._initializer.get("postData")
+        if base64_post_data is not None:
+            return base64.b64decode(base64_post_data).decode()
+        return None
 
     @property
     def post_data_json(self) -> Optional[Any]:
@@ -169,7 +196,7 @@ class Request(ChannelOwner):
         if not post_data:
             return None
         content_type = self.headers["content-type"]
-        if content_type == "application/x-www-form-urlencoded":
+        if "application/x-www-form-urlencoded" in content_type:
             return dict(parse.parse_qsl(post_data))
         try:
             return json.loads(post_data)
@@ -178,7 +205,11 @@ class Request(ChannelOwner):
 
     @property
     def post_data_buffer(self) -> Optional[bytes]:
-        return self._fallback_overrides.post_data_buffer
+        if self._fallback_overrides.post_data_buffer:
+            return self._fallback_overrides.post_data_buffer
+        if self._initializer.get("postData"):
+            return base64.b64decode(self._initializer["postData"])
+        return None
 
     async def response(self) -> Optional["Response"]:
         return from_nullable_channel(await self._channel.send("response"))
@@ -262,7 +293,10 @@ class Request(ChannelOwner):
         return page._closed_or_crashed_future
 
     def _safe_page(self) -> "Optional[Page]":
-        return cast("Frame", from_channel(self._initializer["frame"]))._page
+        frame = from_nullable_channel(self._initializer.get("frame"))
+        if not frame:
+            return None
+        return cast("Frame", frame)._page
 
 
 class Route(ChannelOwner):
@@ -405,6 +439,7 @@ class Route(ChannelOwner):
         headers: Dict[str, str] = None,
         postData: Union[Any, str, bytes] = None,
         maxRedirects: int = None,
+        maxRetries: int = None,
         timeout: float = None,
     ) -> "APIResponse":
         return await self._connection.wrap_api_call(
@@ -415,6 +450,7 @@ class Route(ChannelOwner):
                 headers,
                 postData,
                 maxRedirects=maxRedirects,
+                maxRetries=maxRetries,
                 timeout=timeout,
             )
         )
