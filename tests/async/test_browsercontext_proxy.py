@@ -48,6 +48,29 @@ async def test_should_use_proxy(
     assert await page.title() == "Served by the proxy"
 
 
+async def test_proxy_should_allow_none_for_optional_settings(
+    context_factory: "Callable[..., asyncio.Future[BrowserContext]]", server: Server
+) -> None:
+    server.set_route(
+        "/target.html",
+        lambda r: (
+            r.write(b"<html><title>Served by the proxy</title></html>"),
+            r.finish(),
+        ),
+    )
+    context = await context_factory(
+        proxy={
+            "server": f"localhost:{server.PORT}",
+            "username": None,
+            "password": None,
+            "bypass": None,
+        }
+    )
+    page = await context.new_page()
+    await page.goto("http://non-existent.com/target.html")
+    assert await page.title() == "Served by the proxy"
+
+
 async def test_should_use_proxy_for_second_page(
     context_factory: "Callable[..., Awaitable[BrowserContext]]", server: Server
 ) -> None:
