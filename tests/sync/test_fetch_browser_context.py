@@ -89,8 +89,43 @@ def test_should_support_query_params(
         getattr(context.request, method)(
             server.EMPTY_PAGE + "?p1=foo", params=expected_params
         )
-    assert server_req.value.args["p1".encode()][0].decode() == "v1"
-    assert len(server_req.value.args["p1".encode()]) == 1
+    assert list(map(lambda x: x.decode(), server_req.value.args["p1".encode()])) == [
+        "foo",
+        "v1",
+    ]
+    assert server_req.value.args["парам2".encode()][0].decode() == "знач2"
+
+
+@pytest.mark.parametrize(
+    "method", ["fetch", "delete", "get", "head", "patch", "post", "put"]
+)
+def test_should_support_params_passed_as_object(
+    context: BrowserContext, server: Server, method: str
+) -> None:
+    params = {
+        "param1": "value1",
+        "парам2": "знач2",
+    }
+    with server.expect_request("/empty.html") as server_req:
+        getattr(context.request, method)(server.EMPTY_PAGE, params=params)
+    assert server_req.value.args["param1".encode()][0].decode() == "value1"
+    assert len(server_req.value.args["param1".encode()]) == 1
+    assert server_req.value.args["парам2".encode()][0].decode() == "знач2"
+
+
+@pytest.mark.parametrize(
+    "method", ["fetch", "delete", "get", "head", "patch", "post", "put"]
+)
+def test_should_support_params_passed_as_strings(
+    context: BrowserContext, server: Server, method: str
+) -> None:
+    params = "?param1=value1&param1=value2&парам2=знач2"
+    with server.expect_request("/empty.html") as server_req:
+        getattr(context.request, method)(server.EMPTY_PAGE, params=params)
+    assert list(
+        map(lambda x: x.decode(), server_req.value.args["param1".encode()])
+    ) == ["value1", "value2"]
+    assert len(server_req.value.args["param1".encode()]) == 2
     assert server_req.value.args["парам2".encode()][0].decode() == "знач2"
 
 
