@@ -27,7 +27,7 @@ requirements:
   run:
     - python >=3.8
     - greenlet ==3.0.3
-    - pyee ==11.1.0
+    - pyee ==12.0.0
 
 test: # [build_platform == target_platform]
   requires:
