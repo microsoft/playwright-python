@@ -104,8 +104,11 @@ class StorageState(TypedDict, total=False):
 class ClientCertificate(TypedDict, total=False):
     origin: str
     certPath: Optional[Union[str, Path]]
+    cert: Optional[bytes]
     keyPath: Optional[Union[str, Path]]
+    key: Optional[bytes]
     pfxPath: Optional[Union[str, Path]]
+    pfx: Optional[bytes]
     passphrase: Optional[str]
 
 

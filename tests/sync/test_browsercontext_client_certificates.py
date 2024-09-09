@@ -168,6 +168,44 @@ def test_should_work_with_new_context(browser: Browser, assetdir: Path) -> None:
     context.close()
 
 
+def test_should_work_with_new_context_passing_as_content(
+    browser: Browser, assetdir: Path
+) -> None:
+    context = browser.new_context(
+        # TODO: Remove this once we can pass a custom CA.
+        ignore_https_errors=True,
+        client_certificates=[
+            {
+                "origin": "https://127.0.0.1:8000",
+                "cert": (
+                    assetdir / "client-certificates/client/trusted/cert.pem"
+                ).read_bytes(),
+                "key": (
+                    assetdir / "client-certificates/client/trusted/key.pem"
+                ).read_bytes(),
+            }
+        ],
+    )
+    page = context.new_page()
+    page.goto("https://localhost:8000")
+    expect(page.get_by_test_id("message")).to_have_text(
+        "Sorry, but you need to provide a client certificate to continue."
+    )
+    page.goto("https://127.0.0.1:8000")
+    expect(page.get_by_test_id("message")).to_have_text(
+        "Hello Alice, your certificate was issued by localhost!"
+    )
+
+    response = page.context.request.get("https://localhost:8000")
+    assert (
+        "Sorry, but you need to provide a client certificate to continue."
+        in response.text()
+    )
+    response = page.context.request.get("https://127.0.0.1:8000")
+    assert "Hello Alice, your certificate was issued by localhost!" in response.text()
+    context.close()
+
+
 def test_should_work_with_new_persistent_context(
     browser_type: BrowserType, assetdir: Path, launch_arguments: Dict
 ) -> None:

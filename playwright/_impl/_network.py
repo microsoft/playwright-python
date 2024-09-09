@@ -96,14 +96,20 @@ async def to_client_certificates_protocol(
         }
         if passphrase := clientCertificate.get("passphrase"):
             out_record["passphrase"] = passphrase
+        if pfx := clientCertificate.get("pfx"):
+            out_record["pfx"] = base64.b64encode(pfx).decode()
         if pfx_path := clientCertificate.get("pfxPath"):
             out_record["pfx"] = base64.b64encode(
                 await async_readfile(pfx_path)
             ).decode()
+        if cert := clientCertificate.get("cert"):
+            out_record["cert"] = base64.b64encode(cert).decode()
         if cert_path := clientCertificate.get("certPath"):
             out_record["cert"] = base64.b64encode(
                 await async_readfile(cert_path)
             ).decode()
+        if key := clientCertificate.get("key"):
+            out_record["key"] = base64.b64encode(key).decode()
         if key_path := clientCertificate.get("keyPath"):
             out_record["key"] = base64.b64encode(
                 await async_readfile(key_path)

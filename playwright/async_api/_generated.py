@@ -808,12 +808,15 @@ class Route(AsyncBase):
     ) -> None:
         """Route.fallback
 
+        Continues route's request with optional overrides. The method is similar to `route.continue_()` with the
+        difference that other matching handlers will be invoked before sending the request.
+
+        **Usage**
+
         When several routes match the given pattern, they run in the order opposite to their registration. That way the
         last registered route can always override all the previous ones. In the example below, request will be handled by
         the bottom-most handler first, then it'll fall back to the previous one and in the end will be aborted by the first
         registered route.
-
-        **Usage**
 
         ```py
         await page.route(\"**/*\", lambda route: route.abort())  # Runs last.
@@ -861,6 +864,9 @@ class Route(AsyncBase):
         await page.route(\"**/*\", handle)
         ```
 
+        Use `route.continue_()` to immediately send the request to the network, other matching handlers won't be
+        invoked in that case.
+
         Parameters
         ----------
         url : Union[str, None]
@@ -893,7 +899,7 @@ class Route(AsyncBase):
     ) -> None:
         """Route.continue_
 
-        Continues route's request with optional overrides.
+        Sends route's request to the network with optional overrides.
 
         **Usage**
 
@@ -915,6 +921,9 @@ class Route(AsyncBase):
         Note that any overrides such as `url` or `headers` only apply to the request being routed. If this request results
         in a redirect, overrides will not be applied to the new redirected request. If you want to propagate a header
         through redirects, use the combination of `route.fetch()` and `route.fulfill()` instead.
+
+        `route.continue_()` will immediately send the request to the network, other matching handlers won't be
+        invoked. Use `route.fallback()` If you want next matching handler in the chain to be invoked.
 
         Parameters
         ----------
@@ -2115,10 +2124,8 @@ class ElementHandle(JSHandle):
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
-            Deprecated: This option will default to `true` in the future.
+            This option has no effect.
+            Deprecated: This option has no effect.
 
         Returns
         -------
@@ -5316,10 +5323,8 @@ class Frame(AsyncBase):
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
-            Deprecated: This option will default to `true` in the future.
+            This option has no effect.
+            Deprecated: This option has no effect.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -9390,7 +9395,8 @@ class Page(AsyncContextManager):
             separate files or entries in the ZIP archive. If `embed` is specified, content is stored inline the HAR file.
         update_mode : Union["full", "minimal", None]
             When set to `minimal`, only record information necessary for routing from HAR. This omits sizes, timing, page,
-            cookies, security and other types of HAR information that are not used when replaying from HAR. Defaults to `full`.
+            cookies, security and other types of HAR information that are not used when replaying from HAR. Defaults to
+            `minimal`.
         """
 
         return mapping.from_maybe_impl(
@@ -10749,10 +10755,8 @@ class Page(AsyncContextManager):
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
-            Deprecated: This option will default to `true` in the future.
+            This option has no effect.
+            Deprecated: This option has no effect.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         strict : Union[bool, None]
@@ -13531,10 +13535,6 @@ class Browser(AsyncContextManager):
             Whether to automatically download all the attachments. Defaults to `true` where all the downloads are accepted.
         proxy : Union[{server: str, bypass: Union[str, None], username: Union[str, None], password: Union[str, None]}, None]
             Network proxy settings to use with this context. Defaults to none.
-
-            **NOTE** For Chromium on Windows the browser needs to be launched with the global proxy for this option to work. If
-            all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({
-            proxy: { server: 'http://per-context' } })`.
         record_har_path : Union[pathlib.Path, str, None]
             Enables [HAR](http://www.softwareishard.com/blog/har-12-spec) recording for all pages into the specified HAR file
             on the filesystem. If not specified, the HAR is not recorded. Make sure to call `browser_context.close()`
@@ -13581,15 +13581,15 @@ class Browser(AsyncContextManager):
             Optional setting to control resource content management. If `omit` is specified, content is not persisted. If
             `attach` is specified, resources are persisted as separate files and all of these files are archived along with the
             HAR file. Defaults to `embed`, which stores content inline the HAR file as per HAR specification.
-        client_certificates : Union[Sequence[{origin: str, certPath: Union[pathlib.Path, str, None], keyPath: Union[pathlib.Path, str, None], pfxPath: Union[pathlib.Path, str, None], passphrase: Union[str, None]}], None]
+        client_certificates : Union[Sequence[{origin: str, certPath: Union[pathlib.Path, str, None], cert: Union[bytes, None], keyPath: Union[pathlib.Path, str, None], key: Union[bytes, None], pfxPath: Union[pathlib.Path, str, None], pfx: Union[bytes, None], passphrase: Union[str, None]}], None]
             TLS Client Authentication allows the server to request a client certificate and verify it.
 
             **Details**
 
-            An array of client certificates to be used. Each certificate object must have both `certPath` and `keyPath` or a
-            single `pfxPath` to load the client certificate. Optionally, `passphrase` property should be provided if the
-            certficiate is encrypted. The `origin` property should be provided with an exact match to the request origin that
-            the certificate is valid for.
+            An array of client certificates to be used. Each certificate object must have either both `certPath` and `keyPath`,
+            a single `pfxPath`, or their corresponding direct value equivalents (`cert` and `key`, or `pfx`). Optionally,
+            `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
+            with an exact match to the request origin that the certificate is valid for.
 
             **NOTE** Using Client Certificates in combination with Proxy Servers is not supported.
 
@@ -13761,10 +13761,6 @@ class Browser(AsyncContextManager):
             Whether to automatically download all the attachments. Defaults to `true` where all the downloads are accepted.
         proxy : Union[{server: str, bypass: Union[str, None], username: Union[str, None], password: Union[str, None]}, None]
             Network proxy settings to use with this context. Defaults to none.
-
-            **NOTE** For Chromium on Windows the browser needs to be launched with the global proxy for this option to work. If
-            all contexts override the proxy, global proxy will be never used and can be any string, for example `launch({
-            proxy: { server: 'http://per-context' } })`.
         record_har_path : Union[pathlib.Path, str, None]
             Enables [HAR](http://www.softwareishard.com/blog/har-12-spec) recording for all pages into the specified HAR file
             on the filesystem. If not specified, the HAR is not recorded. Make sure to call `browser_context.close()`
@@ -13811,15 +13807,15 @@ class Browser(AsyncContextManager):
             Optional setting to control resource content management. If `omit` is specified, content is not persisted. If
             `attach` is specified, resources are persisted as separate files and all of these files are archived along with the
             HAR file. Defaults to `embed`, which stores content inline the HAR file as per HAR specification.
-        client_certificates : Union[Sequence[{origin: str, certPath: Union[pathlib.Path, str, None], keyPath: Union[pathlib.Path, str, None], pfxPath: Union[pathlib.Path, str, None], passphrase: Union[str, None]}], None]
+        client_certificates : Union[Sequence[{origin: str, certPath: Union[pathlib.Path, str, None], cert: Union[bytes, None], keyPath: Union[pathlib.Path, str, None], key: Union[bytes, None], pfxPath: Union[pathlib.Path, str, None], pfx: Union[bytes, None], passphrase: Union[str, None]}], None]
             TLS Client Authentication allows the server to request a client certificate and verify it.
 
             **Details**
 
-            An array of client certificates to be used. Each certificate object must have both `certPath` and `keyPath` or a
-            single `pfxPath` to load the client certificate. Optionally, `passphrase` property should be provided if the
-            certficiate is encrypted. The `origin` property should be provided with an exact match to the request origin that
-            the certificate is valid for.
+            An array of client certificates to be used. Each certificate object must have either both `certPath` and `keyPath`,
+            a single `pfxPath`, or their corresponding direct value equivalents (`cert` and `key`, or `pfx`). Optionally,
+            `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
+            with an exact match to the request origin that the certificate is valid for.
 
             **NOTE** Using Client Certificates in combination with Proxy Servers is not supported.
 
@@ -14370,15 +14366,15 @@ class BrowserType(AsyncBase):
             Optional setting to control resource content management. If `omit` is specified, content is not persisted. If
             `attach` is specified, resources are persisted as separate files and all of these files are archived along with the
             HAR file. Defaults to `embed`, which stores content inline the HAR file as per HAR specification.
-        client_certificates : Union[Sequence[{origin: str, certPath: Union[pathlib.Path, str, None], keyPath: Union[pathlib.Path, str, None], pfxPath: Union[pathlib.Path, str, None], passphrase: Union[str, None]}], None]
+        client_certificates : Union[Sequence[{origin: str, certPath: Union[pathlib.Path, str, None], cert: Union[bytes, None], keyPath: Union[pathlib.Path, str, None], key: Union[bytes, None], pfxPath: Union[pathlib.Path, str, None], pfx: Union[bytes, None], passphrase: Union[str, None]}], None]
             TLS Client Authentication allows the server to request a client certificate and verify it.
 
             **Details**
 
-            An array of client certificates to be used. Each certificate object must have both `certPath` and `keyPath` or a
-            single `pfxPath` to load the client certificate. Optionally, `passphrase` property should be provided if the
-            certficiate is encrypted. The `origin` property should be provided with an exact match to the request origin that
-            the certificate is valid for.
+            An array of client certificates to be used. Each certificate object must have either both `certPath` and `keyPath`,
+            a single `pfxPath`, or their corresponding direct value equivalents (`cert` and `key`, or `pfx`). Optionally,
+            `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
+            with an exact match to the request origin that the certificate is valid for.
 
             **NOTE** Using Client Certificates in combination with Proxy Servers is not supported.
 
@@ -16893,10 +16889,8 @@ class Locator(AsyncBase):
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         no_wait_after : Union[bool, None]
-            Actions that initiate navigations are waiting for these navigations to happen and for pages to start loading. You
-            can opt out of waiting via setting this flag. You would only need this option in the exceptional cases such as
-            navigating to inaccessible pages. Defaults to `false`.
-            Deprecated: This option will default to `true` in the future.
+            This option has no effect.
+            Deprecated: This option has no effect.
         force : Union[bool, None]
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
 
@@ -17479,8 +17473,8 @@ class APIResponse(AsyncBase):
     def headers_array(self) -> typing.List[NameValue]:
         """APIResponse.headers_array
 
-        An array with all the request HTTP headers associated with this response. Header names are not lower-cased. Headers
-        with multiple entries, such as `Set-Cookie`, appear in the array multiple times.
+        An array with all the response HTTP headers associated with this response. Header names are not lower-cased.
+        Headers with multiple entries, such as `Set-Cookie`, appear in the array multiple times.
 
         Returns
         -------
@@ -17559,7 +17553,7 @@ class APIRequestContext(AsyncBase):
         url: str,
         *,
         params: typing.Optional[
-            typing.Dict[str, typing.Union[str, float, bool]]
+            typing.Union[typing.Dict[str, typing.Union[str, float, bool]], str]
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
         data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None,
@@ -17583,7 +17577,7 @@ class APIRequestContext(AsyncBase):
         ----------
         url : str
             Target URL.
-        params : Union[Dict[str, Union[bool, float, str]], None]
+        params : Union[Dict[str, Union[bool, float, str]], str, None]
             Query parameters to be sent with the URL.
         headers : Union[Dict[str, str], None]
             Allows to set HTTP headers. These headers will apply to the fetched request as well as any redirects initiated by
@@ -17640,7 +17634,7 @@ class APIRequestContext(AsyncBase):
         url: str,
         *,
         params: typing.Optional[
-            typing.Dict[str, typing.Union[str, float, bool]]
+            typing.Union[typing.Dict[str, typing.Union[str, float, bool]], str]
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
         data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None,
@@ -17664,7 +17658,7 @@ class APIRequestContext(AsyncBase):
         ----------
         url : str
             Target URL.
-        params : Union[Dict[str, Union[bool, float, str]], None]
+        params : Union[Dict[str, Union[bool, float, str]], str, None]
             Query parameters to be sent with the URL.
         headers : Union[Dict[str, str], None]
             Allows to set HTTP headers. These headers will apply to the fetched request as well as any redirects initiated by
@@ -17721,7 +17715,7 @@ class APIRequestContext(AsyncBase):
         url: str,
         *,
         params: typing.Optional[
-            typing.Dict[str, typing.Union[str, float, bool]]
+            typing.Union[typing.Dict[str, typing.Union[str, float, bool]], str]
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
         data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None,
@@ -17757,7 +17751,7 @@ class APIRequestContext(AsyncBase):
         ----------
         url : str
             Target URL.
-        params : Union[Dict[str, Union[bool, float, str]], None]
+        params : Union[Dict[str, Union[bool, float, str]], str, None]
             Query parameters to be sent with the URL.
         headers : Union[Dict[str, str], None]
             Allows to set HTTP headers. These headers will apply to the fetched request as well as any redirects initiated by
@@ -17814,7 +17808,7 @@ class APIRequestContext(AsyncBase):
         url: str,
         *,
         params: typing.Optional[
-            typing.Dict[str, typing.Union[str, float, bool]]
+            typing.Union[typing.Dict[str, typing.Union[str, float, bool]], str]
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
         data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None,
@@ -17838,7 +17832,7 @@ class APIRequestContext(AsyncBase):
         ----------
         url : str
             Target URL.
-        params : Union[Dict[str, Union[bool, float, str]], None]
+        params : Union[Dict[str, Union[bool, float, str]], str, None]
             Query parameters to be sent with the URL.
         headers : Union[Dict[str, str], None]
             Allows to set HTTP headers. These headers will apply to the fetched request as well as any redirects initiated by
@@ -17895,7 +17889,7 @@ class APIRequestContext(AsyncBase):
         url: str,
         *,
         params: typing.Optional[
-            typing.Dict[str, typing.Union[str, float, bool]]
+            typing.Union[typing.Dict[str, typing.Union[str, float, bool]], str]
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
         data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None,
@@ -17919,7 +17913,7 @@ class APIRequestContext(AsyncBase):
         ----------
         url : str
             Target URL.
-        params : Union[Dict[str, Union[bool, float, str]], None]
+        params : Union[Dict[str, Union[bool, float, str]], str, None]
             Query parameters to be sent with the URL.
         headers : Union[Dict[str, str], None]
             Allows to set HTTP headers. These headers will apply to the fetched request as well as any redirects initiated by
@@ -17976,7 +17970,7 @@ class APIRequestContext(AsyncBase):
         url: str,
         *,
         params: typing.Optional[
-            typing.Dict[str, typing.Union[str, float, bool]]
+            typing.Union[typing.Dict[str, typing.Union[str, float, bool]], str]
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
         data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None,
@@ -18031,7 +18025,7 @@ class APIRequestContext(AsyncBase):
         ----------
         url : str
             Target URL.
-        params : Union[Dict[str, Union[bool, float, str]], None]
+        params : Union[Dict[str, Union[bool, float, str]], str, None]
             Query parameters to be sent with the URL.
         headers : Union[Dict[str, str], None]
             Allows to set HTTP headers. These headers will apply to the fetched request as well as any redirects initiated by
@@ -18088,7 +18082,7 @@ class APIRequestContext(AsyncBase):
         url_or_request: typing.Union[str, "Request"],
         *,
         params: typing.Optional[
-            typing.Dict[str, typing.Union[str, float, bool]]
+            typing.Union[typing.Dict[str, typing.Union[str, float, bool]], str]
         ] = None,
         method: typing.Optional[str] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
@@ -18127,7 +18121,7 @@ class APIRequestContext(AsyncBase):
         ----------
         url_or_request : Union[Request, str]
             Target URL or Request to get all parameters from.
-        params : Union[Dict[str, Union[bool, float, str]], None]
+        params : Union[Dict[str, Union[bool, float, str]], str, None]
             Query parameters to be sent with the URL.
         method : Union[str, None]
             If set changes the fetch method (e.g. [PUT](https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/PUT) or
@@ -18258,15 +18252,15 @@ class APIRequest(AsyncBase):
             information obtained via `browser_context.storage_state()` or `a_pi_request_context.storage_state()`.
             Either a path to the file with saved storage, or the value returned by one of
             `browser_context.storage_state()` or `a_pi_request_context.storage_state()` methods.
-        client_certificates : Union[Sequence[{origin: str, certPath: Union[pathlib.Path, str, None], keyPath: Union[pathlib.Path, str, None], pfxPath: Union[pathlib.Path, str, None], passphrase: Union[str, None]}], None]
+        client_certificates : Union[Sequence[{origin: str, certPath: Union[pathlib.Path, str, None], cert: Union[bytes, None], keyPath: Union[pathlib.Path, str, None], key: Union[bytes, None], pfxPath: Union[pathlib.Path, str, None], pfx: Union[bytes, None], passphrase: Union[str, None]}], None]
             TLS Client Authentication allows the server to request a client certificate and verify it.
 
             **Details**
 
-            An array of client certificates to be used. Each certificate object must have both `certPath` and `keyPath` or a
-            single `pfxPath` to load the client certificate. Optionally, `passphrase` property should be provided if the
-            certficiate is encrypted. The `origin` property should be provided with an exact match to the request origin that
-            the certificate is valid for.
+            An array of client certificates to be used. Each certificate object must have either both `certPath` and `keyPath`,
+            a single `pfxPath`, or their corresponding direct value equivalents (`cert` and `key`, or `pfx`). Optionally,
+            `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
+            with an exact match to the request origin that the certificate is valid for.
 
             **NOTE** Using Client Certificates in combination with Proxy Servers is not supported.
 

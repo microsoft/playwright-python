@@ -157,7 +157,6 @@ class ElementHandle(JSHandle):
         params = locals_to_params(
             dict(
                 timeout=timeout,
-                noWaitAfter=noWaitAfter,
                 force=force,
                 **convert_select_option_values(value, index, label, element)
             )
