@@ -218,7 +218,7 @@ setup(
     ],
     include_package_data=True,
     install_requires=[
-        "greenlet==3.0.3",
+        "greenlet==3.1.0",
         "pyee==12.0.0",
     ],
     # TODO: Can be removed once we migrate to pypa/build or pypa/installer.
