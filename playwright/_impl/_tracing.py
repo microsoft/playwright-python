@@ -25,6 +25,7 @@ class Tracing(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
+        self.mark_as_internal_type()
         self._include_sources: bool = False
         self._stacks_id: Optional[str] = None
         self._is_tracing: bool = False
