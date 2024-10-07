@@ -539,6 +539,16 @@ class Route(ChannelOwner):
             await asyncio.gather(fut, return_exceptions=True)
 
 
+def _create_task_and_ignore_exception(coro: Coroutine) -> None:
+    async def _ignore_exception() -> None:
+        try:
+            await coro
+        except Exception:
+            pass
+
+    asyncio.create_task(_ignore_exception())
+
+
 class ServerWebSocketRoute:
     def __init__(self, ws: "WebSocketRoute"):
         self._ws = ws
@@ -559,28 +569,25 @@ class ServerWebSocketRoute:
         return self._ws._initializer["url"]
 
     def close(self, code: int = None, reason: str = None) -> None:
-        try:
-            asyncio.create_task(
-                self._ws._channel.send(
-                    "close",
-                    {
-                        "code": code,
-                        "reason": reason,
-                    },
-                )
+        _create_task_and_ignore_exception(
+            self._ws._channel.send(
+                "close",
+                {
+                    "code": code,
+                    "reason": reason,
+                },
             )
-        except Exception:
-            pass
+        )
 
     def send(self, message: Union[str, bytes]) -> None:
         if isinstance(message, str):
-            asyncio.create_task(
+            _create_task_and_ignore_exception(
                 self._ws._channel.send(
                     "sendToServer", {"message": message, "isBase64": False}
                 )
             )
         else:
-            asyncio.create_task(
+            _create_task_and_ignore_exception(
                 self._ws._channel.send(
                     "sendToServer",
                     {"message": base64.b64encode(message).decode(), "isBase64": True},
@@ -617,10 +624,7 @@ class WebSocketRoute(ChannelOwner):
                 else event["message"]
             )
         elif self._connected:
-            try:
-                asyncio.create_task(self._channel.send("sendToServer", event))
-            except Exception:
-                pass
+            _create_task_and_ignore_exception(self._channel.send("sendToServer", event))
 
     def _channel_message_from_server(self, event: Dict) -> None:
         if self._on_server_message:
@@ -630,28 +634,19 @@ class WebSocketRoute(ChannelOwner):
                 else event["message"]
             )
         else:
-            try:
-                asyncio.create_task(self._channel.send("sendToPage", event))
-            except Exception:
-                pass
+            _create_task_and_ignore_exception(self._channel.send("sendToPage", event))
 
     def _channel_close_page(self, event: Dict) -> None:
         if self._on_page_close:
             self._on_page_close(event["code"], event["reason"])
         else:
-            try:
-                asyncio.create_task(self._channel.send("closeServer", event))
-            except Exception:
-                pass
+            _create_task_and_ignore_exception(self._channel.send("closeServer", event))
 
     def _channel_close_server(self, event: Dict) -> None:
         if self._on_server_close:
             self._on_server_close(event["code"], event["reason"])
         else:
-            try:
-                asyncio.create_task(self._channel.send("closePage", event))
-            except Exception:
-                pass
+            _create_task_and_ignore_exception(self._channel.send("closePage", event))
 
     @property
     def url(self) -> str:
@@ -674,27 +669,21 @@ class WebSocketRoute(ChannelOwner):
 
     def send(self, message: Union[str, bytes]) -> None:
         if isinstance(message, str):
-            try:
-                asyncio.create_task(
-                    self._channel.send(
-                        "sendToPage", {"message": message, "isBase64": False}
-                    )
+            _create_task_and_ignore_exception(
+                self._channel.send(
+                    "sendToPage", {"message": message, "isBase64": False}
                 )
-            except Exception:
-                pass
+            )
         else:
-            try:
-                asyncio.create_task(
-                    self._channel.send(
-                        "sendToPage",
-                        {
-                            "message": base64.b64encode(message).decode(),
-                            "isBase64": True,
-                        },
-                    )
+            _create_task_and_ignore_exception(
+                self._channel.send(
+                    "sendToPage",
+                    {
+                        "message": base64.b64encode(message).decode(),
+                        "isBase64": True,
+                    },
                 )
-            except Exception:
-                pass
+            )
 
     def on_message(self, handler: Callable[[Union[str, bytes]], Any]) -> None:
         self._on_page_message = handler
