@@ -41,13 +41,10 @@ class Tracing(ChannelOwner):
         params = locals_to_params(locals())
         self._include_sources = bool(sources)
 
-        async def _inner_start() -> str:
-            await self._channel.send("tracingStart", params)
-            return await self._channel.send(
-                "tracingStartChunk", {"title": title, "name": name}
-            )
-
-        trace_name = await self._connection.wrap_api_call(_inner_start, True)
+        await self._channel.send("tracingStart", params)
+        trace_name = await self._channel.send(
+            "tracingStartChunk", {"title": title, "name": name}
+        )
         await self._start_collecting_stacks(trace_name)
 
     async def start_chunk(self, title: str = None, name: str = None) -> None:
@@ -64,14 +61,11 @@ class Tracing(ChannelOwner):
         )
 
     async def stop_chunk(self, path: Union[pathlib.Path, str] = None) -> None:
-        await self._connection.wrap_api_call(lambda: self._do_stop_chunk(path), True)
+        await self._do_stop_chunk(path)
 
     async def stop(self, path: Union[pathlib.Path, str] = None) -> None:
-        async def _inner() -> None:
-            await self._do_stop_chunk(path)
-            await self._channel.send("tracingStop")
-
-        await self._connection.wrap_api_call(_inner, True)
+        await self._do_stop_chunk(path)
+        await self._channel.send("tracingStop")
 
     async def _do_stop_chunk(self, file_path: Union[pathlib.Path, str] = None) -> None:
         self._reset_stack_counter()
