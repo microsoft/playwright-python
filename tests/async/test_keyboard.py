@@ -109,7 +109,9 @@ async def test_should_send_a_character_with_send_character(
         '() => window.addEventListener("keydown", e => e.preventDefault(), true)'
     )
     await page.keyboard.insert_text("a")
-    assert await page.evaluate('() => document.querySelector("textarea").value') == "嗨a"
+    assert (
+        await page.evaluate('() => document.querySelector("textarea").value') == "嗨a"
+    )
 
 
 async def test_should_only_emit_input_event(page: Page, server: Server) -> None:

@@ -85,6 +85,7 @@ from playwright._impl._web_error import WebError as WebErrorImpl
 
 
 class Request(SyncBase):
+
     @property
     def url(self) -> str:
         """Request.url
@@ -387,6 +388,7 @@ mapping.register(RequestImpl, Request)
 
 
 class Response(SyncBase):
+
     @property
     def url(self) -> str:
         """Response.url
@@ -627,6 +629,7 @@ mapping.register(ResponseImpl, Response)
 
 
 class Route(SyncBase):
+
     @property
     def request(self) -> "Request":
         """Route.request
@@ -967,6 +970,7 @@ mapping.register(RouteImpl, Route)
 
 
 class WebSocket(SyncBase):
+
     @typing.overload
     def on(
         self, event: Literal["close"], f: typing.Callable[["WebSocket"], "None"]
@@ -1139,6 +1143,7 @@ mapping.register(WebSocketImpl, WebSocket)
 
 
 class Keyboard(SyncBase):
+
     def down(self, key: str) -> None:
         """Keyboard.down
 
@@ -1306,6 +1311,7 @@ mapping.register(KeyboardImpl, Keyboard)
 
 
 class Mouse(SyncBase):
+
     def move(self, x: float, y: float, *, steps: typing.Optional[int] = None) -> None:
         """Mouse.move
 
@@ -1459,6 +1465,7 @@ mapping.register(MouseImpl, Mouse)
 
 
 class Touchscreen(SyncBase):
+
     def tap(self, x: float, y: float) -> None:
         """Touchscreen.tap
 
@@ -1481,6 +1488,7 @@ mapping.register(TouchscreenImpl, Touchscreen)
 
 
 class JSHandle(SyncBase):
+
     def evaluate(
         self, expression: str, arg: typing.Optional[typing.Any] = None
     ) -> typing.Any:
@@ -1638,6 +1646,7 @@ mapping.register(JSHandleImpl, JSHandle)
 
 
 class ElementHandle(JSHandle):
+
     def as_element(self) -> typing.Optional["ElementHandle"]:
         """ElementHandle.as_element
 
@@ -2992,6 +3001,7 @@ mapping.register(ElementHandleImpl, ElementHandle)
 
 
 class Accessibility(SyncBase):
+
     def snapshot(
         self,
         *,
@@ -3059,6 +3069,7 @@ mapping.register(AccessibilityImpl, Accessibility)
 
 
 class FileChooser(SyncBase):
+
     @property
     def page(self) -> "Page":
         """FileChooser.page
@@ -3139,6 +3150,7 @@ mapping.register(FileChooserImpl, FileChooser)
 
 
 class Frame(SyncBase):
+
     @property
     def page(self) -> "Page":
         """Frame.page
@@ -5965,6 +5977,7 @@ mapping.register(FrameImpl, Frame)
 
 
 class FrameLocator(SyncBase):
+
     @property
     def first(self) -> "FrameLocator":
         """FrameLocator.first
@@ -6572,6 +6585,7 @@ mapping.register(FrameLocatorImpl, FrameLocator)
 
 
 class Worker(SyncBase):
+
     def on(
         self, event: Literal["close"], f: typing.Callable[["Worker"], "None"]
     ) -> None:
@@ -6670,6 +6684,7 @@ mapping.register(WorkerImpl, Worker)
 
 
 class Selectors(SyncBase):
+
     def register(
         self,
         name: str,
@@ -6765,6 +6780,7 @@ mapping.register(SelectorsImpl, Selectors)
 
 
 class Clock(SyncBase):
+
     def install(
         self,
         *,
@@ -6927,6 +6943,7 @@ mapping.register(ClockImpl, Clock)
 
 
 class ConsoleMessage(SyncBase):
+
     @property
     def type(self) -> str:
         """ConsoleMessage.type
@@ -6992,6 +7009,7 @@ mapping.register(ConsoleMessageImpl, ConsoleMessage)
 
 
 class Dialog(SyncBase):
+
     @property
     def type(self) -> str:
         """Dialog.type
@@ -7068,6 +7086,7 @@ mapping.register(DialogImpl, Dialog)
 
 
 class Download(SyncBase):
+
     @property
     def page(self) -> "Page":
         """Download.page
@@ -7177,6 +7196,7 @@ mapping.register(DownloadImpl, Download)
 
 
 class Video(SyncBase):
+
     def path(self) -> pathlib.Path:
         """Video.path
 
@@ -7217,6 +7237,7 @@ mapping.register(VideoImpl, Video)
 
 
 class Page(SyncContextManager):
+
     @typing.overload
     def on(self, event: Literal["close"], f: typing.Callable[["Page"], "None"]) -> None:
         """
@@ -12090,6 +12111,7 @@ mapping.register(PageImpl, Page)
 
 
 class WebError(SyncBase):
+
     @property
     def page(self) -> typing.Optional["Page"]:
         """WebError.page
@@ -12119,6 +12141,7 @@ mapping.register(WebErrorImpl, WebError)
 
 
 class BrowserContext(SyncContextManager):
+
     @typing.overload
     def on(
         self, event: Literal["backgroundpage"], f: typing.Callable[["Page"], "None"]
@@ -13317,6 +13340,7 @@ mapping.register(BrowserContextImpl, BrowserContext)
 
 
 class CDPSession(SyncBase):
+
     def send(
         self, method: str, params: typing.Optional[typing.Dict] = None
     ) -> typing.Dict:
@@ -13354,6 +13378,7 @@ mapping.register(CDPSessionImpl, CDPSession)
 
 
 class Browser(SyncContextManager):
+
     def on(
         self, event: Literal["disconnected"], f: typing.Callable[["Browser"], "None"]
     ) -> None:
@@ -14011,6 +14036,7 @@ mapping.register(BrowserImpl, Browser)
 
 
 class BrowserType(SyncBase):
+
     @property
     def name(self) -> str:
         """BrowserType.name
@@ -14600,6 +14626,7 @@ mapping.register(BrowserTypeImpl, BrowserType)
 
 
 class Playwright(SyncBase):
+
     @property
     def devices(self) -> typing.Dict:
         """Playwright.devices
@@ -14691,6 +14718,7 @@ class Playwright(SyncBase):
         return mapping.from_impl(self._impl_obj.request)
 
     def __getitem__(self, value: str) -> "BrowserType":
+
         return mapping.from_impl(self._impl_obj.__getitem__(value=value))
 
     def stop(self) -> None:
@@ -14721,6 +14749,7 @@ mapping.register(PlaywrightImpl, Playwright)
 
 
 class Tracing(SyncBase):
+
     def start(
         self,
         *,
@@ -14849,6 +14878,7 @@ mapping.register(TracingImpl, Tracing)
 
 
 class Locator(SyncBase):
+
     @property
     def page(self) -> "Page":
         """Locator.page
@@ -17511,6 +17541,7 @@ mapping.register(LocatorImpl, Locator)
 
 
 class APIResponse(SyncBase):
+
     @property
     def ok(self) -> bool:
         """APIResponse.ok
@@ -17635,6 +17666,7 @@ mapping.register(APIResponseImpl, APIResponse)
 
 
 class APIRequestContext(SyncBase):
+
     def dispose(self, *, reason: typing.Optional[str] = None) -> None:
         """APIRequestContext.dispose
 
@@ -18325,6 +18357,7 @@ mapping.register(APIRequestContextImpl, APIRequestContext)
 
 
 class APIRequest(SyncBase):
+
     def new_context(
         self,
         *,
@@ -18415,6 +18448,7 @@ mapping.register(APIRequestImpl, APIRequest)
 
 
 class PageAssertions(SyncBase):
+
     def to_have_title(
         self,
         title_or_reg_exp: typing.Union[typing.Pattern[str], str],
@@ -18556,6 +18590,7 @@ mapping.register(PageAssertionsImpl, PageAssertions)
 
 
 class LocatorAssertions(SyncBase):
+
     def to_contain_text(
         self,
         expected: typing.Union[
@@ -20246,6 +20281,7 @@ mapping.register(LocatorAssertionsImpl, LocatorAssertions)
 
 
 class APIResponseAssertions(SyncBase):
+
     def to_be_ok(self) -> None:
         """APIResponseAssertions.to_be_ok
 

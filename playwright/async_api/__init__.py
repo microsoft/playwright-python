@@ -107,20 +107,19 @@ class Expect:
             self._timeout = timeout
 
     @overload
-    def __call__(self, actual: Page, message: Optional[str] = None) -> PageAssertions:
-        ...
+    def __call__(
+        self, actual: Page, message: Optional[str] = None
+    ) -> PageAssertions: ...
 
     @overload
     def __call__(
         self, actual: Locator, message: Optional[str] = None
-    ) -> LocatorAssertions:
-        ...
+    ) -> LocatorAssertions: ...
 
     @overload
     def __call__(
         self, actual: APIResponse, message: Optional[str] = None
-    ) -> APIResponseAssertions:
-        ...
+    ) -> APIResponseAssertions: ...
 
     def __call__(
         self, actual: Union[Page, Locator, APIResponse], message: Optional[str] = None

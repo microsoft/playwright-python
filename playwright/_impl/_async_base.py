@@ -15,7 +15,7 @@
 import asyncio
 from contextlib import AbstractAsyncContextManager
 from types import TracebackType
-from typing import Any, Callable, Generic, Optional, Type, TypeVar
+from typing import Any, Callable, Generic, Optional, Type, TypeVar, Union
 
 from playwright._impl._impl_to_api_mapping import ImplToApiMapping, ImplWrapper
 
@@ -68,7 +68,9 @@ class AsyncBase(ImplWrapper):
     def __str__(self) -> str:
         return self._impl_obj.__str__()
 
-    def _wrap_handler(self, handler: Any) -> Callable[..., None]:
+    def _wrap_handler(
+        self, handler: Union[Callable[..., Any], Any]
+    ) -> Callable[..., None]:
         if callable(handler):
             return mapping.wrap_handler(handler)
         return handler
@@ -100,5 +102,4 @@ class AsyncContextManager(AsyncBase):
     ) -> None:
         await self.close()
 
-    async def close(self) -> None:
-        ...
+    async def close(self) -> None: ...

@@ -185,7 +185,7 @@ class Server:
 
         ws_factory = WebSocketServerFactory()
         ws_factory.protocol = WebSocketProtocol
-        ws_factory.server_instance = self
+        setattr(ws_factory, "server_instance", self)
         self._ws_resource = WebSocketResource(ws_factory)
 
         self.listen(factory)
@@ -281,8 +281,8 @@ class HTTPSServer(Server):
 
 class WebSocketProtocol(WebSocketServerProtocol):
     def onOpen(self) -> None:
-        for handler in self.factory.server_instance._ws_handlers.copy():
-            self.factory.server_instance._ws_handlers.remove(handler)
+        for handler in getattr(self.factory, "server_instance")._ws_handlers.copy():
+            getattr(self.factory, "server_instance")._ws_handlers.remove(handler)
             handler(self)
 
 

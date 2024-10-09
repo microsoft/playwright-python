@@ -117,7 +117,7 @@ class ImplToApiMapping:
         except RecursionError:
             raise Error("Maximum argument depth exceeded")
 
-    def wrap_handler(self, handler: Callable[..., None]) -> Callable[..., None]:
+    def wrap_handler(self, handler: Callable[..., Any]) -> Callable[..., None]:
         def wrapper_func(*args: Any) -> Any:
             arg_count = len(inspect.signature(handler).parameters)
             return handler(

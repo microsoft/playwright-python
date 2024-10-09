@@ -96,9 +96,9 @@ class DocumentationProvider:
         new_name = to_snake_case(alias)
         if kind == "event":
             new_name = new_name.lower()
-            self.links[
-                f"[`event: {clazz}.{member}`]"
-            ] = f"`{var_name}.on('{new_name}')`"
+            self.links[f"[`event: {clazz}.{member}`]"] = (
+                f"`{var_name}.on('{new_name}')`"
+            )
         elif kind == "property":
             self.links[f"[`property: {clazz}.{member}`]"] = f"`{var_name}.{new_name}`"
         else:

@@ -316,21 +316,21 @@ class BrowserContext(ChannelOwner):
             {
                 "name": name if isinstance(name, str) else None,
                 "nameRegexSource": name.pattern if isinstance(name, Pattern) else None,
-                "nameRegexFlags": escape_regex_flags(name)
-                if isinstance(name, Pattern)
-                else None,
+                "nameRegexFlags": (
+                    escape_regex_flags(name) if isinstance(name, Pattern) else None
+                ),
                 "domain": domain if isinstance(domain, str) else None,
-                "domainRegexSource": domain.pattern
-                if isinstance(domain, Pattern)
-                else None,
-                "domainRegexFlags": escape_regex_flags(domain)
-                if isinstance(domain, Pattern)
-                else None,
+                "domainRegexSource": (
+                    domain.pattern if isinstance(domain, Pattern) else None
+                ),
+                "domainRegexFlags": (
+                    escape_regex_flags(domain) if isinstance(domain, Pattern) else None
+                ),
                 "path": path if isinstance(path, str) else None,
                 "pathRegexSource": path.pattern if isinstance(path, Pattern) else None,
-                "pathRegexFlags": escape_regex_flags(path)
-                if isinstance(path, Pattern)
-                else None,
+                "pathRegexFlags": (
+                    escape_regex_flags(path) if isinstance(path, Pattern) else None
+                ),
             },
         )
 

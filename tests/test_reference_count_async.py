@@ -59,6 +59,7 @@ async def test_memory_objects(server: Server, browser_name: str) -> None:
 
     pw_objects: defaultdict = defaultdict(int)
     for o in objgraph.by_type("dict"):
+        assert isinstance(o, dict)
         name = o.get("_type")
         # https://github.com/microsoft/playwright-python/issues/1602
         if o.get("__pw__is_last_network_response_received_event", False):
