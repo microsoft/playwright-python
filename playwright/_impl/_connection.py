@@ -197,9 +197,9 @@ class ProtocolCallback:
         if current_task:
             current_task.add_done_callback(cb)
             self.future.add_done_callback(
-                lambda _: current_task.remove_done_callback(cb)
-                if current_task
-                else None
+                lambda _: (
+                    current_task.remove_done_callback(cb) if current_task else None
+                )
             )
 
 
@@ -243,9 +243,9 @@ class Connection(EventEmitter):
         self._error: Optional[BaseException] = None
         self.is_remote = False
         self._init_task: Optional[asyncio.Task] = None
-        self._api_zone: contextvars.ContextVar[
-            Optional[ParsedStackTrace]
-        ] = contextvars.ContextVar("ApiZone", default=None)
+        self._api_zone: contextvars.ContextVar[Optional[ParsedStackTrace]] = (
+            contextvars.ContextVar("ApiZone", default=None)
+        )
         self._local_utils: Optional["LocalUtils"] = local_utils
         self._tracing_count = 0
         self._closed_error: Optional[Exception] = None

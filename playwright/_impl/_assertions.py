@@ -512,9 +512,11 @@ class LocatorAssertions(AssertionsBase):
     ) -> None:
         __tracebackhide__ = True
         await self._expect_impl(
-            "to.be.attached"
-            if (attached is None or attached is True)
-            else "to.be.detached",
+            (
+                "to.be.attached"
+                if (attached is None or attached is True)
+                else "to.be.detached"
+            ),
             FrameExpectOptions(timeout=timeout),
             None,
             "Locator expected to be attached",
@@ -527,9 +529,11 @@ class LocatorAssertions(AssertionsBase):
     ) -> None:
         __tracebackhide__ = True
         await self._expect_impl(
-            "to.be.checked"
-            if checked is None or checked is True
-            else "to.be.unchecked",
+            (
+                "to.be.checked"
+                if checked is None or checked is True
+                else "to.be.unchecked"
+            ),
             FrameExpectOptions(timeout=timeout),
             None,
             "Locator expected to be checked",

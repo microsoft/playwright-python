@@ -114,7 +114,9 @@ class SyncBase(ImplWrapper):
         asyncio._set_running_loop(self._loop)
         return task.result()
 
-    def _wrap_handler(self, handler: Any) -> Callable[..., None]:
+    def _wrap_handler(
+        self, handler: Union[Callable[..., Any], Any]
+    ) -> Callable[..., None]:
         if callable(handler):
             return mapping.wrap_handler(handler)
         return handler
@@ -146,5 +148,4 @@ class SyncContextManager(SyncBase):
     ) -> None:
         self.close()
 
-    def close(self) -> None:
-        ...
+    def close(self) -> None: ...

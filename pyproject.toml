@@ -35,6 +35,7 @@ profile = "black"
 
 [tool.pyright]
 include = ["playwright", "tests", "scripts"]
+exclude = ["**/node_modules", "**/__pycache__", "**/.*", "./build"]
 pythonVersion = "3.8"
 reportMissingImports = false
 reportTypedDictNotRequiredAccess = false
@@ -42,3 +43,4 @@ reportCallInDefaultInitializer = true
 reportOptionalSubscript = false
 reportUnboundVariable = false
 strictParameterNoneValue = false
+reportIncompatibleVariableOverride = false
