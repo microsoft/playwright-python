@@ -18,7 +18,6 @@ import pathlib
 import typing
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union, cast
-from urllib.parse import parse_qs
 
 import playwright._impl._network as network
 from playwright._impl._api_structures import (
@@ -405,7 +404,8 @@ class APIRequestContext(ChannelOwner):
             "fetch",
             {
                 "url": url,
-                "params": params_to_protocol(params),
+                "params": object_to_array(params) if isinstance(params, dict) else None,
+                "encodedParams": params if isinstance(params, str) else None,
                 "method": method,
                 "headers": serialized_headers,
                 "postData": post_data,
@@ -428,23 +428,6 @@ class APIRequestContext(ChannelOwner):
         if path:
             await async_writefile(path, json.dumps(result))
         return result
-
-
-def params_to_protocol(params: Optional[ParamsType]) -> Optional[List[NameValue]]:
-    if not params:
-        return None
-    if isinstance(params, dict):
-        return object_to_array(params)
-    if params.startswith("?"):
-        params = params[1:]
-    parsed = parse_qs(params)
-    if not parsed:
-        return None
-    out = []
-    for name, values in parsed.items():
-        for value in values:
-            out.append(NameValue(name=name, value=value))
-    return out
 
 
 def file_payload_to_json(payload: FilePayload) -> ServerFilePayload:

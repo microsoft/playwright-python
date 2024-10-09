@@ -40,7 +40,13 @@ from playwright._impl._helper import Error, to_snake_case
 from playwright._impl._input import Keyboard, Mouse, Touchscreen
 from playwright._impl._js_handle import JSHandle, Serializable
 from playwright._impl._locator import FrameLocator, Locator
-from playwright._impl._network import Request, Response, Route, WebSocket
+from playwright._impl._network import (
+    Request,
+    Response,
+    Route,
+    WebSocket,
+    WebSocketRoute,
+)
 from playwright._impl._page import Page, Worker
 from playwright._impl._playwright import Playwright
 from playwright._impl._selectors import Selectors
@@ -233,7 +239,7 @@ from playwright._impl._file_chooser import FileChooser as FileChooserImpl
 from playwright._impl._frame import Frame as FrameImpl
 from playwright._impl._input import Keyboard as KeyboardImpl, Mouse as MouseImpl, Touchscreen as TouchscreenImpl
 from playwright._impl._js_handle import JSHandle as JSHandleImpl
-from playwright._impl._network import Request as RequestImpl, Response as ResponseImpl, Route as RouteImpl, WebSocket as WebSocketImpl
+from playwright._impl._network import Request as RequestImpl, Response as ResponseImpl, Route as RouteImpl, WebSocket as WebSocketImpl, WebSocketRoute as WebSocketRouteImpl
 from playwright._impl._page import Page as PageImpl, Worker as WorkerImpl
 from playwright._impl._web_error import WebError as WebErrorImpl
 from playwright._impl._playwright import Playwright as PlaywrightImpl
@@ -252,6 +258,7 @@ generated_types = [
     Response,
     Route,
     WebSocket,
+    WebSocketRoute,
     Keyboard,
     Mouse,
     Touchscreen,

@@ -50,7 +50,7 @@ from playwright._impl._str_utils import escape_regex_flags
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._api_structures import HeadersArray
-    from playwright._impl._network import Request, Response, Route
+    from playwright._impl._network import Request, Response, Route, WebSocketRoute
 
 URLMatch = Union[str, Pattern[str], Callable[[str], bool]]
 URLMatchRequest = Union[str, Pattern[str], Callable[["Request"], bool]]
@@ -58,6 +58,7 @@ URLMatchResponse = Union[str, Pattern[str], Callable[["Response"], bool]]
 RouteHandlerCallback = Union[
     Callable[["Route"], Any], Callable[["Route", "Request"], Any]
 ]
+WebSocketRouteHandlerCallback = Callable[["WebSocketRoute"], Any]
 
 ColorScheme = Literal["dark", "light", "no-preference", "null"]
 ForcedColors = Literal["active", "none", "null"]

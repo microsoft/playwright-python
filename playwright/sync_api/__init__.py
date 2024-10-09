@@ -61,6 +61,7 @@ from playwright.sync_api._generated import (
     Touchscreen,
     Video,
     WebSocket,
+    WebSocketRoute,
     Worker,
 )
 
@@ -190,5 +191,6 @@ __all__ = [
     "Video",
     "ViewportSize",
     "WebSocket",
+    "WebSocketRoute",
     "Worker",
 ]
