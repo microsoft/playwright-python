@@ -294,6 +294,8 @@ class Connection(EventEmitter):
             # To prevent 'Future exception was never retrieved' we ignore all callbacks that are no_reply.
             if callback.no_reply:
                 continue
+            if callback.future.cancelled():
+                continue
             callback.future.set_exception(self._closed_error)
         self._callbacks.clear()
         self.emit("close")
