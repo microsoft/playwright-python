@@ -13,11 +13,12 @@
 # limitations under the License.
 import asyncio
 import gc
+import sys
 from typing import Dict
 
 import pytest
 
-from playwright.async_api import async_playwright
+from playwright.async_api import Page, async_playwright
 from tests.server import Server
 from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
 
@@ -67,3 +68,22 @@ async def test_cancel_pending_protocol_call_on_playwright_stop(server: Server) -
     with pytest.raises(Exception) as exc_info:
         await pending_task
     assert TARGET_CLOSED_ERROR_MESSAGE in str(exc_info.value)
+
+
+async def test_should_not_throw_with_taskgroup(page: Page) -> None:
+    if sys.version_info < (3, 11):
+        pytest.skip("TaskGroup is only available in Python 3.11+")
+
+    from builtins import ExceptionGroup  # type: ignore
+
+    async def raise_exception() -> None:
+        raise ValueError("Something went wrong")
+
+    with pytest.raises(ExceptionGroup) as exc_info:
+        async with asyncio.TaskGroup() as group:  # type: ignore
+            group.create_task(page.locator(".this-element-does-not-exist").inner_text())
+            group.create_task(raise_exception())
+    assert len(exc_info.value.exceptions) == 1
+    assert "Something went wrong" in str(exc_info.value.exceptions[0])
+    assert isinstance(exc_info.value.exceptions[0], ValueError)
+    assert await page.evaluate("() => 11 * 11") == 121
