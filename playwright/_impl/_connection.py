@@ -132,6 +132,7 @@ class ChannelOwner(AsyncIOEventEmitter):
         self._channel: Channel = Channel(self._connection, self)
         self._initializer = initializer
         self._was_collected = False
+        self._is_internal_type = False
 
         self._connection._objects[guid] = self
         if self._parent:
@@ -155,6 +156,9 @@ class ChannelOwner(AsyncIOEventEmitter):
         del cast("ChannelOwner", child._parent)._objects[child._guid]
         self._objects[child._guid] = child
         child._parent = self
+
+    def mark_as_internal_type(self) -> None:
+        self._is_internal_type = True
 
     def _set_event_to_subscription_mapping(self, mapping: Dict[str, str]) -> None:
         self._event_to_subscription_mapping = mapping
@@ -355,7 +359,7 @@ class Connection(EventEmitter):
             "params": self._replace_channels_with_guids(params),
             "metadata": metadata,
         }
-        if self._tracing_count > 0 and frames and object._guid != "localUtils":
+        if self._tracing_count > 0 and frames and not object._is_internal_type:
             self.local_utils.add_stack_to_tracing_no_reply(id, frames)
 
         self._transport.send(message)

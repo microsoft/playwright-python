@@ -62,6 +62,7 @@ from playwright._impl._helper import (
     TimeoutSettings,
     URLMatch,
     URLMatcher,
+    WebSocketRouteHandlerCallback,
     async_readfile,
     async_writefile,
     locals_to_params,
@@ -69,7 +70,14 @@ from playwright._impl._helper import (
     prepare_record_har_options,
     to_impl,
 )
-from playwright._impl._network import Request, Response, Route, serialize_headers
+from playwright._impl._network import (
+    Request,
+    Response,
+    Route,
+    WebSocketRoute,
+    WebSocketRouteHandler,
+    serialize_headers,
+)
 from playwright._impl._page import BindingCall, Page, Worker
 from playwright._impl._str_utils import escape_regex_flags
 from playwright._impl._tracing import Tracing
@@ -106,6 +114,7 @@ class BrowserContext(ChannelOwner):
             self._browser._contexts.append(self)
         self._pages: List[Page] = []
         self._routes: List[RouteHandler] = []
+        self._web_socket_routes: List[WebSocketRouteHandler] = []
         self._bindings: Dict[str, Any] = {}
         self._timeout_settings = TimeoutSettings(None)
         self._owner_page: Optional[Page] = None
@@ -132,7 +141,14 @@ class BrowserContext(ChannelOwner):
                 )
             ),
         )
-
+        self._channel.on(
+            "webSocketRoute",
+            lambda params: self._loop.create_task(
+                self._on_web_socket_route(
+                    from_channel(params["webSocketRoute"]),
+                )
+            ),
+        )
         self._channel.on(
             "backgroundPage",
             lambda params: self._on_background_page(from_channel(params["page"])),
@@ -244,9 +260,23 @@ class BrowserContext(ChannelOwner):
         try:
             # If the page is closed or unrouteAll() was called without waiting and interception disabled,
             # the method will throw an error - silence it.
-            await route._internal_continue(is_internal=True)
+            await route._inner_continue(True)
         except Exception:
             pass
+
+    async def _on_web_socket_route(self, web_socket_route: WebSocketRoute) -> None:
+        route_handler = next(
+            (
+                route_handler
+                for route_handler in self._web_socket_routes
+                if route_handler.matches(web_socket_route.url)
+            ),
+            None,
+        )
+        if route_handler:
+            await route_handler.handle(web_socket_route)
+        else:
+            web_socket_route.connect_to_server()
 
     def _on_binding(self, binding_call: BindingCall) -> None:
         func = self._bindings.get(binding_call._initializer["name"])
@@ -418,6 +448,17 @@ class BrowserContext(ChannelOwner):
             return
         await asyncio.gather(*map(lambda router: router.stop(behavior), removed))  # type: ignore
 
+    async def route_web_socket(
+        self, url: URLMatch, handler: WebSocketRouteHandlerCallback
+    ) -> None:
+        self._web_socket_routes.insert(
+            0,
+            WebSocketRouteHandler(
+                URLMatcher(self._options.get("baseURL"), url), handler
+            ),
+        )
+        await self._update_web_socket_interception_patterns()
+
     def _dispose_har_routers(self) -> None:
         for router in self._har_routers:
             router.dispose()
@@ -486,6 +527,14 @@ class BrowserContext(ChannelOwner):
         patterns = RouteHandler.prepare_interception_patterns(self._routes)
         await self._channel.send(
             "setNetworkInterceptionPatterns", {"patterns": patterns}
+        )
+
+    async def _update_web_socket_interception_patterns(self) -> None:
+        patterns = WebSocketRouteHandler.prepare_interception_patterns(
+            self._web_socket_routes
+        )
+        await self._channel.send(
+            "setWebSocketInterceptionPatterns", {"patterns": patterns}
         )
 
     def expect_event(
