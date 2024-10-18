@@ -571,10 +571,11 @@ class ServerWebSocketRoute:
     def close(self, code: int = None, reason: str = None) -> None:
         _create_task_and_ignore_exception(
             self._ws._channel.send(
-                "close",
+                "closeServer",
                 {
                     "code": code,
                     "reason": reason,
+                    "wasClean": True,
                 },
             )
         )
@@ -600,6 +601,7 @@ class WebSocketRoute(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
+        self.mark_as_internal_type()
         self._on_page_message: Optional[Callable[[Union[str, bytes]], Any]] = None
         self._on_page_close: Optional[
             Callable[[Optional[int], Optional[str]], Any]
