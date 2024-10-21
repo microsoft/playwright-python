@@ -24,7 +24,6 @@ jobs:
       fail-fast: false
       matrix:
         docker-image-variant:
-          - focal
           - jammy
           - noble
     steps:
