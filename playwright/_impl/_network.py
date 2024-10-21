@@ -502,12 +502,14 @@ class Route(ChannelOwner):
                 {
                     "url": options.url,
                     "method": options.method,
-                    "headers": serialize_headers(options.headers)
-                    if options.headers
-                    else None,
-                    "postData": base64.b64encode(options.post_data_buffer).decode()
-                    if options.post_data_buffer is not None
-                    else None,
+                    "headers": (
+                        serialize_headers(options.headers) if options.headers else None
+                    ),
+                    "postData": (
+                        base64.b64encode(options.post_data_buffer).decode()
+                        if options.post_data_buffer is not None
+                        else None
+                    ),
                     "isFallback": is_fallback,
                 },
             )
@@ -603,9 +605,9 @@ class WebSocketRoute(ChannelOwner):
         super().__init__(parent, type, guid, initializer)
         self.mark_as_internal_type()
         self._on_page_message: Optional[Callable[[Union[str, bytes]], Any]] = None
-        self._on_page_close: Optional[
-            Callable[[Optional[int], Optional[str]], Any]
-        ] = None
+        self._on_page_close: Optional[Callable[[Optional[int], Optional[str]], Any]] = (
+            None
+        )
         self._on_server_message: Optional[Callable[[Union[str, bytes]], Any]] = None
         self._on_server_close: Optional[
             Callable[[Optional[int], Optional[str]], Any]

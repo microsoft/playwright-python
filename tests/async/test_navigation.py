@@ -264,7 +264,7 @@ async def test_goto_should_fail_when_main_resources_failed_to_load(
     if is_chromium:
         assert "net::ERR_CONNECTION_REFUSED" in exc_info.value.message
     elif is_webkit and is_win:
-        assert "Couldn't connect to server" in exc_info.value.message
+        assert "Could not connect to server" in exc_info.value.message
     elif is_webkit:
         assert "Could not connect" in exc_info.value.message
     else:

@@ -101,7 +101,7 @@ def test_should_work_with_ws_close(page: Page, server: Server) -> None:
             "close code=3009 reason=oops wasClean=true",
         ],
     )
-    assert closed_event == [(3009, "oops")]
+    assert_equal(lambda: closed_event, [(3009, "oops")])
 
 
 def test_should_pattern_match(page: Page, server: Server) -> None:
