@@ -132,7 +132,11 @@ class DocumentationProvider:
         doc_is_property = (
             not method.get("async") and not len(method["args"]) and "type" in method
         )
-        if method["name"].startswith("is_") or method["name"].startswith("as_"):
+        if (
+            method["name"].startswith("is_")
+            or method["name"].startswith("as_")
+            or method["name"] == "connect_to_server"
+        ):
             doc_is_property = False
         if doc_is_property != is_property:
             self.errors.add(f"Method vs property mismatch: {fqname}")

@@ -74,6 +74,7 @@ from playwright._impl._helper import (
     URLMatcher,
     URLMatchRequest,
     URLMatchResponse,
+    WebSocketRouteHandlerCallback,
     async_readfile,
     async_writefile,
     locals_to_params,
@@ -88,7 +89,14 @@ from playwright._impl._js_handle import (
     parse_result,
     serialize_argument,
 )
-from playwright._impl._network import Request, Response, Route, serialize_headers
+from playwright._impl._network import (
+    Request,
+    Response,
+    Route,
+    WebSocketRoute,
+    WebSocketRouteHandler,
+    serialize_headers,
+)
 from playwright._impl._video import Video
 from playwright._impl._waiter import Waiter
 
@@ -163,6 +171,7 @@ class Page(ChannelOwner):
         self._workers: List["Worker"] = []
         self._bindings: Dict[str, Any] = {}
         self._routes: List[RouteHandler] = []
+        self._web_socket_routes: List[WebSocketRouteHandler] = []
         self._owned_context: Optional["BrowserContext"] = None
         self._timeout_settings: TimeoutSettings = TimeoutSettings(
             self._browser_context._timeout_settings
@@ -208,6 +217,12 @@ class Page(ChannelOwner):
             "route",
             lambda params: self._loop.create_task(
                 self._on_route(from_channel(params["route"]))
+            ),
+        )
+        self._channel.on(
+            "webSocketRoute",
+            lambda params: self._loop.create_task(
+                self._on_web_socket_route(from_channel(params["webSocketRoute"]))
             ),
         )
         self._channel.on("video", lambda params: self._on_video(params))
@@ -297,6 +312,20 @@ class Page(ChannelOwner):
             if handled:
                 return
         await self._browser_context._on_route(route)
+
+    async def _on_web_socket_route(self, web_socket_route: WebSocketRoute) -> None:
+        route_handler = next(
+            (
+                route_handler
+                for route_handler in self._web_socket_routes
+                if route_handler.matches(web_socket_route.url)
+            ),
+            None,
+        )
+        if route_handler:
+            await route_handler.handle(web_socket_route)
+        else:
+            await self._browser_context._on_web_socket_route(web_socket_route)
 
     def _on_binding(self, binding_call: "BindingCall") -> None:
         func = self._bindings.get(binding_call._initializer["name"])
@@ -572,6 +601,9 @@ class Page(ChannelOwner):
             await self._channel.send("goForward", locals_to_params(locals()))
         )
 
+    async def request_gc(self) -> None:
+        await self._channel.send("requestGC")
+
     async def emulate_media(
         self,
         media: Literal["null", "print", "screen"] = None,
@@ -661,6 +693,17 @@ class Page(ChannelOwner):
             )
         )
 
+    async def route_web_socket(
+        self, url: URLMatch, handler: WebSocketRouteHandlerCallback
+    ) -> None:
+        self._web_socket_routes.insert(
+            0,
+            WebSocketRouteHandler(
+                URLMatcher(self._browser_context._options.get("baseURL"), url), handler
+            ),
+        )
+        await self._update_web_socket_interception_patterns()
+
     def _dispose_har_routers(self) -> None:
         for router in self._har_routers:
             router.dispose()
@@ -703,6 +746,14 @@ class Page(ChannelOwner):
         patterns = RouteHandler.prepare_interception_patterns(self._routes)
         await self._channel.send(
             "setNetworkInterceptionPatterns", {"patterns": patterns}
+        )
+
+    async def _update_web_socket_interception_patterns(self) -> None:
+        patterns = WebSocketRouteHandler.prepare_interception_patterns(
+            self._web_socket_routes
+        )
+        await self._channel.send(
+            "setWebSocketInterceptionPatterns", {"patterns": patterns}
         )
 
     async def screenshot(

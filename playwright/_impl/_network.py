@@ -18,6 +18,7 @@ import inspect
 import json
 import json as json_utils
 import mimetypes
+import re
 from collections import defaultdict
 from pathlib import Path
 from types import SimpleNamespace
@@ -51,7 +52,13 @@ from playwright._impl._connection import (
 )
 from playwright._impl._errors import Error
 from playwright._impl._event_context_manager import EventContextManagerImpl
-from playwright._impl._helper import async_readfile, locals_to_params
+from playwright._impl._helper import (
+    URLMatcher,
+    WebSocketRouteHandlerCallback,
+    async_readfile,
+    locals_to_params,
+)
+from playwright._impl._str_utils import escape_regex_flags
 from playwright._impl._waiter import Waiter
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -310,6 +317,7 @@ class Route(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
+        self.mark_as_internal_type()
         self._handling_future: Optional[asyncio.Future["bool"]] = None
         self._context: "BrowserContext" = cast("BrowserContext", None)
         self._did_throw = False
@@ -342,7 +350,6 @@ class Route(ChannelOwner):
                     "abort",
                     {
                         "errorCode": errorCode,
-                        "requestUrl": self.request._initializer["url"],
                     },
                 )
             )
@@ -425,7 +432,6 @@ class Route(ChannelOwner):
         if length and "content-length" not in headers:
             headers["content-length"] = str(length)
         params["headers"] = serialize_headers(headers)
-        params["requestUrl"] = self.request._initializer["url"]
 
         await self._race_with_page_close(self._channel.send("fulfill", params))
 
@@ -484,43 +490,30 @@ class Route(ChannelOwner):
 
         async def _inner() -> None:
             self.request._apply_fallback_overrides(overrides)
-            await self._internal_continue()
+            await self._inner_continue(False)
 
         return await self._handle_route(_inner)
 
-    def _internal_continue(
-        self, is_internal: bool = False
-    ) -> Coroutine[Any, Any, None]:
-        async def continue_route() -> None:
-            try:
-                params: Dict[str, Any] = {}
-                params["url"] = self.request._fallback_overrides.url
-                params["method"] = self.request._fallback_overrides.method
-                params["headers"] = self.request._fallback_overrides.headers
-                if self.request._fallback_overrides.post_data_buffer is not None:
-                    params["postData"] = base64.b64encode(
-                        self.request._fallback_overrides.post_data_buffer
-                    ).decode()
-                params = locals_to_params(params)
-
-                if "headers" in params:
-                    params["headers"] = serialize_headers(params["headers"])
-                params["requestUrl"] = self.request._initializer["url"]
-                params["isFallback"] = is_internal
-                await self._connection.wrap_api_call(
-                    lambda: self._race_with_page_close(
-                        self._channel.send(
-                            "continue",
-                            params,
-                        )
+    async def _inner_continue(self, is_fallback: bool = False) -> None:
+        options = self.request._fallback_overrides
+        await self._race_with_page_close(
+            self._channel.send(
+                "continue",
+                {
+                    "url": options.url,
+                    "method": options.method,
+                    "headers": (
+                        serialize_headers(options.headers) if options.headers else None
                     ),
-                    is_internal,
-                )
-            except Exception as e:
-                if not is_internal:
-                    raise e
-
-        return continue_route()
+                    "postData": (
+                        base64.b64encode(options.post_data_buffer).decode()
+                        if options.post_data_buffer is not None
+                        else None
+                    ),
+                    "isFallback": is_fallback,
+                },
+            )
+        )
 
     async def _redirected_navigation_request(self, url: str) -> None:
         await self._handle_route(
@@ -546,6 +539,205 @@ class Route(ChannelOwner):
             raise cast(BaseException, fut.exception())
         if target_closed_future.done():
             await asyncio.gather(fut, return_exceptions=True)
+
+
+def _create_task_and_ignore_exception(coro: Coroutine) -> None:
+    async def _ignore_exception() -> None:
+        try:
+            await coro
+        except Exception:
+            pass
+
+    asyncio.create_task(_ignore_exception())
+
+
+class ServerWebSocketRoute:
+    def __init__(self, ws: "WebSocketRoute"):
+        self._ws = ws
+
+    def on_message(self, handler: Callable[[Union[str, bytes]], Any]) -> None:
+        self._ws._on_server_message = handler
+
+    def on_close(self, handler: Callable[[Optional[int], Optional[str]], Any]) -> None:
+        self._ws._on_server_close = handler
+
+    def connect_to_server(self) -> None:
+        raise NotImplementedError(
+            "connectToServer must be called on the page-side WebSocketRoute"
+        )
+
+    @property
+    def url(self) -> str:
+        return self._ws._initializer["url"]
+
+    def close(self, code: int = None, reason: str = None) -> None:
+        _create_task_and_ignore_exception(
+            self._ws._channel.send(
+                "closeServer",
+                {
+                    "code": code,
+                    "reason": reason,
+                    "wasClean": True,
+                },
+            )
+        )
+
+    def send(self, message: Union[str, bytes]) -> None:
+        if isinstance(message, str):
+            _create_task_and_ignore_exception(
+                self._ws._channel.send(
+                    "sendToServer", {"message": message, "isBase64": False}
+                )
+            )
+        else:
+            _create_task_and_ignore_exception(
+                self._ws._channel.send(
+                    "sendToServer",
+                    {"message": base64.b64encode(message).decode(), "isBase64": True},
+                )
+            )
+
+
+class WebSocketRoute(ChannelOwner):
+    def __init__(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
+        self.mark_as_internal_type()
+        self._on_page_message: Optional[Callable[[Union[str, bytes]], Any]] = None
+        self._on_page_close: Optional[Callable[[Optional[int], Optional[str]], Any]] = (
+            None
+        )
+        self._on_server_message: Optional[Callable[[Union[str, bytes]], Any]] = None
+        self._on_server_close: Optional[
+            Callable[[Optional[int], Optional[str]], Any]
+        ] = None
+        self._server = ServerWebSocketRoute(self)
+        self._connected = False
+
+        self._channel.on("messageFromPage", self._channel_message_from_page)
+        self._channel.on("messageFromServer", self._channel_message_from_server)
+        self._channel.on("closePage", self._channel_close_page)
+        self._channel.on("closeServer", self._channel_close_server)
+
+    def _channel_message_from_page(self, event: Dict) -> None:
+        if self._on_page_message:
+            self._on_page_message(
+                base64.b64decode(event["message"])
+                if event["isBase64"]
+                else event["message"]
+            )
+        elif self._connected:
+            _create_task_and_ignore_exception(self._channel.send("sendToServer", event))
+
+    def _channel_message_from_server(self, event: Dict) -> None:
+        if self._on_server_message:
+            self._on_server_message(
+                base64.b64decode(event["message"])
+                if event["isBase64"]
+                else event["message"]
+            )
+        else:
+            _create_task_and_ignore_exception(self._channel.send("sendToPage", event))
+
+    def _channel_close_page(self, event: Dict) -> None:
+        if self._on_page_close:
+            self._on_page_close(event["code"], event["reason"])
+        else:
+            _create_task_and_ignore_exception(self._channel.send("closeServer", event))
+
+    def _channel_close_server(self, event: Dict) -> None:
+        if self._on_server_close:
+            self._on_server_close(event["code"], event["reason"])
+        else:
+            _create_task_and_ignore_exception(self._channel.send("closePage", event))
+
+    @property
+    def url(self) -> str:
+        return self._initializer["url"]
+
+    async def close(self, code: int = None, reason: str = None) -> None:
+        try:
+            await self._channel.send(
+                "closePage", {"code": code, "reason": reason, "wasClean": True}
+            )
+        except Exception:
+            pass
+
+    def connect_to_server(self) -> "WebSocketRoute":
+        if self._connected:
+            raise Error("Already connected to the server")
+        self._connected = True
+        asyncio.create_task(self._channel.send("connect"))
+        return cast("WebSocketRoute", self._server)
+
+    def send(self, message: Union[str, bytes]) -> None:
+        if isinstance(message, str):
+            _create_task_and_ignore_exception(
+                self._channel.send(
+                    "sendToPage", {"message": message, "isBase64": False}
+                )
+            )
+        else:
+            _create_task_and_ignore_exception(
+                self._channel.send(
+                    "sendToPage",
+                    {
+                        "message": base64.b64encode(message).decode(),
+                        "isBase64": True,
+                    },
+                )
+            )
+
+    def on_message(self, handler: Callable[[Union[str, bytes]], Any]) -> None:
+        self._on_page_message = handler
+
+    def on_close(self, handler: Callable[[Optional[int], Optional[str]], Any]) -> None:
+        self._on_page_close = handler
+
+    async def _after_handle(self) -> None:
+        if self._connected:
+            return
+        # Ensure that websocket is "open" and can send messages without an actual server connection.
+        await self._channel.send("ensureOpened")
+
+
+class WebSocketRouteHandler:
+    def __init__(self, matcher: URLMatcher, handler: WebSocketRouteHandlerCallback):
+        self.matcher = matcher
+        self.handler = handler
+
+    @staticmethod
+    def prepare_interception_patterns(
+        handlers: List["WebSocketRouteHandler"],
+    ) -> List[dict]:
+        patterns = []
+        all_urls = False
+        for handler in handlers:
+            if isinstance(handler.matcher.match, str):
+                patterns.append({"glob": handler.matcher.match})
+            elif isinstance(handler.matcher._regex_obj, re.Pattern):
+                patterns.append(
+                    {
+                        "regexSource": handler.matcher._regex_obj.pattern,
+                        "regexFlags": escape_regex_flags(handler.matcher._regex_obj),
+                    }
+                )
+            else:
+                all_urls = True
+
+        if all_urls:
+            return [{"glob": "**/*"}]
+        return patterns
+
+    def matches(self, ws_url: str) -> bool:
+        return self.matcher.matches(ws_url)
+
+    async def handle(self, websocket_route: "WebSocketRoute") -> None:
+        coro_or_future = self.handler(websocket_route)
+        if asyncio.iscoroutine(coro_or_future):
+            await coro_or_future
+        await websocket_route._after_handle()
 
 
 class Response(ChannelOwner):

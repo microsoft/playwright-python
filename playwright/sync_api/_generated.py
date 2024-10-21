@@ -69,6 +69,7 @@ from playwright._impl._network import Request as RequestImpl
 from playwright._impl._network import Response as ResponseImpl
 from playwright._impl._network import Route as RouteImpl
 from playwright._impl._network import WebSocket as WebSocketImpl
+from playwright._impl._network import WebSocketRoute as WebSocketRouteImpl
 from playwright._impl._page import Page as PageImpl
 from playwright._impl._page import Worker as WorkerImpl
 from playwright._impl._playwright import Playwright as PlaywrightImpl
@@ -1140,6 +1141,133 @@ class WebSocket(SyncBase):
 
 
 mapping.register(WebSocketImpl, WebSocket)
+
+
+class WebSocketRoute(SyncBase):
+
+    @property
+    def url(self) -> str:
+        """WebSocketRoute.url
+
+        URL of the WebSocket created in the page.
+
+        Returns
+        -------
+        str
+        """
+        return mapping.from_maybe_impl(self._impl_obj.url)
+
+    def close(
+        self, *, code: typing.Optional[int] = None, reason: typing.Optional[str] = None
+    ) -> None:
+        """WebSocketRoute.close
+
+        Closes one side of the WebSocket connection.
+
+        Parameters
+        ----------
+        code : Union[int, None]
+            Optional [close code](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/close#code).
+        reason : Union[str, None]
+            Optional [close reason](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/close#reason).
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(self._impl_obj.close(code=code, reason=reason))
+        )
+
+    def connect_to_server(self) -> "WebSocketRoute":
+        """WebSocketRoute.connect_to_server
+
+        By default, routed WebSocket does not connect to the server, so you can mock entire WebSocket communication. This
+        method connects to the actual WebSocket server, and returns the server-side `WebSocketRoute` instance, giving the
+        ability to send and receive messages from the server.
+
+        Once connected to the server:
+        - Messages received from the server will be **automatically forwarded** to the WebSocket in the page, unless
+          `web_socket_route.on_message()` is called on the server-side `WebSocketRoute`.
+        - Messages sent by the [`WebSocket.send()`](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/send) call
+          in the page will be **automatically forwarded** to the server, unless `web_socket_route.on_message()` is
+          called on the original `WebSocketRoute`.
+
+        See examples at the top for more details.
+
+        Returns
+        -------
+        WebSocketRoute
+        """
+
+        return mapping.from_impl(self._impl_obj.connect_to_server())
+
+    def send(self, message: typing.Union[str, bytes]) -> None:
+        """WebSocketRoute.send
+
+        Sends a message to the WebSocket. When called on the original WebSocket, sends the message to the page. When called
+        on the result of `web_socket_route.connect_to_server()`, sends the message to the server. See examples at the
+        top for more details.
+
+        Parameters
+        ----------
+        message : Union[bytes, str]
+            Message to send.
+        """
+
+        return mapping.from_maybe_impl(self._impl_obj.send(message=message))
+
+    def on_message(
+        self, handler: typing.Callable[[typing.Union[str, bytes]], typing.Any]
+    ) -> None:
+        """WebSocketRoute.on_message
+
+        This method allows to handle messages that are sent by the WebSocket, either from the page or from the server.
+
+        When called on the original WebSocket route, this method handles messages sent from the page. You can handle this
+        messages by responding to them with `web_socket_route.send()`, forwarding them to the server-side connection
+        returned by `web_socket_route.connect_to_server()` or do something else.
+
+        Once this method is called, messages are not automatically forwarded to the server or to the page - you should do
+        that manually by calling `web_socket_route.send()`. See examples at the top for more details.
+
+        Calling this method again will override the handler with a new one.
+
+        Parameters
+        ----------
+        handler : Callable[[Union[bytes, str]], Any]
+            Function that will handle messages.
+        """
+
+        return mapping.from_maybe_impl(
+            self._impl_obj.on_message(handler=self._wrap_handler(handler))
+        )
+
+    def on_close(
+        self,
+        handler: typing.Callable[
+            [typing.Optional[int], typing.Optional[str]], typing.Any
+        ],
+    ) -> None:
+        """WebSocketRoute.on_close
+
+        Allows to handle [`WebSocket.close`](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/close).
+
+        By default, closing one side of the connection, either in the page or on the server, will close the other side.
+        However, when `web_socket_route.on_close()` handler is set up, the default forwarding of closure is disabled,
+        and handler should take care of it.
+
+        Parameters
+        ----------
+        handler : Callable[[Union[int, None], Union[str, None]], Any]
+            Function that will handle WebSocket closure. Received an optional
+            [close code](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/close#code) and an optional
+            [close reason](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/close#reason).
+        """
+
+        return mapping.from_maybe_impl(
+            self._impl_obj.on_close(handler=self._wrap_handler(handler))
+        )
+
+
+mapping.register(WebSocketRouteImpl, WebSocketRoute)
 
 
 class Keyboard(SyncBase):
@@ -4291,7 +4419,9 @@ class Frame(SyncBase):
             element, the call throws an exception.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
-            to `false`. Useful to wait until the element is ready for the action without performing it.
+            to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
+            `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
+            are pressed.
         """
 
         return mapping.from_maybe_impl(
@@ -4372,7 +4502,9 @@ class Frame(SyncBase):
             element, the call throws an exception.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
-            to `false`. Useful to wait until the element is ready for the action without performing it.
+            to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
+            `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
+            are pressed.
         """
 
         return mapping.from_maybe_impl(
@@ -4445,7 +4577,9 @@ class Frame(SyncBase):
             element, the call throws an exception.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
-            to `false`. Useful to wait until the element is ready for the action without performing it.
+            to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
+            `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
+            are pressed.
         """
 
         return mapping.from_maybe_impl(
@@ -4848,6 +4982,7 @@ class Frame(SyncBase):
 
             **NOTE** Unlike most other attributes, `disabled` is inherited through the DOM hierarchy. Learn more about
             [`aria-disabled`](https://www.w3.org/TR/wai-aria-1.2/#aria-disabled).
+
         expanded : Union[bool, None]
             An attribute that is usually set by `aria-expanded`.
 
@@ -5297,7 +5432,9 @@ class Frame(SyncBase):
             element, the call throws an exception.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
-            to `false`. Useful to wait until the element is ready for the action without performing it.
+            to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
+            `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
+            are pressed.
         """
 
         return mapping.from_maybe_impl(
@@ -6016,7 +6153,7 @@ class FrameLocator(SyncBase):
         **Usage**
 
         ```py
-        frame_locator = page.frame_locator(\"iframe[name=\\\"embedded\\\"]\")
+        frame_locator = page.locator(\"iframe[name=\\\"embedded\\\"]\").content_frame
         # ...
         locator = frame_locator.owner
         expect(locator).to_be_visible()
@@ -6354,6 +6491,7 @@ class FrameLocator(SyncBase):
 
             **NOTE** Unlike most other attributes, `disabled` is inherited through the DOM hierarchy. Learn more about
             [`aria-disabled`](https://www.w3.org/TR/wai-aria-1.2/#aria-disabled).
+
         expanded : Union[bool, None]
             An attribute that is usually set by `aria-expanded`.
 
@@ -9131,6 +9269,28 @@ class Page(SyncContextManager):
             self._sync(self._impl_obj.go_forward(timeout=timeout, waitUntil=wait_until))
         )
 
+    def request_gc(self) -> None:
+        """Page.request_gc
+
+        Request the page to perform garbage collection. Note that there is no guarantee that all unreachable objects will
+        be collected.
+
+        This is useful to help detect memory leaks. For example, if your page has a large object `'suspect'` that might be
+        leaked, you can check that it does not leak by using a
+        [`WeakRef`](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakRef).
+
+        ```py
+        # 1. In your page, save a WeakRef for the \"suspect\".
+        page.evaluate(\"globalThis.suspectWeakRef = new WeakRef(suspect)\")
+        # 2. Request garbage collection.
+        page.request_gc()
+        # 3. Check that weak ref does not deref to the original object.
+        assert page.evaluate(\"!globalThis.suspectWeakRef.deref()\")
+        ```
+        """
+
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.request_gc()))
+
     def emulate_media(
         self,
         *,
@@ -9301,7 +9461,7 @@ class Page(SyncContextManager):
 
         **NOTE** `page.route()` will not intercept requests intercepted by Service Worker. See
         [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when
-        using request interception by setting `Browser.newContext.serviceWorkers` to `'block'`.
+        using request interception by setting `serviceWorkers` to `'block'`.
 
         **NOTE** `page.route()` will not intercept the first request of a popup page. Use
         `browser_context.route()` instead.
@@ -9398,6 +9558,51 @@ class Page(SyncContextManager):
             )
         )
 
+    def route_web_socket(
+        self,
+        url: typing.Union[str, typing.Pattern[str], typing.Callable[[str], bool]],
+        handler: typing.Callable[["WebSocketRoute"], typing.Any],
+    ) -> None:
+        """Page.route_web_socket
+
+        This method allows to modify websocket connections that are made by the page.
+
+        Note that only `WebSocket`s created after this method was called will be routed. It is recommended to call this
+        method before navigating the page.
+
+        **Usage**
+
+        Below is an example of a simple mock that responds to a single message. See `WebSocketRoute` for more details and
+        examples.
+
+        ```py
+        def message_handler(ws: WebSocketRoute, message: Union[str, bytes]):
+          if message == \"request\":
+            ws.send(\"response\")
+
+        def handler(ws: WebSocketRoute):
+          ws.on_message(lambda message: message_handler(ws, message))
+
+        page.route_web_socket(\"/ws\", handler)
+        ```
+
+        Parameters
+        ----------
+        url : Union[Callable[[str], bool], Pattern[str], str]
+            Only WebSockets with the url matching this pattern will be routed. A string pattern can be relative to the
+            `baseURL` context option.
+        handler : Callable[[WebSocketRoute], Any]
+            Handler function to route the WebSocket.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.route_web_socket(
+                    url=self._wrap_handler(url), handler=self._wrap_handler(handler)
+                )
+            )
+        )
+
     def unroute_all(
         self,
         *,
@@ -9439,7 +9644,7 @@ class Page(SyncContextManager):
 
         Playwright will not serve requests intercepted by Service Worker from the HAR file. See
         [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when
-        using request interception by setting `Browser.newContext.serviceWorkers` to `'block'`.
+        using request interception by setting `serviceWorkers` to `'block'`.
 
         Parameters
         ----------
@@ -9688,7 +9893,9 @@ class Page(SyncContextManager):
             Deprecated: This option will default to `true` in the future.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
-            to `false`. Useful to wait until the element is ready for the action without performing it.
+            to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
+            `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
+            are pressed.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
@@ -9771,7 +9978,9 @@ class Page(SyncContextManager):
             element, the call throws an exception.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
-            to `false`. Useful to wait until the element is ready for the action without performing it.
+            to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
+            `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
+            are pressed.
         """
 
         return mapping.from_maybe_impl(
@@ -9844,7 +10053,9 @@ class Page(SyncContextManager):
             element, the call throws an exception.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
-            to `false`. Useful to wait until the element is ready for the action without performing it.
+            to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
+            `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
+            are pressed.
         """
 
         return mapping.from_maybe_impl(
@@ -10245,6 +10456,7 @@ class Page(SyncContextManager):
 
             **NOTE** Unlike most other attributes, `disabled` is inherited through the DOM hierarchy. Learn more about
             [`aria-disabled`](https://www.w3.org/TR/wai-aria-1.2/#aria-disabled).
+
         expanded : Union[bool, None]
             An attribute that is usually set by `aria-expanded`.
 
@@ -10694,7 +10906,9 @@ class Page(SyncContextManager):
             element, the call throws an exception.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
-            to `false`. Useful to wait until the element is ready for the action without performing it.
+            to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
+            `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
+            are pressed.
         """
 
         return mapping.from_maybe_impl(
@@ -11339,8 +11553,7 @@ class Page(SyncContextManager):
         User can inspect selectors or perform manual steps while paused. Resume will continue running the original script
         from the place it was paused.
 
-        **NOTE** This method requires Playwright to be started in a headed mode, with a falsy `headless` value in the
-        `browser_type.launch()`.
+        **NOTE** This method requires Playwright to be started in a headed mode, with a falsy `headless` option.
         """
 
         return mapping.from_maybe_impl(self._sync(self._impl_obj.pause()))
@@ -12005,13 +12218,16 @@ class Page(SyncContextManager):
 
         **NOTE** Running the handler will alter your page state mid-test. For example it will change the currently focused
         element and move the mouse. Make sure that actions that run after the handler are self-contained and do not rely on
-        the focus and mouse state being unchanged. <br /> <br /> For example, consider a test that calls
-        `locator.focus()` followed by `keyboard.press()`. If your handler clicks a button between these two
-        actions, the focused element most likely will be wrong, and key press will happen on the unexpected element. Use
-        `locator.press()` instead to avoid this problem. <br /> <br /> Another example is a series of mouse
-        actions, where `mouse.move()` is followed by `mouse.down()`. Again, when the handler runs between
-        these two actions, the mouse position will be wrong during the mouse down. Prefer self-contained actions like
-        `locator.click()` that do not rely on the state being unchanged by a handler.
+        the focus and mouse state being unchanged.
+
+        For example, consider a test that calls `locator.focus()` followed by `keyboard.press()`. If your
+        handler clicks a button between these two actions, the focused element most likely will be wrong, and key press
+        will happen on the unexpected element. Use `locator.press()` instead to avoid this problem.
+
+        Another example is a series of mouse actions, where `mouse.move()` is followed by `mouse.down()`.
+        Again, when the handler runs between these two actions, the mouse position will be wrong during the mouse down.
+        Prefer self-contained actions like `locator.click()` that do not rely on the state being unchanged by a
+        handler.
 
         **Usage**
 
@@ -12956,7 +13172,7 @@ class BrowserContext(SyncContextManager):
 
         **NOTE** `browser_context.route()` will not intercept requests intercepted by Service Worker. See
         [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when
-        using request interception by setting `Browser.newContext.serviceWorkers` to `'block'`.
+        using request interception by setting `serviceWorkers` to `'block'`.
 
         **Usage**
 
@@ -13055,6 +13271,53 @@ class BrowserContext(SyncContextManager):
             )
         )
 
+    def route_web_socket(
+        self,
+        url: typing.Union[str, typing.Pattern[str], typing.Callable[[str], bool]],
+        handler: typing.Callable[["WebSocketRoute"], typing.Any],
+    ) -> None:
+        """BrowserContext.route_web_socket
+
+        This method allows to modify websocket connections that are made by any page in the browser context.
+
+        Note that only `WebSocket`s created after this method was called will be routed. It is recommended to call this
+        method before creating any pages.
+
+        **Usage**
+
+        Below is an example of a simple handler that blocks some websocket messages. See `WebSocketRoute` for more details
+        and examples.
+
+        ```py
+        def message_handler(ws: WebSocketRoute, message: Union[str, bytes]):
+          if message == \"to-be-blocked\":
+            return
+          ws.send(message)
+
+        def handler(ws: WebSocketRoute):
+          ws.route_send(lambda message: message_handler(ws, message))
+          ws.connect()
+
+        context.route_web_socket(\"/ws\", handler)
+        ```
+
+        Parameters
+        ----------
+        url : Union[Callable[[str], bool], Pattern[str], str]
+            Only WebSockets with the url matching this pattern will be routed. A string pattern can be relative to the
+            `baseURL` context option.
+        handler : Callable[[WebSocketRoute], Any]
+            Handler function to route the WebSocket.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.route_web_socket(
+                    url=self._wrap_handler(url), handler=self._wrap_handler(handler)
+                )
+            )
+        )
+
     def unroute_all(
         self,
         *,
@@ -13096,7 +13359,7 @@ class BrowserContext(SyncContextManager):
 
         Playwright will not serve requests intercepted by Service Worker from the HAR file. See
         [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when
-        using request interception by setting `Browser.newContext.serviceWorkers` to `'block'`.
+        using request interception by setting `serviceWorkers` to `'block'`.
 
         Parameters
         ----------
@@ -13648,10 +13911,9 @@ class Browser(SyncContextManager):
             `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
             with an exact match to the request origin that the certificate is valid for.
 
-            **NOTE** Using Client Certificates in combination with Proxy Servers is not supported.
-
             **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
             work by replacing `localhost` with `local.playwright`.
+
 
         Returns
         -------
@@ -13876,10 +14138,9 @@ class Browser(SyncContextManager):
             `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
             with an exact match to the request origin that the certificate is valid for.
 
-            **NOTE** Using Client Certificates in combination with Proxy Servers is not supported.
-
             **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
             work by replacing `localhost` with `local.playwright`.
+
 
         Returns
         -------
@@ -14442,10 +14703,9 @@ class BrowserType(SyncBase):
             `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
             with an exact match to the request origin that the certificate is valid for.
 
-            **NOTE** Using Client Certificates in combination with Proxy Servers is not supported.
-
             **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
             work by replacing `localhost` with `local.playwright`.
+
 
         Returns
         -------
@@ -14776,8 +15036,8 @@ class Tracing(SyncBase):
         ----------
         name : Union[str, None]
             If specified, intermediate trace files are going to be saved into the files with the given name prefix inside the
-            `tracesDir` folder specified in `browser_type.launch()`. To specify the final trace zip file name, you need
-            to pass `path` option to `tracing.stop()` instead.
+            `tracesDir` directory specified in `browser_type.launch()`. To specify the final trace zip file name, you
+            need to pass `path` option to `tracing.stop()` instead.
         title : Union[str, None]
             Trace name to be shown in the Trace Viewer.
         snapshots : Union[bool, None]
@@ -14835,8 +15095,8 @@ class Tracing(SyncBase):
             Trace name to be shown in the Trace Viewer.
         name : Union[str, None]
             If specified, intermediate trace files are going to be saved into the files with the given name prefix inside the
-            `tracesDir` folder specified in `browser_type.launch()`. To specify the final trace zip file name, you need
-            to pass `path` option to `tracing.stop_chunk()` instead.
+            `tracesDir` directory specified in `browser_type.launch()`. To specify the final trace zip file name, you
+            need to pass `path` option to `tracing.stop_chunk()` instead.
         """
 
         return mapping.from_maybe_impl(
@@ -15129,7 +15389,9 @@ class Locator(SyncBase):
             Deprecated: This option will default to `true` in the future.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
-            to `false`. Useful to wait until the element is ready for the action without performing it.
+            to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
+            `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
+            are pressed.
         """
 
         return mapping.from_maybe_impl(
@@ -15203,7 +15465,9 @@ class Locator(SyncBase):
             Deprecated: This option has no effect.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
-            to `false`. Useful to wait until the element is ready for the action without performing it.
+            to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
+            `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
+            are pressed.
         """
 
         return mapping.from_maybe_impl(
@@ -15856,6 +16120,7 @@ class Locator(SyncBase):
 
             **NOTE** Unlike most other attributes, `disabled` is inherited through the DOM hierarchy. Learn more about
             [`aria-disabled`](https://www.w3.org/TR/wai-aria-1.2/#aria-disabled).
+
         expanded : Union[bool, None]
             An attribute that is usually set by `aria-expanded`.
 
@@ -16195,7 +16460,10 @@ class Locator(SyncBase):
     def or_(self, locator: "Locator") -> "Locator":
         """Locator.or_
 
-        Creates a locator that matches either of the two locators.
+        Creates a locator matching all elements that match one or both of the two locators.
+
+        Note that when both locators match something, the resulting locator will have multiple matches and violate
+        [locator strictness](https://playwright.dev/python/docs/locators#strictness) guidelines.
 
         **Usage**
 
@@ -16285,9 +16553,13 @@ class Locator(SyncBase):
         elements.
 
         **NOTE** `locator.all()` does not wait for elements to match the locator, and instead immediately returns
-        whatever is present in the page.  When the list of elements changes dynamically, `locator.all()` will
-        produce unpredictable and flaky results.  When the list of elements is stable, but loaded dynamically, wait for the
-        full list to finish loading before calling `locator.all()`.
+        whatever is present in the page.
+
+        When the list of elements changes dynamically, `locator.all()` will produce unpredictable and flaky
+        results.
+
+        When the list of elements is stable, but loaded dynamically, wait for the full list to finish loading before
+        calling `locator.all()`.
 
         **Usage**
 
@@ -16476,7 +16748,9 @@ class Locator(SyncBase):
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
-            to `false`. Useful to wait until the element is ready for the action without performing it.
+            to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
+            `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
+            are pressed.
         """
 
         return mapping.from_maybe_impl(
@@ -17178,7 +17452,9 @@ class Locator(SyncBase):
             Deprecated: This option has no effect.
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
-            to `false`. Useful to wait until the element is ready for the action without performing it.
+            to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
+            `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
+            are pressed.
         """
 
         return mapping.from_maybe_impl(
@@ -18255,7 +18531,7 @@ class APIRequestContext(SyncBase):
         JSON objects can be passed directly to the request:
 
         The common way to send file(s) in the body of a request is to upload them as form fields with `multipart/form-data`
-        encoding. Use `FormData` to construct request body and pass it to the request as `multipart` parameter:
+        encoding, by specifiying the `multipart` parameter:
 
         ```python
         api_request_context.fetch(
@@ -18417,10 +18693,9 @@ class APIRequest(SyncBase):
             `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
             with an exact match to the request origin that the certificate is valid for.
 
-            **NOTE** Using Client Certificates in combination with Proxy Servers is not supported.
-
             **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
             work by replacing `localhost` with `local.playwright`.
+
 
         Returns
         -------

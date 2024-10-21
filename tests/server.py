@@ -32,6 +32,7 @@ from typing import (
     Set,
     Tuple,
     TypeVar,
+    Union,
     cast,
 )
 from urllib.parse import urlparse
@@ -39,6 +40,7 @@ from urllib.parse import urlparse
 from autobahn.twisted.resource import WebSocketResource
 from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerProtocol
 from OpenSSL import crypto
+from pyee import EventEmitter
 from twisted.internet import reactor as _twisted_reactor
 from twisted.internet import ssl
 from twisted.internet.selectreactor import SelectReactor
@@ -197,6 +199,11 @@ class Server:
         self.request_subscribers[path] = future
         return await future
 
+    def wait_for_web_socket(self) -> 'asyncio.Future["WebSocketProtocol"]':
+        future: asyncio.Future[WebSocketProtocol] = asyncio.Future()
+        self.once_web_socket_connection(future.set_result)
+        return future
+
     @contextlib.contextmanager
     def expect_request(
         self, path: str
@@ -206,6 +213,20 @@ class Server:
         cb_wrapper: ExpectResponse[TestServerRequest] = ExpectResponse()
 
         def done_cb(task: asyncio.Task) -> None:
+            cb_wrapper._value = future.result()
+
+        future.add_done_callback(done_cb)
+        yield cb_wrapper
+
+    @contextlib.contextmanager
+    def expect_websocket(
+        self,
+    ) -> Generator[ExpectResponse["WebSocketProtocol"], None, None]:
+        future = self.wait_for_web_socket()
+
+        cb_wrapper: ExpectResponse["WebSocketProtocol"] = ExpectResponse()
+
+        def done_cb(_: asyncio.Future) -> None:
             cb_wrapper._value = future.result()
 
         future.add_done_callback(done_cb)
@@ -280,6 +301,21 @@ class HTTPSServer(Server):
 
 
 class WebSocketProtocol(WebSocketServerProtocol):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.events = EventEmitter()
+
+    def onClose(self, wasClean: bool, code: int, reason: str) -> None:
+        super().onClose(wasClean, code, reason)
+        self.events.emit(
+            "close",
+            code,
+            reason,
+        )
+
+    def onMessage(self, payload: Union[str, bytes], isBinary: bool) -> None:
+        self.events.emit("message", payload, isBinary)
+
     def onOpen(self) -> None:
         for handler in getattr(self.factory, "server_instance")._ws_handlers.copy():
             getattr(self.factory, "server_instance")._ws_handlers.remove(handler)
