@@ -218,6 +218,20 @@ class Server:
         future.add_done_callback(done_cb)
         yield cb_wrapper
 
+    @contextlib.contextmanager
+    def expect_websocket(
+        self,
+    ) -> Generator[ExpectResponse["WebSocketProtocol"], None, None]:
+        future = self.wait_for_web_socket()
+
+        cb_wrapper: ExpectResponse["WebSocketProtocol"] = ExpectResponse()
+
+        def done_cb(_: asyncio.Future) -> None:
+            cb_wrapper._value = future.result()
+
+        future.add_done_callback(done_cb)
+        yield cb_wrapper
+
     def set_auth(self, path: str, username: str, password: str) -> None:
         self.auth[path] = (username, password)
 
