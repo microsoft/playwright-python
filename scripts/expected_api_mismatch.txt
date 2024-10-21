@@ -18,5 +18,5 @@ Parameter type mismatch in Page.add_locator_handler(handler=): documented as Cal
 
 Parameter type mismatch in BrowserContext.route_web_socket(handler=): documented as Callable[[WebSocketRoute], Union[Any, Any]], code has Callable[[WebSocketRoute], Any]
 Parameter type mismatch in Page.route_web_socket(handler=): documented as Callable[[WebSocketRoute], Union[Any, Any]], code has Callable[[WebSocketRoute], Any]
-Parameter type mismatch in WebSocketRoute.on_close(handler=): documented as Callable[[Union[number, undefined]], Union[Any, Any]], code has Callable[[Union[int, None], Union[str, None]], Any]
+Parameter type mismatch in WebSocketRoute.on_close(handler=): documented as Callable[[Union[int, undefined]], Union[Any, Any]], code has Callable[[Union[int, None], Union[str, None]], Any]
 Parameter type mismatch in WebSocketRoute.on_message(handler=): documented as Callable[[str], Union[Any, Any]], code has Callable[[Union[bytes, str]], Any]

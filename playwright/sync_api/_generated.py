@@ -1144,6 +1144,7 @@ mapping.register(WebSocketImpl, WebSocket)
 
 
 class WebSocketRoute(SyncBase):
+
     @property
     def url(self) -> str:
         """WebSocketRoute.url
