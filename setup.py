@@ -55,7 +55,6 @@ def download_driver(zip_name: str) -> None:
         url = url + "next/"
     url = url + zip_file
     print(f"Fetching {url}")
-    # Don't replace this with urllib - Python won't have certificates to do SSL on all platforms.
     subprocess.check_call(["curl", url, "-o", "driver/" + zip_file])
 
 
@@ -96,7 +95,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
                 "zip_name": "mac-arm64",
             },
             {
-                "wheel": "manylinux1_x86_64.whl",
+                "wheel": "manylinux2014_x86_64.whl",  # Updated from manylinux1_x86_64
                 "machine": "x86_64",
                 "platform": "linux",
                 "zip_name": "linux",
@@ -124,7 +123,6 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
 
         wheels = base_wheel_bundles
         if not self.all:
-            # Limit to 1, since for MacOS e.g. we have multiple wheels for the same platform and architecture and Conda expects 1.
             wheels = list(
                 filter(
                     lambda wheel: wheel["platform"] == sys.platform
@@ -189,7 +187,8 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
                 ),
             )
         )
-        assert len(zip_names_for_current_system) == 1
+        if len(zip_names_for_current_system) != 1:
+            raise RuntimeError("Could not determine the appropriate driver zip name for the current system.")
         zip_name = zip_names_for_current_system.pop()
         download_driver(zip_name)
         zip_file = f"driver/playwright-{driver_version}-{zip_name}.zip"
@@ -200,7 +199,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
 setup(
     name="playwright",
     author="Microsoft Corporation",
-    author_email="",
+    author_email="",  # Consider adding an author email
     description="A high-level API to automate web browsers",
     long_description=Path("README.md").read_text(encoding="utf-8"),
     long_description_content_type="text/markdown",
@@ -218,11 +217,10 @@ setup(
     ],
     include_package_data=True,
     install_requires=[
-        "greenlet==3.1.1",
-        "pyee==12.0.0",
+        "greenlet>=3.1.1,<4.0.0",  # Updated to version range
+        "pyee>=12.0.0,<13.0.0",
     ],
-    # TODO: Can be removed once we migrate to pypa/build or pypa/installer.
-    setup_requires=["setuptools-scm==8.1.0", "wheel==0.42.0"],
+    setup_requires=["setuptools-scm==8.1.0", "wheel>=0.42.0"],  # Updated to version range
     classifiers=[
         "Topic :: Software Development :: Testing",
         "Topic :: Internet :: WWW/HTTP :: Browsers",
