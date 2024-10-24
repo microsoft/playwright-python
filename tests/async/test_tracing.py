@@ -119,7 +119,6 @@ async def test_should_collect_trace_with_resources_but_no_js(
         "Page.wait_for_timeout",
         "Page.route",
         "Page.goto",
-        "Route.continue_",
         "Page.goto",
         "Page.close",
     ]

@@ -54,15 +54,18 @@ class Channel(AsyncIOEventEmitter):
         self._guid = object._guid
         self._object = object
         self.on("error", lambda exc: self._connection._on_event_listener_error(exc))
+        self._is_internal_type = False
 
     async def send(self, method: str, params: Dict = None) -> Any:
         return await self._connection.wrap_api_call(
-            lambda: self.inner_send(method, params, False)
+            lambda: self._inner_send(method, params, False),
+            self._is_internal_type,
         )
 
     async def send_return_as_dict(self, method: str, params: Dict = None) -> Any:
         return await self._connection.wrap_api_call(
-            lambda: self.inner_send(method, params, True)
+            lambda: self._inner_send(method, params, True),
+            self._is_internal_type,
         )
 
     def send_no_reply(self, method: str, params: Dict = None) -> None:
@@ -73,7 +76,7 @@ class Channel(AsyncIOEventEmitter):
             )
         )
 
-    async def inner_send(
+    async def _inner_send(
         self, method: str, params: Optional[Dict], return_as_dict: bool
     ) -> Any:
         if params is None:
@@ -108,6 +111,9 @@ class Channel(AsyncIOEventEmitter):
         key = next(iter(result))
         return result[key]
 
+    def mark_as_internal_type(self) -> None:
+        self._is_internal_type = True
+
 
 class ChannelOwner(AsyncIOEventEmitter):
     def __init__(
@@ -132,7 +138,6 @@ class ChannelOwner(AsyncIOEventEmitter):
         self._channel: Channel = Channel(self._connection, self)
         self._initializer = initializer
         self._was_collected = False
-        self._is_internal_type = False
 
         self._connection._objects[guid] = self
         if self._parent:
@@ -156,9 +161,6 @@ class ChannelOwner(AsyncIOEventEmitter):
         del cast("ChannelOwner", child._parent)._objects[child._guid]
         self._objects[child._guid] = child
         child._parent = self
-
-    def mark_as_internal_type(self) -> None:
-        self._is_internal_type = True
 
     def _set_event_to_subscription_mapping(self, mapping: Dict[str, str]) -> None:
         self._event_to_subscription_mapping = mapping
@@ -359,7 +361,12 @@ class Connection(EventEmitter):
             "params": self._replace_channels_with_guids(params),
             "metadata": metadata,
         }
-        if self._tracing_count > 0 and frames and not object._is_internal_type:
+        if (
+            self._tracing_count > 0
+            and frames
+            and frames
+            and object._guid != "localUtils"
+        ):
             self.local_utils.add_stack_to_tracing_no_reply(id, frames)
 
         self._transport.send(message)
