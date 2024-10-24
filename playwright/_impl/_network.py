@@ -317,7 +317,7 @@ class Route(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
-        self.mark_as_internal_type()
+        self._channel.mark_as_internal_type()
         self._handling_future: Optional[asyncio.Future["bool"]] = None
         self._context: "BrowserContext" = cast("BrowserContext", None)
         self._did_throw = False
@@ -603,7 +603,7 @@ class WebSocketRoute(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
-        self.mark_as_internal_type()
+        self._channel.mark_as_internal_type()
         self._on_page_message: Optional[Callable[[Union[str, bytes]], Any]] = None
         self._on_page_close: Optional[Callable[[Optional[int], Optional[str]], Any]] = (
             None
