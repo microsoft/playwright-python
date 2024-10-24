@@ -47,7 +47,7 @@ pre-commit install
 pre-commit run --all-files
 ```
 
-For more details look at the [CI configuration](./blob/main/.github/workflows/ci.yml).
+For more details look at the [CI configuration](./.github/workflows/ci.yml).
 
 Collect coverage
 
