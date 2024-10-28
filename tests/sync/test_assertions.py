@@ -490,14 +490,14 @@ def test_assertions_locator_to_be_checked(page: Page, server: Server) -> None:
     page.set_content("<input type=checkbox>")
     my_checkbox = page.locator("input")
     expect(my_checkbox).not_to_be_checked()
-    with pytest.raises(AssertionError):
+    with pytest.raises(AssertionError, match="Locator expected to be checked"):
         expect(my_checkbox).to_be_checked(timeout=100)
     expect(my_checkbox).to_be_checked(timeout=100, checked=False)
     with pytest.raises(AssertionError):
         expect(my_checkbox).to_be_checked(timeout=100, checked=True)
     my_checkbox.check()
     expect(my_checkbox).to_be_checked(timeout=100, checked=True)
-    with pytest.raises(AssertionError):
+    with pytest.raises(AssertionError, match="Locator expected to be unchecked"):
         expect(my_checkbox).to_be_checked(timeout=100, checked=False)
     expect(my_checkbox).to_be_checked()
 
@@ -512,13 +512,21 @@ def test_assertions_locator_to_be_disabled_enabled(page: Page, server: Server) -
         expect(my_checkbox).to_be_disabled(timeout=100)
     my_checkbox.evaluate("e => e.disabled = true")
     expect(my_checkbox).to_be_disabled()
-    with pytest.raises(AssertionError):
+    with pytest.raises(AssertionError, match="Locator expected to be enabled"):
         expect(my_checkbox).to_be_enabled(timeout=100)
 
 
 def test_assertions_locator_to_be_enabled_with_true(page: Page) -> None:
     page.set_content("<button>Text</button>")
     expect(page.locator("button")).to_be_enabled(enabled=True)
+
+
+def test_assertions_locator_to_be_enabled_with_false_throws_good_exception(
+    page: Page,
+) -> None:
+    page.set_content("<button>Text</button>")
+    with pytest.raises(AssertionError, match="Locator expected to be disabled"):
+        expect(page.locator("button")).to_be_enabled(enabled=False)
 
 
 def test_assertions_locator_to_be_enabled_with_false(page: Page) -> None:
@@ -562,7 +570,7 @@ def test_assertions_locator_to_be_editable(page: Page, server: Server) -> None:
     page.set_content("<input></input><button disabled>Text</button>")
     expect(page.locator("button")).not_to_be_editable()
     expect(page.locator("input")).to_be_editable()
-    with pytest.raises(AssertionError):
+    with pytest.raises(AssertionError, match="Locator expected to be editable"):
         expect(page.locator("button")).to_be_editable(timeout=100)
 
 
@@ -574,6 +582,14 @@ def test_assertions_locator_to_be_editable_with_true(page: Page) -> None:
 def test_assertions_locator_to_be_editable_with_false(page: Page) -> None:
     page.set_content("<input readonly></input>")
     expect(page.locator("input")).to_be_editable(editable=False)
+
+
+def test_assertions_locator_to_be_editable_with_false_and_throw_good_exception(
+    page: Page,
+) -> None:
+    page.set_content("<input></input>")
+    with pytest.raises(AssertionError, match="Locator expected to be readonly"):
+        expect(page.locator("input")).to_be_editable(editable=False)
 
 
 def test_assertions_locator_to_be_editable_with_not_and_false(page: Page) -> None:
@@ -611,7 +627,7 @@ def test_assertions_locator_to_be_hidden_visible(page: Page, server: Server) -> 
         expect(my_checkbox).to_be_hidden(timeout=100)
     my_checkbox.evaluate("e => e.style.display = 'none'")
     expect(my_checkbox).to_be_hidden()
-    with pytest.raises(AssertionError):
+    with pytest.raises(AssertionError, match="Locator expected to be visible"):
         expect(my_checkbox).to_be_visible(timeout=100)
 
 
@@ -623,6 +639,14 @@ def test_assertions_locator_to_be_visible_with_true(page: Page) -> None:
 def test_assertions_locator_to_be_visible_with_false(page: Page) -> None:
     page.set_content("<button hidden>hello</button>")
     expect(page.locator("button")).to_be_visible(visible=False)
+
+
+def test_assertions_locator_to_be_visible_with_false_throws_good_exception(
+    page: Page,
+) -> None:
+    page.set_content("<button>hello</button>")
+    with pytest.raises(AssertionError, match="Locator expected to be hidden"):
+        expect(page.locator("button")).to_be_visible(visible=False)
 
 
 def test_assertions_locator_to_be_visible_with_not_and_false(page: Page) -> None:
@@ -813,6 +837,15 @@ def test_should_be_attached_with_attached_false(page: Page) -> None:
     expect(locator).to_be_attached(attached=False)
 
 
+def test_should_be_attached_with_attached_false_and_throw_good_error(
+    page: Page,
+) -> None:
+    page.set_content("<button>hello</button>")
+    locator = page.locator("button")
+    with pytest.raises(AssertionError, match="Locator expected to be detached"):
+        expect(locator).to_be_attached(attached=False, timeout=1)
+
+
 def test_should_be_attached_with_not_and_attached_false(page: Page) -> None:
     page.set_content("<button>hello</button>")
     locator = page.locator("button")
@@ -838,7 +871,9 @@ def test_should_be_attached_eventually_with_not(page: Page) -> None:
 def test_should_be_attached_fail(page: Page) -> None:
     page.set_content("<button>Hello</button>")
     locator = page.locator("input")
-    with pytest.raises(AssertionError) as exc_info:
+    with pytest.raises(
+        AssertionError, match="Locator expected to be attached"
+    ) as exc_info:
         expect(locator).to_be_attached(timeout=1000)
     assert "locator resolved to" not in exc_info.value.args[0]
 

@@ -510,14 +510,14 @@ async def test_assertions_locator_to_be_checked(page: Page, server: Server) -> N
     await page.set_content("<input type=checkbox>")
     my_checkbox = page.locator("input")
     await expect(my_checkbox).not_to_be_checked()
-    with pytest.raises(AssertionError):
+    with pytest.raises(AssertionError, match="Locator expected to be checked"):
         await expect(my_checkbox).to_be_checked(timeout=100)
     await expect(my_checkbox).to_be_checked(timeout=100, checked=False)
     with pytest.raises(AssertionError):
         await expect(my_checkbox).to_be_checked(timeout=100, checked=True)
     await my_checkbox.check()
     await expect(my_checkbox).to_be_checked(timeout=100, checked=True)
-    with pytest.raises(AssertionError):
+    with pytest.raises(AssertionError, match="Locator expected to be unchecked"):
         await expect(my_checkbox).to_be_checked(timeout=100, checked=False)
     await expect(my_checkbox).to_be_checked()
 
@@ -534,8 +534,57 @@ async def test_assertions_locator_to_be_disabled_enabled(
         await expect(my_checkbox).to_be_disabled(timeout=100)
     await my_checkbox.evaluate("e => e.disabled = true")
     await expect(my_checkbox).to_be_disabled()
-    with pytest.raises(AssertionError):
+    with pytest.raises(AssertionError, match="Locator expected to be enabled"):
         await expect(my_checkbox).to_be_enabled(timeout=100)
+
+
+async def test_assertions_locator_to_be_enabled_with_true(page: Page) -> None:
+    await page.set_content("<button>Text</button>")
+    await expect(page.locator("button")).to_be_enabled(enabled=True)
+
+
+async def test_assertions_locator_to_be_enabled_with_false_throws_good_exception(
+    page: Page,
+) -> None:
+    await page.set_content("<button>Text</button>")
+    with pytest.raises(AssertionError, match="Locator expected to be disabled"):
+        await expect(page.locator("button")).to_be_enabled(enabled=False)
+
+
+async def test_assertions_locator_to_be_enabled_with_false(page: Page) -> None:
+    await page.set_content("<button disabled>Text</button>")
+    await expect(page.locator("button")).to_be_enabled(enabled=False)
+
+
+async def test_assertions_locator_to_be_enabled_with_not_and_false(page: Page) -> None:
+    await page.set_content("<button>Text</button>")
+    await expect(page.locator("button")).not_to_be_enabled(enabled=False)
+
+
+async def test_assertions_locator_to_be_enabled_eventually(page: Page) -> None:
+    await page.set_content("<button disabled>Text</button>")
+    await page.eval_on_selector(
+        "button",
+        """
+        button => setTimeout(() => {
+            button.removeAttribute('disabled');
+        }, 700);
+    """,
+    )
+    await expect(page.locator("button")).to_be_enabled()
+
+
+async def test_assertions_locator_to_be_enabled_eventually_with_not(page: Page) -> None:
+    await page.set_content("<button>Text</button>")
+    await page.eval_on_selector(
+        "button",
+        """
+        button => setTimeout(() => {
+            button.setAttribute('disabled', '');
+        }, 700);
+    """,
+    )
+    await expect(page.locator("button")).not_to_be_enabled()
 
 
 async def test_assertions_locator_to_be_editable(page: Page, server: Server) -> None:
@@ -543,8 +592,31 @@ async def test_assertions_locator_to_be_editable(page: Page, server: Server) -> 
     await page.set_content("<input></input><button disabled>Text</button>")
     await expect(page.locator("button")).not_to_be_editable()
     await expect(page.locator("input")).to_be_editable()
-    with pytest.raises(AssertionError):
+    with pytest.raises(AssertionError, match="Locator expected to be editable"):
         await expect(page.locator("button")).to_be_editable(timeout=100)
+
+
+async def test_assertions_locator_to_be_editable_with_true(page: Page) -> None:
+    await page.set_content("<input></input>")
+    await expect(page.locator("input")).to_be_editable(editable=True)
+
+
+async def test_assertions_locator_to_be_editable_with_false(page: Page) -> None:
+    await page.set_content("<input readonly></input>")
+    await expect(page.locator("input")).to_be_editable(editable=False)
+
+
+async def test_assertions_locator_to_be_editable_with_false_and_throw_good_exception(
+    page: Page,
+) -> None:
+    await page.set_content("<input></input>")
+    with pytest.raises(AssertionError, match="Locator expected to be readonly"):
+        await expect(page.locator("input")).to_be_editable(editable=False)
+
+
+async def test_assertions_locator_to_be_editable_with_not_and_false(page: Page) -> None:
+    await page.set_content("<input></input>")
+    await expect(page.locator("input")).not_to_be_editable(editable=False)
 
 
 async def test_assertions_locator_to_be_empty(page: Page, server: Server) -> None:
@@ -579,8 +651,57 @@ async def test_assertions_locator_to_be_hidden_visible(
         await expect(my_checkbox).to_be_hidden(timeout=100)
     await my_checkbox.evaluate("e => e.style.display = 'none'")
     await expect(my_checkbox).to_be_hidden()
-    with pytest.raises(AssertionError):
+    with pytest.raises(AssertionError, match="Locator expected to be visible"):
         await expect(my_checkbox).to_be_visible(timeout=100)
+
+
+async def test_assertions_locator_to_be_visible_with_true(page: Page) -> None:
+    await page.set_content("<button>hello</button>")
+    await expect(page.locator("button")).to_be_visible(visible=True)
+
+
+async def test_assertions_locator_to_be_visible_with_false(page: Page) -> None:
+    await page.set_content("<button hidden>hello</button>")
+    await expect(page.locator("button")).to_be_visible(visible=False)
+
+
+async def test_assertions_locator_to_be_visible_with_false_throws_good_exception(
+    page: Page,
+) -> None:
+    await page.set_content("<button>hello</button>")
+    with pytest.raises(AssertionError, match="Locator expected to be hidden"):
+        await expect(page.locator("button")).to_be_visible(visible=False)
+
+
+async def test_assertions_locator_to_be_visible_with_not_and_false(page: Page) -> None:
+    await page.set_content("<button>hello</button>")
+    await expect(page.locator("button")).not_to_be_visible(visible=False)
+
+
+async def test_assertions_locator_to_be_visible_eventually(page: Page) -> None:
+    await page.set_content("<div></div>")
+    await page.eval_on_selector(
+        "div",
+        """
+        div => setTimeout(() => {
+            div.innerHTML = '<span>Hello</span>';
+        }, 700);
+    """,
+    )
+    await expect(page.locator("span")).to_be_visible()
+
+
+async def test_assertions_locator_to_be_visible_eventually_with_not(page: Page) -> None:
+    await page.set_content("<div><span>Hello</span></div>")
+    await page.eval_on_selector(
+        "span",
+        """
+        span => setTimeout(() => {
+            span.textContent = '';
+        }, 700);
+    """,
+    )
+    await expect(page.locator("span")).not_to_be_visible()
 
 
 async def test_assertions_should_serialize_regexp_correctly(
@@ -746,6 +867,15 @@ async def test_should_be_attached_with_attached_false(page: Page) -> None:
     await expect(locator).to_be_attached(attached=False)
 
 
+async def test_should_be_attached_with_attached_false_and_throw_good_error(
+    page: Page,
+) -> None:
+    await page.set_content("<button>hello</button>")
+    locator = page.locator("button")
+    with pytest.raises(AssertionError, match="Locator expected to be detached"):
+        await expect(locator).to_be_attached(attached=False, timeout=1)
+
+
 async def test_should_be_attached_with_not_and_attached_false(page: Page) -> None:
     await page.set_content("<button>hello</button>")
     locator = page.locator("button")
@@ -773,7 +903,9 @@ async def test_should_be_attached_eventually_with_not(page: Page) -> None:
 async def test_should_be_attached_fail(page: Page) -> None:
     await page.set_content("<button>Hello</button>")
     locator = page.locator("input")
-    with pytest.raises(AssertionError) as exc_info:
+    with pytest.raises(
+        AssertionError, match="Locator expected to be attached"
+    ) as exc_info:
         await expect(locator).to_be_attached(timeout=1000)
     assert "locator resolved to" not in exc_info.value.args[0]
 
