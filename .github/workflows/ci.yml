@@ -47,18 +47,9 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.8', '3.9']
+        python-version: ['3.9', '3.10']
         browser: [chromium, firefox, webkit]
         include:
-        - os: ubuntu-latest
-          python-version: '3.10'
-          browser: chromium
-        - os: windows-latest
-          python-version: '3.10'
-          browser: chromium
-        - os: macos-latest
-          python-version: '3.10'
-          browser: chromium
         - os: windows-latest
           python-version: '3.11'
           browser: chromium
