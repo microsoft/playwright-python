@@ -541,14 +541,16 @@ class Route(ChannelOwner):
             await asyncio.gather(fut, return_exceptions=True)
 
 
-def _create_task_and_ignore_exception(coro: Coroutine) -> None:
+def _create_task_and_ignore_exception(
+    loop: asyncio.AbstractEventLoop, coro: Coroutine
+) -> None:
     async def _ignore_exception() -> None:
         try:
             await coro
         except Exception:
             pass
 
-    asyncio.create_task(_ignore_exception())
+    loop.create_task(_ignore_exception())
 
 
 class ServerWebSocketRoute:
@@ -572,6 +574,7 @@ class ServerWebSocketRoute:
 
     def close(self, code: int = None, reason: str = None) -> None:
         _create_task_and_ignore_exception(
+            self._ws._loop,
             self._ws._channel.send(
                 "closeServer",
                 {
@@ -579,22 +582,24 @@ class ServerWebSocketRoute:
                     "reason": reason,
                     "wasClean": True,
                 },
-            )
+            ),
         )
 
     def send(self, message: Union[str, bytes]) -> None:
         if isinstance(message, str):
             _create_task_and_ignore_exception(
+                self._ws._loop,
                 self._ws._channel.send(
                     "sendToServer", {"message": message, "isBase64": False}
-                )
+                ),
             )
         else:
             _create_task_and_ignore_exception(
+                self._ws._loop,
                 self._ws._channel.send(
                     "sendToServer",
                     {"message": base64.b64encode(message).decode(), "isBase64": True},
-                )
+                ),
             )
 
 
@@ -628,7 +633,9 @@ class WebSocketRoute(ChannelOwner):
                 else event["message"]
             )
         elif self._connected:
-            _create_task_and_ignore_exception(self._channel.send("sendToServer", event))
+            _create_task_and_ignore_exception(
+                self._loop, self._channel.send("sendToServer", event)
+            )
 
     def _channel_message_from_server(self, event: Dict) -> None:
         if self._on_server_message:
@@ -638,19 +645,25 @@ class WebSocketRoute(ChannelOwner):
                 else event["message"]
             )
         else:
-            _create_task_and_ignore_exception(self._channel.send("sendToPage", event))
+            _create_task_and_ignore_exception(
+                self._loop, self._channel.send("sendToPage", event)
+            )
 
     def _channel_close_page(self, event: Dict) -> None:
         if self._on_page_close:
             self._on_page_close(event["code"], event["reason"])
         else:
-            _create_task_and_ignore_exception(self._channel.send("closeServer", event))
+            _create_task_and_ignore_exception(
+                self._loop, self._channel.send("closeServer", event)
+            )
 
     def _channel_close_server(self, event: Dict) -> None:
         if self._on_server_close:
             self._on_server_close(event["code"], event["reason"])
         else:
-            _create_task_and_ignore_exception(self._channel.send("closePage", event))
+            _create_task_and_ignore_exception(
+                self._loop, self._channel.send("closePage", event)
+            )
 
     @property
     def url(self) -> str:
@@ -674,19 +687,21 @@ class WebSocketRoute(ChannelOwner):
     def send(self, message: Union[str, bytes]) -> None:
         if isinstance(message, str):
             _create_task_and_ignore_exception(
+                self._loop,
                 self._channel.send(
                     "sendToPage", {"message": message, "isBase64": False}
-                )
+                ),
             )
         else:
             _create_task_and_ignore_exception(
+                self._loop,
                 self._channel.send(
                     "sendToPage",
                     {
                         "message": base64.b64encode(message).decode(),
                         "isBase64": True,
                     },
-                )
+                ),
             )
 
     def on_message(self, handler: Callable[[Union[str, bytes]], Any]) -> None:
