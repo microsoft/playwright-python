@@ -18,7 +18,7 @@ asyncio_mode = "auto"
 
 [tool.mypy]
 ignore_missing_imports = true
-python_version = "3.8"
+python_version = "3.9"
 warn_unused_ignores = false
 warn_redundant_casts = true
 warn_unused_configs = true
@@ -36,7 +36,7 @@ profile = "black"
 [tool.pyright]
 include = ["playwright", "tests", "scripts"]
 exclude = ["**/node_modules", "**/__pycache__", "**/.*", "./build"]
-pythonVersion = "3.8"
+pythonVersion = "3.9"
 reportMissingImports = false
 reportTypedDictNotRequiredAccess = false
 reportCallInDefaultInitializer = true
