@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import asyncio
 import inspect
 import io
 import json
@@ -20,7 +19,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any, AsyncGenerator, Callable, Dict, Generator, List, Optional, cast
+from typing import Any, Callable, Dict, Generator, List, Optional, cast
 
 import pytest
 from PIL import Image
@@ -39,13 +38,6 @@ def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
     if "browser_name" in metafunc.fixturenames:
         browsers = metafunc.config.option.browser or ["chromium", "firefox", "webkit"]
         metafunc.parametrize("browser_name", browsers, scope="session")
-
-
-@pytest.fixture(scope="session")
-def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
-    loop = asyncio.get_event_loop()
-    yield loop
-    loop.close()
 
 
 @pytest.fixture(scope="session")
@@ -77,7 +69,7 @@ def https_server() -> Generator[Server, None, None]:
 
 
 @pytest.fixture(autouse=True, scope="session")
-async def start_server() -> AsyncGenerator[None, None]:
+def start_server() -> Generator[None, None, None]:
     test_server.start()
     yield
     test_server.stop()
