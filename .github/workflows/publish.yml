@@ -33,8 +33,7 @@ jobs:
           channels: conda-forge
           miniconda-version: latest
       - name: Prepare
-        # Pinned because of https://github.com/conda/conda-build/issues/5267
-        run: conda install anaconda-client conda-build=24.1.2 conda-verify py-lief=0.12.3
+        run: conda install anaconda-client conda-build conda-verify
       - name: Build and Upload
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
