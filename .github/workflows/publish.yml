@@ -6,6 +6,7 @@ on:
 jobs:
   deploy-conda:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest
@@ -24,7 +25,7 @@ jobs:
         # Required for conda-incubator/setup-miniconda@v3
         shell: bash -el {0}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: Get conda
@@ -43,7 +44,8 @@ jobs:
           if [ "${{ matrix.target-platform }}" == "osx-arm64" ]; then
             conda build --user microsoft . -m conda_build_config_osx_arm64.yaml
           elif [ "${{ matrix.target-platform }}" == "linux-aarch64" ]; then
-            conda install cross-python_linux-aarch64
+            # Needs to be pinned until https://github.com/conda-forge/cross-python-feedstock/issues/93 is resolved.
+            conda install cross-python_linux-aarch64=3.12=47_cpython
             conda build --user microsoft . -m conda_build_config_linux_aarch64.yaml
           else
             conda build --user microsoft .
