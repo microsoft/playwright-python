@@ -44,8 +44,6 @@ jobs:
           if [ "${{ matrix.target-platform }}" == "osx-arm64" ]; then
             conda build --user microsoft . -m conda_build_config_osx_arm64.yaml
           elif [ "${{ matrix.target-platform }}" == "linux-aarch64" ]; then
-            # Needs to be pinned until https://github.com/conda-forge/cross-python-feedstock/issues/93 is resolved.
-            conda install cross-python_linux-aarch64=3.12=47_cpython
             conda build --user microsoft . -m conda_build_config_linux_aarch64.yaml
           else
             conda build --user microsoft .
