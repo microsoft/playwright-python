@@ -167,7 +167,7 @@ class PipeTransport(Transport):
                 break
             await asyncio.sleep(0)
 
-        await self._proc.wait()
+        await self._proc.communicate()
         self._stopped_future.set_result(None)
 
     def send(self, message: Dict) -> None:
