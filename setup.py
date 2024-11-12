@@ -19,66 +19,67 @@ import shutil
 import subprocess
 import sys
 import zipfile
-from typing import Dict, List
+from typing import Dict
 
 driver_version = "1.48.1"
 
 base_wheel_bundles = [
-        {
-            "wheel": "macosx_10_13_x86_64.whl",
-            "machine": "x86_64",
-            "platform": "darwin",
-            "zip_name": "mac",
-        },
-        {
-            "wheel": "macosx_11_0_universal2.whl",
-            "machine": "x86_64",
-            "platform": "darwin",
-            "zip_name": "mac",
-        },
-        {
-            "wheel": "macosx_11_0_arm64.whl",
-            "machine": "arm64",
-            "platform": "darwin",
-            "zip_name": "mac-arm64",
-        },
-        {
-            "wheel": "manylinux1_x86_64.whl",
-            "machine": "x86_64",
-            "platform": "linux",
-            "zip_name": "linux",
-        },
-        {
-            "wheel": "manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
-            "machine": "aarch64",
-            "platform": "linux",
-            "zip_name": "linux-arm64",
-        },
-        {
-            "wheel": "win32.whl",
-            "machine": "i386",
-            "platform": "win32",
-            "zip_name": "win32_x64",
-        },
-        {
-            "wheel": "win_amd64.whl",
-            "machine": "amd64",
-            "platform": "win32",
-            "zip_name": "win32_x64",
-        },
-    ]
+    {
+        "wheel": "macosx_10_13_x86_64.whl",
+        "machine": "x86_64",
+        "platform": "darwin",
+        "zip_name": "mac",
+    },
+    {
+        "wheel": "macosx_11_0_universal2.whl",
+        "machine": "x86_64",
+        "platform": "darwin",
+        "zip_name": "mac",
+    },
+    {
+        "wheel": "macosx_11_0_arm64.whl",
+        "machine": "arm64",
+        "platform": "darwin",
+        "zip_name": "mac-arm64",
+    },
+    {
+        "wheel": "manylinux1_x86_64.whl",
+        "machine": "x86_64",
+        "platform": "linux",
+        "zip_name": "linux",
+    },
+    {
+        "wheel": "manylinux_2_17_aarch64.manylinux2014_aarch64.whl",
+        "machine": "aarch64",
+        "platform": "linux",
+        "zip_name": "linux-arm64",
+    },
+    {
+        "wheel": "win32.whl",
+        "machine": "i386",
+        "platform": "win32",
+        "zip_name": "win32_x64",
+    },
+    {
+        "wheel": "win_amd64.whl",
+        "machine": "amd64",
+        "platform": "win32",
+        "zip_name": "win32_x64",
+    },
+]
 
 if len(sys.argv) == 2 and sys.argv[1] == "--list-wheels":
     for bundle in base_wheel_bundles:
         print(bundle["wheel"])
     exit(0)
 
-from setuptools import setup
+from setuptools import setup  # noqa: E402
+
 try:
     from auditwheel.wheeltools import InWheel
 except ImportError:
     InWheel = None
-from wheel.bdist_wheel import bdist_wheel as BDistWheelCommand
+from wheel.bdist_wheel import bdist_wheel as BDistWheelCommand  # noqa: E402
 
 
 def extractall(zip: zipfile.ZipFile, path: str) -> None:
