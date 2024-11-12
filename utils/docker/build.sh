@@ -23,7 +23,9 @@ trap "cleanup; cd $(pwd -P)" EXIT
 cd "$(dirname "$0")"
 
 pushd ../../
-python setup.py bdist_wheel --all
+for wheel in $(python setup.py --list-wheels); do
+  PLAYWRIGHT_TARGET_WHEEL=$wheel python -m build --wheel
+done
 popd
 mkdir dist/
 cp ../../dist/*-manylinux*.whl dist/

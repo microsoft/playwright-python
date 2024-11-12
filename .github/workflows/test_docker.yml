@@ -46,6 +46,6 @@ jobs:
         docker exec "${CONTAINER_ID}" chown -R root:root /root/playwright
         docker exec "${CONTAINER_ID}" pip install -r local-requirements.txt
         docker exec "${CONTAINER_ID}" pip install -e .
-        docker exec "${CONTAINER_ID}" python setup.py bdist_wheel
+        docker exec "${CONTAINER_ID}" python -m build --wheel
         docker exec "${CONTAINER_ID}" xvfb-run pytest -vv tests/sync/
         docker exec "${CONTAINER_ID}" xvfb-run pytest -vv tests/async/

@@ -23,9 +23,7 @@ Build and install drivers:
 
 ```sh
 pip install -e .
-python setup.py bdist_wheel
-# For all platforms
-python setup.py bdist_wheel --all
+python -m build --wheel
 ```
 
 Run tests:
