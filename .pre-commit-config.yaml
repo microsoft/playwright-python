@@ -15,11 +15,11 @@ repos:
       - id: check-executables-have-shebangs
       - id: check-merge-conflict
   - repo: https://github.com/psf/black
-    rev: 24.10.0
+    rev: 24.8.0
     hooks:
       - id: black
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.13.0
+    rev: v1.11.2
     hooks:
       - id: mypy
         additional_dependencies: [types-pyOpenSSL==24.1.0.20240722, types-requests==2.32.0.20240914]
