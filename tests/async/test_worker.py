@@ -151,9 +151,10 @@ async def test_workers_should_report_network_activity(
         await page.goto(server.PREFIX + "/worker/worker.html")
     worker = await worker_info.value
     url = server.PREFIX + "/one-style.css"
-    async with page.expect_request(url) as request_info, page.expect_response(
-        url
-    ) as response_info:
+    async with (
+        page.expect_request(url) as request_info,
+        page.expect_response(url) as response_info,
+    ):
         await worker.evaluate(
             "url => fetch(url).then(response => response.text()).then(console.log)", url
         )
@@ -173,9 +174,10 @@ async def test_workers_should_report_network_activity_on_worker_creation(
     # Chromium needs waitForDebugger enabled for this one.
     await page.goto(server.EMPTY_PAGE)
     url = server.PREFIX + "/one-style.css"
-    async with page.expect_request(url) as request_info, page.expect_response(
-        url
-    ) as response_info:
+    async with (
+        page.expect_request(url) as request_info,
+        page.expect_response(url) as response_info,
+    ):
         await page.evaluate(
             """url => new Worker(URL.createObjectURL(new Blob([`
         fetch("${url}").then(response => response.text()).then(console.log);
