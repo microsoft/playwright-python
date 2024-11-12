@@ -158,7 +158,7 @@ class ElementHandle(JSHandle):
             dict(
                 timeout=timeout,
                 force=force,
-                **convert_select_option_values(value, index, label, element)
+                **convert_select_option_values(value, index, label, element),
             )
         )
         return await self._channel.send("selectOption", params)

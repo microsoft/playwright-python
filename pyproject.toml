@@ -2,6 +2,54 @@
 requires = ["setuptools==75.4.0", "setuptools-scm==8.1.0", "wheel==0.45.0", "auditwheel==6.1.0"]
 build-backend = "setuptools.build_meta"
 
+[project]
+name = "playwright"
+description = "A high-level API to automate web browsers"
+authors = [
+    {name = "Microsoft Corporation"}
+]
+readme = "README.md"
+license = {text = "Apache-2.0"}
+dynamic = ["version"]
+requires-python = ">=3.9"
+dependencies = [
+    "greenlet==3.1.1",
+    "pyee==12.0.0",
+]
+classifiers = [
+    "Topic :: Software Development :: Testing",
+    "Topic :: Internet :: WWW/HTTP :: Browsers",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+homepage = "https://github.com/Microsoft/playwright-python"
+"Release notes" = "https://github.com/microsoft/playwright-python/releases"
+
+[project.scripts]
+playwright = "playwright.__main__:main"
+
+[project.entry-points.pyinstaller40]
+hook-dirs = "playwright._impl.__pyinstaller:get_hook_dirs"
+
+[tool.setuptools]
+packages = [
+    "playwright",
+    "playwright.async_api",
+    "playwright.sync_api",
+    "playwright._impl",
+    "playwright._impl.__pyinstaller",
+]
+include-package-data = true
+
 [tool.setuptools_scm]
 version_file = "playwright/_repo_version.py"
 

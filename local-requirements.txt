@@ -1,6 +1,6 @@
-auditwheel==6.1.0
 autobahn==23.1.2
 black==24.8.0
+build==1.2.2.post1
 flake8==7.1.1
 flaky==3.8.1
 mypy==1.13.0
@@ -17,8 +17,6 @@ pytest-timeout==2.3.1
 pytest-xdist==3.6.1
 requests==2.32.3
 service_identity==24.2.0
-setuptools==75.4.0
 twisted==24.10.0
 types-pyOpenSSL==24.1.0.20240722
 types-requests==2.32.0.20241016
-wheel==0.45.0

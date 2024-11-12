@@ -31,7 +31,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r local-requirements.txt
         pip install -e .
-        python setup.py bdist_wheel
+        python -m build --wheel
         python -m playwright install --with-deps
     - name: Lint
       run: pre-commit run --show-diff-on-failure --color=always --all-files
@@ -89,7 +89,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r local-requirements.txt
         pip install -e .
-        python setup.py bdist_wheel
+        python -m build --wheel
         python -m playwright install --with-deps ${{ matrix.browser }}
     - name: Common Tests
       run: pytest tests/common --browser=${{ matrix.browser }} --timeout 90
@@ -135,7 +135,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r local-requirements.txt
         pip install -e .
-        python setup.py bdist_wheel
+        python -m build --wheel
         python -m playwright install ${{ matrix.browser-channel }} --with-deps
     - name: Common Tests
       run: pytest tests/common --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90

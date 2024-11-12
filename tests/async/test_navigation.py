@@ -504,9 +504,10 @@ async def test_wait_for_nav_should_respect_timeout(page: Page, server: Server) -
 async def test_wait_for_nav_should_work_with_both_domcontentloaded_and_load(
     page: Page, server: Server
 ) -> None:
-    async with page.expect_navigation(
-        wait_until="domcontentloaded"
-    ), page.expect_navigation(wait_until="load"):
+    async with (
+        page.expect_navigation(wait_until="domcontentloaded"),
+        page.expect_navigation(wait_until="load"),
+    ):
         await page.goto(server.PREFIX + "/one-style.html")
 
 
