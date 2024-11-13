@@ -12,11 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
 import re
 from pathlib import Path
 from typing import Dict, List
 
-from playwright.async_api import Browser, BrowserContext, BrowserType, Page
+from playwright.async_api import Browser, BrowserContext, BrowserType, Page, Response
 from tests.server import Server
 from tests.utils import get_trace_actions, parse_trace
 
@@ -143,6 +144,35 @@ async def test_should_collect_trace_with_resources_but_no_js(
     )[0]
     assert script
     assert script["snapshot"]["response"]["content"].get("_sha1") is None
+
+
+async def test_should_correctly_determine_sync_apiname(
+    context: BrowserContext, page: Page, server: Server, tmpdir: Path
+) -> None:
+    await context.tracing.start(screenshots=True, snapshots=True)
+
+    received_response: "asyncio.Future[None]" = asyncio.Future()
+
+    async def _handle_response(response: Response) -> None:
+        await response.request.all_headers()
+        await response.text()
+        received_response.set_result(None)
+
+    page.once("response", _handle_response)
+    await page.goto(server.PREFIX + "/grid.html")
+    await received_response
+    await page.close()
+    trace_file_path = tmpdir / "trace.zip"
+    await context.tracing.stop(path=trace_file_path)
+
+    (_, events) = parse_trace(trace_file_path)
+    assert events[0]["type"] == "context-options"
+    assert get_trace_actions(events) == [
+        "Page.goto",
+        "Request.all_headers",
+        "Response.text",
+        "Page.close",
+    ]
 
 
 async def test_should_collect_two_traces(
