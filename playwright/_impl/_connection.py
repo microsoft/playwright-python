@@ -37,6 +37,7 @@ from pyee import EventEmitter
 from pyee.asyncio import AsyncIOEventEmitter
 
 import playwright
+import playwright._impl._impl_to_api_mapping
 from playwright._impl._errors import TargetClosedError, rewrite_error
 from playwright._impl._greenlets import EventGreenlet
 from playwright._impl._helper import Error, ParsedMessagePayload, parse_error
@@ -573,6 +574,12 @@ def _extract_stack_trace_information_from_stack(
     api_name = ""
     parsed_frames: List[StackFrame] = []
     for frame in st:
+        # Sync and Async implementations can have event handlers. When these are sync, they
+        # get evaluated in the context of the event loop, so they contain the stack trace of when
+        # the message was received. _impl_to_api_mapping is glue between the user-code and internal
+        # code to translate impl classes to api classes. We want to ignore these frames.
+        if playwright._impl._impl_to_api_mapping.__file__ == frame.filename:
+            continue
         is_playwright_internal = frame.filename.startswith(playwright_module_path)
 
         method_name = ""
