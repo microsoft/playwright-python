@@ -15,7 +15,7 @@ jobs:
       contents: read    # This is required for actions/checkout to succeed
     environment: Docker
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Azure login
       uses: azure/login@v2
       with:
@@ -25,11 +25,11 @@ jobs:
     - name: Login to ACR via OIDC
       run: az acr login --name playwright
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: "3.10"
     - name: Set up Docker QEMU for arm64 docker builds
-      uses: docker/setup-qemu-action@v2
+      uses: docker/setup-qemu-action@v3
       with:
         platforms: arm64
     - name: Install dependencies & browsers
