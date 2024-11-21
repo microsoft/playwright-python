@@ -14344,9 +14344,12 @@ class BrowserType(AsyncBase):
             resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium,
             Firefox or WebKit, use at your own risk.
         channel : Union[str, None]
-            Browser distribution channel.  Supported values are "chrome", "chrome-beta", "chrome-dev", "chrome-canary",
-            "msedge", "msedge-beta", "msedge-dev", "msedge-canary". Read more about using
-            [Google Chrome and Microsoft Edge](../browsers.md#google-chrome--microsoft-edge).
+            Browser distribution channel.
+
+            Use "chromium" to [opt in to new headless mode](../browsers.md#opt-in-to-new-headless-mode).
+
+            Use "chrome", "chrome-beta", "chrome-dev", "chrome-canary", "msedge", "msedge-beta", "msedge-dev", or
+            "msedge-canary" to use branded [Google Chrome and Microsoft Edge](../browsers.md#google-chrome--microsoft-edge).
         args : Union[Sequence[str], None]
             **NOTE** Use custom browser args at your own risk, as some of them may break Playwright functionality.
 
@@ -14499,9 +14502,12 @@ class BrowserType(AsyncBase):
             user data directory is the **parent** directory of the "Profile Path" seen at `chrome://version`. Pass an empty
             string to use a temporary directory instead.
         channel : Union[str, None]
-            Browser distribution channel.  Supported values are "chrome", "chrome-beta", "chrome-dev", "chrome-canary",
-            "msedge", "msedge-beta", "msedge-dev", "msedge-canary". Read more about using
-            [Google Chrome and Microsoft Edge](../browsers.md#google-chrome--microsoft-edge).
+            Browser distribution channel.
+
+            Use "chromium" to [opt in to new headless mode](../browsers.md#opt-in-to-new-headless-mode).
+
+            Use "chrome", "chrome-beta", "chrome-dev", "chrome-canary", "msedge", "msedge-beta", "msedge-dev", or
+            "msedge-canary" to use branded [Google Chrome and Microsoft Edge](../browsers.md#google-chrome--microsoft-edge).
         executable_path : Union[pathlib.Path, str, None]
             Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is
             resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium,
@@ -20483,7 +20489,7 @@ class LocatorAssertions(AsyncBase):
         **Usage**
 
         ```py
-        await page.goto('https://demo.playwright.dev/todomvc/')
+        await page.goto(\"https://demo.playwright.dev/todomvc/\")
         await expect(page.locator('body')).to_match_aria_snapshot('''
           - heading \"todos\"
           - textbox \"What needs to be done?\"

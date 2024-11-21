@@ -855,12 +855,12 @@ async def test_set_extra_http_headers_should_throw_for_non_string_header_values(
 
 
 async def test_response_server_addr(page: Page, server: Server) -> None:
-    response = await page.goto(f"http://127.0.0.1:{server.PORT}")
+    response = await page.goto(server.EMPTY_PAGE)
     assert response
     server_addr = await response.server_addr()
     assert server_addr
     assert server_addr["port"] == server.PORT
-    assert server_addr["ipAddress"] in ["127.0.0.1", "::1"]
+    assert server_addr["ipAddress"] in ["127.0.0.1", "[::1]"]
 
 
 async def test_response_security_details(
