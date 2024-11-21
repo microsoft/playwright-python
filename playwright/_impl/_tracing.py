@@ -15,6 +15,7 @@
 import pathlib
 from typing import Dict, Optional, Union, cast
 
+from playwright._impl._api_structures import TracingGroupLocation
 from playwright._impl._artifact import Artifact
 from playwright._impl._connection import ChannelOwner, from_nullable_channel
 from playwright._impl._helper import locals_to_params
@@ -131,3 +132,9 @@ class Tracing(ChannelOwner):
         if self._is_tracing:
             self._is_tracing = False
             self._connection.set_is_tracing(False)
+
+    async def group(self, name: str, location: TracingGroupLocation = None) -> None:
+        await self._channel.send("tracingGroup", locals_to_params(locals()))
+
+    async def group_end(self) -> None:
+        await self._channel.send("tracingGroupEnd")

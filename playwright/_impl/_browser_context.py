@@ -61,7 +61,6 @@ from playwright._impl._helper import (
     RouteHandlerCallback,
     TimeoutSettings,
     URLMatch,
-    URLMatcher,
     WebSocketRouteHandlerCallback,
     async_readfile,
     async_writefile,
@@ -416,7 +415,8 @@ class BrowserContext(ChannelOwner):
         self._routes.insert(
             0,
             RouteHandler(
-                URLMatcher(self._options.get("baseURL"), url),
+                self._options.get("baseURL"),
+                url,
                 handler,
                 True if self._dispatcher_fiber else False,
                 times,
@@ -430,7 +430,7 @@ class BrowserContext(ChannelOwner):
         removed = []
         remaining = []
         for route in self._routes:
-            if route.matcher.match != url or (handler and route.handler != handler):
+            if route.url != url or (handler and route.handler != handler):
                 remaining.append(route)
             else:
                 removed.append(route)
@@ -453,9 +453,7 @@ class BrowserContext(ChannelOwner):
     ) -> None:
         self._web_socket_routes.insert(
             0,
-            WebSocketRouteHandler(
-                URLMatcher(self._options.get("baseURL"), url), handler
-            ),
+            WebSocketRouteHandler(self._options.get("baseURL"), url, handler),
         )
         await self._update_web_socket_interception_patterns()
 

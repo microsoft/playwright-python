@@ -312,3 +312,36 @@ async def test_should_respect_traces_dir_and_name(
         "trace.stacks",
         "trace.trace",
     ]
+
+
+async def test_should_show_tracing_group_in_action_list(
+    context: BrowserContext, tmp_path: Path
+) -> None:
+    await context.tracing.start()
+    page = await context.new_page()
+
+    await context.tracing.group("outer group")
+    await page.goto("data:text/html,<!DOCTYPE html><body><div>Hello world</div></body>")
+    await context.tracing.group("inner group 1")
+    await page.locator("body").click()
+    await context.tracing.group_end()
+    await context.tracing.group("inner group 2")
+    await page.get_by_text("Hello").is_visible()
+    await context.tracing.group_end()
+    await context.tracing.group_end()
+
+    trace_path = tmp_path / "trace.zip"
+    await context.tracing.stop(path=trace_path)
+
+    (resources, events) = parse_trace(trace_path)
+    actions = get_trace_actions(events)
+
+    assert actions == [
+        "BrowserContext.new_page",
+        "outer group",
+        "Page.goto",
+        "inner group 1",
+        "Locator.click",
+        "inner group 2",
+        "Locator.is_visible",
+    ]

@@ -142,27 +142,26 @@ class FrameNavigatedEvent(TypedDict):
 Env = Dict[str, Union[str, float, bool]]
 
 
-class URLMatcher:
-    def __init__(self, base_url: Union[str, None], match: URLMatch) -> None:
-        self._callback: Optional[Callable[[str], bool]] = None
-        self._regex_obj: Optional[Pattern[str]] = None
-        if isinstance(match, str):
-            if base_url and not match.startswith("*"):
-                match = urljoin(base_url, match)
-            regex = glob_to_regex(match)
-            self._regex_obj = re.compile(regex)
-        elif isinstance(match, Pattern):
-            self._regex_obj = match
-        else:
-            self._callback = match
-        self.match = match
-
-    def matches(self, url: str) -> bool:
-        if self._callback:
-            return self._callback(url)
-        if self._regex_obj:
-            return cast(bool, self._regex_obj.search(url))
-        return False
+def url_matches(
+    base_url: Optional[str], url_string: str, match: Optional[URLMatch]
+) -> bool:
+    if not match:
+        return True
+    if isinstance(match, str) and match[0] != "*":
+        # Allow http(s) baseURL to match ws(s) urls.
+        if (
+            base_url
+            and re.match(r"^https?://", base_url)
+            and re.match(r"^wss?://", url_string)
+        ):
+            base_url = re.sub(r"^http", "ws", base_url)
+        if base_url:
+            match = urljoin(base_url, match)
+    if isinstance(match, str):
+        match = glob_to_regex(match)
+    if isinstance(match, Pattern):
+        return bool(match.search(url_string))
+    return match(url_string)
 
 
 class HarLookupResult(TypedDict, total=False):
@@ -271,12 +270,14 @@ class RouteHandlerInvocation:
 class RouteHandler:
     def __init__(
         self,
-        matcher: URLMatcher,
+        base_url: Optional[str],
+        url: URLMatch,
         handler: RouteHandlerCallback,
         is_sync: bool,
         times: Optional[int] = None,
     ):
-        self.matcher = matcher
+        self._base_url = base_url
+        self.url = url
         self.handler = handler
         self._times = times if times else math.inf
         self._handled_count = 0
@@ -285,7 +286,7 @@ class RouteHandler:
         self._active_invocations: Set[RouteHandlerInvocation] = set()
 
     def matches(self, request_url: str) -> bool:
-        return self.matcher.matches(request_url)
+        return url_matches(self._base_url, request_url, self.url)
 
     async def handle(self, route: "Route") -> bool:
         handler_invocation = RouteHandlerInvocation(
@@ -362,13 +363,13 @@ class RouteHandler:
         patterns = []
         all = False
         for handler in handlers:
-            if isinstance(handler.matcher.match, str):
-                patterns.append({"glob": handler.matcher.match})
-            elif isinstance(handler.matcher._regex_obj, re.Pattern):
+            if isinstance(handler.url, str):
+                patterns.append({"glob": handler.url})
+            elif isinstance(handler.url, re.Pattern):
                 patterns.append(
                     {
-                        "regexSource": handler.matcher._regex_obj.pattern,
-                        "regexFlags": escape_regex_flags(handler.matcher._regex_obj),
+                        "regexSource": handler.url.pattern,
+                        "regexFlags": escape_regex_flags(handler.url),
                     }
                 )
             else:

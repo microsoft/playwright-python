@@ -37,6 +37,7 @@ from playwright._impl._api_structures import (
     SetCookieParam,
     SourceLocation,
     StorageState,
+    TracingGroupLocation,
     ViewportSize,
 )
 from playwright._impl._assertions import (
@@ -922,9 +923,8 @@ class Route(AsyncBase):
 
         **Details**
 
-        Note that any overrides such as `url` or `headers` only apply to the request being routed. If this request results
-        in a redirect, overrides will not be applied to the new redirected request. If you want to propagate a header
-        through redirects, use the combination of `route.fetch()` and `route.fulfill()` instead.
+        The `headers` option applies to both the routed request and any redirects it initiates. However, `url`, `method`,
+        and `postData` only apply to the original request and are not carried over to redirected requests.
 
         `route.continue_()` will immediately send the request to the network, other matching handlers won't be
         invoked. Use `route.fallback()` If you want next matching handler in the chain to be invoked.
@@ -6923,6 +6923,9 @@ class Clock(AsyncBase):
 
         Makes `Date.now` and `new Date()` return fixed fake time at all times, keeps all the timers running.
 
+        Use this method for simple scenarios where you only need to test with a predefined time. For more advanced
+        scenarios, use `clock.install()` instead. Read docs on [clock emulation](https://playwright.dev/python/docs/clock) to learn more.
+
         **Usage**
 
         ```py
@@ -6944,7 +6947,8 @@ class Clock(AsyncBase):
     ) -> None:
         """Clock.set_system_time
 
-        Sets current system time but does not trigger any timers.
+        Sets system time, but does not trigger any timers. Use this to test how the web page reacts to a time shift, for
+        example switching from summer to winter time, or changing time zones.
 
         **Usage**
 
@@ -9294,8 +9298,6 @@ class Page(AsyncContextManager):
         # → True
         await page.evaluate(\"matchMedia('(prefers-color-scheme: light)').matches\")
         # → False
-        await page.evaluate(\"matchMedia('(prefers-color-scheme: no-preference)').matches\")
-        # → False
         ```
 
         Parameters
@@ -9304,8 +9306,9 @@ class Page(AsyncContextManager):
             Changes the CSS media type of the page. The only allowed values are `'Screen'`, `'Print'` and `'Null'`. Passing
             `'Null'` disables CSS media emulation.
         color_scheme : Union["dark", "light", "no-preference", "null", None]
-            Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`.
-            Passing `'Null'` disables color scheme emulation.
+            Emulates [prefers-colors-scheme](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme)
+            media feature, supported values are `'light'` and `'dark'`. Passing `'Null'` disables color scheme emulation.
+            `'no-preference'` is deprecated.
         reduced_motion : Union["no-preference", "null", "reduce", None]
             Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. Passing
             `null` disables reduced motion emulation.
@@ -13804,9 +13807,9 @@ class Browser(AsyncContextManager):
             Specifies if viewport supports touch events. Defaults to false. Learn more about
             [mobile emulation](../emulation.md#devices).
         color_scheme : Union["dark", "light", "no-preference", "null", None]
-            Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See
-            `page.emulate_media()` for more details. Passing `'null'` resets emulation to system defaults. Defaults to
-            `'light'`.
+            Emulates [prefers-colors-scheme](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme)
+            media feature, supported values are `'light'` and `'dark'`. See `page.emulate_media()` for more details.
+            Passing `'null'` resets emulation to system defaults. Defaults to `'light'`.
         reduced_motion : Union["no-preference", "null", "reduce", None]
             Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See
             `page.emulate_media()` for more details. Passing `'null'` resets emulation to system defaults. Defaults to
@@ -14029,9 +14032,9 @@ class Browser(AsyncContextManager):
             Specifies if viewport supports touch events. Defaults to false. Learn more about
             [mobile emulation](../emulation.md#devices).
         color_scheme : Union["dark", "light", "no-preference", "null", None]
-            Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See
-            `page.emulate_media()` for more details. Passing `'null'` resets emulation to system defaults. Defaults to
-            `'light'`.
+            Emulates [prefers-colors-scheme](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme)
+            media feature, supported values are `'light'` and `'dark'`. See `page.emulate_media()` for more details.
+            Passing `'null'` resets emulation to system defaults. Defaults to `'light'`.
         forced_colors : Union["active", "none", "null", None]
             Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See
             `page.emulate_media()` for more details. Passing `'null'` resets emulation to system defaults. Defaults to
@@ -14588,9 +14591,9 @@ class BrowserType(AsyncBase):
             Specifies if viewport supports touch events. Defaults to false. Learn more about
             [mobile emulation](../emulation.md#devices).
         color_scheme : Union["dark", "light", "no-preference", "null", None]
-            Emulates `'prefers-colors-scheme'` media feature, supported values are `'light'`, `'dark'`, `'no-preference'`. See
-            `page.emulate_media()` for more details. Passing `'null'` resets emulation to system defaults. Defaults to
-            `'light'`.
+            Emulates [prefers-colors-scheme](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-color-scheme)
+            media feature, supported values are `'light'` and `'dark'`. See `page.emulate_media()` for more details.
+            Passing `'null'` resets emulation to system defaults. Defaults to `'light'`.
         reduced_motion : Union["no-preference", "null", "reduce", None]
             Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See
             `page.emulate_media()` for more details. Passing `'null'` resets emulation to system defaults. Defaults to
@@ -15083,6 +15086,48 @@ class Tracing(AsyncBase):
         """
 
         return mapping.from_maybe_impl(await self._impl_obj.stop(path=path))
+
+    async def group(
+        self, name: str, *, location: typing.Optional[TracingGroupLocation] = None
+    ) -> None:
+        """Tracing.group
+
+        **NOTE** Use `test.step` instead when available.
+
+        Creates a new group within the trace, assigning any subsequent API calls to this group, until
+        `tracing.group_end()` is called. Groups can be nested and will be visible in the trace viewer.
+
+        **Usage**
+
+        ```py
+        # All actions between group and group_end
+        # will be shown in the trace viewer as a group.
+        page.context.tracing.group(\"Open Playwright.dev > API\")
+        page.goto(\"https://playwright.dev/\")
+        page.get_by_role(\"link\", name=\"API\").click()
+        page.context.tracing.group_end()
+        ```
+
+        Parameters
+        ----------
+        name : str
+            Group name shown in the trace viewer.
+        location : Union[{file: str, line: Union[int, None], column: Union[int, None]}, None]
+            Specifies a custom location for the group to be shown in the trace viewer. Defaults to the location of the
+            `tracing.group()` call.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.group(name=name, location=location)
+        )
+
+    async def group_end(self) -> None:
+        """Tracing.group_end
+
+        Closes the last group created by `tracing.group()`.
+        """
+
+        return mapping.from_maybe_impl(await self._impl_obj.group_end())
 
 
 mapping.register(TracingImpl, Tracing)
@@ -17099,6 +17144,61 @@ class Locator(AsyncBase):
                 maskColor=mask_color,
                 style=style,
             )
+        )
+
+    async def aria_snapshot(self, *, timeout: typing.Optional[float] = None) -> str:
+        """Locator.aria_snapshot
+
+        Captures the aria snapshot of the given element. Read more about [aria snapshots](https://playwright.dev/python/docs/aria-snapshots) and
+        `locator_assertions.to_match_aria_snapshot()` for the corresponding assertion.
+
+        **Usage**
+
+        ```py
+        await page.get_by_role(\"link\").aria_snapshot()
+        ```
+
+        **Details**
+
+        This method captures the aria snapshot of the given element. The snapshot is a string that represents the state of
+        the element and its children. The snapshot can be used to assert the state of the element in the test, or to
+        compare it to state in the future.
+
+        The ARIA snapshot is represented using [YAML](https://yaml.org/spec/1.2.2/) markup language:
+        - The keys of the objects are the roles and optional accessible names of the elements.
+        - The values are either text content or an array of child elements.
+        - Generic static text can be represented with the `text` key.
+
+        Below is the HTML markup and the respective ARIA snapshot:
+
+        ```html
+        <ul aria-label=\"Links\">
+          <li><a href=\"/\">Home</a></li>
+          <li><a href=\"/about\">About</a></li>
+        <ul>
+        ```
+
+        ```yml
+        - list \"Links\":
+          - listitem:
+            - link \"Home\"
+          - listitem:
+            - link \"About\"
+        ```
+
+        Parameters
+        ----------
+        timeout : Union[float, None]
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        str
+        """
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.aria_snapshot(timeout=timeout)
         )
 
     async def scroll_into_view_if_needed(
@@ -20371,6 +20471,58 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.not_to_have_role(role=role, timeout=timeout)
+        )
+
+    async def to_match_aria_snapshot(
+        self, expected: str, *, timeout: typing.Optional[float] = None
+    ) -> None:
+        """LocatorAssertions.to_match_aria_snapshot
+
+        Asserts that the target element matches the given [accessibility snapshot](https://playwright.dev/python/docs/aria-snapshots).
+
+        **Usage**
+
+        ```py
+        await page.goto('https://demo.playwright.dev/todomvc/')
+        await expect(page.locator('body')).to_match_aria_snapshot('''
+          - heading \"todos\"
+          - textbox \"What needs to be done?\"
+        ''')
+        ```
+
+        Parameters
+        ----------
+        expected : str
+        timeout : Union[float, None]
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.to_match_aria_snapshot(
+                expected=expected, timeout=timeout
+            )
+        )
+
+    async def not_to_match_aria_snapshot(
+        self, expected: str, *, timeout: typing.Optional[float] = None
+    ) -> None:
+        """LocatorAssertions.not_to_match_aria_snapshot
+
+        The opposite of `locator_assertions.to_match_aria_snapshot()`.
+
+        Parameters
+        ----------
+        expected : str
+        timeout : Union[float, None]
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.not_to_match_aria_snapshot(
+                expected=expected, timeout=timeout
+            )
         )
 
 

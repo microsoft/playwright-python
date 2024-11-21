@@ -291,3 +291,9 @@ AriaRole = Literal[
     "treegrid",
     "treeitem",
 ]
+
+
+class TracingGroupLocation(TypedDict):
+    file: str
+    line: Optional[int]
+    column: Optional[int]

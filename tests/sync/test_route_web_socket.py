@@ -16,7 +16,7 @@ import re
 import time
 from typing import Any, Awaitable, Callable, Literal, Optional, Union
 
-from playwright.sync_api import Frame, Page, WebSocketRoute
+from playwright.sync_api import Browser, Frame, Page, WebSocketRoute
 from tests.server import Server, WebSocketProtocol
 
 
@@ -312,5 +312,31 @@ def test_should_work_without_server(page: Page, server: Server) -> None:
             f"message: data=response origin=ws://localhost:{server.PORT} lastEventId=",
             f"message: data=another origin=ws://localhost:{server.PORT} lastEventId=",
             "close code=3008 reason=oops wasClean=true",
+        ],
+    )
+
+
+def test_should_work_with_base_url(browser: Browser, server: Server) -> None:
+    context = browser.new_context(base_url=f"http://localhost:{server.PORT}")
+    page = context.new_page()
+
+    def _handle_ws(ws: WebSocketRoute) -> None:
+        ws.on_message(lambda message: ws.send(message))
+
+    page.route_web_socket("/ws", _handle_ws)
+    setup_ws(page, server.PORT, "blob")
+
+    page.evaluate(
+        """async () => {
+        await window.wsOpened;
+        window.ws.send('echo');
+    }"""
+    )
+
+    assert_equal(
+        lambda: page.evaluate("window.log"),
+        [
+            "open",
+            f"message: data=echo origin=ws://localhost:{server.PORT} lastEventId=",
         ],
     )
