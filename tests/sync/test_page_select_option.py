@@ -43,6 +43,22 @@ def test_select_option_should_select_single_option_by_label(
     assert page.evaluate("result.onChange") == ["indigo"]
 
 
+def test_select_option_should_select_single_option_by_empty_label(
+    page: Page, server: Server
+) -> None:
+    page.set_content(
+        """
+        <select>
+            <option value="indigo">Indigo</option>
+            <option value="violet"></option>
+        </select>
+    """
+    )
+    assert page.locator("select").input_value() == "indigo"
+    page.select_option("select", label="")
+    assert page.locator("select").input_value() == "violet"
+
+
 def test_select_option_should_select_single_option_by_handle(
     server: Server, page: Page
 ) -> None:
@@ -59,6 +75,14 @@ def test_select_option_should_select_single_option_by_index(
     page.select_option("select", index=2)
     assert page.evaluate("result.onInput") == ["brown"]
     assert page.evaluate("result.onChange") == ["brown"]
+
+
+def test_select_option_should_select_single_option_by_index_0(
+    page: Page, server: Server
+) -> None:
+    page.goto(server.PREFIX + "/input/select.html")
+    page.select_option("select", index=0)
+    assert page.evaluate("result.onInput") == ["black"]
 
 
 def test_select_option_should_select_only_first_option(
@@ -106,6 +130,23 @@ def test_select_option_should_select_multiple_options_with_attributes(
     )
     assert page.evaluate("result.onInput") == ["blue", "gray", "green"]
     assert page.evaluate("result.onChange") == ["blue", "gray", "green"]
+
+
+def test_select_option_should_select_option_with_empty_value(
+    page: Page, server: Server
+) -> None:
+    page.goto(server.EMPTY_PAGE)
+    page.set_content(
+        """
+        <select>
+            <option value="first">First</option>
+            <option value="">Second</option>
+        </select>
+    """
+    )
+    assert page.locator("select").input_value() == "first"
+    page.select_option("select", value="")
+    assert page.locator("select").input_value() == ""
 
 
 def test_select_option_should_respect_event_bubbling(
