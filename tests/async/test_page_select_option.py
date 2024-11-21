@@ -45,6 +45,22 @@ async def test_select_option_should_select_single_option_by_label(
     assert await page.evaluate("result.onChange") == ["indigo"]
 
 
+async def test_select_option_should_select_single_option_by_empty_label(
+    page: Page, server: Server
+) -> None:
+    await page.set_content(
+        """
+        <select>
+            <option value="indigo">Indigo</option>
+            <option value="violet"></option>
+        </select>
+    """
+    )
+    assert await page.locator("select").input_value() == "indigo"
+    await page.select_option("select", label="")
+    assert await page.locator("select").input_value() == "violet"
+
+
 async def test_select_option_should_select_single_option_by_handle(
     page: Page, server: Server
 ) -> None:
@@ -63,6 +79,14 @@ async def test_select_option_should_select_single_option_by_index(
     await page.select_option("select", index=2)
     assert await page.evaluate("result.onInput") == ["brown"]
     assert await page.evaluate("result.onChange") == ["brown"]
+
+
+async def test_select_option_should_select_single_option_by_index_0(
+    page: Page, server: Server
+) -> None:
+    await page.goto(server.PREFIX + "/input/select.html")
+    await page.select_option("select", index=0)
+    assert await page.evaluate("result.onInput") == ["black"]
 
 
 async def test_select_option_should_select_only_first_option(
@@ -110,6 +134,23 @@ async def test_select_option_should_select_multiple_options_with_attributes(
     )
     assert await page.evaluate("result.onInput") == ["blue", "gray", "green"]
     assert await page.evaluate("result.onChange") == ["blue", "gray", "green"]
+
+
+async def test_select_option_should_select_option_with_empty_value(
+    page: Page, server: Server
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+    await page.set_content(
+        """
+        <select>
+            <option value="first">First</option>
+            <option value="">Second</option>
+        </select>
+    """
+    )
+    assert await page.locator("select").input_value() == "first"
+    await page.select_option("select", value="")
+    assert await page.locator("select").input_value() == ""
 
 
 async def test_select_option_should_respect_event_bubbling(
