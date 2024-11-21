@@ -1234,15 +1234,20 @@ class Page(ChannelOwner):
         urlOrPredicate: URLMatchRequest,
         timeout: float = None,
     ) -> EventContextManagerImpl[Request]:
+        def my_predicate(request: Request) -> bool:
+            if not callable(urlOrPredicate):
+                return url_matches(
+                    self._browser_context._options.get("baseURL"),
+                    request.url,
+                    urlOrPredicate,
+                )
+            return urlOrPredicate(request)
+
         trimmed_url = trim_url(urlOrPredicate)
         log_line = f"waiting for request {trimmed_url}" if trimmed_url else None
         return self._expect_event(
             Page.Events.Request,
-            predicate=lambda request: url_matches(
-                self._browser_context._options.get("baseURL"),
-                request.url,
-                cast(URLMatch, urlOrPredicate),
-            ),
+            predicate=my_predicate,
             timeout=timeout,
             log_line=log_line,
         )
@@ -1261,15 +1266,20 @@ class Page(ChannelOwner):
         urlOrPredicate: URLMatchResponse,
         timeout: float = None,
     ) -> EventContextManagerImpl[Response]:
+        def my_predicate(request: Response) -> bool:
+            if not callable(urlOrPredicate):
+                return url_matches(
+                    self._browser_context._options.get("baseURL"),
+                    request.url,
+                    urlOrPredicate,
+                )
+            return urlOrPredicate(request)
+
         trimmed_url = trim_url(urlOrPredicate)
         log_line = f"waiting for response {trimmed_url}" if trimmed_url else None
         return self._expect_event(
             Page.Events.Response,
-            predicate=lambda repsonse: url_matches(
-                self._browser_context._options.get("baseURL"),
-                repsonse.url,
-                cast(URLMatch, urlOrPredicate),
-            ),
+            predicate=my_predicate,
             timeout=timeout,
             log_line=log_line,
         )
