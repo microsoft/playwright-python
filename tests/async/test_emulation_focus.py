@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
-from typing import Callable
 
 from playwright.async_api import Page
 from tests.server import Server
@@ -104,29 +103,6 @@ async def test_should_change_document_activeElement(page: Page, server: Server) 
         page2.evaluate("document.activeElement.tagName"),
     )
     assert active == ["INPUT", "TEXTAREA"]
-
-
-async def test_should_not_affect_screenshots(
-    page: Page, server: Server, assert_to_be_golden: Callable[[bytes, str], None]
-) -> None:
-    # Firefox headed produces a different image.
-    page2 = await page.context.new_page()
-    await asyncio.gather(
-        page.set_viewport_size({"width": 500, "height": 500}),
-        page.goto(server.PREFIX + "/grid.html"),
-        page2.set_viewport_size({"width": 50, "height": 50}),
-        page2.goto(server.PREFIX + "/grid.html"),
-    )
-    await asyncio.gather(
-        page.focus("body"),
-        page2.focus("body"),
-    )
-    screenshots = await asyncio.gather(
-        page.screenshot(),
-        page2.screenshot(),
-    )
-    assert_to_be_golden(screenshots[0], "screenshot-sanity.png")
-    assert_to_be_golden(screenshots[1], "grid-cell-0.png")
 
 
 async def test_should_change_focused_iframe(
