@@ -92,6 +92,14 @@ def browser_channel(pytestconfig: pytest.Config) -> Optional[str]:
 
 
 @pytest.fixture(scope="session")
+def is_headless_shell(browser_name: str, browser_channel: str, headless: bool) -> bool:
+    return browser_name == "chromium" and (
+        browser_channel == "chromium-headless-shell"
+        or (not browser_channel and headless)
+    )
+
+
+@pytest.fixture(scope="session")
 def is_webkit(browser_name: str) -> bool:
     return browser_name == "webkit"
 

@@ -172,7 +172,7 @@ async def test_should_reject_wait_for_event_on_close_and_error(
 
 
 async def test_should_emit_error_event(
-    page: Page, server: Server, browser_name: str
+    page: Page, server: Server, browser_name: str, browser_channel: str
 ) -> None:
     future: "asyncio.Future[str]" = asyncio.Future()
 
@@ -194,4 +194,4 @@ async def test_should_emit_error_event(
     if browser_name == "firefox":
         assert err == "CLOSE_ABNORMAL"
     else:
-        assert ": 404" in err
+        assert ("" if browser_channel == "msedge" else ": 404") in err

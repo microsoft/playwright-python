@@ -32,6 +32,11 @@ from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
 from .utils import Utils
 
 
+@pytest.fixture(scope="session")
+def fails_on_401(browser_name: str, is_headless_shell: bool) -> bool:
+    return browser_name == "chromium" and not is_headless_shell
+
+
 async def test_page_event_should_create_new_context(browser: Browser) -> None:
     assert len(browser.contexts) == 0
     context = await browser.new_context()
@@ -472,13 +477,17 @@ async def test_expose_bindinghandle_should_work(context: BrowserContext) -> None
 
 
 async def test_auth_should_fail_without_credentials(
-    context: BrowserContext, server: Server
+    context: BrowserContext, server: Server, fails_on_401: bool
 ) -> None:
     server.set_auth("/empty.html", "user", "pass")
     page = await context.new_page()
-    response = await page.goto(server.EMPTY_PAGE)
-    assert response
-    assert response.status == 401
+    try:
+        response = await page.goto(server.EMPTY_PAGE)
+        assert response
+        assert response.status == 401
+    except Error as exc:
+        assert fails_on_401
+        assert "net::ERR_INVALID_AUTH_CREDENTIALS" in exc.message
 
 
 async def test_auth_should_work_with_correct_credentials(
@@ -562,7 +571,7 @@ async def test_should_work_with_correct_credentials_and_matching_origin_case_ins
 
 
 async def test_should_fail_with_correct_credentials_and_mismatching_scheme(
-    browser: Browser, server: Server
+    browser: Browser, server: Server, fails_on_401: bool
 ) -> None:
     server.set_auth("/empty.html", "user", "pass")
     context = await browser.new_context(
@@ -573,14 +582,18 @@ async def test_should_fail_with_correct_credentials_and_mismatching_scheme(
         }
     )
     page = await context.new_page()
-    response = await page.goto(server.EMPTY_PAGE)
-    assert response
-    assert response.status == 401
+    try:
+        response = await page.goto(server.EMPTY_PAGE)
+        assert response
+        assert response.status == 401
+    except Error as exc:
+        assert fails_on_401
+        assert "net::ERR_INVALID_AUTH_CREDENTIALS" in exc.message
     await context.close()
 
 
 async def test_should_fail_with_correct_credentials_and_mismatching_hostname(
-    browser: Browser, server: Server
+    browser: Browser, server: Server, fails_on_401: bool
 ) -> None:
     server.set_auth("/empty.html", "user", "pass")
     hostname = urlparse(server.PREFIX).hostname
@@ -590,14 +603,18 @@ async def test_should_fail_with_correct_credentials_and_mismatching_hostname(
         http_credentials={"username": "user", "password": "pass", "origin": origin}
     )
     page = await context.new_page()
-    response = await page.goto(server.EMPTY_PAGE)
-    assert response
-    assert response.status == 401
+    try:
+        response = await page.goto(server.EMPTY_PAGE)
+        assert response
+        assert response.status == 401
+    except Error as exc:
+        assert fails_on_401
+        assert "net::ERR_INVALID_AUTH_CREDENTIALS" in exc.message
     await context.close()
 
 
 async def test_should_fail_with_correct_credentials_and_mismatching_port(
-    browser: Browser, server: Server
+    browser: Browser, server: Server, fails_on_401: bool
 ) -> None:
     server.set_auth("/empty.html", "user", "pass")
     origin = server.PREFIX.replace(str(server.PORT), str(server.PORT + 1))
@@ -605,9 +622,13 @@ async def test_should_fail_with_correct_credentials_and_mismatching_port(
         http_credentials={"username": "user", "password": "pass", "origin": origin}
     )
     page = await context.new_page()
-    response = await page.goto(server.EMPTY_PAGE)
-    assert response
-    assert response.status == 401
+    try:
+        response = await page.goto(server.EMPTY_PAGE)
+        assert response
+        assert response.status == 401
+    except Error as exc:
+        assert fails_on_401
+        assert "net::ERR_INVALID_AUTH_CREDENTIALS" in exc.message
     await context.close()
 
 
