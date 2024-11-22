@@ -305,3 +305,36 @@ def test_should_respect_traces_dir_and_name(
         "trace.stacks",
         "trace.trace",
     ]
+
+
+def test_should_show_tracing_group_in_action_list(
+    context: BrowserContext, tmp_path: Path
+) -> None:
+    context.tracing.start()
+    page = context.new_page()
+
+    context.tracing.group("outer group")
+    page.goto("data:text/html,<!DOCTYPE html><body><div>Hello world</div></body>")
+    context.tracing.group("inner group 1")
+    page.locator("body").click()
+    context.tracing.group_end()
+    context.tracing.group("inner group 2")
+    page.get_by_text("Hello").is_visible()
+    context.tracing.group_end()
+    context.tracing.group_end()
+
+    trace_path = tmp_path / "trace.zip"
+    context.tracing.stop(path=trace_path)
+
+    (resources, events) = parse_trace(trace_path)
+    actions = get_trace_actions(events)
+
+    assert actions == [
+        "BrowserContext.new_page",
+        "outer group",
+        "Page.goto",
+        "inner group 1",
+        "Locator.click",
+        "inner group 2",
+        "Locator.is_visible",
+    ]

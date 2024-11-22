@@ -110,6 +110,7 @@ class TestServerRequest(http.Request):
             if not creds_correct:
                 self.setHeader(b"www-authenticate", 'Basic realm="Secure Area"')
                 self.setResponseCode(HTTPStatus.UNAUTHORIZED)
+                self.write(b"HTTP Error 401 Unauthorized: Access is denied")
                 self.finish()
                 return
         if server.csp.get(path):
@@ -133,7 +134,10 @@ class TestServerRequest(http.Request):
                 self.write(file_content)
             self.setResponseCode(HTTPStatus.OK)
         except (FileNotFoundError, IsADirectoryError, PermissionError):
+            self.setHeader(b"Content-Type", "text/plain")
             self.setResponseCode(HTTPStatus.NOT_FOUND)
+            if self.method != "HEAD":
+                self.write(f"File not found: {path}".encode())
         self.finish()
 
 

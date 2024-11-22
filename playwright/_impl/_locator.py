@@ -534,6 +534,15 @@ class Locator:
             ),
         )
 
+    async def aria_snapshot(self, timeout: float = None) -> str:
+        return await self._frame._channel.send(
+            "ariaSnapshot",
+            {
+                "selector": self._selector,
+                **locals_to_params(locals()),
+            },
+        )
+
     async def scroll_into_view_if_needed(
         self,
         timeout: float = None,

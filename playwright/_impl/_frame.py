@@ -45,10 +45,10 @@ from playwright._impl._helper import (
     Literal,
     MouseButton,
     URLMatch,
-    URLMatcher,
     async_readfile,
     locals_to_params,
     monotonic_time,
+    url_matches,
 )
 from playwright._impl._js_handle import (
     JSHandle,
@@ -185,18 +185,17 @@ class Frame(ChannelOwner):
 
         to_url = f' to "{url}"' if url else ""
         waiter.log(f"waiting for navigation{to_url} until '{waitUntil}'")
-        matcher = (
-            URLMatcher(self._page._browser_context._options.get("baseURL"), url)
-            if url
-            else None
-        )
 
         def predicate(event: Any) -> bool:
             # Any failed navigation results in a rejection.
             if event.get("error"):
                 return True
             waiter.log(f'  navigated to "{event["url"]}"')
-            return not matcher or matcher.matches(event["url"])
+            return url_matches(
+                cast("Page", self._page)._browser_context._options.get("baseURL"),
+                event["url"],
+                url,
+            )
 
         waiter.wait_for_event(
             self._event_emitter,
@@ -226,8 +225,9 @@ class Frame(ChannelOwner):
         timeout: float = None,
     ) -> None:
         assert self._page
-        matcher = URLMatcher(self._page._browser_context._options.get("baseURL"), url)
-        if matcher.matches(self.url):
+        if url_matches(
+            self._page._browser_context._options.get("baseURL"), self.url, url
+        ):
             await self._wait_for_load_state_impl(state=waitUntil, timeout=timeout)
             return
         async with self.expect_navigation(

@@ -783,6 +783,23 @@ class LocatorAssertions(AssertionsBase):
         __tracebackhide__ = True
         await self._not.to_have_role(role, timeout)
 
+    async def to_match_aria_snapshot(
+        self, expected: str, timeout: float = None
+    ) -> None:
+        __tracebackhide__ = True
+        await self._expect_impl(
+            "to.match.aria",
+            FrameExpectOptions(expectedValue=expected, timeout=timeout),
+            expected,
+            "Locator expected to match Aria snapshot",
+        )
+
+    async def not_to_match_aria_snapshot(
+        self, expected: str, timeout: float = None
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_match_aria_snapshot(expected, timeout)
+
 
 class APIResponseAssertions:
     def __init__(

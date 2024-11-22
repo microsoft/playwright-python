@@ -53,10 +53,11 @@ from playwright._impl._connection import (
 from playwright._impl._errors import Error
 from playwright._impl._event_context_manager import EventContextManagerImpl
 from playwright._impl._helper import (
-    URLMatcher,
+    URLMatch,
     WebSocketRouteHandlerCallback,
     async_readfile,
     locals_to_params,
+    url_matches,
 )
 from playwright._impl._str_utils import escape_regex_flags
 from playwright._impl._waiter import Waiter
@@ -718,8 +719,14 @@ class WebSocketRoute(ChannelOwner):
 
 
 class WebSocketRouteHandler:
-    def __init__(self, matcher: URLMatcher, handler: WebSocketRouteHandlerCallback):
-        self.matcher = matcher
+    def __init__(
+        self,
+        base_url: Optional[str],
+        url: URLMatch,
+        handler: WebSocketRouteHandlerCallback,
+    ):
+        self._base_url = base_url
+        self.url = url
         self.handler = handler
 
     @staticmethod
@@ -729,13 +736,13 @@ class WebSocketRouteHandler:
         patterns = []
         all_urls = False
         for handler in handlers:
-            if isinstance(handler.matcher.match, str):
-                patterns.append({"glob": handler.matcher.match})
-            elif isinstance(handler.matcher._regex_obj, re.Pattern):
+            if isinstance(handler.url, str):
+                patterns.append({"glob": handler.url})
+            elif isinstance(handler.url, re.Pattern):
                 patterns.append(
                     {
-                        "regexSource": handler.matcher._regex_obj.pattern,
-                        "regexFlags": escape_regex_flags(handler.matcher._regex_obj),
+                        "regexSource": handler.url.pattern,
+                        "regexFlags": escape_regex_flags(handler.url),
                     }
                 )
             else:
@@ -746,7 +753,7 @@ class WebSocketRouteHandler:
         return patterns
 
     def matches(self, ws_url: str) -> bool:
-        return self.matcher.matches(ws_url)
+        return url_matches(self._base_url, ws_url, self.url)
 
     async def handle(self, websocket_route: "WebSocketRoute") -> None:
         coro_or_future = self.handler(websocket_route)

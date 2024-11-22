@@ -71,7 +71,6 @@ from playwright._impl._helper import (
     RouteHandlerCallback,
     TimeoutSettings,
     URLMatch,
-    URLMatcher,
     URLMatchRequest,
     URLMatchResponse,
     WebSocketRouteHandlerCallback,
@@ -80,6 +79,7 @@ from playwright._impl._helper import (
     locals_to_params,
     make_dirs_for_file,
     serialize_error,
+    url_matches,
 )
 from playwright._impl._input import Keyboard, Mouse, Touchscreen
 from playwright._impl._js_handle import (
@@ -380,16 +380,14 @@ class Page(ChannelOwner):
         return self._main_frame
 
     def frame(self, name: str = None, url: URLMatch = None) -> Optional[Frame]:
-        matcher = (
-            URLMatcher(self._browser_context._options.get("baseURL"), url)
-            if url
-            else None
-        )
         for frame in self._frames:
             if name and frame.name == name:
                 return frame
-            if url and matcher and matcher.matches(frame.url):
+            if url and url_matches(
+                self._browser_context._options.get("baseURL"), frame.url, url
+            ):
                 return frame
+
         return None
 
     @property
@@ -656,7 +654,8 @@ class Page(ChannelOwner):
         self._routes.insert(
             0,
             RouteHandler(
-                URLMatcher(self._browser_context._options.get("baseURL"), url),
+                self._browser_context._options.get("baseURL"),
+                url,
                 handler,
                 True if self._dispatcher_fiber else False,
                 times,
@@ -670,7 +669,7 @@ class Page(ChannelOwner):
         removed = []
         remaining = []
         for route in self._routes:
-            if route.matcher.match != url or (handler and route.handler != handler):
+            if route.url != url or (handler and route.handler != handler):
                 remaining.append(route)
             else:
                 removed.append(route)
@@ -699,7 +698,7 @@ class Page(ChannelOwner):
         self._web_socket_routes.insert(
             0,
             WebSocketRouteHandler(
-                URLMatcher(self._browser_context._options.get("baseURL"), url), handler
+                self._browser_context._options.get("baseURL"), url, handler
             ),
         )
         await self._update_web_socket_interception_patterns()
@@ -1235,21 +1234,14 @@ class Page(ChannelOwner):
         urlOrPredicate: URLMatchRequest,
         timeout: float = None,
     ) -> EventContextManagerImpl[Request]:
-        matcher = (
-            None
-            if callable(urlOrPredicate)
-            else URLMatcher(
-                self._browser_context._options.get("baseURL"), urlOrPredicate
-            )
-        )
-        predicate = urlOrPredicate if callable(urlOrPredicate) else None
-
         def my_predicate(request: Request) -> bool:
-            if matcher:
-                return matcher.matches(request.url)
-            if predicate:
-                return predicate(request)
-            return True
+            if not callable(urlOrPredicate):
+                return url_matches(
+                    self._browser_context._options.get("baseURL"),
+                    request.url,
+                    urlOrPredicate,
+                )
+            return urlOrPredicate(request)
 
         trimmed_url = trim_url(urlOrPredicate)
         log_line = f"waiting for request {trimmed_url}" if trimmed_url else None
@@ -1274,21 +1266,14 @@ class Page(ChannelOwner):
         urlOrPredicate: URLMatchResponse,
         timeout: float = None,
     ) -> EventContextManagerImpl[Response]:
-        matcher = (
-            None
-            if callable(urlOrPredicate)
-            else URLMatcher(
-                self._browser_context._options.get("baseURL"), urlOrPredicate
-            )
-        )
-        predicate = urlOrPredicate if callable(urlOrPredicate) else None
-
-        def my_predicate(response: Response) -> bool:
-            if matcher:
-                return matcher.matches(response.url)
-            if predicate:
-                return predicate(response)
-            return True
+        def my_predicate(request: Response) -> bool:
+            if not callable(urlOrPredicate):
+                return url_matches(
+                    self._browser_context._options.get("baseURL"),
+                    request.url,
+                    urlOrPredicate,
+                )
+            return urlOrPredicate(request)
 
         trimmed_url = trim_url(urlOrPredicate)
         log_line = f"waiting for response {trimmed_url}" if trimmed_url else None
