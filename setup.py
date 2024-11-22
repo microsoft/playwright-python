@@ -148,7 +148,9 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
             extractall(zip, f"driver/{wheel_bundle['zip_name']}")
         wheel_location = without_platform + wheel_bundle["wheel"]
         shutil.copy(base_wheel_location, wheel_location)
-        with zipfile.ZipFile(wheel_location, "a") as zip:
+        with zipfile.ZipFile(
+            wheel_location, mode="a", compression=zipfile.ZIP_DEFLATED
+        ) as zip:
             driver_root = os.path.abspath(f"driver/{wheel_bundle['zip_name']}")
             for dir_path, _, files in os.walk(driver_root):
                 for file in files:
