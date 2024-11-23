@@ -55,5 +55,5 @@ class Artifact(ChannelOwner):
         buffer = await stream.read_all()
         return buffer
 
-    async def cancel(self) -> None:
+    async def cancel(self) -> None:  # pyright: ignore[reportIncompatibleMethodOverride]
         await self._channel.send("cancel")
