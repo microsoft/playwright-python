@@ -36,6 +36,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r local-requirements.txt
+        pip install -r requirements.txt
         pip install -e .
     - name: Build Docker image
       run: bash utils/docker/build.sh --amd64 ${{ matrix.docker-image-variant }} playwright-python:localbuild-${{ matrix.docker-image-variant }}
