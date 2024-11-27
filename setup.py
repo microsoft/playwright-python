@@ -165,13 +165,12 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
         for whlfile in glob.glob(os.path.join(self.dist_dir, "*.whl")):
             os.makedirs("wheelhouse", exist_ok=True)
             if InWheel:
-                with InWheel(
-                    in_wheel=whlfile,
-                    out_wheel=os.path.join("wheelhouse", os.path.basename(whlfile)),
-                ):
+                wheelhouse_whl = os.path.join("wheelhouse", os.path.basename(whlfile))
+                shutil.move(whlfile, wheelhouse_whl)
+                with InWheel(in_wheel=wheelhouse_whl, out_wheel=whlfile):
                     print(f"Updating RECORD file of {whlfile}")
         print("Copying new wheels")
-        shutil.move("wheelhouse", self.dist_dir)
+        shutil.rmtree("wheelhouse")
 
     def _download_and_extract_local_driver(
         self,
