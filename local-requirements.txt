@@ -8,7 +8,7 @@ objgraph==3.6.2
 Pillow==10.4.0
 pixelmatch==0.3.0
 pre-commit==3.5.0
-pyOpenSSL==24.2.1
+pyOpenSSL==24.3.0
 pytest==8.3.3
 pytest-asyncio==0.24.0
 pytest-cov==6.0.0
