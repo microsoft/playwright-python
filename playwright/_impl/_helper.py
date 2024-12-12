@@ -34,7 +34,7 @@ from typing import (
     Union,
     cast,
 )
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 
 from playwright._impl._api_structures import NameValue
 from playwright._impl._errors import (
@@ -157,6 +157,10 @@ def url_matches(
             base_url = re.sub(r"^http", "ws", base_url)
         if base_url:
             match = urljoin(base_url, match)
+        parsed = urlparse(match)
+        if parsed.path == "":
+            parsed = parsed._replace(path="/")
+            match = parsed.geturl()
     if isinstance(match, str):
         match = glob_to_regex(match)
     if isinstance(match, Pattern):
