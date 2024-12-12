@@ -340,3 +340,41 @@ def test_should_work_with_base_url(browser: Browser, server: Server) -> None:
             f"message: data=echo origin=ws://localhost:{server.PORT} lastEventId=",
         ],
     )
+
+
+def test_should_work_with_no_trailing_slash(page: Page, server: Server) -> None:
+    log: list[str] = []
+
+    async def handle_ws(ws: WebSocketRoute) -> None:
+        def on_message(message: Union[str, bytes]) -> None:
+            if isinstance(message, bytes):
+                message = message.decode()
+            log.append(message)
+            ws.send("response")
+
+        ws.on_message(on_message)
+
+    # No trailing slash in the route pattern
+    page.route_web_socket(f"ws://localhost:{server.PORT}", handle_ws)
+
+    page.goto("about:blank")
+    page.evaluate(
+        """({ port }) => {
+            window.log = [];
+            // No trailing slash in WebSocket URL
+            window.ws = new WebSocket('ws://localhost:' + port);
+            window.ws.addEventListener('message', event => window.log.push(event.data));
+        }""",
+        {"port": server.PORT},
+    )
+
+    # Wait for WebSocket to be ready
+    assert_equal(lambda: page.evaluate("window.ws.readyState"), 1)  # WebSocket.OPEN
+
+    page.evaluate("window.ws.send('query')")
+
+    # Verify server received message
+    assert_equal(lambda: log, ["query"])
+
+    # Verify client received response
+    assert_equal(lambda: page.evaluate("window.log"), ["response"])
