@@ -347,8 +347,7 @@ def test_should_work_with_no_trailing_slash(page: Page, server: Server) -> None:
 
     async def handle_ws(ws: WebSocketRoute) -> None:
         def on_message(message: Union[str, bytes]) -> None:
-            if isinstance(message, bytes):
-                message = message.decode()
+            assert isinstance(message, str)
             log.append(message)
             ws.send("response")
 
@@ -368,13 +367,7 @@ def test_should_work_with_no_trailing_slash(page: Page, server: Server) -> None:
         {"port": server.PORT},
     )
 
-    # Wait for WebSocket to be ready
     assert_equal(lambda: page.evaluate("window.ws.readyState"), 1)  # WebSocket.OPEN
-
     page.evaluate("window.ws.send('query')")
-
-    # Verify server received message
     assert_equal(lambda: log, ["query"])
-
-    # Verify client received response
     assert_equal(lambda: page.evaluate("window.log"), ["response"])
