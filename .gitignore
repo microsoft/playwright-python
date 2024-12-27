@@ -12,6 +12,7 @@ htmlcov/
 .coverage*
 .DS_Store
 .vscode/
+.venv
 .eggs
 _repo_version.py
 coverage.xml

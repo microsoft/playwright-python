@@ -30,6 +30,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r local-requirements.txt
+        pip install -r requirements.txt
         pip install -e .
         python -m build --wheel
         python -m playwright install --with-deps
@@ -88,6 +89,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r local-requirements.txt
+        pip install -r requirements.txt
         pip install -e .
         python -m build --wheel
         python -m playwright install --with-deps ${{ matrix.browser }}
@@ -134,6 +136,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r local-requirements.txt
+        pip install -r requirements.txt
         pip install -e .
         python -m build --wheel
         python -m playwright install ${{ matrix.browser-channel }} --with-deps
