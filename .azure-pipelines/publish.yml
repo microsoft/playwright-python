@@ -38,6 +38,7 @@ extends:
         - script: |
             python -m pip install --upgrade pip
             pip install -r local-requirements.txt
+            pip install -r requirements.txt
             pip install -e .
             for wheel in $(python setup.py --list-wheels); do
               PLAYWRIGHT_TARGET_WHEEL=$wheel python -m build --wheel
