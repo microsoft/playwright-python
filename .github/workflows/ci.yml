@@ -77,6 +77,9 @@ jobs:
         - os: ubuntu-latest
           python-version: '3.13'
           browser: chromium
+        - os: ubuntu-24.04-arm
+          python-version: '3.13'
+          browser: chromium
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
@@ -98,16 +101,16 @@ jobs:
     - name: Test Wheel Installation
       run: pytest tests/test_installation.py --browser=${{ matrix.browser }}
     - name: Test Sync API
-      if: matrix.os != 'ubuntu-latest'
+      if: runner.os != 'Linux'
       run: pytest tests/sync --browser=${{ matrix.browser }} --timeout 90
     - name: Test Sync API
-      if: matrix.os == 'ubuntu-latest'
+      if: runner.os == 'Linux'
       run: xvfb-run pytest tests/sync --browser=${{ matrix.browser }} --timeout 90
     - name: Test Async API
-      if: matrix.os != 'ubuntu-latest'
+      if: runner.os != 'Linux'
       run: pytest tests/async --browser=${{ matrix.browser }} --timeout 90
     - name: Test Async API
-      if: matrix.os == 'ubuntu-latest'
+      if: runner.os == 'Linux'
       run: xvfb-run pytest tests/async --browser=${{ matrix.browser }} --timeout 90
 
   test-stable:
@@ -140,16 +143,16 @@ jobs:
     - name: Common Tests
       run: pytest tests/common --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
     - name: Test Sync API
-      if: matrix.os != 'ubuntu-latest'
+      if: runner.os != 'Linux'
       run: pytest tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
     - name: Test Sync API
-      if: matrix.os == 'ubuntu-latest'
+      if: runner.os == 'Linux'
       run: xvfb-run pytest tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
     - name: Test Async API
-      if: matrix.os != 'ubuntu-latest'
+      if: runner.os != 'Linux'
       run: pytest tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
     - name: Test Async API
-      if: matrix.os == 'ubuntu-latest'
+      if: runner.os == 'Linux'
       run: xvfb-run pytest tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
 
   build-conda:
