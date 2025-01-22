@@ -17,7 +17,7 @@ from typing import Optional
 
 import pytest
 
-from playwright.async_api import Page
+from playwright.async_api import BrowserContext, Page
 from tests.utils import must
 
 from ..server import Server, TestServerRequest
@@ -198,3 +198,11 @@ async def test_page_error_event_should_work(page: Page) -> None:
     page_error = await page_error_info.value
     assert page_error.page == page
     assert "boom" in page_error.error.stack
+
+
+async def test_weberror_event_should_work(context: BrowserContext, page: Page) -> None:
+    async with context.expect_event("weberror") as error_info:
+        await page.goto('data:text/html,<script>throw new Error("Test")</script>')
+    error = await error_info.value
+    assert error.page == page
+    assert error.error.message == "Test"
