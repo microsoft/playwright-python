@@ -16,7 +16,7 @@ from typing import Optional
 
 import pytest
 
-from playwright.sync_api import Dialog, Page
+from playwright.sync_api import BrowserContext, Dialog, Page
 
 from ..server import Server, TestServerRequest
 
@@ -198,3 +198,11 @@ def test_console_event_should_work_with_context_manager(page: Page) -> None:
     message = cm_info.value
     assert message.text == "hello"
     assert message.page == page
+
+
+def test_weberror_event_should_work(context: BrowserContext, page: Page) -> None:
+    with context.expect_event("weberror") as error_info:
+        page.goto('data:text/html,<script>throw new Error("Test")</script>')
+    error = error_info.value
+    assert error.page == page
+    assert error.error.message == "Test"
