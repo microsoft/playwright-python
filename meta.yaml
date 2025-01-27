@@ -26,8 +26,9 @@ requirements:
     - setuptools_scm
   run:
     - python >=3.9
-    - greenlet ==3.1.1
-    - pyee ==12.1.1
+    # This should be the same as the dependencies in pyproject.toml
+    - greenlet>=3.1.1,<4.0.0
+    - pyee>=12,<13
 
 test: # [build_platform == target_platform]
   requires:

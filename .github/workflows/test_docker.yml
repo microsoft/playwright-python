@@ -36,6 +36,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r local-requirements.txt
+        pip install -r requirements.txt
         pip install -e .
     - name: Build Docker image
       run: bash utils/docker/build.sh --amd64 ${{ matrix.docker-image-variant }} playwright-python:localbuild-${{ matrix.docker-image-variant }}
@@ -45,6 +46,7 @@ jobs:
         # Fix permissions for Git inside the container
         docker exec "${CONTAINER_ID}" chown -R root:root /root/playwright
         docker exec "${CONTAINER_ID}" pip install -r local-requirements.txt
+        docker exec "${CONTAINER_ID}" pip install -r requirements.txt
         docker exec "${CONTAINER_ID}" pip install -e .
         docker exec "${CONTAINER_ID}" python -m build --wheel
         docker exec "${CONTAINER_ID}" xvfb-run pytest -vv tests/sync/
