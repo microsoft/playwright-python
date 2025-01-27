@@ -274,6 +274,10 @@ async def test_assertions_locator_to_have_text(page: Page, server: Server) -> No
     await expect(page.locator("div")).to_have_text(
         ["Text  1", re.compile(r"Text   \d+a")]
     )
+    # Should work with a tuple
+    await expect(page.locator("div")).to_have_text(
+        ("Text  1", re.compile(r"Text   \d+a"))
+    )
 
 
 @pytest.mark.parametrize(
