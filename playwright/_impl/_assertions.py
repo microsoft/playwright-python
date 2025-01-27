@@ -874,7 +874,7 @@ def to_expected_text_values(
     ignoreCase: Optional[bool] = None,
 ) -> Sequence[ExpectedTextValue]:
     out: List[ExpectedTextValue] = []
-    assert isinstance(items, list)
+    assert isinstance(items, (list, tuple))
     for item in items:
         if isinstance(item, str):
             o = ExpectedTextValue(
