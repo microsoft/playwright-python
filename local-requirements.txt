@@ -10,7 +10,7 @@ pixelmatch==0.3.0
 pre-commit==3.5.0
 pyOpenSSL==24.3.0
 pytest==8.3.4
-pytest-asyncio==0.25.1
+pytest-asyncio==0.25.2
 pytest-cov==6.0.0
 pytest-repeat==0.9.3
 pytest-timeout==2.3.1
