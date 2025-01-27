@@ -12,6 +12,9 @@ readme = "README.md"
 license = {text = "Apache-2.0"}
 dynamic = ["version"]
 requires-python = ">=3.9"
+# Please when changing dependencies run the following commands to update requirements.txt:
+# - pip install uv==0.5.4
+# - uv pip compile pyproject.toml -o requirements.txt
 dependencies = [
     "pyee>=12,<13",
     "greenlet>=3.1.1,<4.0.0"
