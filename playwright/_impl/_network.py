@@ -131,6 +131,7 @@ class Request(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
+        self._channel.mark_as_internal_type()
         self._redirected_from: Optional["Request"] = from_nullable_channel(
             initializer.get("redirectedFrom")
         )
@@ -767,6 +768,7 @@ class Response(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
+        self._channel.mark_as_internal_type()
         self._request: Request = from_channel(self._initializer["request"])
         timing = self._initializer["timing"]
         self._request._timing["startTime"] = timing["startTime"]

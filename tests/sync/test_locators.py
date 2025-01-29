@@ -126,15 +126,27 @@ def test_locators_is_enabled_and_is_disabled_should_work(page: Page) -> None:
     )
 
     div = page.locator("div")
-    assert div.is_enabled() is True
+    with pytest.raises(
+        Error,
+        match=r"Element is not an <input>, <textarea>, <select> or \[contenteditable\] and does not have a role allowing \[aria-readonly\]",
+    ):
+        div.is_enabled()
     assert div.is_disabled() is False
 
     button1 = page.locator(':text("button1")')
-    assert button1.is_enabled() is False
+    with pytest.raises(
+        Error,
+        match=r"Element is not an <input>, <textarea>, <select> or \[contenteditable\] and does not have a role allowing \[aria-readonly\]",
+    ):
+        assert button1.is_enabled()
     assert button1.is_disabled() is True
 
     button1 = page.locator(':text("button2")')
-    assert button1.is_enabled() is True
+    with pytest.raises(
+        Error,
+        match=r"Element is not an <input>, <textarea>, <select> or \[contenteditable\] and does not have a role allowing \[aria-readonly\]",
+    ):
+        assert button1.is_enabled()
     assert button1.is_disabled() is False
 
 

@@ -169,8 +169,6 @@ async def test_should_correctly_determine_sync_apiname(
     assert events[0]["type"] == "context-options"
     assert get_trace_actions(events) == [
         "Page.goto",
-        "Request.all_headers",
-        "Response.text",
         "Page.close",
     ]
 
