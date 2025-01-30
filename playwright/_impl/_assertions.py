@@ -525,14 +525,22 @@ class LocatorAssertions(AssertionsBase):
         self,
         timeout: float = None,
         checked: bool = None,
+        indeterminate: bool = None,
     ) -> None:
         __tracebackhide__ = True
-        if checked is None:
-            checked = True
-        checked_string = "checked" if checked else "unchecked"
+        expected_value = {}
+        if indeterminate is not None:
+            expected_value["indeterminate"] = indeterminate
+        if checked is not None:
+            expected_value["checked"] = checked
+        checked_string: str
+        if indeterminate:
+            checked_string = "indeterminate"
+        else:
+            checked_string = "unchecked" if checked is False else "checked"
         await self._expect_impl(
-            ("to.be.checked" if checked else "to.be.unchecked"),
-            FrameExpectOptions(timeout=timeout),
+            "to.be.checked",
+            FrameExpectOptions(timeout=timeout, expectedValue=expected_value),
             None,
             f"Locator expected to be {checked_string}",
         )
@@ -726,7 +734,9 @@ class LocatorAssertions(AssertionsBase):
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
-        expected_values = to_expected_text_values([description], ignoreCase=ignoreCase)
+        expected_values = to_expected_text_values(
+            [description], ignoreCase=ignoreCase, normalize_white_space=True
+        )
         await self._expect_impl(
             "to.have.accessible.description",
             FrameExpectOptions(expectedText=expected_values, timeout=timeout),
@@ -750,7 +760,9 @@ class LocatorAssertions(AssertionsBase):
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
-        expected_values = to_expected_text_values([name], ignoreCase=ignoreCase)
+        expected_values = to_expected_text_values(
+            [name], ignoreCase=ignoreCase, normalize_white_space=True
+        )
         await self._expect_impl(
             "to.have.accessible.name",
             FrameExpectOptions(expectedText=expected_values, timeout=timeout),
@@ -777,6 +789,34 @@ class LocatorAssertions(AssertionsBase):
             FrameExpectOptions(expectedText=expected_values, timeout=timeout),
             None,
             "Locator expected to have accessible role",
+        )
+
+    async def to_have_accessible_error_message(
+        self,
+        errorMessage: Union[str, Pattern[str]],
+        ignoreCase: bool = None,
+        timeout: float = None,
+    ) -> None:
+        __tracebackhide__ = True
+        expected_values = to_expected_text_values(
+            [errorMessage], ignoreCase=ignoreCase, normalize_white_space=True
+        )
+        await self._expect_impl(
+            "to.have.accessible.error.message",
+            FrameExpectOptions(expectedText=expected_values, timeout=timeout),
+            None,
+            "Locator expected to have accessible error message",
+        )
+
+    async def not_to_have_accessible_error_message(
+        self,
+        errorMessage: Union[str, Pattern[str]],
+        ignoreCase: bool = None,
+        timeout: float = None,
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_have_accessible_error_message(
+            errorMessage=errorMessage, ignoreCase=ignoreCase, timeout=timeout
         )
 
     async def not_to_have_role(self, role: AriaRole, timeout: float = None) -> None:

@@ -593,11 +593,20 @@ async def test_assertions_locator_to_be_enabled_eventually_with_not(page: Page) 
 
 async def test_assertions_locator_to_be_editable(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
-    await page.set_content("<input></input><button disabled>Text</button>")
-    await expect(page.locator("button")).not_to_be_editable()
+    await page.set_content("<input></input>")
     await expect(page.locator("input")).to_be_editable()
-    with pytest.raises(AssertionError, match="Locator expected to be editable"):
-        await expect(page.locator("button")).to_be_editable(timeout=100)
+
+
+async def test_assertions_locator_to_be_editable_throws(
+    page: Page, server: Server
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+    await page.set_content("<button disabled>Text</button>")
+    with pytest.raises(
+        Error,
+        match=r"Element is not an <input>, <textarea>, <select> or \[contenteditable\] and does not have a role allowing \[aria-readonly\]",
+    ):
+        await expect(page.locator("button")).not_to_be_editable()
 
 
 async def test_assertions_locator_to_be_editable_with_true(page: Page) -> None:
@@ -983,6 +992,64 @@ async def test_to_have_accessible_name(page: Page) -> None:
         re.compile(r"hello"), ignore_case=True
     )
 
+    await page.set_content("<button>foo&nbsp;bar\nbaz</button>")
+    await expect(page.locator("button")).to_have_accessible_name("foo bar baz")
+
+
+async def test_to_have_accessible_error_message(page: Page) -> None:
+    await page.set_content(
+        """
+      <form>
+        <input role="textbox" aria-invalid="true" aria-errormessage="error-message" />
+        <div id="error-message">Hello</div>
+        <div id="irrelevant-error">This should not be considered.</div>
+      </form>
+    """
+    )
+
+    locator = page.locator('input[role="textbox"]')
+    await expect(locator).to_have_accessible_error_message("Hello")
+    await expect(locator).not_to_have_accessible_error_message("hello")
+    await expect(locator).to_have_accessible_error_message("hello", ignore_case=True)
+    await expect(locator).to_have_accessible_error_message(re.compile(r"ell\w"))
+    await expect(locator).not_to_have_accessible_error_message(re.compile(r"hello"))
+    await expect(locator).to_have_accessible_error_message(
+        re.compile(r"hello"), ignore_case=True
+    )
+    await expect(locator).not_to_have_accessible_error_message(
+        "This should not be considered."
+    )
+
+
+async def test_to_have_accessible_error_message_should_handle_multiple_aria_error_message_references(
+    page: Page,
+) -> None:
+    await page.set_content(
+        """
+      <form>
+        <input role="textbox" aria-invalid="true" aria-errormessage="error1 error2" />
+        <div id="error1">First error message.</div>
+        <div id="error2">Second error message.</div>
+        <div id="irrelevant-error">This should not be considered.</div>
+      </form>
+    """
+    )
+
+    locator = page.locator('input[role="textbox"]')
+
+    await expect(locator).to_have_accessible_error_message(
+        "First error message. Second error message."
+    )
+    await expect(locator).to_have_accessible_error_message(
+        re.compile(r"first error message.", re.IGNORECASE)
+    )
+    await expect(locator).to_have_accessible_error_message(
+        re.compile(r"second error message.", re.IGNORECASE)
+    )
+    await expect(locator).not_to_have_accessible_error_message(
+        re.compile(r"This should not be considered.", re.IGNORECASE)
+    )
+
 
 async def test_to_have_accessible_description(page: Page) -> None:
     await page.set_content('<div role="button" aria-description="Hello"></div>')
@@ -995,6 +1062,14 @@ async def test_to_have_accessible_description(page: Page) -> None:
     await expect(locator).to_have_accessible_description(
         re.compile(r"hello"), ignore_case=True
     )
+
+    await page.set_content(
+        """
+        <div role="button" aria-describedby="desc"></div>
+        <span id="desc">foo&nbsp;bar\nbaz</span>
+    """
+    )
+    await expect(page.locator("div")).to_have_accessible_description("foo bar baz")
 
 
 async def test_to_have_role(page: Page) -> None:

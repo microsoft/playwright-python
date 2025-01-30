@@ -6879,6 +6879,18 @@ class Clock(AsyncBase):
         await page.clock.pause_at(\"2020-02-02\")
         ```
 
+        For best results, install the clock before navigating the page and set it to a time slightly before the intended
+        test time. This ensures that all timers run normally during page loading, preventing the page from getting stuck.
+        Once the page has fully loaded, you can safely use `clock.pause_at()` to pause the clock.
+
+        ```py
+        # Initialize clock with some time before the test time and let the page load
+        # naturally. `Date.now` will progress as the timers fire.
+        await page.clock.install(time=datetime.datetime(2024, 12, 10, 8, 0, 0))
+        await page.goto(\"http://localhost:3333\")
+        await page.clock.pause_at(datetime.datetime(2024, 12, 10, 10, 0, 0))
+        ```
+
         Parameters
         ----------
         time : Union[datetime.datetime, float, str]
@@ -8036,7 +8048,7 @@ class Page(AsyncContextManager):
         Parameters
         ----------
         timeout : float
-            Maximum time in milliseconds
+            Maximum time in milliseconds. Pass `0` to disable timeout.
         """
 
         return mapping.from_maybe_impl(
@@ -11497,8 +11509,6 @@ class Page(AsyncContextManager):
 
         Returns the PDF buffer.
 
-        **NOTE** Generating a pdf is currently only supported in Chromium headless.
-
         `page.pdf()` generates a pdf of the page with `print` css media. To generate a pdf with `screen` media, call
         `page.emulate_media()` before calling `page.pdf()`:
 
@@ -12750,7 +12760,7 @@ class BrowserContext(AsyncContextManager):
         Parameters
         ----------
         timeout : float
-            Maximum time in milliseconds
+            Maximum time in milliseconds. Pass `0` to disable timeout.
         """
 
         return mapping.from_maybe_impl(
@@ -12858,9 +12868,13 @@ class BrowserContext(AsyncContextManager):
         Parameters
         ----------
         permissions : Sequence[str]
-            A permission or an array of permissions to grant. Permissions can be one of the following values:
+            A list of permissions to grant.
+
+            **NOTE** Supported permissions differ between browsers, and even between different versions of the same browser.
+            Any permission may stop working after an update.
+
+            Here are some permissions that may be supported by some browsers:
             - `'accelerometer'`
-            - `'accessibility-events'`
             - `'ambient-light-sensor'`
             - `'background-sync'`
             - `'camera'`
@@ -14161,9 +14175,9 @@ class Browser(AsyncContextManager):
         In case this browser is connected to, clears all created contexts belonging to this browser and disconnects from
         the browser server.
 
-        **NOTE** This is similar to force quitting the browser. Therefore, you should call `browser_context.close()`
-        on any `BrowserContext`'s you explicitly created earlier with `browser.new_context()` **before** calling
-        `browser.close()`.
+        **NOTE** This is similar to force-quitting the browser. To close pages gracefully and ensure you receive page close
+        events, call `browser_context.close()` on any `BrowserContext` instances you explicitly created earlier
+        using `browser.new_context()` **before** calling `browser.close()`.
 
         The `Browser` object itself is considered to be disposed and cannot be used anymore.
 
@@ -14346,7 +14360,7 @@ class BrowserType(AsyncBase):
         channel : Union[str, None]
             Browser distribution channel.
 
-            Use "chromium" to [opt in to new headless mode](../browsers.md#opt-in-to-new-headless-mode).
+            Use "chromium" to [opt in to new headless mode](../browsers.md#chromium-new-headless-mode).
 
             Use "chrome", "chrome-beta", "chrome-dev", "chrome-canary", "msedge", "msedge-beta", "msedge-dev", or
             "msedge-canary" to use branded [Google Chrome and Microsoft Edge](../browsers.md#google-chrome--microsoft-edge).
@@ -14504,7 +14518,7 @@ class BrowserType(AsyncBase):
         channel : Union[str, None]
             Browser distribution channel.
 
-            Use "chromium" to [opt in to new headless mode](../browsers.md#opt-in-to-new-headless-mode).
+            Use "chromium" to [opt in to new headless mode](../browsers.md#chromium-new-headless-mode).
 
             Use "chrome", "chrome-beta", "chrome-dev", "chrome-canary", "msedge", "msedge-beta", "msedge-dev", or
             "msedge-canary" to use branded [Google Chrome and Microsoft Edge](../browsers.md#google-chrome--microsoft-edge).
@@ -15522,7 +15536,6 @@ class Locator(AsyncBase):
         You can also specify `JSHandle` as the property value if you want live objects to be passed into the event:
 
         ```py
-        # note you can only create data_transfer in chromium and firefox
         data_transfer = await page.evaluate_handle(\"new DataTransfer()\")
         await locator.dispatch_event(\"#source\", \"dragstart\", {\"dataTransfer\": data_transfer})
         ```
@@ -16445,18 +16458,22 @@ class Locator(AsyncBase):
 
         Creates a locator matching all elements that match one or both of the two locators.
 
-        Note that when both locators match something, the resulting locator will have multiple matches and violate
-        [locator strictness](https://playwright.dev/python/docs/locators#strictness) guidelines.
+        Note that when both locators match something, the resulting locator will have multiple matches, potentially causing
+        a [locator strictness](https://playwright.dev/python/docs/locators#strictness) violation.
 
         **Usage**
 
         Consider a scenario where you'd like to click on a \"New email\" button, but sometimes a security settings dialog
         shows up instead. In this case, you can wait for either a \"New email\" button, or a dialog and act accordingly.
 
+        **NOTE** If both \"New email\" button and security dialog appear on screen, the \"or\" locator will match both of them,
+        possibly throwing the [\"strict mode violation\" error](https://playwright.dev/python/docs/locators#strictness). In this case, you can use
+        `locator.first()` to only match one of them.
+
         ```py
         new_email = page.get_by_role(\"button\", name=\"New\")
         dialog = page.get_by_text(\"Confirm security settings\")
-        await expect(new_email.or_(dialog)).to_be_visible()
+        await expect(new_email.or_(dialog).first).to_be_visible()
         if (await dialog.is_visible()):
           await page.get_by_role(\"button\", name=\"Dismiss\").click()
         await new_email.click()
@@ -16877,7 +16894,9 @@ class Locator(AsyncBase):
     async def is_editable(self, *, timeout: typing.Optional[float] = None) -> bool:
         """Locator.is_editable
 
-        Returns whether the element is [editable](https://playwright.dev/python/docs/actionability#editable).
+        Returns whether the element is [editable](https://playwright.dev/python/docs/actionability#editable). If the target element is not an `<input>`,
+        `<textarea>`, `<select>`, `[contenteditable]` and does not have a role allowing `[aria-readonly]`, this method
+        throws an error.
 
         **NOTE** If you need to assert that an element is editable, prefer `locator_assertions.to_be_editable()` to
         avoid flakiness. See [assertions guide](https://playwright.dev/python/docs/test-assertions) for more details.
@@ -19056,24 +19075,26 @@ class LocatorAssertions(AsyncBase):
     ) -> None:
         """LocatorAssertions.to_have_class
 
-        Ensures the `Locator` points to an element with given CSS classes. This needs to be a full match or using a relaxed
-        regular expression.
+        Ensures the `Locator` points to an element with given CSS classes. When a string is provided, it must fully match
+        the element's `class` attribute. To match individual classes or perform partial matches, use a regular expression:
 
         **Usage**
 
         ```html
-        <div class='selected row' id='component'></div>
+        <div class='middle selected row' id='component'></div>
         ```
 
         ```py
         from playwright.async_api import expect
 
         locator = page.locator(\"#component\")
-        await expect(locator).to_have_class(re.compile(r\"selected\"))
-        await expect(locator).to_have_class(\"selected row\")
+        await expect(locator).to_have_class(re.compile(r\"(^|\\\\s)selected(\\\\s|$)\"))
+        await expect(locator).to_have_class(\"middle selected row\")
         ```
 
-        Note that if array is passed as an expected value, entire lists of elements can be asserted:
+        When an array is passed, the method asserts that the list of elements located matches the corresponding list of
+        expected class values. Each element's class attribute is matched against the corresponding string or regular
+        expression in the array:
 
         ```py
         from playwright.async_api import expect
@@ -19656,6 +19677,7 @@ class LocatorAssertions(AsyncBase):
         *,
         timeout: typing.Optional[float] = None,
         checked: typing.Optional[bool] = None,
+        indeterminate: typing.Optional[bool] = None,
     ) -> None:
         """LocatorAssertions.to_be_checked
 
@@ -19675,11 +19697,18 @@ class LocatorAssertions(AsyncBase):
         timeout : Union[float, None]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         checked : Union[bool, None]
+            Provides state to assert for. Asserts for input to be checked by default. This option can't be used when
+            `indeterminate` is set to true.
+        indeterminate : Union[bool, None]
+            Asserts that the element is in the indeterminate (mixed) state. Only supported for checkboxes and radio buttons.
+            This option can't be true when `checked` is provided.
         """
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.to_be_checked(timeout=timeout, checked=checked)
+            await self._impl_obj.to_be_checked(
+                timeout=timeout, checked=checked, indeterminate=indeterminate
+            )
         )
 
     async def not_to_be_attached(
@@ -20371,6 +20400,72 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.to_have_role(role=role, timeout=timeout)
+        )
+
+    async def to_have_accessible_error_message(
+        self,
+        error_message: typing.Union[str, typing.Pattern[str]],
+        *,
+        ignore_case: typing.Optional[bool] = None,
+        timeout: typing.Optional[float] = None,
+    ) -> None:
+        """LocatorAssertions.to_have_accessible_error_message
+
+        Ensures the `Locator` points to an element with a given
+        [aria errormessage](https://w3c.github.io/aria/#aria-errormessage).
+
+        **Usage**
+
+        ```py
+        locator = page.get_by_test_id(\"username-input\")
+        await expect(locator).to_have_accessible_error_message(\"Username is required.\")
+        ```
+
+        Parameters
+        ----------
+        error_message : Union[Pattern[str], str]
+            Expected accessible error message.
+        ignore_case : Union[bool, None]
+            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            expression flag if specified.
+        timeout : Union[float, None]
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.to_have_accessible_error_message(
+                errorMessage=error_message, ignoreCase=ignore_case, timeout=timeout
+            )
+        )
+
+    async def not_to_have_accessible_error_message(
+        self,
+        error_message: typing.Union[str, typing.Pattern[str]],
+        *,
+        ignore_case: typing.Optional[bool] = None,
+        timeout: typing.Optional[float] = None,
+    ) -> None:
+        """LocatorAssertions.not_to_have_accessible_error_message
+
+        The opposite of `locator_assertions.to_have_accessible_error_message()`.
+
+        Parameters
+        ----------
+        error_message : Union[Pattern[str], str]
+            Expected accessible error message.
+        ignore_case : Union[bool, None]
+            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            expression flag if specified.
+        timeout : Union[float, None]
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.not_to_have_accessible_error_message(
+                errorMessage=error_message, ignoreCase=ignore_case, timeout=timeout
+            )
         )
 
     async def not_to_have_role(
