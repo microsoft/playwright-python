@@ -528,9 +528,9 @@ class LocatorAssertions(AssertionsBase):
         indeterminate: bool = None,
     ) -> None:
         __tracebackhide__ = True
-        expected_value = {
-            "indeterminate": indeterminate,
-        }
+        expected_value = {}
+        if indeterminate is not None:
+            expected_value["indeterminate"] = indeterminate
         if checked is not None:
             expected_value["checked"] = checked
         checked_string: str
