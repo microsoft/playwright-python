@@ -21,7 +21,7 @@ import sys
 import zipfile
 from typing import Dict
 
-driver_version = "1.50.0-beta-1737762224000"
+driver_version = "1.50.0-beta-1738235262000"
 
 base_wheel_bundles = [
     {
