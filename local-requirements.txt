@@ -1,5 +1,5 @@
 autobahn==23.1.2
-black==24.8.0
+black==25.1.0
 build==1.2.2.post1
 flake8==7.1.1
 flaky==3.8.1
