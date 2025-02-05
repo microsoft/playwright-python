@@ -22,7 +22,14 @@ async def test_fill_textarea(page: Page, server: Server) -> None:
     assert await page.evaluate("result") == "some value"
 
 
-#
+async def test_is_enabled_for_non_editable_button(page: Page) -> None:
+    await page.set_content(
+        """
+        <button>button</button>
+    """
+    )
+    button = page.locator("button")
+    assert await button.is_enabled() is True
 
 
 async def test_fill_input(page: Page, server: Server) -> None:
