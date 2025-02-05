@@ -481,7 +481,7 @@ class Locator:
 
     async def is_enabled(self, timeout: float = None) -> bool:
         params = locals_to_params(locals())
-        return await self._frame.is_editable(
+        return await self._frame.is_enabled(
             self._selector,
             strict=True,
             **params,
