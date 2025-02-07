@@ -29,7 +29,12 @@ extends:
     stages:
     - stage: Stage
       jobs:
-      - job: HostJob
+      - job: Build
+        templateContext:
+          outputs:
+          - output: pipelineArtifact
+            path: $(Build.ArtifactStagingDirectory)/esrp-build
+            artifact: esrp-build
         steps:
         - task: UsePythonVersion@0
           inputs:
@@ -41,9 +46,20 @@ extends:
             pip install -r requirements.txt
             pip install -e .
             for wheel in $(python setup.py --list-wheels); do
-              PLAYWRIGHT_TARGET_WHEEL=$wheel python -m build --wheel
+              PLAYWRIGHT_TARGET_WHEEL=$wheel python -m build --wheel --outdir $(Build.ArtifactStagingDirectory)/esrp-build
             done
           displayName: 'Install & Build'
+    - job: Publish
+      dependsOn: Build
+      templateContext:
+        type: releaseJob
+        isProduction: true
+        inputs:
+        - input: pipelineArtifact
+          artifactName: esrp-build
+          targetPath: $(Build.ArtifactStagingDirectory)/esrp-build
+      steps:
+        - checkout: none
         - task: EsrpRelease@7
           inputs:
             connectedservicename: 'Playwright-ESRP-Azure'
@@ -56,7 +72,7 @@ extends:
             # Keeping it commented out as a workaround for:
             # https://portal.microsofticm.com/imp/v3/incidents/incident/499972482/summary
             # contentsource: 'folder'
-            folderlocation: './dist/'
+            folderlocation: '$(Build.ArtifactStagingDirectory)/esrp-build'
             waitforreleasecompletion: true
             owners: 'maxschmitt@microsoft.com'
             approvers: 'maxschmitt@microsoft.com'
