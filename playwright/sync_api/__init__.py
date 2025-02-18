@@ -28,6 +28,10 @@ from playwright._impl._assertions import (
 )
 from playwright._impl._assertions import LocatorAssertions as LocatorAssertionsImpl
 from playwright._impl._assertions import PageAssertions as PageAssertionsImpl
+from playwright._impl._assertions import (
+    SoftAssertionContext,
+    SoftAssertionContextManager,
+)
 from playwright.sync_api._context_manager import PlaywrightContextManager
 from playwright.sync_api._generated import (
     Accessibility,
@@ -95,6 +99,7 @@ class Expect:
 
     def __init__(self) -> None:
         self._timeout: Optional[float] = None
+        self._soft_context: Optional[SoftAssertionContext] = None
 
     def set_options(self, timeout: Optional[float] = _unset) -> None:
         """
@@ -108,6 +113,11 @@ class Expect:
         """
         if timeout is not self._unset:
             self._timeout = timeout
+
+    def soft(self) -> SoftAssertionContextManager:
+        expect = Expect()
+        expect._timeout = self._timeout
+        return SoftAssertionContextManager(expect, SoftAssertionContext())
 
     @overload
     def __call__(
@@ -129,16 +139,29 @@ class Expect:
     ) -> Union[PageAssertions, LocatorAssertions, APIResponseAssertions]:
         if isinstance(actual, Page):
             return PageAssertions(
-                PageAssertionsImpl(actual._impl_obj, self._timeout, message=message)
+                PageAssertionsImpl(
+                    actual._impl_obj,
+                    self._timeout,
+                    message=message,
+                    soft_context=self._soft_context,
+                )
             )
         elif isinstance(actual, Locator):
             return LocatorAssertions(
-                LocatorAssertionsImpl(actual._impl_obj, self._timeout, message=message)
+                LocatorAssertionsImpl(
+                    actual._impl_obj,
+                    self._timeout,
+                    message=message,
+                    soft_context=self._soft_context,
+                )
             )
         elif isinstance(actual, APIResponse):
             return APIResponseAssertions(
                 APIResponseAssertionsImpl(
-                    actual._impl_obj, self._timeout, message=message
+                    actual._impl_obj,
+                    self._timeout,
+                    message=message,
+                    soft_context=self._soft_context,
                 )
             )
         raise ValueError(f"Unsupported type: {type(actual)}")
