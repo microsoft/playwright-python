@@ -1111,14 +1111,13 @@ class SoftAssertionContextManager(Generic[E]):
         __tracebackhide__ = True
 
         if self._context.has_failures():
-            if exc_type is not None:
+            if exc_type is not None and exc_val is not None:
                 failure_message = (
                     f"{str(exc_val)}"
                     f"\n\nThe above exception occurred within soft assertion block."
                     f"\n\nSoft assertion failures:\n{self._context.get_failure_messages()}"
                 )
-                if exc_val is not None:
-                    exc_val.args = (failure_message,) + exc_val.args[1:]
+                exc_val.args = (failure_message,) + exc_val.args[1:]
                 return
 
             raise AssertionError(
