@@ -176,3 +176,4 @@ class PipeTransport(Transport):
         self._output.write(
             len(data).to_bytes(4, byteorder="little", signed=False) + data
         )
+        await self._output.drain()
