@@ -60,11 +60,11 @@ extends:
           targetPath: $(Build.ArtifactStagingDirectory)/esrp-build
       steps:
         - checkout: none
-        - task: EsrpRelease@7
+        - task: EsrpRelease@9
           inputs:
-            connectedservicename: 'Playwright-ESRP-Azure'
-            keyvaultname: 'pw-publishing-secrets'
-            authcertname: 'ESRP-Release-Auth'
+            connectedservicename: 'Playwright-ESRP-PME'
+            usemanagedidentity: true
+            keyvaultname: 'playwright-esrp-pme'
             signcertname: 'ESRP-Release-Sign'
             clientid: '13434a40-7de4-4c23-81a3-d843dc81c2c5'
             intent: 'PackageDistribution'
@@ -78,5 +78,5 @@ extends:
             approvers: 'maxschmitt@microsoft.com'
             serviceendpointurl: 'https://api.esrp.microsoft.com'
             mainpublisher: 'Playwright'
-            domaintenantid: '72f988bf-86f1-41af-91ab-2d7cd011db47'
+            domaintenantid: '975f013f-7f24-47e8-a7d3-abc4752bf346'
           displayName: 'ESRP Release to PIP'
