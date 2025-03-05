@@ -32,6 +32,7 @@ from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._errors import is_target_closed_error
 from playwright._impl._helper import (
     ColorScheme,
+    Contrast,
     ForcedColors,
     HarContentPolicy,
     HarMode,
@@ -107,6 +108,7 @@ class Browser(ChannelOwner):
         colorScheme: ColorScheme = None,
         reducedMotion: ReducedMotion = None,
         forcedColors: ForcedColors = None,
+        contrast: Contrast = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
         proxy: ProxySettings = None,
@@ -152,6 +154,7 @@ class Browser(ChannelOwner):
         hasTouch: bool = None,
         colorScheme: ColorScheme = None,
         forcedColors: ForcedColors = None,
+        contrast: Contrast = None,
         reducedMotion: ReducedMotion = None,
         acceptDownloads: bool = None,
         defaultBrowserType: str = None,
@@ -254,6 +257,8 @@ async def prepare_browser_context_params(params: Dict) -> None:
         params["reducedMotion"] = "no-override"
     if params.get("forcedColors", None) == "null":
         params["forcedColors"] = "no-override"
+    if params.get("contrast", None) == "null":
+        params["contrast"] = "no-override"
     if "acceptDownloads" in params:
         params["acceptDownloads"] = "accept" if params["acceptDownloads"] else "deny"
 

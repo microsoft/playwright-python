@@ -599,8 +599,12 @@ class BrowserContext(ChannelOwner):
         await self._channel.send("close", {"reason": reason})
         await self._closed_future
 
-    async def storage_state(self, path: Union[str, Path] = None) -> StorageState:
-        result = await self._channel.send_return_as_dict("storageState")
+    async def storage_state(
+        self, path: Union[str, Path] = None, indexedDB: bool = None
+    ) -> StorageState:
+        result = await self._channel.send_return_as_dict(
+            "storageState", {"indexedDB": indexedDB}
+        )
         if path:
             await async_writefile(path, json.dumps(result))
         return result

@@ -35,6 +35,7 @@ from playwright._impl._connection import (
 from playwright._impl._errors import Error
 from playwright._impl._helper import (
     ColorScheme,
+    Contrast,
     Env,
     ForcedColors,
     HarContentPolicy,
@@ -134,6 +135,7 @@ class BrowserType(ChannelOwner):
         colorScheme: ColorScheme = None,
         reducedMotion: ReducedMotion = None,
         forcedColors: ForcedColors = None,
+        contrast: Contrast = None,
         acceptDownloads: bool = None,
         tracesDir: Union[pathlib.Path, str] = None,
         chromiumSandbox: bool = None,
