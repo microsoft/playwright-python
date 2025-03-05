@@ -62,6 +62,7 @@ WebSocketRouteHandlerCallback = Callable[["WebSocketRoute"], Any]
 
 ColorScheme = Literal["dark", "light", "no-preference", "null"]
 ForcedColors = Literal["active", "none", "null"]
+Contrast = Literal["more", "no-preference", "null"]
 ReducedMotion = Literal["no-preference", "null", "reduce"]
 DocumentLoadState = Literal["commit", "domcontentloaded", "load", "networkidle"]
 KeyboardModifier = Literal["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]

@@ -489,7 +489,7 @@ class DocumentationProvider:
             return "int"
         if type_name.lower() == "string":
             return "str"
-        if type_name == "any" or type_name == "Serializable":
+        if type_name == "any" or type_name == "unknown" or type_name == "Serializable":
             return "Any"
         if type_name == "Object":
             return "Dict"

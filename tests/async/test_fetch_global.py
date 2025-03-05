@@ -486,3 +486,41 @@ async def test_should_retry_ECONNRESET(playwright: Playwright, server: Server) -
     assert await response.text() == "Hello!"
     assert request_count == 4
     await request.dispose()
+
+
+async def test_should_throw_when_fail_on_status_code_is_true(
+    playwright: Playwright, server: Server
+) -> None:
+    server.set_route(
+        "/empty.html",
+        lambda req: (
+            req.setResponseCode(404),
+            req.setHeader("Content-Length", "10"),
+            req.setHeader("Content-Type", "text/plain"),
+            req.write(b"Not found."),
+            req.finish(),
+        ),
+    )
+    request = await playwright.request.new_context(fail_on_status_code=True)
+    with pytest.raises(Error, match="404 Not Found"):
+        await request.fetch(server.EMPTY_PAGE)
+    await request.dispose()
+
+
+async def test_should_not_throw_when_fail_on_status_code_is_false(
+    playwright: Playwright, server: Server
+) -> None:
+    server.set_route(
+        "/empty.html",
+        lambda req: (
+            req.setResponseCode(404),
+            req.setHeader("Content-Length", "10"),
+            req.setHeader("Content-Type", "text/plain"),
+            req.write(b"Not found."),
+            req.finish(),
+        ),
+    )
+    request = await playwright.request.new_context(fail_on_status_code=False)
+    response = await request.fetch(server.EMPTY_PAGE)
+    assert response.status == 404
+    await request.dispose()
