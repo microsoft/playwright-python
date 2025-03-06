@@ -21,6 +21,7 @@ from typing import (
     Awaitable,
     Callable,
     Dict,
+    List,
     Literal,
     Optional,
     Tuple,
@@ -28,7 +29,14 @@ from typing import (
 
 import pytest
 
-from playwright.async_api import BrowserContext, BrowserType, Error, Page, expect
+from playwright.async_api import (
+    BrowserContext,
+    BrowserType,
+    Cookie,
+    Error,
+    Page,
+    expect,
+)
 from tests.server import Server
 from tests.utils import must
 
@@ -116,6 +124,12 @@ async def test_context_add_cookies_should_work(
     ]
 
 
+def _filter_cookies(cookies: List[Cookie]) -> List[Cookie]:
+    return list(
+        filter(lambda cookie: cookie["domain"] != "copilot.microsoft.com", cookies)
+    )
+
+
 async def test_context_clear_cookies_should_work(
     server: Server,
     launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
@@ -131,7 +145,7 @@ async def test_context_clear_cookies_should_work(
     assert await page.evaluate("document.cookie") == "cookie1=1; cookie2=2"
     await page.context.clear_cookies()
     await page.reload()
-    assert await page.context.cookies([]) == []
+    assert _filter_cookies(await page.context.cookies([])) == []
     assert await page.evaluate("document.cookie") == ""
 
 

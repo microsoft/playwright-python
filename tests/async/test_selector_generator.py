@@ -40,7 +40,7 @@ async def test_should_use_data_test_id_in_strict_errors(
         """
         )
         with pytest.raises(Error) as exc_info:
-            await page.locator(".foo").hover(timeout=200)
+            await page.locator(".foo").hover()
         assert "strict mode violation" in exc_info.value.message
         assert '<div class="foo bar:0' in exc_info.value.message
         assert '<div class="foo bar:1' in exc_info.value.message
