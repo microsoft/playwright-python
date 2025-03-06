@@ -152,7 +152,11 @@ class BrowserType(ChannelOwner):
         recordHarContent: HarContentPolicy = None,
         clientCertificates: List[ClientCertificate] = None,
     ) -> BrowserContext:
-        userDataDir = str(Path(userDataDir)) if userDataDir else ""
+        userDataDir = (
+            str(Path(userDataDir))
+            if (Path(userDataDir).is_absolute() or not userDataDir)
+            else str(Path(userDataDir).resolve())
+        )
         params = locals_to_params(locals())
         await prepare_browser_context_params(params)
         normalize_launch_params(params)

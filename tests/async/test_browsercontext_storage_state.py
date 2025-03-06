@@ -16,7 +16,7 @@ import asyncio
 import json
 from pathlib import Path
 
-from playwright.async_api import Browser, BrowserContext, Page
+from playwright.async_api import Browser, BrowserContext, Page, StorageState
 from tests.server import Server
 
 
@@ -44,30 +44,30 @@ async def test_should_capture_local_storage(context: BrowserContext) -> None:
 
 
 async def test_should_set_local_storage(browser: Browser) -> None:
-    context = await browser.new_context(
-        storage_state={
-            "origins": [
+    storage_state: StorageState = {
+        "origins": [
+            {
+                "origin": "https://www.example.com",
+                "localStorage": [{"name": "name1", "value": "value1"}],
+            }
+        ]
+    }
+    # We intentionally hide the indexed_db part in our API for now
+    storage_state["origins"][0]["indexedDB"] = [  # type: ignore
+        {
+            "name": "db",
+            "version": 42,
+            "stores": [
                 {
-                    "origin": "https://www.example.com",
-                    "localStorage": [{"name": "name1", "value": "value1"}],
-                    "indexedDB": [
-                        {
-                            "name": "db",
-                            "version": 42,
-                            "stores": [
-                                {
-                                    "name": "store",
-                                    "autoIncrement": False,
-                                    "records": [{"key": "bar", "value": "foo"}],
-                                    "indexes": [],
-                                }
-                            ],
-                        }
-                    ],
+                    "name": "store",
+                    "autoIncrement": False,
+                    "records": [{"key": "bar", "value": "foo"}],
+                    "indexes": [],
                 }
-            ]
+            ],
         }
-    )
+    ]
+    context = await browser.new_context(storage_state=storage_state)
 
     page = await context.new_page()
     await page.route(

@@ -13469,7 +13469,7 @@ class BrowserContext(AsyncContextManager):
 
         Returns
         -------
-        {cookies: List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: List[{origin: str, localStorage: List[{name: str, value: str}], indexedDB: Union[List[Any], None]}]}
+        {cookies: List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: List[{origin: str, localStorage: List[{name: str, value: str}]}]}
         """
 
         return mapping.from_impl(
@@ -13874,7 +13874,7 @@ class Browser(AsyncContextManager):
             Dimensions of the recorded videos. If not specified the size will be equal to `viewport` scaled down to fit into
             800x800. If `viewport` is not configured explicitly the video size defaults to 800x450. Actual picture of each page
             will be scaled down if necessary to fit the specified size.
-        storage_state : Union[pathlib.Path, str, {cookies: Sequence[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: Sequence[{origin: str, localStorage: Sequence[{name: str, value: str}], indexedDB: Union[Sequence[Any], None]}]}, None]
+        storage_state : Union[pathlib.Path, str, {cookies: Sequence[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: Sequence[{origin: str, localStorage: Sequence[{name: str, value: str}]}]}, None]
             Learn more about [storage state and auth](../auth.md).
 
             Populates context with given storage state. This option can be used to initialize context with logged-in
@@ -14105,7 +14105,7 @@ class Browser(AsyncContextManager):
             Dimensions of the recorded videos. If not specified the size will be equal to `viewport` scaled down to fit into
             800x800. If `viewport` is not configured explicitly the video size defaults to 800x450. Actual picture of each page
             will be scaled down if necessary to fit the specified size.
-        storage_state : Union[pathlib.Path, str, {cookies: Sequence[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: Sequence[{origin: str, localStorage: Sequence[{name: str, value: str}], indexedDB: Union[Sequence[Any], None]}]}, None]
+        storage_state : Union[pathlib.Path, str, {cookies: Sequence[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: Sequence[{origin: str, localStorage: Sequence[{name: str, value: str}]}]}, None]
             Learn more about [storage state and auth](../auth.md).
 
             Populates context with given storage state. This option can be used to initialize context with logged-in
@@ -18672,7 +18672,7 @@ class APIRequestContext(AsyncBase):
 
         Returns
         -------
-        {cookies: List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: List[{origin: str, localStorage: List[{name: str, value: str}], indexedDB: Union[List[Any], None]}]}
+        {cookies: List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: List[{origin: str, localStorage: List[{name: str, value: str}]}]}
         """
 
         return mapping.from_impl(
@@ -18730,7 +18730,7 @@ class APIRequest(AsyncBase):
         timeout : Union[float, None]
             Maximum time in milliseconds to wait for the response. Defaults to `30000` (30 seconds). Pass `0` to disable
             timeout.
-        storage_state : Union[pathlib.Path, str, {cookies: Sequence[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: Sequence[{origin: str, localStorage: Sequence[{name: str, value: str}], indexedDB: Union[Sequence[Any], None]}]}, None]
+        storage_state : Union[pathlib.Path, str, {cookies: Sequence[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: Sequence[{origin: str, localStorage: Sequence[{name: str, value: str}]}]}, None]
             Populates context with given storage state. This option can be used to initialize context with logged-in
             information obtained via `browser_context.storage_state()` or `a_pi_request_context.storage_state()`.
             Either a path to the file with saved storage, or the value returned by one of

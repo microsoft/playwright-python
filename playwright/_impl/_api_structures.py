@@ -72,10 +72,9 @@ class LocalStorageEntry(TypedDict):
     value: str
 
 
-class OriginState(TypedDict, total=False):
+class OriginState(TypedDict):
     origin: str
     localStorage: List[LocalStorageEntry]
-    indexedDB: Optional[List[Any]]
 
 
 class PdfMargins(TypedDict, total=False):
