@@ -323,3 +323,41 @@ def test_should_serialize_null_values_in_json(
     assert response.status == 200
     assert response.text() == '{"foo": null}'
     request.dispose()
+
+
+def test_should_throw_when_fail_on_status_code_is_true(
+    playwright: Playwright, server: Server
+) -> None:
+    server.set_route(
+        "/empty.html",
+        lambda req: (
+            req.setResponseCode(404),
+            req.setHeader("Content-Length", "10"),
+            req.setHeader("Content-Type", "text/plain"),
+            req.write(b"Not found."),
+            req.finish(),
+        ),
+    )
+    request = playwright.request.new_context(fail_on_status_code=True)
+    with pytest.raises(Error, match="404 Not Found"):
+        request.fetch(server.EMPTY_PAGE)
+    request.dispose()
+
+
+def test_should_not_throw_when_fail_on_status_code_is_false(
+    playwright: Playwright, server: Server
+) -> None:
+    server.set_route(
+        "/empty.html",
+        lambda req: (
+            req.setResponseCode(404),
+            req.setHeader("Content-Length", "10"),
+            req.setHeader("Content-Type", "text/plain"),
+            req.write(b"Not found."),
+            req.finish(),
+        ),
+    )
+    request = playwright.request.new_context(fail_on_status_code=False)
+    response = request.fetch(server.EMPTY_PAGE)
+    assert response.status == 404
+    request.dispose()

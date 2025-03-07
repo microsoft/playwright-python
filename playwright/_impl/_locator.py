@@ -70,6 +70,7 @@ class Locator:
         has_not_text: Union[str, Pattern[str]] = None,
         has: "Locator" = None,
         has_not: "Locator" = None,
+        visible: bool = None,
     ) -> None:
         self._frame = frame
         self._selector = selector
@@ -94,6 +95,9 @@ class Locator:
             if locator._frame != frame:
                 raise Error('Inner "has_not" locator must belong to the same frame.')
             self._selector += " >> internal:has-not=" + json.dumps(locator._selector)
+
+        if visible is not None:
+            self._selector += f" >> visible={bool_to_js_bool(visible)}"
 
     def __repr__(self) -> str:
         return f"<Locator frame={self._frame!r} selector={self._selector!r}>"
@@ -338,6 +342,7 @@ class Locator:
         hasNotText: Union[str, Pattern[str]] = None,
         has: "Locator" = None,
         hasNot: "Locator" = None,
+        visible: bool = None,
     ) -> "Locator":
         return Locator(
             self._frame,
@@ -346,6 +351,7 @@ class Locator:
             has_not_text=hasNotText,
             has=has,
             has_not=hasNot,
+            visible=visible,
         )
 
     def or_(self, locator: "Locator") -> "Locator":

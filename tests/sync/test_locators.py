@@ -493,6 +493,28 @@ def test_should_combine_visible_with_other_selectors(page: Page) -> None:
     )
 
 
+def test_should_support_filter_visible(page: Page) -> None:
+    page.set_content(
+        """<div>
+    <div class="item" style="display: none">Hidden data0</div>
+    <div class="item">visible data1</div>
+    <div class="item" style="display: none">Hidden data1</div>
+    <div class="item">visible data2</div>
+    <div class="item" style="display: none">Hidden data2</div>
+    <div class="item">visible data3</div>
+    </div>
+    """
+    )
+    locator = page.locator(".item").filter(visible=True).nth(1)
+    expect(locator).to_have_text("visible data2")
+    expect(
+        page.locator(".item").filter(visible=True).get_by_text("data3")
+    ).to_have_text("visible data3")
+    expect(
+        page.locator(".item").filter(visible=False).get_by_text("data1")
+    ).to_have_text("Hidden data1")
+
+
 def test_locator_count_should_work_with_deleted_map_in_main_world(page: Page) -> None:
     page.evaluate("Map = 1")
     page.locator("#searchResultTableDiv .x-grid3-row").count()
