@@ -152,11 +152,7 @@ class BrowserType(ChannelOwner):
         recordHarContent: HarContentPolicy = None,
         clientCertificates: List[ClientCertificate] = None,
     ) -> BrowserContext:
-        userDataDir = (
-            str(Path(userDataDir))
-            if (Path(userDataDir).is_absolute() or not userDataDir)
-            else str(Path(userDataDir).resolve())
-        )
+        userDataDir = self._user_data_dir(userDataDir)
         params = locals_to_params(locals())
         await prepare_browser_context_params(params)
         normalize_launch_params(params)
@@ -166,6 +162,13 @@ class BrowserType(ChannelOwner):
         )
         self._did_create_context(context, params, params)
         return context
+
+    def _user_data_dir(self, userDataDir: Optional[Union[str, Path]]) -> str:
+        if not userDataDir:
+            return ""
+        if not Path(userDataDir).is_absolute():
+            return str(Path(userDataDir).resolve())
+        return str(Path(userDataDir))
 
     async def connect_over_cdp(
         self,
