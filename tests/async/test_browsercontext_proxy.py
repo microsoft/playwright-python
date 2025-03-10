@@ -17,7 +17,6 @@ import base64
 from typing import AsyncGenerator, Awaitable, Callable
 
 import pytest
-from flaky import flaky
 
 from playwright.async_api import Browser, BrowserContext
 from tests.server import Server, TestServerRequest
@@ -108,7 +107,6 @@ async def test_should_work_with_ip_port_notion(
     assert await page.title() == "Served by the proxy"
 
 
-@flaky  # Upstream flaky
 async def test_should_authenticate(
     context_factory: "Callable[..., Awaitable[BrowserContext]]", server: Server
 ) -> None:
@@ -139,7 +137,6 @@ async def test_should_authenticate(
     )
 
 
-@flaky  # Upstream flaky
 async def test_should_authenticate_with_empty_password(
     context_factory: "Callable[..., Awaitable[BrowserContext]]", server: Server
 ) -> None:

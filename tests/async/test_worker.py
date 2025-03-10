@@ -16,7 +16,6 @@ import asyncio
 from asyncio.futures import Future
 
 import pytest
-from flaky import flaky
 
 from playwright.async_api import Browser, ConsoleMessage, Error, Page, Worker
 from tests.server import Server
@@ -107,7 +106,6 @@ async def test_workers_should_report_errors(page: Page) -> None:
     assert "this is my error" in error_log.message
 
 
-@flaky  # Upstream flaky
 async def test_workers_should_clear_upon_navigation(server: Server, page: Page) -> None:
     await page.goto(server.EMPTY_PAGE)
     async with page.expect_event("worker") as event_info:
@@ -123,7 +121,6 @@ async def test_workers_should_clear_upon_navigation(server: Server, page: Page) 
     assert len(page.workers) == 0
 
 
-@flaky  # Upstream flaky
 async def test_workers_should_clear_upon_cross_process_navigation(
     server: Server, page: Page
 ) -> None:

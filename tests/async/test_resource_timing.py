@@ -15,7 +15,6 @@
 from typing import Dict
 
 import pytest
-from flaky import flaky
 
 from playwright.async_api import Browser, Page
 from tests.server import Server
@@ -33,7 +32,6 @@ async def test_should_work(page: Page, server: Server) -> None:
     assert timing["responseEnd"] < 10000
 
 
-@flaky
 async def test_should_work_for_subresource(
     page: Page, server: Server, is_win: bool, is_mac: bool, is_webkit: bool
 ) -> None:
@@ -51,7 +49,6 @@ async def test_should_work_for_subresource(
     assert timing["responseEnd"] < 10000
 
 
-@flaky  # Upstream flaky
 async def test_should_work_for_ssl(browser: Browser, https_server: Server) -> None:
     page = await browser.new_page(ignore_https_errors=True)
     async with page.expect_event("requestfinished") as request_info:

@@ -21,7 +21,6 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from flaky import flaky
 
 from playwright._impl._path_utils import get_file_dirname
 from playwright.async_api import Error, FilePayload, Page
@@ -316,7 +315,6 @@ async def _listen_for_wheel_events(page: Page, selector: str) -> None:
     )
 
 
-@flaky
 async def test_should_upload_large_file(
     page: Page, server: Server, tmp_path: Path
 ) -> None:
@@ -383,7 +381,6 @@ async def test_set_input_files_should_preserve_last_modified_timestamp(
         assert abs(timestamps[i] - expected_timestamps[i]) < 1000
 
 
-@flaky
 async def test_should_upload_multiple_large_file(
     page: Page, server: Server, tmp_path: Path
 ) -> None:
