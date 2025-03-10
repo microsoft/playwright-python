@@ -34,6 +34,11 @@ from .server import Server, test_server
 _dirname = get_file_dirname()
 
 
+def pytest_configure(config: pytest.Config) -> None:
+    if os.environ.get("CI"):
+        config.option.reruns = 3
+
+
 def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:
     if "browser_name" in metafunc.fixturenames:
         browsers = metafunc.config.option.browser or ["chromium", "firefox", "webkit"]

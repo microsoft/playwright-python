@@ -49,5 +49,5 @@ jobs:
         docker exec "${CONTAINER_ID}" pip install -r requirements.txt
         docker exec "${CONTAINER_ID}" pip install -e .
         docker exec "${CONTAINER_ID}" python -m build --wheel
-        docker exec "${CONTAINER_ID}" xvfb-run pytest -vv tests/sync/
-        docker exec "${CONTAINER_ID}" xvfb-run pytest -vv tests/async/
+        docker exec "${CONTAINER_ID}" xvfb-run pytest tests/sync/
+        docker exec "${CONTAINER_ID}" xvfb-run pytest tests/async/
