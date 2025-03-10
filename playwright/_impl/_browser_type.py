@@ -35,6 +35,7 @@ from playwright._impl._connection import (
 from playwright._impl._errors import Error
 from playwright._impl._helper import (
     ColorScheme,
+    Contrast,
     Env,
     ForcedColors,
     HarContentPolicy,
@@ -134,6 +135,7 @@ class BrowserType(ChannelOwner):
         colorScheme: ColorScheme = None,
         reducedMotion: ReducedMotion = None,
         forcedColors: ForcedColors = None,
+        contrast: Contrast = None,
         acceptDownloads: bool = None,
         tracesDir: Union[pathlib.Path, str] = None,
         chromiumSandbox: bool = None,
@@ -150,7 +152,7 @@ class BrowserType(ChannelOwner):
         recordHarContent: HarContentPolicy = None,
         clientCertificates: List[ClientCertificate] = None,
     ) -> BrowserContext:
-        userDataDir = str(Path(userDataDir)) if userDataDir else ""
+        userDataDir = self._user_data_dir(userDataDir)
         params = locals_to_params(locals())
         await prepare_browser_context_params(params)
         normalize_launch_params(params)
@@ -160,6 +162,13 @@ class BrowserType(ChannelOwner):
         )
         self._did_create_context(context, params, params)
         return context
+
+    def _user_data_dir(self, userDataDir: Optional[Union[str, Path]]) -> str:
+        if not userDataDir:
+            return ""
+        if not Path(userDataDir).is_absolute():
+            return str(Path(userDataDir).resolve())
+        return str(Path(userDataDir))
 
     async def connect_over_cdp(
         self,

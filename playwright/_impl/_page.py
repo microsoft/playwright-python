@@ -60,6 +60,7 @@ from playwright._impl._greenlets import LocatorHandlerGreenlet
 from playwright._impl._har_router import HarRouter
 from playwright._impl._helper import (
     ColorScheme,
+    Contrast,
     DocumentLoadState,
     ForcedColors,
     HarMode,
@@ -608,6 +609,7 @@ class Page(ChannelOwner):
         colorScheme: ColorScheme = None,
         reducedMotion: ReducedMotion = None,
         forcedColors: ForcedColors = None,
+        contrast: Contrast = None,
     ) -> None:
         params = locals_to_params(locals())
         if "media" in params:
@@ -623,6 +625,10 @@ class Page(ChannelOwner):
         if "forcedColors" in params:
             params["forcedColors"] = (
                 "no-override" if params["forcedColors"] == "null" else forcedColors
+            )
+        if "contrast" in params:
+            params["contrast"] = (
+                "no-override" if params["contrast"] == "null" else contrast
             )
         await self._channel.send("emulateMedia", params)
 

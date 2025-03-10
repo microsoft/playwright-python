@@ -15,7 +15,8 @@
 import json
 from pathlib import Path
 
-from playwright.sync_api import Browser, BrowserContext
+from playwright.sync_api import Browser, BrowserContext, Page, StorageState
+from tests.server import Server
 
 
 def test_should_capture_local_storage(context: BrowserContext) -> None:
@@ -41,22 +42,53 @@ def test_should_capture_local_storage(context: BrowserContext) -> None:
 
 
 def test_should_set_local_storage(browser: Browser) -> None:
-    context = browser.new_context(
-        storage_state={
-            "origins": [
+    storage_state: StorageState = {
+        "origins": [
+            {
+                "origin": "https://www.example.com",
+                "localStorage": [{"name": "name1", "value": "value1"}],
+            }
+        ]
+    }
+    # We intentionally hide the indexed_db part in our API for now
+    storage_state["origins"][0]["indexedDB"] = [  # type: ignore
+        {
+            "name": "db",
+            "version": 42,
+            "stores": [
                 {
-                    "origin": "https://www.example.com",
-                    "localStorage": [{"name": "name1", "value": "value1"}],
+                    "name": "store",
+                    "autoIncrement": False,
+                    "records": [{"key": "bar", "value": "foo"}],
+                    "indexes": [],
                 }
-            ]
+            ],
         }
-    )
+    ]
+    context = browser.new_context(storage_state=storage_state)
 
     page = context.new_page()
     page.route("**/*", lambda route: route.fulfill(body="<html></html>"))
     page.goto("https://www.example.com")
     local_storage = page.evaluate("window.localStorage")
     assert local_storage == {"name1": "value1"}
+
+    indexed_db = page.evaluate(
+        """async () => {
+        return new Promise((resolve, reject) => {
+            const openRequest = indexedDB.open('db', 42);
+            openRequest.addEventListener('success', () => {
+                const db = openRequest.result;
+                const transaction = db.transaction('store', 'readonly');
+                const getRequest = transaction.objectStore('store').get('bar');
+                getRequest.addEventListener('success', () => resolve(getRequest.result));
+                getRequest.addEventListener('error', () => reject(getRequest.error));
+            });
+            openRequest.addEventListener('error', () => reject(openRequest.error));
+        });
+    }"""
+    )
+    assert indexed_db == "foo"
     context.close()
 
 
@@ -95,3 +127,48 @@ def test_should_round_trip_through_the_file(
     cookie = page2.evaluate("document.cookie")
     assert cookie == "username=John Doe"
     context2.close()
+
+
+def test_should_serialise_indexed_db(page: Page, server: Server) -> None:
+    page.goto(server.EMPTY_PAGE)
+    page.evaluate(
+        """async () => {
+            await new Promise((resolve, reject) => {
+                const openRequest = indexedDB.open('db', 42);
+                openRequest.onupgradeneeded = () => {
+                openRequest.result.createObjectStore('store');
+                };
+                openRequest.onsuccess = () => {
+                const request = openRequest.result.transaction('store', 'readwrite')
+                    .objectStore('store')
+                    .put('foo', 'bar');
+                request.addEventListener('success', resolve);
+                request.addEventListener('error', reject);
+                };
+            });
+        }"""
+    )
+    assert page.context.storage_state() == {"cookies": [], "origins": []}
+    assert page.context.storage_state(indexed_db=True) == {
+        "cookies": [],
+        "origins": [
+            {
+                "origin": f"http://localhost:{server.PORT}",
+                "localStorage": [],
+                "indexedDB": [
+                    {
+                        "name": "db",
+                        "version": 42,
+                        "stores": [
+                            {
+                                "name": "store",
+                                "autoIncrement": False,
+                                "records": [{"key": "bar", "value": "foo"}],
+                                "indexes": [],
+                            }
+                        ],
+                    }
+                ],
+            }
+        ],
+    }

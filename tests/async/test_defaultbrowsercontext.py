@@ -317,6 +317,16 @@ async def test_should_support_timezone_id_option(
     )
 
 
+async def test_should_support_contrast_option(
+    launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
+) -> None:
+    (page, _) = await launch_persistent(contrast="more")
+    assert await page.evaluate('() => matchMedia("(prefers-contrast: more)").matches')
+    assert not await page.evaluate(
+        '() => matchMedia("(prefers-contrast: no-preference)").matches'
+    )
+
+
 async def test_should_support_locale_option(
     launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
 ) -> None:

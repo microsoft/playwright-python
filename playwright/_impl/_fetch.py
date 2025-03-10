@@ -73,6 +73,7 @@ class APIRequest:
         timeout: float = None,
         storageState: Union[StorageState, str, Path] = None,
         clientCertificates: List[ClientCertificate] = None,
+        failOnStatusCode: bool = None,
     ) -> "APIRequestContext":
         params = locals_to_params(locals())
         if "storageState" in params:
@@ -422,9 +423,13 @@ class APIRequestContext(ChannelOwner):
         return APIResponse(self, response)
 
     async def storage_state(
-        self, path: Union[pathlib.Path, str] = None
+        self,
+        path: Union[pathlib.Path, str] = None,
+        indexedDB: bool = None,
     ) -> StorageState:
-        result = await self._channel.send_return_as_dict("storageState")
+        result = await self._channel.send_return_as_dict(
+            "storageState", {"indexedDB": indexedDB}
+        )
         if path:
             await async_writefile(path, json.dumps(result))
         return result
@@ -475,11 +480,14 @@ class APIResponse:
 
     async def body(self) -> bytes:
         try:
-            result = await self._request._channel.send_return_as_dict(
-                "fetchResponseBody",
-                {
-                    "fetchUid": self._fetch_uid,
-                },
+            result = await self._request._connection.wrap_api_call(
+                lambda: self._request._channel.send_return_as_dict(
+                    "fetchResponseBody",
+                    {
+                        "fetchUid": self._fetch_uid,
+                    },
+                ),
+                True,
             )
             if result is None:
                 raise Error("Response has been disposed")

@@ -1350,7 +1350,6 @@ async def test_should_set_bodysize_to_0(page: Page, server: Server) -> None:
     assert sizes["requestHeadersSize"] >= 200
 
 
-@pytest.mark.skip_browser("webkit")  # https://bugs.webkit.org/show_bug.cgi?id=225281
 async def test_should_emulate_forced_colors(page: Page) -> None:
     assert await page.evaluate("matchMedia('(forced-colors: none)').matches")
     await page.emulate_media(forced_colors="none")
@@ -1359,6 +1358,26 @@ async def test_should_emulate_forced_colors(page: Page) -> None:
     await page.emulate_media(forced_colors="active")
     assert await page.evaluate("matchMedia('(forced-colors: active)').matches")
     assert not await page.evaluate("matchMedia('(forced-colors: none)').matches")
+
+
+async def test_should_emulate_contrast(page: Page) -> None:
+    assert await page.evaluate(
+        "matchMedia('(prefers-contrast: no-preference)').matches"
+    )
+    await page.emulate_media(contrast="no-preference")
+    assert await page.evaluate(
+        "matchMedia('(prefers-contrast: no-preference)').matches"
+    )
+    assert not await page.evaluate("matchMedia('(prefers-contrast: more)').matches")
+    await page.emulate_media(contrast="more")
+    assert not await page.evaluate(
+        "matchMedia('(prefers-contrast: no-preference)').matches"
+    )
+    assert await page.evaluate("matchMedia('(prefers-contrast: more)').matches")
+    await page.emulate_media(contrast="null")
+    assert await page.evaluate(
+        "matchMedia('(prefers-contrast: no-preference)').matches"
+    )
 
 
 async def test_should_not_throw_when_continuing_while_page_is_closing(

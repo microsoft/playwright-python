@@ -2821,7 +2821,9 @@ class ElementHandle(JSHandle):
             Defaults to `"device"`.
         mask : Union[Sequence[Locator], None]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
-            box `#FF00FF` (customized by `maskColor`) that completely covers its bounding box.
+            box `#FF00FF` (customized by `maskColor`) that completely covers its bounding box. The mask is also applied to
+            invisible elements, see [Matching only visible elements](../locators.md#matching-only-visible-elements) to disable
+            that.
         mask_color : Union[str, None]
             Specify the color of the overlay box for masked elements, in
             [CSS color format](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value). Default color is pink `#FF00FF`.
@@ -9277,6 +9279,7 @@ class Page(AsyncContextManager):
             Literal["no-preference", "null", "reduce"]
         ] = None,
         forced_colors: typing.Optional[Literal["active", "none", "null"]] = None,
+        contrast: typing.Optional[Literal["more", "no-preference", "null"]] = None,
     ) -> None:
         """Page.emulate_media
 
@@ -9325,6 +9328,7 @@ class Page(AsyncContextManager):
             Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. Passing
             `null` disables reduced motion emulation.
         forced_colors : Union["active", "none", "null", None]
+        contrast : Union["more", "no-preference", "null", None]
         """
 
         return mapping.from_maybe_impl(
@@ -9333,6 +9337,7 @@ class Page(AsyncContextManager):
                 colorScheme=color_scheme,
                 reducedMotion=reduced_motion,
                 forcedColors=forced_colors,
+                contrast=contrast,
             )
         )
 
@@ -9709,7 +9714,9 @@ class Page(AsyncContextManager):
             Defaults to `"device"`.
         mask : Union[Sequence[Locator], None]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
-            box `#FF00FF` (customized by `maskColor`) that completely covers its bounding box.
+            box `#FF00FF` (customized by `maskColor`) that completely covers its bounding box. The mask is also applied to
+            invisible elements, see [Matching only visible elements](../locators.md#matching-only-visible-elements) to disable
+            that.
         mask_color : Union[str, None]
             Specify the color of the overlay box for masked elements, in
             [CSS color format](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value). Default color is pink `#FF00FF`.
@@ -13437,24 +13444,37 @@ class BrowserContext(AsyncContextManager):
         return mapping.from_maybe_impl(await self._impl_obj.close(reason=reason))
 
     async def storage_state(
-        self, *, path: typing.Optional[typing.Union[str, pathlib.Path]] = None
+        self,
+        *,
+        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        indexed_db: typing.Optional[bool] = None,
     ) -> StorageState:
         """BrowserContext.storage_state
 
-        Returns storage state for this browser context, contains current cookies and local storage snapshot.
+        Returns storage state for this browser context, contains current cookies, local storage snapshot and IndexedDB
+        snapshot.
 
         Parameters
         ----------
         path : Union[pathlib.Path, str, None]
             The file path to save the storage state to. If `path` is a relative path, then it is resolved relative to current
             working directory. If no path is provided, storage state is still returned, but won't be saved to the disk.
+        indexed_db : Union[bool, None]
+            Set to `true` to include [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) in the storage
+            state snapshot. If your application uses IndexedDB to store authentication tokens, like Firebase Authentication,
+            enable this.
+
+            **NOTE** IndexedDBs with typed arrays are currently not supported.
+
 
         Returns
         -------
         {cookies: List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: List[{origin: str, localStorage: List[{name: str, value: str}]}]}
         """
 
-        return mapping.from_impl(await self._impl_obj.storage_state(path=path))
+        return mapping.from_impl(
+            await self._impl_obj.storage_state(path=path, indexedDB=indexed_db)
+        )
 
     async def wait_for_event(
         self,
@@ -13727,6 +13747,7 @@ class Browser(AsyncContextManager):
             Literal["no-preference", "null", "reduce"]
         ] = None,
         forced_colors: typing.Optional[Literal["active", "none", "null"]] = None,
+        contrast: typing.Optional[Literal["more", "no-preference", "null"]] = None,
         accept_downloads: typing.Optional[bool] = None,
         default_browser_type: typing.Optional[str] = None,
         proxy: typing.Optional[ProxySettings] = None,
@@ -13832,6 +13853,10 @@ class Browser(AsyncContextManager):
             Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See
             `page.emulate_media()` for more details. Passing `'null'` resets emulation to system defaults. Defaults to
             `'none'`.
+        contrast : Union["more", "no-preference", "null", None]
+            Emulates `'prefers-contrast'` media feature, supported values are `'no-preference'`, `'more'`. See
+            `page.emulate_media()` for more details. Passing `'null'` resets emulation to system defaults. Defaults to
+            `'no-preference'`.
         accept_downloads : Union[bool, None]
             Whether to automatically download all the attachments. Defaults to `true` where all the downloads are accepted.
         proxy : Union[{server: str, bypass: Union[str, None], username: Union[str, None], password: Union[str, None]}, None]
@@ -13923,6 +13948,7 @@ class Browser(AsyncContextManager):
                 colorScheme=color_scheme,
                 reducedMotion=reduced_motion,
                 forcedColors=forced_colors,
+                contrast=contrast,
                 acceptDownloads=accept_downloads,
                 defaultBrowserType=default_browser_type,
                 proxy=proxy,
@@ -13965,6 +13991,7 @@ class Browser(AsyncContextManager):
             Literal["dark", "light", "no-preference", "null"]
         ] = None,
         forced_colors: typing.Optional[Literal["active", "none", "null"]] = None,
+        contrast: typing.Optional[Literal["more", "no-preference", "null"]] = None,
         reduced_motion: typing.Optional[
             Literal["no-preference", "null", "reduce"]
         ] = None,
@@ -14053,6 +14080,10 @@ class Browser(AsyncContextManager):
             Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See
             `page.emulate_media()` for more details. Passing `'null'` resets emulation to system defaults. Defaults to
             `'none'`.
+        contrast : Union["more", "no-preference", "null", None]
+            Emulates `'prefers-contrast'` media feature, supported values are `'no-preference'`, `'more'`. See
+            `page.emulate_media()` for more details. Passing `'null'` resets emulation to system defaults. Defaults to
+            `'no-preference'`.
         reduced_motion : Union["no-preference", "null", "reduce", None]
             Emulates `'prefers-reduced-motion'` media feature, supported values are `'reduce'`, `'no-preference'`. See
             `page.emulate_media()` for more details. Passing `'null'` resets emulation to system defaults. Defaults to
@@ -14147,6 +14178,7 @@ class Browser(AsyncContextManager):
                 hasTouch=has_touch,
                 colorScheme=color_scheme,
                 forcedColors=forced_colors,
+                contrast=contrast,
                 reducedMotion=reduced_motion,
                 acceptDownloads=accept_downloads,
                 defaultBrowserType=default_browser_type,
@@ -14480,6 +14512,7 @@ class BrowserType(AsyncBase):
             Literal["no-preference", "null", "reduce"]
         ] = None,
         forced_colors: typing.Optional[Literal["active", "none", "null"]] = None,
+        contrast: typing.Optional[Literal["more", "no-preference", "null"]] = None,
         accept_downloads: typing.Optional[bool] = None,
         traces_dir: typing.Optional[typing.Union[str, pathlib.Path]] = None,
         chromium_sandbox: typing.Optional[bool] = None,
@@ -14622,6 +14655,10 @@ class BrowserType(AsyncBase):
             Emulates `'forced-colors'` media feature, supported values are `'active'`, `'none'`. See
             `page.emulate_media()` for more details. Passing `'null'` resets emulation to system defaults. Defaults to
             `'none'`.
+        contrast : Union["more", "no-preference", "null", None]
+            Emulates `'prefers-contrast'` media feature, supported values are `'no-preference'`, `'more'`. See
+            `page.emulate_media()` for more details. Passing `'null'` resets emulation to system defaults. Defaults to
+            `'no-preference'`.
         accept_downloads : Union[bool, None]
             Whether to automatically download all the attachments. Defaults to `true` where all the downloads are accepted.
         traces_dir : Union[pathlib.Path, str, None]
@@ -14728,6 +14765,7 @@ class BrowserType(AsyncBase):
                 colorScheme=color_scheme,
                 reducedMotion=reduced_motion,
                 forcedColors=forced_colors,
+                contrast=contrast,
                 acceptDownloads=accept_downloads,
                 tracesDir=traces_dir,
                 chromiumSandbox=chromium_sandbox,
@@ -14761,6 +14799,10 @@ class BrowserType(AsyncBase):
         The default browser context is accessible via `browser.contexts()`.
 
         **NOTE** Connecting over the Chrome DevTools Protocol is only supported for Chromium-based browsers.
+
+        **NOTE** This connection is significantly lower fidelity than the Playwright protocol connection via
+        `browser_type.connect()`. If you are experiencing issues or attempting to use advanced functionality, you
+        probably want to use `browser_type.connect()`.
 
         **Usage**
 
@@ -14809,14 +14851,15 @@ class BrowserType(AsyncBase):
     ) -> "Browser":
         """BrowserType.connect
 
-        This method attaches Playwright to an existing browser instance. When connecting to another browser launched via
-        `BrowserType.launchServer` in Node.js, the major and minor version needs to match the client version (1.2.3 → is
-        compatible with 1.2.x).
+        This method attaches Playwright to an existing browser instance created via `BrowserType.launchServer` in Node.js.
+
+        **NOTE** The major and minor version of the Playwright instance that connects needs to match the version of
+        Playwright that launches the browser (1.2.3 → is compatible with 1.2.x).
 
         Parameters
         ----------
         ws_endpoint : str
-            A browser websocket endpoint to connect to.
+            A Playwright browser websocket endpoint to connect to. You obtain this endpoint via `BrowserServer.wsEndpoint`.
         timeout : Union[float, None]
             Maximum time in milliseconds to wait for the connection to be established. Defaults to `0` (no timeout).
         slow_mo : Union[float, None]
@@ -15578,11 +15621,6 @@ class Locator(AsyncBase):
         If `expression` throws or rejects, this method throws.
 
         **Usage**
-
-        ```py
-        tweets = page.locator(\".tweet .retweets\")
-        assert await tweets.evaluate(\"node => node.innerText\") == \"10 retweets\"
-        ```
 
         Parameters
         ----------
@@ -16397,6 +16435,7 @@ class Locator(AsyncBase):
         has_not_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
         has: typing.Optional["Locator"] = None,
         has_not: typing.Optional["Locator"] = None,
+        visible: typing.Optional[bool] = None,
     ) -> "Locator":
         """Locator.filter
 
@@ -16438,6 +16477,8 @@ class Locator(AsyncBase):
             outer one. For example, `article` that does not have `div` matches `<article><span>Playwright</span></article>`.
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
+        visible : Union[bool, None]
+            Only matches visible or invisible elements.
 
         Returns
         -------
@@ -16450,6 +16491,7 @@ class Locator(AsyncBase):
                 hasNotText=has_not_text,
                 has=has._impl_obj if has else None,
                 hasNot=has_not._impl_obj if has_not else None,
+                visible=visible,
             )
         )
 
@@ -17141,7 +17183,9 @@ class Locator(AsyncBase):
             Defaults to `"device"`.
         mask : Union[Sequence[Locator], None]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
-            box `#FF00FF` (customized by `maskColor`) that completely covers its bounding box.
+            box `#FF00FF` (customized by `maskColor`) that completely covers its bounding box. The mask is also applied to
+            invisible elements, see [Matching only visible elements](../locators.md#matching-only-visible-elements) to disable
+            that.
         mask_color : Union[str, None]
             Specify the color of the overlay box for masked elements, in
             [CSS color format](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value). Default color is pink `#FF00FF`.
@@ -17283,9 +17327,9 @@ class Locator(AsyncBase):
 
         ```html
         <select multiple>
-          <option value=\"red\">Red</div>
-          <option value=\"green\">Green</div>
-          <option value=\"blue\">Blue</div>
+          <option value=\"red\">Red</option>
+          <option value=\"green\">Green</option>
+          <option value=\"blue\">Blue</option>
         </select>
         ```
 
@@ -17446,7 +17490,8 @@ class Locator(AsyncBase):
     ) -> None:
         """Locator.tap
 
-        Perform a tap gesture on the element matching the locator.
+        Perform a tap gesture on the element matching the locator. For examples of emulating other gestures by manually
+        dispatching touch events, see the [emulating legacy touch events](https://playwright.dev/python/docs/touch-events) page.
 
         **Details**
 
@@ -18607,7 +18652,10 @@ class APIRequestContext(AsyncBase):
         )
 
     async def storage_state(
-        self, *, path: typing.Optional[typing.Union[str, pathlib.Path]] = None
+        self,
+        *,
+        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        indexed_db: typing.Optional[bool] = None,
     ) -> StorageState:
         """APIRequestContext.storage_state
 
@@ -18619,13 +18667,17 @@ class APIRequestContext(AsyncBase):
         path : Union[pathlib.Path, str, None]
             The file path to save the storage state to. If `path` is a relative path, then it is resolved relative to current
             working directory. If no path is provided, storage state is still returned, but won't be saved to the disk.
+        indexed_db : Union[bool, None]
+            Set to `true` to include IndexedDB in the storage state snapshot.
 
         Returns
         -------
         {cookies: List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: List[{origin: str, localStorage: List[{name: str, value: str}]}]}
         """
 
-        return mapping.from_impl(await self._impl_obj.storage_state(path=path))
+        return mapping.from_impl(
+            await self._impl_obj.storage_state(path=path, indexedDB=indexed_db)
+        )
 
 
 mapping.register(APIRequestContextImpl, APIRequestContext)
@@ -18647,6 +18699,7 @@ class APIRequest(AsyncBase):
             typing.Union[StorageState, str, pathlib.Path]
         ] = None,
         client_certificates: typing.Optional[typing.List[ClientCertificate]] = None,
+        fail_on_status_code: typing.Optional[bool] = None,
     ) -> "APIRequestContext":
         """APIRequest.new_context
 
@@ -18695,6 +18748,9 @@ class APIRequest(AsyncBase):
             **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
             work by replacing `localhost` with `local.playwright`.
 
+        fail_on_status_code : Union[bool, None]
+            Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status
+            codes.
 
         Returns
         -------
@@ -18712,6 +18768,7 @@ class APIRequest(AsyncBase):
                 timeout=timeout,
                 storageState=storage_state,
                 clientCertificates=client_certificates,
+                failOnStatusCode=fail_on_status_code,
             )
         )
 
@@ -18810,7 +18867,7 @@ class PageAssertions(AsyncBase):
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         ignore_case : Union[bool, None]
             Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
-            expression flag if specified.
+            expression parameter if specified. A provided predicate ignores this flag.
         """
         __tracebackhide__ = True
 
