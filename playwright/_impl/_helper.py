@@ -442,6 +442,13 @@ def is_file_payload(value: Optional[Any]) -> bool:
     )
 
 
+def is_file_array_payload(value: Optional[Any]) -> bool:
+    return (
+        isinstance(value, list)
+        and all(is_file_payload(x) for x in value)
+    )
+
+
 TEXTUAL_MIME_TYPE = re.compile(
     r"^(text\/.*?|application\/(json|(x-)?javascript|xml.*?|ecmascript|graphql|x-www-form-urlencoded)|image\/svg(\+xml)?|application\/.*?(\+json|\+xml))(;\s*charset=.*)?$"
 )
