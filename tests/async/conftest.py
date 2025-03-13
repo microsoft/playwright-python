@@ -13,10 +13,9 @@
 # limitations under the License.
 
 import asyncio
-from typing import Any, AsyncGenerator, Awaitable, Callable, Dict, Generator, List
+from typing import Any, AsyncGenerator, Awaitable, Callable, Dict, Generator
 
 import pytest
-from pytest_asyncio import is_async_test
 
 from playwright.async_api import (
     Browser,
@@ -35,14 +34,6 @@ from .utils import utils as utils_object
 @pytest.fixture
 def utils() -> Generator[Utils, None, None]:
     yield utils_object
-
-
-# Will mark all the tests as async
-def pytest_collection_modifyitems(items: List[pytest.Item]) -> None:
-    pytest_asyncio_tests = (item for item in items if is_async_test(item))
-    session_scope_marker = pytest.mark.asyncio(loop_scope="session")
-    for async_test in pytest_asyncio_tests:
-        async_test.add_marker(session_scope_marker, append=False)
 
 
 @pytest.fixture(scope="session")
