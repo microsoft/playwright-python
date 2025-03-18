@@ -32,6 +32,9 @@ requirements:
     - pyee>=12,<13
 
 test: # [build_platform == target_platform]
+  files:
+    - scripts/example_sync.py
+    - scripts/example_async.py
   requires:
     - pip
   imports:
@@ -41,6 +44,8 @@ test: # [build_platform == target_platform]
   commands:
     - playwright --help
     - playwright install
+    - python scripts/example_sync.py
+    - python scripts/example_async.py
 
 about:
   home: https://github.com/microsoft/playwright-python
