@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>微信支付</title>
+    <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/2.4.4/weui.min.css">
+    <style>
+        .page {
+            padding: 20px;
+            box-sizing: border-box;
+            background: #f7f7f7;
+            min-height: 100vh;
+        }
+        
+        .payment-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .payment-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        .payment-title {
+            font-size: 20px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .payment-desc {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .price-info {
+            text-align: center;
+            margin: 24px 0;
+        }
+        
+        .price-amount {
+            font-size: 32px;
+            font-weight: 600;
+            color: #07c160;
+        }
+        
+        .price-original {
+            font-size: 14px;
+            color: #999;
+            text-decoration: line-through;
+            margin-left: 8px;
+        }
+        
+        .discount-tag {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #fff5e6;
+            color: #ff9500;
+            border-radius: 4px;
+            font-size: 12px;
+            margin: 4px;
+        }
+        
+        .qrcode-wrapper {
+            text-align: center;
+            margin: 32px 0;
+        }
+        
+        .qrcode-img {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+        }
+        
+        .qrcode-tips {
+            font-size: 14px;
+            color: #666;
+            margin-top: 12px;
+        }
+        
+        .order-info {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 24px;
+        }
+        
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .order-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .payment-footer {
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+            margin-top: 32px;
+        }
+        
+        .weui-loading {
+            margin: 0 5px;
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            vertical-align: middle;
+            animation: weuiLoading 1s steps(12, end) infinite;
+            background: transparent url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjAiIGhlaWdodD0iMTIwIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PHBhdGggZmlsbD0ibm9uZSIgZD0iTTAgMGgxMDB2MTAwSDB6Ii8+PHJlY3Qgd2lkdGg9IjciIGhlaWdodD0iMjAiIHg9IjQ2LjUiIHk9IjQwIiBmaWxsPSIjRTlFOUU5IiByeD0iNSIgcnk9IjUiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAgLTMwKSIvPjxyZWN0IHdpZHRoPSI3IiBoZWlnaHQ9IjIwIiB4PSI0Ni41IiB5PSI0MCIgZmlsbD0iIzk4OTY5NyIgcng9IjUiIHJ5PSI1IiB0cmFuc2Zvcm09InJvdGF0ZSgzMCAxMDUuOTggNjUpIi8+PHJlY3Qgd2lkdGg9IjciIGhlaWdodD0iMjAiIHg9IjQ2LjUiIHk9IjQwIiBmaWxsPSIjOUI5OTlBIiByeD0iNSIgcnk9IjUiIHRyYW5zZm9ybT0icm90YXRlKDYwIDc1Ljk4IDY1KSIvPjxyZWN0IHdpZHRoPSI3IiBoZWlnaHQ9IjIwIiB4PSI0Ni41IiB5PSI0MCIgZmlsbD0iI0EzQTFBMiIgcng9IjUiIHJ5PSI1IiB0cmFuc2Zvcm09InJvdGF0ZSg5MCA2NSA2NSkiLz48cmVjdCB3aWR0aD0iNyIgaGVpZ2h0PSIyMCIgeD0iNDYuNSIgeT0iNDAiIGZpbGw9IiNBQkE5QUEiIHJ4PSI1IiByeT0iNSIgdHJhbnNmb3JtPSJyb3RhdGUoMTIwIDU4LjY2IDY1KSIvPjxyZWN0IHdpZHRoPSI3IiBoZWlnaHQ9IjIwIiB4PSI0Ni41IiB5PSI0MCIgZmlsbD0iI0IyQjJCMiIgcng9IjUiIHJ5PSI1IiB0cmFuc2Zvcm09InJvdGF0ZSgxNTAgNTQuMDIgNjUpIi8+PHJlY3Qgd2lkdGg9IjciIGhlaWdodD0iMjAiIHg9IjQ2LjUiIHk9IjQwIiBmaWxsPSIjQkFCOEI5IiByeD0iNSIgcnk9IjUiIHRyYW5zZm9ybT0icm90YXRlKDE4MCA1MCA2NSkiLz48cmVjdCB3aWR0aD0iNyIgaGVpZ2h0PSIyMCIgeD0iNDYuNSIgeT0iNDAiIGZpbGw9IiNDMkMwQzEiIHJ4PSI1IiByeT0iNSIgdHJhbnNmb3JtPSJyb3RhdGUoLTE1MCA0NS45OCA2NSkiLz48cmVjdCB3aWR0aD0iNyIgaGVpZ2h0PSIyMCIgeD0iNDYuNSIgeT0iNDAiIGZpbGw9IiNDQkNCQ0IiIHJ4PSI1IiByeT0iNSIgdHJhbnNmb3JtPSJyb3RhdGUoLTEyMCA0MS4zNCA2NSkiLz48cmVjdCB3aWR0aD0iNyIgaGVpZ2h0PSIyMCIgeD0iNDYuNSIgeT0iNDAiIGZpbGw9IiNEMkQyRDIiIHJ4PSI1IiByeT0iNSIgdHJhbnNmb3JtPSJyb3RhdGUoLTkwIDM1IDY1KSIvPjxyZWN0IHdpZHRoPSI3IiBoZWlnaHQ9IjIwIiB4PSI0Ni41IiB5PSI0MCIgZmlsbD0iI0RBREFEQSIgcng9IjUiIHJ5PSI1IiB0cmFuc2Zvcm09InJvdGF0ZSgtNjAgMjQuMDIgNjUpIi8+PHJlY3Qgd2lkdGg9IjciIGhlaWdodD0iMjAiIHg9IjQ2LjUiIHk9IjQwIiBmaWxsPSIjRTJFMkUyIiByeD0iNSIgcnk9IjUiIHRyYW5zZm9ybT0icm90YXRlKC0zMCAtNS45OCA2NSkiLz48L3N2Zz4=) no-repeat;
+            background-size: 100%;
+        }
+        
+        @keyframes weuiLoading {
+            0% {
+                transform: rotate3d(0, 0, 1, 0deg);
+            }
+            100% {
+                transform: rotate3d(0, 0, 1, 360deg);
+            }
+        }
+        
+        .status-wrapper {
+            display: none;
+            text-align: center;
+            margin-top: 24px;
+        }
+        
+        .status-wrapper.show {
+            display: block;
+        }
+        
+        .status-success {
+            color: #07c160;
+        }
+        
+        .status-waiting {
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="payment-card">
+            <div class="payment-header">
+                <div class="payment-title">{{ title }}</div>
+                <div class="payment-desc">{{ description }}</div>
+            </div>
+            
+            <div class="price-info">
+                <span class="price-amount">¥{{ price_info.final_price }}</span>
+                {% if price_info.discount_amount > 0 %}
+                <span class="price-original">¥{{ price_info.original_price }}</span>
+                {% endif %}
+            </div>
+            
+            {% if price_info.available_discounts %}
+            <div style="text-align: center">
+                {% for discount in price_info.available_discounts %}
+                <span class="discount-tag">{{ discount }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="qrcode-wrapper">
+                <img class="qrcode-img" src="{{ qrcode_url }}" alt="微信支付二维码">
+                <div class="qrcode-tips">请使用微信扫一扫</div>
+            </div>
+            
+            <div class="order-info">
+                {% for item in items %}
+                <div class="order-item">
+                    <span>{{ item.name }}</span>
+                    <span>¥{{ item.price }} × {{ item.quantity }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="status-wrapper" id="statusWrapper">
+                <div class="status-waiting" id="statusWaiting">
+                    <i class="weui-loading"></i>
+                    <span>支付处理中...</span>
+                </div>
+                <div class="status-success" id="statusSuccess" style="display: none;">
+                    <i class="weui-icon-success weui-icon_msg"></i>
+                    <div>支付成功</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="payment-footer">
+            <p>支付安全由微信支付保障</p>
+        </div>
+    </div>
+    
+    <script>
+        // 检查支付状态
+        function checkPaymentStatus(orderId) {
+            fetch(`/api/payment/status/${orderId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        document.getElementById('statusWaiting').style.display = 'none';
+                        document.getElementById('statusSuccess').style.display = 'block';
+                        // 支付成功后的跳转
+                        setTimeout(() => {
+                            window.location.href = '/payment/success';
+                        }, 2000);
+                    } else {
+                        // 继续轮询
+                        setTimeout(() => checkPaymentStatus(orderId), 2000);
+                    }
+                })
+                .catch(error => {
+                    console.error('检查支付状态失败:', error);
+                });
+        }
+        
+        // 启动支付状态检查
+        document.addEventListener('DOMContentLoaded', () => {
+            const orderId = new URLSearchParams(window.location.search).get('order_id');
+            if (orderId) {
+                document.getElementById('statusWrapper').classList.add('show');
+                checkPaymentStatus(orderId);
+            }
+        });
+    </script>
+</body>
+</html>

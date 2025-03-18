@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>智能问卷</title>
+    <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/2.4.4/weui.min.css">
+    <style>
+        .page {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            box-sizing: border-box;
+            opacity: 0;
+            z-index: 1;
+            transition: opacity .2s;
+        }
+        
+        .page.active {
+            opacity: 1;
+            z-index: 2;
+        }
+        
+        .question-card {
+            margin: 16px;
+            background: #fff;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .question-title {
+            font-size: 17px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 16px;
+        }
+        
+        .question-desc {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+        
+        .weui-btn {
+            margin: 16px;
+        }
+        
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #f5f5f5;
+            z-index: 100;
+        }
+        
+        .progress-inner {
+            height: 100%;
+            background: #07c160;
+            transition: width .3s;
+        }
+        
+        .emoji {
+            font-size: 20px;
+            margin-right: 8px;
+        }
+        
+        .feedback {
+            font-size: 14px;
+            color: #07c160;
+            text-align: center;
+            margin: 8px 0;
+            opacity: 0;
+            transition: opacity .3s;
+        }
+        
+        .feedback.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar">
+        <div class="progress-inner" id="progressBar"></div>
+    </div>
+    
+    <div class="weui-form" id="surveyForm">
+        <div class="weui-form__text-area">
+            <h2 class="weui-form__title">我们想更好地了解您</h2>
+            <div class="weui-form__desc">您的反馈对我们很重要 🙏</div>
+        </div>
+        
+        <div id="questionContainer"></div>
+        
+        <div class="weui-form__opr-area">
+            <button class="weui-btn weui-btn_primary" id="prevBtn" style="display: none;">上一题</button>
+            <button class="weui-btn weui-btn_primary" id="nextBtn">下一题</button>
+            <button class="weui-btn weui-btn_primary" id="submitBtn" style="display: none;">完成</button>
+        </div>
+    </div>
+    
+    <div id="loadingToast" style="display: none;">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast">
+            <i class="weui-loading weui-icon_toast"></i>
+            <p class="weui-toast__content">提交中</p>
+        </div>
+    </div>
+    
+    <script>
+        class SurveyManager {
+            constructor(questions) {
+                this.questions = questions;
+                this.currentIndex = 0;
+                this.answers = {};
+                this.init();
+            }
+            
+            init() {
+                this.container = document.getElementById('questionContainer');
+                this.prevBtn = document.getElementById('prevBtn');
+                this.nextBtn = document.getElementById('nextBtn');
+                this.submitBtn = document.getElementById('submitBtn');
+                this.progressBar = document.getElementById('progressBar');
+                
+                this.prevBtn.addEventListener('click', () => this.prevQuestion());
+                this.nextBtn.addEventListener('click', () => this.nextQuestion());
+                this.submitBtn.addEventListener('click', () => this.submit());
+                
+                this.renderCurrentQuestion();
+                this.updateProgress();
+            }
+            
+            renderCurrentQuestion() {
+                const question = this.questions[this.currentIndex];
+                const template = this.getQuestionTemplate(question);
+                
+                // 创建新页面
+                const page = document.createElement('div');
+                page.className = 'page';
+                page.innerHTML = template;
+                
+                // 添加到容器
+                this.container.innerHTML = '';
+                this.container.appendChild(page);
+                
+                // 动画显示
+                setTimeout(() => page.classList.add('active'), 50);
+                
+                // 更新按钮状态
+                this.prevBtn.style.display = this.currentIndex > 0 ? 'block' : 'none';
+                this.nextBtn.style.display = this.currentIndex < this.questions.length - 1 ? 'block' : 'none';
+                this.submitBtn.style.display = this.currentIndex === this.questions.length - 1 ? 'block' : 'none';
+                
+                // 添加输入监听
+                this.setupInputListeners(question);
+            }
+            
+            getQuestionTemplate(question) {
+                const { id, type, title, options, required, description } = question;
+                
+                let inputHtml = '';
+                if (type === 'text') {
+                    inputHtml = `
+                        <div class="weui-cell">
+                            <div class="weui-cell__bd">
+                                <input class="weui-input" type="text" placeholder="请输入" ${required ? 'required' : ''}>
+                            </div>
+                        </div>
+                    `;
+                } else if (type === 'radio') {
+                    inputHtml = options.map(option => `
+                        <label class="weui-cell weui-cell_active weui-check__label">
+                            <div class="weui-cell__bd">${option}</div>
+                            <div class="weui-cell__ft">
+                                <input type="radio" class="weui-check" name="question_${id}" value="${option}">
+                                <i class="weui-icon-checked"></i>
+                            </div>
+                        </label>
+                    `).join('');
+                } else if (type === 'checkbox') {
+                    inputHtml = options.map(option => `
+                        <label class="weui-cell weui-cell_active weui-check__label">
+                            <div class="weui-cell__bd">${option}</div>
+                            <div class="weui-cell__ft">
+                                <input type="checkbox" class="weui-check" name="question_${id}" value="${option}">
+                                <i class="weui-icon-checked"></i>
+                            </div>
+                        </label>
+                    `).join('');
+                }
+                
+                return `
+                    <div class="question-card">
+                        <div class="question-title">${title}</div>
+                        ${description ? `<div class="question-desc">${description}</div>` : ''}
+                        <div class="weui-cells weui-cells_form">
+                            ${inputHtml}
+                        </div>
+                        <div class="feedback"></div>
+                    </div>
+                `;
+            }
+            
+            setupInputListeners(question) {
+                const inputs = this.container.querySelectorAll('input');
+                inputs.forEach(input => {
+                    input.addEventListener('change', () => {
+                        this.answers[question.id] = input.type === 'checkbox' 
+                            ? Array.from(inputs).filter(i => i.checked).map(i => i.value)
+                            : input.value;
+                        
+                        // 显示积极反馈
+                        this.showFeedback();
+                    });
+                });
+            }
+            
+            showFeedback() {
+                const feedback = this.container.querySelector('.feedback');
+                const messages = [
+                    '太棒了！ 👍',
+                    '感谢您的认真填写 ❤️',
+                    '您的回答很有价值 ✨',
+                    '继续加油！ 🌟'
+                ];
+                
+                feedback.textContent = messages[Math.floor(Math.random() * messages.length)];
+                feedback.classList.add('show');
+                
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                }, 2000);
+            }
+            
+            prevQuestion() {
+                if (this.currentIndex > 0) {
+                    this.currentIndex--;
+                    this.renderCurrentQuestion();
+                    this.updateProgress();
+                }
+            }
+            
+            nextQuestion() {
+                if (this.currentIndex < this.questions.length - 1) {
+                    this.currentIndex++;
+                    this.renderCurrentQuestion();
+                    this.updateProgress();
+                }
+            }
+            
+            updateProgress() {
+                const progress = ((this.currentIndex + 1) / this.questions.length) * 100;
+                this.progressBar.style.width = `${progress}%`;
+            }
+            
+            async submit() {
+                // 显示加载提示
+                document.getElementById('loadingToast').style.display = 'block';
+                
+                try {
+                    const response = await fetch('/api/submit-survey', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(this.answers)
+                    });
+                    
+                    if (response.ok) {
+                        // 显示成功提示
+                        weui.toast('提交成功', 2000);
+                        // 可以跳转到感谢页面
+                        setTimeout(() => {
+                            window.location.href = '/thank-you';
+                        }, 2000);
+                    } else {
+                        throw new Error('提交失败');
+                    }
+                } catch (error) {
+                    weui.topTips('提交失败，请重试');
+                } finally {
+                    document.getElementById('loadingToast').style.display = 'none';
+                }
+            }
+        }
+        
+        // 初始化问卷
+        const questions = {{questions|safe}};  // 从服务端注入的问题数据
+        new SurveyManager(questions);
+    </script>
+</body>
+</html>

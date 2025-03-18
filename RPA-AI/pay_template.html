@@ -1,0 +1,574 @@
+<html><head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+    <link rel="stylesheet" href="../css/weui.css">
+    <link rel="stylesheet" href="../css/weuix.css">
+
+    <script src="../js/zepto.min.js"></script>
+    <script>
+        $(function(){
+            $(".weui-payselect-li").on('click',function(){
+                $(this).children().addClass("weui-payselect-on");
+                $(this).siblings().children().removeClass("weui-payselect-on");
+                return false;
+            })
+
+        });
+
+    </script>
+
+<style>
+#clip_copy,#web-copy-btn-wk{
+   background:#54aae9 !important
+}
+</style>
+<style type="text/css">#_copy{align-items:center;background:#4494d5;border-radius:3px;color:#fff;cursor:pointer;display:flex;font-size:13px;height:30px;justify-content:center;position:absolute;width:60px;z-index:1000}#select-tooltip,#sfModal,.modal-backdrop,div[id^=reader-helper]{display:none!important}.modal-open{overflow:auto!important}._sf_adjust_body{padding-right:0!important}.enable_copy_btns_div{position:fixed;width:154px;left:10px;top:45%;background:#e7f1ff;border:2px solid #4595d5;font-weight:600;border-radius:2px;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,PingFang SC,Hiragino Sans GB,Microsoft YaHei,Helvetica Neue,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol;z-index:5000}.enable_copy_btns_logo{width:100%;background:#4595d5;text-align:center;font-size:12px;color:#e7f1ff;line-height:30px;height:30px}.enable_copy_btns_btn{display:block;width:128px;height:28px;background:#7f5711;border-radius:4px;color:#fff;font-size:12px;border:0;outline:0;margin:8px auto;font-weight:700;cursor:pointer;opacity:.9}.enable_copy_btns_btn:hover{opacity:.8}.enable_copy_btns_btn:active{opacity:1}</style><script src="chrome-extension://ojaffphbffmdaicdkahnmihipclmepok/static/js/workers.min.js"></script><style data-id="immersive-translate-input-injected-css">.immersive-translate-input {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 2147483647;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.immersive-translate-attach-loading::after {
+  content: " ";
+
+  --loading-color: #f78fb6;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: block;
+  margin: 12px auto;
+  position: relative;
+  color: white;
+  left: -100px;
+  box-sizing: border-box;
+  animation: immersiveTranslateShadowRolling 1.5s linear infinite;
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-2000%, -50%);
+  z-index: 100;
+}
+
+.immersive-translate-loading-spinner {
+  vertical-align: middle !important;
+  width: 10px !important;
+  height: 10px !important;
+  display: inline-block !important;
+  margin: 0 4px !important;
+  border: 2px rgba(221, 244, 255, 0.6) solid !important;
+  border-top: 2px rgba(0, 0, 0, 0.375) solid !important;
+  border-left: 2px rgba(0, 0, 0, 0.375) solid !important;
+  border-radius: 50% !important;
+  padding: 0 !important;
+  -webkit-animation: immersive-translate-loading-animation 0.6s infinite linear !important;
+  animation: immersive-translate-loading-animation 0.6s infinite linear !important;
+}
+
+@-webkit-keyframes immersive-translate-loading-animation {
+  from {
+    -webkit-transform: rotate(0deg);
+  }
+
+  to {
+    -webkit-transform: rotate(359deg);
+  }
+}
+
+@keyframes immersive-translate-loading-animation {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(359deg);
+  }
+}
+
+.immersive-translate-input-loading {
+  --loading-color: #f78fb6;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: block;
+  margin: 12px auto;
+  position: relative;
+  color: white;
+  left: -100px;
+  box-sizing: border-box;
+  animation: immersiveTranslateShadowRolling 1.5s linear infinite;
+}
+
+@keyframes immersiveTranslateShadowRolling {
+  0% {
+    box-shadow: 0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0),
+      0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0);
+  }
+
+  12% {
+    box-shadow: 100px 0 var(--loading-color), 0px 0 rgba(255, 255, 255, 0),
+      0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0);
+  }
+
+  25% {
+    box-shadow: 110px 0 var(--loading-color), 100px 0 var(--loading-color),
+      0px 0 rgba(255, 255, 255, 0), 0px 0 rgba(255, 255, 255, 0);
+  }
+
+  36% {
+    box-shadow: 120px 0 var(--loading-color), 110px 0 var(--loading-color),
+      100px 0 var(--loading-color), 0px 0 rgba(255, 255, 255, 0);
+  }
+
+  50% {
+    box-shadow: 130px 0 var(--loading-color), 120px 0 var(--loading-color),
+      110px 0 var(--loading-color), 100px 0 var(--loading-color);
+  }
+
+  62% {
+    box-shadow: 200px 0 rgba(255, 255, 255, 0), 130px 0 var(--loading-color),
+      120px 0 var(--loading-color), 110px 0 var(--loading-color);
+  }
+
+  75% {
+    box-shadow: 200px 0 rgba(255, 255, 255, 0), 200px 0 rgba(255, 255, 255, 0),
+      130px 0 var(--loading-color), 120px 0 var(--loading-color);
+  }
+
+  87% {
+    box-shadow: 200px 0 rgba(255, 255, 255, 0), 200px 0 rgba(255, 255, 255, 0),
+      200px 0 rgba(255, 255, 255, 0), 130px 0 var(--loading-color);
+  }
+
+  100% {
+    box-shadow: 200px 0 rgba(255, 255, 255, 0), 200px 0 rgba(255, 255, 255, 0),
+      200px 0 rgba(255, 255, 255, 0), 200px 0 rgba(255, 255, 255, 0);
+  }
+}
+
+.immersive-translate-toast {
+  display: flex;
+  position: fixed;
+  z-index: 2147483647;
+  left: 0;
+  right: 0;
+  top: 1%;
+  width: fit-content;
+  padding: 12px 20px;
+  margin: auto;
+  overflow: auto;
+  background: #fef6f9;
+  box-shadow: 0px 4px 10px 0px rgba(0, 10, 30, 0.06);
+  font-size: 15px;
+  border-radius: 8px;
+  color: #333;
+}
+
+.immersive-translate-toast-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.immersive-translate-toast-hidden {
+  margin: 0 20px 0 72px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.immersive-translate-toast-close {
+  color: #666666;
+  font-size: 20px;
+  font-weight: bold;
+  padding: 0 10px;
+  cursor: pointer;
+}
+
+@media screen and (max-width: 768px) {
+  .immersive-translate-toast {
+    top: 0;
+    padding: 12px 0px 0 10px;
+  }
+  .immersive-translate-toast-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  .immersive-translate-toast-hidden {
+    margin: 10px auto;
+  }
+}
+
+.immersive-translate-modal {
+  display: none;
+  position: fixed;
+  z-index: 2147483647;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgb(0, 0, 0);
+  background-color: rgba(0, 0, 0, 0.4);
+  font-size: 15px;
+}
+
+.immersive-translate-modal-content {
+  background-color: #fefefe;
+  margin: 10% auto;
+  padding: 40px 24px 24px;
+  border: 1px solid #888;
+  border-radius: 10px;
+  width: 80%;
+  max-width: 270px;
+  font-family: system-ui, -apple-system, "Segoe UI", "Roboto", "Ubuntu",
+    "Cantarell", "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji";
+  position: relative;
+}
+
+@media screen and (max-width: 768px) {
+  .immersive-translate-modal-content {
+    margin: 50% auto !important;
+  }
+}
+
+.immersive-translate-modal .immersive-translate-modal-content-in-input {
+  max-width: 500px;
+}
+.immersive-translate-modal-content-in-input .immersive-translate-modal-body {
+  text-align: left;
+  max-height: unset;
+}
+
+.immersive-translate-modal-title {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+  color: #333333;
+}
+
+.immersive-translate-modal-body {
+  text-align: center;
+  font-size: 14px;
+  font-weight: 400;
+  color: #333333;
+  word-break: break-all;
+  margin-top: 24px;
+}
+
+@media screen and (max-width: 768px) {
+  .immersive-translate-modal-body {
+    max-height: 250px;
+    overflow-y: auto;
+  }
+}
+
+.immersive-translate-close {
+  color: #666666;
+  position: absolute;
+  right: 16px;
+  top: 16px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.immersive-translate-close:hover,
+.immersive-translate-close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.immersive-translate-modal-footer {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.immersive-translate-btn {
+  width: fit-content;
+  color: #fff;
+  background-color: #ea4c89;
+  border: none;
+  font-size: 16px;
+  margin: 0 8px;
+  padding: 9px 30px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.immersive-translate-btn:hover {
+  background-color: #f082ac;
+}
+.immersive-translate-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.immersive-translate-btn:disabled:hover {
+  background-color: #ea4c89;
+}
+
+.immersive-translate-cancel-btn {
+  /* gray color */
+  background-color: rgb(89, 107, 120);
+}
+
+.immersive-translate-cancel-btn:hover {
+  background-color: hsl(205, 20%, 32%);
+}
+
+.immersive-translate-action-btn {
+  background-color: transparent;
+  color: #ea4c89;
+  border: 1px solid #ea4c89;
+}
+
+.immersive-translate-btn svg {
+  margin-right: 5px;
+}
+
+.immersive-translate-link {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-drag: none;
+  text-decoration: none;
+  color: #007bff;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+}
+
+.immersive-translate-primary-link {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-drag: none;
+  text-decoration: none;
+  color: #ea4c89;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+}
+
+.immersive-translate-modal input[type="radio"] {
+  margin: 0 6px;
+  cursor: pointer;
+}
+
+.immersive-translate-modal label {
+  cursor: pointer;
+}
+
+.immersive-translate-close-action {
+  position: absolute;
+  top: 2px;
+  right: 0px;
+  cursor: pointer;
+}
+
+.imt-image-status {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 16px !important;
+}
+.imt-image-status img,
+.imt-image-status svg,
+.imt-img-loading {
+  width: 28px !important;
+  height: 28px !important;
+  margin: 0 0 8px 0 !important;
+  min-height: 28px !important;
+  min-width: 28px !important;
+  position: relative !important;
+}
+.imt-img-loading {
+  background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAA4CAMAAACfWMssAAAAtFBMVEUAAAD////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////oK74hAAAAPHRSTlMABBMIDyQXHwyBfFdDMSw+OjXCb+5RG51IvV/k0rOqlGRM6KKMhdvNyZBz9MaupmxpWyj437iYd/yJVNZeuUC7AAACt0lEQVRIx53T2XKiUBCA4QYOiyCbiAsuuGBcYtxiYtT3f6/pbqoYHVFO5r+iivpo6DpAWYpqeoFfr9f90DsYAuRSWkFnPO50OgR9PwiCUFcl2GEcx+N/YBh6pvKaefHlUgZd1zVe0NbYcQjGBfzrPE8Xz8aF+71D8gG6DHFPpc4a7xFiCDuhaWgKgGIJQ3d5IMGDrpS4S5KgpIm+en9f6PlAhKby4JwEIxlYJV9h5k5nee9GoxHJ2IDSNB0dwdad1NAxDJ/uXDHYmebdk4PdbkS58CIVHdYSUHTYYRWOJblWSyu2lmy3KNFVJNBhxcuGW4YBVCbYGRZwIooipHsNqjM4FbgOQqQqSKQQU9V8xmi1QlgHqQQ6DDBvRUVCDirs+EzGDGOQTCATgtYTnbCVLgsVgRE0T1QE0qHCFAht2z6dLvJQs3Lo2FQoDxWNUiBhaP4eRgwNkI+dAjVOA/kUrIDwf3CG8NfNOE0eiFotSuo+rBiq8tD9oY4Qzc6YJw99hl1wzpQvD7ef2M8QgnOGJfJw+EltQc+oX2yn907QB22WZcvlUpd143dqQu+8pCJZuGE4xCuPXJqqcs5sNpsI93Rmzym1k4Npk+oD1SH3/a3LOK/JpUBpWfqNySxWzCfNCUITuDG5dtuphrUJ1myeIE9bIsPiKrfqTai5WZxbhtNphYx6GEIHihyGFTI69lje/rxajdh0s0msZ0zYxyPLhYCb1CyHm9Qsd2H37Y3lugVwL9kNh8Ot8cha6fUNQ8nuXi5z9/ExsAO4zQrb/ev1yrCB7lGyQzgYDGuxq1toDN/JGvN+HyWNHKB7zEoK+PX11e12G431erGYzwmytAWU56fkMHY5JJnDRR2eZji3AwtIcrEV8Cojat/BdQ7XOwGV1e1hDjGGjXbdArm8uJZtCH5MbcctVX8A1WpqumJHwckAAAAASUVORK5CYII=");
+  background-size: 28px 28px;
+  animation: image-loading-rotate 1s linear infinite !important;
+}
+
+.imt-image-status span {
+  color: var(--bg-2, #fff) !important;
+  font-size: 14px !important;
+  line-height: 14px !important;
+  font-weight: 500 !important;
+  font-family: "PingFang SC", Arial, sans-serif !important;
+}
+
+@keyframes image-loading-rotate {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+</style></head>
+
+<body ontouchstart="" class="page-bg" inmaintabuse="1">
+<div class="page-hd">
+    <h1 class="page-hd-title">
+        支付场景
+    </h1>
+    <p class="page-hd-desc">输入支付/支付表单/订单显示</p>
+</div>
+
+<div class="weui-pay">
+    <div class="weui-pay-inner">
+        <h1 class="weui-pay-title">付款金额(元)</h1>
+        <div class="weui-pay-input"> <strong class="weui-pay-strong">￥</strong>
+            <input type="number" name="money" class="weui-pay-inputs" placeholder="请输入金额"></div>
+        <div class="weui-pay-intro">最多可输入金额500元</div>
+    </div>
+    <p class="weui-pay-info">支付金额给商户</p>
+    <div class="weui-pay-btn">
+        <a href="javascript:;" class="weui-btn weui-btn_primary">立即支付</a>
+    </div>
+</div>
+
+
+<div class="weui-pay">
+    <h1 class="weui-payselect-title">停车费</h1>
+    <p class="weui-pay-num">￥15.00</p>
+    <ul class="weui-pay-u">
+        <li>
+            <span class="title">停车优惠</span>
+            <span class="content">5折停车优惠券</span>
+        </li>
+        <li>
+            <span class="title">已停时长</span>
+            <span class="content">1小时23分</span>
+        </li>
+        <li>
+            <span class="title">停车卡号</span>
+            <span class="content">12345678</span>
+        </li>
+        <li>
+            <span class="title">车牌号码</span>
+            <span class="content">粤B·JQ238</span>
+        </li>
+    </ul>
+    <div class="pay-div">
+        <a href="javascript:;" class="weui-btn weui-btn_primary" id="pay">立即支付</a>
+    </div>
+</div>
+
+<div class="weui-payrec">
+    <div class="weui-cells ">
+        <a class="weui-cell weui-cell_access" href="javascript:;">
+            <div class="weui-cell__bd weui-cell_primary">
+                <h2 class="weui_cell_title">行政业务订单统一支付</h2>
+                <div class="weui_cell_info">4月11日 22:54</div>
+            </div>
+            <div class="weui-cell__ft">
+                <div class="weui_cell_title">支付成功</div>
+                <div class="weui_cell_info">￥200元</div>
+            </div>
+        </a>
+        <a class="weui-cell weui-cell_access" href="javascript:;">
+            <div class="weui-cell__bd weui-cell_primary">
+                <h2 class="weui_cell_title">行政业务订单统一支付</h2>
+                <div class="weui_cell_info">4月11日 22:54</div>
+            </div>
+            <div class="weui-cell__ft">
+                <div class="weui_cell_title">支付成功</div>
+                <div class="weui_cell_info">￥200元</div>
+            </div>
+        </a>
+        <a class="weui-cell " href="javascript:;">
+            <div class="weui-cell__bd weui-cell_primary">
+                <h2 class="weui_cell_title">行政业务订单统一支付</h2>
+                <div class="weui_cell_info">4月11日 22:54</div>
+                <div class="weui_cell_info">4月11日 22:54</div>
+            </div>
+            <div class="weui-cell__ft">
+                <div class="weui_cell_title f-green">支付成功</div>
+            </div>
+        </a>
+
+    </div>
+
+    <div class="weui-loadmore">
+        <i class="weui-loading"></i>
+        <span class="weui-loadmore-tips">正在加载</span>
+    </div>
+</div>
+
+<ul class="weui-payrec">
+    <div class="weui-pay-m">
+        <li class="weui-pay-order">
+            <dl class="weui-pay-line">
+                <dd class="weui-pay-name">天朝科学商学院</dd>
+                <dt class="weui-pay-label">订 单 号：</dt><dd class="weui-pay-e">465464565665</dd>
+            </dl>
+            <dl class="weui-pay-line"><dt class="weui-pay-label">出发时间：</dt><dd class="weui-pay-e">2015年1月20日 12:20</dd></dl>
+            <dl class="weui-pay-line"><dt class="weui-pay-label">应付金额：</dt><dd class="weui-pay-e">￥315.0</dd></dl>
+
+            <div class="weui-pay-area">
+                <a href="javascript:;" class="weui-pay-c">取消订单</a>
+                <a href="javascript:;" class="weui-pay-v">立即付款</a>
+            </div>
+        </li>
+    </div>
+    <div class="weui-pay-m">
+        <li class="weui-pay-order">
+            <dl class="weui-pay-line">
+                <dd class="weui-pay-name">天朝科学商学院</dd>
+                <dt class="weui-pay-label">订 单 号：</dt><dd class="weui-pay-e">465464565665</dd>
+            </dl>
+            <dl class="weui-pay-line"><dt class="weui-pay-label">出发时间：</dt><dd class="weui-pay-e">2015年1月20日 12:20</dd></dl>
+            <dl class="weui-pay-line"><dt class="weui-pay-label">应付金额：</dt><dd class="weui-pay-e">￥315.0</dd></dl>
+
+            <div class="weui-pay-area">
+                <a href="javascript:;" class="weui-pay-c">取消订单</a>
+                <a href="javascript:;" class="weui-pay-v">立即付款</a>
+            </div>
+        </li>
+    </div>
+</ul>
+
+<div class="weui-pay">
+    <h1 class="weui-payselect-title">选择金额付款</h1>
+    <p class="weui-payselect-info">支付金额给商户</p>
+    <ul class="weui-payselect-ul">
+        <li class="weui-payselect-li">
+            <a href="javascript:;" class="weui-payselect-a weui-payselect-on">1元<span class="weui-pay-12">110次</span></a>
+        </li>
+        <li class="weui-payselect-li">
+            <a href="javascript:;" class="weui-payselect-a">10元</a>
+        </li>
+        <li class="weui-payselect-li">
+            <a href="javascript:;" class="weui-payselect-a">100元<span class="weui-pay-12">99.9元</span></a>
+        </li>
+        <li class="weui-payselect-li">
+            <a href="javascript:;" class="weui-payselect-a">200元</a>
+        </li>
+        <li class="weui-payselect-li">
+            <a href="javascript:;" class="weui-payselect-a">300元</a>
+        </li>
+        <li class="weui-payselect-li">
+            <a href="javascript:;" class="weui-payselect-a">500元</a>
+        </li>
+    </ul>
+    <a href="javascript:;" class="weui-btn weui-btn_primary">立即支付</a>
+
+</div>
+<br>
+<br>
+<div class="weui-footer weui-footer_fixed-bottom">
+    <p class="weui-footer__links">
+        <a href="../index.html" class="weui-footer__link">WeUI首页</a>
+    </p>
+    <p class="weui-footer__text">Copyright © Yoby</p>
+</div>
+
+<script src="chrome-extension://onepmapfbjohnegdmfhndpefjkppbjkm/sm.bundle.js" data-pname="supercopy-v3" data-asset-path="https://spc4.s3.ap-east-1.amazonaws.com"></script></body><div id="immersive-translate-browser-popup" style="all: initial"></div></html>

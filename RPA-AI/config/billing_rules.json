@@ -1,0 +1,208 @@
+{
+    "subscription_plans": {
+        "free": {
+            "name": "免费体验",
+            "quota": 5,
+            "type": "times",
+            "price": 0,
+            "features": ["基础功能", "5次免费使用"]
+        },
+        "time_based": {
+            "5min": {
+                "name": "5分钟体验",
+                "duration": 300,
+                "price": 9.9,
+                "features": ["所有功能", "5分钟使用"]
+            },
+            "30min": {
+                "name": "30分钟套餐",
+                "duration": 1800,
+                "price": 29.9,
+                "features": ["所有功能", "30分钟使用"]
+            },
+            "60min": {
+                "name": "1小时套餐",
+                "duration": 3600,
+                "price": 49.9,
+                "features": ["所有功能", "60分钟使用", "赠送5次提问"]
+            },
+            "480min": {
+                "name": "8小时套餐",
+                "duration": 28800,
+                "price": 199,
+                "features": ["所有功能", "8小时使用", "赠送20次提问"]
+            },
+            "24h": {
+                "name": "24小时畅享",
+                "duration": 86400,
+                "price": 399,
+                "features": ["所有功能", "24小时使用", "赠送50次提问"]
+            }
+        },
+        "subscription": {
+            "7d": {
+                "name": "周卡",
+                "duration": 604800,
+                "price": 999,
+                "features": ["所有功能", "7天使用", "赠送200次提问"]
+            },
+            "30d": {
+                "name": "月卡",
+                "duration": 2592000,
+                "price": 2999,
+                "features": ["所有功能", "30天使用", "赠送1000次提问"]
+            },
+            "90d": {
+                "name": "季卡",
+                "duration": 7776000,
+                "price": 7999,
+                "features": ["所有功能", "90天使用", "赠送3000次提问"]
+            },
+            "1y": {
+                "name": "年卡",
+                "duration": 31536000,
+                "price": 19999,
+                "features": ["所有功能", "365天使用", "赠送12000次提问"]
+            },
+            "3y": {
+                "name": "3年卡",
+                "duration": 94608000,
+                "price": 49999,
+                "features": ["所有功能", "3年使用", "赠送50000次提问"]
+            }
+        }
+    },
+    "token_pricing": {
+        "base_rate": 0.01,
+        "bulk_discounts": [
+            {
+                "threshold": 10000,
+                "discount": 0.9
+            },
+            {
+                "threshold": 50000,
+                "discount": 0.8
+            },
+            {
+                "threshold": 100000,
+                "discount": 0.7
+            }
+        ]
+    },
+    "referral_program": {
+        "minimum_referrals": 2,
+        "levels": {
+            "level_1": {
+                "commission_rate": 0.15,
+                "requirements": {
+                    "min_referrals": 2,
+                    "min_active_users": 1
+                }
+            },
+            "level_2": {
+                "commission_rate": 0.1,
+                "requirements": {
+                    "min_referrals": 5,
+                    "min_active_users": 3
+                }
+            },
+            "level_3": {
+                "commission_rate": 0.05,
+                "requirements": {
+                    "min_referrals": 10,
+                    "min_active_users": 5
+                }
+            }
+        },
+        "referral_discounts": [
+            {
+                "referrals": 2,
+                "discount": 0.95
+            },
+            {
+                "referrals": 5,
+                "discount": 0.9
+            },
+            {
+                "referrals": 10,
+                "discount": 0.85
+            },
+            {
+                "referrals": 20,
+                "discount": 0.8
+            }
+        ],
+        "bonus_rules": {
+            "welcome_bonus": {
+                "amount": 50,
+                "type": "credits"
+            },
+            "referral_bonus": {
+                "referrer": {
+                    "amount": 100,
+                    "type": "credits"
+                },
+                "referee": {
+                    "amount": 50,
+                    "type": "credits"
+                }
+            },
+            "achievement_bonus": {
+                "first_paid_referral": {
+                    "amount": 200,
+                    "type": "credits"
+                },
+                "five_active_referrals": {
+                    "amount": 1000,
+                    "type": "credits"
+                }
+            }
+        }
+    },
+    "vip_levels": {
+        "bronze": {
+            "name": "青铜会员",
+            "requirements": {
+                "min_spending": 1000,
+                "min_referrals": 2
+            },
+            "benefits": {
+                "discount": 0.95,
+                "extra_credits": 500
+            }
+        },
+        "silver": {
+            "name": "白银会员",
+            "requirements": {
+                "min_spending": 5000,
+                "min_referrals": 5
+            },
+            "benefits": {
+                "discount": 0.9,
+                "extra_credits": 2000
+            }
+        },
+        "gold": {
+            "name": "黄金会员",
+            "requirements": {
+                "min_spending": 20000,
+                "min_referrals": 10
+            },
+            "benefits": {
+                "discount": 0.85,
+                "extra_credits": 5000
+            }
+        },
+        "platinum": {
+            "name": "铂金会员",
+            "requirements": {
+                "min_spending": 50000,
+                "min_referrals": 20
+            },
+            "benefits": {
+                "discount": 0.8,
+                "extra_credits": 10000
+            }
+        }
+    }
+}
