@@ -17,8 +17,9 @@ jobs:
       with:
         app-id: ${{ vars.PLAYWRIGHT_APP_ID }}
         private-key: ${{ secrets.PLAYWRIGHT_PRIVATE_KEY }}
+        repositories: playwright-browsers
     - run: |
-        curl -X POST \
+        curl -X POST --fail \
           -H "Accept: application/vnd.github.v3+json" \
           -H "Authorization: token ${GH_TOKEN}" \
           --data "{\"event_type\": \"playwright_tests_python\", \"client_payload\": {\"ref\": \"${GITHUB_SHA}\"}}" \
