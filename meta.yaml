@@ -7,7 +7,7 @@ source:
 
 build:
   noarch: python
-  numsber: 0
+  number: 0
   script: "{{ PYTHON }} -m pip install . --no-deps -vv"
   binary_relocation: False
   missing_dso_whitelist: "*"
