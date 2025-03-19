@@ -7,7 +7,7 @@ source:
 
 build:
   noarch: python
-  number: 0
+  numsber: 0
   script: "{{ PYTHON }} -m pip install . --no-deps -vv"
   binary_relocation: False
   missing_dso_whitelist: "*"
@@ -32,6 +32,9 @@ requirements:
     - pyee>=12,<13
 
 test: # [build_platform == target_platform]
+  files:
+    - scripts/example_sync.py
+    - scripts/example_async.py
   requires:
     - pip
   imports:
@@ -40,6 +43,9 @@ test: # [build_platform == target_platform]
     - playwright.async_api
   commands:
     - playwright --help
+    - playwright install
+    - python scripts/example_sync.py
+    - python scripts/example_async.py
 
 about:
   home: https://github.com/microsoft/playwright-python

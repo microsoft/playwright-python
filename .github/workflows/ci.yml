@@ -169,7 +169,7 @@ jobs:
       - name: Get conda
         uses: conda-incubator/setup-miniconda@v3
         with:
-          python-version: 3.12
+          python-version: 3.9
           channels: conda-forge
           miniconda-version: latest
       - name: Prepare
