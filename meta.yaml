@@ -43,7 +43,7 @@ test: # [build_platform == target_platform]
     - playwright.async_api
   commands:
     - playwright --help
-    - playwright install
+    - playwright install --with-deps
     - python scripts/example_sync.py
     - python scripts/example_async.py
 
