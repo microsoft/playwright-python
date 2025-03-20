@@ -2,6 +2,7 @@ autobahn==23.1.2
 black==25.1.0
 build==1.2.2.post1
 flake8==7.1.2
+git+https://github.com/pytest-dev/pytest-asyncio
 mypy==1.15.0
 objgraph==3.6.2
 Pillow==11.1.0
@@ -9,7 +10,6 @@ pixelmatch==0.3.0
 pre-commit==3.5.0
 pyOpenSSL==25.0.0
 pytest==8.3.5
-pytest-asyncio==0.25.3
 pytest-cov==6.0.0
 pytest-repeat==0.9.3
 pytest-rerunfailures==15.0
