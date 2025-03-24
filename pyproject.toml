@@ -16,7 +16,7 @@ requires-python = ">=3.9"
 # - pip install uv==0.5.4
 # - uv pip compile pyproject.toml -o requirements.txt
 dependencies = [
-    "pyee>=12,<13",
+    "pyee>=12,<14",
     "greenlet>=3.1.1,<4.0.0"
 ]
 classifiers = [
