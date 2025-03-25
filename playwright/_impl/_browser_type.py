@@ -14,6 +14,7 @@
 
 import asyncio
 import pathlib
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Sequence, Union, cast
 
@@ -167,6 +168,10 @@ class BrowserType(ChannelOwner):
         if not userDataDir:
             return ""
         if not Path(userDataDir).is_absolute():
+            # Can be dropped once we drop Python 3.9 support (10/2025):
+            # https://github.com/python/cpython/issues/82852
+            if sys.platform == "win32" and sys.version_info[:2] < (3, 10):
+                return pathlib.Path.cwd() / userDataDir
             return str(Path(userDataDir).resolve())
         return str(Path(userDataDir))
 
