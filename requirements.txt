@@ -2,7 +2,7 @@
 #    uv pip compile pyproject.toml -o requirements.txt
 greenlet==3.1.1
     # via playwright (pyproject.toml)
-pyee==12.1.1
+pyee==13.0.0
     # via playwright (pyproject.toml)
 typing-extensions==4.12.2
     # via pyee
