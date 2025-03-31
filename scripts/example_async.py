@@ -22,8 +22,7 @@ async def main() -> None:
         for browser_type in [p.chromium, p.firefox, p.webkit]:
             browser = await browser_type.launch()
             page = await browser.new_page()
-            await page.goto("http://playwright.dev")
-            await page.screenshot(path=f"example-{browser_type.name}.png")
+            assert await page.evaluate("() => 11 * 11") == 121
             await browser.close()
 
 

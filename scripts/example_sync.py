@@ -20,8 +20,7 @@ def main() -> None:
         for browser_type in [p.chromium, p.firefox, p.webkit]:
             browser = browser_type.launch()
             page = browser.new_page()
-            page.goto("http://playwright.dev")
-            page.screenshot(path=f"example-{browser_type.name}.png")
+            assert page.evaluate("() => 11 * 11") == 121
             browser.close()
 
 
