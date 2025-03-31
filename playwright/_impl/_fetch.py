@@ -39,6 +39,7 @@ from playwright._impl._helper import (
     async_readfile,
     async_writefile,
     is_file_payload,
+    is_file_array_payload,
     locals_to_params,
     object_to_array,
     to_impl,
@@ -381,13 +382,12 @@ class APIRequestContext(ChannelOwner):
             # Convert file-like values to ServerFilePayload structs.
             for name, value in multipart.items():
                 if is_file_payload(value):
-                    payload = cast(FilePayload, value)
-                    assert isinstance(
-                        payload["buffer"], bytes
-                    ), f"Unexpected buffer type of 'data.{name}'"
-                    multipart_data.append(
-                        FormField(name=name, file=file_payload_to_json(payload))
-                    )
+                    file_payload_json = get_file_payload(name, value)
+                    multipart_data.append(FormField(name=name, file=file_payload_json))
+                elif is_file_array_payload(value):
+                    for value_item in value:
+                        file_payload_json = get_file_payload(name, value_item)
+                        multipart_data.append(FormField(name=name, file=file_payload_json))
                 elif isinstance(value, str):
                     multipart_data.append(FormField(name=name, value=value))
         if (
@@ -434,6 +434,14 @@ class APIRequestContext(ChannelOwner):
             await async_writefile(path, json.dumps(result))
         return result
 
+
+def get_file_payload(name: str, value: Optional[Any]):
+    payload = cast(FilePayload, value)
+    assert isinstance(
+        payload["buffer"], bytes
+    ), f"Unexpected buffer type of 'data.{name}', filename='{payload.filename}'"
+    return file_payload_to_json(payload)
+    
 
 def file_payload_to_json(payload: FilePayload) -> ServerFilePayload:
     return ServerFilePayload(
