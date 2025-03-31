@@ -619,4 +619,4 @@ def format_call_log(log: Optional[List[str]]) -> str:
         return ""
     if len(list(filter(lambda x: x.strip(), log))) == 0:
         return ""
-    return "\nCall log:\n" + "\n  - ".join(log) + "\n"
+    return "\nCall log:\n" + "\n".join(log) + "\n"
