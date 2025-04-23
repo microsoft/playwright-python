@@ -300,6 +300,33 @@ class LocatorAssertions(AssertionsBase):
         __tracebackhide__ = True
         await self._not.to_have_class(expected, timeout)
 
+    async def to_contain_class(
+        self,
+        expected: Union[
+            Sequence[str],
+            str,
+        ],
+        timeout: float = None,
+    ) -> None:
+        __tracebackhide__ = True
+        await self._expect_impl(
+            "to.contain.class",
+            FrameExpectOptions(expectedValue=expected, timeout=timeout),
+            expected,
+            "Locator expected to contain class",
+        )
+
+    async def not_to_contain_class(
+        self,
+        expected: Union[
+            Sequence[str],
+            str,
+        ],
+        timeout: float = None,
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_contain_class(expected, timeout)
+
     async def to_have_count(
         self,
         count: int,
