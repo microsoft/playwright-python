@@ -91,3 +91,14 @@ async def test_should_snapshot_complex(page: Page) -> None:
           - link "link"
     """,
     )
+
+
+async def test_should_snapshot_with_ref(page: Page) -> None:
+    await page.set_content('<ul><li><a href="about:blank">link</a></li></ul>')
+    expected = """
+      - list [ref=s1e3]:
+        - listitem [ref=s1e4]:
+          - link "link" [ref=s1e5]:
+            - /url: about:blank
+    """
+    assert await page.locator("body").aria_snapshot(ref=True) == _unshift(expected)
