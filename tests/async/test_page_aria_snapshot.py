@@ -88,7 +88,8 @@ async def test_should_snapshot_complex(page: Page) -> None:
         """
       - list:
         - listitem:
-          - link "link"
+          - link "link":
+            - /url: about:blank
     """,
     )
 

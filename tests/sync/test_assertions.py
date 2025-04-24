@@ -124,6 +124,16 @@ def test_assertions_locator_to_have_class(page: Page, server: Server) -> None:
         expect(page.locator("div.foobar")).to_have_class("oh-no", timeout=100)
 
 
+def test_assertions_locator_to_contain_class(page: Page, server: Server) -> None:
+    page.goto(server.EMPTY_PAGE)
+    page.set_content("<div class='foo bar another foobar'>kek</div>")
+    expect(page.locator("div.foobar")).to_contain_class("foobar")
+    expect(page.locator("div.foobar")).to_contain_class(["another foobar"])
+    expect(page.locator("div.foobar")).not_to_contain_class("kekstar", timeout=100)
+    with pytest.raises(AssertionError):
+        expect(page.locator("div.foobar")).to_contain_class("oh-no", timeout=100)
+
+
 def test_assertions_locator_to_have_count(page: Page, server: Server) -> None:
     page.goto(server.EMPTY_PAGE)
     page.set_content("<div class=foobar>kek</div><div class=foobar>kek</div>")

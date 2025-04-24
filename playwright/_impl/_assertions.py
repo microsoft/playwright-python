@@ -309,9 +309,15 @@ class LocatorAssertions(AssertionsBase):
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
+        if isinstance(expected, collections.abc.Sequence) and not isinstance(
+            expected, str
+        ):
+            expected_text = to_expected_text_values(expected)
+        else:
+            expected_text = to_expected_text_values([expected])
         await self._expect_impl(
             "to.contain.class",
-            FrameExpectOptions(expectedValue=expected, timeout=timeout),
+            FrameExpectOptions(expectedText=expected_text, timeout=timeout),
             expected,
             "Locator expected to contain class",
         )
