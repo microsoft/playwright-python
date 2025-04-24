@@ -534,9 +534,9 @@ async def test_should_follow_max_redirects(
     def _handle_request(req: TestServerRequest) -> None:
         nonlocal redirect_count
         redirect_count += 1
-        req.setResponseCode(301),
-        req.setHeader("Location", server.EMPTY_PAGE),
-        req.finish(),
+        req.setResponseCode(301)
+        req.setHeader("Location", server.EMPTY_PAGE)
+        req.finish()
 
     server.set_route("/empty.html", _handle_request)
     request = await playwright.request.new_context(max_redirects=1)

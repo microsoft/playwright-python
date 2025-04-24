@@ -20,9 +20,9 @@ from playwright.async_api import Page
 
 
 async def test_accessibility_should_work(
-    page: Page, is_firefox: bool, is_chromium: bool
+    page: Page, is_firefox: bool, is_chromium: bool, is_webkit: bool
 ) -> None:
-    if not is_firefox and not is_chromium and sys.platform == "darwin":
+    if is_webkit and sys.platform == "darwin":
         pytest.skip("Test disabled on WebKit on macOS")
     await page.set_content(
         """<head>
