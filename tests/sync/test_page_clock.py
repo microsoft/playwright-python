@@ -392,7 +392,6 @@ class TestWhileRunning:
         page.goto("data:text/html,")
         page.clock.pause_at(1)
         page.wait_for_timeout(1000)
-        page.clock.resume()
         now = page.evaluate("Date.now()")
         assert 0 <= now <= 1000
 
