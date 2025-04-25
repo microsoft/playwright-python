@@ -20,7 +20,8 @@ from typing import Callable, List, Optional
 
 import pytest
 
-from playwright._impl._glob import glob_to_regex
+from playwright._impl._glob import glob_to_regex_pattern
+from playwright._impl._helper import url_matches
 from playwright.async_api import (
     Browser,
     BrowserContext,
@@ -29,6 +30,7 @@ from playwright.async_api import (
     Playwright,
     Request,
     Route,
+    expect,
 )
 from tests.server import Server, TestServerRequest
 from tests.utils import must
@@ -1051,16 +1053,18 @@ async def test_should_fulfill_with_global_fetch_result(
     assert await response.json() == {"foo": "bar"}
 
 
-async def test_glob_to_regex() -> None:
+async def test_should_work_with_glob() -> None:
+    def glob_to_regex(pattern: str) -> re.Pattern:
+        return re.compile(glob_to_regex_pattern(pattern))
+
     assert glob_to_regex("**/*.js").match("https://localhost:8080/foo.js")
     assert not glob_to_regex("**/*.css").match("https://localhost:8080/foo.js")
-    assert not glob_to_regex("*.js").match("https://localhost:8080/foo.js")
+    assert not glob_to_regex("*.js").match(
+        "https://localhost:8080/foo.js"
+    )  # Doesn"t match path separator
     assert glob_to_regex("https://**/*.js").match("https://localhost:8080/foo.js")
     assert glob_to_regex("http://localhost:8080/simple/path.js").match(
         "http://localhost:8080/simple/path.js"
-    )
-    assert glob_to_regex("http://localhost:8080/?imple/path.js").match(
-        "http://localhost:8080/Simple/path.js"
     )
     assert glob_to_regex("**/{a,b}.js").match("https://localhost:8080/a.js")
     assert glob_to_regex("**/{a,b}.js").match("https://localhost:8080/b.js")
@@ -1081,15 +1085,110 @@ async def test_glob_to_regex() -> None:
         "http://localhost:3000/signin-oidcnice"
     )
 
-    assert glob_to_regex("**/three-columns/settings.html?**id=[a-z]**").match(
+    # range [] is NOT supported
+    assert glob_to_regex("**/api/v[0-9]").fullmatch("http://example.com/api/v[0-9]")
+    assert not glob_to_regex("**/api/v[0-9]").fullmatch(
+        "http://example.com/api/version"
+    )
+    assert not glob_to_regex("**/api/v[0-9]").fullmatch(
+        "http://example.com/api/v1"
+    )  # Should not match if [] is literal
+
+    # query params
+    assert glob_to_regex("**/api\\?param").match("http://example.com/api?param")
+    assert not glob_to_regex("**/api\\?param").match("http://example.com/api-param")
+
+    assert glob_to_regex("**/three-columns/settings.html\\?**id=settings-**").match(
         "http://mydomain:8080/blah/blah/three-columns/settings.html?id=settings-e3c58efe-02e9-44b0-97ac-dd138100cf7c&blah"
     )
 
-    assert glob_to_regex("\\?") == re.compile(r"^\?$")
-    assert glob_to_regex("\\") == re.compile(r"^\\$")
-    assert glob_to_regex("\\\\") == re.compile(r"^\\$")
-    assert glob_to_regex("\\[") == re.compile(r"^\[$")
-    assert glob_to_regex("[a-z]") == re.compile(r"^[a-z]$")
-    assert glob_to_regex("$^+.\\*()|\\?\\{\\}\\[\\]") == re.compile(
-        r"^\$\^\+\.\*\(\)\|\?\{\}\[\]$"
+    print(glob_to_regex("\\?").pattern)
+    assert glob_to_regex("\\?").pattern == r"^\?$"
+    assert glob_to_regex("\\").pattern == r"^\\$"
+    assert glob_to_regex("\\\\").pattern == r"^\\$"
+    assert glob_to_regex("\\[").pattern == r"^\[$"
+    assert glob_to_regex("[a-z]").pattern == r"^\[a-z\]$"
+    assert (
+        glob_to_regex("$^+.\\*()|\\?\\{\\}\\[\\]").pattern
+        == r"^\$\^\+\.\*\(\)\|\?\{\}\[\]$"
     )
+
+    # --- url_matches tests ---
+    # Basic exact and wildcard matching
+    assert url_matches(None, "http://playwright.dev/", "http://playwright.dev")
+    assert url_matches(None, "http://playwright.dev/?a=b", "http://playwright.dev?a=b")
+    assert url_matches(None, "http://playwright.dev/", "h*://playwright.dev")
+    assert url_matches(
+        None, "http://api.playwright.dev/?x=y", "http://*.playwright.dev?x=y"
+    )
+    assert url_matches(None, "http://playwright.dev/foo/bar", "**/foo/**")
+
+    # Relative path matching with base URL
+    assert url_matches("http://playwright.dev", "http://playwright.dev/?x=y", "?x=y")
+    assert url_matches(
+        "http://playwright.dev/foo/", "http://playwright.dev/foo/bar?x=y", "./bar?x=y"
+    )
+
+    # This is not supported, we treat ? as a query separator.
+    assert not url_matches(
+        None,
+        "http://localhost:8080/Simple/path.js",
+        "http://localhost:8080/?imple/path.js",
+    )
+    assert not url_matches(None, "http://playwright.dev/", "http://playwright.?ev")
+    assert url_matches(None, "http://playwright./?ev", "http://playwright.?ev")
+    assert not url_matches(
+        None, "http://playwright.dev/foo", "http://playwright.dev/f??"
+    )
+    assert url_matches(None, "http://playwright.dev/f??", "http://playwright.dev/f??")
+    assert url_matches(
+        None, "http://playwright.dev/?x=y", r"http://playwright.dev\?x=y"
+    )
+    assert url_matches(
+        None, "http://playwright.dev/?x=y", r"http://playwright.dev/\?x=y"
+    )
+    assert url_matches(
+        "http://playwright.dev/foo", "http://playwright.dev/foo?bar", "?bar"
+    )
+    assert url_matches(
+        "http://playwright.dev/foo", "http://playwright.dev/foo?bar", r"\\?bar"
+    )
+    assert url_matches("http://first.host/", "http://second.host/foo", "**/foo")
+    assert url_matches("http://playwright.dev/", "http://localhost/", "*//localhost/")
+
+
+async def test_should_not_support_question_in_glob_pattern(
+    page: Page, playwright: Playwright, server: Server
+) -> None:
+    server.set_route("/index", lambda req: (req.write(b"index-no-hello"), req.finish()))
+    server.set_route(
+        "/index123hello", lambda req: (req.write(b"index123hello"), req.finish())
+    )
+    server.set_route(
+        "/index?hello", lambda req: (req.write(b"index?hello"), req.finish())
+    )
+    server.set_route(
+        "/index1hello", lambda req: (req.write(b"index1hello"), req.finish())
+    )
+
+    async def handle_any_char(route: Route) -> None:
+        await route.fulfill(body="intercepted any character")
+
+    await page.route("**/index?hello", handle_any_char)
+
+    async def handle_question_mark(route: Route) -> None:
+        await route.fulfill(body="intercepted question mark")
+
+    await page.route(r"**/index\?hello", handle_question_mark)
+
+    await page.goto(server.PREFIX + "/index?hello")
+    await expect(page.locator("body")).to_have_text("intercepted question mark")
+
+    await page.goto(server.PREFIX + "/index")
+    await expect(page.locator("body")).to_have_text("index-no-hello")
+
+    await page.goto(server.PREFIX + "/index1hello")
+    await expect(page.locator("body")).to_have_text("index1hello")
+
+    await page.goto(server.PREFIX + "/index123hello")
+    await expect(page.locator("body")).to_have_text("index123hello")

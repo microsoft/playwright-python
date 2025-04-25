@@ -44,7 +44,7 @@ from playwright._impl._errors import (
     is_target_closed_error,
     rewrite_error,
 )
-from playwright._impl._glob import glob_to_regex
+from playwright._impl._glob import glob_to_regex_pattern
 from playwright._impl._greenlets import RouteGreenlet
 from playwright._impl._str_utils import escape_regex_flags
 
@@ -144,29 +144,94 @@ Env = Dict[str, Union[str, float, bool]]
 
 
 def url_matches(
-    base_url: Optional[str], url_string: str, match: Optional[URLMatch]
+    base_url: Optional[str],
+    url_string: str,
+    match: Optional[URLMatch],
+    websocket_url: bool = None,
 ) -> bool:
     if not match:
         return True
-    if isinstance(match, str) and match[0] != "*":
-        # Allow http(s) baseURL to match ws(s) urls.
-        if (
-            base_url
-            and re.match(r"^https?://", base_url)
-            and re.match(r"^wss?://", url_string)
-        ):
-            base_url = re.sub(r"^http", "ws", base_url)
-        if base_url:
-            match = urljoin(base_url, match)
-        parsed = urlparse(match)
-        if parsed.path == "":
-            parsed = parsed._replace(path="/")
-            match = parsed.geturl()
     if isinstance(match, str):
-        match = glob_to_regex(match)
+        match = re.compile(
+            resolve_glob_to_regex_pattern(base_url, match, websocket_url)
+        )
     if isinstance(match, Pattern):
         return bool(match.search(url_string))
     return match(url_string)
+
+
+def resolve_glob_to_regex_pattern(
+    base_url: Optional[str], glob: str, websocket_url: bool = None
+) -> str:
+    if websocket_url:
+        base_url = to_websocket_base_url(base_url)
+    glob = resolve_glob_base(base_url, glob)
+    return glob_to_regex_pattern(glob)
+
+
+def to_websocket_base_url(base_url: Optional[str]) -> Optional[str]:
+    if base_url is not None and re.match(r"^https?://", base_url):
+        base_url = re.sub(r"^http", "ws", base_url)
+    return base_url
+
+
+def resolve_glob_base(base_url: Optional[str], match: str) -> str:
+    if match[0] == "*":
+        return match
+
+    token_map: Dict[str, str] = {}
+
+    def map_token(original: str, replacement: str) -> str:
+        if len(original) == 0:
+            return ""
+        token_map[replacement] = original
+        return replacement
+
+    # Escaped `\\?` behaves the same as `?` in our glob patterns.
+    match = match.replace(r"\\?", "?")
+    # Glob symbols may be escaped in the URL and some of them such as ? affect resolution,
+    # so we replace them with safe components first.
+    processed_parts = []
+    for index, token in enumerate(match.split("/")):
+        if token in (".", "..", ""):
+            processed_parts.append(token)
+            continue
+        # Handle special case of http*://, note that the new schema has to be
+        # a web schema so that slashes are properly inserted after domain.
+        if index == 0 and token.endswith(":"):
+            # Using a simple replacement for the scheme part
+            processed_parts.append(map_token(token, "http:"))
+            continue
+        question_index = token.find("?")
+        if question_index == -1:
+            processed_parts.append(map_token(token, f"$_{index}_$"))
+        else:
+            new_prefix = map_token(token[:question_index], f"$_{index}_$")
+            new_suffix = map_token(token[question_index:], f"?$_{index}_$")
+            processed_parts.append(new_prefix + new_suffix)
+
+    relative_path = "/".join(processed_parts)
+    resolved_url = urljoin(base_url if base_url is not None else "", relative_path)
+
+    for replacement, original in token_map.items():
+        resolved_url = resolved_url.replace(replacement, original, 1)
+
+    # In Node.js, new URL('http://localhost') returns 'http://localhost/'.
+    # To ensure the same url matching behavior, do the same.
+    split = resolved_url.split("://", maxsplit=1)
+    if len(split) == 2:
+        core_url = "http://" + split[1]
+    else:
+        core_url = match
+    parsed = urlparse(core_url, allow_fragments=True)
+    if len(split) == 2:
+        # urlparse doesn't like stars in the scheme
+        parsed = parsed._replace(scheme=split[0])
+    if parsed.path == "":
+        parsed = parsed._replace(path="/")
+        resolved_url = parsed.geturl()
+
+    return resolved_url
 
 
 class HarLookupResult(TypedDict, total=False):
