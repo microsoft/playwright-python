@@ -313,14 +313,20 @@ class LocatorAssertions(AssertionsBase):
             expected, str
         ):
             expected_text = to_expected_text_values(expected)
+            await self._expect_impl(
+                "to.contain.class.array",
+                FrameExpectOptions(expectedText=expected_text, timeout=timeout),
+                expected,
+                "Locator expected to contain class names",
+            )
         else:
             expected_text = to_expected_text_values([expected])
-        await self._expect_impl(
-            "to.contain.class",
-            FrameExpectOptions(expectedText=expected_text, timeout=timeout),
-            expected,
-            "Locator expected to contain class",
-        )
+            await self._expect_impl(
+                "to.contain.class",
+                FrameExpectOptions(expectedText=expected_text, timeout=timeout),
+                expected,
+                "Locator expected to contain class",
+            )
 
     async def not_to_contain_class(
         self,
