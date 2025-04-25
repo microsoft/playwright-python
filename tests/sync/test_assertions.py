@@ -126,12 +126,28 @@ def test_assertions_locator_to_have_class(page: Page, server: Server) -> None:
 
 def test_assertions_locator_to_contain_class(page: Page, server: Server) -> None:
     page.goto(server.EMPTY_PAGE)
-    page.set_content("<div class='foo bar another foobar'>kek</div>")
-    expect(page.locator("div.foobar")).to_contain_class("foobar")
-    expect(page.locator("div.foobar")).to_contain_class(["another foobar"])
-    expect(page.locator("div.foobar")).not_to_contain_class("kekstar", timeout=100)
-    with pytest.raises(AssertionError):
-        expect(page.locator("div.foobar")).to_contain_class("oh-no", timeout=100)
+    page.set_content("<div class='foo bar baz'></div>")
+    locator = page.locator("div")
+    expect(locator).to_contain_class("")
+    expect(locator).to_contain_class("bar")
+    expect(locator).to_contain_class("baz bar")
+    expect(locator).to_contain_class("  bar   foo ")
+    expect(locator).not_to_contain_class(
+        "  baz   not-matching "
+    )  # Strip whitespace and match individual classes
+    with pytest.raises(AssertionError) as excinfo:
+        expect(locator).to_contain_class("does-not-exist", timeout=100)
+
+    assert excinfo.match("Locator expected to contain class 'does-not-exist'")
+    assert excinfo.match("Actual value: foo bar baz")
+    assert excinfo.match("LocatorAssertions.to_contain_class with timeout 100ms")
+
+    page.set_content(
+        '<div class="foo"></div><div class="hello bar"></div><div class="baz"></div>'
+    )
+    expect(locator).to_contain_class(["foo", "hello", "baz"])
+    expect(locator).not_to_contain_class(["not-there", "hello", "baz"])
+    expect(locator).not_to_contain_class(["foo", "hello"])
 
 
 def test_assertions_locator_to_have_count(page: Page, server: Server) -> None:
