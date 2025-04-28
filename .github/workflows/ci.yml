@@ -84,6 +84,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
+    - uses: actions-rust-lang/setup-rust-toolchain@v1
+      if: matrix.os == 'windows-11-arm'
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
