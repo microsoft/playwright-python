@@ -66,6 +66,12 @@ base_wheel_bundles = [
         "platform": "win32",
         "zip_name": "win32_x64",
     },
+    {
+        "wheel": "win_arm64.whl",
+        "machine": "arm64",
+        "platform": "win32",
+        "zip_name": "win32_arm64",
+    },
 ]
 
 if len(sys.argv) == 2 and sys.argv[1] == "--list-wheels":
