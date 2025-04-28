@@ -47,37 +47,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.9', '3.10']
-        browser: [chromium, firefox, webkit]
         include:
-        - os: windows-latest
-          python-version: '3.11'
-          browser: chromium
-        - os: macos-latest
-          python-version: '3.11'
-          browser: chromium
-        - os: ubuntu-latest
-          python-version: '3.11'
-          browser: chromium
-        - os: windows-latest
-          python-version: '3.12'
-          browser: chromium
-        - os: macos-latest
-          python-version: '3.12'
-          browser: chromium
-        - os: ubuntu-latest
-          python-version: '3.12'
-          browser: chromium
-        - os: windows-latest
-          python-version: '3.13'
-          browser: chromium
-        - os: macos-latest
-          python-version: '3.13'
-          browser: chromium
-        - os: ubuntu-latest
-          python-version: '3.13'
-          browser: chromium
         - os: windows-11-arm
           python-version: '3.13'
           browser: chromium
