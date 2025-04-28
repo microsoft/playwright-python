@@ -216,25 +216,29 @@ def resolve_glob_base(base_url: Optional[str], match: str) -> str:
     for replacement, original in token_map.items():
         resolved_url = resolved_url.replace(replacement, original, 1)
 
-    # In Node.js, new URL('http://localhost') returns 'http://localhost/'.
-    # To ensure the same url matching behavior, do the same.
-    split = resolved_url.split("://", maxsplit=1)
+    return ensure_trailing_slash(resolved_url)
+
+
+# In Node.js, new URL('http://localhost') returns 'http://localhost/'.
+# To ensure the same url matching behavior, do the same.
+def ensure_trailing_slash(url: str) -> str:
+    split = url.split("://", maxsplit=1)
     if len(split) == 2:
         # URL parser doesn't like strange/unknown schemes, so we replace it for parsing, then put it back
         parsable_url = "http://" + split[1]
     else:
         # Given current rules, this should never happen _and_ still be a valid matcher. We require the protocol to be part of the match,
         # so either the user is using a glob that starts with "*" (and none of this code is running), or the user actually has `something://` in `match`
-        parsable_url = resolved_url
+        parsable_url = url
     parsed = urlparse(parsable_url, allow_fragments=True)
     if len(split) == 2:
         # Replace the scheme that we removed earlier
         parsed = parsed._replace(scheme=split[0])
     if parsed.path == "":
         parsed = parsed._replace(path="/")
-        resolved_url = parsed.geturl()
+        url = parsed.geturl()
 
-    return resolved_url
+    return url
 
 
 class HarLookupResult(TypedDict, total=False):
