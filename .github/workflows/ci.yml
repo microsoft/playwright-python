@@ -58,7 +58,7 @@ jobs:
         curl -L -o foo.sh https://sh.rustup.rs
         chmod +x foo.sh
         ./foo.sh -y
-        if: matrix.os == 'windows-11-arm'
+      if: matrix.os == 'windows-11-arm'
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
