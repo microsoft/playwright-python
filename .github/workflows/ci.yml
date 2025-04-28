@@ -54,8 +54,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v4
-    - run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs -y | sh
-      if: matrix.os == 'windows-11-arm'
+    - run: |
+        curl -L -o foo.sh https://sh.rustup.rs
+        chmod +x foo.sh
+        ./foo.sh -y
+        if: matrix.os == 'windows-11-arm'
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
