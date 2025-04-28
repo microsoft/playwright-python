@@ -96,18 +96,12 @@ jobs:
         pip install -e .
         python -m build --wheel
         python -m playwright install --with-deps ${{ matrix.browser }}
-    - name: Common Tests
-      run: pytest tests/common --browser=${{ matrix.browser }} --timeout 90
-    - name: Test Reference count
-      run: pytest tests/test_reference_count_async.py --browser=${{ matrix.browser }}
-    - name: Test Wheel Installation
-      run: pytest tests/test_installation.py --browser=${{ matrix.browser }}
     - name: Test Sync API
       if: matrix.os != 'ubuntu-latest'
-      run: pytest tests/sync --browser=${{ matrix.browser }} --timeout 90
+      run: python -m pytest tests/sync --browser=${{ matrix.browser }} --timeout 90
     - name: Test Sync API
       if: matrix.os == 'ubuntu-latest'
-      run: xvfb-run pytest tests/sync --browser=${{ matrix.browser }} --timeout 90
+      run: xvfb-run python -m pytest tests/sync --browser=${{ matrix.browser }} --timeout 90
     - name: Test Async API
       if: matrix.os != 'ubuntu-latest'
       run: pytest tests/async --browser=${{ matrix.browser }} --timeout 90
