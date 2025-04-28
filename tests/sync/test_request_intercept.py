@@ -131,3 +131,17 @@ def test_should_support_fulfill_after_intercept(
     assert request.uri.decode() == "/title.html"
     original = (assetdir / "title.html").read_text()
     assert response.text() == original
+
+
+def test_should_intercept_by_glob(page: Page, server: Server) -> None:
+    page.goto(server.EMPTY_PAGE)
+    page.route(
+        "http://localhos**?*oo",
+        lambda route: route.fulfill(body="intercepted", status=200),
+    )
+
+    result = page.evaluate(
+        "url => fetch(url).then(r => r.text())", server.PREFIX + "/?foo"
+    )
+
+    assert result == "intercepted"
