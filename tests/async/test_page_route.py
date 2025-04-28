@@ -1102,7 +1102,6 @@ async def test_should_work_with_glob() -> None:
         "http://mydomain:8080/blah/blah/three-columns/settings.html?id=settings-e3c58efe-02e9-44b0-97ac-dd138100cf7c&blah"
     )
 
-    print(glob_to_regex("\\?").pattern)
     assert glob_to_regex("\\?").pattern == r"^\?$"
     assert glob_to_regex("\\").pattern == r"^\\$"
     assert glob_to_regex("\\\\").pattern == r"^\\$"
@@ -1155,6 +1154,16 @@ async def test_should_work_with_glob() -> None:
     )
     assert url_matches("http://first.host/", "http://second.host/foo", "**/foo")
     assert url_matches("http://playwright.dev/", "http://localhost/", "*//localhost/")
+
+    # Added for Python implementation
+    assert url_matches(
+        None,
+        "custom://example.com/foo/bar?id=123",
+        "{custom,another}://example.com/foo/bar?id=123",
+    )
+    assert not url_matches(
+        None, "custom://example.com/foo/bar?id=123", "**example.com/foo/bar?id=123"
+    )
 
 
 async def test_should_not_support_question_in_glob_pattern(

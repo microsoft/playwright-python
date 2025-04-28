@@ -220,12 +220,15 @@ def resolve_glob_base(base_url: Optional[str], match: str) -> str:
     # To ensure the same url matching behavior, do the same.
     split = resolved_url.split("://", maxsplit=1)
     if len(split) == 2:
-        core_url = "http://" + split[1]
+        # URL parser doesn't like strange/unknown schemes, so we replace it for parsing, then put it back
+        parsable_url = "http://" + split[1]
     else:
-        core_url = match
-    parsed = urlparse(core_url, allow_fragments=True)
+        # Given current rules, this should never happen _and_ still be a valid matcher. We require the protocol to be part of the match,
+        # so either the user is using a glob that starts with "*" (and none of this code is running), or the user actually has `something://` in `match`
+        parsable_url = resolved_url
+    parsed = urlparse(parsable_url, allow_fragments=True)
     if len(split) == 2:
-        # urlparse doesn't like stars in the scheme
+        # Replace the scheme that we removed earlier
         parsed = parsed._replace(scheme=split[0])
     if parsed.path == "":
         parsed = parsed._replace(path="/")
