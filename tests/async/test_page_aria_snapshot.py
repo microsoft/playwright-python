@@ -14,6 +14,8 @@
 
 import re
 
+import pytest
+
 from playwright.async_api import Locator, Page, expect
 
 
@@ -33,7 +35,7 @@ def _unshift(snapshot: str) -> str:
 
 async def check_and_match_snapshot(locator: Locator, snapshot: str) -> None:
     assert await locator.aria_snapshot() == _unshift(snapshot)
-    await expect(locator).to_match_aria_snapshot(snapshot)
+    await expect(locator).to_match_aria_snapshot(snapshot, timeout=1000)
 
 
 async def test_should_snapshot(page: Page) -> None:
@@ -88,6 +90,128 @@ async def test_should_snapshot_complex(page: Page) -> None:
         """
       - list:
         - listitem:
-          - link "link"
+          - link "link":
+            - /url: about:blank
     """,
+    )
+
+
+async def test_should_snapshot_with_ref(page: Page) -> None:
+    await page.set_content('<ul><li><a href="about:blank">link</a></li></ul>')
+    expected = """
+      - list [ref=s1e3]:
+        - listitem [ref=s1e4]:
+          - link "link" [ref=s1e5]:
+            - /url: about:blank
+    """
+    assert await page.locator("body").aria_snapshot(ref=True) == _unshift(expected)
+
+
+async def test_should_snapshot_with_unexpected_children_equal(page: Page) -> None:
+    await page.set_content(
+        """
+      <ul>
+        <li>One</li>
+        <li>Two</li>
+        <li>Three</li>
+      </ul>
+    """
+    )
+    await expect(page.locator("body")).to_match_aria_snapshot(
+        """
+      - list:
+        - listitem: One
+        - listitem: Three
+    """,
+    )
+    with pytest.raises(AssertionError):
+        await expect(page.locator("body")).to_match_aria_snapshot(
+            """
+        - list:
+          - /children: equal
+          - listitem: One
+          - listitem: Three
+      """,
+            timeout=1000,
+        )
+
+
+async def test_should_snapshot_with_unexpected_children_deep_equal(page: Page) -> None:
+    await page.set_content(
+        """
+      <ul>
+        <li>
+          <ul>
+            <li>1.1</li>
+            <li>1.2</li>
+          </ul>
+        </li>
+      </ul>
+    """
+    )
+    await expect(page.locator("body")).to_match_aria_snapshot(
+        """
+      - list:
+        - listitem:
+          - list:
+            - listitem: 1.1
+    """,
+    )
+    await expect(page.locator("body")).to_match_aria_snapshot(
+        """
+        - list:
+          - /children: equal
+          - listitem:
+            - list:
+              - listitem: 1.1
+      """,
+    )
+    with pytest.raises(AssertionError):
+        await expect(page.locator("body")).to_match_aria_snapshot(
+            """
+          - list:
+            - /children: deep-equal
+            - listitem:
+              - list:
+                - listitem: 1.1
+        """,
+            timeout=1000,
+        )
+
+
+async def test_should_snapshot_with_restored_contain_mode_inside_deep_equal(
+    page: Page,
+) -> None:
+    await page.set_content(
+        """
+      <ul>
+        <li>
+          <ul>
+            <li>1.1</li>
+            <li>1.2</li>
+          </ul>
+        </li>
+      </ul>
+    """
+    )
+    with pytest.raises(AssertionError):
+        await expect(page.locator("body")).to_match_aria_snapshot(
+            """
+        - list:
+          - /children: deep-equal
+          - listitem:
+            - list:
+              - listitem: 1.1
+      """,
+            timeout=1000,
+        )
+    await expect(page.locator("body")).to_match_aria_snapshot(
+        """
+        - list:
+          - /children: deep-equal
+          - listitem:
+            - list:
+              - /children: contain
+              - listitem: 1.1
+      """,
     )

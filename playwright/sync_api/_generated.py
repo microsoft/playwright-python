@@ -943,6 +943,10 @@ class Route(SyncBase):
         `route.continue_()` will immediately send the request to the network, other matching handlers won't be
         invoked. Use `route.fallback()` If you want next matching handler in the chain to be invoked.
 
+        **NOTE** The `Cookie` header cannot be overridden using this method. If a value is provided, it will be ignored,
+        and the cookie will be loaded from the browser's cookie store. To set custom cookies, use
+        `browser_context.add_cookies()`.
+
         Parameters
         ----------
         url : Union[str, None]
@@ -9529,8 +9533,8 @@ class Page(SyncContextManager):
         Parameters
         ----------
         url : Union[Callable[[str], bool], Pattern[str], str]
-            A glob pattern, regex pattern or predicate receiving [URL] to match while routing. When a `baseURL` via the context
-            options was provided and the passed URL is a path, it gets merged via the
+            A glob pattern, regex pattern, or predicate that receives a [URL] to match during routing. If `baseURL` is set in
+            the context options and the provided URL is a string that does not start with `*`, it is resolved using the
             [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
         handler : Union[Callable[[Route, Request], Any], Callable[[Route], Any]]
             handler function to route the request.
@@ -13245,8 +13249,8 @@ class BrowserContext(SyncContextManager):
         Parameters
         ----------
         url : Union[Callable[[str], bool], Pattern[str], str]
-            A glob pattern, regex pattern or predicate receiving [URL] to match while routing. When a `baseURL` via the context
-            options was provided and the passed URL is a path, it gets merged via the
+            A glob pattern, regex pattern, or predicate that receives a [URL] to match during routing. If `baseURL` is set in
+            the context options and the provided URL is a string that does not start with `*`, it is resolved using the
             [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
         handler : Union[Callable[[Route, Request], Any], Callable[[Route], Any]]
             handler function to route the request.
@@ -13500,9 +13504,6 @@ class BrowserContext(SyncContextManager):
             Set to `true` to include [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) in the storage
             state snapshot. If your application uses IndexedDB to store authentication tokens, like Firebase Authentication,
             enable this.
-
-            **NOTE** IndexedDBs with typed arrays are currently not supported.
-
 
         Returns
         -------
@@ -14461,7 +14462,7 @@ class BrowserType(SyncBase):
         headless : Union[bool, None]
             Whether to run browser in headless mode. More details for
             [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and
-            [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode). Defaults to `true` unless the
+            [Firefox](https://hacks.mozilla.org/2017/12/using-headless-mode-in-firefox/). Defaults to `true` unless the
             `devtools` option is `true`.
         devtools : Union[bool, None]
             **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the
@@ -14588,11 +14589,15 @@ class BrowserType(SyncBase):
         Parameters
         ----------
         user_data_dir : Union[pathlib.Path, str]
-            Path to a User Data Directory, which stores browser session data like cookies and local storage. More details for
+            Path to a User Data Directory, which stores browser session data like cookies and local storage. Pass an empty
+            string to create a temporary directory.
+
+            More details for
             [Chromium](https://chromium.googlesource.com/chromium/src/+/master/docs/user_data_dir.md#introduction) and
-            [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options#User_Profile). Note that Chromium's
-            user data directory is the **parent** directory of the "Profile Path" seen at `chrome://version`. Pass an empty
-            string to use a temporary directory instead.
+            [Firefox](https://wiki.mozilla.org/Firefox/CommandLineOptions#User_profile). Chromium's user data directory is the
+            **parent** directory of the "Profile Path" seen at `chrome://version`.
+
+            Note that browsers do not allow launching multiple instances with the same User Data Directory.
         channel : Union[str, None]
             Browser distribution channel.
 
@@ -14626,7 +14631,7 @@ class BrowserType(SyncBase):
         headless : Union[bool, None]
             Whether to run browser in headless mode. More details for
             [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and
-            [Firefox](https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode). Defaults to `true` unless the
+            [Firefox](https://hacks.mozilla.org/2017/12/using-headless-mode-in-firefox/). Defaults to `true` unless the
             `devtools` option is `true`.
         devtools : Union[bool, None]
             **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the
@@ -15688,8 +15693,8 @@ class Locator(SyncBase):
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
         timeout : Union[float, None]
-            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
-            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds to wait for the locator before evaluating. Note that after locator is resolved,
+            evaluation itself is not limited by the timeout. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
 
         Returns
         -------
@@ -15782,8 +15787,8 @@ class Locator(SyncBase):
         arg : Union[Any, None]
             Optional argument to pass to `expression`.
         timeout : Union[float, None]
-            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
-            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Maximum time in milliseconds to wait for the locator before evaluating. Note that after locator is resolved,
+            evaluation itself is not limited by the timeout. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
 
         Returns
         -------
@@ -17306,7 +17311,12 @@ class Locator(SyncBase):
             )
         )
 
-    def aria_snapshot(self, *, timeout: typing.Optional[float] = None) -> str:
+    def aria_snapshot(
+        self,
+        *,
+        timeout: typing.Optional[float] = None,
+        ref: typing.Optional[bool] = None,
+    ) -> str:
         """Locator.aria_snapshot
 
         Captures the aria snapshot of the given element. Read more about [aria snapshots](https://playwright.dev/python/docs/aria-snapshots) and
@@ -17351,6 +17361,9 @@ class Locator(SyncBase):
         timeout : Union[float, None]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        ref : Union[bool, None]
+            Generate symbolic reference for each element. One can use `aria-ref=<ref>` locator immediately after capturing the
+            snapshot to perform actions on the element.
 
         Returns
         -------
@@ -17358,7 +17371,7 @@ class Locator(SyncBase):
         """
 
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.aria_snapshot(timeout=timeout))
+            self._sync(self._impl_obj.aria_snapshot(timeout=timeout, ref=ref))
         )
 
     def scroll_into_view_if_needed(
@@ -18827,6 +18840,7 @@ class APIRequest(SyncBase):
         ] = None,
         client_certificates: typing.Optional[typing.List[ClientCertificate]] = None,
         fail_on_status_code: typing.Optional[bool] = None,
+        max_redirects: typing.Optional[int] = None,
     ) -> "APIRequestContext":
         """APIRequest.new_context
 
@@ -18878,6 +18892,10 @@ class APIRequest(SyncBase):
         fail_on_status_code : Union[bool, None]
             Whether to throw on response codes other than 2xx and 3xx. By default response object is returned for all status
             codes.
+        max_redirects : Union[int, None]
+            Maximum number of request redirects that will be followed automatically. An error will be thrown if the number is
+            exceeded. Defaults to `20`. Pass `0` to not follow redirects. This can be overwritten for each request
+            individually.
 
         Returns
         -------
@@ -18897,6 +18915,7 @@ class APIRequest(SyncBase):
                     storageState=storage_state,
                     clientCertificates=client_certificates,
                     failOnStatusCode=fail_on_status_code,
+                    maxRedirects=max_redirects,
                 )
             )
         )
@@ -19278,7 +19297,7 @@ class LocatorAssertions(SyncBase):
         """LocatorAssertions.to_have_class
 
         Ensures the `Locator` points to an element with given CSS classes. When a string is provided, it must fully match
-        the element's `class` attribute. To match individual classes or perform partial matches, use a regular expression:
+        the element's `class` attribute. To match individual classes use `locator_assertions.to_contain_class()`.
 
         **Usage**
 
@@ -19290,8 +19309,8 @@ class LocatorAssertions(SyncBase):
         from playwright.sync_api import expect
 
         locator = page.locator(\"#component\")
-        expect(locator).to_have_class(re.compile(r\"(^|\\\\s)selected(\\\\s|$)\"))
         expect(locator).to_have_class(\"middle selected row\")
+        expect(locator).to_have_class(re.compile(r\"(^|\\\\s)selected(\\\\s|$)\"))
         ```
 
         When an array is passed, the method asserts that the list of elements located matches the corresponding list of
@@ -19350,6 +19369,96 @@ class LocatorAssertions(SyncBase):
         return mapping.from_maybe_impl(
             self._sync(
                 self._impl_obj.not_to_have_class(
+                    expected=mapping.to_impl(expected), timeout=timeout
+                )
+            )
+        )
+
+    def to_contain_class(
+        self,
+        expected: typing.Union[typing.Sequence[str], str],
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> None:
+        """LocatorAssertions.to_contain_class
+
+        Ensures the `Locator` points to an element with given CSS classes. All classes from the asserted value, separated
+        by spaces, must be present in the
+        [Element.classList](https://developer.mozilla.org/en-US/docs/Web/API/Element/classList) in any order.
+
+        **Usage**
+
+        ```html
+        <div class='middle selected row' id='component'></div>
+        ```
+
+        ```py
+        from playwright.sync_api import expect
+
+        locator = page.locator(\"#component\")
+        expect(locator).to_contain_class(\"middle selected row\")
+        expect(locator).to_contain_class(\"selected\")
+        expect(locator).to_contain_class(\"row middle\")
+        ```
+
+        When an array is passed, the method asserts that the list of elements located matches the corresponding list of
+        expected class lists. Each element's class attribute is matched against the corresponding class in the array:
+
+        ```html
+        <div class='list'></div>
+          <div class='component inactive'></div>
+          <div class='component active'></div>
+          <div class='component inactive'></div>
+        </div>
+        ```
+
+        ```py
+        from playwright.sync_api import expect
+
+        locator = page.locator(\"list > .component\")
+        await expect(locator).to_contain_class([\"inactive\", \"active\", \"inactive\"])
+        ```
+
+        Parameters
+        ----------
+        expected : Union[Sequence[str], str]
+            A string containing expected class names, separated by spaces, or a list of such strings to assert multiple
+            elements.
+        timeout : Union[float, None]
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.to_contain_class(
+                    expected=mapping.to_impl(expected), timeout=timeout
+                )
+            )
+        )
+
+    def not_to_contain_class(
+        self,
+        expected: typing.Union[typing.Sequence[str], str],
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> None:
+        """LocatorAssertions.not_to_contain_class
+
+        The opposite of `locator_assertions.to_contain_class()`.
+
+        Parameters
+        ----------
+        expected : Union[Sequence[str], str]
+            Expected class or RegExp or a list of those.
+        timeout : Union[float, None]
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.not_to_contain_class(
                     expected=mapping.to_impl(expected), timeout=timeout
                 )
             )

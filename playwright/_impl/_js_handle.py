@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import base64
 import collections.abc
 import datetime
 import math
+import struct
 import traceback
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
@@ -260,6 +262,56 @@ def parse_value(value: Any, refs: Optional[Dict[int, Any]] = None) -> Any:
 
         if "b" in value:
             return value["b"]
+
+        if "ta" in value:
+            encoded_bytes = value["ta"]["b"]
+            decoded_bytes = base64.b64decode(encoded_bytes)
+            array_type = value["ta"]["k"]
+            if array_type == "i8":
+                word_size = 1
+                fmt = "b"
+            elif array_type == "ui8" or array_type == "ui8c":
+                word_size = 1
+                fmt = "B"
+            elif array_type == "i16":
+                word_size = 2
+                fmt = "h"
+            elif array_type == "ui16":
+                word_size = 2
+                fmt = "H"
+            elif array_type == "i32":
+                word_size = 4
+                fmt = "i"
+            elif array_type == "ui32":
+                word_size = 4
+                fmt = "I"
+            elif array_type == "f32":
+                word_size = 4
+                fmt = "f"
+            elif array_type == "f64":
+                word_size = 8
+                fmt = "d"
+            elif array_type == "bi64":
+                word_size = 8
+                fmt = "q"
+            elif array_type == "bui64":
+                word_size = 8
+                fmt = "Q"
+            else:
+                raise ValueError(f"Unsupported array type: {array_type}")
+
+            byte_len = len(decoded_bytes)
+            if byte_len % word_size != 0:
+                raise ValueError(
+                    f"Decoded bytes length {byte_len} is not a multiple of word size {word_size}"
+                )
+
+            if byte_len == 0:
+                return []
+            array_len = byte_len // word_size
+            # "<" denotes little-endian
+            format_string = f"<{array_len}{fmt}"
+            return list(struct.unpack(format_string, decoded_bytes))
     return value
 
 
