@@ -19,12 +19,14 @@ import datetime
 import inspect
 import sys
 import traceback
+from inspect import FrameInfo
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
     Dict,
+    Generator,
     List,
     Mapping,
     Optional,
@@ -362,7 +364,7 @@ class Connection(EventEmitter):
             "params": self._replace_channels_with_guids(params),
             "metadata": metadata,
         }
-        if self._tracing_count > 0 and frames and object._guid != "localUtils":
+        if self.needs_full_stack_trace() and frames and object._guid != "localUtils":
             self.local_utils.add_stack_to_tracing_no_reply(id, frames)
 
         self._transport.send(message)
@@ -508,17 +510,42 @@ class Connection(EventEmitter):
             return result
         return payload
 
+    def needs_full_stack_trace(self) -> bool:
+        return self._tracing_count > 0
+
+    def get_frame_info(self) -> Generator[FrameInfo]:
+        current_frame = inspect.currentframe()
+
+        while current_frame:
+            traceback_info = inspect.getframeinfo(current_frame, 0)
+            # TODO: Used to be *frameinfo, but I couldn't figure out how to get the type checking to work correctly
+            # frameinfo = (current_frame,) + traceback_info
+            # yield FrameInfo(*frameinfo)
+            # yield FrameInfo(cast(inspect.FrameType, *frameinfo))
+            yield FrameInfo(
+                current_frame,
+                traceback_info.filename,
+                traceback_info.lineno,
+                traceback_info.function,
+                traceback_info.code_context,
+                traceback_info.index,
+                # positions=current_frame.positions,
+            )
+
+            current_frame = current_frame.f_back
+
     async def wrap_api_call(
         self, cb: Callable[[], Any], is_internal: bool = False
     ) -> Any:
         if self._api_zone.get():
             return await cb()
         task = asyncio.current_task(self._loop)
-        st: List[inspect.FrameInfo] = getattr(
-            task, "__pw_stack__", None
-        ) or inspect.stack(0)
-
-        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal)
+        st: Union[List[FrameInfo], Generator[FrameInfo]] = (
+            getattr(task, "__pw_stack__", None) or self.get_frame_info()
+        )
+        parsed_st = _extract_stack_trace_information_from_stack(
+            st, is_internal, self.needs_full_stack_trace()
+        )
         self._api_zone.set(parsed_st)
         try:
             return await cb()
@@ -533,10 +560,12 @@ class Connection(EventEmitter):
         if self._api_zone.get():
             return cb()
         task = asyncio.current_task(self._loop)
-        st: List[inspect.FrameInfo] = getattr(
-            task, "__pw_stack__", None
-        ) or inspect.stack(0)
-        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal)
+        st: Union[List[FrameInfo], Generator[FrameInfo]] = (
+            getattr(task, "__pw_stack__", None) or self.get_frame_info()
+        )
+        parsed_st = _extract_stack_trace_information_from_stack(
+            st, is_internal, self.needs_full_stack_trace()
+        )
         self._api_zone.set(parsed_st)
         try:
             return cb()
@@ -567,7 +596,9 @@ class ParsedStackTrace(TypedDict):
 
 
 def _extract_stack_trace_information_from_stack(
-    st: List[inspect.FrameInfo], is_internal: bool
+    st: Union[List[FrameInfo], Generator[FrameInfo]],
+    is_internal: bool,
+    needs_full_stack: bool,
 ) -> ParsedStackTrace:
     playwright_module_path = str(Path(playwright.__file__).parents[0])
     last_internal_api_name = ""
@@ -596,6 +627,9 @@ def _extract_stack_trace_information_from_stack(
                     "function": method_name,
                 }
             )
+
+            if not needs_full_stack:
+                break
         if is_playwright_internal:
             last_internal_api_name = method_name
         elif last_internal_api_name:
