@@ -356,11 +356,5 @@ def test_should_return_proper_api_name_on_error(page: Page) -> None:
             False
         ), "Accessing undefined JavaScript variable should have thrown exception"
     except Exception as error:
-        assert (
-            str(error)
-            == """Page.evaluate: ReferenceError: does_not_exist is not defined
-    at eval (eval at evaluate (:234:30), <anonymous>:1:1)
-    at eval (<anonymous>)
-    at UtilityScript.evaluate (<anonymous>:234:30)
-    at UtilityScript.<anonymous> (<anonymous>:1:44)"""
-        )
+        # Each browser returns slightly different error messages, but they should all start with "Page.evaluate:", because that was the Playwright method where the error originated
+        assert str(error).startswith("Page.evaluate:")
