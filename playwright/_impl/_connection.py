@@ -533,7 +533,9 @@ class Connection(EventEmitter):
         if self._api_zone.get():
             return cb()
         task = asyncio.current_task(self._loop)
-        st: List[inspect.FrameInfo] = getattr(task, "__pw_stack__", inspect.stack())
+        st: List[inspect.FrameInfo] = getattr(
+            task, "__pw_stack__", None
+        ) or inspect.stack(0)
         parsed_st = _extract_stack_trace_information_from_stack(st, is_internal)
         self._api_zone.set(parsed_st)
         try:
