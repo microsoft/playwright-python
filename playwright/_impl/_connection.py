@@ -362,11 +362,7 @@ class Connection(EventEmitter):
             "params": self._replace_channels_with_guids(params),
             "metadata": metadata,
         }
-        if (
-            self._tracing_count > 0
-            and frames
-            and object._guid != "localUtils"
-        ):
+        if self._tracing_count > 0 and frames and object._guid != "localUtils":
             self.local_utils.add_stack_to_tracing_no_reply(id, frames)
 
         self._transport.send(message)
@@ -518,10 +514,9 @@ class Connection(EventEmitter):
         if self._api_zone.get():
             return await cb()
         task = asyncio.current_task(self._loop)
-        st: List[inspect.FrameInfo] = getattr(task, "__pw_stack__", None)
-
-        if st == None:
-            st = inspect.stack(0)
+        st: List[inspect.FrameInfo] = getattr(
+            task, "__pw_stack__", None
+        ) or inspect.stack(0)
 
         parsed_st = _extract_stack_trace_information_from_stack(st, is_internal)
         self._api_zone.set(parsed_st)
