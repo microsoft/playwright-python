@@ -356,9 +356,8 @@ def test_should_return_proper_api_name_on_error(page: Page) -> None:
             False
         ), "Accessing undefined JavaScript variable should have thrown exception"
     except Exception as error:
-        print(":-:" + error.message + ":-:")
         assert (
-            error.message
+            str(error)
             == """Page.evaluate: ReferenceError: does_not_exist is not defined
     at eval (eval at evaluate (:234:30), <anonymous>:1:1)
     at eval (<anonymous>)
