@@ -346,3 +346,16 @@ def test_call_sync_method_after_playwright_close_with_own_loop(
     p.start()
     p.join()
     assert p.exitcode == 0
+
+def test_should_return_proper_api_name_on_error(page: Page) -> None:
+    try:
+        page.evaluate("does_not_exist")
+
+        assert False, "Accessing undefined JavaScript variable should have thrown exception"
+    except Exception as error:
+        print(':-:' + error.message + ':-:')
+        assert error.message == """Page.evaluate: ReferenceError: does_not_exist is not defined
+    at eval (eval at evaluate (:234:30), <anonymous>:1:1)
+    at eval (<anonymous>)
+    at UtilityScript.evaluate (<anonymous>:234:30)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)"""
