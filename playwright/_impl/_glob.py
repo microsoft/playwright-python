@@ -11,13 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import re
 
 #  https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_expressions#escaping
 escaped_chars = {"$", "^", "+", ".", "*", "(", ")", "|", "\\", "?", "{", "}", "[", "]"}
 
 
-def glob_to_regex(glob: str) -> "re.Pattern[str]":
+def glob_to_regex_pattern(glob: str) -> str:
     tokens = ["^"]
     in_group = False
 
@@ -46,23 +45,20 @@ def glob_to_regex(glob: str) -> "re.Pattern[str]":
             else:
                 tokens.append("([^/]*)")
         else:
-            if c == "?":
-                tokens.append(".")
-            elif c == "[":
-                tokens.append("[")
-            elif c == "]":
-                tokens.append("]")
-            elif c == "{":
+            if c == "{":
                 in_group = True
                 tokens.append("(")
             elif c == "}":
                 in_group = False
                 tokens.append(")")
-            elif c == "," and in_group:
-                tokens.append("|")
+            elif c == ",":
+                if in_group:
+                    tokens.append("|")
+                else:
+                    tokens.append("\\" + c)
             else:
                 tokens.append("\\" + c if c in escaped_chars else c)
         i += 1
 
     tokens.append("$")
-    return re.compile("".join(tokens))
+    return "".join(tokens)

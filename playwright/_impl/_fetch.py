@@ -74,6 +74,7 @@ class APIRequest:
         storageState: Union[StorageState, str, Path] = None,
         clientCertificates: List[ClientCertificate] = None,
         failOnStatusCode: bool = None,
+        maxRedirects: int = None,
     ) -> "APIRequestContext":
         params = locals_to_params(locals())
         if "storageState" in params:

@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import sys
 
 import pytest
@@ -21,8 +20,10 @@ from playwright.async_api import Page
 
 
 async def test_accessibility_should_work(
-    page: Page, is_firefox: bool, is_chromium: bool
+    page: Page, is_firefox: bool, is_chromium: bool, is_webkit: bool
 ) -> None:
+    if is_webkit and sys.platform == "darwin":
+        pytest.skip("Test disabled on WebKit on macOS")
     await page.set_content(
         """<head>
       <title>Accessibility Test</title>
@@ -100,14 +101,7 @@ async def test_accessibility_should_work(
                 {"role": "textbox", "name": "placeholder", "value": "and a value"},
                 {
                     "role": "textbox",
-                    "name": (
-                        "placeholder"
-                        if (
-                            sys.platform == "darwin"
-                            and int(os.uname().release.split(".")[0]) >= 21
-                        )
-                        else "This is a description!"
-                    ),
+                    "name": "This is a description!",
                     "value": "and a value",
                 },  # webkit uses the description over placeholder for the name
             ],

@@ -540,7 +540,7 @@ class Locator:
             ),
         )
 
-    async def aria_snapshot(self, timeout: float = None) -> str:
+    async def aria_snapshot(self, timeout: float = None, ref: bool = None) -> str:
         return await self._frame._channel.send(
             "ariaSnapshot",
             {

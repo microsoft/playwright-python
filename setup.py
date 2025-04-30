@@ -21,7 +21,7 @@ import sys
 import zipfile
 from typing import Dict
 
-driver_version = "1.51.1"
+driver_version = "1.52.0"
 
 base_wheel_bundles = [
     {
@@ -65,6 +65,12 @@ base_wheel_bundles = [
         "machine": "amd64",
         "platform": "win32",
         "zip_name": "win32_x64",
+    },
+    {
+        "wheel": "win_arm64.whl",
+        "machine": "arm64",
+        "platform": "win32",
+        "zip_name": "win32_arm64",
     },
 ]
 
