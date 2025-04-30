@@ -346,3 +346,15 @@ def test_call_sync_method_after_playwright_close_with_own_loop(
     p.start()
     p.join()
     assert p.exitcode == 0
+
+
+def test_should_return_proper_api_name_on_error(page: Page) -> None:
+    try:
+        page.evaluate("does_not_exist")
+
+        assert (
+            False
+        ), "Accessing undefined JavaScript variable should have thrown exception"
+    except Exception as error:
+        # Each browser returns slightly different error messages, but they should all start with "Page.evaluate:", because that was the Playwright method where the error originated
+        assert str(error).startswith("Page.evaluate:")
