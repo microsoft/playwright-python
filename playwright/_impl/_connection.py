@@ -516,12 +516,15 @@ class Connection(EventEmitter):
     def get_frame_info(self) -> Generator[FrameInfo]:
         current_frame = inspect.currentframe()
 
+        if current_frame is None:
+            return
+
+        # Don't include the current method ("get_frame_info()") in the callstack
+        current_frame = current_frame.f_back
+
         while current_frame:
             traceback_info = inspect.getframeinfo(current_frame, 0)
-            # TODO: Used to be *frameinfo, but I couldn't figure out how to get the type checking to work correctly
-            # frameinfo = (current_frame,) + traceback_info
-            # yield FrameInfo(*frameinfo)
-            # yield FrameInfo(cast(inspect.FrameType, *frameinfo))
+
             yield FrameInfo(
                 current_frame,
                 traceback_info.filename,
@@ -529,7 +532,6 @@ class Connection(EventEmitter):
                 traceback_info.function,
                 traceback_info.code_context,
                 traceback_info.index,
-                # positions=current_frame.positions,
             )
 
             current_frame = current_frame.f_back
