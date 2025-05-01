@@ -19,13 +19,16 @@ on:
 jobs:
   build:
     timeout-minutes: 120
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.runs-on }}
     strategy:
       fail-fast: false
       matrix:
         docker-image-variant:
           - jammy
           - noble
+        runs-on:
+          - ubuntu-24.04
+          - ubuntu-24.04-arm
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python
@@ -39,10 +42,12 @@ jobs:
         pip install -r requirements.txt
         pip install -e .
     - name: Build Docker image
-      run: bash utils/docker/build.sh --amd64 ${{ matrix.docker-image-variant }} playwright-python:localbuild-${{ matrix.docker-image-variant }}
+      run: |
+        ARCH="${{ matrix.runs-on == 'ubuntu-24.04-arm' && 'arm64' || 'amd64' }}"
+        bash utils/docker/build.sh --$ARCH ${{ matrix.docker-image-variant }} playwright-python:localbuild-${{ matrix.docker-image-variant }}
     - name: Test
       run: |
-        CONTAINER_ID="$(docker run --rm -v $(pwd):/root/playwright --name playwright-docker-test --workdir /root/playwright/ -d -t playwright-python:localbuild-${{ matrix.docker-image-variant }} /bin/bash)"
+        CONTAINER_ID="$(docker run --rm -e CI -v $(pwd):/root/playwright --name playwright-docker-test --workdir /root/playwright/ -d -t playwright-python:localbuild-${{ matrix.docker-image-variant }} /bin/bash)"
         # Fix permissions for Git inside the container
         docker exec "${CONTAINER_ID}" chown -R root:root /root/playwright
         docker exec "${CONTAINER_ID}" pip install -r local-requirements.txt
