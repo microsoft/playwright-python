@@ -99,7 +99,8 @@ def extractall(zip: zipfile.ZipFile, path: str) -> None:
 
 def download_driver(zip_name: str) -> None:
     zip_file = f"playwright-{driver_version}-{zip_name}.zip"
-    if os.path.exists("driver/" + zip_file):
+    destination_path = "driver/" + zip_file
+    if os.path.exists(destination_path):
         return
     url = "https://playwright.azureedge.net/builds/driver/"
     if (
@@ -109,9 +110,11 @@ def download_driver(zip_name: str) -> None:
     ):
         url = url + "next/"
     url = url + zip_file
+    temp_destination_path = destination_path + ".tmp"
     print(f"Fetching {url}")
     # Don't replace this with urllib - Python won't have certificates to do SSL on all platforms.
-    subprocess.check_call(["curl", url, "-o", "driver/" + zip_file])
+    subprocess.check_call(["curl", url, "-o", temp_destination_path])
+    os.rename(temp_destination_path, destination_path)
 
 
 class PlaywrightBDistWheelCommand(BDistWheelCommand):
