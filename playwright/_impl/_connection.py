@@ -26,7 +26,7 @@ from typing import (
     Any,
     Callable,
     Dict,
-    Generator,
+    Iterator,
     List,
     Mapping,
     Optional,
@@ -513,7 +513,7 @@ class Connection(EventEmitter):
     def needs_full_stack_trace(self) -> bool:
         return self._tracing_count > 0
 
-    def get_frame_info(self) -> Generator[FrameInfo, None]:
+    def get_frame_info(self) -> Iterator[FrameInfo]:
         current_frame = inspect.currentframe()
 
         if current_frame is None:
@@ -542,7 +542,7 @@ class Connection(EventEmitter):
         if self._api_zone.get():
             return await cb()
         task = asyncio.current_task(self._loop)
-        st: Union[List[FrameInfo], Generator[FrameInfo, None]] = (
+        st: Union[List[FrameInfo], Iterator[FrameInfo]] = (
             getattr(task, "__pw_stack__", None) or self.get_frame_info()
         )
         parsed_st = _extract_stack_trace_information_from_stack(
@@ -562,7 +562,7 @@ class Connection(EventEmitter):
         if self._api_zone.get():
             return cb()
         task = asyncio.current_task(self._loop)
-        st: Union[List[FrameInfo], Generator[FrameInfo, None]] = (
+        st: Union[List[FrameInfo], Iterator[FrameInfo]] = (
             getattr(task, "__pw_stack__", None) or self.get_frame_info()
         )
         parsed_st = _extract_stack_trace_information_from_stack(
@@ -598,7 +598,7 @@ class ParsedStackTrace(TypedDict):
 
 
 def _extract_stack_trace_information_from_stack(
-    st: Union[List[FrameInfo], Generator[FrameInfo, None]],
+    st: Union[List[FrameInfo], Iterator[FrameInfo]],
     is_internal: bool,
     needs_full_stack: bool,
 ) -> ParsedStackTrace:
