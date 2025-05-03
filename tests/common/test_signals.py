@@ -27,6 +27,10 @@ from playwright.sync_api import sync_playwright
 def _test_signals_async(
     browser_name: str, launch_arguments: Dict, wait_queue: "multiprocessing.Queue[str]"
 ) -> None:
+    # On Windows, hint to mypy and pyright that they shouldn't check this function
+    if sys.platform == "win32":
+        return
+
     os.setpgrp()
     sigint_received = False
 
@@ -67,6 +71,10 @@ def _test_signals_async(
 def _test_signals_sync(
     browser_name: str, launch_arguments: Dict, wait_queue: "multiprocessing.Queue[str]"
 ) -> None:
+    # On Windows, hint to mypy and pyright that they shouldn't check this function
+    if sys.platform == "win32":
+        return
+
     os.setpgrp()
     sigint_received = False
 
@@ -103,6 +111,10 @@ def _test_signals_sync(
 def _create_signals_test(
     target: Any, browser_name: str, launch_arguments: Dict
 ) -> None:
+    # On Windows, hint to mypy and pyright that they shouldn't check this function
+    if sys.platform == "win32":
+        return
+
     wait_queue: "multiprocessing.Queue[str]" = multiprocessing.Queue()
     process = multiprocessing.Process(
         target=target, args=[browser_name, launch_arguments, wait_queue]
