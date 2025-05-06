@@ -171,7 +171,7 @@ class BrowserType(ChannelOwner):
             # Can be dropped once we drop Python 3.9 support (10/2025):
             # https://github.com/python/cpython/issues/82852
             if sys.platform == "win32" and sys.version_info[:2] < (3, 10):
-                return pathlib.Path.cwd() / userDataDir
+                return str(pathlib.Path.cwd() / userDataDir)
             return str(Path(userDataDir).resolve())
         return str(Path(userDataDir))
 
