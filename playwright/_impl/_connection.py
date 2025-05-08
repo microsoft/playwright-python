@@ -387,9 +387,7 @@ class Connection(EventEmitter):
                 parsed_error = parse_error(
                     error["error"], format_call_log(msg.get("log"))  # type: ignore
                 )
-                parsed_error._stack = "".join(
-                    traceback.format_list(callback.stack_trace)
-                )
+                parsed_error._stack = "".join(callback.stack_trace.format())
                 callback.future.set_exception(parsed_error)
             else:
                 result = self._replace_guids_with_channels(msg.get("result"))
