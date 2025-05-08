@@ -333,7 +333,7 @@ class Connection(EventEmitter):
         task = asyncio.current_task(self._loop)
         callback.stack_trace = cast(
             traceback.StackSummary,
-            getattr(task, "__pw_stack_trace__", traceback.extract_stack()),
+            getattr(task, "__pw_stack_trace__", traceback.extract_stack(limit=10)),
         )
         callback.no_reply = no_reply
         self._callbacks[id] = callback
@@ -388,7 +388,7 @@ class Connection(EventEmitter):
                     error["error"], format_call_log(msg.get("log"))  # type: ignore
                 )
                 parsed_error._stack = "".join(
-                    traceback.format_list(callback.stack_trace)[-10:]
+                    traceback.format_list(callback.stack_trace)
                 )
                 callback.future.set_exception(parsed_error)
             else:
