@@ -105,8 +105,8 @@ class SyncBase(ImplWrapper):
 
         g_self = greenlet.getcurrent()
         task: asyncio.tasks.Task[Any] = self._loop.create_task(coro)
-        setattr(task, "__pw_stack__", inspect.stack())
-        setattr(task, "__pw_stack_trace__", traceback.extract_stack())
+        setattr(task, "__pw_stack__", inspect.stack(0))
+        setattr(task, "__pw_stack_trace__", traceback.extract_stack(limit=10))
 
         task.add_done_callback(lambda _: g_self.switch())
         while not task.done():
