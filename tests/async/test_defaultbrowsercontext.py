@@ -78,7 +78,7 @@ async def test_context_cookies_should_work(
     )
 
     assert document_cookie == "username=John Doe"
-    assert await page.context.cookies() == [
+    assert _filter_cookies(await page.context.cookies()) == [
         {
             "name": "username",
             "value": "John Doe",
