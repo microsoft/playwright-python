@@ -12,7 +12,7 @@ pytest==8.3.5
 pytest-asyncio==0.26.0
 pytest-cov==6.1.1
 pytest-repeat==0.9.4
-pytest-rerunfailures==15.0
+pytest-rerunfailures==15.1
 pytest-timeout==2.3.1
 pytest-xdist==3.6.1
 requests==2.32.3
