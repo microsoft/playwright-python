@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools==78.0.1", "setuptools-scm==8.2.0", "wheel==0.45.1", "auditwheel==6.3.0"]
+requires = ["setuptools==80.3.1", "setuptools-scm==8.3.1", "wheel==0.45.1", "auditwheel==6.3.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -9,7 +9,7 @@ authors = [
     {name = "Microsoft Corporation"}
 ]
 readme = "README.md"
-license = {text = "Apache-2.0"}
+license = "Apache-2.0"
 dynamic = ["version"]
 requires-python = ">=3.9"
 # Please when changing dependencies run the following commands to update requirements.txt:
@@ -29,7 +29,6 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
-    "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
 ]
 

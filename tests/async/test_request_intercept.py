@@ -175,3 +175,17 @@ async def test_should_give_access_to_the_intercepted_response_body(
         route.fulfill(response=response),
         eval_task,
     )
+
+
+async def test_should_intercept_by_glob(page: Page, server: Server) -> None:
+    await page.goto(server.EMPTY_PAGE)
+    await page.route(
+        "http://localhos**?*oo",
+        lambda route: route.fulfill(body="intercepted", status=200),
+    )
+
+    result = await page.evaluate(
+        "url => fetch(url).then(r => r.text())", server.PREFIX + "/?foo"
+    )
+
+    assert result == "intercepted"

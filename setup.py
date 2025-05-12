@@ -22,7 +22,7 @@ import zipfile
 from pathlib import Path
 from typing import Dict
 
-driver_version = "1.51.1"
+driver_version = "1.52.0"
 
 base_wheel_bundles = [
     {
@@ -67,6 +67,12 @@ base_wheel_bundles = [
         "platform": "win32",
         "zip_name": "win32_x64",
     },
+    {
+        "wheel": "win_arm64.whl",
+        "machine": "arm64",
+        "platform": "win32",
+        "zip_name": "win32_arm64",
+    },
 ]
 
 if len(sys.argv) == 2 and sys.argv[1] == "--list-wheels":
@@ -94,7 +100,8 @@ def extractall(zip: zipfile.ZipFile, path: str) -> None:
 
 def download_driver(zip_name: str) -> None:
     zip_file = f"playwright-{driver_version}-{zip_name}.zip"
-    if os.path.exists("driver/" + zip_file):
+    destination_path = "driver/" + zip_file
+    if os.path.exists(destination_path):
         return
     url = "https://playwright.azureedge.net/builds/driver/"
     if (
@@ -104,9 +111,11 @@ def download_driver(zip_name: str) -> None:
     ):
         url = url + "next/"
     url = url + zip_file
+    temp_destination_path = destination_path + ".tmp"
     print(f"Fetching {url}")
     # Don't replace this with urllib - Python won't have certificates to do SSL on all platforms.
-    subprocess.check_call(["curl", url, "-o", "driver/" + zip_file])
+    subprocess.check_call(["curl", url, "-o", temp_destination_path])
+    os.rename(temp_destination_path, destination_path)
 
 
 class PlaywrightBDistWheelCommand(BDistWheelCommand):

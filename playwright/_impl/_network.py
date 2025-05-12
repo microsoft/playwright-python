@@ -754,7 +754,7 @@ class WebSocketRouteHandler:
         return patterns
 
     def matches(self, ws_url: str) -> bool:
-        return url_matches(self._base_url, ws_url, self.url)
+        return url_matches(self._base_url, ws_url, self.url, True)
 
     async def handle(self, websocket_route: "WebSocketRoute") -> None:
         coro_or_future = self.handler(websocket_route)

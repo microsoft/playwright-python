@@ -524,3 +524,23 @@ async def test_should_not_throw_when_fail_on_status_code_is_false(
     response = await request.fetch(server.EMPTY_PAGE)
     assert response.status == 404
     await request.dispose()
+
+
+async def test_should_follow_max_redirects(
+    playwright: Playwright, server: Server
+) -> None:
+    redirect_count = 0
+
+    def _handle_request(req: TestServerRequest) -> None:
+        nonlocal redirect_count
+        redirect_count += 1
+        req.setResponseCode(301)
+        req.setHeader("Location", server.EMPTY_PAGE)
+        req.finish()
+
+    server.set_route("/empty.html", _handle_request)
+    request = await playwright.request.new_context(max_redirects=1)
+    with pytest.raises(Error, match="Max redirect count exceeded"):
+        await request.fetch(server.EMPTY_PAGE)
+    assert redirect_count == 2
+    await request.dispose()

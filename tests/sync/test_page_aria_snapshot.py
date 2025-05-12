@@ -14,6 +14,8 @@
 
 import re
 
+import pytest
+
 from playwright.sync_api import Locator, Page, expect
 
 
@@ -88,6 +90,128 @@ def test_should_snapshot_complex(page: Page) -> None:
         """
       - list:
         - listitem:
-          - link "link"
+          - link "link":
+            - /url: about:blank
     """,
+    )
+
+
+def test_should_snapshot_with_ref(page: Page) -> None:
+    page.set_content('<ul><li><a href="about:blank">link</a></li></ul>')
+    expected = """
+      - list [ref=s1e3]:
+        - listitem [ref=s1e4]:
+          - link "link" [ref=s1e5]:
+            - /url: about:blank
+    """
+    assert page.locator("body").aria_snapshot(ref=True) == _unshift(expected)
+
+
+def test_should_snapshot_with_unexpected_children_equal(page: Page) -> None:
+    page.set_content(
+        """
+      <ul>
+        <li>One</li>
+        <li>Two</li>
+        <li>Three</li>
+      </ul>
+    """
+    )
+    expect(page.locator("body")).to_match_aria_snapshot(
+        """
+      - list:
+        - listitem: One
+        - listitem: Three
+    """,
+    )
+    with pytest.raises(AssertionError):
+        expect(page.locator("body")).to_match_aria_snapshot(
+            """
+        - list:
+          - /children: equal
+          - listitem: One
+          - listitem: Three
+      """,
+            timeout=1000,
+        )
+
+
+def test_should_snapshot_with_unexpected_children_deep_equal(page: Page) -> None:
+    page.set_content(
+        """
+      <ul>
+        <li>
+          <ul>
+            <li>1.1</li>
+            <li>1.2</li>
+          </ul>
+        </li>
+      </ul>
+    """
+    )
+    expect(page.locator("body")).to_match_aria_snapshot(
+        """
+      - list:
+        - listitem:
+          - list:
+            - listitem: 1.1
+    """,
+    )
+    expect(page.locator("body")).to_match_aria_snapshot(
+        """
+        - list:
+          - /children: equal
+          - listitem:
+            - list:
+              - listitem: 1.1
+      """,
+    )
+    with pytest.raises(AssertionError):
+        expect(page.locator("body")).to_match_aria_snapshot(
+            """
+          - list:
+            - /children: deep-equal
+            - listitem:
+              - list:
+                - listitem: 1.1
+        """,
+            timeout=1000,
+        )
+
+
+def test_should_snapshot_with_restored_contain_mode_inside_deep_equal(
+    page: Page,
+) -> None:
+    page.set_content(
+        """
+      <ul>
+        <li>
+          <ul>
+            <li>1.1</li>
+            <li>1.2</li>
+          </ul>
+        </li>
+      </ul>
+    """
+    )
+    with pytest.raises(AssertionError):
+        expect(page.locator("body")).to_match_aria_snapshot(
+            """
+        - list:
+          - /children: deep-equal
+          - listitem:
+            - list:
+              - listitem: 1.1
+      """,
+            timeout=1000,
+        )
+    expect(page.locator("body")).to_match_aria_snapshot(
+        """
+        - list:
+          - /children: deep-equal
+          - listitem:
+            - list:
+              - /children: contain
+              - listitem: 1.1
+      """,
     )

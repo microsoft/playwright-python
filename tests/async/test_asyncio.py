@@ -87,3 +87,15 @@ async def test_should_not_throw_with_taskgroup(page: Page) -> None:
     assert "Something went wrong" in str(exc_info.value.exceptions[0])
     assert isinstance(exc_info.value.exceptions[0], ValueError)
     assert await page.evaluate("() => 11 * 11") == 121
+
+
+async def test_should_return_proper_api_name_on_error(page: Page) -> None:
+    try:
+        await page.evaluate("does_not_exist")
+
+        assert (
+            False
+        ), "Accessing undefined JavaScript variable should have thrown exception"
+    except Exception as error:
+        # Each browser returns slightly different error messages, but they should all start with "Page.evaluate:", because that was the Playwright method where the error originated
+        assert str(error).startswith("Page.evaluate:")
