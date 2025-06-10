@@ -236,7 +236,7 @@ def test_should_return_empty_body(playwright: Playwright, server: Server) -> Non
 
 
 def test_storage_state_should_round_trip_through_file(
-    playwright: Playwright, tmpdir: Path
+    playwright: Playwright, tmp_path: Path
 ) -> None:
     expected: StorageState = {
         "cookies": [
@@ -254,7 +254,7 @@ def test_storage_state_should_round_trip_through_file(
         "origins": [],
     }
     request = playwright.request.new_context(storage_state=expected)
-    path = tmpdir / "storage-state.json"
+    path = tmp_path / "storage-state.json"
     actual = request.storage_state(path=path)
     assert actual == expected
 

@@ -23,8 +23,8 @@ from tests.server import Server
 pytestmark = pytest.mark.only_browser("chromium")
 
 
-async def test_should_be_able_to_save_pdf_file(page: Page, tmpdir: Path) -> None:
-    output_file = tmpdir / "foo.png"
+async def test_should_be_able_to_save_pdf_file(page: Page, tmp_path: Path) -> None:
+    output_file = tmp_path / "foo.png"
     await page.pdf(path=str(output_file))
     assert os.path.getsize(output_file) > 0
 
@@ -35,11 +35,11 @@ async def test_should_be_able_capture_pdf_without_path(page: Page) -> None:
 
 
 async def test_should_be_able_to_generate_outline(
-    page: Page, server: Server, tmpdir: Path
+    page: Page, server: Server, tmp_path: Path
 ) -> None:
     await page.goto(server.PREFIX + "/headings.html")
-    output_file_no_outline = tmpdir / "outputNoOutline.pdf"
-    output_file_outline = tmpdir / "outputOutline.pdf"
+    output_file_no_outline = tmp_path / "outputNoOutline.pdf"
+    output_file_outline = tmp_path / "outputOutline.pdf"
     await page.pdf(path=output_file_no_outline)
     await page.pdf(path=output_file_outline, tagged=True, outline=True)
     assert os.path.getsize(output_file_outline) > os.path.getsize(

@@ -24,9 +24,9 @@ from tests.server import Server
 
 @pytest.mark.only_browser("chromium")
 async def test_should_output_a_trace(
-    browser: Browser, page: Page, server: Server, tmpdir: Path
+    browser: Browser, page: Page, server: Server, tmp_path: Path
 ) -> None:
-    output_file = tmpdir / "trace.json"
+    output_file = tmp_path / "trace.json"
     await browser.start_tracing(page=page, screenshots=True, path=output_file)
     await page.goto(server.PREFIX + "/grid.html")
     await browser.stop_tracing()
@@ -35,9 +35,9 @@ async def test_should_output_a_trace(
 
 @pytest.mark.only_browser("chromium")
 async def test_should_create_directories_as_needed(
-    browser: Browser, page: Page, server: Server, tmpdir: Path
+    browser: Browser, page: Page, server: Server, tmp_path: Path
 ) -> None:
-    output_file = tmpdir / "these" / "are" / "directories" / "trace.json"
+    output_file = tmp_path / "these" / "are" / "directories" / "trace.json"
     await browser.start_tracing(page=page, screenshots=True, path=output_file)
     await page.goto(server.PREFIX + "/grid.html")
     await browser.stop_tracing()
@@ -46,9 +46,9 @@ async def test_should_create_directories_as_needed(
 
 @pytest.mark.only_browser("chromium")
 async def test_should_run_with_custom_categories_if_provided(
-    browser: Browser, page: Page, tmpdir: Path
+    browser: Browser, page: Page, tmp_path: Path
 ) -> None:
-    output_file = tmpdir / "trace.json"
+    output_file = tmp_path / "trace.json"
     await browser.start_tracing(
         page=page,
         screenshots=True,
@@ -66,11 +66,11 @@ async def test_should_run_with_custom_categories_if_provided(
 
 @pytest.mark.only_browser("chromium")
 async def test_should_throw_if_tracing_on_two_pages(
-    browser: Browser, page: Page, tmpdir: Path
+    browser: Browser, page: Page, tmp_path: Path
 ) -> None:
-    output_file_1 = tmpdir / "trace1.json"
+    output_file_1 = tmp_path / "trace1.json"
     await browser.start_tracing(page=page, screenshots=True, path=output_file_1)
-    output_file_2 = tmpdir / "trace2.json"
+    output_file_2 = tmp_path / "trace2.json"
     with pytest.raises(Exception):
         await browser.start_tracing(page=page, screenshots=True, path=output_file_2)
     await browser.stop_tracing()
@@ -78,9 +78,9 @@ async def test_should_throw_if_tracing_on_two_pages(
 
 @pytest.mark.only_browser("chromium")
 async def test_should_return_a_buffer(
-    browser: Browser, page: Page, server: Server, tmpdir: Path
+    browser: Browser, page: Page, server: Server, tmp_path: Path
 ) -> None:
-    output_file = tmpdir / "trace.json"
+    output_file = tmp_path / "trace.json"
     await browser.start_tracing(page=page, path=output_file, screenshots=True)
     await page.goto(server.PREFIX + "/grid.html")
     value = await browser.stop_tracing()

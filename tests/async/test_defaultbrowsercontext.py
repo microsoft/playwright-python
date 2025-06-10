@@ -45,7 +45,7 @@ from .utils import Utils
 
 @pytest.fixture()
 async def launch_persistent(
-    tmpdir: Path, launch_arguments: Dict, browser_type: BrowserType
+    tmp_path: Path, launch_arguments: Dict, browser_type: BrowserType
 ) -> AsyncGenerator[Callable[..., Awaitable[Tuple[Page, BrowserContext]]], None]:
     context: Optional[BrowserContext] = None
 
@@ -54,7 +54,7 @@ async def launch_persistent(
         if context:
             raise ValueError("can only launch one persistent context")
         context = await browser_type.launch_persistent_context(
-            str(tmpdir), **{**launch_arguments, **options}
+            str(tmp_path), **{**launch_arguments, **options}
         )
         assert context
         return (context.pages[0], context)
@@ -373,14 +373,14 @@ async def test_should_support_extra_http_headers_option(
 
 
 async def test_should_accept_user_data_dir(
-    tmpdir: Path,
+    tmp_path: Path,
     launch_persistent: "Callable[..., asyncio.Future[Tuple[Page, BrowserContext]]]",
 ) -> None:
     (page, context) = await launch_persistent()
     # Note: we need an open page to make sure its functional.
-    assert len(os.listdir(tmpdir)) > 0
+    assert len(os.listdir(tmp_path)) > 0
     await context.close()
-    assert len(os.listdir(tmpdir)) > 0
+    assert len(os.listdir(tmp_path)) > 0
 
 
 async def test_should_restore_state_from_userDataDir(
@@ -426,11 +426,11 @@ async def test_should_have_default_url_when_launching_browser(
 
 @pytest.mark.skip_browser("firefox")
 async def test_should_throw_if_page_argument_is_passed(
-    browser_type: BrowserType, server: Server, tmpdir: Path, launch_arguments: Dict
+    browser_type: BrowserType, server: Server, tmp_path: Path, launch_arguments: Dict
 ) -> None:
     options = {**launch_arguments, "args": [server.EMPTY_PAGE]}
     with pytest.raises(Error) as exc:
-        await browser_type.launch_persistent_context(tmpdir, **options)
+        await browser_type.launch_persistent_context(tmp_path, **options)
     assert "can not specify page" in exc.value.message
 
 

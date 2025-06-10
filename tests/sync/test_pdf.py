@@ -21,8 +21,8 @@ from playwright.sync_api import Page
 
 
 @pytest.mark.only_browser("chromium")
-def test_should_be_able_to_save_pdf_file(page: Page, tmpdir: Path) -> None:
-    output_file = tmpdir / "foo.png"
+def test_should_be_able_to_save_pdf_file(page: Page, tmp_path: Path) -> None:
+    output_file = tmp_path / "foo.png"
     page.pdf(path=str(output_file))
     assert os.path.getsize(output_file) > 0
 

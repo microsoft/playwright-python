@@ -21,37 +21,37 @@ from tests.server import Server
 
 
 async def test_should_expose_video_path(
-    browser: Browser, tmpdir: Path, server: Server
+    browser: Browser, tmp_path: Path, server: Server
 ) -> None:
-    page = await browser.new_page(record_video_dir=tmpdir)
+    page = await browser.new_page(record_video_dir=tmp_path)
     await page.goto(server.PREFIX + "/grid.html")
     assert page.video
     path = await page.video.path()
-    assert str(tmpdir) in str(path)
+    assert str(tmp_path) in str(path)
     await page.context.close()
 
 
 async def test_short_video_should_throw(
-    browser: Browser, tmpdir: Path, server: Server
+    browser: Browser, tmp_path: Path, server: Server
 ) -> None:
-    page = await browser.new_page(record_video_dir=tmpdir)
+    page = await browser.new_page(record_video_dir=tmp_path)
     await page.goto(server.PREFIX + "/grid.html")
     assert page.video
     path = await page.video.path()
-    assert str(tmpdir) in str(path)
+    assert str(tmp_path) in str(path)
     await page.wait_for_timeout(1000)
     await page.context.close()
     assert os.path.exists(path)
 
 
 async def test_short_video_should_throw_persistent_context(
-    browser_type: BrowserType, tmpdir: Path, launch_arguments: Dict, server: Server
+    browser_type: BrowserType, tmp_path: Path, launch_arguments: Dict, server: Server
 ) -> None:
     context = await browser_type.launch_persistent_context(
-        str(tmpdir),
+        str(tmp_path),
         **launch_arguments,
         viewport={"width": 320, "height": 240},
-        record_video_dir=str(tmpdir) + "1",
+        record_video_dir=str(tmp_path) + "1",
     )
     page = context.pages[0]
     await page.goto(server.PREFIX + "/grid.html")
@@ -60,16 +60,16 @@ async def test_short_video_should_throw_persistent_context(
 
     assert page.video
     path = await page.video.path()
-    assert str(tmpdir) in str(path)
+    assert str(tmp_path) in str(path)
 
 
 async def test_should_not_error_if_page_not_closed_before_save_as(
-    browser: Browser, tmpdir: Path, server: Server
+    browser: Browser, tmp_path: Path, server: Server
 ) -> None:
-    page = await browser.new_page(record_video_dir=tmpdir)
+    page = await browser.new_page(record_video_dir=tmp_path)
     await page.goto(server.PREFIX + "/grid.html")
     await page.wait_for_timeout(1000)  # make sure video has some data
-    out_path = tmpdir / "some-video.webm"
+    out_path = tmp_path / "some-video.webm"
     assert page.video
     saved = page.video.save_as(out_path)
     await page.close()
@@ -79,7 +79,7 @@ async def test_should_not_error_if_page_not_closed_before_save_as(
 
 
 async def test_should_be_None_if_not_recording(
-    browser: Browser, tmpdir: Path, server: Server
+    browser: Browser, tmp_path: Path, server: Server
 ) -> None:
     page = await browser.new_page()
     assert page.video is None

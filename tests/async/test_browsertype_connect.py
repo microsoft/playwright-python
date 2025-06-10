@@ -208,12 +208,12 @@ async def test_should_not_allow_getting_the_path(
 async def test_prevent_getting_video_path(
     browser_type: BrowserType,
     launch_server: Callable[[], RemoteServer],
-    tmpdir: Path,
+    tmp_path: Path,
     server: Server,
 ) -> None:
     remote_server = launch_server()
     browser = await browser_type.connect(remote_server.ws_endpoint)
-    page = await browser.new_page(record_video_dir=tmpdir)
+    page = await browser.new_page(record_video_dir=tmp_path)
     await page.goto(server.PREFIX + "/grid.html")
     await browser.close()
     assert page.video

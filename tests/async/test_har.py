@@ -27,8 +27,8 @@ from tests.server import Server, TestServerRequest
 from tests.utils import must
 
 
-async def test_should_work(browser: Browser, server: Server, tmpdir: Path) -> None:
-    path = os.path.join(tmpdir, "log.har")
+async def test_should_work(browser: Browser, server: Server, tmp_path: Path) -> None:
+    path = os.path.join(tmp_path, "log.har")
     context = await browser.new_context(record_har_path=path)
     page = await context.new_page()
     await page.goto(server.EMPTY_PAGE)
@@ -39,9 +39,9 @@ async def test_should_work(browser: Browser, server: Server, tmpdir: Path) -> No
 
 
 async def test_should_omit_content(
-    browser: Browser, server: Server, tmpdir: Path
+    browser: Browser, server: Server, tmp_path: Path
 ) -> None:
-    path = os.path.join(tmpdir, "log.har")
+    path = os.path.join(tmp_path, "log.har")
     context = await browser.new_context(
         record_har_path=path,
         record_har_content="omit",
@@ -59,9 +59,9 @@ async def test_should_omit_content(
 
 
 async def test_should_omit_content_legacy(
-    browser: Browser, server: Server, tmpdir: Path
+    browser: Browser, server: Server, tmp_path: Path
 ) -> None:
-    path = os.path.join(tmpdir, "log.har")
+    path = os.path.join(tmp_path, "log.har")
     context = await browser.new_context(
         record_har_path=path, record_har_omit_content=True
     )
@@ -78,9 +78,9 @@ async def test_should_omit_content_legacy(
 
 
 async def test_should_attach_content(
-    browser: Browser, server: Server, tmpdir: Path
+    browser: Browser, server: Server, tmp_path: Path
 ) -> None:
-    path = os.path.join(tmpdir, "log.har.zip")
+    path = os.path.join(tmp_path, "log.har.zip")
     context = await browser.new_context(
         record_har_path=path,
         record_har_content="attach",
@@ -137,9 +137,9 @@ async def test_should_attach_content(
 
 
 async def test_should_not_omit_content(
-    browser: Browser, server: Server, tmpdir: Path
+    browser: Browser, server: Server, tmp_path: Path
 ) -> None:
-    path = os.path.join(tmpdir, "log.har")
+    path = os.path.join(tmp_path, "log.har")
     context = await browser.new_context(
         record_har_path=path, record_har_omit_content=False
     )
@@ -153,9 +153,9 @@ async def test_should_not_omit_content(
 
 
 async def test_should_include_content(
-    browser: Browser, server: Server, tmpdir: Path
+    browser: Browser, server: Server, tmp_path: Path
 ) -> None:
-    path = os.path.join(tmpdir, "log.har")
+    path = os.path.join(tmp_path, "log.har")
     context = await browser.new_context(record_har_path=path)
     page = await context.new_page()
     await page.goto(server.PREFIX + "/har.html")
@@ -171,9 +171,9 @@ async def test_should_include_content(
 
 
 async def test_should_default_to_full_mode(
-    browser: Browser, server: Server, tmpdir: Path
+    browser: Browser, server: Server, tmp_path: Path
 ) -> None:
-    path = os.path.join(tmpdir, "log.har")
+    path = os.path.join(tmp_path, "log.har")
     context = await browser.new_context(
         record_har_path=path,
     )
@@ -188,9 +188,9 @@ async def test_should_default_to_full_mode(
 
 
 async def test_should_support_minimal_mode(
-    browser: Browser, server: Server, tmpdir: Path
+    browser: Browser, server: Server, tmp_path: Path
 ) -> None:
-    path = os.path.join(tmpdir, "log.har")
+    path = os.path.join(tmp_path, "log.har")
     context = await browser.new_context(
         record_har_path=path,
         record_har_mode="minimal",
@@ -206,9 +206,9 @@ async def test_should_support_minimal_mode(
 
 
 async def test_should_filter_by_glob(
-    browser: Browser, server: Server, tmpdir: str
+    browser: Browser, server: Server, tmp_path: str
 ) -> None:
-    path = os.path.join(tmpdir, "log.har")
+    path = os.path.join(tmp_path, "log.har")
     context = await browser.new_context(
         base_url=server.PREFIX,
         record_har_path=path,
@@ -227,9 +227,9 @@ async def test_should_filter_by_glob(
 
 
 async def test_should_filter_by_regexp(
-    browser: Browser, server: Server, tmpdir: str
+    browser: Browser, server: Server, tmp_path: str
 ) -> None:
-    path = os.path.join(tmpdir, "log.har")
+    path = os.path.join(tmp_path, "log.har")
     context = await browser.new_context(
         base_url=server.PREFIX,
         record_har_path=path,
@@ -303,9 +303,9 @@ async def test_by_default_should_abort_requests_not_found_in_har(
 
 
 async def test_fallback_continue_should_continue_requests_on_bad_har(
-    context: BrowserContext, server: Server, tmpdir: Path
+    context: BrowserContext, server: Server, tmp_path: Path
 ) -> None:
-    path_to_invalid_har = tmpdir / "invalid.har"
+    path_to_invalid_har = tmp_path / "invalid.har"
     with path_to_invalid_har.open("w") as f:
         json.dump({"log": {}}, f)
     await context.route_from_har(har=path_to_invalid_har, not_found="fallback")
@@ -500,9 +500,9 @@ async def test_should_fulfill_from_har_with_content_in_a_file(
 
 
 async def test_should_round_trip_har_zip(
-    browser: Browser, server: Server, assetdir: Path, tmpdir: Path
+    browser: Browser, server: Server, assetdir: Path, tmp_path: Path
 ) -> None:
-    har_path = tmpdir / "har.zip"
+    har_path = tmp_path / "har.zip"
     context_1 = await browser.new_context(
         record_har_mode="minimal", record_har_path=har_path
     )
@@ -521,7 +521,7 @@ async def test_should_round_trip_har_zip(
 
 
 async def test_should_round_trip_har_with_post_data(
-    browser: Browser, server: Server, assetdir: Path, tmpdir: Path
+    browser: Browser, server: Server, assetdir: Path, tmp_path: Path
 ) -> None:
     server.set_route("/echo", lambda req: (req.write(req.post_body), req.finish()))
     fetch_function = """
@@ -530,7 +530,7 @@ async def test_should_round_trip_har_with_post_data(
             return await response.text();
         };
     """
-    har_path = tmpdir / "har.zip"
+    har_path = tmp_path / "har.zip"
     context_1 = await browser.new_context(
         record_har_mode="minimal", record_har_path=har_path
     )
@@ -554,7 +554,7 @@ async def test_should_round_trip_har_with_post_data(
 
 
 async def test_should_disambiguate_by_header(
-    browser: Browser, server: Server, tmpdir: Path
+    browser: Browser, server: Server, tmp_path: Path
 ) -> None:
     server.set_route(
         "/echo",
@@ -574,7 +574,7 @@ async def test_should_disambiguate_by_header(
             return await response.text();
         };
     """
-    har_path = tmpdir / "har.zip"
+    har_path = tmp_path / "har.zip"
     context_1 = await browser.new_context(
         record_har_mode="minimal", record_har_path=har_path
     )
@@ -597,9 +597,9 @@ async def test_should_disambiguate_by_header(
 
 
 async def test_should_produce_extracted_zip(
-    browser: Browser, server: Server, tmpdir: Path
+    browser: Browser, server: Server, tmp_path: Path
 ) -> None:
-    har_path = tmpdir / "har.har"
+    har_path = tmp_path / "har.har"
     context = await browser.new_context(
         record_har_mode="minimal", record_har_path=har_path, record_har_content="attach"
     )
@@ -624,9 +624,9 @@ async def test_should_produce_extracted_zip(
 
 
 async def test_should_update_har_zip_for_context(
-    browser: Browser, server: Server, tmpdir: Path
+    browser: Browser, server: Server, tmp_path: Path
 ) -> None:
-    har_path = tmpdir / "har.zip"
+    har_path = tmp_path / "har.zip"
     context = await browser.new_context()
     await context.route_from_har(har_path, update=True)
     page_1 = await context.new_page()
@@ -684,9 +684,9 @@ async def test_context_unroute_call_should_stop_context_route_from_har(
 
 
 async def test_should_update_har_zip_for_page(
-    browser: Browser, server: Server, tmpdir: Path
+    browser: Browser, server: Server, tmp_path: Path
 ) -> None:
-    har_path = tmpdir / "har.zip"
+    har_path = tmp_path / "har.zip"
     context = await browser.new_context()
     page_1 = await context.new_page()
     await page_1.route_from_har(har_path, update=True)
@@ -706,9 +706,9 @@ async def test_should_update_har_zip_for_page(
 
 
 async def test_should_update_har_zip_for_page_with_different_options(
-    browser: Browser, server: Server, tmpdir: Path
+    browser: Browser, server: Server, tmp_path: Path
 ) -> None:
-    har_path = tmpdir / "har.zip"
+    har_path = tmp_path / "har.zip"
     context1 = await browser.new_context()
     page1 = await context1.new_page()
     await page1.route_from_har(
@@ -729,9 +729,9 @@ async def test_should_update_har_zip_for_page_with_different_options(
 
 
 async def test_should_update_extracted_har_zip_for_page(
-    browser: Browser, server: Server, tmpdir: Path
+    browser: Browser, server: Server, tmp_path: Path
 ) -> None:
-    har_path = tmpdir / "har.har"
+    har_path = tmp_path / "har.har"
     context = await browser.new_context()
     page_1 = await context.new_page()
     await page_1.route_from_har(har_path, update=True)
@@ -757,9 +757,9 @@ async def test_should_update_extracted_har_zip_for_page(
 async def test_should_ignore_aborted_requests(
     context_factory: Callable[[], Awaitable[BrowserContext]],
     server: Server,
-    tmpdir: Path,
+    tmp_path: Path,
 ) -> None:
-    path = tmpdir / "test.har"
+    path = tmp_path / "test.har"
     server.set_route("/x", lambda request: request.loseConnection())
     context1 = await context_factory()
     await context1.route_from_har(har=path, update=True)
