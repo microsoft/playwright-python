@@ -93,7 +93,7 @@ def test_browser_close_should_be_callable_twice(
 @pytest.mark.only_browser("chromium")
 def test_browser_launch_should_return_background_pages(
     browser_type: BrowserType,
-    tmpdir: Path,
+    tmp_path: Path,
     browser_channel: Optional[str],
     assetdir: Path,
     launch_arguments: Dict,
@@ -103,7 +103,7 @@ def test_browser_launch_should_return_background_pages(
 
     extension_path = str(assetdir / "simple-extension")
     context = browser_type.launch_persistent_context(
-        str(tmpdir),
+        str(tmp_path),
         **{
             **launch_arguments,
             "headless": False,

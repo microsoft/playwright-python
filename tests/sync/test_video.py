@@ -23,85 +23,85 @@ from tests.server import Server
 
 
 def test_should_expose_video_path(
-    browser: Browser, tmpdir: Path, server: Server
+    browser: Browser, tmp_path: Path, server: Server
 ) -> None:
     page = browser.new_page(
-        record_video_dir=tmpdir, record_video_size={"width": 100, "height": 200}
+        record_video_dir=tmp_path, record_video_size={"width": 100, "height": 200}
     )
     page.goto(server.PREFIX + "/grid.html")
     video = page.video
     assert video
     path = video.path()
     assert repr(page.video) == f"<Video page={page}>"
-    assert str(tmpdir) in str(path)
+    assert str(tmp_path) in str(path)
     page.wait_for_timeout(1000)
     page.context.close()
 
 
-def test_video_should_exist(browser: Browser, tmpdir: Path, server: Server) -> None:
-    page = browser.new_page(record_video_dir=tmpdir)
+def test_video_should_exist(browser: Browser, tmp_path: Path, server: Server) -> None:
+    page = browser.new_page(record_video_dir=tmp_path)
     page.goto(server.PREFIX + "/grid.html")
     video = page.video
     assert video
     path = video.path()
-    assert str(tmpdir) in str(path)
+    assert str(tmp_path) in str(path)
     page.wait_for_timeout(1000)
     page.context.close()
     assert os.path.exists(path)
 
 
-def test_record_video_to_path(browser: Browser, tmpdir: Path, server: Server) -> None:
-    page = browser.new_page(record_video_dir=tmpdir)
+def test_record_video_to_path(browser: Browser, tmp_path: Path, server: Server) -> None:
+    page = browser.new_page(record_video_dir=tmp_path)
     page.goto(server.PREFIX + "/grid.html")
     video = page.video
     assert video
     path = video.path()
-    assert str(tmpdir) in str(path)
+    assert str(tmp_path) in str(path)
     page.wait_for_timeout(1000)
     page.context.close()
     assert os.path.exists(path)
 
 
 def test_record_video_to_path_persistent(
-    browser_type: BrowserType, tmpdir: Path, server: Server, launch_arguments: Dict
+    browser_type: BrowserType, tmp_path: Path, server: Server, launch_arguments: Dict
 ) -> None:
     context = browser_type.launch_persistent_context(
-        tmpdir, **launch_arguments, record_video_dir=tmpdir
+        tmp_path, **launch_arguments, record_video_dir=tmp_path
     )
     page = context.pages[0]
     page.goto(server.PREFIX + "/grid.html")
     video = page.video
     assert video
     path = video.path()
-    assert str(tmpdir) in str(path)
+    assert str(tmp_path) in str(path)
     page.wait_for_timeout(1000)
     context.close()
     assert os.path.exists(path)
 
 
 def test_record_video_can_get_video_path_immediately(
-    browser_type: BrowserType, tmpdir: Path, launch_arguments: Dict
+    browser_type: BrowserType, tmp_path: Path, launch_arguments: Dict
 ) -> None:
     context = browser_type.launch_persistent_context(
-        tmpdir, **launch_arguments, record_video_dir=tmpdir
+        tmp_path, **launch_arguments, record_video_dir=tmp_path
     )
     page = context.pages[0]
     video = page.video
     assert video
     path = video.path()
-    assert str(tmpdir) in str(path)
+    assert str(tmp_path) in str(path)
     page.wait_for_timeout(1000)
     context.close()
     assert os.path.exists(path)
 
 
 def test_should_error_if_page_not_closed_before_save_as(
-    browser: Browser, tmpdir: Path, server: Server
+    browser: Browser, tmp_path: Path, server: Server
 ) -> None:
-    page = browser.new_page(record_video_dir=tmpdir)
+    page = browser.new_page(record_video_dir=tmp_path)
     page.goto(server.PREFIX + "/grid.html")
     page.wait_for_timeout(1000)  # Give it some time to record.
-    out_path = tmpdir / "some-video.webm"
+    out_path = tmp_path / "some-video.webm"
     with pytest.raises(Error) as err:
         video = page.video
         assert video

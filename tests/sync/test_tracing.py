@@ -80,7 +80,7 @@ def test_should_collect_sources(
 
 
 def test_should_collect_trace_with_resources_but_no_js(
-    context: BrowserContext, page: Page, server: Server, tmpdir: Path
+    context: BrowserContext, page: Page, server: Server, tmp_path: Path
 ) -> None:
     context.tracing.start(screenshots=True, snapshots=True)
     page.goto(server.PREFIX + "/frames/frame.html")
@@ -98,7 +98,7 @@ def test_should_collect_trace_with_resources_but_no_js(
         server.PREFIX + "/one-style.html"
     )  # should not produce a route.continue_ entry since we continue all routes if no match.
     page.close()
-    trace_file_path = tmpdir / "trace.zip"
+    trace_file_path = tmp_path / "trace.zip"
     context.tracing.stop(path=trace_file_path)
 
     (_, events) = parse_trace(trace_file_path)
@@ -140,7 +140,7 @@ def test_should_collect_trace_with_resources_but_no_js(
 
 
 def test_should_correctly_determine_sync_apiname(
-    context: BrowserContext, page: Page, server: Server, tmpdir: Path
+    context: BrowserContext, page: Page, server: Server, tmp_path: Path
 ) -> None:
     context.tracing.start(screenshots=True, snapshots=True)
     received_response = threading.Event()
@@ -155,7 +155,7 @@ def test_should_correctly_determine_sync_apiname(
     received_response.wait()
 
     page.close()
-    trace_file_path = tmpdir / "trace.zip"
+    trace_file_path = tmp_path / "trace.zip"
     context.tracing.stop(path=trace_file_path)
 
     (_, events) = parse_trace(trace_file_path)
@@ -167,19 +167,19 @@ def test_should_correctly_determine_sync_apiname(
 
 
 def test_should_collect_two_traces(
-    context: BrowserContext, page: Page, server: Server, tmpdir: Path
+    context: BrowserContext, page: Page, server: Server, tmp_path: Path
 ) -> None:
     context.tracing.start(screenshots=True, snapshots=True)
     page.goto(server.EMPTY_PAGE)
     page.set_content("<button>Click</button>")
     page.click('"Click"')
-    tracing1_path = tmpdir / "trace1.zip"
+    tracing1_path = tmp_path / "trace1.zip"
     context.tracing.stop(path=tracing1_path)
 
     context.tracing.start(screenshots=True, snapshots=True)
     page.dblclick('"Click"')
     page.close()
-    tracing2_path = tmpdir / "trace2.zip"
+    tracing2_path = tmp_path / "trace2.zip"
     context.tracing.stop(path=tracing2_path)
 
     (_, events) = parse_trace(tracing1_path)
@@ -202,7 +202,7 @@ def test_should_not_throw_when_stopping_without_start_but_not_exporting(
 
 
 def test_should_work_with_playwright_context_managers(
-    context: BrowserContext, page: Page, server: Server, tmpdir: Path
+    context: BrowserContext, page: Page, server: Server, tmp_path: Path
 ) -> None:
     context.tracing.start(screenshots=True, snapshots=True)
     page.goto(server.EMPTY_PAGE)
@@ -214,7 +214,7 @@ def test_should_work_with_playwright_context_managers(
 
     with page.expect_popup():
         page.evaluate("window._popup = window.open(document.location.href)")
-    trace_file_path = tmpdir / "trace.zip"
+    trace_file_path = tmp_path / "trace.zip"
     context.tracing.stop(path=trace_file_path)
 
     (_, events) = parse_trace(trace_file_path)
@@ -231,7 +231,7 @@ def test_should_work_with_playwright_context_managers(
 
 
 def test_should_display_wait_for_load_state_even_if_did_not_wait_for_it(
-    context: BrowserContext, page: Page, server: Server, tmpdir: Path
+    context: BrowserContext, page: Page, server: Server, tmp_path: Path
 ) -> None:
     context.tracing.start(screenshots=True, snapshots=True)
 
@@ -239,7 +239,7 @@ def test_should_display_wait_for_load_state_even_if_did_not_wait_for_it(
     page.wait_for_load_state("load")
     page.wait_for_load_state("load")
 
-    trace_file_path = tmpdir / "trace.zip"
+    trace_file_path = tmp_path / "trace.zip"
     context.tracing.stop(path=trace_file_path)
 
     (_, events) = parse_trace(trace_file_path)
@@ -253,23 +253,23 @@ def test_should_display_wait_for_load_state_even_if_did_not_wait_for_it(
 def test_should_respect_traces_dir_and_name(
     browser_type: BrowserType,
     server: Server,
-    tmpdir: Path,
+    tmp_path: Path,
     launch_arguments: Any,
 ) -> None:
-    traces_dir = tmpdir / "traces"
+    traces_dir = tmp_path / "traces"
     browser = browser_type.launch(traces_dir=traces_dir, **launch_arguments)
     context = browser.new_context()
     page = context.new_page()
 
     context.tracing.start(name="name1", snapshots=True)
     page.goto(server.PREFIX + "/one-style.html")
-    context.tracing.stop_chunk(path=tmpdir / "trace1.zip")
+    context.tracing.stop_chunk(path=tmp_path / "trace1.zip")
     assert (traces_dir / "name1.trace").exists()
     assert (traces_dir / "name1.network").exists()
 
     context.tracing.start_chunk(name="name2")
     page.goto(server.PREFIX + "/har.html")
-    context.tracing.stop(path=tmpdir / "trace2.zip")
+    context.tracing.stop(path=tmp_path / "trace2.zip")
     assert (traces_dir / "name2.trace").exists()
     assert (traces_dir / "name2.network").exists()
 
@@ -283,7 +283,7 @@ def test_should_respect_traces_dir_and_name(
             ]
         )
 
-    (resources, events) = parse_trace(tmpdir / "trace1.zip")
+    (resources, events) = parse_trace(tmp_path / "trace1.zip")
     assert get_trace_actions(events) == ["Page.goto"]
     assert resource_names(resources) == [
         "resources/XXX.css",
@@ -293,7 +293,7 @@ def test_should_respect_traces_dir_and_name(
         "trace.trace",
     ]
 
-    (resources, events) = parse_trace(tmpdir / "trace2.zip")
+    (resources, events) = parse_trace(tmp_path / "trace2.zip")
     assert get_trace_actions(events) == ["Page.goto"]
     assert resource_names(resources) == [
         "resources/XXX.css",

@@ -25,8 +25,8 @@ from playwright.sync_api import Browser, BrowserContext, Error, Page, Route, exp
 from tests.server import Server
 
 
-def test_should_work(browser: Browser, server: Server, tmpdir: Path) -> None:
-    path = os.path.join(tmpdir, "log.har")
+def test_should_work(browser: Browser, server: Server, tmp_path: Path) -> None:
+    path = os.path.join(tmp_path, "log.har")
     context = browser.new_context(record_har_path=path)
     page = context.new_page()
     page.goto(server.EMPTY_PAGE)
@@ -36,8 +36,8 @@ def test_should_work(browser: Browser, server: Server, tmpdir: Path) -> None:
         assert "log" in data
 
 
-def test_should_omit_content(browser: Browser, server: Server, tmpdir: Path) -> None:
-    path = os.path.join(tmpdir, "log.har")
+def test_should_omit_content(browser: Browser, server: Server, tmp_path: Path) -> None:
+    path = os.path.join(tmp_path, "log.har")
     context = browser.new_context(record_har_path=path, record_har_content="omit")
     page = context.new_page()
     page.goto(server.PREFIX + "/har.html")
@@ -53,9 +53,9 @@ def test_should_omit_content(browser: Browser, server: Server, tmpdir: Path) -> 
 
 
 def test_should_omit_content_legacy(
-    browser: Browser, server: Server, tmpdir: Path
+    browser: Browser, server: Server, tmp_path: Path
 ) -> None:
-    path = os.path.join(tmpdir, "log.har")
+    path = os.path.join(tmp_path, "log.har")
     context = browser.new_context(record_har_path=path, record_har_omit_content=True)
     page = context.new_page()
     page.goto(server.PREFIX + "/har.html")
@@ -70,8 +70,10 @@ def test_should_omit_content_legacy(
         assert "encoding" not in content1
 
 
-def test_should_attach_content(browser: Browser, server: Server, tmpdir: Path) -> None:
-    path = os.path.join(tmpdir, "log.har.zip")
+def test_should_attach_content(
+    browser: Browser, server: Server, tmp_path: Path
+) -> None:
+    path = os.path.join(tmp_path, "log.har.zip")
     context = browser.new_context(
         record_har_path=path,
         record_har_content="attach",
@@ -127,8 +129,10 @@ def test_should_attach_content(browser: Browser, server: Server, tmpdir: Path) -
                 assert len(f.read()) == entries[2]["response"]["content"]["size"]
 
 
-def test_should_include_content(browser: Browser, server: Server, tmpdir: Path) -> None:
-    path = os.path.join(tmpdir, "log.har")
+def test_should_include_content(
+    browser: Browser, server: Server, tmp_path: Path
+) -> None:
+    path = os.path.join(tmp_path, "log.har")
     context = browser.new_context(record_har_path=path)
     page = context.new_page()
     page.goto(server.PREFIX + "/har.html")
@@ -144,9 +148,9 @@ def test_should_include_content(browser: Browser, server: Server, tmpdir: Path) 
 
 
 def test_should_default_to_full_mode(
-    browser: Browser, server: Server, tmpdir: Path
+    browser: Browser, server: Server, tmp_path: Path
 ) -> None:
-    path = os.path.join(tmpdir, "log.har")
+    path = os.path.join(tmp_path, "log.har")
     context = browser.new_context(
         record_har_path=path,
     )
@@ -161,9 +165,9 @@ def test_should_default_to_full_mode(
 
 
 def test_should_support_minimal_mode(
-    browser: Browser, server: Server, tmpdir: Path
+    browser: Browser, server: Server, tmp_path: Path
 ) -> None:
-    path = os.path.join(tmpdir, "log.har")
+    path = os.path.join(tmp_path, "log.har")
     context = browser.new_context(
         record_har_path=path,
         record_har_mode="minimal",
@@ -178,8 +182,8 @@ def test_should_support_minimal_mode(
         assert log["entries"][0]["request"]["bodySize"] == -1
 
 
-def test_should_filter_by_glob(browser: Browser, server: Server, tmpdir: str) -> None:
-    path = os.path.join(tmpdir, "log.har")
+def test_should_filter_by_glob(browser: Browser, server: Server, tmp_path: str) -> None:
+    path = os.path.join(tmp_path, "log.har")
     context = browser.new_context(
         base_url=server.PREFIX,
         record_har_path=path,
@@ -197,8 +201,10 @@ def test_should_filter_by_glob(browser: Browser, server: Server, tmpdir: str) ->
         assert log["entries"][0]["request"]["url"].endswith("one-style.css")
 
 
-def test_should_filter_by_regexp(browser: Browser, server: Server, tmpdir: str) -> None:
-    path = os.path.join(tmpdir, "log.har")
+def test_should_filter_by_regexp(
+    browser: Browser, server: Server, tmp_path: str
+) -> None:
+    path = os.path.join(tmp_path, "log.har")
     context = browser.new_context(
         base_url=server.PREFIX,
         record_har_path=path,
@@ -270,9 +276,9 @@ def test_by_default_should_abort_requests_not_found_in_har(
 
 
 def test_fallback_continue_should_continue_requests_on_bad_har(
-    context: BrowserContext, server: Server, tmpdir: Path
+    context: BrowserContext, server: Server, tmp_path: Path
 ) -> None:
-    path_to_invalid_har = tmpdir / "invalid.har"
+    path_to_invalid_har = tmp_path / "invalid.har"
     with path_to_invalid_har.open("w") as f:
         json.dump({"log": {}}, f)
     context.route_from_har(har=path_to_invalid_har, not_found="fallback")
@@ -423,9 +429,9 @@ def test_should_fulfill_from_har_with_content_in_a_file(
 
 
 def test_should_round_trip_har_zip(
-    browser: Browser, server: Server, tmpdir: Path
+    browser: Browser, server: Server, tmp_path: Path
 ) -> None:
-    har_path = tmpdir / "har.zip"
+    har_path = tmp_path / "har.zip"
     context_1 = browser.new_context(record_har_mode="minimal", record_har_path=har_path)
     page_1 = context_1.new_page()
     page_1.goto(server.PREFIX + "/one-style.html")
@@ -440,7 +446,7 @@ def test_should_round_trip_har_zip(
 
 
 def test_should_round_trip_har_with_post_data(
-    browser: Browser, server: Server, tmpdir: Path
+    browser: Browser, server: Server, tmp_path: Path
 ) -> None:
     server.set_route(
         "/echo", lambda req: (req.write(cast(Any, req).post_body), req.finish())
@@ -451,7 +457,7 @@ def test_should_round_trip_har_with_post_data(
             return response.text();
         };
     """
-    har_path = tmpdir / "har.zip"
+    har_path = tmp_path / "har.zip"
     context_1 = browser.new_context(record_har_mode="minimal", record_har_path=har_path)
     page_1 = context_1.new_page()
     page_1.goto(server.EMPTY_PAGE)
@@ -473,7 +479,7 @@ def test_should_round_trip_har_with_post_data(
 
 
 def test_should_disambiguate_by_header(
-    browser: Browser, server: Server, tmpdir: Path
+    browser: Browser, server: Server, tmp_path: Path
 ) -> None:
     server.set_route(
         "/echo",
@@ -493,7 +499,7 @@ def test_should_disambiguate_by_header(
             return response.text();
         };
     """
-    har_path = tmpdir / "har.zip"
+    har_path = tmp_path / "har.zip"
     context_1 = browser.new_context(record_har_mode="minimal", record_har_path=har_path)
     page_1 = context_1.new_page()
     page_1.goto(server.EMPTY_PAGE)
@@ -514,9 +520,9 @@ def test_should_disambiguate_by_header(
 
 
 def test_should_produce_extracted_zip(
-    browser: Browser, server: Server, tmpdir: Path
+    browser: Browser, server: Server, tmp_path: Path
 ) -> None:
-    har_path = tmpdir / "har.har"
+    har_path = tmp_path / "har.har"
     context = browser.new_context(
         record_har_mode="minimal", record_har_path=har_path, record_har_content="attach"
     )
@@ -539,9 +545,9 @@ def test_should_produce_extracted_zip(
 
 
 def test_should_update_har_zip_for_context(
-    browser: Browser, server: Server, tmpdir: Path
+    browser: Browser, server: Server, tmp_path: Path
 ) -> None:
-    har_path = tmpdir / "har.zip"
+    har_path = tmp_path / "har.zip"
     context = browser.new_context()
     context.route_from_har(har_path, update=True)
     page_1 = context.new_page()
@@ -559,9 +565,9 @@ def test_should_update_har_zip_for_context(
 
 
 def test_should_update_har_zip_for_page(
-    browser: Browser, server: Server, tmpdir: Path
+    browser: Browser, server: Server, tmp_path: Path
 ) -> None:
-    har_path = tmpdir / "har.zip"
+    har_path = tmp_path / "har.zip"
     context = browser.new_context()
     page_1 = context.new_page()
     page_1.route_from_har(har_path, update=True)
@@ -579,9 +585,9 @@ def test_should_update_har_zip_for_page(
 
 
 def test_should_update_har_zip_for_page_with_different_options(
-    browser: Browser, server: Server, tmpdir: Path
+    browser: Browser, server: Server, tmp_path: Path
 ) -> None:
-    har_path = tmpdir / "har.zip"
+    har_path = tmp_path / "har.zip"
     context1 = browser.new_context()
     page1 = context1.new_page()
     page1.route_from_har(
@@ -600,9 +606,9 @@ def test_should_update_har_zip_for_page_with_different_options(
 
 
 def test_should_update_extracted_har_zip_for_page(
-    browser: Browser, server: Server, tmpdir: Path
+    browser: Browser, server: Server, tmp_path: Path
 ) -> None:
-    har_path = tmpdir / "har.har"
+    har_path = tmp_path / "har.har"
     context = browser.new_context()
     page_1 = context.new_page()
     page_1.route_from_har(har_path, update=True)

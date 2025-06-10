@@ -289,7 +289,7 @@ async def test_should_return_empty_body(playwright: Playwright, server: Server) 
 
 
 async def test_storage_state_should_round_trip_through_file(
-    playwright: Playwright, tmpdir: Path
+    playwright: Playwright, tmp_path: Path
 ) -> None:
     expected: StorageState = {
         "cookies": [
@@ -307,7 +307,7 @@ async def test_storage_state_should_round_trip_through_file(
         "origins": [],
     }
     request = await playwright.request.new_context(storage_state=expected)
-    path = tmpdir / "storage-state.json"
+    path = tmp_path / "storage-state.json"
     actual = await request.storage_state(path=path)
     assert actual == expected
 

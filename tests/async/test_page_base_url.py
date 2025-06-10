@@ -38,10 +38,10 @@ async def test_should_construct_a_new_url_when_a_base_url_in_browser_new_page_is
 
 
 async def test_should_construct_a_new_url_when_a_base_url_in_browser_new_persistent_context_is_passed(
-    browser_type: BrowserType, tmpdir: Path, server: Server, launch_arguments: Dict
+    browser_type: BrowserType, tmp_path: Path, server: Server, launch_arguments: Dict
 ) -> None:
     context = await browser_type.launch_persistent_context(
-        tmpdir, **launch_arguments, base_url=server.PREFIX
+        tmp_path, **launch_arguments, base_url=server.PREFIX
     )
     page = await context.new_page()
     assert (must(await page.goto("/empty.html"))).url == server.EMPTY_PAGE

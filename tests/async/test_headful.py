@@ -23,10 +23,10 @@ from tests.server import Server
 
 
 async def test_should_have_default_url_when_launching_browser(
-    browser_type: BrowserType, launch_arguments: Dict, tmpdir: Path
+    browser_type: BrowserType, launch_arguments: Dict, tmp_path: Path
 ) -> None:
     browser_context = await browser_type.launch_persistent_context(
-        tmpdir, **{**launch_arguments, "headless": False}
+        tmp_path, **{**launch_arguments, "headless": False}
     )
     urls = [page.url for page in browser_context.pages]
     assert urls == ["about:blank"]
@@ -34,10 +34,10 @@ async def test_should_have_default_url_when_launching_browser(
 
 
 async def test_should_close_browser_with_beforeunload_page(
-    browser_type: BrowserType, launch_arguments: Dict, server: Server, tmpdir: Path
+    browser_type: BrowserType, launch_arguments: Dict, server: Server, tmp_path: Path
 ) -> None:
     browser_context = await browser_type.launch_persistent_context(
-        tmpdir, **{**launch_arguments, "headless": False}
+        tmp_path, **{**launch_arguments, "headless": False}
     )
     page = await browser_context.new_page()
     await page.goto(server.PREFIX + "/beforeunload.html")

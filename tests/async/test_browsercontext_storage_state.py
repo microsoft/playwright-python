@@ -97,7 +97,7 @@ async def test_should_set_local_storage(browser: Browser) -> None:
 
 
 async def test_should_round_trip_through_the_file(
-    browser: Browser, context: BrowserContext, tmpdir: Path
+    browser: Browser, context: BrowserContext, tmp_path: Path
 ) -> None:
     page1 = await context.new_page()
     await page1.route(
@@ -113,7 +113,7 @@ async def test_should_round_trip_through_the_file(
         }"""
     )
 
-    path = tmpdir / "storage-state.json"
+    path = tmp_path / "storage-state.json"
     state = await context.storage_state(path=path)
     with open(path, "r") as f:
         written = json.load(f)
