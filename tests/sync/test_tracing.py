@@ -15,11 +15,19 @@
 import re
 import threading
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Callable, ContextManager
 
-from playwright.sync_api import Browser, BrowserContext, BrowserType, Page, Response
+from playwright.sync_api import (
+    Browser,
+    BrowserContext,
+    BrowserType,
+    Page,
+    Response,
+    expect,
+)
 from tests.server import Server
-from tests.utils import get_trace_actions, parse_trace
+
+from .conftest import TraceViewerPage
 
 
 def test_browser_context_output_trace(
@@ -31,6 +39,13 @@ def test_browser_context_output_trace(
     page.goto(server.PREFIX + "/grid.html")
     context.tracing.stop(path=tmp_path / "trace.zip")
     assert Path(tmp_path / "trace.zip").exists()
+
+
+def test_start_stop(browser: Browser) -> None:
+    context = browser.new_context()
+    context.tracing.start()
+    context.tracing.stop()
+    context.close()
 
 
 def test_browser_context_should_not_throw_when_stopping_without_start_but_not_exporting(
@@ -60,27 +75,60 @@ def test_browser_context_output_trace_chunk(
 
 
 def test_should_collect_sources(
-    context: BrowserContext, page: Page, server: Server, tmp_path: Path
+    context: BrowserContext,
+    page: Page,
+    server: Server,
+    tmp_path: Path,
+    show_trace_viewer: Callable[[Path], ContextManager[TraceViewerPage]],
 ) -> None:
     context.tracing.start(sources=True)
     page.goto(server.EMPTY_PAGE)
     page.set_content("<button>Click</button>")
-    page.click("button")
+
+    def my_method_outer() -> None:
+        def my_method_inner() -> None:
+            page.get_by_text("Click").click()
+
+        my_method_inner()
+
+    my_method_outer()
     path = tmp_path / "trace.zip"
     context.tracing.stop(path=path)
 
-    (resources, events) = parse_trace(path)
-    current_file_content = Path(__file__).read_bytes()
-    found_current_file = False
-    for name, resource in resources.items():
-        if resource == current_file_content:
-            found_current_file = True
-            break
-    assert found_current_file
+    with show_trace_viewer(path) as trace_viewer:
+        expect(trace_viewer.action_titles).to_have_text(
+            [
+                re.compile(r"Page.goto"),
+                re.compile(r"Page.set_content"),
+                re.compile(r"Locator.click"),
+            ]
+        )
+        trace_viewer.show_source_tab()
+        # Check that stack frames are shown (they might be anonymous in Python)
+        expect(trace_viewer.stack_frames).to_contain_text(
+            [
+                re.compile(r"my_method_inner"),
+                re.compile(r"my_method_outer"),
+                re.compile(r"test_should_collect_sources"),
+            ]
+        )
+
+        trace_viewer.select_action("Page.set_content")
+        # Check that the source file is shown
+        expect(trace_viewer.page.locator(".source-tab-file-name")).to_have_attribute(
+            "title", re.compile(r".*test_.*\.py")
+        )
+        expect(trace_viewer.page.locator(".source-line-running")).to_contain_text(
+            'page.set_content("<button>Click</button>")'
+        )
 
 
 def test_should_collect_trace_with_resources_but_no_js(
-    context: BrowserContext, page: Page, server: Server, tmp_path: Path
+    context: BrowserContext,
+    page: Page,
+    server: Server,
+    tmp_path: Path,
+    show_trace_viewer: Callable[[Path], ContextManager[TraceViewerPage]],
 ) -> None:
     context.tracing.start(screenshots=True, snapshots=True)
     page.goto(server.PREFIX + "/frames/frame.html")
@@ -101,48 +149,40 @@ def test_should_collect_trace_with_resources_but_no_js(
     trace_file_path = tmp_path / "trace.zip"
     context.tracing.stop(path=trace_file_path)
 
-    (_, events) = parse_trace(trace_file_path)
-    assert events[0]["type"] == "context-options"
-    assert get_trace_actions(events) == [
-        "Page.goto",
-        "Page.set_content",
-        "Page.click",
-        "Mouse.move",
-        "Mouse.dblclick",
-        "Keyboard.insert_text",
-        "Page.wait_for_timeout",
-        "Page.route",
-        "Page.goto",
-        "Page.goto",
-        "Page.close",
-    ]
+    with show_trace_viewer(trace_file_path) as trace_viewer:
+        expect(trace_viewer.action_titles).to_have_text(
+            [
+                re.compile("Page.goto"),
+                re.compile("Page.set_content"),
+                re.compile("Page.click"),
+                re.compile("Mouse.move"),
+                re.compile("Mouse.dblclick"),
+                re.compile("Keyboard.insert_text"),
+                re.compile("Page.wait_for_timeout"),
+                re.compile("Page.route"),
+                re.compile("Page.goto"),
+                re.compile("Page.goto"),
+                re.compile("Page.close"),
+            ]
+        )
 
-    assert len(list(filter(lambda e: e["type"] == "frame-snapshot", events))) >= 1
-    assert len(list(filter(lambda e: e["type"] == "screencast-frame", events))) >= 1
-    style = list(
-        filter(
-            lambda e: e["type"] == "resource-snapshot"
-            and e["snapshot"]["request"]["url"].endswith("style.css"),
-            events,
+        trace_viewer.select_action("Page.set_content")
+        expect(trace_viewer.page.locator(".browser-frame-address-bar")).to_have_text(
+            server.PREFIX + "/frames/frame.html"
         )
-    )[0]
-    assert style
-    assert style["snapshot"]["response"]["content"]["_sha1"]
-    script = list(
-        filter(
-            lambda e: e["type"] == "resource-snapshot"
-            and e["snapshot"]["request"]["url"].endswith("script.js"),
-            events,
-        )
-    )[0]
-    assert script
-    assert script["snapshot"]["response"]["content"].get("_sha1") is None
+        frame = trace_viewer.snapshot_frame("Page.set_content", 0, False)
+        expect(frame.locator("button")).to_have_text("Click")
 
 
 def test_should_correctly_determine_sync_apiname(
-    context: BrowserContext, page: Page, server: Server, tmp_path: Path
+    context: BrowserContext,
+    page: Page,
+    server: Server,
+    tmp_path: Path,
+    show_trace_viewer: Callable,
 ) -> None:
     context.tracing.start(screenshots=True, snapshots=True)
+
     received_response = threading.Event()
 
     def _handle_response(response: Response) -> None:
@@ -158,16 +198,21 @@ def test_should_correctly_determine_sync_apiname(
     trace_file_path = tmp_path / "trace.zip"
     context.tracing.stop(path=trace_file_path)
 
-    (_, events) = parse_trace(trace_file_path)
-    assert events[0]["type"] == "context-options"
-    assert get_trace_actions(events) == [
-        "Page.goto",
-        "Page.close",
-    ]
+    with show_trace_viewer(trace_file_path) as trace_viewer:
+        expect(trace_viewer.action_titles).to_have_text(
+            [
+                re.compile(r"Page.goto"),
+                re.compile(r"Page.close"),
+            ]
+        )
 
 
 def test_should_collect_two_traces(
-    context: BrowserContext, page: Page, server: Server, tmp_path: Path
+    context: BrowserContext,
+    page: Page,
+    server: Server,
+    tmp_path: Path,
+    show_trace_viewer: Callable[[Path], ContextManager[TraceViewerPage]],
 ) -> None:
     context.tracing.start(screenshots=True, snapshots=True)
     page.goto(server.EMPTY_PAGE)
@@ -182,27 +227,30 @@ def test_should_collect_two_traces(
     tracing2_path = tmp_path / "trace2.zip"
     context.tracing.stop(path=tracing2_path)
 
-    (_, events) = parse_trace(tracing1_path)
-    assert events[0]["type"] == "context-options"
-    assert get_trace_actions(events) == [
-        "Page.goto",
-        "Page.set_content",
-        "Page.click",
-    ]
+    with show_trace_viewer(tracing1_path) as trace_viewer:
+        expect(trace_viewer.action_titles).to_have_text(
+            [
+                re.compile("Page.goto"),
+                re.compile("Page.set_content"),
+                re.compile("Page.click"),
+            ]
+        )
 
-    (_, events) = parse_trace(tracing2_path)
-    assert events[0]["type"] == "context-options"
-    assert get_trace_actions(events) == ["Page.dblclick", "Page.close"]
-
-
-def test_should_not_throw_when_stopping_without_start_but_not_exporting(
-    context: BrowserContext,
-) -> None:
-    context.tracing.stop()
+    with show_trace_viewer(tracing2_path) as trace_viewer:
+        expect(trace_viewer.action_titles).to_have_text(
+            [
+                re.compile(r"Page.dblclick"),
+                re.compile(r"Page.close"),
+            ]
+        )
 
 
 def test_should_work_with_playwright_context_managers(
-    context: BrowserContext, page: Page, server: Server, tmp_path: Path
+    context: BrowserContext,
+    page: Page,
+    server: Server,
+    tmp_path: Path,
+    show_trace_viewer: Callable[[Path], ContextManager[TraceViewerPage]],
 ) -> None:
     context.tracing.start(screenshots=True, snapshots=True)
     page.goto(server.EMPTY_PAGE)
@@ -217,21 +265,26 @@ def test_should_work_with_playwright_context_managers(
     trace_file_path = tmp_path / "trace.zip"
     context.tracing.stop(path=trace_file_path)
 
-    (_, events) = parse_trace(trace_file_path)
-    assert events[0]["type"] == "context-options"
-    assert get_trace_actions(events) == [
-        "Page.goto",
-        "Page.set_content",
-        "Page.expect_console_message",
-        "Page.evaluate",
-        "Page.click",
-        "Page.expect_popup",
-        "Page.evaluate",
-    ]
+    with show_trace_viewer(trace_file_path) as trace_viewer:
+        expect(trace_viewer.action_titles).to_have_text(
+            [
+                re.compile("Page.goto"),
+                re.compile("Page.set_content"),
+                re.compile("Page.expect_console_message"),
+                re.compile("Page.evaluate"),
+                re.compile("Page.click"),
+                re.compile("Page.expect_popup"),
+                re.compile("Page.evaluate"),
+            ]
+        )
 
 
 def test_should_display_wait_for_load_state_even_if_did_not_wait_for_it(
-    context: BrowserContext, page: Page, server: Server, tmp_path: Path
+    context: BrowserContext,
+    page: Page,
+    server: Server,
+    tmp_path: Path,
+    show_trace_viewer: Callable[[Path], ContextManager[TraceViewerPage]],
 ) -> None:
     context.tracing.start(screenshots=True, snapshots=True)
 
@@ -242,19 +295,22 @@ def test_should_display_wait_for_load_state_even_if_did_not_wait_for_it(
     trace_file_path = tmp_path / "trace.zip"
     context.tracing.stop(path=trace_file_path)
 
-    (_, events) = parse_trace(trace_file_path)
-    assert get_trace_actions(events) == [
-        "Page.goto",
-        "Page.wait_for_load_state",
-        "Page.wait_for_load_state",
-    ]
+    with show_trace_viewer(trace_file_path) as trace_viewer:
+        expect(trace_viewer.action_titles).to_have_text(
+            [
+                re.compile(r"Page.goto"),
+                re.compile(r"Page.wait_for_load_state"),
+                re.compile(r"Page.wait_for_load_state"),
+            ]
+        )
 
 
 def test_should_respect_traces_dir_and_name(
     browser_type: BrowserType,
     server: Server,
     tmp_path: Path,
-    launch_arguments: Any,
+    launch_arguments: dict,
+    show_trace_viewer: Callable[[Path], ContextManager[TraceViewerPage]],
 ) -> None:
     traces_dir = tmp_path / "traces"
     browser = browser_type.launch(traces_dir=traces_dir, **launch_arguments)
@@ -275,38 +331,35 @@ def test_should_respect_traces_dir_and_name(
 
     browser.close()
 
-    def resource_names(resources: Dict[str, bytes]) -> List[str]:
-        return sorted(
+    with show_trace_viewer(tmp_path / "trace1.zip") as trace_viewer:
+        expect(trace_viewer.action_titles).to_have_text(
             [
-                re.sub(r"^resources/.*\.(html|css)$", r"resources/XXX.\g<1>", file)
-                for file in resources.keys()
+                re.compile(r"Page.goto"),
             ]
         )
+        frame = trace_viewer.snapshot_frame("Page.goto", 0, False)
+        expect(frame.locator("body")).to_have_css(
+            "background-color", "rgb(255, 192, 203)"
+        )
+        expect(frame.locator("body")).to_have_text("hello, world!")
 
-    (resources, events) = parse_trace(tmp_path / "trace1.zip")
-    assert get_trace_actions(events) == ["Page.goto"]
-    assert resource_names(resources) == [
-        "resources/XXX.css",
-        "resources/XXX.html",
-        "trace.network",
-        "trace.stacks",
-        "trace.trace",
-    ]
-
-    (resources, events) = parse_trace(tmp_path / "trace2.zip")
-    assert get_trace_actions(events) == ["Page.goto"]
-    assert resource_names(resources) == [
-        "resources/XXX.css",
-        "resources/XXX.html",
-        "resources/XXX.html",
-        "trace.network",
-        "trace.stacks",
-        "trace.trace",
-    ]
+    with show_trace_viewer(tmp_path / "trace2.zip") as trace_viewer:
+        expect(trace_viewer.action_titles).to_have_text(
+            [
+                re.compile(r"Page.goto"),
+            ]
+        )
+        frame = trace_viewer.snapshot_frame("Page.goto", 0, False)
+        expect(frame.locator("body")).to_have_css(
+            "background-color", "rgb(255, 192, 203)"
+        )
+        expect(frame.locator("body")).to_have_text("hello, world!")
 
 
 def test_should_show_tracing_group_in_action_list(
-    context: BrowserContext, tmp_path: Path
+    context: BrowserContext,
+    tmp_path: Path,
+    show_trace_viewer: Callable[[Path], ContextManager[TraceViewerPage]],
 ) -> None:
     context.tracing.start()
     page = context.new_page()
@@ -324,15 +377,16 @@ def test_should_show_tracing_group_in_action_list(
     trace_path = tmp_path / "trace.zip"
     context.tracing.stop(path=trace_path)
 
-    (resources, events) = parse_trace(trace_path)
-    actions = get_trace_actions(events)
-
-    assert actions == [
-        "BrowserContext.new_page",
-        "outer group",
-        "Page.goto",
-        "inner group 1",
-        "Locator.click",
-        "inner group 2",
-        "Locator.is_visible",
-    ]
+    with show_trace_viewer(trace_path) as trace_viewer:
+        trace_viewer.expand_action("inner group 1")
+        expect(trace_viewer.action_titles).to_have_text(
+            [
+                "BrowserContext.new_page",
+                "outer group",
+                re.compile("Page.goto"),
+                "inner group 1",
+                re.compile("Locator.click"),
+                "inner group 2",
+                re.compile("Locator.is_visible"),
+            ]
+        )

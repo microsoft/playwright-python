@@ -14,20 +14,26 @@
 
 
 import asyncio
+from contextlib import contextmanager
+from pathlib import Path
 from typing import Any, Callable, Dict, Generator, List
 
 import pytest
 from greenlet import greenlet
 
+from playwright._impl._driver import compute_driver_executable
 from playwright.sync_api import (
     Browser,
     BrowserContext,
     BrowserType,
+    FrameLocator,
+    Locator,
     Page,
     Playwright,
     Selectors,
     sync_playwright,
 )
+from tests.server import HTTPServer
 
 from .utils import Utils
 from .utils import utils as utils_object
@@ -121,3 +127,71 @@ def sync_gather(playwright: Playwright) -> Generator[Callable, None, None]:
         return list(map(lambda action: results[action], actions))
 
     yield _sync_gather_impl
+
+
+class TraceViewerPage:
+    def __init__(self, page: Page):
+        self.page = page
+
+    @property
+    def actions_tree(self) -> Locator:
+        return self.page.get_by_test_id("actions-tree")
+
+    @property
+    def action_titles(self) -> Locator:
+        return self.page.locator(".action-title")
+
+    @property
+    def stack_frames(self) -> Locator:
+        return self.page.get_by_test_id("stack-trace-list").locator(".list-view-entry")
+
+    def select_action(self, title: str, ordinal: int = 0) -> None:
+        self.page.locator(f'.action-title:has-text("{title}")').nth(ordinal).click()
+
+    def select_snapshot(self, name: str) -> None:
+        self.page.click(f'.snapshot-tab .tabbed-pane-tab-label:has-text("{name}")')
+
+    def snapshot_frame(
+        self, action_name: str, ordinal: int = 0, has_subframe: bool = False
+    ) -> FrameLocator:
+        self.select_action(action_name, ordinal)
+        expected_frames = 4 if has_subframe else 3
+        while len(self.page.frames) < expected_frames:
+            self.page.wait_for_event("frameattached")
+        return self.page.frame_locator("iframe.snapshot-visible[name=snapshot]")
+
+    def show_source_tab(self) -> None:
+        self.page.click("text='Source'")
+
+    def expand_action(self, title: str, ordinal: int = 0) -> None:
+        self.actions_tree.locator(".tree-view-entry", has_text=title).nth(
+            ordinal
+        ).locator(".codicon-chevron-right").click()
+
+
+@pytest.fixture
+def show_trace_viewer(browser: Browser) -> Generator[Callable, None, None]:
+    """Fixture that provides a function to show trace viewer for a trace file."""
+
+    @contextmanager
+    def _show_trace_viewer(
+        trace_path: Path,
+    ) -> Generator[TraceViewerPage, None, None]:
+        trace_viewer_path = (
+            Path(compute_driver_executable()[0]) / "../package/lib/vite/traceViewer"
+        ).resolve()
+
+        server = HTTPServer()
+        server.start(trace_viewer_path)
+        server.set_route("/trace.zip", lambda request: request.serve_file(trace_path))
+
+        page = browser.new_page()
+
+        try:
+            page.goto(f"{server.PREFIX}/index.html?trace={server.PREFIX}/trace.zip")
+            yield TraceViewerPage(page)
+        finally:
+            page.close()
+            server.stop()
+
+    yield _show_trace_viewer
