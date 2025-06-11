@@ -16,14 +16,16 @@ import asyncio
 import os
 import re
 from pathlib import Path
-from typing import Callable
+from typing import AsyncContextManager, Callable
 
 import pytest
 
-from playwright.async_api import BrowserType, Error, Playwright, Route
+from playwright.async_api import BrowserType, Error, Playwright, Route, expect
 from tests.conftest import RemoteServer
 from tests.server import Server, TestServerRequest, WebSocketProtocol
-from tests.utils import chromium_version_less_than, parse_trace
+from tests.utils import chromium_version_less_than
+
+from .conftest import TraceViewerPage
 
 
 async def test_should_print_custom_ws_close_error(
@@ -325,6 +327,7 @@ async def test_should_record_trace_with_source(
     server: Server,
     tmp_path: Path,
     browser_type: BrowserType,
+    show_trace_viewer: Callable[[Path], AsyncContextManager[TraceViewerPage]],
 ) -> None:
     remote = launch_server()
     browser = await browser_type.connect(remote.ws_endpoint)
@@ -341,14 +344,28 @@ async def test_should_record_trace_with_source(
     await context.close()
     await browser.close()
 
-    (resources, events) = parse_trace(path)
-    current_file_content = Path(__file__).read_bytes()
-    found_current_file = False
-    for name, resource in resources.items():
-        if resource == current_file_content:
-            found_current_file = True
-            break
-    assert found_current_file
+    async with show_trace_viewer(path) as trace_viewer:
+        await expect(trace_viewer.action_titles).to_have_text(
+            [
+                re.compile("Page.goto"),
+                re.compile("Page.set_content"),
+                re.compile("Page.click"),
+            ]
+        )
+        await trace_viewer.show_source_tab()
+        await expect(trace_viewer.stack_frames).to_contain_text(
+            [
+                re.compile(r"test_should_record_trace_with_source"),
+            ]
+        )
+        await trace_viewer.select_action("Page.set_content")
+        # Check that the source file is shown
+        await expect(
+            trace_viewer.page.locator(".source-tab-file-name")
+        ).to_have_attribute("title", re.compile(r".*test_browsertype_connect\.py"))
+        await expect(trace_viewer.page.locator(".source-line-running")).to_contain_text(
+            'page.set_content("<button>Click</button>")'
+        )
 
 
 async def test_should_record_trace_with_relative_trace_path(

@@ -57,10 +57,12 @@ def headless(pytestconfig: pytest.Config) -> bool:
 
 @pytest.fixture(scope="session")
 def launch_arguments(pytestconfig: pytest.Config, headless: bool) -> Dict:
-    return {
+    args: Dict = {
         "headless": headless,
-        "channel": pytestconfig.getoption("--browser-channel"),
     }
+    if pytestconfig.getoption("--browser-channel"):
+        args["channel"] = pytestconfig.getoption("--browser-channel")
+    return args
 
 
 @pytest.fixture

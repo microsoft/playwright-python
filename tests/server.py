@@ -17,6 +17,7 @@ import asyncio
 import contextlib
 import gzip
 import mimetypes
+import pathlib
 import socket
 import threading
 from contextlib import closing
@@ -85,8 +86,7 @@ class TestServerRequest(http.Request):
             self.content.seek(0, 0)
         else:
             self.post_body = None
-        uri = urlparse(self.uri.decode())
-        path = uri.path
+        path = urlparse(self.uri.decode()).path
 
         request_subscriber = server.request_subscribers.get(path)
         if request_subscriber:
@@ -118,15 +118,23 @@ class TestServerRequest(http.Request):
         if server.routes.get(path):
             server.routes[path](self)
             return
+
+        self._serve_file(server.static_path / path[1:], path)
+
+    def serve_file(self, path: pathlib.Path) -> None:
+        return self._serve_file(path, urlparse(self.uri.decode()).path)
+
+    def _serve_file(self, path: pathlib.Path, request_path: str) -> None:
+        server = self.channel.factory.server_instance
         file_content = None
         try:
-            file_content = (server.static_path / path[1:]).read_bytes()
+            file_content = path.read_bytes()
             content_type = mimetypes.guess_type(path)[0]
             if content_type and content_type.startswith("text/"):
                 content_type += "; charset=utf-8"
             self.setHeader(b"Content-Type", content_type)
             self.setHeader(b"Cache-Control", "no-cache, no-store")
-            if path in server.gzip_routes:
+            if request_path in server.gzip_routes:
                 self.setHeader("Content-Encoding", "gzip")
                 self.write(gzip.compress(file_content))
             else:
@@ -173,7 +181,7 @@ class Server:
     def listen(self, factory: TestServerFactory) -> None:
         pass
 
-    def start(self) -> None:
+    def start(self, static_path: pathlib.Path = _dirname / "assets") -> None:
         request_subscribers: Dict[str, asyncio.Future] = {}
         auth: Dict[str, Tuple[str, str]] = {}
         csp: Dict[str, str] = {}
@@ -185,7 +193,7 @@ class Server:
         self.routes = routes
         self._ws_handlers: List[Callable[["WebSocketProtocol"], None]] = []
         self.gzip_routes = gzip_routes
-        self.static_path = _dirname / "assets"
+        self.static_path = static_path
         factory = TestServerFactory()
         factory.server_instance = self
 
@@ -276,16 +284,33 @@ class Server:
 
 
 class HTTPServer(Server):
+    def __init__(self) -> None:
+        self._listeners: list[Any] = []
+        super().__init__()
+
     def listen(self, factory: http.HTTPFactory) -> None:
-        reactor.listenTCP(self.PORT, factory, interface="127.0.0.1")
+        self._listeners.append(
+            reactor.listenTCP(self.PORT, factory, interface="127.0.0.1")
+        )
         try:
-            reactor.listenTCP(self.PORT, factory, interface="::1")
+            self._listeners.append(
+                reactor.listenTCP(self.PORT, factory, interface="::1")
+            )
         except Exception:
             pass
+
+    def stop(self) -> None:
+        for listener in self._listeners:
+            listener.stopListening()
+        self._listeners.clear()
 
 
 class HTTPSServer(Server):
     protocol = "https"
+
+    def __init__(self) -> None:
+        self._listeners: list[Any] = []
+        super().__init__()
 
     def listen(self, factory: http.HTTPFactory) -> None:
         cert = ssl.PrivateCertificate.fromCertificateAndKeyPair(
@@ -297,11 +322,20 @@ class HTTPSServer(Server):
             ),
         )
         contextFactory = cert.options()
-        reactor.listenSSL(self.PORT, factory, contextFactory, interface="127.0.0.1")
+        self._listeners.append(
+            reactor.listenSSL(self.PORT, factory, contextFactory, interface="127.0.0.1")
+        )
         try:
-            reactor.listenSSL(self.PORT, factory, contextFactory, interface="::1")
+            self._listeners.append(
+                reactor.listenSSL(self.PORT, factory, contextFactory, interface="::1")
+            )
         except Exception:
             pass
+
+    def stop(self) -> None:
+        for listener in self._listeners:
+            listener.stopListening()
+        self._listeners.clear()
 
 
 class WebSocketProtocol(WebSocketServerProtocol):
