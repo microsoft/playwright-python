@@ -14442,6 +14442,9 @@ class BrowserType(AsyncBase):
             Firefox user preferences. Learn more about the Firefox user preferences at
             [`about:config`](https://support.mozilla.org/en-US/kb/about-config-editor-firefox).
 
+            You can also provide a path to a custom [`policies.json` file](https://mozilla.github.io/policy-templates/) via
+            `PLAYWRIGHT_FIREFOX_POLICIES_JSON` environment variable.
+
         Returns
         -------
         Browser
@@ -14673,6 +14676,9 @@ class BrowserType(AsyncBase):
         firefox_user_prefs : Union[Dict[str, Union[bool, float, str]], None]
             Firefox user preferences. Learn more about the Firefox user preferences at
             [`about:config`](https://support.mozilla.org/en-US/kb/about-config-editor-firefox).
+
+            You can also provide a path to a custom [`policies.json` file](https://mozilla.github.io/policy-templates/) via
+            `PLAYWRIGHT_FIREFOX_POLICIES_JSON` environment variable.
         record_har_path : Union[pathlib.Path, str, None]
             Enables [HAR](http://www.softwareishard.com/blog/har-12-spec) recording for all pages into the specified HAR file
             on the filesystem. If not specified, the HAR is not recorded. Make sure to call `browser_context.close()`
@@ -15046,6 +15052,15 @@ class Tracing(AsyncBase):
         """Tracing.start
 
         Start tracing.
+
+        **NOTE** You probably want to
+        [enable tracing in your config file](https://playwright.dev/docs/api/class-testoptions#test-options-trace) instead
+        of using `Tracing.start`.
+
+        The `context.tracing` API captures browser operations and network activity, but it doesn't record test assertions
+        (like `expect` calls). We recommend
+        [enabling tracing through Playwright Test configuration](https://playwright.dev/docs/api/class-testoptions#test-options-trace),
+        which includes those assertions and provides a more complete trace for debugging test failures.
 
         **Usage**
 
@@ -15626,6 +15641,13 @@ class Locator(AsyncBase):
         If `expression` throws or rejects, this method throws.
 
         **Usage**
+
+        Passing argument to `expression`:
+
+        ```py
+        result = await page.get_by_testid(\"myId\").evaluate(\"(element, [x, y]) => element.textContent + ' ' + x * y\", [7, 8])
+        print(result) # prints \"myId text 56\"
+        ```
 
         Parameters
         ----------
@@ -16433,6 +16455,31 @@ class Locator(AsyncBase):
 
         return mapping.from_impl(self._impl_obj.nth(index=index))
 
+    def describe(self, description: str) -> "Locator":
+        """Locator.describe
+
+        Describes the locator, description is used in the trace viewer and reports. Returns the locator pointing to the
+        same element.
+
+        **Usage**
+
+        ```py
+        button = page.get_by_test_id(\"btn-sub\").describe(\"Subscribe button\")
+        await button.click()
+        ```
+
+        Parameters
+        ----------
+        description : str
+            Locator description.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.describe(description=description))
+
     def filter(
         self,
         *,
@@ -17220,12 +17267,7 @@ class Locator(AsyncBase):
             )
         )
 
-    async def aria_snapshot(
-        self,
-        *,
-        timeout: typing.Optional[float] = None,
-        ref: typing.Optional[bool] = None,
-    ) -> str:
+    async def aria_snapshot(self, *, timeout: typing.Optional[float] = None) -> str:
         """Locator.aria_snapshot
 
         Captures the aria snapshot of the given element. Read more about [aria snapshots](https://playwright.dev/python/docs/aria-snapshots) and
@@ -17270,9 +17312,6 @@ class Locator(AsyncBase):
         timeout : Union[float, None]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        ref : Union[bool, None]
-            Generate symbolic reference for each element. One can use `aria-ref=<ref>` locator immediately after capturing the
-            snapshot to perform actions on the element.
 
         Returns
         -------
@@ -17280,7 +17319,7 @@ class Locator(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.aria_snapshot(timeout=timeout, ref=ref)
+            await self._impl_obj.aria_snapshot(timeout=timeout)
         )
 
     async def scroll_into_view_if_needed(
@@ -19175,7 +19214,7 @@ class LocatorAssertions(AsyncBase):
         ```py
         from playwright.async_api import expect
 
-        locator = page.locator(\"list > .component\")
+        locator = page.locator(\".list > .component\")
         await expect(locator).to_have_class([\"component\", \"component selected\", \"component\"])
         ```
 
@@ -19256,7 +19295,7 @@ class LocatorAssertions(AsyncBase):
         expected class lists. Each element's class attribute is matched against the corresponding class in the array:
 
         ```html
-        <div class='list'></div>
+        <div class='list'>
           <div class='component inactive'></div>
           <div class='component active'></div>
           <div class='component inactive'></div>
@@ -19266,7 +19305,7 @@ class LocatorAssertions(AsyncBase):
         ```py
         from playwright.async_api import expect
 
-        locator = page.locator(\"list > .component\")
+        locator = page.locator(\".list > .component\")
         await expect(locator).to_contain_class([\"inactive\", \"active\", \"inactive\"])
         ```
 

@@ -336,6 +336,12 @@ class Locator:
     def content_frame(self) -> "FrameLocator":
         return FrameLocator(self._frame, self._selector)
 
+    def describe(self, description: str) -> "Locator":
+        return Locator(
+            self._frame,
+            f"{self._selector} >> internal:describe={json.dumps(description)}",
+        )
+
     def filter(
         self,
         hasText: Union[str, Pattern[str]] = None,
@@ -540,7 +546,7 @@ class Locator:
             ),
         )
 
-    async def aria_snapshot(self, timeout: float = None, ref: bool = None) -> str:
+    async def aria_snapshot(self, timeout: float = None) -> str:
         return await self._frame._channel.send(
             "ariaSnapshot",
             {
