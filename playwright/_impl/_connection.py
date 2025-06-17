@@ -64,17 +64,12 @@ class Channel(AsyncIOEventEmitter):
         )
 
     async def send_return_as_dict(self, method: str, params: Dict = None) -> Any:
-        return await self._connection.wrap_api_call(
-            lambda: self._inner_send(method, params, True),
-            self._is_internal_type,
-        )
+        return await self._inner_send(method, params, True)
 
     def send_no_reply(self, method: str, params: Dict = None) -> None:
         # No reply messages are used to e.g. waitForEventInfo(after).
-        self._connection.wrap_api_call_sync(
-            lambda: self._connection._send_message_to_server(
-                self._object, method, {} if params is None else params, True
-            )
+        self._connection._send_message_to_server(
+            self._object, method, {} if params is None else params, True
         )
 
     async def _inner_send(

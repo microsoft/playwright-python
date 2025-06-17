@@ -107,7 +107,7 @@ class Locator:
         task: Callable[[ElementHandle, float], Awaitable[T]],
         timeout: float = None,
     ) -> T:
-        timeout = self._frame.page._timeout_settings.timeout(timeout)
+        timeout = self._frame._timeout(timeout)
         deadline = (monotonic_time() + timeout) if timeout else 0
         handle = await self.element_handle(timeout=timeout)
         if not handle:
@@ -336,6 +336,12 @@ class Locator:
     def content_frame(self) -> "FrameLocator":
         return FrameLocator(self._frame, self._selector)
 
+    def describe(self, description: str) -> "Locator":
+        return Locator(
+            self._frame,
+            f"{self._selector} >> internal:describe={json.dumps(description)}",
+        )
+
     def filter(
         self,
         hasText: Union[str, Pattern[str]] = None,
@@ -380,7 +386,7 @@ class Locator:
             {
                 "selector": self._selector,
                 "strict": True,
-                **locals_to_params(locals()),
+                **self._locals_to_params_with_timeout(locals()),
             },
         )
 
@@ -540,12 +546,12 @@ class Locator:
             ),
         )
 
-    async def aria_snapshot(self, timeout: float = None, ref: bool = None) -> str:
+    async def aria_snapshot(self, timeout: float = None) -> str:
         return await self._frame._channel.send(
             "ariaSnapshot",
             {
                 "selector": self._selector,
-                **locals_to_params(locals()),
+                **self._locals_to_params_with_timeout(locals()),
             },
         )
 
@@ -715,6 +721,7 @@ class Locator:
     ) -> FrameExpectResult:
         if "expectedValue" in options:
             options["expectedValue"] = serialize_argument(options["expectedValue"])
+        options["timeout"] = self._frame._timeout(options.get("timeout"))
         result = await self._frame._channel.send_return_as_dict(
             "expect",
             {
@@ -729,6 +736,11 @@ class Locator:
 
     async def highlight(self) -> None:
         await self._frame._highlight(self._selector)
+
+    def _locals_to_params_with_timeout(self, args: Dict) -> Dict:
+        params = locals_to_params(args)
+        params["timeout"] = self._frame._timeout(params.get("timeout"))
+        return params
 
 
 class FrameLocator:

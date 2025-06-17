@@ -43,6 +43,7 @@ from playwright._impl._helper import (
     HarMode,
     ReducedMotion,
     ServiceWorkersPolicy,
+    TimeoutSettings,
     locals_to_params,
 )
 from playwright._impl._json_pipe import JsonPipeTransport
@@ -183,6 +184,7 @@ class BrowserType(ChannelOwner):
         headers: Dict[str, str] = None,
     ) -> Browser:
         params = locals_to_params(locals())
+        params["timeout"] = TimeoutSettings.launch_timeout(timeout)
         if params.get("headers"):
             params["headers"] = serialize_headers(params["headers"])
         response = await self._channel.send_return_as_dict("connectOverCDP", params)
@@ -205,11 +207,10 @@ class BrowserType(ChannelOwner):
         headers: Dict[str, str] = None,
         exposeNetwork: str = None,
     ) -> Browser:
-        if timeout is None:
-            timeout = 30000
         if slowMo is None:
             slowMo = 0
 
+        timeout = timeout if timeout is not None else 0
         headers = {**(headers if headers else {}), "x-playwright-browser": self.name}
         local_utils = self._connection.local_utils
         pipe_channel = (
@@ -304,3 +305,4 @@ def normalize_launch_params(params: Dict) -> None:
         params["downloadsPath"] = str(Path(params["downloadsPath"]))
     if "tracesDir" in params:
         params["tracesDir"] = str(Path(params["tracesDir"]))
+    params["timeout"] = TimeoutSettings.launch_timeout(params.get("timeout"))

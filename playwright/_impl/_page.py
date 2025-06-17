@@ -557,7 +557,9 @@ class Page(ChannelOwner):
         waitUntil: DocumentLoadState = None,
     ) -> Optional[Response]:
         return from_nullable_channel(
-            await self._channel.send("reload", locals_to_params(locals()))
+            await self._channel.send(
+                "reload", self._locals_to_params_with_navigation_timeout(locals())
+            )
         )
 
     async def wait_for_load_state(
@@ -588,7 +590,9 @@ class Page(ChannelOwner):
         waitUntil: DocumentLoadState = None,
     ) -> Optional[Response]:
         return from_nullable_channel(
-            await self._channel.send("goBack", locals_to_params(locals()))
+            await self._channel.send(
+                "goBack", self._locals_to_params_with_navigation_timeout(locals())
+            )
         )
 
     async def go_forward(
@@ -597,7 +601,9 @@ class Page(ChannelOwner):
         waitUntil: DocumentLoadState = None,
     ) -> Optional[Response]:
         return from_nullable_channel(
-            await self._channel.send("goForward", locals_to_params(locals()))
+            await self._channel.send(
+                "goForward", self._locals_to_params_with_navigation_timeout(locals())
+            )
         )
 
     async def request_gc(self) -> None:
@@ -778,6 +784,7 @@ class Page(ChannelOwner):
         style: str = None,
     ) -> bytes:
         params = locals_to_params(locals())
+        params["timeout"] = self._timeout_settings.timeout(timeout)
         if "path" in params:
             del params["path"]
         if "mask" in params:
@@ -1399,6 +1406,13 @@ class Page(ChannelOwner):
             if data.locator._equals(locator):
                 del self._locator_handlers[uid]
                 self._channel.send_no_reply("unregisterLocatorHandler", {"uid": uid})
+
+    def _locals_to_params_with_navigation_timeout(self, args: Dict) -> Dict:
+        params = locals_to_params(args)
+        params["timeout"] = self._timeout_settings.navigation_timeout(
+            params.get("timeout")
+        )
+        return params
 
 
 class Worker(ChannelOwner):

@@ -3980,13 +3980,7 @@ class Frame(SyncBase):
             )
         )
 
-    def is_hidden(
-        self,
-        selector: str,
-        *,
-        strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
-    ) -> bool:
+    def is_hidden(self, selector: str, *, strict: typing.Optional[bool] = None) -> bool:
         """Frame.is_hidden
 
         Returns whether the element is hidden, the opposite of [visible](https://playwright.dev/python/docs/actionability#visible).  `selector` that
@@ -4000,8 +3994,6 @@ class Frame(SyncBase):
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
-            Deprecated: This option is ignored. `frame.is_hidden()` does not wait for the element to become hidden and returns immediately.
 
         Returns
         -------
@@ -4009,19 +4001,11 @@ class Frame(SyncBase):
         """
 
         return mapping.from_maybe_impl(
-            self._sync(
-                self._impl_obj.is_hidden(
-                    selector=selector, strict=strict, timeout=timeout
-                )
-            )
+            self._sync(self._impl_obj.is_hidden(selector=selector, strict=strict))
         )
 
     def is_visible(
-        self,
-        selector: str,
-        *,
-        strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        self, selector: str, *, strict: typing.Optional[bool] = None
     ) -> bool:
         """Frame.is_visible
 
@@ -4036,8 +4020,6 @@ class Frame(SyncBase):
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
-            Deprecated: This option is ignored. `frame.is_visible()` does not wait for the element to become visible and returns immediately.
 
         Returns
         -------
@@ -4045,11 +4027,7 @@ class Frame(SyncBase):
         """
 
         return mapping.from_maybe_impl(
-            self._sync(
-                self._impl_obj.is_visible(
-                    selector=selector, strict=strict, timeout=timeout
-                )
-            )
+            self._sync(self._impl_obj.is_visible(selector=selector, strict=strict))
         )
 
     def dispatch_event(
@@ -14485,6 +14463,9 @@ class BrowserType(SyncBase):
             Firefox user preferences. Learn more about the Firefox user preferences at
             [`about:config`](https://support.mozilla.org/en-US/kb/about-config-editor-firefox).
 
+            You can also provide a path to a custom [`policies.json` file](https://mozilla.github.io/policy-templates/) via
+            `PLAYWRIGHT_FIREFOX_POLICIES_JSON` environment variable.
+
         Returns
         -------
         Browser
@@ -14718,6 +14699,9 @@ class BrowserType(SyncBase):
         firefox_user_prefs : Union[Dict[str, Union[bool, float, str]], None]
             Firefox user preferences. Learn more about the Firefox user preferences at
             [`about:config`](https://support.mozilla.org/en-US/kb/about-config-editor-firefox).
+
+            You can also provide a path to a custom [`policies.json` file](https://mozilla.github.io/policy-templates/) via
+            `PLAYWRIGHT_FIREFOX_POLICIES_JSON` environment variable.
         record_har_path : Union[pathlib.Path, str, None]
             Enables [HAR](http://www.softwareishard.com/blog/har-12-spec) recording for all pages into the specified HAR file
             on the filesystem. If not specified, the HAR is not recorded. Make sure to call `browser_context.close()`
@@ -15094,6 +15078,15 @@ class Tracing(SyncBase):
         """Tracing.start
 
         Start tracing.
+
+        **NOTE** You probably want to
+        [enable tracing in your config file](https://playwright.dev/docs/api/class-testoptions#test-options-trace) instead
+        of using `Tracing.start`.
+
+        The `context.tracing` API captures browser operations and network activity, but it doesn't record test assertions
+        (like `expect` calls). We recommend
+        [enabling tracing through Playwright Test configuration](https://playwright.dev/docs/api/class-testoptions#test-options-trace),
+        which includes those assertions and provides a more complete trace for debugging test failures.
 
         **Usage**
 
@@ -15684,6 +15677,13 @@ class Locator(SyncBase):
         If `expression` throws or rejects, this method throws.
 
         **Usage**
+
+        Passing argument to `expression`:
+
+        ```py
+        result = page.get_by_testid(\"myId\").evaluate(\"(element, [x, y]) => element.textContent + ' ' + x * y\", [7, 8])
+        print(result) # prints \"myId text 56\"
+        ```
 
         Parameters
         ----------
@@ -16503,6 +16503,24 @@ class Locator(SyncBase):
 
         return mapping.from_impl(self._impl_obj.nth(index=index))
 
+    def describe(self, description: str) -> "Locator":
+        """Locator.describe
+
+        Describes the locator, description is used in the trace viewer and reports. Returns the locator pointing to the
+        same element.
+
+        Parameters
+        ----------
+        description : str
+            Locator description.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.describe(description=description))
+
     def filter(
         self,
         *,
@@ -17311,12 +17329,7 @@ class Locator(SyncBase):
             )
         )
 
-    def aria_snapshot(
-        self,
-        *,
-        timeout: typing.Optional[float] = None,
-        ref: typing.Optional[bool] = None,
-    ) -> str:
+    def aria_snapshot(self, *, timeout: typing.Optional[float] = None) -> str:
         """Locator.aria_snapshot
 
         Captures the aria snapshot of the given element. Read more about [aria snapshots](https://playwright.dev/python/docs/aria-snapshots) and
@@ -17361,9 +17374,6 @@ class Locator(SyncBase):
         timeout : Union[float, None]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        ref : Union[bool, None]
-            Generate symbolic reference for each element. One can use `aria-ref=<ref>` locator immediately after capturing the
-            snapshot to perform actions on the element.
 
         Returns
         -------
@@ -17371,7 +17381,7 @@ class Locator(SyncBase):
         """
 
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.aria_snapshot(timeout=timeout, ref=ref))
+            self._sync(self._impl_obj.aria_snapshot(timeout=timeout))
         )
 
     def scroll_into_view_if_needed(
@@ -19320,7 +19330,7 @@ class LocatorAssertions(SyncBase):
         ```py
         from playwright.sync_api import expect
 
-        locator = page.locator(\"list > .component\")
+        locator = page.locator(\".list > .component\")
         expect(locator).to_have_class([\"component\", \"component selected\", \"component\"])
         ```
 
@@ -19405,7 +19415,7 @@ class LocatorAssertions(SyncBase):
         expected class lists. Each element's class attribute is matched against the corresponding class in the array:
 
         ```html
-        <div class='list'></div>
+        <div class='list'>
           <div class='component inactive'></div>
           <div class='component active'></div>
           <div class='component inactive'></div>
@@ -19415,7 +19425,7 @@ class LocatorAssertions(SyncBase):
         ```py
         from playwright.sync_api import expect
 
-        locator = page.locator(\"list > .component\")
+        locator = page.locator(\".list > .component\")
         await expect(locator).to_contain_class([\"inactive\", \"active\", \"inactive\"])
         ```
 
