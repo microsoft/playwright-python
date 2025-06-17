@@ -397,13 +397,9 @@ class Page(ChannelOwner):
 
     def set_default_navigation_timeout(self, timeout: float) -> None:
         self._timeout_settings.set_default_navigation_timeout(timeout)
-        self._channel.send_no_reply(
-            "setDefaultNavigationTimeoutNoReply", dict(timeout=timeout)
-        )
 
     def set_default_timeout(self, timeout: float) -> None:
         self._timeout_settings.set_default_timeout(timeout)
-        self._channel.send_no_reply("setDefaultTimeoutNoReply", dict(timeout=timeout))
 
     async def query_selector(
         self,

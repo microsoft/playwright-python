@@ -444,7 +444,7 @@ class Frame(ChannelOwner):
         waitUntil: DocumentLoadState = None,
     ) -> None:
         await self._channel.send(
-            "setContent", self._locals_to_params_with_timeout(locals())
+            "setContent", self._locals_to_params_with_navigation_timeout(locals())
         )
 
     @property
