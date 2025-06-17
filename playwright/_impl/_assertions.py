@@ -51,6 +51,7 @@ class AssertionsBase:
         expect_options: FrameExpectOptions,
         expected: Any,
         message: str,
+        # title: str,
     ) -> None:
         __tracebackhide__ = True
         expect_options["isNot"] = self._is_not
@@ -60,6 +61,7 @@ class AssertionsBase:
             message = message.replace("expected to", "expected not to")
         if "useInnerText" in expect_options and expect_options["useInnerText"] is None:
             del expect_options["useInnerText"]
+        # result = await self._actual_locator._expect(expression, expect_options, title)
         result = await self._actual_locator._expect(expression, expect_options)
         if result["matches"] == self._is_not:
             actual = result.get("received")

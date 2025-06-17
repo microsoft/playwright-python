@@ -85,35 +85,6 @@ class HarRecordingMetadata(TypedDict, total=False):
     content: Optional[HarContentPolicy]
 
 
-def prepare_record_har_options(params: Dict) -> Dict[str, Any]:
-    out_params: Dict[str, Any] = {"path": str(params["recordHarPath"])}
-    if "recordHarUrlFilter" in params:
-        opt = params["recordHarUrlFilter"]
-        if isinstance(opt, str):
-            out_params["urlGlob"] = opt
-        if isinstance(opt, Pattern):
-            out_params["urlRegexSource"] = opt.pattern
-            out_params["urlRegexFlags"] = escape_regex_flags(opt)
-        del params["recordHarUrlFilter"]
-    if "recordHarMode" in params:
-        out_params["mode"] = params["recordHarMode"]
-        del params["recordHarMode"]
-
-    new_content_api = None
-    old_content_api = None
-    if "recordHarContent" in params:
-        new_content_api = params["recordHarContent"]
-        del params["recordHarContent"]
-    if "recordHarOmitContent" in params:
-        old_content_api = params["recordHarOmitContent"]
-        del params["recordHarOmitContent"]
-    content = new_content_api or ("omit" if old_content_api else None)
-    if content:
-        out_params["content"] = content
-
-    return out_params
-
-
 class ParsedMessageParams(TypedDict):
     type: str
     guid: str

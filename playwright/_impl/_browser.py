@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Sequence, Union, cast
@@ -38,12 +37,9 @@ from playwright._impl._helper import (
     HarMode,
     ReducedMotion,
     ServiceWorkersPolicy,
-    async_readfile,
     locals_to_params,
     make_dirs_for_file,
-    prepare_record_har_options,
 )
-from playwright._impl._network import serialize_headers, to_client_certificates_protocol
 from playwright._impl._page import Page
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -65,11 +61,40 @@ class Browser(ChannelOwner):
         self._cr_tracing_path: Optional[str] = None
 
         self._contexts: List[BrowserContext] = []
+        self._traces_dir: Optional[str] = None
+        self._channel.on(
+            "context",
+            lambda context: self._did_create_context(cast(BrowserContext, context)),
+        )
         self._channel.on("close", lambda _: self._on_close())
         self._close_reason: Optional[str] = None
 
     def __repr__(self) -> str:
         return f"<Browser type={self._browser_type} version={self.version}>"
+
+    def connect_to_browser_type(
+        self,
+        browser_type: BrowserType,
+        traces_dir: Optional[str] = None,
+    ) -> None:
+        # Note: when using connect(), `browserType` is different from `this.parent`.
+        # This is why browser type is not wired up in the constructor, and instead this separate method is called later on.
+        self._browser_type = browser_type
+        self._traces_dir = traces_dir
+        for context in self._contexts:
+            context._tracing._traces_dir = traces_dir
+            browser_type._playwright.selectors._contextsForSelectors.append(context)
+
+    def _did_create_context(self, context: BrowserContext) -> None:
+        context._browser = self
+        self._contexts.append(context)
+        # Note: when connecting to a browser, initial contexts arrive before `_browserType` is set,
+        # and will be configured later in `ConnectToBrowserType`.
+        if self._browser_type:
+            context._tracing._traces_dir = self._traces_dir
+            self._browser_type._playwright.selectors._contextsForSelectors.append(
+                context
+            )
 
     def _on_close(self) -> None:
         self._is_connected = False
@@ -126,11 +151,19 @@ class Browser(ChannelOwner):
         clientCertificates: List[ClientCertificate] = None,
     ) -> BrowserContext:
         params = locals_to_params(locals())
-        await prepare_browser_context_params(params)
+        await self._browser_type.prepare_browser_context_params(params)
 
         channel = await self._channel.send("newContext", params)
         context = cast(BrowserContext, from_channel(channel))
-        self._browser_type._did_create_context(context, params, {})
+        await context.initialize_har_from_options(
+            {
+                "recordHarPath": recordHarPath,
+                "recordHarContent": recordHarContent,
+                "recordHarOmitContent": recordHarOmitContent,
+                "recordHarUrlFilter": recordHarUrlFilter,
+                "recordHarMode": recordHarMode,
+            }
+        )
         return context
 
     async def new_page(
@@ -181,6 +214,7 @@ class Browser(ChannelOwner):
             context._owner_page = page
             return page
 
+        # TODO: Args
         return await self._connection.wrap_api_call(inner)
 
     async def close(self, reason: str = None) -> None:
@@ -226,43 +260,3 @@ class Browser(ChannelOwner):
                 f.write(buffer)
             self._cr_tracing_path = None
         return buffer
-
-
-async def prepare_browser_context_params(params: Dict) -> None:
-    if params.get("noViewport"):
-        del params["noViewport"]
-        params["noDefaultViewport"] = True
-    if "defaultBrowserType" in params:
-        del params["defaultBrowserType"]
-    if "extraHTTPHeaders" in params:
-        params["extraHTTPHeaders"] = serialize_headers(params["extraHTTPHeaders"])
-    if "recordHarPath" in params:
-        params["recordHar"] = prepare_record_har_options(params)
-        del params["recordHarPath"]
-    if "recordVideoDir" in params:
-        params["recordVideo"] = {"dir": Path(params["recordVideoDir"]).absolute()}
-        if "recordVideoSize" in params:
-            params["recordVideo"]["size"] = params["recordVideoSize"]
-            del params["recordVideoSize"]
-        del params["recordVideoDir"]
-    if "storageState" in params:
-        storageState = params["storageState"]
-        if not isinstance(storageState, dict):
-            params["storageState"] = json.loads(
-                (await async_readfile(storageState)).decode()
-            )
-    if params.get("colorScheme", None) == "null":
-        params["colorScheme"] = "no-override"
-    if params.get("reducedMotion", None) == "null":
-        params["reducedMotion"] = "no-override"
-    if params.get("forcedColors", None) == "null":
-        params["forcedColors"] = "no-override"
-    if params.get("contrast", None) == "null":
-        params["contrast"] = "no-override"
-    if "acceptDownloads" in params:
-        params["acceptDownloads"] = "accept" if params["acceptDownloads"] else "deny"
-
-    if "clientCertificates" in params:
-        params["clientCertificates"] = await to_client_certificates_protocol(
-            params["clientCertificates"]
-        )

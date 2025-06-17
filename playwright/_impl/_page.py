@@ -286,7 +286,7 @@ class Page(ChannelOwner):
         route_handlers = self._routes.copy()
         for route_handler in route_handlers:
             # If the page was closed we stall all requests right away.
-            if self._close_was_called or self.context._close_was_called:
+            if self._close_was_called or self.context._closing_or_closed:
                 return
             if not route_handler.matches(route.request.url):
                 continue
