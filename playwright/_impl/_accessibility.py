@@ -67,3 +67,11 @@ class Accessibility:
             params["root"] = root._channel
         result = await self._channel.send("accessibilitySnapshot", params)
         return _ax_node_from_protocol(result) if result else None
+
+    async def snapshot_for_ai(
+        self,
+    ) -> Optional[Dict]:
+        params = locals_to_params(locals())
+        result = await self._channel.send("_snapshotForAI", params)
+        return _ax_node_from_protocol(result) if result else None
+
