@@ -213,7 +213,7 @@ class ElementHandle(JSHandle):
         await self._channel.send(
             "setInputFiles",
             {
-                "timeout": timeout,
+                "timeout": self._frame._timeout(timeout),
                 **converted,
             },
         )

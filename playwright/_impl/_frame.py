@@ -739,7 +739,7 @@ class Frame(ChannelOwner):
             {
                 "selector": selector,
                 "strict": strict,
-                "timeout": timeout,
+                "timeout": self._timeout(timeout),
                 **converted,
             },
         )

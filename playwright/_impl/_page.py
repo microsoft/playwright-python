@@ -418,37 +418,51 @@ class Page(ChannelOwner):
         state: Literal["attached", "detached", "hidden", "visible"] = None,
         strict: bool = None,
     ) -> Optional[ElementHandle]:
-        return await self._main_frame.wait_for_selector(**locals_to_params(locals()))
+        return await self._main_frame.wait_for_selector(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def is_checked(
         self, selector: str, strict: bool = None, timeout: float = None
     ) -> bool:
-        return await self._main_frame.is_checked(**locals_to_params(locals()))
+        return await self._main_frame.is_checked(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def is_disabled(
         self, selector: str, strict: bool = None, timeout: float = None
     ) -> bool:
-        return await self._main_frame.is_disabled(**locals_to_params(locals()))
+        return await self._main_frame.is_disabled(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def is_editable(
         self, selector: str, strict: bool = None, timeout: float = None
     ) -> bool:
-        return await self._main_frame.is_editable(**locals_to_params(locals()))
+        return await self._main_frame.is_editable(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def is_enabled(
         self, selector: str, strict: bool = None, timeout: float = None
     ) -> bool:
-        return await self._main_frame.is_enabled(**locals_to_params(locals()))
+        return await self._main_frame.is_enabled(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def is_hidden(
         self, selector: str, strict: bool = None, timeout: float = None
     ) -> bool:
-        return await self._main_frame.is_hidden(**locals_to_params(locals()))
+        return await self._main_frame.is_hidden(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def is_visible(
         self, selector: str, strict: bool = None, timeout: float = None
     ) -> bool:
-        return await self._main_frame.is_visible(**locals_to_params(locals()))
+        return await self._main_frame.is_visible(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def dispatch_event(
         self,
@@ -458,7 +472,9 @@ class Page(ChannelOwner):
         timeout: float = None,
         strict: bool = None,
     ) -> None:
-        return await self._main_frame.dispatch_event(**locals_to_params(locals()))
+        return await self._main_frame.dispatch_event(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def evaluate(self, expression: str, arg: Serializable = None) -> Any:
         return await self._main_frame.evaluate(expression, arg)
@@ -494,12 +510,16 @@ class Page(ChannelOwner):
         content: str = None,
         type: str = None,
     ) -> ElementHandle:
-        return await self._main_frame.add_script_tag(**locals_to_params(locals()))
+        return await self._main_frame.add_script_tag(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def add_style_tag(
         self, url: str = None, path: Union[str, Path] = None, content: str = None
     ) -> ElementHandle:
-        return await self._main_frame.add_style_tag(**locals_to_params(locals()))
+        return await self._main_frame.add_style_tag(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def expose_function(self, name: str, callback: Callable) -> None:
         await self.expose_binding(name, lambda source, *args: callback(*args))
@@ -536,7 +556,9 @@ class Page(ChannelOwner):
         timeout: float = None,
         waitUntil: DocumentLoadState = None,
     ) -> None:
-        return await self._main_frame.set_content(**locals_to_params(locals()))
+        return await self._main_frame.set_content(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def goto(
         self,
@@ -545,7 +567,9 @@ class Page(ChannelOwner):
         waitUntil: DocumentLoadState = None,
         referer: str = None,
     ) -> Optional[Response]:
-        return await self._main_frame.goto(**locals_to_params(locals()))
+        return await self._main_frame.goto(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def reload(
         self,
@@ -563,7 +587,9 @@ class Page(ChannelOwner):
         state: Literal["domcontentloaded", "load", "networkidle"] = None,
         timeout: float = None,
     ) -> None:
-        return await self._main_frame.wait_for_load_state(**locals_to_params(locals()))
+        return await self._main_frame.wait_for_load_state(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def wait_for_url(
         self,
@@ -571,7 +597,9 @@ class Page(ChannelOwner):
         waitUntil: DocumentLoadState = None,
         timeout: float = None,
     ) -> None:
-        return await self._main_frame.wait_for_url(**locals_to_params(locals()))
+        return await self._main_frame.wait_for_url(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def wait_for_event(
         self, event: str, predicate: Callable = None, timeout: float = None
@@ -613,7 +641,7 @@ class Page(ChannelOwner):
         forcedColors: ForcedColors = None,
         contrast: Contrast = None,
     ) -> None:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         if "media" in params:
             params["media"] = "no-override" if params["media"] == "null" else media
         if "colorScheme" in params:
@@ -636,7 +664,9 @@ class Page(ChannelOwner):
 
     async def set_viewport_size(self, viewportSize: ViewportSize) -> None:
         self._viewport_size = viewportSize
-        await self._channel.send("setViewportSize", locals_to_params(locals()))
+        await self._channel.send(
+            "setViewportSize", self._locals_to_params_with_timeout(locals())
+        )
 
     @property
     def viewport_size(self) -> Optional[ViewportSize]:
@@ -779,7 +809,7 @@ class Page(ChannelOwner):
         maskColor: str = None,
         style: str = None,
     ) -> bytes:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         params["timeout"] = self._timeout_settings.timeout(timeout)
         if "path" in params:
             del params["path"]
@@ -809,7 +839,9 @@ class Page(ChannelOwner):
         self._close_reason = reason
         self._close_was_called = True
         try:
-            await self._channel.send("close", locals_to_params(locals()))
+            await self._channel.send(
+                "close", self._locals_to_params_with_timeout(locals())
+            )
             if self._owned_context:
                 await self._owned_context.close()
         except Exception as e:
@@ -833,7 +865,9 @@ class Page(ChannelOwner):
         trial: bool = None,
         strict: bool = None,
     ) -> None:
-        return await self._main_frame.click(**locals_to_params(locals()))
+        return await self._main_frame.click(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def dblclick(
         self,
@@ -848,7 +882,9 @@ class Page(ChannelOwner):
         strict: bool = None,
         trial: bool = None,
     ) -> None:
-        return await self._main_frame.dblclick(**locals_to_params(locals()))
+        return await self._main_frame.dblclick(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def tap(
         self,
@@ -861,7 +897,9 @@ class Page(ChannelOwner):
         strict: bool = None,
         trial: bool = None,
     ) -> None:
-        return await self._main_frame.tap(**locals_to_params(locals()))
+        return await self._main_frame.tap(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def fill(
         self,
@@ -872,7 +910,9 @@ class Page(ChannelOwner):
         strict: bool = None,
         force: bool = None,
     ) -> None:
-        return await self._main_frame.fill(**locals_to_params(locals()))
+        return await self._main_frame.fill(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     def locator(
         self,
@@ -950,27 +990,37 @@ class Page(ChannelOwner):
     async def focus(
         self, selector: str, strict: bool = None, timeout: float = None
     ) -> None:
-        return await self._main_frame.focus(**locals_to_params(locals()))
+        return await self._main_frame.focus(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def text_content(
         self, selector: str, strict: bool = None, timeout: float = None
     ) -> Optional[str]:
-        return await self._main_frame.text_content(**locals_to_params(locals()))
+        return await self._main_frame.text_content(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def inner_text(
         self, selector: str, strict: bool = None, timeout: float = None
     ) -> str:
-        return await self._main_frame.inner_text(**locals_to_params(locals()))
+        return await self._main_frame.inner_text(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def inner_html(
         self, selector: str, strict: bool = None, timeout: float = None
     ) -> str:
-        return await self._main_frame.inner_html(**locals_to_params(locals()))
+        return await self._main_frame.inner_html(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def get_attribute(
         self, selector: str, name: str, strict: bool = None, timeout: float = None
     ) -> Optional[str]:
-        return await self._main_frame.get_attribute(**locals_to_params(locals()))
+        return await self._main_frame.get_attribute(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def hover(
         self,
@@ -983,7 +1033,9 @@ class Page(ChannelOwner):
         strict: bool = None,
         trial: bool = None,
     ) -> None:
-        return await self._main_frame.hover(**locals_to_params(locals()))
+        return await self._main_frame.hover(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def drag_and_drop(
         self,
@@ -997,7 +1049,9 @@ class Page(ChannelOwner):
         strict: bool = None,
         trial: bool = None,
     ) -> None:
-        return await self._main_frame.drag_and_drop(**locals_to_params(locals()))
+        return await self._main_frame.drag_and_drop(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def select_option(
         self,
@@ -1011,13 +1065,13 @@ class Page(ChannelOwner):
         force: bool = None,
         strict: bool = None,
     ) -> List[str]:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._main_frame.select_option(**params)
 
     async def input_value(
         self, selector: str, strict: bool = None, timeout: float = None
     ) -> str:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._main_frame.input_value(**params)
 
     async def set_input_files(
@@ -1030,7 +1084,9 @@ class Page(ChannelOwner):
         strict: bool = None,
         noWaitAfter: bool = None,
     ) -> None:
-        return await self._main_frame.set_input_files(**locals_to_params(locals()))
+        return await self._main_frame.set_input_files(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def type(
         self,
@@ -1041,7 +1097,9 @@ class Page(ChannelOwner):
         noWaitAfter: bool = None,
         strict: bool = None,
     ) -> None:
-        return await self._main_frame.type(**locals_to_params(locals()))
+        return await self._main_frame.type(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def press(
         self,
@@ -1052,7 +1110,9 @@ class Page(ChannelOwner):
         noWaitAfter: bool = None,
         strict: bool = None,
     ) -> None:
-        return await self._main_frame.press(**locals_to_params(locals()))
+        return await self._main_frame.press(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def check(
         self,
@@ -1064,7 +1124,9 @@ class Page(ChannelOwner):
         strict: bool = None,
         trial: bool = None,
     ) -> None:
-        return await self._main_frame.check(**locals_to_params(locals()))
+        return await self._main_frame.check(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def uncheck(
         self,
@@ -1076,7 +1138,9 @@ class Page(ChannelOwner):
         strict: bool = None,
         trial: bool = None,
     ) -> None:
-        return await self._main_frame.uncheck(**locals_to_params(locals()))
+        return await self._main_frame.uncheck(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def wait_for_timeout(self, timeout: float) -> None:
         await self._main_frame.wait_for_timeout(timeout)
@@ -1088,7 +1152,9 @@ class Page(ChannelOwner):
         timeout: float = None,
         polling: Union[float, Literal["raf"]] = None,
     ) -> JSHandle:
-        return await self._main_frame.wait_for_function(**locals_to_params(locals()))
+        return await self._main_frame.wait_for_function(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     @property
     def workers(self) -> List["Worker"]:
@@ -1137,7 +1203,7 @@ class Page(ChannelOwner):
         outline: bool = None,
         tagged: bool = None,
     ) -> bytes:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         if "path" in params:
             del params["path"]
         encoded_binary = await self._channel.send("pdf", params)
@@ -1402,6 +1468,11 @@ class Page(ChannelOwner):
             if data.locator._equals(locator):
                 del self._locator_handlers[uid]
                 self._channel.send_no_reply("unregisterLocatorHandler", {"uid": uid})
+
+    def _locals_to_params_with_timeout(self, args: Dict) -> Dict:
+        params = locals_to_params(args)
+        params["timeout"] = self._timeout_settings.timeout(params.get("timeout"))
+        return params
 
     def _locals_to_params_with_navigation_timeout(self, args: Dict) -> Dict:
         params = locals_to_params(args)

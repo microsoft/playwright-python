@@ -35,6 +35,7 @@ from playwright._impl._connection import (
 )
 from playwright._impl._errors import Error
 from playwright._impl._helper import (
+    PLAYWRIGHT_MAX_DEADLINE,
     ColorScheme,
     Contrast,
     Env,
@@ -210,7 +211,6 @@ class BrowserType(ChannelOwner):
         if slowMo is None:
             slowMo = 0
 
-        timeout = timeout if timeout is not None else 0
         headers = {**(headers if headers else {}), "x-playwright-browser": self.name}
         local_utils = self._connection.local_utils
         pipe_channel = (
@@ -220,7 +220,7 @@ class BrowserType(ChannelOwner):
                     "wsEndpoint": wsEndpoint,
                     "headers": headers,
                     "slowMo": slowMo,
-                    "timeout": timeout,
+                    "timeout": timeout if timeout is not None else 0,
                     "exposeNetwork": exposeNetwork,
                 },
             )
@@ -260,7 +260,10 @@ class BrowserType(ChannelOwner):
         connection._loop.create_task(connection.run())
         playwright_future = connection.playwright_future
 
-        timeout_future = throw_on_timeout(timeout, Error("Connection timed out"))
+        timeout_future = throw_on_timeout(
+            timeout if timeout is not None else PLAYWRIGHT_MAX_DEADLINE,
+            Error("Connection timed out"),
+        )
         done, pending = await asyncio.wait(
             {transport.on_error_future, playwright_future, timeout_future},
             return_when=asyncio.FIRST_COMPLETED,
