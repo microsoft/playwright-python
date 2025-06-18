@@ -32,10 +32,10 @@ from typing import (
 )
 
 from playwright._impl._api_structures import (
-    Cookie,
     Geolocation,
+    PartitionedCookie,
+    PartitionedStorageState,
     SetCookieParam,
-    StorageState,
 )
 from playwright._impl._artifact import Artifact
 from playwright._impl._cdp_session import CDPSession
@@ -317,7 +317,9 @@ class BrowserContext(ChannelOwner):
             raise Error("Please use browser.new_context()")
         return from_channel(await self._channel.send("newPage"))
 
-    async def cookies(self, urls: Union[str, Sequence[str]] = None) -> List[Cookie]:
+    async def cookies(
+        self, urls: Union[str, Sequence[str]] = None
+    ) -> List[PartitionedCookie]:
         if urls is None:
             urls = []
         if isinstance(urls, str):
@@ -594,7 +596,7 @@ class BrowserContext(ChannelOwner):
 
     async def storage_state(
         self, path: Union[str, Path] = None, indexedDB: bool = None
-    ) -> StorageState:
+    ) -> PartitionedStorageState:
         result = await self._channel.send_return_as_dict(
             "storageState", {"indexedDB": indexedDB}
         )

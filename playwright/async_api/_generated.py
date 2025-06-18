@@ -21,12 +21,13 @@ from typing import Literal
 from playwright._impl._accessibility import Accessibility as AccessibilityImpl
 from playwright._impl._api_structures import (
     ClientCertificate,
-    Cookie,
     FilePayload,
     FloatRect,
     Geolocation,
     HttpCredentials,
     NameValue,
+    PartitionedCookie,
+    PartitionedStorageState,
     PdfMargins,
     Position,
     ProxySettings,
@@ -12649,7 +12650,8 @@ class BrowserContext(AsyncContextManager):
     def browser(self) -> typing.Optional["Browser"]:
         """BrowserContext.browser
 
-        Returns the browser instance of the context. If it was launched as a persistent context null gets returned.
+        Gets the browser instance that owns the context. Returns `null` if the context is created outside of normal
+        browser, e.g. Android or Electron.
 
         Returns
         -------
@@ -12776,7 +12778,7 @@ class BrowserContext(AsyncContextManager):
 
     async def cookies(
         self, urls: typing.Optional[typing.Union[str, typing.Sequence[str]]] = None
-    ) -> typing.List[Cookie]:
+    ) -> typing.List[PartitionedCookie]:
         """BrowserContext.cookies
 
         If no URLs are specified, this method returns all cookies. If URLs are specified, only cookies that affect those
@@ -12789,7 +12791,7 @@ class BrowserContext(AsyncContextManager):
 
         Returns
         -------
-        List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}]
+        List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"], partitionKey: Union[str, None]}]
         """
 
         return mapping.from_impl_list(
@@ -12810,7 +12812,7 @@ class BrowserContext(AsyncContextManager):
 
         Parameters
         ----------
-        cookies : Sequence[{name: str, value: str, url: Union[str, None], domain: Union[str, None], path: Union[str, None], expires: Union[float, None], httpOnly: Union[bool, None], secure: Union[bool, None], sameSite: Union["Lax", "None", "Strict", None]}]
+        cookies : Sequence[{name: str, value: str, url: Union[str, None], domain: Union[str, None], path: Union[str, None], expires: Union[float, None], httpOnly: Union[bool, None], secure: Union[bool, None], sameSite: Union["Lax", "None", "Strict", None], partitionKey: Union[str, None]}]
         """
 
         return mapping.from_maybe_impl(
@@ -13436,7 +13438,7 @@ class BrowserContext(AsyncContextManager):
         *,
         path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
         indexed_db: typing.Optional[bool] = None,
-    ) -> StorageState:
+    ) -> PartitionedStorageState:
         """BrowserContext.storage_state
 
         Returns storage state for this browser context, contains current cookies, local storage snapshot and IndexedDB
@@ -13454,7 +13456,7 @@ class BrowserContext(AsyncContextManager):
 
         Returns
         -------
-        {cookies: List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: List[{origin: str, localStorage: List[{name: str, value: str}]}]}
+        {cookies: List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"], partitionKey: Union[str, None]}], origins: List[{origin: str, localStorage: List[{name: str, value: str}]}]}
         """
 
         return mapping.from_impl(
@@ -16444,6 +16446,13 @@ class Locator(AsyncBase):
 
         Describes the locator, description is used in the trace viewer and reports. Returns the locator pointing to the
         same element.
+
+        **Usage**
+
+        ```py
+        button = page.get_by_test_id(\"btn-sub\").describe(\"Subscribe button\")
+        await button.click()
+        ```
 
         Parameters
         ----------
