@@ -34,10 +34,6 @@ class Cookie(TypedDict, total=False):
     sameSite: Literal["Lax", "None", "Strict"]
 
 
-class PartitionedCookie(Cookie):
-    partitionKey: Optional[str]
-
-
 # TODO: We are waiting for PEP705 so SetCookieParam can be readonly and matches Cookie.
 class SetCookieParam(TypedDict, total=False):
     name: str
@@ -49,7 +45,6 @@ class SetCookieParam(TypedDict, total=False):
     httpOnly: Optional[bool]
     secure: Optional[bool]
     sameSite: Optional[Literal["Lax", "None", "Strict"]]
-    partitionKey: Optional[str]
 
 
 class FloatRect(TypedDict):
@@ -103,11 +98,6 @@ class ProxySettings(TypedDict, total=False):
 
 class StorageState(TypedDict, total=False):
     cookies: List[Cookie]
-    origins: List[OriginState]
-
-
-class PartitionedStorageState(TypedDict, total=False):
-    cookies: List[PartitionedCookie]
     origins: List[OriginState]
 
 

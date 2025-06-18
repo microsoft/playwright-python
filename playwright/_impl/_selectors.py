@@ -14,20 +14,21 @@
 
 import asyncio
 from pathlib import Path
-from typing import Any, Dict, List, Set, Union
+from typing import Any, Dict, List, Optional, Union
 
-from playwright._impl._connection import ChannelOwner
+from playwright._impl._browser_context import BrowserContext
 from playwright._impl._errors import Error
 from playwright._impl._helper import async_readfile
-from playwright._impl._locator import set_test_id_attribute_name, test_id_attribute_name
+from playwright._impl._locator import set_test_id_attribute_name
 
 
 class Selectors:
     def __init__(self, loop: asyncio.AbstractEventLoop, dispatcher_fiber: Any) -> None:
         self._loop = loop
-        self._channels: Set[SelectorsOwner] = set()
-        self._registrations: List[Dict] = []
+        self._contextsForSelectors: List[BrowserContext] = []
+        self._selectorEngines: List[Dict] = []
         self._dispatcher_fiber = dispatcher_fiber
+        self._testIdAttributeName: Optional[str] = None
 
     async def register(
         self,
@@ -40,37 +41,19 @@ class Selectors:
             raise Error("Either source or path should be specified")
         if path:
             script = (await async_readfile(path)).decode()
-        params: Dict[str, Any] = dict(name=name, source=script)
+        engine: Dict[str, Any] = dict(name=name, source=script)
         if contentScript:
-            params["contentScript"] = True
-        for channel in self._channels:
-            await channel._channel.send("register", params)
-        self._registrations.append(params)
+            engine["contentScript"] = contentScript
+        for context in self._contextsForSelectors:
+            await context._channel.send(
+                "registerSelectorEngine", dict(selectorEngine=engine)
+            )
+        self._selectorEngines.append(engine)
 
     def set_test_id_attribute(self, attributeName: str) -> None:
         set_test_id_attribute_name(attributeName)
-        for channel in self._channels:
-            channel._channel.send_no_reply(
+        self._testIdAttributeName = attributeName
+        for context in self._contextsForSelectors:
+            context._channel.send_no_reply(
                 "setTestIdAttributeName", {"testIdAttributeName": attributeName}
             )
-
-    def _add_channel(self, channel: "SelectorsOwner") -> None:
-        self._channels.add(channel)
-        for params in self._registrations:
-            # This should not fail except for connection closure, but just in case we catch.
-            channel._channel.send_no_reply("register", params)
-            channel._channel.send_no_reply(
-                "setTestIdAttributeName",
-                {"testIdAttributeName": test_id_attribute_name()},
-            )
-
-    def _remove_channel(self, channel: "SelectorsOwner") -> None:
-        if channel in self._channels:
-            self._channels.remove(channel)
-
-
-class SelectorsOwner(ChannelOwner):
-    def __init__(
-        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
-    ) -> None:
-        super().__init__(parent, type, guid, initializer)

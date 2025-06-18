@@ -69,7 +69,6 @@ from playwright.sync_api._generated import (
 ChromiumBrowserContext = BrowserContext
 
 Cookie = playwright._impl._api_structures.Cookie
-PartitionedCookie = playwright._impl._api_structures.PartitionedCookie
 FilePayload = playwright._impl._api_structures.FilePayload
 FloatRect = playwright._impl._api_structures.FloatRect
 Geolocation = playwright._impl._api_structures.Geolocation
@@ -176,7 +175,6 @@ __all__ = [
     "Locator",
     "Mouse",
     "Page",
-    "PartitionedCookie",
     "PdfMargins",
     "Position",
     "Playwright",

@@ -13,10 +13,21 @@
 # limitations under the License.
 
 import asyncio
+import json
 import pathlib
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Sequence, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Optional,
+    Pattern,
+    Sequence,
+    Union,
+    cast,
+)
 
 from playwright._impl._api_structures import (
     ClientCertificate,
@@ -25,14 +36,9 @@ from playwright._impl._api_structures import (
     ProxySettings,
     ViewportSize,
 )
-from playwright._impl._browser import Browser, prepare_browser_context_params
+from playwright._impl._browser import Browser
 from playwright._impl._browser_context import BrowserContext
-from playwright._impl._connection import (
-    ChannelOwner,
-    Connection,
-    from_channel,
-    from_nullable_channel,
-)
+from playwright._impl._connection import ChannelOwner, Connection, from_channel
 from playwright._impl._errors import Error
 from playwright._impl._helper import (
     PLAYWRIGHT_MAX_DEADLINE,
@@ -45,10 +51,11 @@ from playwright._impl._helper import (
     ReducedMotion,
     ServiceWorkersPolicy,
     TimeoutSettings,
+    async_readfile,
     locals_to_params,
 )
 from playwright._impl._json_pipe import JsonPipeTransport
-from playwright._impl._network import serialize_headers
+from playwright._impl._network import serialize_headers, to_client_certificates_protocol
 from playwright._impl._waiter import throw_on_timeout
 
 if TYPE_CHECKING:
@@ -98,7 +105,7 @@ class BrowserType(ChannelOwner):
         browser = cast(
             Browser, from_channel(await self._channel.send("launch", params))
         )
-        self._did_launch_browser(browser)
+        browser._connect_to_browser_type(self, str(tracesDir))
         return browser
 
     async def launch_persistent_context(
@@ -157,13 +164,33 @@ class BrowserType(ChannelOwner):
     ) -> BrowserContext:
         userDataDir = self._user_data_dir(userDataDir)
         params = locals_to_params(locals())
-        await prepare_browser_context_params(params)
+        await self._prepare_browser_context_params(params)
         normalize_launch_params(params)
-        context = cast(
-            BrowserContext,
-            from_channel(await self._channel.send("launchPersistentContext", params)),
+        result: Dict[str, Any] = from_channel(
+            await self._channel.send("launchPersistentContext", params)
         )
-        self._did_create_context(context, params, params)
+        browser = cast(
+            Browser,
+            result["browser"],
+        )
+        browser._connect_to_browser_type(self, str(tracesDir))
+        context = cast(BrowserContext, result["context"])
+        await context._initialize_har_from_options(
+            {
+                "recordHarContent": recordHarContent,
+                "recordHarMode": recordHarMode,
+                "recordHarOmitContent": recordHarOmitContent,
+                "recordHarPath": recordHarPath,
+                "recordHarUrlFilter": (
+                    recordHarUrlFilter if isinstance(recordHarUrlFilter, str) else None
+                ),
+                "recordHarUrlFilterRegex": (
+                    recordHarUrlFilter
+                    if isinstance(recordHarUrlFilter, Pattern)
+                    else None
+                ),
+            }
+        )
         return context
 
     def _user_data_dir(self, userDataDir: Optional[Union[str, Path]]) -> str:
@@ -190,14 +217,8 @@ class BrowserType(ChannelOwner):
             params["headers"] = serialize_headers(params["headers"])
         response = await self._channel.send_return_as_dict("connectOverCDP", params)
         browser = cast(Browser, from_channel(response["browser"]))
-        self._did_launch_browser(browser)
+        browser._connect_to_browser_type(self, None)
 
-        default_context = cast(
-            Optional[BrowserContext],
-            from_nullable_channel(response.get("defaultContext")),
-        )
-        if default_context:
-            self._did_create_context(default_context, {}, {})
         return browser
 
     async def connect(
@@ -278,18 +299,54 @@ class BrowserType(ChannelOwner):
         pre_launched_browser = playwright._initializer.get("preLaunchedBrowser")
         assert pre_launched_browser
         browser = cast(Browser, from_channel(pre_launched_browser))
-        self._did_launch_browser(browser)
         browser._should_close_connection_on_close = True
+        browser._connect_to_browser_type(self, None)
 
         return browser
 
-    def _did_create_context(
-        self, context: BrowserContext, context_options: Dict, browser_options: Dict
-    ) -> None:
-        context._set_options(context_options, browser_options)
+    async def _prepare_browser_context_params(self, params: Dict) -> None:
+        if params.get("noViewport"):
+            del params["noViewport"]
+            params["noDefaultViewport"] = True
+        if "defaultBrowserType" in params:
+            del params["defaultBrowserType"]
+        if "extraHTTPHeaders" in params:
+            params["extraHTTPHeaders"] = serialize_headers(params["extraHTTPHeaders"])
+        if "recordVideoDir" in params:
+            params["recordVideo"] = {"dir": Path(params["recordVideoDir"]).absolute()}
+            if "recordVideoSize" in params:
+                params["recordVideo"]["size"] = params["recordVideoSize"]
+                del params["recordVideoSize"]
+            del params["recordVideoDir"]
+        if "storageState" in params:
+            storageState = params["storageState"]
+            if not isinstance(storageState, dict):
+                params["storageState"] = json.loads(
+                    (await async_readfile(storageState)).decode()
+                )
+        if params.get("colorScheme", None) == "null":
+            params["colorScheme"] = "no-override"
+        if params.get("reducedMotion", None) == "null":
+            params["reducedMotion"] = "no-override"
+        if params.get("forcedColors", None) == "null":
+            params["forcedColors"] = "no-override"
+        if params.get("contrast", None) == "null":
+            params["contrast"] = "no-override"
+        if "acceptDownloads" in params:
+            params["acceptDownloads"] = (
+                "accept" if params["acceptDownloads"] else "deny"
+            )
 
-    def _did_launch_browser(self, browser: Browser) -> None:
-        browser._browser_type = self
+        if "clientCertificates" in params:
+            params["clientCertificates"] = await to_client_certificates_protocol(
+                params["clientCertificates"]
+            )
+        if "selectorEngines" in params:
+            params["selectorEngines"] = self._playwright.selectors._selectorEngines
+        if "testIdAttributeName" in params:
+            params["testIdAttributeName"] = (
+                self._playwright.selectors._testIdAttributeName
+            )
 
 
 def normalize_launch_params(params: Dict) -> None:

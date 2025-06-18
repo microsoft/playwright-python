@@ -65,11 +65,42 @@ class Browser(ChannelOwner):
         self._cr_tracing_path: Optional[str] = None
 
         self._contexts: List[BrowserContext] = []
+        self._traces_dir: Optional[str] = None
+        self._channel.on(
+            "context",
+            lambda params: self._did_create_context(
+                cast(BrowserContext, from_channel(params["context"]))
+            ),
+        )
         self._channel.on("close", lambda _: self._on_close())
         self._close_reason: Optional[str] = None
 
     def __repr__(self) -> str:
         return f"<Browser type={self._browser_type} version={self.version}>"
+
+    def _connect_to_browser_type(
+        self,
+        browserType: "BrowserType",
+        tracesDir: Optional[str] = None,
+    ) -> None:
+        # Note: when using connect(), `browserType` is different from `this.parent`.
+        # This is why browser type is not wired up in the constructor, and instead this separate method is called later on.
+        self._browser_type = browserType
+        self._traces_dir = tracesDir
+        for context in self._contexts:
+            self._setup_browser_context(context)
+
+    def _did_create_context(self, context: BrowserContext) -> None:
+        context._browser = self
+        self._contexts.append(context)
+        # Note: when connecting to a browser, initial contexts arrive before `_browserType` is set,
+        # and will be configured later in `ConnectToBrowserType`.
+        if self._browser_type:
+            self._setup_browser_context(context)
+
+    def _setup_browser_context(self, context: BrowserContext) -> None:
+        context._tracing._traces_dir = self._traces_dir
+        self._browser_type._playwright.selectors._contextsForSelectors.append(context)
 
     def _on_close(self) -> None:
         self._is_connected = False
@@ -130,7 +161,15 @@ class Browser(ChannelOwner):
 
         channel = await self._channel.send("newContext", params)
         context = cast(BrowserContext, from_channel(channel))
-        self._browser_type._did_create_context(context, params, {})
+        await context._initialize_har_from_options(
+            {
+                "recordHarPath": recordHarPath,
+                "recordHarContent": recordHarContent,
+                "recordHarOmitContent": recordHarOmitContent,
+                "recordHarUrlFilter": recordHarUrlFilter,
+                "recordHarMode": recordHarMode,
+            }
+        )
         return context
 
     async def new_page(
@@ -181,6 +220,7 @@ class Browser(ChannelOwner):
             context._owner_page = page
             return page
 
+        # TODO: Args
         return await self._connection.wrap_api_call(inner)
 
     async def close(self, reason: str = None) -> None:
