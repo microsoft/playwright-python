@@ -288,19 +288,12 @@ class BrowserContext(ChannelOwner):
 
     def _set_default_navigation_timeout_impl(self, timeout: Optional[float]) -> None:
         self._timeout_settings.set_default_navigation_timeout(timeout)
-        self._channel.send_no_reply(
-            "setDefaultNavigationTimeoutNoReply",
-            {} if timeout is None else {"timeout": timeout},
-        )
 
     def set_default_timeout(self, timeout: float) -> None:
         return self._set_default_timeout_impl(timeout)
 
     def _set_default_timeout_impl(self, timeout: Optional[float]) -> None:
         self._timeout_settings.set_default_timeout(timeout)
-        self._channel.send_no_reply(
-            "setDefaultTimeoutNoReply", {} if timeout is None else {"timeout": timeout}
-        )
 
     @property
     def pages(self) -> List[Page]:
