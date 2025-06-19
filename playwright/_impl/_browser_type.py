@@ -17,17 +17,7 @@ import json
 import pathlib
 import sys
 from pathlib import Path
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    List,
-    Optional,
-    Pattern,
-    Sequence,
-    Union,
-    cast,
-)
+from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Sequence, Union, cast
 
 from playwright._impl._api_structures import (
     ClientCertificate,
@@ -166,15 +156,15 @@ class BrowserType(ChannelOwner):
         params = locals_to_params(locals())
         await self._prepare_browser_context_params(params)
         normalize_launch_params(params)
-        result: Dict[str, Any] = from_channel(
-            await self._channel.send("launchPersistentContext", params)
+        result = await self._channel.send_return_as_dict(
+            "launchPersistentContext", params
         )
         browser = cast(
             Browser,
-            result["browser"],
+            from_channel(result["browser"]),
         )
         browser._connect_to_browser_type(self, str(tracesDir))
-        context = cast(BrowserContext, result["context"])
+        context = cast(BrowserContext, from_channel(result["context"]))
         await context._initialize_har_from_options(
             {
                 "recordHarContent": recordHarContent,
