@@ -110,7 +110,6 @@ class BrowserContext(ChannelOwner):
         self._browser: Optional["Browser"] = None
         if parent.__class__.__name__ == "Browser":
             self._browser = cast("Browser", parent)
-            self._browser._contexts.append(self)
         self._pages: List[Page] = []
         self._routes: List[RouteHandler] = []
         self._web_socket_routes: List[WebSocketRouteHandler] = []
