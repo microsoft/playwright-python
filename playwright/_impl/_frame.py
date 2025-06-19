@@ -370,14 +370,10 @@ class Frame(ChannelOwner):
         )
 
     async def is_hidden(self, selector: str, strict: bool = None) -> bool:
-        return await self._channel.send(
-            "isHidden", self._locals_to_params_with_timeout(locals())
-        )
+        return await self._channel.send("isHidden", locals_to_params(locals()))
 
     async def is_visible(self, selector: str, strict: bool = None) -> bool:
-        return await self._channel.send(
-            "isVisible", self._locals_to_params_with_timeout(locals())
-        )
+        return await self._channel.send("isVisible", locals_to_params(locals()))
 
     async def dispatch_event(
         self,
@@ -865,5 +861,6 @@ class Frame(ChannelOwner):
     def _locals_to_params_without_timeout(self, args: Dict) -> Dict:
         params = locals_to_params(locals())
         # Timeout is deprecated and does nothing
-        del params["timeout"]
+        if "timeout" in params:
+            del params["timeout"]
         return params

@@ -379,9 +379,9 @@ async def test_should_show_tracing_group_in_action_list(
         await trace_viewer.expand_action("inner group 1")
         await expect(trace_viewer.action_titles).to_have_text(
             [
-                re.compile(r"New page"),
+                re.compile(r"Create page"),
                 re.compile(r"outer group"),
-                re.compile(r"Navigate to data:"),
+                re.compile(r"Navigate to \"data:\""),
                 re.compile(r"inner group 1"),
                 re.compile(r"Click"),
                 re.compile(r"inner group 2"),

@@ -191,7 +191,7 @@ class Locator:
         )
 
     async def evaluate_all(self, expression: str, arg: Serializable = None) -> Any:
-        params = self._locals_to_params_with_timeout(locals())
+        params = locals_to_params(locals())
         return await self._frame.eval_on_selector_all(self._selector, **params)
 
     async def evaluate_handle(
@@ -500,7 +500,7 @@ class Locator:
         )
 
     async def is_hidden(self, timeout: float = None) -> bool:
-        params = self._locals_to_params_with_timeout(locals())
+        params = self._locals_to_params_without_timeout(locals())
         return await self._frame.is_hidden(
             self._selector,
             strict=True,
@@ -508,7 +508,7 @@ class Locator:
         )
 
     async def is_visible(self, timeout: float = None) -> bool:
-        params = self._locals_to_params_with_timeout(locals())
+        params = self._locals_to_params_without_timeout(locals())
         return await self._frame.is_visible(
             self._selector,
             strict=True,
@@ -740,6 +740,13 @@ class Locator:
     def _locals_to_params_with_timeout(self, args: Dict) -> Dict:
         params = locals_to_params(args)
         params["timeout"] = self._frame._timeout(params.get("timeout"))
+        return params
+
+    def _locals_to_params_without_timeout(self, args: Dict) -> Dict:
+        params = locals_to_params(args)
+        # Timeout is deprecated and does nothing
+        if "timeout" in params:
+            del params["timeout"]
         return params
 
 
