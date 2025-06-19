@@ -116,7 +116,7 @@ class BrowserContext(ChannelOwner):
         self._bindings: Dict[str, Any] = {}
         self._timeout_settings = TimeoutSettings(None)
         self._owner_page: Optional[Page] = None
-        self._options: Dict[str, Any] = {}
+        self._options: Dict[str, Any] = initializer.get("options", {})
         self._background_pages: Set[Page] = set()
         self._service_workers: Set[Worker] = set()
         self._tracing = cast(Tracing, from_channel(initializer["tracing"]))
@@ -301,15 +301,6 @@ class BrowserContext(ChannelOwner):
     @property
     def browser(self) -> Optional["Browser"]:
         return self._browser
-
-    def _set_options(self, context_options: Dict, browser_options: Dict) -> None:
-        self._options = context_options
-        if self._options.get("recordHar"):
-            self._har_recorders[""] = {
-                "path": self._options["recordHar"]["path"],
-                "content": self._options["recordHar"].get("content"),
-            }
-        self._tracing._traces_dir = browser_options.get("tracesDir")
 
     async def _initialize_har_from_options(self, options: Dict) -> None:
         record_har_path = options.get("recordHarPath")

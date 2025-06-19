@@ -95,7 +95,9 @@ class BrowserType(ChannelOwner):
         browser = cast(
             Browser, from_channel(await self._channel.send("launch", params))
         )
-        browser._connect_to_browser_type(self, str(tracesDir))
+        browser._connect_to_browser_type(
+            self, str(tracesDir) if tracesDir is not None else None
+        )
         return browser
 
     async def launch_persistent_context(
@@ -163,7 +165,9 @@ class BrowserType(ChannelOwner):
             Browser,
             from_channel(result["browser"]),
         )
-        browser._connect_to_browser_type(self, str(tracesDir))
+        browser._connect_to_browser_type(
+            self, str(tracesDir) if tracesDir is not None else None
+        )
         context = cast(BrowserContext, from_channel(result["context"]))
         await context._initialize_har_from_options(
             {
