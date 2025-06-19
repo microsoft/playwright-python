@@ -358,7 +358,7 @@ async def test_should_record_trace_with_source(
                 re.compile(r"test_should_record_trace_with_source"),
             ]
         )
-        await trace_viewer.select_action("Page.set_content")
+        await trace_viewer.select_action("Set content")
         # Check that the source file is shown
         await expect(
             trace_viewer.page.locator(".source-tab-file-name")

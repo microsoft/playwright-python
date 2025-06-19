@@ -312,8 +312,11 @@ class BrowserContext(ChannelOwner):
         self._tracing._traces_dir = browser_options.get("tracesDir")
 
     async def _initialize_har_from_options(self, options: Dict) -> None:
-        record_har_path = str(options["recordHarPath"])
-        if not record_har_path or len(record_har_path) == 0:
+        record_har_path = options.get("recordHarPath")
+        if not record_har_path:
+            return
+        record_har_path = str(record_har_path)
+        if len(record_har_path) == 0:
             return
         default_policy = "attach" if record_har_path.endswith(".zip") else "embed"
         content_policy = options.get(
