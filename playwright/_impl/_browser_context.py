@@ -302,24 +302,32 @@ class BrowserContext(ChannelOwner):
     def browser(self) -> Optional["Browser"]:
         return self._browser
 
-    async def _initialize_har_from_options(self, options: Dict) -> None:
-        record_har_path = options.get("recordHarPath")
+    async def _initialize_har_from_options(
+        self,
+        record_har_path: Optional[Union[Path, str]],
+        record_har_content: Optional[HarContentPolicy],
+        record_har_omit_content: Optional[bool],
+        record_har_url_filter: Optional[Union[Pattern[str], str]],
+        record_har_mode: Optional[HarMode],
+    ) -> None:
         if not record_har_path:
             return
         record_har_path = str(record_har_path)
         if len(record_har_path) == 0:
             return
-        default_policy = "attach" if record_har_path.endswith(".zip") else "embed"
-        content_policy = options.get(
-            "recordHarContent",
-            "omit" if options["recordHarOmitContent"] is True else default_policy,
+        # Forcibly list type to satisfy mypy
+        default_policy: HarContentPolicy = (
+            "attach" if record_har_path.endswith(".zip") else "embed"
+        )
+        content_policy: HarContentPolicy = record_har_content or (
+            "omit" if record_har_omit_content is True else default_policy
         )
         await self._record_into_har(
             har=record_har_path,
             page=None,
-            url=options["recordHarUrlFilter"],
+            url=record_har_url_filter,
             update_content=content_policy,
-            update_mode=options.get("recordHarMode", "full"),
+            update_mode=(record_har_mode or "full"),
         )
 
     async def new_page(self) -> Page:

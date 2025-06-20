@@ -158,13 +158,11 @@ class Browser(ChannelOwner):
         channel = await self._channel.send("newContext", params)
         context = cast(BrowserContext, from_channel(channel))
         await context._initialize_har_from_options(
-            {
-                "recordHarPath": recordHarPath,
-                "recordHarContent": recordHarContent,
-                "recordHarOmitContent": recordHarOmitContent,
-                "recordHarUrlFilter": recordHarUrlFilter,
-                "recordHarMode": recordHarMode,
-            }
+            record_har_content=recordHarContent,
+            record_har_mode=recordHarMode,
+            record_har_omit_content=recordHarOmitContent,
+            record_har_path=recordHarPath,
+            record_har_url_filter=recordHarUrlFilter,
         )
         return context
 

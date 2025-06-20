@@ -170,20 +170,11 @@ class BrowserType(ChannelOwner):
         )
         context = cast(BrowserContext, from_channel(result["context"]))
         await context._initialize_har_from_options(
-            {
-                "recordHarContent": recordHarContent,
-                "recordHarMode": recordHarMode,
-                "recordHarOmitContent": recordHarOmitContent,
-                "recordHarPath": recordHarPath,
-                "recordHarUrlFilter": (
-                    recordHarUrlFilter if isinstance(recordHarUrlFilter, str) else None
-                ),
-                "recordHarUrlFilterRegex": (
-                    recordHarUrlFilter
-                    if isinstance(recordHarUrlFilter, Pattern)
-                    else None
-                ),
-            }
+            record_har_content=recordHarContent,
+            record_har_mode=recordHarMode,
+            record_har_omit_content=recordHarOmitContent,
+            record_har_path=recordHarPath,
+            record_har_url_filter=recordHarUrlFilter,
         )
         return context
 
@@ -337,6 +328,13 @@ class BrowserType(ChannelOwner):
             )
         params["selectorEngines"] = self._playwright.selectors._selectorEngines
         params["testIdAttributeName"] = self._playwright.selectors._testIdAttributeName
+
+        # Remove HAR options
+        params.pop("recordHarPath", None)
+        params.pop("recordHarOmitContent", None)
+        params.pop("recordHarUrlFilter", None)
+        params.pop("recordHarMode", None)
+        params.pop("recordHarContent", None)
 
 
 def normalize_launch_params(params: Dict) -> None:
