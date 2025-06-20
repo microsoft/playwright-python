@@ -335,12 +335,8 @@ class BrowserType(ChannelOwner):
             params["clientCertificates"] = await to_client_certificates_protocol(
                 params["clientCertificates"]
             )
-        if "selectorEngines" in params:
-            params["selectorEngines"] = self._playwright.selectors._selectorEngines
-        if "testIdAttributeName" in params:
-            params["testIdAttributeName"] = (
-                self._playwright.selectors._testIdAttributeName
-            )
+        params["selectorEngines"] = self._playwright.selectors._selectorEngines
+        params["testIdAttributeName"] = self._playwright.selectors._testIdAttributeName
 
 
 def normalize_launch_params(params: Dict) -> None:

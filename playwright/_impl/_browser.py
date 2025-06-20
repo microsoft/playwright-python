@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Sequence, Union, cast
@@ -38,12 +37,9 @@ from playwright._impl._helper import (
     HarMode,
     ReducedMotion,
     ServiceWorkersPolicy,
-    async_readfile,
     locals_to_params,
     make_dirs_for_file,
-    prepare_record_har_options,
 )
-from playwright._impl._network import serialize_headers, to_client_certificates_protocol
 from playwright._impl._page import Page
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -157,7 +153,7 @@ class Browser(ChannelOwner):
         clientCertificates: List[ClientCertificate] = None,
     ) -> BrowserContext:
         params = locals_to_params(locals())
-        await prepare_browser_context_params(params)
+        await self._browser_type._prepare_browser_context_params(params)
 
         channel = await self._channel.send("newContext", params)
         context = cast(BrowserContext, from_channel(channel))
@@ -266,43 +262,3 @@ class Browser(ChannelOwner):
                 f.write(buffer)
             self._cr_tracing_path = None
         return buffer
-
-
-async def prepare_browser_context_params(params: Dict) -> None:
-    if params.get("noViewport"):
-        del params["noViewport"]
-        params["noDefaultViewport"] = True
-    if "defaultBrowserType" in params:
-        del params["defaultBrowserType"]
-    if "extraHTTPHeaders" in params:
-        params["extraHTTPHeaders"] = serialize_headers(params["extraHTTPHeaders"])
-    if "recordHarPath" in params:
-        params["recordHar"] = prepare_record_har_options(params)
-        del params["recordHarPath"]
-    if "recordVideoDir" in params:
-        params["recordVideo"] = {"dir": Path(params["recordVideoDir"]).absolute()}
-        if "recordVideoSize" in params:
-            params["recordVideo"]["size"] = params["recordVideoSize"]
-            del params["recordVideoSize"]
-        del params["recordVideoDir"]
-    if "storageState" in params:
-        storageState = params["storageState"]
-        if not isinstance(storageState, dict):
-            params["storageState"] = json.loads(
-                (await async_readfile(storageState)).decode()
-            )
-    if params.get("colorScheme", None) == "null":
-        params["colorScheme"] = "no-override"
-    if params.get("reducedMotion", None) == "null":
-        params["reducedMotion"] = "no-override"
-    if params.get("forcedColors", None) == "null":
-        params["forcedColors"] = "no-override"
-    if params.get("contrast", None) == "null":
-        params["contrast"] = "no-override"
-    if "acceptDownloads" in params:
-        params["acceptDownloads"] = "accept" if params["acceptDownloads"] else "deny"
-
-    if "clientCertificates" in params:
-        params["clientCertificates"] = await to_client_certificates_protocol(
-            params["clientCertificates"]
-        )
