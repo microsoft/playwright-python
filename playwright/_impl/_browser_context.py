@@ -582,7 +582,10 @@ class BrowserContext(ChannelOwner):
                 self._browser._browser_type._playwright.selectors._contextsForSelectors.remove(
                     self
                 )
-                print("Successfully removed context from browser selectors")
+                print(
+                    "Successfully removed context from browser selectors",
+                    self._browser._browser_type._playwright.selectors._contextsForSelectors,
+                )
             except ValueError:
                 print("Context already removed from browser selectors")
                 pass

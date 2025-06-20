@@ -96,6 +96,7 @@ class Browser(ChannelOwner):
 
     def _setup_browser_context(self, context: BrowserContext) -> None:
         context._tracing._traces_dir = self._traces_dir
+        print("Appending context to selectors")
         self._browser_type._playwright.selectors._contextsForSelectors.append(context)
 
     def _on_close(self) -> None:
