@@ -575,6 +575,7 @@ class BrowserContext(ChannelOwner):
             try:
                 self._browser._contexts.remove(self)
             except ValueError:
+                print("Context already removed from browser contexts")
                 pass
             try:
                 print("Removing context from browser selectors")
@@ -583,6 +584,7 @@ class BrowserContext(ChannelOwner):
                 )
                 print("Successfully removed context from browser selectors")
             except ValueError:
+                print("Context already removed from browser selectors")
                 pass
 
         self._dispose_har_routers()
