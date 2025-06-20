@@ -593,7 +593,9 @@ class BrowserContext(ChannelOwner):
 
     async def close(self, reason: str = None) -> None:
         if self._closing_or_closed:
+            print("Context already closed", self)
             return
+        print("Closing context", self)
         self._close_reason = reason
         self._closing_or_closed = True
 
