@@ -682,7 +682,7 @@ class Route(SyncBase):
         headers: typing.Optional[typing.Dict[str, str]] = None,
         body: typing.Optional[typing.Union[str, bytes]] = None,
         json: typing.Optional[typing.Any] = None,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         content_type: typing.Optional[str] = None,
         response: typing.Optional["APIResponse"] = None,
     ) -> None:
@@ -2804,7 +2804,7 @@ class ElementHandle(JSHandle):
         *,
         timeout: typing.Optional[float] = None,
         type: typing.Optional[Literal["jpeg", "png"]] = None,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         quality: typing.Optional[int] = None,
         omit_background: typing.Optional[bool] = None,
         animations: typing.Optional[Literal["allow", "disabled"]] = None,
@@ -4269,7 +4269,7 @@ class Frame(SyncBase):
         self,
         *,
         url: typing.Optional[str] = None,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         content: typing.Optional[str] = None,
         type: typing.Optional[str] = None,
     ) -> "ElementHandle":
@@ -4309,7 +4309,7 @@ class Frame(SyncBase):
         self,
         *,
         url: typing.Optional[str] = None,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         content: typing.Optional[str] = None,
     ) -> "ElementHandle":
         """Frame.add_style_tag
@@ -4641,8 +4641,8 @@ class Frame(SyncBase):
         self,
         selector: str,
         *,
-        has_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
-        has_not_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        has_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        has_not_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         has: typing.Optional["Locator"] = None,
         has_not: typing.Optional["Locator"] = None,
     ) -> "Locator":
@@ -4909,7 +4909,7 @@ class Frame(SyncBase):
         expanded: typing.Optional[bool] = None,
         include_hidden: typing.Optional[bool] = None,
         level: typing.Optional[int] = None,
-        name: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        name: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         pressed: typing.Optional[bool] = None,
         selected: typing.Optional[bool] = None,
         exact: typing.Optional[bool] = None,
@@ -6153,8 +6153,8 @@ class FrameLocator(SyncBase):
         self,
         selector_or_locator: typing.Union["Locator", str],
         *,
-        has_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
-        has_not_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        has_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        has_not_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         has: typing.Optional["Locator"] = None,
         has_not: typing.Optional["Locator"] = None,
     ) -> "Locator":
@@ -6418,7 +6418,7 @@ class FrameLocator(SyncBase):
         expanded: typing.Optional[bool] = None,
         include_hidden: typing.Optional[bool] = None,
         level: typing.Optional[int] = None,
-        name: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        name: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         pressed: typing.Optional[bool] = None,
         selected: typing.Optional[bool] = None,
         exact: typing.Optional[bool] = None,
@@ -6812,7 +6812,7 @@ class Selectors(SyncBase):
         name: str,
         script: typing.Optional[str] = None,
         *,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         content_script: typing.Optional[bool] = None,
     ) -> None:
         """Selectors.register
@@ -8669,7 +8669,7 @@ class Page(SyncContextManager):
         self,
         *,
         url: typing.Optional[str] = None,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         content: typing.Optional[str] = None,
         type: typing.Optional[str] = None,
     ) -> "ElementHandle":
@@ -8708,7 +8708,7 @@ class Page(SyncContextManager):
         self,
         *,
         url: typing.Optional[str] = None,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         content: typing.Optional[str] = None,
     ) -> "ElementHandle":
         """Page.add_style_tag
@@ -9406,7 +9406,7 @@ class Page(SyncContextManager):
         self,
         script: typing.Optional[str] = None,
         *,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
     ) -> None:
         """Page.add_init_script
 
@@ -9634,7 +9634,7 @@ class Page(SyncContextManager):
         self,
         har: typing.Union[pathlib.Path, str],
         *,
-        url: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        url: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         not_found: typing.Optional[Literal["abort", "fallback"]] = None,
         update: typing.Optional[bool] = None,
         update_content: typing.Optional[Literal["attach", "embed"]] = None,
@@ -9692,7 +9692,7 @@ class Page(SyncContextManager):
         *,
         timeout: typing.Optional[float] = None,
         type: typing.Optional[Literal["jpeg", "png"]] = None,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         quality: typing.Optional[int] = None,
         omit_background: typing.Optional[bool] = None,
         full_page: typing.Optional[bool] = None,
@@ -10138,8 +10138,8 @@ class Page(SyncContextManager):
         self,
         selector: str,
         *,
-        has_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
-        has_not_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        has_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        has_not_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         has: typing.Optional["Locator"] = None,
         has_not: typing.Optional["Locator"] = None,
     ) -> "Locator":
@@ -10404,7 +10404,7 @@ class Page(SyncContextManager):
         expanded: typing.Optional[bool] = None,
         include_hidden: typing.Optional[bool] = None,
         level: typing.Optional[int] = None,
-        name: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        name: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         pressed: typing.Optional[bool] = None,
         selected: typing.Optional[bool] = None,
         exact: typing.Optional[bool] = None,
@@ -11578,7 +11578,7 @@ class Page(SyncContextManager):
         height: typing.Optional[typing.Union[str, float]] = None,
         prefer_css_page_size: typing.Optional[bool] = None,
         margin: typing.Optional[PdfMargins] = None,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         outline: typing.Optional[bool] = None,
         tagged: typing.Optional[bool] = None,
     ) -> bytes:
@@ -12842,9 +12842,9 @@ class BrowserContext(SyncContextManager):
     def clear_cookies(
         self,
         *,
-        name: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
-        domain: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
-        path: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        name: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        domain: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        path: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
     ) -> None:
         """BrowserContext.clear_cookies
 
@@ -12999,7 +12999,7 @@ class BrowserContext(SyncContextManager):
         self,
         script: typing.Optional[str] = None,
         *,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
     ) -> None:
         """BrowserContext.add_init_script
 
@@ -13353,7 +13353,7 @@ class BrowserContext(SyncContextManager):
         self,
         har: typing.Union[pathlib.Path, str],
         *,
-        url: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        url: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         not_found: typing.Optional[Literal["abort", "fallback"]] = None,
         update: typing.Optional[bool] = None,
         update_content: typing.Optional[Literal["attach", "embed"]] = None,
@@ -13465,7 +13465,7 @@ class BrowserContext(SyncContextManager):
     def storage_state(
         self,
         *,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         indexed_db: typing.Optional[bool] = None,
     ) -> StorageState:
         """BrowserContext.storage_state
@@ -13767,9 +13767,9 @@ class Browser(SyncContextManager):
         accept_downloads: typing.Optional[bool] = None,
         default_browser_type: typing.Optional[str] = None,
         proxy: typing.Optional[ProxySettings] = None,
-        record_har_path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        record_har_path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         record_har_omit_content: typing.Optional[bool] = None,
-        record_video_dir: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        record_video_dir: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         record_video_size: typing.Optional[ViewportSize] = None,
         storage_state: typing.Optional[
             typing.Union[StorageState, str, pathlib.Path]
@@ -13778,7 +13778,7 @@ class Browser(SyncContextManager):
         strict_selectors: typing.Optional[bool] = None,
         service_workers: typing.Optional[Literal["allow", "block"]] = None,
         record_har_url_filter: typing.Optional[
-            typing.Union[str, typing.Pattern[str]]
+            typing.Union[typing.Pattern[str], str]
         ] = None,
         record_har_mode: typing.Optional[Literal["full", "minimal"]] = None,
         record_har_content: typing.Optional[Literal["attach", "embed", "omit"]] = None,
@@ -14016,9 +14016,9 @@ class Browser(SyncContextManager):
         accept_downloads: typing.Optional[bool] = None,
         default_browser_type: typing.Optional[str] = None,
         proxy: typing.Optional[ProxySettings] = None,
-        record_har_path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        record_har_path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         record_har_omit_content: typing.Optional[bool] = None,
-        record_video_dir: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        record_video_dir: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         record_video_size: typing.Optional[ViewportSize] = None,
         storage_state: typing.Optional[
             typing.Union[StorageState, str, pathlib.Path]
@@ -14027,7 +14027,7 @@ class Browser(SyncContextManager):
         strict_selectors: typing.Optional[bool] = None,
         service_workers: typing.Optional[Literal["allow", "block"]] = None,
         record_har_url_filter: typing.Optional[
-            typing.Union[str, typing.Pattern[str]]
+            typing.Union[typing.Pattern[str], str]
         ] = None,
         record_har_mode: typing.Optional[Literal["full", "minimal"]] = None,
         record_har_content: typing.Optional[Literal["attach", "embed", "omit"]] = None,
@@ -14259,7 +14259,7 @@ class Browser(SyncContextManager):
         self,
         *,
         page: typing.Optional["Page"] = None,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         screenshots: typing.Optional[bool] = None,
         categories: typing.Optional[typing.Sequence[str]] = None,
     ) -> None:
@@ -14354,7 +14354,7 @@ class BrowserType(SyncBase):
     def launch(
         self,
         *,
-        executable_path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        executable_path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         channel: typing.Optional[str] = None,
         args: typing.Optional[typing.Sequence[str]] = None,
         ignore_default_args: typing.Optional[
@@ -14368,9 +14368,9 @@ class BrowserType(SyncBase):
         headless: typing.Optional[bool] = None,
         devtools: typing.Optional[bool] = None,
         proxy: typing.Optional[ProxySettings] = None,
-        downloads_path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        downloads_path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         slow_mo: typing.Optional[float] = None,
-        traces_dir: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        traces_dir: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         chromium_sandbox: typing.Optional[bool] = None,
         firefox_user_prefs: typing.Optional[
             typing.Dict[str, typing.Union[str, float, bool]]
@@ -14500,7 +14500,7 @@ class BrowserType(SyncBase):
         user_data_dir: typing.Union[str, pathlib.Path],
         *,
         channel: typing.Optional[str] = None,
-        executable_path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        executable_path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         args: typing.Optional[typing.Sequence[str]] = None,
         ignore_default_args: typing.Optional[
             typing.Union[bool, typing.Sequence[str]]
@@ -14513,7 +14513,7 @@ class BrowserType(SyncBase):
         headless: typing.Optional[bool] = None,
         devtools: typing.Optional[bool] = None,
         proxy: typing.Optional[ProxySettings] = None,
-        downloads_path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        downloads_path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         slow_mo: typing.Optional[float] = None,
         viewport: typing.Optional[ViewportSize] = None,
         screen: typing.Optional[ViewportSize] = None,
@@ -14541,20 +14541,20 @@ class BrowserType(SyncBase):
         forced_colors: typing.Optional[Literal["active", "none", "null"]] = None,
         contrast: typing.Optional[Literal["more", "no-preference", "null"]] = None,
         accept_downloads: typing.Optional[bool] = None,
-        traces_dir: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        traces_dir: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         chromium_sandbox: typing.Optional[bool] = None,
         firefox_user_prefs: typing.Optional[
             typing.Dict[str, typing.Union[str, float, bool]]
         ] = None,
-        record_har_path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        record_har_path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         record_har_omit_content: typing.Optional[bool] = None,
-        record_video_dir: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        record_video_dir: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         record_video_size: typing.Optional[ViewportSize] = None,
         base_url: typing.Optional[str] = None,
         strict_selectors: typing.Optional[bool] = None,
         service_workers: typing.Optional[Literal["allow", "block"]] = None,
         record_har_url_filter: typing.Optional[
-            typing.Union[str, typing.Pattern[str]]
+            typing.Union[typing.Pattern[str], str]
         ] = None,
         record_har_mode: typing.Optional[Literal["full", "minimal"]] = None,
         record_har_content: typing.Optional[Literal["attach", "embed", "omit"]] = None,
@@ -15169,7 +15169,7 @@ class Tracing(SyncBase):
         )
 
     def stop_chunk(
-        self, *, path: typing.Optional[typing.Union[str, pathlib.Path]] = None
+        self, *, path: typing.Optional[typing.Union[pathlib.Path, str]] = None
     ) -> None:
         """Tracing.stop_chunk
 
@@ -15184,7 +15184,7 @@ class Tracing(SyncBase):
         return mapping.from_maybe_impl(self._sync(self._impl_obj.stop_chunk(path=path)))
 
     def stop(
-        self, *, path: typing.Optional[typing.Union[str, pathlib.Path]] = None
+        self, *, path: typing.Optional[typing.Union[pathlib.Path, str]] = None
     ) -> None:
         """Tracing.stop
 
@@ -15906,8 +15906,8 @@ class Locator(SyncBase):
         self,
         selector_or_locator: typing.Union[str, "Locator"],
         *,
-        has_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
-        has_not_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        has_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        has_not_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         has: typing.Optional["Locator"] = None,
         has_not: typing.Optional["Locator"] = None,
     ) -> "Locator":
@@ -16171,7 +16171,7 @@ class Locator(SyncBase):
         expanded: typing.Optional[bool] = None,
         include_hidden: typing.Optional[bool] = None,
         level: typing.Optional[int] = None,
-        name: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        name: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         pressed: typing.Optional[bool] = None,
         selected: typing.Optional[bool] = None,
         exact: typing.Optional[bool] = None,
@@ -16531,8 +16531,8 @@ class Locator(SyncBase):
     def filter(
         self,
         *,
-        has_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
-        has_not_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        has_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        has_not_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         has: typing.Optional["Locator"] = None,
         has_not: typing.Optional["Locator"] = None,
         visible: typing.Optional[bool] = None,
@@ -17231,7 +17231,7 @@ class Locator(SyncBase):
         *,
         timeout: typing.Optional[float] = None,
         type: typing.Optional[Literal["jpeg", "png"]] = None,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         quality: typing.Optional[int] = None,
         omit_background: typing.Optional[bool] = None,
         animations: typing.Optional[Literal["allow", "disabled"]] = None,
@@ -18811,7 +18811,7 @@ class APIRequestContext(SyncBase):
     def storage_state(
         self,
         *,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         indexed_db: typing.Optional[bool] = None,
     ) -> StorageState:
         """APIRequestContext.storage_state
