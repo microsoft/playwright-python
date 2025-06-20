@@ -315,7 +315,7 @@ class BrowserContext(ChannelOwner):
         record_har_path = str(record_har_path)
         if len(record_har_path) == 0:
             return
-        # Forcibly list type to satisfy mypy
+        # Forcibly provide type to satisfy mypy
         default_policy: HarContentPolicy = (
             "attach" if record_har_path.endswith(".zip") else "embed"
         )
@@ -570,24 +570,16 @@ class BrowserContext(ChannelOwner):
 
     def _on_close(self) -> None:
         self._closing_or_closed = True
-        print("Closing")
         if self._browser:
             try:
                 self._browser._contexts.remove(self)
             except KeyError:
-                print("Context already removed from browser contexts")
                 pass
             try:
-                print("Removing context from browser selectors")
                 self._browser._browser_type._playwright.selectors._contextsForSelectors.remove(
                     self
                 )
-                print(
-                    "Successfully removed context from browser selectors",
-                    self._browser._browser_type._playwright.selectors._contextsForSelectors,
-                )
             except KeyError:
-                print("Context already removed from browser selectors")
                 pass
 
         self._dispose_har_routers()
@@ -596,9 +588,7 @@ class BrowserContext(ChannelOwner):
 
     async def close(self, reason: str = None) -> None:
         if self._closing_or_closed:
-            print("Context already closed", self)
             return
-        print(f"Closing context {self}, contexts: {self._browser._contexts}")  # type: ignore
         self._close_reason = reason
         self._closing_or_closed = True
 

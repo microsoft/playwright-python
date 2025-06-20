@@ -44,9 +44,6 @@ class Selectors:
         engine: Dict[str, Any] = dict(name=name, source=script)
         if contentScript:
             engine["contentScript"] = contentScript
-        print(
-            f"Registering selector engine: {name} with contexts {self._contextsForSelectors}"
-        )
         for context in self._contextsForSelectors:
             await context._channel.send(
                 "registerSelectorEngine", dict(selectorEngine=engine)
