@@ -14,7 +14,7 @@
 
 import asyncio
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Set, Union
 
 from playwright._impl._browser_context import BrowserContext
 from playwright._impl._errors import Error
@@ -25,7 +25,7 @@ from playwright._impl._locator import set_test_id_attribute_name
 class Selectors:
     def __init__(self, loop: asyncio.AbstractEventLoop, dispatcher_fiber: Any) -> None:
         self._loop = loop
-        self._contextsForSelectors: List[BrowserContext] = []
+        self._contextsForSelectors: Set[BrowserContext] = set()
         self._selectorEngines: List[Dict] = []
         self._dispatcher_fiber = dispatcher_fiber
         self._testIdAttributeName: Optional[str] = None

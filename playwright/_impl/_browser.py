@@ -14,7 +14,17 @@
 
 from pathlib import Path
 from types import SimpleNamespace
-from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Sequence, Union, cast
+from typing import (
+    TYPE_CHECKING,
+    Dict,
+    List,
+    Optional,
+    Pattern,
+    Sequence,
+    Set,
+    Union,
+    cast,
+)
 
 from playwright._impl._api_structures import (
     ClientCertificate,
@@ -60,7 +70,7 @@ class Browser(ChannelOwner):
         self._should_close_connection_on_close = False
         self._cr_tracing_path: Optional[str] = None
 
-        self._contexts: List[BrowserContext] = []
+        self._contexts: Set[BrowserContext] = set()
         self._traces_dir: Optional[str] = None
         self._channel.on(
             "context",
@@ -88,7 +98,7 @@ class Browser(ChannelOwner):
 
     def _did_create_context(self, context: BrowserContext) -> None:
         context._browser = self
-        self._contexts.append(context)
+        self._contexts.add(context)
         # Note: when connecting to a browser, initial contexts arrive before `_browserType` is set,
         # and will be configured later in `ConnectToBrowserType`.
         if self._browser_type:
@@ -97,7 +107,7 @@ class Browser(ChannelOwner):
     def _setup_browser_context(self, context: BrowserContext) -> None:
         context._tracing._traces_dir = self._traces_dir
         print("Appending context to selectors")
-        self._browser_type._playwright.selectors._contextsForSelectors.append(context)
+        self._browser_type._playwright.selectors._contextsForSelectors.add(context)
 
     def _on_close(self) -> None:
         self._is_connected = False
@@ -105,7 +115,7 @@ class Browser(ChannelOwner):
 
     @property
     def contexts(self) -> List[BrowserContext]:
-        return self._contexts.copy()
+        return list(self._contexts)
 
     @property
     def browser_type(self) -> "BrowserType":

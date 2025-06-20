@@ -574,7 +574,7 @@ class BrowserContext(ChannelOwner):
         if self._browser:
             try:
                 self._browser._contexts.remove(self)
-            except ValueError:
+            except KeyError:
                 print("Context already removed from browser contexts")
                 pass
             try:
@@ -586,7 +586,7 @@ class BrowserContext(ChannelOwner):
                     "Successfully removed context from browser selectors",
                     self._browser._browser_type._playwright.selectors._contextsForSelectors,
                 )
-            except ValueError:
+            except KeyError:
                 print("Context already removed from browser selectors")
                 pass
 
