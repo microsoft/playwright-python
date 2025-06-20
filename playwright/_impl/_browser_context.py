@@ -595,7 +595,7 @@ class BrowserContext(ChannelOwner):
         if self._closing_or_closed:
             print("Context already closed", self)
             return
-        print("Closing context", self)
+        print(f"Closing context {self}, contexts: {self._browser._contexts}")  # type: ignore
         self._close_reason = reason
         self._closing_or_closed = True
 
