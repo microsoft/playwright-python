@@ -39,6 +39,8 @@ def test_selectors_register_should_work(
     selector_name = f"tag_{browser_name}"
     selector2_name = f"tag2_{browser_name}"
 
+    print("Registering")
+
     # Register one engine before creating context.
     selectors.register(selector_name, tag_selector)
 

@@ -570,15 +570,18 @@ class BrowserContext(ChannelOwner):
 
     def _on_close(self) -> None:
         self._closing_or_closed = True
+        print("Closing")
         if self._browser:
             try:
                 self._browser._contexts.remove(self)
             except ValueError:
                 pass
             try:
+                print("Removing context from browser selectors")
                 self._browser._browser_type._playwright.selectors._contextsForSelectors.remove(
                     self
                 )
+                print("Successfully removed context from browser selectors")
             except ValueError:
                 pass
 
