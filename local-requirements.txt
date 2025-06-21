@@ -10,7 +10,7 @@ pre-commit==3.5.0
 pyOpenSSL==25.1.0
 pytest==8.4.0
 pytest-asyncio==1.0.0
-pytest-cov==6.1.1
+pytest-cov==6.2.1
 pytest-repeat==0.9.4
 pytest-rerunfailures==15.1
 pytest-timeout==2.4.0
