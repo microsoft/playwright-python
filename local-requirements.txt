@@ -14,7 +14,7 @@ pytest-cov==6.1.1
 pytest-repeat==0.9.4
 pytest-rerunfailures==15.1
 pytest-timeout==2.4.0
-pytest-xdist==3.6.1
+pytest-xdist==3.7.0
 requests==2.32.4
 service_identity==24.2.0
 twisted==24.11.0
