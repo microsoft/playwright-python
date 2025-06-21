@@ -25,7 +25,6 @@ class LocalUtils(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
-        self._channel.mark_as_internal_type()
         self.devices = {
             device["name"]: parse_device_descriptor(device["descriptor"])
             for device in initializer["deviceDescriptors"]

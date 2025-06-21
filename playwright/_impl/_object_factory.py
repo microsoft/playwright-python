@@ -35,7 +35,6 @@ from playwright._impl._network import (
 )
 from playwright._impl._page import BindingCall, Page, Worker
 from playwright._impl._playwright import Playwright
-from playwright._impl._selectors import SelectorsOwner
 from playwright._impl._stream import Stream
 from playwright._impl._tracing import Tracing
 from playwright._impl._writable_stream import WritableStream
@@ -100,6 +99,4 @@ def create_remote_object(
         return Worker(parent, type, guid, initializer)
     if type == "WritableStream":
         return WritableStream(parent, type, guid, initializer)
-    if type == "Selectors":
-        return SelectorsOwner(parent, type, guid, initializer)
     return DummyObject(parent, type, guid, initializer)

@@ -286,7 +286,7 @@ class Page(ChannelOwner):
         route_handlers = self._routes.copy()
         for route_handler in route_handlers:
             # If the page was closed we stall all requests right away.
-            if self._close_was_called or self.context._close_was_called:
+            if self._close_was_called or self.context._closing_or_closed:
                 return
             if not route_handler.matches(route.request.url):
                 continue
@@ -397,13 +397,9 @@ class Page(ChannelOwner):
 
     def set_default_navigation_timeout(self, timeout: float) -> None:
         self._timeout_settings.set_default_navigation_timeout(timeout)
-        self._channel.send_no_reply(
-            "setDefaultNavigationTimeoutNoReply", dict(timeout=timeout)
-        )
 
     def set_default_timeout(self, timeout: float) -> None:
         self._timeout_settings.set_default_timeout(timeout)
-        self._channel.send_no_reply("setDefaultTimeoutNoReply", dict(timeout=timeout))
 
     async def query_selector(
         self,
@@ -557,7 +553,9 @@ class Page(ChannelOwner):
         waitUntil: DocumentLoadState = None,
     ) -> Optional[Response]:
         return from_nullable_channel(
-            await self._channel.send("reload", locals_to_params(locals()))
+            await self._channel.send(
+                "reload", self._locals_to_params_with_navigation_timeout(locals())
+            )
         )
 
     async def wait_for_load_state(
@@ -588,7 +586,9 @@ class Page(ChannelOwner):
         waitUntil: DocumentLoadState = None,
     ) -> Optional[Response]:
         return from_nullable_channel(
-            await self._channel.send("goBack", locals_to_params(locals()))
+            await self._channel.send(
+                "goBack", self._locals_to_params_with_navigation_timeout(locals())
+            )
         )
 
     async def go_forward(
@@ -597,7 +597,9 @@ class Page(ChannelOwner):
         waitUntil: DocumentLoadState = None,
     ) -> Optional[Response]:
         return from_nullable_channel(
-            await self._channel.send("goForward", locals_to_params(locals()))
+            await self._channel.send(
+                "goForward", self._locals_to_params_with_navigation_timeout(locals())
+            )
         )
 
     async def request_gc(self) -> None:
@@ -611,7 +613,7 @@ class Page(ChannelOwner):
         forcedColors: ForcedColors = None,
         contrast: Contrast = None,
     ) -> None:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         if "media" in params:
             params["media"] = "no-override" if params["media"] == "null" else media
         if "colorScheme" in params:
@@ -634,7 +636,9 @@ class Page(ChannelOwner):
 
     async def set_viewport_size(self, viewportSize: ViewportSize) -> None:
         self._viewport_size = viewportSize
-        await self._channel.send("setViewportSize", locals_to_params(locals()))
+        await self._channel.send(
+            "setViewportSize", self._locals_to_params_with_timeout(locals())
+        )
 
     @property
     def viewport_size(self) -> Optional[ViewportSize]:
@@ -777,7 +781,8 @@ class Page(ChannelOwner):
         maskColor: str = None,
         style: str = None,
     ) -> bytes:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
+        params["timeout"] = self._timeout_settings.timeout(timeout)
         if "path" in params:
             del params["path"]
         if "mask" in params:
@@ -806,7 +811,9 @@ class Page(ChannelOwner):
         self._close_reason = reason
         self._close_was_called = True
         try:
-            await self._channel.send("close", locals_to_params(locals()))
+            await self._channel.send(
+                "close", self._locals_to_params_with_timeout(locals())
+            )
             if self._owned_context:
                 await self._owned_context.close()
         except Exception as e:
@@ -1049,7 +1056,9 @@ class Page(ChannelOwner):
         noWaitAfter: bool = None,
         strict: bool = None,
     ) -> None:
-        return await self._main_frame.press(**locals_to_params(locals()))
+        return await self._main_frame.press(
+            **self._locals_to_params_with_timeout(locals())
+        )
 
     async def check(
         self,
@@ -1134,7 +1143,7 @@ class Page(ChannelOwner):
         outline: bool = None,
         tagged: bool = None,
     ) -> bytes:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         if "path" in params:
             del params["path"]
         encoded_binary = await self._channel.send("pdf", params)
@@ -1399,6 +1408,18 @@ class Page(ChannelOwner):
             if data.locator._equals(locator):
                 del self._locator_handlers[uid]
                 self._channel.send_no_reply("unregisterLocatorHandler", {"uid": uid})
+
+    def _locals_to_params_with_timeout(self, args: Dict) -> Dict:
+        params = locals_to_params(args)
+        params["timeout"] = self._timeout_settings.timeout(params.get("timeout"))
+        return params
+
+    def _locals_to_params_with_navigation_timeout(self, args: Dict) -> Dict:
+        params = locals_to_params(args)
+        params["timeout"] = self._timeout_settings.navigation_timeout(
+            params.get("timeout")
+        )
+        return params
 
 
 class Worker(ChannelOwner):

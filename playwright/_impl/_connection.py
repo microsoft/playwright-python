@@ -609,7 +609,21 @@ def _extract_stack_trace_information_from_stack(
 
 
 def _filter_none(d: Mapping) -> Dict:
-    return {k: v for k, v in d.items() if v is not None}
+    result = {}
+    for k, v in d.items():
+        if v is None:
+            continue
+        elif isinstance(v, dict):
+            filtered_v = _filter_none(v)
+            if filtered_v:
+                result[k] = filtered_v
+        elif isinstance(v, Mapping):
+            filtered_v = _filter_none(v)
+            if filtered_v:
+                result[k] = filtered_v
+        else:
+            result[k] = v
+    return result
 
 
 def format_call_log(log: Optional[List[str]]) -> str:

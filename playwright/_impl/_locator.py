@@ -107,7 +107,7 @@ class Locator:
         task: Callable[[ElementHandle, float], Awaitable[T]],
         timeout: float = None,
     ) -> T:
-        timeout = self._frame.page._timeout_settings.timeout(timeout)
+        timeout = self._frame._timeout(timeout)
         deadline = (monotonic_time() + timeout) if timeout else 0
         handle = await self.element_handle(timeout=timeout)
         if not handle:
@@ -141,7 +141,7 @@ class Locator:
         noWaitAfter: bool = None,
         trial: bool = None,
     ) -> None:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._frame.check(self._selector, strict=True, **params)
 
     async def click(
@@ -156,7 +156,7 @@ class Locator:
         noWaitAfter: bool = None,
         trial: bool = None,
     ) -> None:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._frame.click(self._selector, strict=True, **params)
 
     async def dblclick(
@@ -170,7 +170,7 @@ class Locator:
         noWaitAfter: bool = None,
         trial: bool = None,
     ) -> None:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._frame.dblclick(self._selector, strict=True, **params)
 
     async def dispatch_event(
@@ -179,7 +179,7 @@ class Locator:
         eventInit: Dict = None,
         timeout: float = None,
     ) -> None:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._frame.dispatch_event(self._selector, strict=True, **params)
 
     async def evaluate(
@@ -208,7 +208,7 @@ class Locator:
         noWaitAfter: bool = None,
         force: bool = None,
     ) -> None:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._frame.fill(self._selector, strict=True, **params)
 
     async def clear(
@@ -311,7 +311,7 @@ class Locator:
         self,
         timeout: float = None,
     ) -> ElementHandle:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         handle = await self._frame.wait_for_selector(
             self._selector, strict=True, state="attached", **params
         )
@@ -335,6 +335,12 @@ class Locator:
     @property
     def content_frame(self) -> "FrameLocator":
         return FrameLocator(self._frame, self._selector)
+
+    def describe(self, description: str) -> "Locator":
+        return Locator(
+            self._frame,
+            f"{self._selector} >> internal:describe={json.dumps(description)}",
+        )
 
     def filter(
         self,
@@ -371,7 +377,7 @@ class Locator:
         )
 
     async def focus(self, timeout: float = None) -> None:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._frame.focus(self._selector, strict=True, **params)
 
     async def blur(self, timeout: float = None) -> None:
@@ -380,7 +386,7 @@ class Locator:
             {
                 "selector": self._selector,
                 "strict": True,
-                **locals_to_params(locals()),
+                **self._locals_to_params_with_timeout(locals()),
             },
         )
 
@@ -407,14 +413,14 @@ class Locator:
         sourcePosition: Position = None,
         targetPosition: Position = None,
     ) -> None:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         del params["target"]
         return await self._frame.drag_and_drop(
             self._selector, target._selector, strict=True, **params
         )
 
     async def get_attribute(self, name: str, timeout: float = None) -> Optional[str]:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._frame.get_attribute(
             self._selector,
             strict=True,
@@ -430,7 +436,7 @@ class Locator:
         force: bool = None,
         trial: bool = None,
     ) -> None:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._frame.hover(
             self._selector,
             strict=True,
@@ -438,7 +444,7 @@ class Locator:
         )
 
     async def inner_html(self, timeout: float = None) -> str:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._frame.inner_html(
             self._selector,
             strict=True,
@@ -446,7 +452,7 @@ class Locator:
         )
 
     async def inner_text(self, timeout: float = None) -> str:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._frame.inner_text(
             self._selector,
             strict=True,
@@ -454,7 +460,7 @@ class Locator:
         )
 
     async def input_value(self, timeout: float = None) -> str:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._frame.input_value(
             self._selector,
             strict=True,
@@ -462,7 +468,7 @@ class Locator:
         )
 
     async def is_checked(self, timeout: float = None) -> bool:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._frame.is_checked(
             self._selector,
             strict=True,
@@ -470,7 +476,7 @@ class Locator:
         )
 
     async def is_disabled(self, timeout: float = None) -> bool:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._frame.is_disabled(
             self._selector,
             strict=True,
@@ -478,7 +484,7 @@ class Locator:
         )
 
     async def is_editable(self, timeout: float = None) -> bool:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._frame.is_editable(
             self._selector,
             strict=True,
@@ -486,7 +492,7 @@ class Locator:
         )
 
     async def is_enabled(self, timeout: float = None) -> bool:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._frame.is_enabled(
             self._selector,
             strict=True,
@@ -494,7 +500,7 @@ class Locator:
         )
 
     async def is_hidden(self, timeout: float = None) -> bool:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_without_timeout(locals())
         return await self._frame.is_hidden(
             self._selector,
             strict=True,
@@ -502,7 +508,7 @@ class Locator:
         )
 
     async def is_visible(self, timeout: float = None) -> bool:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_without_timeout(locals())
         return await self._frame.is_visible(
             self._selector,
             strict=True,
@@ -516,7 +522,7 @@ class Locator:
         timeout: float = None,
         noWaitAfter: bool = None,
     ) -> None:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._frame.press(self._selector, strict=True, **params)
 
     async def screenshot(
@@ -533,19 +539,19 @@ class Locator:
         maskColor: str = None,
         style: str = None,
     ) -> bytes:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._with_element(
             lambda h, timeout: h.screenshot(
                 **{**params, "timeout": timeout},
             ),
         )
 
-    async def aria_snapshot(self, timeout: float = None, ref: bool = None) -> str:
+    async def aria_snapshot(self, timeout: float = None) -> str:
         return await self._frame._channel.send(
             "ariaSnapshot",
             {
                 "selector": self._selector,
-                **locals_to_params(locals()),
+                **self._locals_to_params_with_timeout(locals()),
             },
         )
 
@@ -568,7 +574,7 @@ class Locator:
         noWaitAfter: bool = None,
         force: bool = None,
     ) -> List[str]:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._frame.select_option(
             self._selector,
             strict=True,
@@ -576,7 +582,7 @@ class Locator:
         )
 
     async def select_text(self, force: bool = None, timeout: float = None) -> None:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._with_element(
             lambda h, timeout: h.select_text(**{**params, "timeout": timeout}),
             timeout,
@@ -594,7 +600,7 @@ class Locator:
         timeout: float = None,
         noWaitAfter: bool = None,
     ) -> None:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._frame.set_input_files(
             self._selector,
             strict=True,
@@ -610,7 +616,7 @@ class Locator:
         noWaitAfter: bool = None,
         trial: bool = None,
     ) -> None:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._frame.tap(
             self._selector,
             strict=True,
@@ -618,7 +624,7 @@ class Locator:
         )
 
     async def text_content(self, timeout: float = None) -> Optional[str]:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._frame.text_content(
             self._selector,
             strict=True,
@@ -632,7 +638,7 @@ class Locator:
         timeout: float = None,
         noWaitAfter: bool = None,
     ) -> None:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._frame.type(
             self._selector,
             strict=True,
@@ -656,7 +662,7 @@ class Locator:
         noWaitAfter: bool = None,
         trial: bool = None,
     ) -> None:
-        params = locals_to_params(locals())
+        params = self._locals_to_params_with_timeout(locals())
         return await self._frame.uncheck(
             self._selector,
             strict=True,
@@ -715,6 +721,7 @@ class Locator:
     ) -> FrameExpectResult:
         if "expectedValue" in options:
             options["expectedValue"] = serialize_argument(options["expectedValue"])
+        options["timeout"] = self._frame._timeout(options.get("timeout"))
         result = await self._frame._channel.send_return_as_dict(
             "expect",
             {
@@ -729,6 +736,18 @@ class Locator:
 
     async def highlight(self) -> None:
         await self._frame._highlight(self._selector)
+
+    def _locals_to_params_with_timeout(self, args: Dict) -> Dict:
+        params = locals_to_params(args)
+        params["timeout"] = self._frame._timeout(params.get("timeout"))
+        return params
+
+    def _locals_to_params_without_timeout(self, args: Dict) -> Dict:
+        params = locals_to_params(args)
+        # Timeout is deprecated and does nothing
+        if "timeout" in params:
+            del params["timeout"]
+        return params
 
 
 class FrameLocator:
@@ -846,6 +865,11 @@ class FrameLocator:
 
     def __repr__(self) -> str:
         return f"<FrameLocator frame={self._frame!r} selector={self._frame_selector!r}>"
+
+    def _locals_to_params_with_timeout(self, args: Dict) -> Dict:
+        params = locals_to_params(args)
+        params["timeout"] = self._frame._timeout(params.get("timeout"))
+        return params
 
 
 _test_id_attribute_name: str = "data-testid"

@@ -156,9 +156,7 @@ class TraceViewerPage:
         return self.page.get_by_test_id("stack-trace-list").locator(".list-view-entry")
 
     async def select_action(self, title: str, ordinal: int = 0) -> None:
-        await self.page.locator(f'.action-title:has-text("{title}")').nth(
-            ordinal
-        ).click()
+        await self.page.locator(".action-title", has_text=title).nth(ordinal).click()
 
     async def select_snapshot(self, name: str) -> None:
         await self.page.click(

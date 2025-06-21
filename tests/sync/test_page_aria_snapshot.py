@@ -96,17 +96,6 @@ def test_should_snapshot_complex(page: Page) -> None:
     )
 
 
-def test_should_snapshot_with_ref(page: Page) -> None:
-    page.set_content('<ul><li><a href="about:blank">link</a></li></ul>')
-    expected = """
-      - list [ref=s1e3]:
-        - listitem [ref=s1e4]:
-          - link "link" [ref=s1e5]:
-            - /url: about:blank
-    """
-    assert page.locator("body").aria_snapshot(ref=True) == _unshift(expected)
-
-
 def test_should_snapshot_with_unexpected_children_equal(page: Page) -> None:
     page.set_content(
         """

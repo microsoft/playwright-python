@@ -674,7 +674,7 @@ class Route(AsyncBase):
         headers: typing.Optional[typing.Dict[str, str]] = None,
         body: typing.Optional[typing.Union[str, bytes]] = None,
         json: typing.Optional[typing.Any] = None,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         content_type: typing.Optional[str] = None,
         response: typing.Optional["APIResponse"] = None,
     ) -> None:
@@ -2770,7 +2770,7 @@ class ElementHandle(JSHandle):
         *,
         timeout: typing.Optional[float] = None,
         type: typing.Optional[Literal["jpeg", "png"]] = None,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         quality: typing.Optional[int] = None,
         omit_background: typing.Optional[bool] = None,
         animations: typing.Optional[Literal["allow", "disabled"]] = None,
@@ -3918,11 +3918,7 @@ class Frame(AsyncBase):
         )
 
     async def is_hidden(
-        self,
-        selector: str,
-        *,
-        strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        self, selector: str, *, strict: typing.Optional[bool] = None
     ) -> bool:
         """Frame.is_hidden
 
@@ -3937,8 +3933,6 @@ class Frame(AsyncBase):
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
-            Deprecated: This option is ignored. `frame.is_hidden()` does not wait for the element to become hidden and returns immediately.
 
         Returns
         -------
@@ -3946,17 +3940,11 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.is_hidden(
-                selector=selector, strict=strict, timeout=timeout
-            )
+            await self._impl_obj.is_hidden(selector=selector, strict=strict)
         )
 
     async def is_visible(
-        self,
-        selector: str,
-        *,
-        strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        self, selector: str, *, strict: typing.Optional[bool] = None
     ) -> bool:
         """Frame.is_visible
 
@@ -3971,8 +3959,6 @@ class Frame(AsyncBase):
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
-        timeout : Union[float, None]
-            Deprecated: This option is ignored. `frame.is_visible()` does not wait for the element to become visible and returns immediately.
 
         Returns
         -------
@@ -3980,9 +3966,7 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.is_visible(
-                selector=selector, strict=strict, timeout=timeout
-            )
+            await self._impl_obj.is_visible(selector=selector, strict=strict)
         )
 
     async def dispatch_event(
@@ -4216,7 +4200,7 @@ class Frame(AsyncBase):
         self,
         *,
         url: typing.Optional[str] = None,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         content: typing.Optional[str] = None,
         type: typing.Optional[str] = None,
     ) -> "ElementHandle":
@@ -4254,7 +4238,7 @@ class Frame(AsyncBase):
         self,
         *,
         url: typing.Optional[str] = None,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         content: typing.Optional[str] = None,
     ) -> "ElementHandle":
         """Frame.add_style_tag
@@ -4576,8 +4560,8 @@ class Frame(AsyncBase):
         self,
         selector: str,
         *,
-        has_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
-        has_not_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        has_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        has_not_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         has: typing.Optional["Locator"] = None,
         has_not: typing.Optional["Locator"] = None,
     ) -> "Locator":
@@ -4844,7 +4828,7 @@ class Frame(AsyncBase):
         expanded: typing.Optional[bool] = None,
         include_hidden: typing.Optional[bool] = None,
         level: typing.Optional[int] = None,
-        name: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        name: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         pressed: typing.Optional[bool] = None,
         selected: typing.Optional[bool] = None,
         exact: typing.Optional[bool] = None,
@@ -6061,8 +6045,8 @@ class FrameLocator(AsyncBase):
         self,
         selector_or_locator: typing.Union["Locator", str],
         *,
-        has_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
-        has_not_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        has_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        has_not_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         has: typing.Optional["Locator"] = None,
         has_not: typing.Optional["Locator"] = None,
     ) -> "Locator":
@@ -6326,7 +6310,7 @@ class FrameLocator(AsyncBase):
         expanded: typing.Optional[bool] = None,
         include_hidden: typing.Optional[bool] = None,
         level: typing.Optional[int] = None,
-        name: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        name: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         pressed: typing.Optional[bool] = None,
         selected: typing.Optional[bool] = None,
         exact: typing.Optional[bool] = None,
@@ -6722,7 +6706,7 @@ class Selectors(AsyncBase):
         name: str,
         script: typing.Optional[str] = None,
         *,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         content_script: typing.Optional[bool] = None,
     ) -> None:
         """Selectors.register
@@ -8662,7 +8646,7 @@ class Page(AsyncContextManager):
         self,
         *,
         url: typing.Optional[str] = None,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         content: typing.Optional[str] = None,
         type: typing.Optional[str] = None,
     ) -> "ElementHandle":
@@ -8699,7 +8683,7 @@ class Page(AsyncContextManager):
         self,
         *,
         url: typing.Optional[str] = None,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         content: typing.Optional[str] = None,
     ) -> "ElementHandle":
         """Page.add_style_tag
@@ -9385,7 +9369,7 @@ class Page(AsyncContextManager):
         self,
         script: typing.Optional[str] = None,
         *,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
     ) -> None:
         """Page.add_init_script
 
@@ -9607,7 +9591,7 @@ class Page(AsyncContextManager):
         self,
         har: typing.Union[pathlib.Path, str],
         *,
-        url: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        url: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         not_found: typing.Optional[Literal["abort", "fallback"]] = None,
         update: typing.Optional[bool] = None,
         update_content: typing.Optional[Literal["attach", "embed"]] = None,
@@ -9663,7 +9647,7 @@ class Page(AsyncContextManager):
         *,
         timeout: typing.Optional[float] = None,
         type: typing.Optional[Literal["jpeg", "png"]] = None,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         quality: typing.Optional[int] = None,
         omit_background: typing.Optional[bool] = None,
         full_page: typing.Optional[bool] = None,
@@ -10097,8 +10081,8 @@ class Page(AsyncContextManager):
         self,
         selector: str,
         *,
-        has_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
-        has_not_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        has_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        has_not_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         has: typing.Optional["Locator"] = None,
         has_not: typing.Optional["Locator"] = None,
     ) -> "Locator":
@@ -10363,7 +10347,7 @@ class Page(AsyncContextManager):
         expanded: typing.Optional[bool] = None,
         include_hidden: typing.Optional[bool] = None,
         level: typing.Optional[int] = None,
-        name: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        name: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         pressed: typing.Optional[bool] = None,
         selected: typing.Optional[bool] = None,
         exact: typing.Optional[bool] = None,
@@ -11512,7 +11496,7 @@ class Page(AsyncContextManager):
         height: typing.Optional[typing.Union[str, float]] = None,
         prefer_css_page_size: typing.Optional[bool] = None,
         margin: typing.Optional[PdfMargins] = None,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         outline: typing.Optional[bool] = None,
         tagged: typing.Optional[bool] = None,
     ) -> bytes:
@@ -12836,9 +12820,9 @@ class BrowserContext(AsyncContextManager):
     async def clear_cookies(
         self,
         *,
-        name: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
-        domain: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
-        path: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        name: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        domain: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        path: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
     ) -> None:
         """BrowserContext.clear_cookies
 
@@ -12991,7 +12975,7 @@ class BrowserContext(AsyncContextManager):
         self,
         script: typing.Optional[str] = None,
         *,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
     ) -> None:
         """BrowserContext.add_init_script
 
@@ -13340,7 +13324,7 @@ class BrowserContext(AsyncContextManager):
         self,
         har: typing.Union[pathlib.Path, str],
         *,
-        url: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        url: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         not_found: typing.Optional[Literal["abort", "fallback"]] = None,
         update: typing.Optional[bool] = None,
         update_content: typing.Optional[Literal["attach", "embed"]] = None,
@@ -13450,7 +13434,7 @@ class BrowserContext(AsyncContextManager):
     async def storage_state(
         self,
         *,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         indexed_db: typing.Optional[bool] = None,
     ) -> StorageState:
         """BrowserContext.storage_state
@@ -13752,9 +13736,9 @@ class Browser(AsyncContextManager):
         accept_downloads: typing.Optional[bool] = None,
         default_browser_type: typing.Optional[str] = None,
         proxy: typing.Optional[ProxySettings] = None,
-        record_har_path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        record_har_path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         record_har_omit_content: typing.Optional[bool] = None,
-        record_video_dir: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        record_video_dir: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         record_video_size: typing.Optional[ViewportSize] = None,
         storage_state: typing.Optional[
             typing.Union[StorageState, str, pathlib.Path]
@@ -13763,7 +13747,7 @@ class Browser(AsyncContextManager):
         strict_selectors: typing.Optional[bool] = None,
         service_workers: typing.Optional[Literal["allow", "block"]] = None,
         record_har_url_filter: typing.Optional[
-            typing.Union[str, typing.Pattern[str]]
+            typing.Union[typing.Pattern[str], str]
         ] = None,
         record_har_mode: typing.Optional[Literal["full", "minimal"]] = None,
         record_har_content: typing.Optional[Literal["attach", "embed", "omit"]] = None,
@@ -13999,9 +13983,9 @@ class Browser(AsyncContextManager):
         accept_downloads: typing.Optional[bool] = None,
         default_browser_type: typing.Optional[str] = None,
         proxy: typing.Optional[ProxySettings] = None,
-        record_har_path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        record_har_path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         record_har_omit_content: typing.Optional[bool] = None,
-        record_video_dir: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        record_video_dir: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         record_video_size: typing.Optional[ViewportSize] = None,
         storage_state: typing.Optional[
             typing.Union[StorageState, str, pathlib.Path]
@@ -14010,7 +13994,7 @@ class Browser(AsyncContextManager):
         strict_selectors: typing.Optional[bool] = None,
         service_workers: typing.Optional[Literal["allow", "block"]] = None,
         record_har_url_filter: typing.Optional[
-            typing.Union[str, typing.Pattern[str]]
+            typing.Union[typing.Pattern[str], str]
         ] = None,
         record_har_mode: typing.Optional[Literal["full", "minimal"]] = None,
         record_har_content: typing.Optional[Literal["attach", "embed", "omit"]] = None,
@@ -14240,7 +14224,7 @@ class Browser(AsyncContextManager):
         self,
         *,
         page: typing.Optional["Page"] = None,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         screenshots: typing.Optional[bool] = None,
         categories: typing.Optional[typing.Sequence[str]] = None,
     ) -> None:
@@ -14333,7 +14317,7 @@ class BrowserType(AsyncBase):
     async def launch(
         self,
         *,
-        executable_path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        executable_path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         channel: typing.Optional[str] = None,
         args: typing.Optional[typing.Sequence[str]] = None,
         ignore_default_args: typing.Optional[
@@ -14347,9 +14331,9 @@ class BrowserType(AsyncBase):
         headless: typing.Optional[bool] = None,
         devtools: typing.Optional[bool] = None,
         proxy: typing.Optional[ProxySettings] = None,
-        downloads_path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        downloads_path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         slow_mo: typing.Optional[float] = None,
-        traces_dir: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        traces_dir: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         chromium_sandbox: typing.Optional[bool] = None,
         firefox_user_prefs: typing.Optional[
             typing.Dict[str, typing.Union[str, float, bool]]
@@ -14442,6 +14426,9 @@ class BrowserType(AsyncBase):
             Firefox user preferences. Learn more about the Firefox user preferences at
             [`about:config`](https://support.mozilla.org/en-US/kb/about-config-editor-firefox).
 
+            You can also provide a path to a custom [`policies.json` file](https://mozilla.github.io/policy-templates/) via
+            `PLAYWRIGHT_FIREFOX_POLICIES_JSON` environment variable.
+
         Returns
         -------
         Browser
@@ -14474,7 +14461,7 @@ class BrowserType(AsyncBase):
         user_data_dir: typing.Union[str, pathlib.Path],
         *,
         channel: typing.Optional[str] = None,
-        executable_path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        executable_path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         args: typing.Optional[typing.Sequence[str]] = None,
         ignore_default_args: typing.Optional[
             typing.Union[bool, typing.Sequence[str]]
@@ -14487,7 +14474,7 @@ class BrowserType(AsyncBase):
         headless: typing.Optional[bool] = None,
         devtools: typing.Optional[bool] = None,
         proxy: typing.Optional[ProxySettings] = None,
-        downloads_path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        downloads_path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         slow_mo: typing.Optional[float] = None,
         viewport: typing.Optional[ViewportSize] = None,
         screen: typing.Optional[ViewportSize] = None,
@@ -14515,20 +14502,20 @@ class BrowserType(AsyncBase):
         forced_colors: typing.Optional[Literal["active", "none", "null"]] = None,
         contrast: typing.Optional[Literal["more", "no-preference", "null"]] = None,
         accept_downloads: typing.Optional[bool] = None,
-        traces_dir: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        traces_dir: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         chromium_sandbox: typing.Optional[bool] = None,
         firefox_user_prefs: typing.Optional[
             typing.Dict[str, typing.Union[str, float, bool]]
         ] = None,
-        record_har_path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        record_har_path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         record_har_omit_content: typing.Optional[bool] = None,
-        record_video_dir: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        record_video_dir: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         record_video_size: typing.Optional[ViewportSize] = None,
         base_url: typing.Optional[str] = None,
         strict_selectors: typing.Optional[bool] = None,
         service_workers: typing.Optional[Literal["allow", "block"]] = None,
         record_har_url_filter: typing.Optional[
-            typing.Union[str, typing.Pattern[str]]
+            typing.Union[typing.Pattern[str], str]
         ] = None,
         record_har_mode: typing.Optional[Literal["full", "minimal"]] = None,
         record_har_content: typing.Optional[Literal["attach", "embed", "omit"]] = None,
@@ -14673,6 +14660,9 @@ class BrowserType(AsyncBase):
         firefox_user_prefs : Union[Dict[str, Union[bool, float, str]], None]
             Firefox user preferences. Learn more about the Firefox user preferences at
             [`about:config`](https://support.mozilla.org/en-US/kb/about-config-editor-firefox).
+
+            You can also provide a path to a custom [`policies.json` file](https://mozilla.github.io/policy-templates/) via
+            `PLAYWRIGHT_FIREFOX_POLICIES_JSON` environment variable.
         record_har_path : Union[pathlib.Path, str, None]
             Enables [HAR](http://www.softwareishard.com/blog/har-12-spec) recording for all pages into the specified HAR file
             on the filesystem. If not specified, the HAR is not recorded. Make sure to call `browser_context.close()`
@@ -15047,6 +15037,15 @@ class Tracing(AsyncBase):
 
         Start tracing.
 
+        **NOTE** You probably want to
+        [enable tracing in your config file](https://playwright.dev/docs/api/class-testoptions#test-options-trace) instead
+        of using `Tracing.start`.
+
+        The `context.tracing` API captures browser operations and network activity, but it doesn't record test assertions
+        (like `expect` calls). We recommend
+        [enabling tracing through Playwright Test configuration](https://playwright.dev/docs/api/class-testoptions#test-options-trace),
+        which includes those assertions and provides a more complete trace for debugging test failures.
+
         **Usage**
 
         ```py
@@ -15126,7 +15125,7 @@ class Tracing(AsyncBase):
         )
 
     async def stop_chunk(
-        self, *, path: typing.Optional[typing.Union[str, pathlib.Path]] = None
+        self, *, path: typing.Optional[typing.Union[pathlib.Path, str]] = None
     ) -> None:
         """Tracing.stop_chunk
 
@@ -15141,7 +15140,7 @@ class Tracing(AsyncBase):
         return mapping.from_maybe_impl(await self._impl_obj.stop_chunk(path=path))
 
     async def stop(
-        self, *, path: typing.Optional[typing.Union[str, pathlib.Path]] = None
+        self, *, path: typing.Optional[typing.Union[pathlib.Path, str]] = None
     ) -> None:
         """Tracing.stop
 
@@ -15627,6 +15626,13 @@ class Locator(AsyncBase):
 
         **Usage**
 
+        Passing argument to `expression`:
+
+        ```py
+        result = await page.get_by_testid(\"myId\").evaluate(\"(element, [x, y]) => element.textContent + ' ' + x * y\", [7, 8])
+        print(result) # prints \"myId text 56\"
+        ```
+
         Parameters
         ----------
         expression : str
@@ -15838,8 +15844,8 @@ class Locator(AsyncBase):
         self,
         selector_or_locator: typing.Union[str, "Locator"],
         *,
-        has_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
-        has_not_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        has_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        has_not_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         has: typing.Optional["Locator"] = None,
         has_not: typing.Optional["Locator"] = None,
     ) -> "Locator":
@@ -16103,7 +16109,7 @@ class Locator(AsyncBase):
         expanded: typing.Optional[bool] = None,
         include_hidden: typing.Optional[bool] = None,
         level: typing.Optional[int] = None,
-        name: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        name: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         pressed: typing.Optional[bool] = None,
         selected: typing.Optional[bool] = None,
         exact: typing.Optional[bool] = None,
@@ -16433,11 +16439,36 @@ class Locator(AsyncBase):
 
         return mapping.from_impl(self._impl_obj.nth(index=index))
 
+    def describe(self, description: str) -> "Locator":
+        """Locator.describe
+
+        Describes the locator, description is used in the trace viewer and reports. Returns the locator pointing to the
+        same element.
+
+        **Usage**
+
+        ```py
+        button = page.get_by_test_id(\"btn-sub\").describe(\"Subscribe button\")
+        await button.click()
+        ```
+
+        Parameters
+        ----------
+        description : str
+            Locator description.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.describe(description=description))
+
     def filter(
         self,
         *,
-        has_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
-        has_not_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        has_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        has_not_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         has: typing.Optional["Locator"] = None,
         has_not: typing.Optional["Locator"] = None,
         visible: typing.Optional[bool] = None,
@@ -17117,7 +17148,7 @@ class Locator(AsyncBase):
         *,
         timeout: typing.Optional[float] = None,
         type: typing.Optional[Literal["jpeg", "png"]] = None,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         quality: typing.Optional[int] = None,
         omit_background: typing.Optional[bool] = None,
         animations: typing.Optional[Literal["allow", "disabled"]] = None,
@@ -17220,12 +17251,7 @@ class Locator(AsyncBase):
             )
         )
 
-    async def aria_snapshot(
-        self,
-        *,
-        timeout: typing.Optional[float] = None,
-        ref: typing.Optional[bool] = None,
-    ) -> str:
+    async def aria_snapshot(self, *, timeout: typing.Optional[float] = None) -> str:
         """Locator.aria_snapshot
 
         Captures the aria snapshot of the given element. Read more about [aria snapshots](https://playwright.dev/python/docs/aria-snapshots) and
@@ -17270,9 +17296,6 @@ class Locator(AsyncBase):
         timeout : Union[float, None]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        ref : Union[bool, None]
-            Generate symbolic reference for each element. One can use `aria-ref=<ref>` locator immediately after capturing the
-            snapshot to perform actions on the element.
 
         Returns
         -------
@@ -17280,7 +17303,7 @@ class Locator(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.aria_snapshot(timeout=timeout, ref=ref)
+            await self._impl_obj.aria_snapshot(timeout=timeout)
         )
 
     async def scroll_into_view_if_needed(
@@ -18667,7 +18690,7 @@ class APIRequestContext(AsyncBase):
     async def storage_state(
         self,
         *,
-        path: typing.Optional[typing.Union[str, pathlib.Path]] = None,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         indexed_db: typing.Optional[bool] = None,
     ) -> StorageState:
         """APIRequestContext.storage_state
@@ -19175,7 +19198,7 @@ class LocatorAssertions(AsyncBase):
         ```py
         from playwright.async_api import expect
 
-        locator = page.locator(\"list > .component\")
+        locator = page.locator(\".list > .component\")
         await expect(locator).to_have_class([\"component\", \"component selected\", \"component\"])
         ```
 
@@ -19256,7 +19279,7 @@ class LocatorAssertions(AsyncBase):
         expected class lists. Each element's class attribute is matched against the corresponding class in the array:
 
         ```html
-        <div class='list'></div>
+        <div class='list'>
           <div class='component inactive'></div>
           <div class='component active'></div>
           <div class='component inactive'></div>
@@ -19266,7 +19289,7 @@ class LocatorAssertions(AsyncBase):
         ```py
         from playwright.async_api import expect
 
-        locator = page.locator(\"list > .component\")
+        locator = page.locator(\".list > .component\")
         await expect(locator).to_contain_class([\"inactive\", \"active\", \"inactive\"])
         ```
 

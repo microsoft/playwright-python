@@ -24,6 +24,7 @@ from typing import (
     List,
     Literal,
     Optional,
+    Sequence,
     Tuple,
 )
 
@@ -124,7 +125,7 @@ async def test_context_add_cookies_should_work(
     ]
 
 
-def _filter_cookies(cookies: List[Cookie]) -> List[Cookie]:
+def _filter_cookies(cookies: Sequence[Cookie]) -> List[Cookie]:
     return list(
         filter(lambda cookie: cookie["domain"] != "copilot.microsoft.com", cookies)
     )
