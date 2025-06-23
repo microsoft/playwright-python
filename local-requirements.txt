@@ -2,7 +2,7 @@ autobahn==23.1.2
 black==25.1.0
 build==1.2.2.post1
 flake8==7.2.0
-mypy==1.16.0
+mypy==1.16.1
 objgraph==3.6.2
 Pillow==11.2.1
 pixelmatch==0.3.0
