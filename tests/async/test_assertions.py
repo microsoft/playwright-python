@@ -552,6 +552,35 @@ async def test_assertions_locator_to_be_checked(page: Page, server: Server) -> N
     await expect(my_checkbox).to_be_checked()
 
 
+async def test_assertions_boolean_checked_with_intermediate_true(page: Page) -> None:
+    await page.set_content("<input type=checkbox></input>")
+    await page.locator("input").evaluate("e => e.indeterminate = true")
+    await expect(page.locator("input")).to_be_checked(indeterminate=True)
+
+
+async def test_assertions_boolean_checked_with_intermediate_true_and_checked(
+    page: Page,
+) -> None:
+    await page.set_content("<input type=checkbox></input>")
+    await page.locator("input").evaluate("e => e.indeterminate = true")
+    with pytest.raises(
+        Error, match="Can't assert indeterminate and checked at the same time"
+    ):
+        await expect(page.locator("input")).to_be_checked(
+            checked=False, indeterminate=True
+        )
+
+
+async def test_assertions_boolean_fail_with_indeterminate_true(page: Page) -> None:
+    await page.set_content("<input type=checkbox></input>")
+    with pytest.raises(
+        AssertionError, match='Expect "to_be_checked" with timeout 1000ms'
+    ):
+        await expect(page.locator("input")).to_be_checked(
+            indeterminate=True, timeout=1000
+        )
+
+
 async def test_assertions_locator_to_be_disabled_enabled(
     page: Page, server: Server
 ) -> None:

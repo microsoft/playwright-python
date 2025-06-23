@@ -548,7 +548,7 @@ def test_assertions_boolean_checked_with_intermediate_true_and_checked(
 def test_assertions_boolean_fail_with_indeterminate_true(page: Page) -> None:
     page.set_content("<input type=checkbox></input>")
     with pytest.raises(
-        AssertionError, match='Expect "to.be.checked" with timeout 1000ms'
+        AssertionError, match='Expect "to_be_checked" with timeout 1000ms'
     ):
         expect(page.locator("input")).to_be_checked(indeterminate=True, timeout=1000)
 
