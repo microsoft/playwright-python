@@ -140,7 +140,7 @@ def test_assertions_locator_to_contain_class(page: Page, server: Server) -> None
 
     assert excinfo.match("Locator expected to contain class 'does-not-exist'")
     assert excinfo.match("Actual value: foo bar baz")
-    assert excinfo.match('Expect "to.contain.class" with timeout 100ms')
+    assert excinfo.match('Expect "to_contain_class" with timeout 100ms')
 
     page.set_content(
         '<div class="foo"></div><div class="hello bar"></div><div class="baz"></div>'
@@ -957,7 +957,7 @@ def test_should_be_attached_with_impossible_timeout_not(page: Page) -> None:
 def test_should_be_able_to_set_custom_timeout(page: Page) -> None:
     with pytest.raises(AssertionError) as exc_info:
         expect(page.locator("#a1")).to_be_visible(timeout=111)
-    assert 'Expect "to.be.visible" with timeout 111ms' in str(exc_info.value)
+    assert 'Expect "to_be_visible" with timeout 111ms' in str(exc_info.value)
 
 
 def test_should_be_able_to_set_custom_global_timeout(page: Page) -> None:
@@ -965,7 +965,7 @@ def test_should_be_able_to_set_custom_global_timeout(page: Page) -> None:
         expect.set_options(timeout=111)
         with pytest.raises(AssertionError) as exc_info:
             expect(page.locator("#a1")).to_be_visible()
-        assert 'Expect "to.be.visible" with timeout 111ms' in str(exc_info.value)
+        assert 'Expect "to_be_visible" with timeout 111ms' in str(exc_info.value)
     finally:
         expect.set_options(timeout=5_000)
 

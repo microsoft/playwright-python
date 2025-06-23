@@ -51,6 +51,7 @@ class AssertionsBase:
         expect_options: FrameExpectOptions,
         expected: Any,
         message: str,
+        title: str = None,
     ) -> None:
         __tracebackhide__ = True
         expect_options["isNot"] = self._is_not
@@ -60,7 +61,7 @@ class AssertionsBase:
             message = message.replace("expected to", "expected not to")
         if "useInnerText" in expect_options and expect_options["useInnerText"] is None:
             del expect_options["useInnerText"]
-        result = await self._actual_locator._expect(expression, expect_options)
+        result = await self._actual_locator._expect(expression, expect_options, title)
         if result["matches"] == self._is_not:
             actual = result.get("received")
             if self._custom_message:
@@ -105,6 +106,7 @@ class PageAssertions(AssertionsBase):
             FrameExpectOptions(expectedText=expected_values, timeout=timeout),
             titleOrRegExp,
             "Page title expected to be",
+            'Expect "to_have_title"',
         )
 
     async def not_to_have_title(
@@ -129,6 +131,7 @@ class PageAssertions(AssertionsBase):
             FrameExpectOptions(expectedText=expected_text, timeout=timeout),
             urlOrRegExp,
             "Page URL expected to be",
+            'Expect "to_have_url"',
         )
 
     async def not_to_have_url(
@@ -190,6 +193,7 @@ class LocatorAssertions(AssertionsBase):
                 ),
                 expected,
                 "Locator expected to contain text",
+                'Expect "to_contain_text"',
             )
         else:
             expected_text = to_expected_text_values(
@@ -207,6 +211,7 @@ class LocatorAssertions(AssertionsBase):
                 ),
                 expected,
                 "Locator expected to contain text",
+                'Expect "to_contain_text"',
             )
 
     async def not_to_contain_text(
@@ -241,6 +246,7 @@ class LocatorAssertions(AssertionsBase):
             ),
             value,
             "Locator expected to have attribute",
+            'Expect "to_have_attribute"',
         )
 
     async def not_to_have_attribute(
@@ -276,6 +282,7 @@ class LocatorAssertions(AssertionsBase):
                 FrameExpectOptions(expectedText=expected_text, timeout=timeout),
                 expected,
                 "Locator expected to have class",
+                'Expect "to_have_class"',
             )
         else:
             expected_text = to_expected_text_values([expected])
@@ -284,6 +291,7 @@ class LocatorAssertions(AssertionsBase):
                 FrameExpectOptions(expectedText=expected_text, timeout=timeout),
                 expected,
                 "Locator expected to have class",
+                'Expect "to_have_class"',
             )
 
     async def not_to_have_class(
@@ -318,6 +326,7 @@ class LocatorAssertions(AssertionsBase):
                 FrameExpectOptions(expectedText=expected_text, timeout=timeout),
                 expected,
                 "Locator expected to contain class names",
+                'Expect "to_contain_class"',
             )
         else:
             expected_text = to_expected_text_values([expected])
@@ -326,6 +335,7 @@ class LocatorAssertions(AssertionsBase):
                 FrameExpectOptions(expectedText=expected_text, timeout=timeout),
                 expected,
                 "Locator expected to contain class",
+                'Expect "to_contain_class"',
             )
 
     async def not_to_contain_class(
@@ -350,6 +360,7 @@ class LocatorAssertions(AssertionsBase):
             FrameExpectOptions(expectedNumber=count, timeout=timeout),
             count,
             "Locator expected to have count",
+            'Expect "to_have_count"',
         )
 
     async def not_to_have_count(
@@ -375,6 +386,7 @@ class LocatorAssertions(AssertionsBase):
             ),
             value,
             "Locator expected to have CSS",
+            'Expect "to_have_css"',
         )
 
     async def not_to_have_css(
@@ -398,6 +410,7 @@ class LocatorAssertions(AssertionsBase):
             FrameExpectOptions(expectedText=expected_text, timeout=timeout),
             id,
             "Locator expected to have ID",
+            'Expect "to_have_id"',
         )
 
     async def not_to_have_id(
@@ -422,6 +435,7 @@ class LocatorAssertions(AssertionsBase):
             ),
             value,
             "Locator expected to have JS Property",
+            'Expect "to_have_property"',
         )
 
     async def not_to_have_js_property(
@@ -445,6 +459,7 @@ class LocatorAssertions(AssertionsBase):
             FrameExpectOptions(expectedText=expected_text, timeout=timeout),
             value,
             "Locator expected to have Value",
+            'Expect "to_have_value"',
         )
 
     async def not_to_have_value(
@@ -469,6 +484,7 @@ class LocatorAssertions(AssertionsBase):
             FrameExpectOptions(expectedText=expected_text, timeout=timeout),
             values,
             "Locator expected to have Values",
+            'Expect "to_have_values"',
         )
 
     async def not_to_have_values(
@@ -512,6 +528,7 @@ class LocatorAssertions(AssertionsBase):
                 ),
                 expected,
                 "Locator expected to have text",
+                'Expect "to_have_text"',
             )
         else:
             expected_text = to_expected_text_values(
@@ -526,6 +543,7 @@ class LocatorAssertions(AssertionsBase):
                 ),
                 expected,
                 "Locator expected to have text",
+                'Expect "to_have_text"',
             )
 
     async def not_to_have_text(
@@ -558,6 +576,7 @@ class LocatorAssertions(AssertionsBase):
             FrameExpectOptions(timeout=timeout),
             None,
             f"Locator expected to be {attached_string}",
+            'Expect "to_be_attached"',
         )
 
     async def to_be_checked(
@@ -582,6 +601,7 @@ class LocatorAssertions(AssertionsBase):
             FrameExpectOptions(timeout=timeout, expectedValue=expected_value),
             None,
             f"Locator expected to be {checked_string}",
+            'Expect "to_be_checked"',
         )
 
     async def not_to_be_attached(
@@ -609,6 +629,7 @@ class LocatorAssertions(AssertionsBase):
             FrameExpectOptions(timeout=timeout),
             None,
             "Locator expected to be disabled",
+            'Expect "to_be_disabled"',
         )
 
     async def not_to_be_disabled(
@@ -632,6 +653,7 @@ class LocatorAssertions(AssertionsBase):
             FrameExpectOptions(timeout=timeout),
             None,
             f"Locator expected to be {editable_string}",
+            'Expect "to_be_editable"',
         )
 
     async def not_to_be_editable(
@@ -652,6 +674,7 @@ class LocatorAssertions(AssertionsBase):
             FrameExpectOptions(timeout=timeout),
             None,
             "Locator expected to be empty",
+            'Expect "to_be_empty"',
         )
 
     async def not_to_be_empty(
@@ -675,6 +698,7 @@ class LocatorAssertions(AssertionsBase):
             FrameExpectOptions(timeout=timeout),
             None,
             f"Locator expected to be {enabled_string}",
+            'Expect "to_be_enabled"',
         )
 
     async def not_to_be_enabled(
@@ -695,6 +719,7 @@ class LocatorAssertions(AssertionsBase):
             FrameExpectOptions(timeout=timeout),
             None,
             "Locator expected to be hidden",
+            'Expect "to_be_hidden"',
         )
 
     async def not_to_be_hidden(
@@ -718,6 +743,7 @@ class LocatorAssertions(AssertionsBase):
             FrameExpectOptions(timeout=timeout),
             None,
             f"Locator expected to be {visible_string}",
+            'Expect "to_be_visible"',
         )
 
     async def not_to_be_visible(
@@ -738,6 +764,7 @@ class LocatorAssertions(AssertionsBase):
             FrameExpectOptions(timeout=timeout),
             None,
             "Locator expected to be focused",
+            'Expect "to_be_focused"',
         )
 
     async def not_to_be_focused(
@@ -758,6 +785,7 @@ class LocatorAssertions(AssertionsBase):
             FrameExpectOptions(timeout=timeout, expectedNumber=ratio),
             None,
             "Locator expected to be in viewport",
+            'Expect "to_be_in_viewport"',
         )
 
     async def not_to_be_in_viewport(
@@ -781,6 +809,7 @@ class LocatorAssertions(AssertionsBase):
             FrameExpectOptions(expectedText=expected_values, timeout=timeout),
             None,
             "Locator expected to have accessible description",
+            'Expect "to_have_accessible_description"',
         )
 
     async def not_to_have_accessible_description(
@@ -807,6 +836,7 @@ class LocatorAssertions(AssertionsBase):
             FrameExpectOptions(expectedText=expected_values, timeout=timeout),
             None,
             "Locator expected to have accessible name",
+            'Expect "to_have_accessible_name"',
         )
 
     async def not_to_have_accessible_name(
@@ -828,6 +858,7 @@ class LocatorAssertions(AssertionsBase):
             FrameExpectOptions(expectedText=expected_values, timeout=timeout),
             None,
             "Locator expected to have accessible role",
+            'Expect "to_have_role"',
         )
 
     async def to_have_accessible_error_message(
@@ -845,6 +876,7 @@ class LocatorAssertions(AssertionsBase):
             FrameExpectOptions(expectedText=expected_values, timeout=timeout),
             None,
             "Locator expected to have accessible error message",
+            'Expect "to_have_accessible_error_message"',
         )
 
     async def not_to_have_accessible_error_message(
@@ -871,6 +903,7 @@ class LocatorAssertions(AssertionsBase):
             FrameExpectOptions(expectedValue=expected, timeout=timeout),
             expected,
             "Locator expected to match Aria snapshot",
+            'Expect "to_match_aria_snapshot"',
         )
 
     async def not_to_match_aria_snapshot(

@@ -291,7 +291,7 @@ class Request(ChannelOwner):
             return RawHeaders(serialize_headers(override))
         if not self._all_headers_future:
             self._all_headers_future = asyncio.Future()
-            headers = await self._channel.send("rawRequestHeaders")
+            headers = await self._channel.send("rawRequestHeaders", is_internal=True)
             self._all_headers_future.set_result(RawHeaders(headers))
         return await self._all_headers_future
 

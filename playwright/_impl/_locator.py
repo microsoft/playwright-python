@@ -717,7 +717,10 @@ class Locator:
             )
 
     async def _expect(
-        self, expression: str, options: FrameExpectOptions
+        self,
+        expression: str,
+        options: FrameExpectOptions,
+        title: str = None,
     ) -> FrameExpectResult:
         if "expectedValue" in options:
             options["expectedValue"] = serialize_argument(options["expectedValue"])
@@ -728,6 +731,7 @@ class Locator:
                 "expression": expression,
                 **options,
             },
+            title=title,
         )
         if result.get("received"):
             result["received"] = parse_value(result["received"])
