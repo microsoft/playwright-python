@@ -224,7 +224,7 @@ class Browser(ChannelOwner):
             context._owner_page = page
             return page
 
-        return await self._connection.wrap_api_call(inner)
+        return await self._connection.wrap_api_call(inner, title="Create page")
 
     async def close(self, reason: str = None) -> None:
         self._close_reason = reason
