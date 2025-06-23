@@ -340,7 +340,7 @@ def test_should_work_with_base_url(browser: Browser, server: Server) -> None:
             f"message: data=echo origin=ws://localhost:{server.PORT} lastEventId=",
         ],
     )
-    page.close()
+    context.close()
 
 
 def test_should_work_with_no_trailing_slash(page: Page, server: Server) -> None:

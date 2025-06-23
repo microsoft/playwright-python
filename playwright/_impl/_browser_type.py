@@ -326,8 +326,10 @@ class BrowserType(ChannelOwner):
             params["clientCertificates"] = await to_client_certificates_protocol(
                 params["clientCertificates"]
             )
-        params["selectorEngines"] = self._playwright.selectors._selectorEngines
-        params["testIdAttributeName"] = self._playwright.selectors._testIdAttributeName
+        params["selectorEngines"] = self._playwright.selectors._selector_engines
+        params["testIdAttributeName"] = (
+            self._playwright.selectors._test_id_attribute_name
+        )
 
         # Remove HAR options
         params.pop("recordHarPath", None)

@@ -116,7 +116,7 @@ class BrowserContext(ChannelOwner):
         self._bindings: Dict[str, Any] = {}
         self._timeout_settings = TimeoutSettings(None)
         self._owner_page: Optional[Page] = None
-        self._options: Dict[str, Any] = initializer.get("options", {})
+        self._options: Dict[str, Any] = initializer["options"]
         self._background_pages: Set[Page] = set()
         self._service_workers: Set[Worker] = set()
         self._tracing = cast(Tracing, from_channel(initializer["tracing"]))
@@ -313,9 +313,6 @@ class BrowserContext(ChannelOwner):
         if not record_har_path:
             return
         record_har_path = str(record_har_path)
-        if len(record_har_path) == 0:
-            return
-        # Forcibly provide type to satisfy mypy
         default_policy: HarContentPolicy = (
             "attach" if record_har_path.endswith(".zip") else "embed"
         )
@@ -571,16 +568,15 @@ class BrowserContext(ChannelOwner):
     def _on_close(self) -> None:
         self._closing_or_closed = True
         if self._browser:
-            try:
+            if self in self._browser._contexts:
                 self._browser._contexts.remove(self)
-            except KeyError:
-                pass
-            try:
-                self._browser._browser_type._playwright.selectors._contextsForSelectors.remove(
+            if (
+                self
+                in self._browser._browser_type._playwright.selectors._contexts_for_selectors
+            ):
+                self._browser._browser_type._playwright.selectors._contexts_for_selectors.remove(
                     self
                 )
-            except KeyError:
-                pass
 
         self._dispose_har_routers()
         self._tracing._reset_stack_counter()

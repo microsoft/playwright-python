@@ -857,10 +857,3 @@ class Frame(ChannelOwner):
         params = locals_to_params(args)
         params["timeout"] = self._navigation_timeout(params.get("timeout"))
         return params
-
-    def _locals_to_params_without_timeout(self, args: Dict) -> Dict:
-        params = locals_to_params(locals())
-        # Timeout is deprecated and does nothing
-        if "timeout" in params:
-            del params["timeout"]
-        return params

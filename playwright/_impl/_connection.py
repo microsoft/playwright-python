@@ -617,10 +617,6 @@ def _filter_none(d: Mapping) -> Dict:
             filtered_v = _filter_none(v)
             if filtered_v:
                 result[k] = filtered_v
-        elif isinstance(v, Mapping):
-            filtered_v = _filter_none(v)
-            if filtered_v:
-                result[k] = filtered_v
         else:
             result[k] = v
     return result

@@ -25,10 +25,10 @@ from playwright._impl._locator import set_test_id_attribute_name
 class Selectors:
     def __init__(self, loop: asyncio.AbstractEventLoop, dispatcher_fiber: Any) -> None:
         self._loop = loop
-        self._contextsForSelectors: Set[BrowserContext] = set()
-        self._selectorEngines: List[Dict] = []
+        self._contexts_for_selectors: Set[BrowserContext] = set()
+        self._selector_engines: List[Dict] = []
         self._dispatcher_fiber = dispatcher_fiber
-        self._testIdAttributeName: Optional[str] = None
+        self._test_id_attribute_name: Optional[str] = None
 
     async def register(
         self,
@@ -44,16 +44,16 @@ class Selectors:
         engine: Dict[str, Any] = dict(name=name, source=script)
         if contentScript:
             engine["contentScript"] = contentScript
-        for context in self._contextsForSelectors:
+        for context in self._contexts_for_selectors:
             await context._channel.send(
-                "registerSelectorEngine", dict(selectorEngine=engine)
+                "registerSelectorEngine", {"selectorEngine": engine}
             )
-        self._selectorEngines.append(engine)
+        self._selector_engines.append(engine)
 
     def set_test_id_attribute(self, attributeName: str) -> None:
         set_test_id_attribute_name(attributeName)
-        self._testIdAttributeName = attributeName
-        for context in self._contextsForSelectors:
+        self._test_id_attribute_name = attributeName
+        for context in self._contexts_for_selectors:
             context._channel.send_no_reply(
                 "setTestIdAttributeName", {"testIdAttributeName": attributeName}
             )
