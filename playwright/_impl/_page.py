@@ -227,6 +227,7 @@ class Page(ChannelOwner):
             ),
         )
         self._channel.on("video", lambda params: self._on_video(params))
+        self._channel.on("viewportSizeChanged", self._on_viewport_size_changed)
         self._channel.on(
             "webSocket",
             lambda params: self.emit(
@@ -363,6 +364,9 @@ class Page(ChannelOwner):
     def _on_video(self, params: Any) -> None:
         artifact = from_channel(params["artifact"])
         self._force_video()._artifact_ready(artifact)
+
+    def _on_viewport_size_changed(self, params: Any) -> None:
+        self._viewport_size = params["viewportSize"]
 
     @property
     def context(self) -> "BrowserContext":
