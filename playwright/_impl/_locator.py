@@ -736,11 +736,6 @@ class Locator:
     async def highlight(self) -> None:
         await self._frame._highlight(self._selector)
 
-    def _locals_to_params_with_timeout(self, args: Dict) -> Dict:
-        params = locals_to_params(args)
-        params["timeout"] = self._frame._timeout(params.get("timeout"))
-        return params
-
 
 class FrameLocator:
     def __init__(self, frame: "Frame", frame_selector: str) -> None:
