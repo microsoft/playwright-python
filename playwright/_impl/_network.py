@@ -131,7 +131,6 @@ class Request(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
-        self._channel.mark_as_internal_type()
         self._redirected_from: Optional["Request"] = from_nullable_channel(
             initializer.get("redirectedFrom")
         )
@@ -319,7 +318,6 @@ class Route(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
-        self._channel.mark_as_internal_type()
         self._handling_future: Optional[asyncio.Future["bool"]] = None
         self._context: "BrowserContext" = cast("BrowserContext", None)
         self._did_throw = False
@@ -610,7 +608,6 @@ class WebSocketRoute(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
-        self._channel.mark_as_internal_type()
         self._on_page_message: Optional[Callable[[Union[str, bytes]], Any]] = None
         self._on_page_close: Optional[Callable[[Optional[int], Optional[str]], Any]] = (
             None
@@ -768,7 +765,6 @@ class Response(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
-        self._channel.mark_as_internal_type()
         self._request: Request = from_channel(self._initializer["request"])
         timing = self._initializer["timing"]
         self._request._timing["startTime"] = timing["startTime"]

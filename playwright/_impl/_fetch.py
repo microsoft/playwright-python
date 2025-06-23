@@ -105,6 +105,7 @@ class APIRequestContext(ChannelOwner):
         self._tracing: Tracing = from_channel(initializer["tracing"])
         self._close_reason: Optional[str] = None
         self._timeout_settings = TimeoutSettings(None)
+        self._channel._set_timeout_calculator(self._timeout_settings.timeout)
 
     async def dispose(self, reason: str = None) -> None:
         self._close_reason = reason
@@ -417,7 +418,6 @@ class APIRequestContext(ChannelOwner):
                 "jsonData": json_data,
                 "formData": form_data,
                 "multipartData": multipart_data,
-                "timeout": self._timeout_settings.timeout(timeout),
                 "failOnStatusCode": failOnStatusCode,
                 "ignoreHTTPSErrors": ignoreHTTPSErrors,
                 "maxRedirects": maxRedirects,

@@ -56,6 +56,7 @@ class Channel(AsyncIOEventEmitter):
         self._object = object
         self.on("error", lambda exc: self._connection._on_event_listener_error(exc))
         self._is_internal_type = False
+        self._timeout_calculator: Optional[Callable[[Optional[float]], float]] = None
 
     async def send(self, method: str, params: Dict = None) -> Any:
         return await self._connection.wrap_api_call(
@@ -82,6 +83,8 @@ class Channel(AsyncIOEventEmitter):
     ) -> Any:
         if params is None:
             params = {}
+        if self._timeout_calculator is not None:
+            params["timeout"] = self._timeout_calculator(params.get("timeout"))
         if self._connection._error:
             error = self._connection._error
             self._connection._error = None
@@ -112,8 +115,10 @@ class Channel(AsyncIOEventEmitter):
         key = next(iter(result))
         return result[key]
 
-    def mark_as_internal_type(self) -> None:
-        self._is_internal_type = True
+    def _set_timeout_calculator(
+        self, timeout_calculator: Callable[[Optional[float]], float]
+    ) -> None:
+        self._timeout_calculator = timeout_calculator
 
 
 class ChannelOwner(AsyncIOEventEmitter):

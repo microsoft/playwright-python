@@ -56,6 +56,7 @@ class ElementHandle(JSHandle):
     ) -> None:
         super().__init__(parent, type, guid, initializer)
         self._frame = cast("Frame", parent)
+        self._channel._set_timeout_calculator(self._frame._timeout)
 
     async def _createSelectorForTest(self, name: str) -> Optional[str]:
         return await self._channel.send("createSelectorForTest", dict(name=name))
@@ -105,9 +106,7 @@ class ElementHandle(JSHandle):
         )
 
     async def scroll_into_view_if_needed(self, timeout: float = None) -> None:
-        await self._channel.send(
-            "scrollIntoViewIfNeeded", self._locals_to_params_with_timeout(locals())
-        )
+        await self._channel.send("scrollIntoViewIfNeeded", locals_to_params(locals()))
 
     async def hover(
         self,
@@ -118,7 +117,7 @@ class ElementHandle(JSHandle):
         force: bool = None,
         trial: bool = None,
     ) -> None:
-        await self._channel.send("hover", self._locals_to_params_with_timeout(locals()))
+        await self._channel.send("hover", locals_to_params(locals()))
 
     async def click(
         self,
@@ -132,7 +131,7 @@ class ElementHandle(JSHandle):
         noWaitAfter: bool = None,
         trial: bool = None,
     ) -> None:
-        await self._channel.send("click", self._locals_to_params_with_timeout(locals()))
+        await self._channel.send("click", locals_to_params(locals()))
 
     async def dblclick(
         self,
@@ -145,9 +144,7 @@ class ElementHandle(JSHandle):
         noWaitAfter: bool = None,
         trial: bool = None,
     ) -> None:
-        await self._channel.send(
-            "dblclick", self._locals_to_params_with_timeout(locals())
-        )
+        await self._channel.send("dblclick", locals_to_params(locals()))
 
     async def select_option(
         self,
@@ -159,7 +156,7 @@ class ElementHandle(JSHandle):
         force: bool = None,
         noWaitAfter: bool = None,
     ) -> List[str]:
-        params = self._locals_to_params_with_timeout(
+        params = locals_to_params(
             dict(
                 timeout=timeout,
                 force=force,
@@ -177,7 +174,7 @@ class ElementHandle(JSHandle):
         noWaitAfter: bool = None,
         trial: bool = None,
     ) -> None:
-        await self._channel.send("tap", self._locals_to_params_with_timeout(locals()))
+        await self._channel.send("tap", locals_to_params(locals()))
 
     async def fill(
         self,
@@ -186,17 +183,13 @@ class ElementHandle(JSHandle):
         noWaitAfter: bool = None,
         force: bool = None,
     ) -> None:
-        await self._channel.send("fill", self._locals_to_params_with_timeout(locals()))
+        await self._channel.send("fill", locals_to_params(locals()))
 
     async def select_text(self, force: bool = None, timeout: float = None) -> None:
-        await self._channel.send(
-            "selectText", self._locals_to_params_with_timeout(locals())
-        )
+        await self._channel.send("selectText", locals_to_params(locals()))
 
     async def input_value(self, timeout: float = None) -> str:
-        return await self._channel.send(
-            "inputValue", self._locals_to_params_with_timeout(locals())
-        )
+        return await self._channel.send("inputValue", locals_to_params(locals()))
 
     async def set_input_files(
         self,
@@ -228,7 +221,7 @@ class ElementHandle(JSHandle):
         timeout: float = None,
         noWaitAfter: bool = None,
     ) -> None:
-        await self._channel.send("type", self._locals_to_params_with_timeout(locals()))
+        await self._channel.send("type", locals_to_params(locals()))
 
     async def press(
         self,
@@ -237,7 +230,7 @@ class ElementHandle(JSHandle):
         timeout: float = None,
         noWaitAfter: bool = None,
     ) -> None:
-        await self._channel.send("press", self._locals_to_params_with_timeout(locals()))
+        await self._channel.send("press", locals_to_params(locals()))
 
     async def set_checked(
         self,
@@ -271,7 +264,7 @@ class ElementHandle(JSHandle):
         noWaitAfter: bool = None,
         trial: bool = None,
     ) -> None:
-        await self._channel.send("check", self._locals_to_params_with_timeout(locals()))
+        await self._channel.send("check", locals_to_params(locals()))
 
     async def uncheck(
         self,
@@ -281,9 +274,7 @@ class ElementHandle(JSHandle):
         noWaitAfter: bool = None,
         trial: bool = None,
     ) -> None:
-        await self._channel.send(
-            "uncheck", self._locals_to_params_with_timeout(locals())
-        )
+        await self._channel.send("uncheck", locals_to_params(locals()))
 
     async def bounding_box(self) -> Optional[FloatRect]:
         return await self._channel.send("boundingBox")
@@ -302,7 +293,7 @@ class ElementHandle(JSHandle):
         maskColor: str = None,
         style: str = None,
     ) -> bytes:
-        params = self._locals_to_params_with_timeout(locals())
+        params = locals_to_params(locals())
         if "path" in params:
             del params["path"]
         if "mask" in params:
@@ -378,9 +369,7 @@ class ElementHandle(JSHandle):
         ],
         timeout: float = None,
     ) -> None:
-        await self._channel.send(
-            "waitForElementState", self._locals_to_params_with_timeout(locals())
-        )
+        await self._channel.send("waitForElementState", locals_to_params(locals()))
 
     async def wait_for_selector(
         self,
@@ -390,15 +379,8 @@ class ElementHandle(JSHandle):
         strict: bool = None,
     ) -> Optional["ElementHandle"]:
         return from_nullable_channel(
-            await self._channel.send(
-                "waitForSelector", self._locals_to_params_with_timeout(locals())
-            )
+            await self._channel.send("waitForSelector", locals_to_params(locals()))
         )
-
-    def _locals_to_params_with_timeout(self, args: Dict) -> Dict:
-        params = locals_to_params(args)
-        params["timeout"] = self._frame._timeout(params.get("timeout"))
-        return params
 
 
 def convert_select_option_values(

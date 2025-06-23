@@ -236,6 +236,7 @@ class Page(ChannelOwner):
         self._channel.on(
             "worker", lambda params: self._on_worker(from_channel(params["worker"]))
         )
+        self._channel._set_timeout_calculator(self._timeout_settings.timeout)
         self._closed_or_crashed_future: asyncio.Future = asyncio.Future()
         self.on(
             Page.Events.Close,
@@ -613,7 +614,7 @@ class Page(ChannelOwner):
         forcedColors: ForcedColors = None,
         contrast: Contrast = None,
     ) -> None:
-        params = self._locals_to_params_with_timeout(locals())
+        params = locals_to_params(locals())
         if "media" in params:
             params["media"] = "no-override" if params["media"] == "null" else media
         if "colorScheme" in params:
@@ -636,9 +637,7 @@ class Page(ChannelOwner):
 
     async def set_viewport_size(self, viewportSize: ViewportSize) -> None:
         self._viewport_size = viewportSize
-        await self._channel.send(
-            "setViewportSize", self._locals_to_params_with_timeout(locals())
-        )
+        await self._channel.send("setViewportSize", locals_to_params(locals()))
 
     @property
     def viewport_size(self) -> Optional[ViewportSize]:
@@ -781,8 +780,7 @@ class Page(ChannelOwner):
         maskColor: str = None,
         style: str = None,
     ) -> bytes:
-        params = self._locals_to_params_with_timeout(locals())
-        params["timeout"] = self._timeout_settings.timeout(timeout)
+        params = locals_to_params(locals())
         if "path" in params:
             del params["path"]
         if "mask" in params:
@@ -811,9 +809,7 @@ class Page(ChannelOwner):
         self._close_reason = reason
         self._close_was_called = True
         try:
-            await self._channel.send(
-                "close", self._locals_to_params_with_timeout(locals())
-            )
+            await self._channel.send("close", locals_to_params(locals()))
             if self._owned_context:
                 await self._owned_context.close()
         except Exception as e:
@@ -1056,9 +1052,7 @@ class Page(ChannelOwner):
         noWaitAfter: bool = None,
         strict: bool = None,
     ) -> None:
-        return await self._main_frame.press(
-            **self._locals_to_params_with_timeout(locals())
-        )
+        return await self._main_frame.press(**locals_to_params(locals()))
 
     async def check(
         self,
@@ -1143,7 +1137,7 @@ class Page(ChannelOwner):
         outline: bool = None,
         tagged: bool = None,
     ) -> bytes:
-        params = self._locals_to_params_with_timeout(locals())
+        params = locals_to_params(locals())
         if "path" in params:
             del params["path"]
         encoded_binary = await self._channel.send("pdf", params)
@@ -1408,11 +1402,6 @@ class Page(ChannelOwner):
             if data.locator._equals(locator):
                 del self._locator_handlers[uid]
                 self._channel.send_no_reply("unregisterLocatorHandler", {"uid": uid})
-
-    def _locals_to_params_with_timeout(self, args: Dict) -> Dict:
-        params = locals_to_params(args)
-        params["timeout"] = self._timeout_settings.timeout(params.get("timeout"))
-        return params
 
     def _locals_to_params_with_navigation_timeout(self, args: Dict) -> Dict:
         params = locals_to_params(args)
