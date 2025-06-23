@@ -152,8 +152,7 @@ async def test_should_collect_trace_with_resources_but_no_js(
                 re.compile(r"Set content"),
                 re.compile(r"Click"),
                 re.compile(r"Mouse move"),
-                # TODO: Roll: Switch to Double click
-                re.compile(r"Click"),
+                re.compile(r"Double click"),
                 re.compile(r'Insert "abc"'),
                 re.compile(r"Wait for timeout"),
                 re.compile(r'Navigate to "/empty\.html"'),
@@ -234,8 +233,7 @@ async def test_should_collect_two_traces(
     async with show_trace_viewer(tracing2_path) as trace_viewer:
         await expect(trace_viewer.action_titles).to_have_text(
             [
-                # TODO: Roll: Switch to Double click
-                re.compile(r"Click"),
+                re.compile(r"Double click"),
                 re.compile(r"Close"),
             ]
         )

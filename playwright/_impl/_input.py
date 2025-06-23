@@ -61,6 +61,17 @@ class Mouse:
     ) -> None:
         await self._channel.send("mouseUp", locals_to_params(locals()))
 
+    async def _click(
+        self,
+        x: float,
+        y: float,
+        delay: float = None,
+        button: MouseButton = None,
+        clickCount: int = None,
+        title: str = None,
+    ) -> None:
+        await self._channel.send("mouseClick", locals_to_params(locals()), title=title)
+
     async def click(
         self,
         x: float,
@@ -69,7 +80,7 @@ class Mouse:
         button: MouseButton = None,
         clickCount: int = None,
     ) -> None:
-        await self._channel.send("mouseClick", locals_to_params(locals()))
+        await self._click(**locals())
 
     async def dblclick(
         self,
@@ -78,7 +89,9 @@ class Mouse:
         delay: float = None,
         button: MouseButton = None,
     ) -> None:
-        await self.click(x, y, delay=delay, button=button, clickCount=2)
+        await self._click(
+            x, y, delay=delay, button=button, clickCount=2, title="Double click"
+        )
 
     async def wheel(self, deltaX: float, deltaY: float) -> None:
         await self._channel.send("mouseWheel", locals_to_params(locals()))

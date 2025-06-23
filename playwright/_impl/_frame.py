@@ -513,7 +513,9 @@ class Frame(ChannelOwner):
         strict: bool = None,
         trial: bool = None,
     ) -> None:
-        await self._channel.send("dblclick", locals_to_params(locals()))
+        await self._channel.send(
+            "dblclick", locals_to_params(locals()), title="Double click"
+        )
 
     async def tap(
         self,
