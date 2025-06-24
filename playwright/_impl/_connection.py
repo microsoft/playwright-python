@@ -55,26 +55,48 @@ class Channel(AsyncIOEventEmitter):
         self._guid = object._guid
         self._object = object
         self.on("error", lambda exc: self._connection._on_event_listener_error(exc))
-        self._is_internal_type = False
+        self._timeout_calculator: Optional[Callable[[Optional[float]], float]] = None
 
-    async def send(self, method: str, params: Dict = None) -> Any:
+    async def send(
+        self,
+        method: str,
+        params: Dict = None,
+        is_internal: bool = False,
+        title: str = None,
+    ) -> Any:
         return await self._connection.wrap_api_call(
             lambda: self._inner_send(method, params, False),
-            self._is_internal_type,
+            is_internal,
+            title,
         )
 
-    async def send_return_as_dict(self, method: str, params: Dict = None) -> Any:
+    async def send_return_as_dict(
+        self,
+        method: str,
+        params: Dict = None,
+        is_internal: bool = False,
+        title: str = None,
+    ) -> Any:
         return await self._connection.wrap_api_call(
             lambda: self._inner_send(method, params, True),
-            self._is_internal_type,
+            is_internal,
+            title,
         )
 
-    def send_no_reply(self, method: str, params: Dict = None) -> None:
+    def send_no_reply(
+        self,
+        method: str,
+        params: Dict = None,
+        is_internal: bool = False,
+        title: str = None,
+    ) -> None:
         # No reply messages are used to e.g. waitForEventInfo(after).
         self._connection.wrap_api_call_sync(
             lambda: self._connection._send_message_to_server(
                 self._object, method, {} if params is None else params, True
-            )
+            ),
+            is_internal,
+            title,
         )
 
     async def _inner_send(
@@ -82,6 +104,8 @@ class Channel(AsyncIOEventEmitter):
     ) -> Any:
         if params is None:
             params = {}
+        if self._timeout_calculator is not None:
+            params["timeout"] = self._timeout_calculator(params.get("timeout"))
         if self._connection._error:
             error = self._connection._error
             self._connection._error = None
@@ -112,8 +136,10 @@ class Channel(AsyncIOEventEmitter):
         key = next(iter(result))
         return result[key]
 
-    def mark_as_internal_type(self) -> None:
-        self._is_internal_type = True
+    def _set_timeout_calculator(
+        self, timeout_calculator: Callable[[Optional[float]], float]
+    ) -> None:
+        self._timeout_calculator = timeout_calculator
 
 
 class ChannelOwner(AsyncIOEventEmitter):
@@ -355,6 +381,9 @@ class Connection(EventEmitter):
         }
         if location:
             metadata["location"] = location  # type: ignore
+        title = stack_trace_information["title"]
+        if title:
+            metadata["title"] = title
         message = {
             "id": id,
             "guid": object._guid,
@@ -507,7 +536,7 @@ class Connection(EventEmitter):
         return payload
 
     async def wrap_api_call(
-        self, cb: Callable[[], Any], is_internal: bool = False
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
     ) -> Any:
         if self._api_zone.get():
             return await cb()
@@ -516,7 +545,7 @@ class Connection(EventEmitter):
             task, "__pw_stack__", None
         ) or inspect.stack(0)
 
-        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal)
+        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)
         self._api_zone.set(parsed_st)
         try:
             return await cb()
@@ -526,7 +555,7 @@ class Connection(EventEmitter):
             self._api_zone.set(None)
 
     def wrap_api_call_sync(
-        self, cb: Callable[[], Any], is_internal: bool = False
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
     ) -> Any:
         if self._api_zone.get():
             return cb()
@@ -534,7 +563,7 @@ class Connection(EventEmitter):
         st: List[inspect.FrameInfo] = getattr(
             task, "__pw_stack__", None
         ) or inspect.stack(0)
-        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal)
+        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)
         self._api_zone.set(parsed_st)
         try:
             return cb()
@@ -562,10 +591,11 @@ class StackFrame(TypedDict):
 class ParsedStackTrace(TypedDict):
     frames: List[StackFrame]
     apiName: Optional[str]
+    title: Optional[str]
 
 
 def _extract_stack_trace_information_from_stack(
-    st: List[inspect.FrameInfo], is_internal: bool
+    st: List[inspect.FrameInfo], is_internal: bool, title: str = None
 ) -> ParsedStackTrace:
     playwright_module_path = str(Path(playwright.__file__).parents[0])
     last_internal_api_name = ""
@@ -605,11 +635,22 @@ def _extract_stack_trace_information_from_stack(
     return {
         "frames": parsed_frames,
         "apiName": "" if is_internal else api_name,
+        "title": title,
     }
 
 
 def _filter_none(d: Mapping) -> Dict:
-    return {k: v for k, v in d.items() if v is not None}
+    result = {}
+    for k, v in d.items():
+        if v is None:
+            continue
+        elif isinstance(v, dict):
+            filtered_v = _filter_none(v)
+            if filtered_v:
+                result[k] = filtered_v
+        else:
+            result[k] = v
+    return result
 
 
 def format_call_log(log: Optional[List[str]]) -> str:

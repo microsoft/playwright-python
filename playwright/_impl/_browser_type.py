@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+import json
 import pathlib
 import sys
 from pathlib import Path
@@ -25,16 +26,12 @@ from playwright._impl._api_structures import (
     ProxySettings,
     ViewportSize,
 )
-from playwright._impl._browser import Browser, prepare_browser_context_params
+from playwright._impl._browser import Browser
 from playwright._impl._browser_context import BrowserContext
-from playwright._impl._connection import (
-    ChannelOwner,
-    Connection,
-    from_channel,
-    from_nullable_channel,
-)
+from playwright._impl._connection import ChannelOwner, Connection, from_channel
 from playwright._impl._errors import Error
 from playwright._impl._helper import (
+    PLAYWRIGHT_MAX_DEADLINE,
     ColorScheme,
     Contrast,
     Env,
@@ -43,10 +40,12 @@ from playwright._impl._helper import (
     HarMode,
     ReducedMotion,
     ServiceWorkersPolicy,
+    TimeoutSettings,
+    async_readfile,
     locals_to_params,
 )
 from playwright._impl._json_pipe import JsonPipeTransport
-from playwright._impl._network import serialize_headers
+from playwright._impl._network import serialize_headers, to_client_certificates_protocol
 from playwright._impl._waiter import throw_on_timeout
 
 if TYPE_CHECKING:
@@ -96,7 +95,9 @@ class BrowserType(ChannelOwner):
         browser = cast(
             Browser, from_channel(await self._channel.send("launch", params))
         )
-        self._did_launch_browser(browser)
+        browser._connect_to_browser_type(
+            self, str(tracesDir) if tracesDir is not None else None
+        )
         return browser
 
     async def launch_persistent_context(
@@ -155,13 +156,26 @@ class BrowserType(ChannelOwner):
     ) -> BrowserContext:
         userDataDir = self._user_data_dir(userDataDir)
         params = locals_to_params(locals())
-        await prepare_browser_context_params(params)
+        await self._prepare_browser_context_params(params)
         normalize_launch_params(params)
-        context = cast(
-            BrowserContext,
-            from_channel(await self._channel.send("launchPersistentContext", params)),
+        result = await self._channel.send_return_as_dict(
+            "launchPersistentContext", params
         )
-        self._did_create_context(context, params, params)
+        browser = cast(
+            Browser,
+            from_channel(result["browser"]),
+        )
+        browser._connect_to_browser_type(
+            self, str(tracesDir) if tracesDir is not None else None
+        )
+        context = cast(BrowserContext, from_channel(result["context"]))
+        await context._initialize_har_from_options(
+            record_har_content=recordHarContent,
+            record_har_mode=recordHarMode,
+            record_har_omit_content=recordHarOmitContent,
+            record_har_path=recordHarPath,
+            record_har_url_filter=recordHarUrlFilter,
+        )
         return context
 
     def _user_data_dir(self, userDataDir: Optional[Union[str, Path]]) -> str:
@@ -183,18 +197,13 @@ class BrowserType(ChannelOwner):
         headers: Dict[str, str] = None,
     ) -> Browser:
         params = locals_to_params(locals())
+        params["timeout"] = TimeoutSettings.launch_timeout(timeout)
         if params.get("headers"):
             params["headers"] = serialize_headers(params["headers"])
         response = await self._channel.send_return_as_dict("connectOverCDP", params)
         browser = cast(Browser, from_channel(response["browser"]))
-        self._did_launch_browser(browser)
+        browser._connect_to_browser_type(self, None)
 
-        default_context = cast(
-            Optional[BrowserContext],
-            from_nullable_channel(response.get("defaultContext")),
-        )
-        if default_context:
-            self._did_create_context(default_context, {}, {})
         return browser
 
     async def connect(
@@ -205,8 +214,6 @@ class BrowserType(ChannelOwner):
         headers: Dict[str, str] = None,
         exposeNetwork: str = None,
     ) -> Browser:
-        if timeout is None:
-            timeout = 30000
         if slowMo is None:
             slowMo = 0
 
@@ -219,7 +226,7 @@ class BrowserType(ChannelOwner):
                     "wsEndpoint": wsEndpoint,
                     "headers": headers,
                     "slowMo": slowMo,
-                    "timeout": timeout,
+                    "timeout": timeout if timeout is not None else 0,
                     "exposeNetwork": exposeNetwork,
                 },
             )
@@ -259,7 +266,10 @@ class BrowserType(ChannelOwner):
         connection._loop.create_task(connection.run())
         playwright_future = connection.playwright_future
 
-        timeout_future = throw_on_timeout(timeout, Error("Connection timed out"))
+        timeout_future = throw_on_timeout(
+            timeout if timeout is not None else PLAYWRIGHT_MAX_DEADLINE,
+            Error("Connection timed out"),
+        )
         done, pending = await asyncio.wait(
             {transport.on_error_future, playwright_future, timeout_future},
             return_when=asyncio.FIRST_COMPLETED,
@@ -274,18 +284,59 @@ class BrowserType(ChannelOwner):
         pre_launched_browser = playwright._initializer.get("preLaunchedBrowser")
         assert pre_launched_browser
         browser = cast(Browser, from_channel(pre_launched_browser))
-        self._did_launch_browser(browser)
         browser._should_close_connection_on_close = True
+        browser._connect_to_browser_type(self, None)
 
         return browser
 
-    def _did_create_context(
-        self, context: BrowserContext, context_options: Dict, browser_options: Dict
-    ) -> None:
-        context._set_options(context_options, browser_options)
+    async def _prepare_browser_context_params(self, params: Dict) -> None:
+        if params.get("noViewport"):
+            del params["noViewport"]
+            params["noDefaultViewport"] = True
+        if "defaultBrowserType" in params:
+            del params["defaultBrowserType"]
+        if "extraHTTPHeaders" in params:
+            params["extraHTTPHeaders"] = serialize_headers(params["extraHTTPHeaders"])
+        if "recordVideoDir" in params:
+            params["recordVideo"] = {"dir": Path(params["recordVideoDir"]).absolute()}
+            if "recordVideoSize" in params:
+                params["recordVideo"]["size"] = params["recordVideoSize"]
+                del params["recordVideoSize"]
+            del params["recordVideoDir"]
+        if "storageState" in params:
+            storageState = params["storageState"]
+            if not isinstance(storageState, dict):
+                params["storageState"] = json.loads(
+                    (await async_readfile(storageState)).decode()
+                )
+        if params.get("colorScheme", None) == "null":
+            params["colorScheme"] = "no-override"
+        if params.get("reducedMotion", None) == "null":
+            params["reducedMotion"] = "no-override"
+        if params.get("forcedColors", None) == "null":
+            params["forcedColors"] = "no-override"
+        if params.get("contrast", None) == "null":
+            params["contrast"] = "no-override"
+        if "acceptDownloads" in params:
+            params["acceptDownloads"] = (
+                "accept" if params["acceptDownloads"] else "deny"
+            )
 
-    def _did_launch_browser(self, browser: Browser) -> None:
-        browser._browser_type = self
+        if "clientCertificates" in params:
+            params["clientCertificates"] = await to_client_certificates_protocol(
+                params["clientCertificates"]
+            )
+        params["selectorEngines"] = self._playwright.selectors._selector_engines
+        params["testIdAttributeName"] = (
+            self._playwright.selectors._test_id_attribute_name
+        )
+
+        # Remove HAR options
+        params.pop("recordHarPath", None)
+        params.pop("recordHarOmitContent", None)
+        params.pop("recordHarUrlFilter", None)
+        params.pop("recordHarMode", None)
+        params.pop("recordHarContent", None)
 
 
 def normalize_launch_params(params: Dict) -> None:
@@ -304,3 +355,4 @@ def normalize_launch_params(params: Dict) -> None:
         params["downloadsPath"] = str(Path(params["downloadsPath"]))
     if "tracesDir" in params:
         params["tracesDir"] = str(Path(params["tracesDir"]))
+    params["timeout"] = TimeoutSettings.launch_timeout(params.get("timeout"))

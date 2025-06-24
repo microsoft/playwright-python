@@ -347,9 +347,9 @@ async def test_should_record_trace_with_source(
     async with show_trace_viewer(path) as trace_viewer:
         await expect(trace_viewer.action_titles).to_have_text(
             [
-                re.compile("Page.goto"),
-                re.compile("Page.set_content"),
-                re.compile("Page.click"),
+                re.compile(r'Navigate to "/empty\.html"'),
+                re.compile(r"Set content"),
+                re.compile(r"Click"),
             ]
         )
         await trace_viewer.show_source_tab()
@@ -358,7 +358,7 @@ async def test_should_record_trace_with_source(
                 re.compile(r"test_should_record_trace_with_source"),
             ]
         )
-        await trace_viewer.select_action("Page.set_content")
+        await trace_viewer.select_action("Set content")
         # Check that the source file is shown
         await expect(
             trace_viewer.page.locator(".source-tab-file-name")

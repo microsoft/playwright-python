@@ -39,6 +39,7 @@ def test_browser_context_output_trace(
     page.goto(server.PREFIX + "/grid.html")
     context.tracing.stop(path=tmp_path / "trace.zip")
     assert Path(tmp_path / "trace.zip").exists()
+    context.close()
 
 
 def test_start_stop(browser: Browser) -> None:
@@ -72,6 +73,7 @@ def test_browser_context_output_trace_chunk(
     button.click()
     context.tracing.stop_chunk(path=tmp_path / "trace2.zip")
     assert Path(tmp_path / "trace2.zip").exists()
+    context.close()
 
 
 def test_should_collect_sources(
@@ -98,9 +100,9 @@ def test_should_collect_sources(
     with show_trace_viewer(path) as trace_viewer:
         expect(trace_viewer.action_titles).to_have_text(
             [
-                re.compile(r"Page.goto"),
-                re.compile(r"Page.set_content"),
-                re.compile(r"Locator.click"),
+                re.compile(r'Navigate to "/empty\.html"'),
+                re.compile(r"Set content"),
+                re.compile(r"Click"),
             ]
         )
         trace_viewer.show_source_tab()
@@ -113,7 +115,7 @@ def test_should_collect_sources(
             ]
         )
 
-        trace_viewer.select_action("Page.set_content")
+        trace_viewer.select_action("Set content")
         # Check that the source file is shown
         expect(trace_viewer.page.locator(".source-tab-file-name")).to_have_attribute(
             "title", re.compile(r".*test_.*\.py")
@@ -138,13 +140,9 @@ def test_should_collect_trace_with_resources_but_no_js(
     page.mouse.dblclick(30, 30)
     page.keyboard.insert_text("abc")
     page.wait_for_timeout(2000)  # Give it some time to produce screenshots.
-    page.route(
-        "**/empty.html", lambda route: route.continue_()
-    )  # should produce a route.continue_ entry.
+    page.route("**/empty.html", lambda route: route.continue_())
     page.goto(server.EMPTY_PAGE)
-    page.goto(
-        server.PREFIX + "/one-style.html"
-    )  # should not produce a route.continue_ entry since we continue all routes if no match.
+    page.goto(server.PREFIX + "/one-style.html")
     page.close()
     trace_file_path = tmp_path / "trace.zip"
     context.tracing.stop(path=trace_file_path)
@@ -152,25 +150,24 @@ def test_should_collect_trace_with_resources_but_no_js(
     with show_trace_viewer(trace_file_path) as trace_viewer:
         expect(trace_viewer.action_titles).to_have_text(
             [
-                re.compile("Page.goto"),
-                re.compile("Page.set_content"),
-                re.compile("Page.click"),
-                re.compile("Mouse.move"),
-                re.compile("Mouse.dblclick"),
-                re.compile("Keyboard.insert_text"),
-                re.compile("Page.wait_for_timeout"),
-                re.compile("Page.route"),
-                re.compile("Page.goto"),
-                re.compile("Page.goto"),
-                re.compile("Page.close"),
+                re.compile(r'Navigate to "/frames/frame\.html"'),
+                re.compile(r"Set content"),
+                re.compile(r"Click"),
+                re.compile(r"Mouse move"),
+                re.compile(r"Double click"),
+                re.compile(r'Insert "abc"'),
+                re.compile(r"Wait for timeout"),
+                re.compile(r'Navigate to "/empty\.html"'),
+                re.compile(r'Navigate to "/one-style\.html"'),
+                re.compile(r"Close"),
             ]
         )
 
-        trace_viewer.select_action("Page.set_content")
+        trace_viewer.select_action("Set content")
         expect(trace_viewer.page.locator(".browser-frame-address-bar")).to_have_text(
             server.PREFIX + "/frames/frame.html"
         )
-        frame = trace_viewer.snapshot_frame("Page.set_content", 0, False)
+        frame = trace_viewer.snapshot_frame("Set content", 0, False)
         expect(frame.locator("button")).to_have_text("Click")
 
 
@@ -201,8 +198,8 @@ def test_should_correctly_determine_sync_apiname(
     with show_trace_viewer(trace_file_path) as trace_viewer:
         expect(trace_viewer.action_titles).to_have_text(
             [
-                re.compile(r"Page.goto"),
-                re.compile(r"Page.close"),
+                re.compile(r'Navigate to "/grid\.html"'),
+                re.compile(r"Close"),
             ]
         )
 
@@ -230,17 +227,17 @@ def test_should_collect_two_traces(
     with show_trace_viewer(tracing1_path) as trace_viewer:
         expect(trace_viewer.action_titles).to_have_text(
             [
-                re.compile("Page.goto"),
-                re.compile("Page.set_content"),
-                re.compile("Page.click"),
+                re.compile(r'Navigate to "/empty\.html"'),
+                re.compile(r"Set content"),
+                re.compile(r"Click"),
             ]
         )
 
     with show_trace_viewer(tracing2_path) as trace_viewer:
         expect(trace_viewer.action_titles).to_have_text(
             [
-                re.compile(r"Page.dblclick"),
-                re.compile(r"Page.close"),
+                re.compile(r"Double click"),
+                re.compile(r"Close"),
             ]
         )
 
@@ -268,13 +265,13 @@ def test_should_work_with_playwright_context_managers(
     with show_trace_viewer(trace_file_path) as trace_viewer:
         expect(trace_viewer.action_titles).to_have_text(
             [
-                re.compile("Page.goto"),
-                re.compile("Page.set_content"),
-                re.compile("Page.expect_console_message"),
-                re.compile("Page.evaluate"),
-                re.compile("Page.click"),
-                re.compile("Page.expect_popup"),
-                re.compile("Page.evaluate"),
+                re.compile(r'Navigate to "/empty\.html"'),
+                re.compile(r"Set content"),
+                re.compile(r'Wait for event "page\.expect_event\(console\)"'),
+                re.compile(r"Evaluate"),
+                re.compile(r"Click"),
+                re.compile(r'Wait for event "page\.expect_event\(popup\)"'),
+                re.compile(r"Evaluate"),
             ]
         )
 
@@ -298,9 +295,9 @@ def test_should_display_wait_for_load_state_even_if_did_not_wait_for_it(
     with show_trace_viewer(trace_file_path) as trace_viewer:
         expect(trace_viewer.action_titles).to_have_text(
             [
-                re.compile(r"Page.goto"),
-                re.compile(r"Page.wait_for_load_state"),
-                re.compile(r"Page.wait_for_load_state"),
+                re.compile(r'Navigate to "/empty\.html"'),
+                re.compile(r'Wait for event "frame\.wait_for_load_state"'),
+                re.compile(r'Wait for event "frame\.wait_for_load_state"'),
             ]
         )
 
@@ -334,10 +331,10 @@ def test_should_respect_traces_dir_and_name(
     with show_trace_viewer(tmp_path / "trace1.zip") as trace_viewer:
         expect(trace_viewer.action_titles).to_have_text(
             [
-                re.compile(r"Page.goto"),
+                re.compile(r'Navigate to "/one-style\.html"'),
             ]
         )
-        frame = trace_viewer.snapshot_frame("Page.goto", 0, False)
+        frame = trace_viewer.snapshot_frame('Navigate to "/one-style.html"', 0, False)
         expect(frame.locator("body")).to_have_css(
             "background-color", "rgb(255, 192, 203)"
         )
@@ -346,10 +343,10 @@ def test_should_respect_traces_dir_and_name(
     with show_trace_viewer(tmp_path / "trace2.zip") as trace_viewer:
         expect(trace_viewer.action_titles).to_have_text(
             [
-                re.compile(r"Page.goto"),
+                re.compile(r'Navigate to "/har\.html"'),
             ]
         )
-        frame = trace_viewer.snapshot_frame("Page.goto", 0, False)
+        frame = trace_viewer.snapshot_frame('Navigate to "/har.html"', 0, False)
         expect(frame.locator("body")).to_have_css(
             "background-color", "rgb(255, 192, 203)"
         )
@@ -381,12 +378,12 @@ def test_should_show_tracing_group_in_action_list(
         trace_viewer.expand_action("inner group 1")
         expect(trace_viewer.action_titles).to_have_text(
             [
-                "BrowserContext.new_page",
-                "outer group",
-                re.compile("Page.goto"),
-                "inner group 1",
-                re.compile("Locator.click"),
-                "inner group 2",
-                re.compile("Locator.is_visible"),
+                re.compile(r"Create page"),
+                re.compile(r"outer group"),
+                re.compile(r"Navigate to \"data:\""),
+                re.compile(r"inner group 1"),
+                re.compile(r"Click"),
+                re.compile(r"inner group 2"),
+                re.compile(r"Is visible"),
             ]
         )

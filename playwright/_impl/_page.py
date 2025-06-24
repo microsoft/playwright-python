@@ -227,6 +227,7 @@ class Page(ChannelOwner):
             ),
         )
         self._channel.on("video", lambda params: self._on_video(params))
+        self._channel.on("viewportSizeChanged", self._on_viewport_size_changed)
         self._channel.on(
             "webSocket",
             lambda params: self.emit(
@@ -236,6 +237,7 @@ class Page(ChannelOwner):
         self._channel.on(
             "worker", lambda params: self._on_worker(from_channel(params["worker"]))
         )
+        self._channel._set_timeout_calculator(self._timeout_settings.timeout)
         self._closed_or_crashed_future: asyncio.Future = asyncio.Future()
         self.on(
             Page.Events.Close,
@@ -286,7 +288,7 @@ class Page(ChannelOwner):
         route_handlers = self._routes.copy()
         for route_handler in route_handlers:
             # If the page was closed we stall all requests right away.
-            if self._close_was_called or self.context._close_was_called:
+            if self._close_was_called or self.context._closing_or_closed:
                 return
             if not route_handler.matches(route.request.url):
                 continue
@@ -363,6 +365,9 @@ class Page(ChannelOwner):
         artifact = from_channel(params["artifact"])
         self._force_video()._artifact_ready(artifact)
 
+    def _on_viewport_size_changed(self, params: Any) -> None:
+        self._viewport_size = params["viewportSize"]
+
     @property
     def context(self) -> "BrowserContext":
         return self._browser_context
@@ -397,13 +402,9 @@ class Page(ChannelOwner):
 
     def set_default_navigation_timeout(self, timeout: float) -> None:
         self._timeout_settings.set_default_navigation_timeout(timeout)
-        self._channel.send_no_reply(
-            "setDefaultNavigationTimeoutNoReply", dict(timeout=timeout)
-        )
 
     def set_default_timeout(self, timeout: float) -> None:
         self._timeout_settings.set_default_timeout(timeout)
-        self._channel.send_no_reply("setDefaultTimeoutNoReply", dict(timeout=timeout))
 
     async def query_selector(
         self,
@@ -557,7 +558,9 @@ class Page(ChannelOwner):
         waitUntil: DocumentLoadState = None,
     ) -> Optional[Response]:
         return from_nullable_channel(
-            await self._channel.send("reload", locals_to_params(locals()))
+            await self._channel.send(
+                "reload", self._locals_to_params_with_navigation_timeout(locals())
+            )
         )
 
     async def wait_for_load_state(
@@ -588,7 +591,9 @@ class Page(ChannelOwner):
         waitUntil: DocumentLoadState = None,
     ) -> Optional[Response]:
         return from_nullable_channel(
-            await self._channel.send("goBack", locals_to_params(locals()))
+            await self._channel.send(
+                "goBack", self._locals_to_params_with_navigation_timeout(locals())
+            )
         )
 
     async def go_forward(
@@ -597,7 +602,9 @@ class Page(ChannelOwner):
         waitUntil: DocumentLoadState = None,
     ) -> Optional[Response]:
         return from_nullable_channel(
-            await self._channel.send("goForward", locals_to_params(locals()))
+            await self._channel.send(
+                "goForward", self._locals_to_params_with_navigation_timeout(locals())
+            )
         )
 
     async def request_gc(self) -> None:
@@ -1399,6 +1406,13 @@ class Page(ChannelOwner):
             if data.locator._equals(locator):
                 del self._locator_handlers[uid]
                 self._channel.send_no_reply("unregisterLocatorHandler", {"uid": uid})
+
+    def _locals_to_params_with_navigation_timeout(self, args: Dict) -> Dict:
+        params = locals_to_params(args)
+        params["timeout"] = self._timeout_settings.navigation_timeout(
+            params.get("timeout")
+        )
+        return params
 
 
 class Worker(ChannelOwner):

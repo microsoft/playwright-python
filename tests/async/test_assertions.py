@@ -161,7 +161,7 @@ async def test_assertions_locator_to_contain_class(page: Page, server: Server) -
 
     assert excinfo.match("Locator expected to contain class 'does-not-exist'")
     assert excinfo.match("Actual value: foo bar baz")
-    assert excinfo.match("LocatorAssertions.to_contain_class with timeout 100ms")
+    assert excinfo.match('Expect "to_contain_class" with timeout 100ms')
 
     await page.set_content(
         '<div class="foo"></div><div class="hello bar"></div><div class="baz"></div>'
@@ -550,6 +550,35 @@ async def test_assertions_locator_to_be_checked(page: Page, server: Server) -> N
     with pytest.raises(AssertionError, match="Locator expected to be unchecked"):
         await expect(my_checkbox).to_be_checked(timeout=100, checked=False)
     await expect(my_checkbox).to_be_checked()
+
+
+async def test_assertions_boolean_checked_with_intermediate_true(page: Page) -> None:
+    await page.set_content("<input type=checkbox></input>")
+    await page.locator("input").evaluate("e => e.indeterminate = true")
+    await expect(page.locator("input")).to_be_checked(indeterminate=True)
+
+
+async def test_assertions_boolean_checked_with_intermediate_true_and_checked(
+    page: Page,
+) -> None:
+    await page.set_content("<input type=checkbox></input>")
+    await page.locator("input").evaluate("e => e.indeterminate = true")
+    with pytest.raises(
+        Error, match="Can't assert indeterminate and checked at the same time"
+    ):
+        await expect(page.locator("input")).to_be_checked(
+            checked=False, indeterminate=True
+        )
+
+
+async def test_assertions_boolean_fail_with_indeterminate_true(page: Page) -> None:
+    await page.set_content("<input type=checkbox></input>")
+    with pytest.raises(
+        AssertionError, match='Expect "to_be_checked" with timeout 1000ms'
+    ):
+        await expect(page.locator("input")).to_be_checked(
+            indeterminate=True, timeout=1000
+        )
 
 
 async def test_assertions_locator_to_be_disabled_enabled(
@@ -991,7 +1020,7 @@ async def test_should_be_attached_over_navigation(page: Page, server: Server) ->
 async def test_should_be_able_to_set_custom_timeout(page: Page) -> None:
     with pytest.raises(AssertionError) as exc_info:
         await expect(page.locator("#a1")).to_be_visible(timeout=111)
-    assert "LocatorAssertions.to_be_visible with timeout 111ms" in str(exc_info.value)
+    assert 'Expect "to_be_visible" with timeout 111ms' in str(exc_info.value)
 
 
 async def test_should_be_able_to_set_custom_global_timeout(page: Page) -> None:
@@ -999,9 +1028,7 @@ async def test_should_be_able_to_set_custom_global_timeout(page: Page) -> None:
         expect.set_options(timeout=111)
         with pytest.raises(AssertionError) as exc_info:
             await expect(page.locator("#a1")).to_be_visible()
-        assert "LocatorAssertions.to_be_visible with timeout 111ms" in str(
-            exc_info.value
-        )
+        assert 'Expect "to_be_visible" with timeout 111ms' in str(exc_info.value)
     finally:
         expect.set_options(timeout=None)
 

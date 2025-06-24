@@ -55,6 +55,8 @@ class ElementHandle(JSHandle):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
+        self._frame = cast("Frame", parent)
+        self._channel._set_timeout_calculator(self._frame._timeout)
 
     async def _createSelectorForTest(self, name: str) -> Optional[str]:
         return await self._channel.send("createSelectorForTest", dict(name=name))
@@ -204,7 +206,7 @@ class ElementHandle(JSHandle):
         await self._channel.send(
             "setInputFiles",
             {
-                "timeout": timeout,
+                "timeout": self._frame._timeout(timeout),
                 **converted,
             },
         )

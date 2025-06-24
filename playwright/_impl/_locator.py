@@ -107,7 +107,7 @@ class Locator:
         task: Callable[[ElementHandle, float], Awaitable[T]],
         timeout: float = None,
     ) -> T:
-        timeout = self._frame.page._timeout_settings.timeout(timeout)
+        timeout = self._frame._timeout(timeout)
         deadline = (monotonic_time() + timeout) if timeout else 0
         handle = await self.element_handle(timeout=timeout)
         if not handle:
@@ -336,6 +336,12 @@ class Locator:
     def content_frame(self) -> "FrameLocator":
         return FrameLocator(self._frame, self._selector)
 
+    def describe(self, description: str) -> "Locator":
+        return Locator(
+            self._frame,
+            f"{self._selector} >> internal:describe={json.dumps(description)}",
+        )
+
     def filter(
         self,
         hasText: Union[str, Pattern[str]] = None,
@@ -540,7 +546,7 @@ class Locator:
             ),
         )
 
-    async def aria_snapshot(self, timeout: float = None, ref: bool = None) -> str:
+    async def aria_snapshot(self, timeout: float = None) -> str:
         return await self._frame._channel.send(
             "ariaSnapshot",
             {
@@ -711,7 +717,10 @@ class Locator:
             )
 
     async def _expect(
-        self, expression: str, options: FrameExpectOptions
+        self,
+        expression: str,
+        options: FrameExpectOptions,
+        title: str = None,
     ) -> FrameExpectResult:
         if "expectedValue" in options:
             options["expectedValue"] = serialize_argument(options["expectedValue"])
@@ -722,6 +731,7 @@ class Locator:
                 "expression": expression,
                 **options,
             },
+            title=title,
         )
         if result.get("received"):
             result["received"] = parse_value(result["received"])

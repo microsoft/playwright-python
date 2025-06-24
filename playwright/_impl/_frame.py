@@ -19,6 +19,7 @@ from typing import (
     Any,
     Dict,
     List,
+    Literal,
     Optional,
     Pattern,
     Sequence,
@@ -42,8 +43,8 @@ from playwright._impl._helper import (
     DocumentLoadState,
     FrameNavigatedEvent,
     KeyboardModifier,
-    Literal,
     MouseButton,
+    TimeoutSettings,
     URLMatch,
     async_readfile,
     locals_to_params,
@@ -100,6 +101,7 @@ class Frame(ChannelOwner):
             "navigated",
             lambda params: self._on_frame_navigated(params),
         )
+        self._channel._set_timeout_calculator(self._timeout)
 
     def __repr__(self) -> str:
         return f"<Frame name={self.name} url={self.url!r}>"
@@ -142,7 +144,9 @@ class Frame(ChannelOwner):
         return cast(
             Optional[Response],
             from_nullable_channel(
-                await self._channel.send("goto", locals_to_params(locals()))
+                await self._channel.send(
+                    "goto", self._locals_to_params_with_navigation_timeout(locals())
+                )
             ),
         )
 
@@ -163,8 +167,7 @@ class Frame(ChannelOwner):
             Error("Navigating frame was detached!"),
             lambda frame: frame == self,
         )
-        if timeout is None:
-            timeout = self._page._timeout_settings.navigation_timeout()
+        timeout = self._page._timeout_settings.navigation_timeout(timeout)
         waiter.reject_on_timeout(timeout, f"Timeout {timeout}ms exceeded.")
         return waiter
 
@@ -270,6 +273,18 @@ class Frame(ChannelOwner):
             )
         await waiter.result()
 
+    def _timeout(self, timeout: Optional[float]) -> float:
+        timeout_settings = (
+            self._page._timeout_settings if self._page else TimeoutSettings(None)
+        )
+        return timeout_settings.timeout(timeout)
+
+    def _navigation_timeout(self, timeout: Optional[float]) -> float:
+        timeout_settings = (
+            self._page._timeout_settings if self._page else TimeoutSettings(None)
+        )
+        return timeout_settings.navigation_timeout(timeout)
+
     async def frame_element(self) -> ElementHandle:
         return from_channel(await self._channel.send("frameElement"))
 
@@ -343,14 +358,10 @@ class Frame(ChannelOwner):
     ) -> bool:
         return await self._channel.send("isEnabled", locals_to_params(locals()))
 
-    async def is_hidden(
-        self, selector: str, strict: bool = None, timeout: float = None
-    ) -> bool:
+    async def is_hidden(self, selector: str, strict: bool = None) -> bool:
         return await self._channel.send("isHidden", locals_to_params(locals()))
 
-    async def is_visible(
-        self, selector: str, strict: bool = None, timeout: float = None
-    ) -> bool:
+    async def is_visible(self, selector: str, strict: bool = None) -> bool:
         return await self._channel.send("isVisible", locals_to_params(locals()))
 
     async def dispatch_event(
@@ -421,7 +432,9 @@ class Frame(ChannelOwner):
         timeout: float = None,
         waitUntil: DocumentLoadState = None,
     ) -> None:
-        await self._channel.send("setContent", locals_to_params(locals()))
+        await self._channel.send(
+            "setContent", self._locals_to_params_with_navigation_timeout(locals())
+        )
 
     @property
     def name(self) -> str:
@@ -500,7 +513,9 @@ class Frame(ChannelOwner):
         strict: bool = None,
         trial: bool = None,
     ) -> None:
-        await self._channel.send("dblclick", locals_to_params(locals()))
+        await self._channel.send(
+            "dblclick", locals_to_params(locals()), title="Double click"
+        )
 
     async def tap(
         self,
@@ -701,7 +716,7 @@ class Frame(ChannelOwner):
             {
                 "selector": selector,
                 "strict": strict,
-                "timeout": timeout,
+                "timeout": self._timeout(timeout),
                 **converted,
             },
         )
@@ -805,3 +820,8 @@ class Frame(ChannelOwner):
 
     async def _highlight(self, selector: str) -> None:
         await self._channel.send("highlight", {"selector": selector})
+
+    def _locals_to_params_with_navigation_timeout(self, args: Dict) -> Dict:
+        params = locals_to_params(args)
+        params["timeout"] = self._navigation_timeout(params.get("timeout"))
+        return params

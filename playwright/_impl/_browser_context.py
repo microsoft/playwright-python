@@ -66,7 +66,6 @@ from playwright._impl._helper import (
     async_writefile,
     locals_to_params,
     parse_error,
-    prepare_record_har_options,
     to_impl,
 )
 from playwright._impl._network import (
@@ -106,18 +105,18 @@ class BrowserContext(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
+        # Browser is null for browser contexts created outside of normal browser, e.g. android or electron.
         # circular import workaround:
         self._browser: Optional["Browser"] = None
         if parent.__class__.__name__ == "Browser":
             self._browser = cast("Browser", parent)
-            self._browser._contexts.append(self)
         self._pages: List[Page] = []
         self._routes: List[RouteHandler] = []
         self._web_socket_routes: List[WebSocketRouteHandler] = []
         self._bindings: Dict[str, Any] = {}
         self._timeout_settings = TimeoutSettings(None)
         self._owner_page: Optional[Page] = None
-        self._options: Dict[str, Any] = {}
+        self._options: Dict[str, Any] = initializer["options"]
         self._background_pages: Set[Page] = set()
         self._service_workers: Set[Worker] = set()
         self._tracing = cast(Tracing, from_channel(initializer["tracing"]))
@@ -220,7 +219,7 @@ class BrowserContext(ChannelOwner):
                 BrowserContext.Events.RequestFailed: "requestFailed",
             }
         )
-        self._close_was_called = False
+        self._closing_or_closed = False
 
     def __repr__(self) -> str:
         return f"<BrowserContext browser={self.browser}>"
@@ -237,7 +236,7 @@ class BrowserContext(ChannelOwner):
         route_handlers = self._routes.copy()
         for route_handler in route_handlers:
             # If the page or the context was closed we stall all requests right away.
-            if (page and page._close_was_called) or self._close_was_called:
+            if (page and page._close_was_called) or self._closing_or_closed:
                 return
             if not route_handler.matches(route.request.url):
                 continue
@@ -288,19 +287,12 @@ class BrowserContext(ChannelOwner):
 
     def _set_default_navigation_timeout_impl(self, timeout: Optional[float]) -> None:
         self._timeout_settings.set_default_navigation_timeout(timeout)
-        self._channel.send_no_reply(
-            "setDefaultNavigationTimeoutNoReply",
-            {} if timeout is None else {"timeout": timeout},
-        )
 
     def set_default_timeout(self, timeout: float) -> None:
         return self._set_default_timeout_impl(timeout)
 
     def _set_default_timeout_impl(self, timeout: Optional[float]) -> None:
         self._timeout_settings.set_default_timeout(timeout)
-        self._channel.send_no_reply(
-            "setDefaultTimeoutNoReply", {} if timeout is None else {"timeout": timeout}
-        )
 
     @property
     def pages(self) -> List[Page]:
@@ -310,14 +302,30 @@ class BrowserContext(ChannelOwner):
     def browser(self) -> Optional["Browser"]:
         return self._browser
 
-    def _set_options(self, context_options: Dict, browser_options: Dict) -> None:
-        self._options = context_options
-        if self._options.get("recordHar"):
-            self._har_recorders[""] = {
-                "path": self._options["recordHar"]["path"],
-                "content": self._options["recordHar"].get("content"),
-            }
-        self._tracing._traces_dir = browser_options.get("tracesDir")
+    async def _initialize_har_from_options(
+        self,
+        record_har_path: Optional[Union[Path, str]],
+        record_har_content: Optional[HarContentPolicy],
+        record_har_omit_content: Optional[bool],
+        record_har_url_filter: Optional[Union[Pattern[str], str]],
+        record_har_mode: Optional[HarMode],
+    ) -> None:
+        if not record_har_path:
+            return
+        record_har_path = str(record_har_path)
+        default_policy: HarContentPolicy = (
+            "attach" if record_har_path.endswith(".zip") else "embed"
+        )
+        content_policy: HarContentPolicy = record_har_content or (
+            "omit" if record_har_omit_content is True else default_policy
+        )
+        await self._record_into_har(
+            har=record_har_path,
+            page=None,
+            url=record_har_url_filter,
+            update_content=content_policy,
+            update_mode=(record_har_mode or "full"),
+        )
 
     async def new_page(self) -> Page:
         if self._owner_page:
@@ -476,22 +484,25 @@ class BrowserContext(ChannelOwner):
         update_content: HarContentPolicy = None,
         update_mode: HarMode = None,
     ) -> None:
+        update_content = update_content or "attach"
         params: Dict[str, Any] = {
-            "options": prepare_record_har_options(
-                {
-                    "recordHarPath": har,
-                    "recordHarContent": update_content or "attach",
-                    "recordHarMode": update_mode or "minimal",
-                    "recordHarUrlFilter": url,
-                }
-            )
+            "options": {
+                "zip": str(har).endswith(".zip"),
+                "content": update_content,
+                "urlGlob": url if isinstance(url, str) else None,
+                "urlRegexSource": url.pattern if isinstance(url, Pattern) else None,
+                "urlRegexFlags": (
+                    escape_regex_flags(url) if isinstance(url, Pattern) else None
+                ),
+                "mode": update_mode or "minimal",
+            }
         }
         if page:
             params["page"] = page._channel
         har_id = await self._channel.send("harStart", params)
         self._har_recorders[har_id] = {
             "path": str(har),
-            "content": update_content or "attach",
+            "content": update_content,
         }
 
     async def route_from_har(
@@ -555,22 +566,30 @@ class BrowserContext(ChannelOwner):
         return EventContextManagerImpl(waiter.result())
 
     def _on_close(self) -> None:
+        self._closing_or_closed = True
         if self._browser:
-            self._browser._contexts.remove(self)
+            if self in self._browser._contexts:
+                self._browser._contexts.remove(self)
+            assert self._browser._browser_type is not None
+            if (
+                self
+                in self._browser._browser_type._playwright.selectors._contexts_for_selectors
+            ):
+                self._browser._browser_type._playwright.selectors._contexts_for_selectors.remove(
+                    self
+                )
 
         self._dispose_har_routers()
         self._tracing._reset_stack_counter()
         self.emit(BrowserContext.Events.Close, self)
 
     async def close(self, reason: str = None) -> None:
-        if self._close_was_called:
+        if self._closing_or_closed:
             return
         self._close_reason = reason
-        self._close_was_called = True
+        self._closing_or_closed = True
 
-        await self._channel._connection.wrap_api_call(
-            lambda: self.request.dispose(reason=reason), True
-        )
+        await self.request.dispose(reason=reason)
 
         async def _inner_close() -> None:
             for har_id, params in self._har_recorders.items():

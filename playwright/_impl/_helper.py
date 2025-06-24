@@ -250,7 +250,21 @@ class HarLookupResult(TypedDict, total=False):
     body: Optional[str]
 
 
+DEFAULT_PLAYWRIGHT_TIMEOUT_IN_MILLISECONDS = 30000
+DEFAULT_PLAYWRIGHT_LAUNCH_TIMEOUT_IN_MILLISECONDS = 180000
+PLAYWRIGHT_MAX_DEADLINE = 2147483647  # 2^31-1
+
+
 class TimeoutSettings:
+
+    @staticmethod
+    def launch_timeout(timeout: Optional[float] = None) -> float:
+        return (
+            timeout
+            if timeout is not None
+            else DEFAULT_PLAYWRIGHT_LAUNCH_TIMEOUT_IN_MILLISECONDS
+        )
+
     def __init__(self, parent: Optional["TimeoutSettings"]) -> None:
         self._parent = parent
         self._default_timeout: Optional[float] = None
@@ -266,7 +280,7 @@ class TimeoutSettings:
             return self._default_timeout
         if self._parent:
             return self._parent.timeout()
-        return 30000
+        return DEFAULT_PLAYWRIGHT_TIMEOUT_IN_MILLISECONDS
 
     def set_default_navigation_timeout(
         self, navigation_timeout: Optional[float]
@@ -279,12 +293,16 @@ class TimeoutSettings:
     def default_timeout(self) -> Optional[float]:
         return self._default_timeout
 
-    def navigation_timeout(self) -> float:
+    def navigation_timeout(self, timeout: float = None) -> float:
+        if timeout is not None:
+            return timeout
         if self._default_navigation_timeout is not None:
             return self._default_navigation_timeout
+        if self._default_timeout is not None:
+            return self._default_timeout
         if self._parent:
             return self._parent.navigation_timeout()
-        return 30000
+        return DEFAULT_PLAYWRIGHT_TIMEOUT_IN_MILLISECONDS
 
 
 def serialize_error(ex: Exception, tb: Optional[TracebackType]) -> ErrorPayload:
