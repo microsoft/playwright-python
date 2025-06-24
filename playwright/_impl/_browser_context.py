@@ -330,17 +330,17 @@ class BrowserContext(ChannelOwner):
     async def new_page(self) -> Page:
         if self._owner_page:
             raise Error("Please use browser.new_context()")
-        return from_channel(await self._channel.send("newPage"))
+        return from_channel(await self._channel.send("newPage", None))
 
     async def cookies(self, urls: Union[str, Sequence[str]] = None) -> List[Cookie]:
         if urls is None:
             urls = []
         if isinstance(urls, str):
             urls = [urls]
-        return await self._channel.send("cookies", dict(urls=urls))
+        return await self._channel.send("cookies", None, dict(urls=urls))
 
     async def add_cookies(self, cookies: Sequence[SetCookieParam]) -> None:
-        await self._channel.send("addCookies", dict(cookies=cookies))
+        await self._channel.send("addCookies", None, dict(cookies=cookies))
 
     async def clear_cookies(
         self,
@@ -350,6 +350,7 @@ class BrowserContext(ChannelOwner):
     ) -> None:
         await self._channel.send(
             "clearCookies",
+            None,
             {
                 "name": name if isinstance(name, str) else None,
                 "nameRegexSource": name.pattern if isinstance(name, Pattern) else None,
@@ -374,21 +375,21 @@ class BrowserContext(ChannelOwner):
     async def grant_permissions(
         self, permissions: Sequence[str], origin: str = None
     ) -> None:
-        await self._channel.send("grantPermissions", locals_to_params(locals()))
+        await self._channel.send("grantPermissions", None, locals_to_params(locals()))
 
     async def clear_permissions(self) -> None:
-        await self._channel.send("clearPermissions")
+        await self._channel.send("clearPermissions", None)
 
     async def set_geolocation(self, geolocation: Geolocation = None) -> None:
-        await self._channel.send("setGeolocation", locals_to_params(locals()))
+        await self._channel.send("setGeolocation", None, locals_to_params(locals()))
 
     async def set_extra_http_headers(self, headers: Dict[str, str]) -> None:
         await self._channel.send(
-            "setExtraHTTPHeaders", dict(headers=serialize_headers(headers))
+            "setExtraHTTPHeaders", None, dict(headers=serialize_headers(headers))
         )
 
     async def set_offline(self, offline: bool) -> None:
-        await self._channel.send("setOffline", dict(offline=offline))
+        await self._channel.send("setOffline", None, dict(offline=offline))
 
     async def add_init_script(
         self, script: str = None, path: Union[str, Path] = None
@@ -397,7 +398,7 @@ class BrowserContext(ChannelOwner):
             script = (await async_readfile(path)).decode()
         if not isinstance(script, str):
             raise Error("Either path or script parameter must be specified")
-        await self._channel.send("addInitScript", dict(source=script))
+        await self._channel.send("addInitScript", None, dict(source=script))
 
     async def expose_binding(
         self, name: str, callback: Callable, handle: bool = None
@@ -411,7 +412,7 @@ class BrowserContext(ChannelOwner):
             raise Error(f'Function "{name}" has been already registered')
         self._bindings[name] = callback
         await self._channel.send(
-            "exposeBinding", dict(name=name, needsHandle=handle or False)
+            "exposeBinding", None, dict(name=name, needsHandle=handle or False)
         )
 
     async def expose_function(self, name: str, callback: Callable) -> None:
@@ -499,7 +500,7 @@ class BrowserContext(ChannelOwner):
         }
         if page:
             params["page"] = page._channel
-        har_id = await self._channel.send("harStart", params)
+        har_id = await self._channel.send("harStart", None, params)
         self._har_recorders[har_id] = {
             "path": str(har),
             "content": update_content,
@@ -535,7 +536,7 @@ class BrowserContext(ChannelOwner):
     async def _update_interception_patterns(self) -> None:
         patterns = RouteHandler.prepare_interception_patterns(self._routes)
         await self._channel.send(
-            "setNetworkInterceptionPatterns", {"patterns": patterns}
+            "setNetworkInterceptionPatterns", None, {"patterns": patterns}
         )
 
     async def _update_web_socket_interception_patterns(self) -> None:
@@ -543,7 +544,7 @@ class BrowserContext(ChannelOwner):
             self._web_socket_routes
         )
         await self._channel.send(
-            "setWebSocketInterceptionPatterns", {"patterns": patterns}
+            "setWebSocketInterceptionPatterns", None, {"patterns": patterns}
         )
 
     def expect_event(
@@ -596,7 +597,7 @@ class BrowserContext(ChannelOwner):
                 har = cast(
                     Artifact,
                     from_channel(
-                        await self._channel.send("harExport", {"harId": har_id})
+                        await self._channel.send("harExport", None, {"harId": har_id})
                     ),
                 )
                 # Server side will compress artifact if content is attach or if file is .zip.
@@ -615,14 +616,14 @@ class BrowserContext(ChannelOwner):
                 await har.delete()
 
         await self._channel._connection.wrap_api_call(_inner_close, True)
-        await self._channel.send("close", {"reason": reason})
+        await self._channel.send("close", None, {"reason": reason})
         await self._closed_future
 
     async def storage_state(
         self, path: Union[str, Path] = None, indexedDB: bool = None
     ) -> StorageState:
         result = await self._channel.send_return_as_dict(
-            "storageState", {"indexedDB": indexedDB}
+            "storageState", None, {"indexedDB": indexedDB}
         )
         if path:
             await async_writefile(path, json.dumps(result))
@@ -749,7 +750,7 @@ class BrowserContext(ChannelOwner):
             params["frame"] = page._channel
         else:
             raise Error("page: expected Page or Frame")
-        return from_channel(await self._channel.send("newCDPSession", params))
+        return from_channel(await self._channel.send("newCDPSession", None, params))
 
     @property
     def tracing(self) -> Tracing:

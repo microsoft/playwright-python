@@ -168,7 +168,7 @@ class Browser(ChannelOwner):
         assert self._browser_type is not None
         await self._browser_type._prepare_browser_context_params(params)
 
-        channel = await self._channel.send("newContext", params)
+        channel = await self._channel.send("newContext", None, params)
         context = cast(BrowserContext, from_channel(channel))
         await context._initialize_har_from_options(
             record_har_content=recordHarContent,
@@ -235,7 +235,7 @@ class Browser(ChannelOwner):
             if self._should_close_connection_on_close:
                 await self._connection.stop_async()
             else:
-                await self._channel.send("close", {"reason": reason})
+                await self._channel.send("close", None, {"reason": reason})
         except Exception as e:
             if not is_target_closed_error(e):
                 raise e
@@ -245,7 +245,7 @@ class Browser(ChannelOwner):
         return self._initializer["version"]
 
     async def new_browser_cdp_session(self) -> CDPSession:
-        return from_channel(await self._channel.send("newBrowserCDPSession"))
+        return from_channel(await self._channel.send("newBrowserCDPSession", None))
 
     async def start_tracing(
         self,
@@ -260,10 +260,12 @@ class Browser(ChannelOwner):
         if path:
             self._cr_tracing_path = str(path)
             params["path"] = str(path)
-        await self._channel.send("startTracing", params)
+        await self._channel.send("startTracing", None, params)
 
     async def stop_tracing(self) -> bytes:
-        artifact = cast(Artifact, from_channel(await self._channel.send("stopTracing")))
+        artifact = cast(
+            Artifact, from_channel(await self._channel.send("stopTracing", None))
+        )
         buffer = await artifact.read_info_buffer()
         await artifact.delete()
         if self._cr_tracing_path:

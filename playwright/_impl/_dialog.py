@@ -48,7 +48,10 @@ class Dialog(ChannelOwner):
         return self._page
 
     async def accept(self, promptText: str = None) -> None:
-        await self._channel.send("accept", locals_to_params(locals()))
+        await self._channel.send("accept", None, locals_to_params(locals()))
 
     async def dismiss(self) -> None:
-        await self._channel.send("dismiss")
+        await self._channel.send(
+            "dismiss",
+            None,
+        )

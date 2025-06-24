@@ -47,6 +47,8 @@ if TYPE_CHECKING:
     from playwright._impl._local_utils import LocalUtils
     from playwright._impl._playwright import Playwright
 
+TimeoutCalculator = Optional[Callable[[Optional[float]], float]]
+
 
 class Channel(AsyncIOEventEmitter):
     def __init__(self, connection: "Connection", object: "ChannelOwner") -> None:
@@ -55,17 +57,18 @@ class Channel(AsyncIOEventEmitter):
         self._guid = object._guid
         self._object = object
         self.on("error", lambda exc: self._connection._on_event_listener_error(exc))
-        self._timeout_calculator: Optional[Callable[[Optional[float]], float]] = None
+        self._timeout_calculator: TimeoutCalculator = None
 
     async def send(
         self,
         method: str,
+        timeout_calculator: TimeoutCalculator,
         params: Dict = None,
         is_internal: bool = False,
         title: str = None,
     ) -> Any:
         return await self._connection.wrap_api_call(
-            lambda: self._inner_send(method, params, False),
+            lambda: self._inner_send(method, timeout_calculator, params, False),
             is_internal,
             title,
         )
@@ -73,12 +76,13 @@ class Channel(AsyncIOEventEmitter):
     async def send_return_as_dict(
         self,
         method: str,
+        timeout_calculator: TimeoutCalculator,
         params: Dict = None,
         is_internal: bool = False,
         title: str = None,
     ) -> Any:
         return await self._connection.wrap_api_call(
-            lambda: self._inner_send(method, params, True),
+            lambda: self._inner_send(method, timeout_calculator, params, True),
             is_internal,
             title,
         )
@@ -86,6 +90,7 @@ class Channel(AsyncIOEventEmitter):
     def send_no_reply(
         self,
         method: str,
+        timeout_calculator: TimeoutCalculator,
         params: Dict = None,
         is_internal: bool = False,
         title: str = None,
@@ -93,25 +98,25 @@ class Channel(AsyncIOEventEmitter):
         # No reply messages are used to e.g. waitForEventInfo(after).
         self._connection.wrap_api_call_sync(
             lambda: self._connection._send_message_to_server(
-                self._object, method, {} if params is None else params, True
+                self._object, method, _augment_params(params, timeout_calculator), True
             ),
             is_internal,
             title,
         )
 
     async def _inner_send(
-        self, method: str, params: Optional[Dict], return_as_dict: bool
+        self,
+        method: str,
+        timeout_calculator: TimeoutCalculator,
+        params: Optional[Dict],
+        return_as_dict: bool,
     ) -> Any:
-        if params is None:
-            params = {}
-        if self._timeout_calculator is not None:
-            params["timeout"] = self._timeout_calculator(params.get("timeout"))
         if self._connection._error:
             error = self._connection._error
             self._connection._error = None
             raise error
         callback = self._connection._send_message_to_server(
-            self._object, method, _filter_none(params)
+            self._object, method, _augment_params(params, timeout_calculator)
         )
         done, _ = await asyncio.wait(
             {
@@ -135,11 +140,6 @@ class Channel(AsyncIOEventEmitter):
         assert len(result) == 1
         key = next(iter(result))
         return result[key]
-
-    def _set_timeout_calculator(
-        self, timeout_calculator: Callable[[Optional[float]], float]
-    ) -> None:
-        self._timeout_calculator = timeout_calculator
 
 
 class ChannelOwner(AsyncIOEventEmitter):
@@ -197,7 +197,9 @@ class ChannelOwner(AsyncIOEventEmitter):
         if protocol_event:
             self._connection.wrap_api_call_sync(
                 lambda: self._channel.send_no_reply(
-                    "updateSubscription", {"event": protocol_event, "enabled": enabled}
+                    "updateSubscription",
+                    None,
+                    {"event": protocol_event, "enabled": enabled},
                 ),
                 True,
             )
@@ -244,6 +246,7 @@ class RootChannelOwner(ChannelOwner):
         return from_channel(
             await self._channel.send(
                 "initialize",
+                None,
                 {
                     "sdkLanguage": "python",
                 },
@@ -637,6 +640,17 @@ def _extract_stack_trace_information_from_stack(
         "apiName": "" if is_internal else api_name,
         "title": title,
     }
+
+
+def _augment_params(
+    params: Optional[Dict],
+    timeout_calculator: Optional[Callable[[Optional[float]], float]],
+) -> Dict:
+    if params is None:
+        params = {}
+    if timeout_calculator is not None:
+        params["timeout"] = timeout_calculator(params.get("timeout"))
+    return _filter_none(params)
 
 
 def _filter_none(d: Mapping) -> Dict:

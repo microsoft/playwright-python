@@ -42,15 +42,15 @@ class Tracing(ChannelOwner):
         params = locals_to_params(locals())
         self._include_sources = bool(sources)
 
-        await self._channel.send("tracingStart", params)
+        await self._channel.send("tracingStart", None, params)
         trace_name = await self._channel.send(
-            "tracingStartChunk", {"title": title, "name": name}
+            "tracingStartChunk", None, {"title": title, "name": name}
         )
         await self._start_collecting_stacks(trace_name)
 
     async def start_chunk(self, title: str = None, name: str = None) -> None:
         params = locals_to_params(locals())
-        trace_name = await self._channel.send("tracingStartChunk", params)
+        trace_name = await self._channel.send("tracingStartChunk", None, params)
         await self._start_collecting_stacks(trace_name)
 
     async def _start_collecting_stacks(self, trace_name: str) -> None:
@@ -66,14 +66,17 @@ class Tracing(ChannelOwner):
 
     async def stop(self, path: Union[pathlib.Path, str] = None) -> None:
         await self._do_stop_chunk(path)
-        await self._channel.send("tracingStop")
+        await self._channel.send(
+            "tracingStop",
+            None,
+        )
 
     async def _do_stop_chunk(self, file_path: Union[pathlib.Path, str] = None) -> None:
         self._reset_stack_counter()
 
         if not file_path:
             # Not interested in any artifacts
-            await self._channel.send("tracingStopChunk", {"mode": "discard"})
+            await self._channel.send("tracingStopChunk", None, {"mode": "discard"})
             if self._stacks_id:
                 await self._connection.local_utils.trace_discarded(self._stacks_id)
             return
@@ -82,7 +85,7 @@ class Tracing(ChannelOwner):
 
         if is_local:
             result = await self._channel.send_return_as_dict(
-                "tracingStopChunk", {"mode": "entries"}
+                "tracingStopChunk", None, {"mode": "entries"}
             )
             await self._connection.local_utils.zip(
                 {
@@ -97,6 +100,7 @@ class Tracing(ChannelOwner):
 
         result = await self._channel.send_return_as_dict(
             "tracingStopChunk",
+            None,
             {
                 "mode": "archive",
             },
@@ -133,7 +137,10 @@ class Tracing(ChannelOwner):
             self._connection.set_is_tracing(False)
 
     async def group(self, name: str, location: TracingGroupLocation = None) -> None:
-        await self._channel.send("tracingGroup", locals_to_params(locals()))
+        await self._channel.send("tracingGroup", None, locals_to_params(locals()))
 
     async def group_end(self) -> None:
-        await self._channel.send("tracingGroupEnd")
+        await self._channel.send(
+            "tracingGroupEnd",
+            None,
+        )

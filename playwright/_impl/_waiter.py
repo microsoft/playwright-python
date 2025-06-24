@@ -38,6 +38,7 @@ class Waiter:
     def _wait_for_event_info_before(self, wait_id: str, event: str) -> None:
         self._channel.send_no_reply(
             "waitForEventInfo",
+            None,
             {
                 "info": {
                     "waitId": wait_id,
@@ -51,6 +52,7 @@ class Waiter:
         self._channel._connection.wrap_api_call_sync(
             lambda: self._channel.send_no_reply(
                 "waitForEventInfo",
+                None,
                 {
                     "info": {
                         "waitId": wait_id,
@@ -130,6 +132,7 @@ class Waiter:
             self._channel._connection.wrap_api_call_sync(
                 lambda: self._channel.send_no_reply(
                     "waitForEventInfo",
+                    None,
                     {
                         "info": {
                             "waitId": self._wait_id,
