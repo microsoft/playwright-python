@@ -80,7 +80,9 @@ class Mouse:
         button: MouseButton = None,
         clickCount: int = None,
     ) -> None:
-        await self._click(**locals())
+        params = locals()
+        del params["self"]
+        await self._click(**params)
 
     async def dblclick(
         self,
