@@ -98,7 +98,10 @@ class Channel(AsyncIOEventEmitter):
         # No reply messages are used to e.g. waitForEventInfo(after).
         self._connection.wrap_api_call_sync(
             lambda: self._connection._send_message_to_server(
-                self._object, method, _augment_params(params, timeout_calculator), True
+                self._object,
+                method,
+                _augment_params(params, timeout_calculator, filter=False),
+                True,
             ),
             is_internal,
             title,
@@ -645,12 +648,13 @@ def _extract_stack_trace_information_from_stack(
 def _augment_params(
     params: Optional[Dict],
     timeout_calculator: Optional[Callable[[Optional[float]], float]],
+    filter: bool = True,
 ) -> Dict:
     if params is None:
         params = {}
     if timeout_calculator:
         params["timeout"] = timeout_calculator(params.get("timeout"))
-    return _filter_none(params)
+    return _filter_none(params) if filter else params
 
 
 def _filter_none(d: Mapping) -> Dict:
