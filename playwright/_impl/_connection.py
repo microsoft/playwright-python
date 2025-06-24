@@ -648,7 +648,7 @@ def _augment_params(
 ) -> Dict:
     if params is None:
         params = {}
-    if timeout_calculator is not None:
+    if timeout_calculator:
         params["timeout"] = timeout_calculator(params.get("timeout"))
     return _filter_none(params)
 

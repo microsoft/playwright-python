@@ -27,7 +27,9 @@ class Clock:
 
     async def install(self, time: Union[float, str, datetime.datetime] = None) -> None:
         await self._browser_context._channel.send(
-            "clockInstall", None, parse_time(time) if time is not None else {}
+            "clockInstall",
+            self._browser_context._timeout_settings.timeout,
+            parse_time(time) if time is not None else {},
         )
 
     async def fast_forward(
@@ -35,7 +37,9 @@ class Clock:
         ticks: Union[int, str],
     ) -> None:
         await self._browser_context._channel.send(
-            "clockFastForward", None, parse_ticks(ticks)
+            "clockFastForward",
+            self._browser_context._timeout_settings.timeout,
+            parse_ticks(ticks),
         )
 
     async def pause_at(
@@ -43,20 +47,26 @@ class Clock:
         time: Union[float, str, datetime.datetime],
     ) -> None:
         await self._browser_context._channel.send(
-            "clockPauseAt", None, parse_time(time)
+            "clockPauseAt",
+            self._browser_context._timeout_settings.timeout,
+            parse_time(time),
         )
 
     async def resume(
         self,
     ) -> None:
-        await self._browser_context._channel.send("clockResume", None)
+        await self._browser_context._channel.send(
+            "clockResume", self._browser_context._timeout_settings.timeout
+        )
 
     async def run_for(
         self,
         ticks: Union[int, str],
     ) -> None:
         await self._browser_context._channel.send(
-            "clockRunFor", None, parse_ticks(ticks)
+            "clockRunFor",
+            self._browser_context._timeout_settings.timeout,
+            parse_ticks(ticks),
         )
 
     async def set_fixed_time(
@@ -64,7 +74,9 @@ class Clock:
         time: Union[float, str, datetime.datetime],
     ) -> None:
         await self._browser_context._channel.send(
-            "clockSetFixedTime", None, parse_time(time)
+            "clockSetFixedTime",
+            self._browser_context._timeout_settings.timeout,
+            parse_time(time),
         )
 
     async def set_system_time(
@@ -72,7 +84,9 @@ class Clock:
         time: Union[float, str, datetime.datetime],
     ) -> None:
         await self._browser_context._channel.send(
-            "clockSetSystemTime", None, parse_time(time)
+            "clockSetSystemTime",
+            self._browser_context._timeout_settings.timeout,
+            parse_time(time),
         )
 
 
