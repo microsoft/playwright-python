@@ -570,9 +570,9 @@ class BrowserContext(ChannelOwner):
         if self._browser:
             if self in self._browser._contexts:
                 self._browser._contexts.remove(self)
+            assert self._browser._browser_type is not None
             if (
-                self._browser._browser_type
-                and self
+                self
                 in self._browser._browser_type._playwright.selectors._contexts_for_selectors
             ):
                 self._browser._browser_type._playwright.selectors._contexts_for_selectors.remove(
