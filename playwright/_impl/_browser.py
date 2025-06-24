@@ -65,7 +65,6 @@ class Browser(ChannelOwner):
         self, parent: "BrowserType", type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
-        self._browser_type = parent
         self._is_connected = True
         self._should_close_connection_on_close = False
         self._cr_tracing_path: Optional[str] = None
@@ -86,13 +85,13 @@ class Browser(ChannelOwner):
 
     def _connect_to_browser_type(
         self,
-        browserType: "BrowserType",
-        tracesDir: Optional[str] = None,
+        browser_type: "BrowserType",
+        traces_dir: Optional[str] = None,
     ) -> None:
         # Note: when using connect(), `browserType` is different from `this.parent`.
         # This is why browser type is not wired up in the constructor, and instead this separate method is called later on.
-        self._browser_type = browserType
-        self._traces_dir = tracesDir
+        self._browser_type = browser_type
+        self._traces_dir = traces_dir
         for context in self._contexts:
             self._setup_browser_context(context)
 
