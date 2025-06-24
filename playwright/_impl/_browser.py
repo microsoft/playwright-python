@@ -65,6 +65,7 @@ class Browser(ChannelOwner):
         self, parent: "BrowserType", type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
+        self._browser_type: Optional["BrowserType"] = None
         self._is_connected = True
         self._should_close_connection_on_close = False
         self._cr_tracing_path: Optional[str] = None
@@ -105,7 +106,10 @@ class Browser(ChannelOwner):
 
     def _setup_browser_context(self, context: BrowserContext) -> None:
         context._tracing._traces_dir = self._traces_dir
-        self._browser_type._playwright.selectors._contexts_for_selectors.add(context)
+        if self._browser_type:
+            self._browser_type._playwright.selectors._contexts_for_selectors.add(
+                context
+            )
 
     def _on_close(self) -> None:
         self._is_connected = False
@@ -117,6 +121,10 @@ class Browser(ChannelOwner):
 
     @property
     def browser_type(self) -> "BrowserType":
+        if not self._browser_type:
+            raise RuntimeError(
+                "_browser_type is not set. Make sure _connect_to_browser_type() is called on initialization."
+            )
         return self._browser_type
 
     def is_connected(self) -> bool:
@@ -162,7 +170,8 @@ class Browser(ChannelOwner):
         clientCertificates: List[ClientCertificate] = None,
     ) -> BrowserContext:
         params = locals_to_params(locals())
-        await self._browser_type._prepare_browser_context_params(params)
+        if self._browser_type:
+            await self._browser_type._prepare_browser_context_params(params)
 
         channel = await self._channel.send("newContext", params)
         context = cast(BrowserContext, from_channel(channel))

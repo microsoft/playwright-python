@@ -571,7 +571,8 @@ class BrowserContext(ChannelOwner):
             if self in self._browser._contexts:
                 self._browser._contexts.remove(self)
             if (
-                self
+                self._browser._browser_type
+                and self
                 in self._browser._browser_type._playwright.selectors._contexts_for_selectors
             ):
                 self._browser._browser_type._playwright.selectors._contexts_for_selectors.remove(
