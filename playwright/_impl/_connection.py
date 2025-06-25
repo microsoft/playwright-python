@@ -660,13 +660,7 @@ def _filter_none(d: Mapping) -> Dict:
     for k, v in d.items():
         if v is None:
             continue
-        elif isinstance(v, dict):
-            filtered_v = _filter_none(v)
-            if filtered_v is not None:
-                # Allow empty dicts/lists, but not None
-                result[k] = filtered_v
-        else:
-            result[k] = v
+        result[k] = _filter_none(v) if isinstance(v, dict) else v
     return result
 
 
