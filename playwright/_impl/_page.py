@@ -816,7 +816,9 @@ class Page(ChannelOwner):
                     params["mask"],
                 )
             )
-        encoded_binary = await self._channel.send("screenshot", None, params)
+        encoded_binary = await self._channel.send(
+            "screenshot", self._timeout_settings.timeout, params
+        )
         decoded_binary = base64.b64decode(encoded_binary)
         if path:
             make_dirs_for_file(path)
