@@ -57,7 +57,6 @@ class Channel(AsyncIOEventEmitter):
         self._guid = object._guid
         self._object = object
         self.on("error", lambda exc: self._connection._on_event_listener_error(exc))
-        self._timeout_calculator: TimeoutCalculator = None
 
     async def send(
         self,

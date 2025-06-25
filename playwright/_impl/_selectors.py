@@ -47,7 +47,7 @@ class Selectors:
         for context in self._contexts_for_selectors:
             await context._channel.send(
                 "registerSelectorEngine",
-                context._timeout_settings.timeout,
+                None,
                 {"selectorEngine": engine},
             )
         self._selector_engines.append(engine)
@@ -58,6 +58,6 @@ class Selectors:
         for context in self._contexts_for_selectors:
             context._channel.send_no_reply(
                 "setTestIdAttributeName",
-                context._timeout_settings.timeout,
+                None,
                 {"testIdAttributeName": attributeName},
             )

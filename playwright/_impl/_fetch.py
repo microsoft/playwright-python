@@ -111,9 +111,7 @@ class APIRequestContext(ChannelOwner):
     async def dispose(self, reason: str = None) -> None:
         self._close_reason = reason
         try:
-            await self._channel.send(
-                "dispose", self._timeout_settings.timeout, {"reason": reason}
-            )
+            await self._channel.send("dispose", None, {"reason": reason})
         except Error as e:
             if is_target_closed_error(e):
                 return
@@ -436,7 +434,7 @@ class APIRequestContext(ChannelOwner):
         indexedDB: bool = None,
     ) -> StorageState:
         result = await self._channel.send_return_as_dict(
-            "storageState", self._timeout_settings.timeout, {"indexedDB": indexedDB}
+            "storageState", None, {"indexedDB": indexedDB}
         )
         if path:
             await async_writefile(path, json.dumps(result))

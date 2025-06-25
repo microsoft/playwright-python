@@ -28,7 +28,7 @@ class Clock:
     async def install(self, time: Union[float, str, datetime.datetime] = None) -> None:
         await self._browser_context._channel.send(
             "clockInstall",
-            self._browser_context._timeout_settings.timeout,
+            None,
             parse_time(time) if time is not None else {},
         )
 
@@ -38,7 +38,7 @@ class Clock:
     ) -> None:
         await self._browser_context._channel.send(
             "clockFastForward",
-            self._browser_context._timeout_settings.timeout,
+            None,
             parse_ticks(ticks),
         )
 
@@ -48,16 +48,14 @@ class Clock:
     ) -> None:
         await self._browser_context._channel.send(
             "clockPauseAt",
-            self._browser_context._timeout_settings.timeout,
+            None,
             parse_time(time),
         )
 
     async def resume(
         self,
     ) -> None:
-        await self._browser_context._channel.send(
-            "clockResume", self._browser_context._timeout_settings.timeout
-        )
+        await self._browser_context._channel.send("clockResume", None)
 
     async def run_for(
         self,
@@ -65,7 +63,7 @@ class Clock:
     ) -> None:
         await self._browser_context._channel.send(
             "clockRunFor",
-            self._browser_context._timeout_settings.timeout,
+            None,
             parse_ticks(ticks),
         )
 
@@ -75,7 +73,7 @@ class Clock:
     ) -> None:
         await self._browser_context._channel.send(
             "clockSetFixedTime",
-            self._browser_context._timeout_settings.timeout,
+            None,
             parse_time(time),
         )
 
@@ -85,7 +83,7 @@ class Clock:
     ) -> None:
         await self._browser_context._channel.send(
             "clockSetSystemTime",
-            self._browser_context._timeout_settings.timeout,
+            None,
             parse_time(time),
         )
 

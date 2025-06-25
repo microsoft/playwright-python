@@ -126,9 +126,7 @@ class Frame(ChannelOwner):
             self._page.emit("framenavigated", self)
 
     async def _query_count(self, selector: str) -> int:
-        return await self._channel.send(
-            "queryCount", self._timeout, {"selector": selector}
-        )
+        return await self._channel.send("queryCount", None, {"selector": selector})
 
     @property
     def page(self) -> "Page":
@@ -287,13 +285,13 @@ class Frame(ChannelOwner):
         return timeout_settings.navigation_timeout(timeout)
 
     async def frame_element(self) -> ElementHandle:
-        return from_channel(await self._channel.send("frameElement", self._timeout))
+        return from_channel(await self._channel.send("frameElement", None))
 
     async def evaluate(self, expression: str, arg: Serializable = None) -> Any:
         return parse_result(
             await self._channel.send(
                 "evaluateExpression",
-                self._timeout,
+                None,
                 dict(
                     expression=expression,
                     arg=serialize_argument(arg),
@@ -307,7 +305,7 @@ class Frame(ChannelOwner):
         return from_channel(
             await self._channel.send(
                 "evaluateExpressionHandle",
-                self._timeout,
+                None,
                 dict(
                     expression=expression,
                     arg=serialize_argument(arg),
@@ -319,9 +317,7 @@ class Frame(ChannelOwner):
         self, selector: str, strict: bool = None
     ) -> Optional[ElementHandle]:
         return from_nullable_channel(
-            await self._channel.send(
-                "querySelector", self._timeout, locals_to_params(locals())
-            )
+            await self._channel.send("querySelector", None, locals_to_params(locals()))
         )
 
     async def query_selector_all(self, selector: str) -> List[ElementHandle]:
@@ -329,7 +325,7 @@ class Frame(ChannelOwner):
             map(
                 from_channel,
                 await self._channel.send(
-                    "querySelectorAll", self._timeout, dict(selector=selector)
+                    "querySelectorAll", None, dict(selector=selector)
                 ),
             )
         )
@@ -417,7 +413,7 @@ class Frame(ChannelOwner):
         return parse_result(
             await self._channel.send(
                 "evalOnSelector",
-                self._timeout,
+                None,
                 locals_to_params(
                     dict(
                         selector=selector,
@@ -438,7 +434,7 @@ class Frame(ChannelOwner):
         return parse_result(
             await self._channel.send(
                 "evalOnSelectorAll",
-                self._timeout,
+                None,
                 dict(
                     selector=selector,
                     expression=expression,
@@ -448,7 +444,7 @@ class Frame(ChannelOwner):
         )
 
     async def content(self) -> str:
-        return await self._channel.send("content", self._timeout)
+        return await self._channel.send("content", None)
 
     async def set_content(
         self,
@@ -492,9 +488,7 @@ class Frame(ChannelOwner):
                 (await async_readfile(path)).decode(), path
             )
             del params["path"]
-        return from_channel(
-            await self._channel.send("addScriptTag", self._timeout, params)
-        )
+        return from_channel(await self._channel.send("addScriptTag", None, params))
 
     async def add_style_tag(
         self, url: str = None, path: Union[str, Path] = None, content: str = None
@@ -508,9 +502,7 @@ class Frame(ChannelOwner):
                 + "*/"
             )
             del params["path"]
-        return from_channel(
-            await self._channel.send("addStyleTag", self._timeout, params)
-        )
+        return from_channel(await self._channel.send("addStyleTag", None, params))
 
     async def click(
         self,
@@ -831,7 +823,7 @@ class Frame(ChannelOwner):
         )
 
     async def title(self) -> str:
-        return await self._channel.send("title", self._timeout)
+        return await self._channel.send("title", None)
 
     async def set_checked(
         self,
@@ -864,4 +856,4 @@ class Frame(ChannelOwner):
             )
 
     async def _highlight(self, selector: str) -> None:
-        await self._channel.send("highlight", self._timeout, {"selector": selector})
+        await self._channel.send("highlight", None, {"selector": selector})

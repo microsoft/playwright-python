@@ -66,51 +66,45 @@ class ElementHandle(JSHandle):
         return self
 
     async def owner_frame(self) -> Optional["Frame"]:
-        return from_nullable_channel(
-            await self._channel.send("ownerFrame", self._frame._timeout)
-        )
+        return from_nullable_channel(await self._channel.send("ownerFrame", None))
 
     async def content_frame(self) -> Optional["Frame"]:
-        return from_nullable_channel(
-            await self._channel.send("contentFrame", self._frame._timeout)
-        )
+        return from_nullable_channel(await self._channel.send("contentFrame", None))
 
     async def get_attribute(self, name: str) -> Optional[str]:
-        return await self._channel.send(
-            "getAttribute", self._frame._timeout, dict(name=name)
-        )
+        return await self._channel.send("getAttribute", None, dict(name=name))
 
     async def text_content(self) -> Optional[str]:
-        return await self._channel.send("textContent", self._frame._timeout)
+        return await self._channel.send("textContent", None)
 
     async def inner_text(self) -> str:
-        return await self._channel.send("innerText", self._frame._timeout)
+        return await self._channel.send("innerText", None)
 
     async def inner_html(self) -> str:
-        return await self._channel.send("innerHTML", self._frame._timeout)
+        return await self._channel.send("innerHTML", None)
 
     async def is_checked(self) -> bool:
-        return await self._channel.send("isChecked", self._frame._timeout)
+        return await self._channel.send("isChecked", None)
 
     async def is_disabled(self) -> bool:
-        return await self._channel.send("isDisabled", self._frame._timeout)
+        return await self._channel.send("isDisabled", None)
 
     async def is_editable(self) -> bool:
-        return await self._channel.send("isEditable", self._frame._timeout)
+        return await self._channel.send("isEditable", None)
 
     async def is_enabled(self) -> bool:
-        return await self._channel.send("isEnabled", self._frame._timeout)
+        return await self._channel.send("isEnabled", None)
 
     async def is_hidden(self) -> bool:
-        return await self._channel.send("isHidden", self._frame._timeout)
+        return await self._channel.send("isHidden", None)
 
     async def is_visible(self) -> bool:
-        return await self._channel.send("isVisible", self._frame._timeout)
+        return await self._channel.send("isVisible", None)
 
     async def dispatch_event(self, type: str, eventInit: Dict = None) -> None:
         await self._channel.send(
             "dispatchEvent",
-            self._frame._timeout,
+            None,
             dict(type=type, eventInit=serialize_argument(eventInit)),
         )
 
@@ -238,7 +232,7 @@ class ElementHandle(JSHandle):
         )
 
     async def focus(self) -> None:
-        await self._channel.send("focus", self._frame._timeout)
+        await self._channel.send("focus", None)
 
     async def type(
         self,
@@ -311,7 +305,7 @@ class ElementHandle(JSHandle):
         )
 
     async def bounding_box(self) -> Optional[FloatRect]:
-        return await self._channel.send("boundingBox", self._frame._timeout)
+        return await self._channel.send("boundingBox", None)
 
     async def screenshot(
         self,
@@ -353,9 +347,7 @@ class ElementHandle(JSHandle):
 
     async def query_selector(self, selector: str) -> Optional["ElementHandle"]:
         return from_nullable_channel(
-            await self._channel.send(
-                "querySelector", self._frame._timeout, dict(selector=selector)
-            )
+            await self._channel.send("querySelector", None, dict(selector=selector))
         )
 
     async def query_selector_all(self, selector: str) -> List["ElementHandle"]:
@@ -363,7 +355,7 @@ class ElementHandle(JSHandle):
             map(
                 cast(Callable[[Any], Any], from_nullable_channel),
                 await self._channel.send(
-                    "querySelectorAll", self._frame._timeout, dict(selector=selector)
+                    "querySelectorAll", None, dict(selector=selector)
                 ),
             )
         )
@@ -377,7 +369,7 @@ class ElementHandle(JSHandle):
         return parse_result(
             await self._channel.send(
                 "evalOnSelector",
-                self._frame._timeout,
+                None,
                 dict(
                     selector=selector,
                     expression=expression,
@@ -395,7 +387,7 @@ class ElementHandle(JSHandle):
         return parse_result(
             await self._channel.send(
                 "evalOnSelectorAll",
-                self._frame._timeout,
+                None,
                 dict(
                     selector=selector,
                     expression=expression,
