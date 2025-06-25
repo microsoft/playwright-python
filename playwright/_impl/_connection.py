@@ -99,7 +99,7 @@ class Channel(AsyncIOEventEmitter):
             lambda: self._connection._send_message_to_server(
                 self._object,
                 method,
-                _augment_params(params, timeout_calculator, filter=False),
+                _augment_params(params, timeout_calculator),
                 True,
             ),
             is_internal,
@@ -647,13 +647,12 @@ def _extract_stack_trace_information_from_stack(
 def _augment_params(
     params: Optional[Dict],
     timeout_calculator: Optional[Callable[[Optional[float]], float]],
-    filter: bool = True,
 ) -> Dict:
     if params is None:
         params = {}
     if timeout_calculator:
         params["timeout"] = timeout_calculator(params.get("timeout"))
-    return _filter_none(params) if filter else params
+    return _filter_none(params)
 
 
 def _filter_none(d: Mapping) -> Dict:
@@ -663,7 +662,8 @@ def _filter_none(d: Mapping) -> Dict:
             continue
         elif isinstance(v, dict):
             filtered_v = _filter_none(v)
-            if filtered_v:
+            if filtered_v is not None:
+                # Allow empty dicts/lists, but not None
                 result[k] = filtered_v
         else:
             result[k] = v
