@@ -65,5 +65,5 @@ class Accessibility:
         params = locals_to_params(locals())
         if root:
             params["root"] = root._channel
-        result = await self._channel.send("accessibilitySnapshot", params)
+        result = await self._channel.send("accessibilitySnapshot", None, params)
         return _ax_node_from_protocol(result) if result else None

@@ -37,6 +37,6 @@ class WritableStream(ChannelOwner):
                 if not data:
                     break
                 await self._channel.send(
-                    "write", {"binary": base64.b64encode(data).decode()}
+                    "write", None, {"binary": base64.b64encode(data).decode()}
                 )
-        await self._channel.send("close")
+        await self._channel.send("close", None)

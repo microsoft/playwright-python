@@ -49,7 +49,7 @@ class HarRouter:
         not_found_action: RouteFromHarNotFoundPolicy,
         url_matcher: Optional[URLMatch] = None,
     ) -> "HarRouter":
-        har_id = await local_utils._channel.send("harOpen", {"file": file})
+        har_id = await local_utils._channel.send("harOpen", None, {"file": file})
         return HarRouter(
             local_utils=local_utils,
             har_id=har_id,
@@ -118,5 +118,5 @@ class HarRouter:
 
     def dispose(self) -> None:
         asyncio.create_task(
-            self._local_utils._channel.send("harClose", {"harId": self._har_id})
+            self._local_utils._channel.send("harClose", None, {"harId": self._har_id})
         )

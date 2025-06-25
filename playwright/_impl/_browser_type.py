@@ -93,7 +93,12 @@ class BrowserType(ChannelOwner):
         params = locals_to_params(locals())
         normalize_launch_params(params)
         browser = cast(
-            Browser, from_channel(await self._channel.send("launch", params))
+            Browser,
+            from_channel(
+                await self._channel.send(
+                    "launch", TimeoutSettings.launch_timeout, params
+                )
+            ),
         )
         browser._connect_to_browser_type(
             self, str(tracesDir) if tracesDir is not None else None
@@ -159,7 +164,7 @@ class BrowserType(ChannelOwner):
         await self._prepare_browser_context_params(params)
         normalize_launch_params(params)
         result = await self._channel.send_return_as_dict(
-            "launchPersistentContext", params
+            "launchPersistentContext", TimeoutSettings.launch_timeout, params
         )
         browser = cast(
             Browser,
@@ -197,10 +202,11 @@ class BrowserType(ChannelOwner):
         headers: Dict[str, str] = None,
     ) -> Browser:
         params = locals_to_params(locals())
-        params["timeout"] = TimeoutSettings.launch_timeout(timeout)
         if params.get("headers"):
             params["headers"] = serialize_headers(params["headers"])
-        response = await self._channel.send_return_as_dict("connectOverCDP", params)
+        response = await self._channel.send_return_as_dict(
+            "connectOverCDP", TimeoutSettings.launch_timeout, params
+        )
         browser = cast(Browser, from_channel(response["browser"]))
         browser._connect_to_browser_type(self, None)
 
@@ -222,6 +228,7 @@ class BrowserType(ChannelOwner):
         pipe_channel = (
             await local_utils._channel.send_return_as_dict(
                 "connect",
+                None,
                 {
                     "wsEndpoint": wsEndpoint,
                     "headers": headers,
@@ -355,4 +362,3 @@ def normalize_launch_params(params: Dict) -> None:
         params["downloadsPath"] = str(Path(params["downloadsPath"]))
     if "tracesDir" in params:
         params["tracesDir"] = str(Path(params["tracesDir"]))
-    params["timeout"] = TimeoutSettings.launch_timeout(params.get("timeout"))

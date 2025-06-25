@@ -27,7 +27,9 @@ class Clock:
 
     async def install(self, time: Union[float, str, datetime.datetime] = None) -> None:
         await self._browser_context._channel.send(
-            "clockInstall", parse_time(time) if time is not None else {}
+            "clockInstall",
+            None,
+            parse_time(time) if time is not None else {},
         )
 
     async def fast_forward(
@@ -35,38 +37,54 @@ class Clock:
         ticks: Union[int, str],
     ) -> None:
         await self._browser_context._channel.send(
-            "clockFastForward", parse_ticks(ticks)
+            "clockFastForward",
+            None,
+            parse_ticks(ticks),
         )
 
     async def pause_at(
         self,
         time: Union[float, str, datetime.datetime],
     ) -> None:
-        await self._browser_context._channel.send("clockPauseAt", parse_time(time))
+        await self._browser_context._channel.send(
+            "clockPauseAt",
+            None,
+            parse_time(time),
+        )
 
     async def resume(
         self,
     ) -> None:
-        await self._browser_context._channel.send("clockResume")
+        await self._browser_context._channel.send("clockResume", None)
 
     async def run_for(
         self,
         ticks: Union[int, str],
     ) -> None:
-        await self._browser_context._channel.send("clockRunFor", parse_ticks(ticks))
+        await self._browser_context._channel.send(
+            "clockRunFor",
+            None,
+            parse_ticks(ticks),
+        )
 
     async def set_fixed_time(
         self,
         time: Union[float, str, datetime.datetime],
     ) -> None:
-        await self._browser_context._channel.send("clockSetFixedTime", parse_time(time))
+        await self._browser_context._channel.send(
+            "clockSetFixedTime",
+            None,
+            parse_time(time),
+        )
 
     async def set_system_time(
         self,
         time: Union[float, str, datetime.datetime],
     ) -> None:
         await self._browser_context._channel.send(
-            "clockSetSystemTime", parse_time(time)
+            "clockSetSystemTime",
+            None,
+            parse_time(time),
         )
 
 

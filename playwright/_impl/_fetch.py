@@ -91,7 +91,9 @@ class APIRequest:
         )
         context = cast(
             APIRequestContext,
-            from_channel(await self.playwright._channel.send("newRequest", params)),
+            from_channel(
+                await self.playwright._channel.send("newRequest", None, params)
+            ),
         )
         context._timeout_settings.set_default_timeout(timeout)
         return context
@@ -105,12 +107,11 @@ class APIRequestContext(ChannelOwner):
         self._tracing: Tracing = from_channel(initializer["tracing"])
         self._close_reason: Optional[str] = None
         self._timeout_settings = TimeoutSettings(None)
-        self._channel._set_timeout_calculator(self._timeout_settings.timeout)
 
     async def dispose(self, reason: str = None) -> None:
         self._close_reason = reason
         try:
-            await self._channel.send("dispose", {"reason": reason})
+            await self._channel.send("dispose", None, {"reason": reason})
         except Error as e:
             if is_target_closed_error(e):
                 return
@@ -408,6 +409,7 @@ class APIRequestContext(ChannelOwner):
 
         response = await self._channel.send(
             "fetch",
+            self._timeout_settings.timeout,
             {
                 "url": url,
                 "params": object_to_array(params) if isinstance(params, dict) else None,
@@ -432,7 +434,7 @@ class APIRequestContext(ChannelOwner):
         indexedDB: bool = None,
     ) -> StorageState:
         result = await self._channel.send_return_as_dict(
-            "storageState", {"indexedDB": indexedDB}
+            "storageState", None, {"indexedDB": indexedDB}
         )
         if path:
             await async_writefile(path, json.dumps(result))
@@ -487,6 +489,7 @@ class APIResponse:
             result = await self._request._connection.wrap_api_call(
                 lambda: self._request._channel.send_return_as_dict(
                     "fetchResponseBody",
+                    None,
                     {
                         "fetchUid": self._fetch_uid,
                     },
@@ -512,6 +515,7 @@ class APIResponse:
     async def dispose(self) -> None:
         await self._request._channel.send(
             "disposeAPIResponse",
+            None,
             {
                 "fetchUid": self._fetch_uid,
             },
@@ -524,6 +528,7 @@ class APIResponse:
     async def _fetch_log(self) -> List[str]:
         return await self._request._channel.send(
             "fetchLog",
+            None,
             {
                 "fetchUid": self._fetch_uid,
             },

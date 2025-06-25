@@ -31,11 +31,11 @@ class LocalUtils(ChannelOwner):
         }
 
     async def zip(self, params: Dict) -> None:
-        await self._channel.send("zip", params)
+        await self._channel.send("zip", None, params)
 
     async def har_open(self, file: str) -> None:
         params = locals_to_params(locals())
-        await self._channel.send("harOpen", params)
+        await self._channel.send("harOpen", None, params)
 
     async def har_lookup(
         self,
@@ -51,27 +51,28 @@ class LocalUtils(ChannelOwner):
             params["postData"] = base64.b64encode(params["postData"]).decode()
         return cast(
             HarLookupResult,
-            await self._channel.send_return_as_dict("harLookup", params),
+            await self._channel.send_return_as_dict("harLookup", None, params),
         )
 
     async def har_close(self, harId: str) -> None:
         params = locals_to_params(locals())
-        await self._channel.send("harClose", params)
+        await self._channel.send("harClose", None, params)
 
     async def har_unzip(self, zipFile: str, harFile: str) -> None:
         params = locals_to_params(locals())
-        await self._channel.send("harUnzip", params)
+        await self._channel.send("harUnzip", None, params)
 
     async def tracing_started(self, tracesDir: Optional[str], traceName: str) -> str:
         params = locals_to_params(locals())
-        return await self._channel.send("tracingStarted", params)
+        return await self._channel.send("tracingStarted", None, params)
 
     async def trace_discarded(self, stacks_id: str) -> None:
-        return await self._channel.send("traceDiscarded", {"stacksId": stacks_id})
+        return await self._channel.send("traceDiscarded", None, {"stacksId": stacks_id})
 
     def add_stack_to_tracing_no_reply(self, id: int, frames: List[StackFrame]) -> None:
         self._channel.send_no_reply(
             "addStackToTracingNoReply",
+            None,
             {
                 "callData": {
                     "stack": frames,

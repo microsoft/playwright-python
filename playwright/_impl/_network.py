@@ -192,7 +192,10 @@ class Request(ChannelOwner):
         response = await self.response()
         if not response:
             raise Error("Unable to fetch sizes for failed request")
-        return await response._channel.send("sizes")
+        return await response._channel.send(
+            "sizes",
+            None,
+        )
 
     @property
     def post_data(self) -> Optional[str]:
@@ -226,7 +229,12 @@ class Request(ChannelOwner):
         return None
 
     async def response(self) -> Optional["Response"]:
-        return from_nullable_channel(await self._channel.send("response"))
+        return from_nullable_channel(
+            await self._channel.send(
+                "response",
+                None,
+            )
+        )
 
     @property
     def frame(self) -> "Frame":
@@ -291,7 +299,9 @@ class Request(ChannelOwner):
             return RawHeaders(serialize_headers(override))
         if not self._all_headers_future:
             self._all_headers_future = asyncio.Future()
-            headers = await self._channel.send("rawRequestHeaders", is_internal=True)
+            headers = await self._channel.send(
+                "rawRequestHeaders", None, is_internal=True
+            )
             self._all_headers_future.set_result(RawHeaders(headers))
         return await self._all_headers_future
 
@@ -348,6 +358,7 @@ class Route(ChannelOwner):
             lambda: self._race_with_page_close(
                 self._channel.send(
                     "abort",
+                    None,
                     {
                         "errorCode": errorCode,
                     },
@@ -433,7 +444,7 @@ class Route(ChannelOwner):
             headers["content-length"] = str(length)
         params["headers"] = serialize_headers(headers)
 
-        await self._race_with_page_close(self._channel.send("fulfill", params))
+        await self._race_with_page_close(self._channel.send("fulfill", None, params))
 
     async def _handle_route(self, callback: Callable) -> None:
         self._check_not_handled()
@@ -499,6 +510,7 @@ class Route(ChannelOwner):
         await self._race_with_page_close(
             self._channel.send(
                 "continue",
+                None,
                 {
                     "url": options.url,
                     "method": options.method,
@@ -518,7 +530,7 @@ class Route(ChannelOwner):
     async def _redirected_navigation_request(self, url: str) -> None:
         await self._handle_route(
             lambda: self._race_with_page_close(
-                self._channel.send("redirectNavigationRequest", {"url": url})
+                self._channel.send("redirectNavigationRequest", None, {"url": url})
             )
         )
 
@@ -577,6 +589,7 @@ class ServerWebSocketRoute:
             self._ws._loop,
             self._ws._channel.send(
                 "closeServer",
+                None,
                 {
                     "code": code,
                     "reason": reason,
@@ -590,7 +603,7 @@ class ServerWebSocketRoute:
             _create_task_and_ignore_exception(
                 self._ws._loop,
                 self._ws._channel.send(
-                    "sendToServer", {"message": message, "isBase64": False}
+                    "sendToServer", None, {"message": message, "isBase64": False}
                 ),
             )
         else:
@@ -598,6 +611,7 @@ class ServerWebSocketRoute:
                 self._ws._loop,
                 self._ws._channel.send(
                     "sendToServer",
+                    None,
                     {"message": base64.b64encode(message).decode(), "isBase64": True},
                 ),
             )
@@ -633,7 +647,7 @@ class WebSocketRoute(ChannelOwner):
             )
         elif self._connected:
             _create_task_and_ignore_exception(
-                self._loop, self._channel.send("sendToServer", event)
+                self._loop, self._channel.send("sendToServer", None, event)
             )
 
     def _channel_message_from_server(self, event: Dict) -> None:
@@ -645,7 +659,7 @@ class WebSocketRoute(ChannelOwner):
             )
         else:
             _create_task_and_ignore_exception(
-                self._loop, self._channel.send("sendToPage", event)
+                self._loop, self._channel.send("sendToPage", None, event)
             )
 
     def _channel_close_page(self, event: Dict) -> None:
@@ -653,7 +667,7 @@ class WebSocketRoute(ChannelOwner):
             self._on_page_close(event["code"], event["reason"])
         else:
             _create_task_and_ignore_exception(
-                self._loop, self._channel.send("closeServer", event)
+                self._loop, self._channel.send("closeServer", None, event)
             )
 
     def _channel_close_server(self, event: Dict) -> None:
@@ -661,7 +675,7 @@ class WebSocketRoute(ChannelOwner):
             self._on_server_close(event["code"], event["reason"])
         else:
             _create_task_and_ignore_exception(
-                self._loop, self._channel.send("closePage", event)
+                self._loop, self._channel.send("closePage", None, event)
             )
 
     @property
@@ -671,7 +685,7 @@ class WebSocketRoute(ChannelOwner):
     async def close(self, code: int = None, reason: str = None) -> None:
         try:
             await self._channel.send(
-                "closePage", {"code": code, "reason": reason, "wasClean": True}
+                "closePage", None, {"code": code, "reason": reason, "wasClean": True}
             )
         except Exception:
             pass
@@ -680,7 +694,12 @@ class WebSocketRoute(ChannelOwner):
         if self._connected:
             raise Error("Already connected to the server")
         self._connected = True
-        asyncio.create_task(self._channel.send("connect"))
+        asyncio.create_task(
+            self._channel.send(
+                "connect",
+                None,
+            )
+        )
         return cast("WebSocketRoute", self._server)
 
     def send(self, message: Union[str, bytes]) -> None:
@@ -688,7 +707,7 @@ class WebSocketRoute(ChannelOwner):
             _create_task_and_ignore_exception(
                 self._loop,
                 self._channel.send(
-                    "sendToPage", {"message": message, "isBase64": False}
+                    "sendToPage", None, {"message": message, "isBase64": False}
                 ),
             )
         else:
@@ -696,6 +715,7 @@ class WebSocketRoute(ChannelOwner):
                 self._loop,
                 self._channel.send(
                     "sendToPage",
+                    None,
                     {
                         "message": base64.b64encode(message).decode(),
                         "isBase64": True,
@@ -713,7 +733,10 @@ class WebSocketRoute(ChannelOwner):
         if self._connected:
             return
         # Ensure that websocket is "open" and can send messages without an actual server connection.
-        await self._channel.send("ensureOpened")
+        await self._channel.send(
+            "ensureOpened",
+            None,
+        )
 
 
 class WebSocketRouteHandler:
@@ -826,15 +849,27 @@ class Response(ChannelOwner):
     async def _actual_headers(self) -> "RawHeaders":
         if not self._raw_headers_future:
             self._raw_headers_future = asyncio.Future()
-            headers = cast(HeadersArray, await self._channel.send("rawResponseHeaders"))
+            headers = cast(
+                HeadersArray,
+                await self._channel.send(
+                    "rawResponseHeaders",
+                    None,
+                ),
+            )
             self._raw_headers_future.set_result(RawHeaders(headers))
         return await self._raw_headers_future
 
     async def server_addr(self) -> Optional[RemoteAddr]:
-        return await self._channel.send("serverAddr")
+        return await self._channel.send(
+            "serverAddr",
+            None,
+        )
 
     async def security_details(self) -> Optional[SecurityDetails]:
-        return await self._channel.send("securityDetails")
+        return await self._channel.send(
+            "securityDetails",
+            None,
+        )
 
     async def finished(self) -> None:
         async def on_finished() -> None:
@@ -853,7 +888,10 @@ class Response(ChannelOwner):
             await on_finished_task
 
     async def body(self) -> bytes:
-        binary = await self._channel.send("body")
+        binary = await self._channel.send(
+            "body",
+            None,
+        )
         return base64.b64decode(binary)
 
     async def text(self) -> str:

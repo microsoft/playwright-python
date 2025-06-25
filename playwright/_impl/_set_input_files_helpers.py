@@ -84,6 +84,7 @@ async def convert_input_files(
             result = await context._connection.wrap_api_call(
                 lambda: context._channel.send_return_as_dict(
                     "createTempFiles",
+                    None,
                     {
                         "rootDirName": (
                             os.path.basename(local_directory)

@@ -33,27 +33,55 @@ class Artifact(ChannelOwner):
             raise Error(
                 "Path is not available when using browser_type.connect(). Use save_as() to save a local copy."
             )
-        path = await self._channel.send("pathAfterFinished")
+        path = await self._channel.send(
+            "pathAfterFinished",
+            None,
+        )
         return pathlib.Path(path)
 
     async def save_as(self, path: Union[str, Path]) -> None:
-        stream = cast(Stream, from_channel(await self._channel.send("saveAsStream")))
+        stream = cast(
+            Stream,
+            from_channel(
+                await self._channel.send(
+                    "saveAsStream",
+                    None,
+                )
+            ),
+        )
         make_dirs_for_file(path)
         await stream.save_as(path)
 
     async def failure(self) -> Optional[str]:
-        reason = await self._channel.send("failure")
+        reason = await self._channel.send(
+            "failure",
+            None,
+        )
         if reason is None:
             return None
         return patch_error_message(reason)
 
     async def delete(self) -> None:
-        await self._channel.send("delete")
+        await self._channel.send(
+            "delete",
+            None,
+        )
 
     async def read_info_buffer(self) -> bytes:
-        stream = cast(Stream, from_channel(await self._channel.send("stream")))
+        stream = cast(
+            Stream,
+            from_channel(
+                await self._channel.send(
+                    "stream",
+                    None,
+                )
+            ),
+        )
         buffer = await stream.read_all()
         return buffer
 
     async def cancel(self) -> None:  # pyright: ignore[reportIncompatibleMethodOverride]
-        await self._channel.send("cancel")
+        await self._channel.send(
+            "cancel",
+            None,
+        )

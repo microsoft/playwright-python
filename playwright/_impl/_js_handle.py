@@ -71,6 +71,7 @@ class JSHandle(ChannelOwner):
         return parse_result(
             await self._channel.send(
                 "evaluateExpression",
+                None,
                 dict(
                     expression=expression,
                     arg=serialize_argument(arg),
@@ -84,6 +85,7 @@ class JSHandle(ChannelOwner):
         return from_channel(
             await self._channel.send(
                 "evaluateExpressionHandle",
+                None,
                 dict(
                     expression=expression,
                     arg=serialize_argument(arg),
@@ -93,13 +95,16 @@ class JSHandle(ChannelOwner):
 
     async def get_property(self, propertyName: str) -> "JSHandle":
         return from_channel(
-            await self._channel.send("getProperty", dict(name=propertyName))
+            await self._channel.send("getProperty", None, dict(name=propertyName))
         )
 
     async def get_properties(self) -> Dict[str, "JSHandle"]:
         return {
             prop["name"]: from_channel(prop["value"])
-            for prop in await self._channel.send("getPropertyList")
+            for prop in await self._channel.send(
+                "getPropertyList",
+                None,
+            )
         }
 
     def as_element(self) -> Optional["ElementHandle"]:
@@ -107,13 +112,21 @@ class JSHandle(ChannelOwner):
 
     async def dispose(self) -> None:
         try:
-            await self._channel.send("dispose")
+            await self._channel.send(
+                "dispose",
+                None,
+            )
         except Exception as e:
             if not is_target_closed_error(e):
                 raise e
 
     async def json_value(self) -> Any:
-        return parse_result(await self._channel.send("jsonValue"))
+        return parse_result(
+            await self._channel.send(
+                "jsonValue",
+                None,
+            )
+        )
 
 
 def serialize_value(

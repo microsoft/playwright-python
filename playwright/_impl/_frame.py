@@ -101,7 +101,6 @@ class Frame(ChannelOwner):
             "navigated",
             lambda params: self._on_frame_navigated(params),
         )
-        self._channel._set_timeout_calculator(self._timeout)
 
     def __repr__(self) -> str:
         return f"<Frame name={self.name} url={self.url!r}>"
@@ -127,7 +126,7 @@ class Frame(ChannelOwner):
             self._page.emit("framenavigated", self)
 
     async def _query_count(self, selector: str) -> int:
-        return await self._channel.send("queryCount", {"selector": selector})
+        return await self._channel.send("queryCount", None, {"selector": selector})
 
     @property
     def page(self) -> "Page":
@@ -145,7 +144,7 @@ class Frame(ChannelOwner):
             Optional[Response],
             from_nullable_channel(
                 await self._channel.send(
-                    "goto", self._locals_to_params_with_navigation_timeout(locals())
+                    "goto", self._navigation_timeout, locals_to_params(locals())
                 )
             ),
         )
@@ -286,12 +285,13 @@ class Frame(ChannelOwner):
         return timeout_settings.navigation_timeout(timeout)
 
     async def frame_element(self) -> ElementHandle:
-        return from_channel(await self._channel.send("frameElement"))
+        return from_channel(await self._channel.send("frameElement", None))
 
     async def evaluate(self, expression: str, arg: Serializable = None) -> Any:
         return parse_result(
             await self._channel.send(
                 "evaluateExpression",
+                None,
                 dict(
                     expression=expression,
                     arg=serialize_argument(arg),
@@ -305,6 +305,7 @@ class Frame(ChannelOwner):
         return from_channel(
             await self._channel.send(
                 "evaluateExpressionHandle",
+                None,
                 dict(
                     expression=expression,
                     arg=serialize_argument(arg),
@@ -316,14 +317,16 @@ class Frame(ChannelOwner):
         self, selector: str, strict: bool = None
     ) -> Optional[ElementHandle]:
         return from_nullable_channel(
-            await self._channel.send("querySelector", locals_to_params(locals()))
+            await self._channel.send("querySelector", None, locals_to_params(locals()))
         )
 
     async def query_selector_all(self, selector: str) -> List[ElementHandle]:
         return list(
             map(
                 from_channel,
-                await self._channel.send("querySelectorAll", dict(selector=selector)),
+                await self._channel.send(
+                    "querySelectorAll", None, dict(selector=selector)
+                ),
             )
         )
 
@@ -335,34 +338,48 @@ class Frame(ChannelOwner):
         state: Literal["attached", "detached", "hidden", "visible"] = None,
     ) -> Optional[ElementHandle]:
         return from_nullable_channel(
-            await self._channel.send("waitForSelector", locals_to_params(locals()))
+            await self._channel.send(
+                "waitForSelector", self._timeout, locals_to_params(locals())
+            )
         )
 
     async def is_checked(
         self, selector: str, strict: bool = None, timeout: float = None
     ) -> bool:
-        return await self._channel.send("isChecked", locals_to_params(locals()))
+        return await self._channel.send(
+            "isChecked", self._timeout, locals_to_params(locals())
+        )
 
     async def is_disabled(
         self, selector: str, strict: bool = None, timeout: float = None
     ) -> bool:
-        return await self._channel.send("isDisabled", locals_to_params(locals()))
+        return await self._channel.send(
+            "isDisabled", self._timeout, locals_to_params(locals())
+        )
 
     async def is_editable(
         self, selector: str, strict: bool = None, timeout: float = None
     ) -> bool:
-        return await self._channel.send("isEditable", locals_to_params(locals()))
+        return await self._channel.send(
+            "isEditable", self._timeout, locals_to_params(locals())
+        )
 
     async def is_enabled(
         self, selector: str, strict: bool = None, timeout: float = None
     ) -> bool:
-        return await self._channel.send("isEnabled", locals_to_params(locals()))
+        return await self._channel.send(
+            "isEnabled", self._timeout, locals_to_params(locals())
+        )
 
     async def is_hidden(self, selector: str, strict: bool = None) -> bool:
-        return await self._channel.send("isHidden", locals_to_params(locals()))
+        return await self._channel.send(
+            "isHidden", self._timeout, locals_to_params(locals())
+        )
 
     async def is_visible(self, selector: str, strict: bool = None) -> bool:
-        return await self._channel.send("isVisible", locals_to_params(locals()))
+        return await self._channel.send(
+            "isVisible", self._timeout, locals_to_params(locals())
+        )
 
     async def dispatch_event(
         self,
@@ -374,6 +391,7 @@ class Frame(ChannelOwner):
     ) -> None:
         await self._channel.send(
             "dispatchEvent",
+            self._timeout,
             locals_to_params(
                 dict(
                     selector=selector,
@@ -395,6 +413,7 @@ class Frame(ChannelOwner):
         return parse_result(
             await self._channel.send(
                 "evalOnSelector",
+                None,
                 locals_to_params(
                     dict(
                         selector=selector,
@@ -415,6 +434,7 @@ class Frame(ChannelOwner):
         return parse_result(
             await self._channel.send(
                 "evalOnSelectorAll",
+                None,
                 dict(
                     selector=selector,
                     expression=expression,
@@ -424,7 +444,7 @@ class Frame(ChannelOwner):
         )
 
     async def content(self) -> str:
-        return await self._channel.send("content")
+        return await self._channel.send("content", None)
 
     async def set_content(
         self,
@@ -433,7 +453,7 @@ class Frame(ChannelOwner):
         waitUntil: DocumentLoadState = None,
     ) -> None:
         await self._channel.send(
-            "setContent", self._locals_to_params_with_navigation_timeout(locals())
+            "setContent", self._navigation_timeout, locals_to_params(locals())
         )
 
     @property
@@ -468,7 +488,7 @@ class Frame(ChannelOwner):
                 (await async_readfile(path)).decode(), path
             )
             del params["path"]
-        return from_channel(await self._channel.send("addScriptTag", params))
+        return from_channel(await self._channel.send("addScriptTag", None, params))
 
     async def add_style_tag(
         self, url: str = None, path: Union[str, Path] = None, content: str = None
@@ -482,7 +502,7 @@ class Frame(ChannelOwner):
                 + "*/"
             )
             del params["path"]
-        return from_channel(await self._channel.send("addStyleTag", params))
+        return from_channel(await self._channel.send("addStyleTag", None, params))
 
     async def click(
         self,
@@ -498,7 +518,7 @@ class Frame(ChannelOwner):
         strict: bool = None,
         trial: bool = None,
     ) -> None:
-        await self._channel.send("click", locals_to_params(locals()))
+        await self._channel.send("click", self._timeout, locals_to_params(locals()))
 
     async def dblclick(
         self,
@@ -514,7 +534,7 @@ class Frame(ChannelOwner):
         trial: bool = None,
     ) -> None:
         await self._channel.send(
-            "dblclick", locals_to_params(locals()), title="Double click"
+            "dblclick", self._timeout, locals_to_params(locals()), title="Double click"
         )
 
     async def tap(
@@ -528,7 +548,7 @@ class Frame(ChannelOwner):
         strict: bool = None,
         trial: bool = None,
     ) -> None:
-        await self._channel.send("tap", locals_to_params(locals()))
+        await self._channel.send("tap", self._timeout, locals_to_params(locals()))
 
     async def fill(
         self,
@@ -539,7 +559,7 @@ class Frame(ChannelOwner):
         strict: bool = None,
         force: bool = None,
     ) -> None:
-        await self._channel.send("fill", locals_to_params(locals()))
+        await self._channel.send("fill", self._timeout, locals_to_params(locals()))
 
     def locator(
         self,
@@ -620,27 +640,35 @@ class Frame(ChannelOwner):
     async def focus(
         self, selector: str, strict: bool = None, timeout: float = None
     ) -> None:
-        await self._channel.send("focus", locals_to_params(locals()))
+        await self._channel.send("focus", self._timeout, locals_to_params(locals()))
 
     async def text_content(
         self, selector: str, strict: bool = None, timeout: float = None
     ) -> Optional[str]:
-        return await self._channel.send("textContent", locals_to_params(locals()))
+        return await self._channel.send(
+            "textContent", self._timeout, locals_to_params(locals())
+        )
 
     async def inner_text(
         self, selector: str, strict: bool = None, timeout: float = None
     ) -> str:
-        return await self._channel.send("innerText", locals_to_params(locals()))
+        return await self._channel.send(
+            "innerText", self._timeout, locals_to_params(locals())
+        )
 
     async def inner_html(
         self, selector: str, strict: bool = None, timeout: float = None
     ) -> str:
-        return await self._channel.send("innerHTML", locals_to_params(locals()))
+        return await self._channel.send(
+            "innerHTML", self._timeout, locals_to_params(locals())
+        )
 
     async def get_attribute(
         self, selector: str, name: str, strict: bool = None, timeout: float = None
     ) -> Optional[str]:
-        return await self._channel.send("getAttribute", locals_to_params(locals()))
+        return await self._channel.send(
+            "getAttribute", self._timeout, locals_to_params(locals())
+        )
 
     async def hover(
         self,
@@ -653,7 +681,7 @@ class Frame(ChannelOwner):
         strict: bool = None,
         trial: bool = None,
     ) -> None:
-        await self._channel.send("hover", locals_to_params(locals()))
+        await self._channel.send("hover", self._timeout, locals_to_params(locals()))
 
     async def drag_and_drop(
         self,
@@ -667,7 +695,9 @@ class Frame(ChannelOwner):
         timeout: float = None,
         trial: bool = None,
     ) -> None:
-        await self._channel.send("dragAndDrop", locals_to_params(locals()))
+        await self._channel.send(
+            "dragAndDrop", self._timeout, locals_to_params(locals())
+        )
 
     async def select_option(
         self,
@@ -690,7 +720,7 @@ class Frame(ChannelOwner):
                 **convert_select_option_values(value, index, label, element),
             )
         )
-        return await self._channel.send("selectOption", params)
+        return await self._channel.send("selectOption", self._timeout, params)
 
     async def input_value(
         self,
@@ -698,7 +728,9 @@ class Frame(ChannelOwner):
         strict: bool = None,
         timeout: float = None,
     ) -> str:
-        return await self._channel.send("inputValue", locals_to_params(locals()))
+        return await self._channel.send(
+            "inputValue", self._timeout, locals_to_params(locals())
+        )
 
     async def set_input_files(
         self,
@@ -713,6 +745,7 @@ class Frame(ChannelOwner):
         converted = await convert_input_files(files, self.page.context)
         await self._channel.send(
             "setInputFiles",
+            self._timeout,
             {
                 "selector": selector,
                 "strict": strict,
@@ -730,7 +763,7 @@ class Frame(ChannelOwner):
         timeout: float = None,
         noWaitAfter: bool = None,
     ) -> None:
-        await self._channel.send("type", locals_to_params(locals()))
+        await self._channel.send("type", self._timeout, locals_to_params(locals()))
 
     async def press(
         self,
@@ -741,7 +774,7 @@ class Frame(ChannelOwner):
         timeout: float = None,
         noWaitAfter: bool = None,
     ) -> None:
-        await self._channel.send("press", locals_to_params(locals()))
+        await self._channel.send("press", self._timeout, locals_to_params(locals()))
 
     async def check(
         self,
@@ -753,7 +786,7 @@ class Frame(ChannelOwner):
         strict: bool = None,
         trial: bool = None,
     ) -> None:
-        await self._channel.send("check", locals_to_params(locals()))
+        await self._channel.send("check", self._timeout, locals_to_params(locals()))
 
     async def uncheck(
         self,
@@ -765,10 +798,10 @@ class Frame(ChannelOwner):
         strict: bool = None,
         trial: bool = None,
     ) -> None:
-        await self._channel.send("uncheck", locals_to_params(locals()))
+        await self._channel.send("uncheck", self._timeout, locals_to_params(locals()))
 
     async def wait_for_timeout(self, timeout: float) -> None:
-        await self._channel.send("waitForTimeout", locals_to_params(locals()))
+        await self._channel.send("waitForTimeout", None, locals_to_params(locals()))
 
     async def wait_for_function(
         self,
@@ -783,10 +816,12 @@ class Frame(ChannelOwner):
         params["arg"] = serialize_argument(arg)
         if polling is not None and polling != "raf":
             params["pollingInterval"] = polling
-        return from_channel(await self._channel.send("waitForFunction", params))
+        return from_channel(
+            await self._channel.send("waitForFunction", self._timeout, params)
+        )
 
     async def title(self) -> str:
-        return await self._channel.send("title")
+        return await self._channel.send("title", None)
 
     async def set_checked(
         self,
@@ -819,9 +854,4 @@ class Frame(ChannelOwner):
             )
 
     async def _highlight(self, selector: str) -> None:
-        await self._channel.send("highlight", {"selector": selector})
-
-    def _locals_to_params_with_navigation_timeout(self, args: Dict) -> Dict:
-        params = locals_to_params(args)
-        params["timeout"] = self._navigation_timeout(params.get("timeout"))
-        return params
+        await self._channel.send("highlight", None, {"selector": selector})

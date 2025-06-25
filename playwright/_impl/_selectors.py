@@ -46,7 +46,9 @@ class Selectors:
             engine["contentScript"] = contentScript
         for context in self._contexts_for_selectors:
             await context._channel.send(
-                "registerSelectorEngine", {"selectorEngine": engine}
+                "registerSelectorEngine",
+                None,
+                {"selectorEngine": engine},
             )
         self._selector_engines.append(engine)
 
@@ -55,5 +57,7 @@ class Selectors:
         self._test_id_attribute_name = attributeName
         for context in self._contexts_for_selectors:
             context._channel.send_no_reply(
-                "setTestIdAttributeName", {"testIdAttributeName": attributeName}
+                "setTestIdAttributeName",
+                None,
+                {"testIdAttributeName": attributeName},
             )

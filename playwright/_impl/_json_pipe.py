@@ -36,7 +36,7 @@ class JsonPipeTransport(AsyncIOEventEmitter, Transport):
 
     def request_stop(self) -> None:
         self._stop_requested = True
-        self._pipe_channel.send_no_reply("close", {})
+        self._pipe_channel.send_no_reply("close", None, {})
 
     def dispose(self) -> None:
         self.on_error_future.cancel()
@@ -74,4 +74,4 @@ class JsonPipeTransport(AsyncIOEventEmitter, Transport):
     def send(self, message: Dict) -> None:
         if self._stop_requested:
             raise Error("Playwright connection closed")
-        self._pipe_channel.send_no_reply("send", {"message": message})
+        self._pipe_channel.send_no_reply("send", None, {"message": message})

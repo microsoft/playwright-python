@@ -383,6 +383,7 @@ class Locator:
     async def blur(self, timeout: float = None) -> None:
         await self._frame._channel.send(
             "blur",
+            self._frame._timeout,
             {
                 "selector": self._selector,
                 "strict": True,
@@ -549,6 +550,7 @@ class Locator:
     async def aria_snapshot(self, timeout: float = None) -> str:
         return await self._frame._channel.send(
             "ariaSnapshot",
+            self._frame._timeout,
             {
                 "selector": self._selector,
                 **locals_to_params(locals()),
@@ -726,6 +728,7 @@ class Locator:
             options["expectedValue"] = serialize_argument(options["expectedValue"])
         result = await self._frame._channel.send_return_as_dict(
             "expect",
+            self._frame._timeout,
             {
                 "selector": self._selector,
                 "expression": expression,

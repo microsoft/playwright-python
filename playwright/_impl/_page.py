@@ -237,7 +237,6 @@ class Page(ChannelOwner):
         self._channel.on(
             "worker", lambda params: self._on_worker(from_channel(params["worker"]))
         )
-        self._channel._set_timeout_calculator(self._timeout_settings.timeout)
         self._closed_or_crashed_future: asyncio.Future = asyncio.Future()
         self.on(
             Page.Events.Close,
@@ -520,12 +519,16 @@ class Page(ChannelOwner):
             )
         self._bindings[name] = callback
         await self._channel.send(
-            "exposeBinding", dict(name=name, needsHandle=handle or False)
+            "exposeBinding",
+            None,
+            dict(name=name, needsHandle=handle or False),
         )
 
     async def set_extra_http_headers(self, headers: Dict[str, str]) -> None:
         await self._channel.send(
-            "setExtraHTTPHeaders", dict(headers=serialize_headers(headers))
+            "setExtraHTTPHeaders",
+            None,
+            dict(headers=serialize_headers(headers)),
         )
 
     @property
@@ -559,7 +562,9 @@ class Page(ChannelOwner):
     ) -> Optional[Response]:
         return from_nullable_channel(
             await self._channel.send(
-                "reload", self._locals_to_params_with_navigation_timeout(locals())
+                "reload",
+                self._timeout_settings.navigation_timeout,
+                locals_to_params(locals()),
             )
         )
 
@@ -592,7 +597,9 @@ class Page(ChannelOwner):
     ) -> Optional[Response]:
         return from_nullable_channel(
             await self._channel.send(
-                "goBack", self._locals_to_params_with_navigation_timeout(locals())
+                "goBack",
+                self._timeout_settings.navigation_timeout,
+                locals_to_params(locals()),
             )
         )
 
@@ -603,12 +610,14 @@ class Page(ChannelOwner):
     ) -> Optional[Response]:
         return from_nullable_channel(
             await self._channel.send(
-                "goForward", self._locals_to_params_with_navigation_timeout(locals())
+                "goForward",
+                self._timeout_settings.navigation_timeout,
+                locals_to_params(locals()),
             )
         )
 
     async def request_gc(self) -> None:
-        await self._channel.send("requestGC")
+        await self._channel.send("requestGC", None)
 
     async def emulate_media(
         self,
@@ -637,18 +646,22 @@ class Page(ChannelOwner):
             params["contrast"] = (
                 "no-override" if params["contrast"] == "null" else contrast
             )
-        await self._channel.send("emulateMedia", params)
+        await self._channel.send("emulateMedia", None, params)
 
     async def set_viewport_size(self, viewportSize: ViewportSize) -> None:
         self._viewport_size = viewportSize
-        await self._channel.send("setViewportSize", locals_to_params(locals()))
+        await self._channel.send(
+            "setViewportSize",
+            None,
+            locals_to_params(locals()),
+        )
 
     @property
     def viewport_size(self) -> Optional[ViewportSize]:
         return self._viewport_size
 
     async def bring_to_front(self) -> None:
-        await self._channel.send("bringToFront")
+        await self._channel.send("bringToFront", None)
 
     async def add_init_script(
         self, script: str = None, path: Union[str, Path] = None
@@ -659,7 +672,7 @@ class Page(ChannelOwner):
             )
         if not isinstance(script, str):
             raise Error("Either path or script parameter must be specified")
-        await self._channel.send("addInitScript", dict(source=script))
+        await self._channel.send("addInitScript", None, dict(source=script))
 
     async def route(
         self, url: URLMatch, handler: RouteHandlerCallback, times: int = None
@@ -757,7 +770,9 @@ class Page(ChannelOwner):
     async def _update_interception_patterns(self) -> None:
         patterns = RouteHandler.prepare_interception_patterns(self._routes)
         await self._channel.send(
-            "setNetworkInterceptionPatterns", {"patterns": patterns}
+            "setNetworkInterceptionPatterns",
+            None,
+            {"patterns": patterns},
         )
 
     async def _update_web_socket_interception_patterns(self) -> None:
@@ -765,7 +780,9 @@ class Page(ChannelOwner):
             self._web_socket_routes
         )
         await self._channel.send(
-            "setWebSocketInterceptionPatterns", {"patterns": patterns}
+            "setWebSocketInterceptionPatterns",
+            None,
+            {"patterns": patterns},
         )
 
     async def screenshot(
@@ -799,7 +816,9 @@ class Page(ChannelOwner):
                     params["mask"],
                 )
             )
-        encoded_binary = await self._channel.send("screenshot", params)
+        encoded_binary = await self._channel.send(
+            "screenshot", self._timeout_settings.timeout, params
+        )
         decoded_binary = base64.b64decode(encoded_binary)
         if path:
             make_dirs_for_file(path)
@@ -813,7 +832,7 @@ class Page(ChannelOwner):
         self._close_reason = reason
         self._close_was_called = True
         try:
-            await self._channel.send("close", locals_to_params(locals()))
+            await self._channel.send("close", None, locals_to_params(locals()))
             if self._owned_context:
                 await self._owned_context.close()
         except Exception as e:
@@ -1112,7 +1131,9 @@ class Page(ChannelOwner):
         try:
             await asyncio.wait(
                 [
-                    asyncio.create_task(self._browser_context._channel.send("pause")),
+                    asyncio.create_task(
+                        self._browser_context._channel.send("pause", None)
+                    ),
                     self._closed_or_crashed_future,
                 ],
                 return_when=asyncio.FIRST_COMPLETED,
@@ -1144,7 +1165,7 @@ class Page(ChannelOwner):
         params = locals_to_params(locals())
         if "path" in params:
             del params["path"]
-        encoded_binary = await self._channel.send("pdf", params)
+        encoded_binary = await self._channel.send("pdf", None, params)
         decoded_binary = base64.b64decode(encoded_binary)
         if path:
             make_dirs_for_file(path)
@@ -1354,6 +1375,7 @@ class Page(ChannelOwner):
             return
         uid = await self._channel.send(
             "registerLocatorHandler",
+            None,
             {
                 "selector": locator._selector,
                 "noWaitAfter": noWaitAfter,
@@ -1394,7 +1416,9 @@ class Page(ChannelOwner):
             try:
                 await self._connection.wrap_api_call(
                     lambda: self._channel.send(
-                        "resolveLocatorHandlerNoReply", {"uid": uid, "remove": remove}
+                        "resolveLocatorHandlerNoReply",
+                        None,
+                        {"uid": uid, "remove": remove},
                     ),
                     is_internal=True,
                 )
@@ -1405,14 +1429,11 @@ class Page(ChannelOwner):
         for uid, data in self._locator_handlers.copy().items():
             if data.locator._equals(locator):
                 del self._locator_handlers[uid]
-                self._channel.send_no_reply("unregisterLocatorHandler", {"uid": uid})
-
-    def _locals_to_params_with_navigation_timeout(self, args: Dict) -> Dict:
-        params = locals_to_params(args)
-        params["timeout"] = self._timeout_settings.navigation_timeout(
-            params.get("timeout")
-        )
-        return params
+                self._channel.send_no_reply(
+                    "unregisterLocatorHandler",
+                    None,
+                    {"uid": uid},
+                )
 
 
 class Worker(ChannelOwner):
@@ -1444,6 +1465,7 @@ class Worker(ChannelOwner):
         return parse_result(
             await self._channel.send(
                 "evaluateExpression",
+                None,
                 dict(
                     expression=expression,
                     arg=serialize_argument(arg),
@@ -1457,6 +1479,7 @@ class Worker(ChannelOwner):
         return from_channel(
             await self._channel.send(
                 "evaluateExpressionHandle",
+                None,
                 dict(
                     expression=expression,
                     arg=serialize_argument(arg),
@@ -1482,12 +1505,14 @@ class BindingCall(ChannelOwner):
                 result = func(source, *func_args)
             if inspect.iscoroutine(result):
                 result = await result
-            await self._channel.send("resolve", dict(result=serialize_argument(result)))
+            await self._channel.send(
+                "resolve", None, dict(result=serialize_argument(result))
+            )
         except Exception as e:
             tb = sys.exc_info()[2]
             asyncio.create_task(
                 self._channel.send(
-                    "reject", dict(error=dict(error=serialize_error(e, tb)))
+                    "reject", None, dict(error=dict(error=serialize_error(e, tb)))
                 )
             )
 
