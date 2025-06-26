@@ -114,3 +114,11 @@ def test_page_pause_should_reset_custom_timeouts(
     server.set_route("/empty.html", lambda route: None)
     with pytest.raises(Error, match="Timeout 456ms exceeded."):
         page.goto(server.EMPTY_PAGE)
+
+
+def test_page_should_ignore_deprecated_is_hidden_and_visible_timeout(
+    page: Page,
+) -> None:
+    page.set_content("<div>foo</div>")
+    assert page.is_hidden("div", timeout=10) is False
+    assert page.is_visible("div", timeout=10) is True

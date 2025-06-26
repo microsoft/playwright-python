@@ -447,12 +447,14 @@ class Page(ChannelOwner):
     async def is_hidden(
         self, selector: str, strict: bool = None, timeout: float = None
     ) -> bool:
-        return await self._main_frame.is_hidden(**locals_to_params(locals()))
+        # timeout is deprecated and does nothing
+        return await self._main_frame.is_hidden(selector=selector, strict=strict)
 
     async def is_visible(
         self, selector: str, strict: bool = None, timeout: float = None
     ) -> bool:
-        return await self._main_frame.is_visible(**locals_to_params(locals()))
+        # timeout is deprecated and does nothing
+        return await self._main_frame.is_visible(selector=selector, strict=strict)
 
     async def dispatch_event(
         self,

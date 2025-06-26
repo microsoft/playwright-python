@@ -1143,3 +1143,12 @@ async def test_locator_click_timeout_error_should_contain_call_log(page: Page) -
         "During handling of the above exception, another exception occurred"
         not in formatted_exception
     )
+
+
+async def test_locator_should_ignore_deprecated_is_hidden_and_visible_timeout(
+    page: Page,
+) -> None:
+    await page.set_content("<div>foo</div>")
+    div = page.locator("div")
+    assert await div.is_hidden(timeout=10) is False
+    assert await div.is_visible(timeout=10) is True
