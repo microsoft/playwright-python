@@ -501,19 +501,17 @@ class Locator:
         )
 
     async def is_hidden(self, timeout: float = None) -> bool:
-        params = locals_to_params(locals())
+        # timeout is deprecated and does nothing
         return await self._frame.is_hidden(
             self._selector,
             strict=True,
-            **params,
         )
 
     async def is_visible(self, timeout: float = None) -> bool:
-        params = locals_to_params(locals())
+        # timeout is deprecated and does nothing
         return await self._frame.is_visible(
             self._selector,
             strict=True,
-            **params,
         )
 
     async def press(
