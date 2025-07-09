@@ -1155,6 +1155,18 @@ async def test_should_work_with_glob() -> None:
     assert url_matches("http://first.host/", "http://second.host/foo", "**/foo")
     assert url_matches("http://playwright.dev/", "http://localhost/", "*//localhost/")
 
+    custom_prefixes = ["about", "data", "chrome", "edge", "file"]
+    for prefix in custom_prefixes:
+        assert url_matches(
+            "http://playwright.dev/", f"{prefix}:blank", f"{prefix}:blank"
+        )
+        assert not url_matches(
+            "http://playwright.dev/", f"{prefix}:blank", "http://playwright.dev/"
+        )
+        assert url_matches(None, f"{prefix}:blank", f"{prefix}:blank")
+        assert url_matches(None, f"{prefix}:blank", f"{prefix}:*")
+        assert not url_matches(None, f"not{prefix}:blank", f"{prefix}:*")
+
     # Added for Python implementation
     assert url_matches(
         None,

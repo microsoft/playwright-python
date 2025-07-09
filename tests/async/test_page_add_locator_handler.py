@@ -312,7 +312,7 @@ async def test_should_wait_for_hidden_by_default_2(page: Page, server: Server) -
     with pytest.raises(Error) as exc_info:
         await page.locator("#target").click(timeout=3000)
     assert await page.evaluate("window.clicked") == 0
-    await expect(page.locator("#interstitial")).to_be_visible()
+    assert await page.locator("#interstitial").is_visible()
     assert called == 1
     assert (
         'locator handler has finished, waiting for get_by_role("button", name="close") to be hidden'

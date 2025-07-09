@@ -189,6 +189,16 @@ def resolve_glob_base(base_url: Optional[str], match: str) -> str:
 
     # Escaped `\\?` behaves the same as `?` in our glob patterns.
     match = match.replace(r"\\?", "?")
+    # Special case about: URLs as they are not relative to base_url
+    if (
+        match.startswith("about:")
+        or match.startswith("data:")
+        or match.startswith("chrome:")
+        or match.startswith("edge:")
+        or match.startswith("file:")
+    ):
+        # about: and data: URLs are not relative to base_url, so we return them as is.
+        return match
     # Glob symbols may be escaped in the URL and some of them such as ? affect resolution,
     # so we replace them with safe components first.
     processed_parts = []

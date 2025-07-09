@@ -47,7 +47,7 @@ from playwright._impl._helper import (
     monotonic_time,
     to_impl,
 )
-from playwright._impl._js_handle import Serializable, parse_value, serialize_argument
+from playwright._impl._js_handle import Serializable
 from playwright._impl._str_utils import (
     escape_for_attribute_selector,
     escape_for_text_selector,
@@ -722,21 +722,7 @@ class Locator:
         options: FrameExpectOptions,
         title: str = None,
     ) -> FrameExpectResult:
-        if "expectedValue" in options:
-            options["expectedValue"] = serialize_argument(options["expectedValue"])
-        result = await self._frame._channel.send_return_as_dict(
-            "expect",
-            self._frame._timeout,
-            {
-                "selector": self._selector,
-                "expression": expression,
-                **options,
-            },
-            title=title,
-        )
-        if result.get("received"):
-            result["received"] = parse_value(result["received"])
-        return result
+        return await self._frame._expect(self._selector, expression, options, title)
 
     async def highlight(self) -> None:
         await self._frame._highlight(self._selector)

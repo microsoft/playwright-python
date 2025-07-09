@@ -37,6 +37,10 @@ class Selectors:
         path: Union[str, Path] = None,
         contentScript: bool = None,
     ) -> None:
+        if any(engine for engine in self._selector_engines if engine["name"] == name):
+            raise Error(
+                f'Selectors.register: "{name}" selector engine has been already registered'
+            )
         if not script and not path:
             raise Error("Either source or path should be specified")
         if path:

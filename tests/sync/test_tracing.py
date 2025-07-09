@@ -138,6 +138,7 @@ def test_should_collect_trace_with_resources_but_no_js(
     page.click('"Click"')
     page.mouse.move(20, 20)
     page.mouse.dblclick(30, 30)
+    page.request.get(server.EMPTY_PAGE)
     page.keyboard.insert_text("abc")
     page.wait_for_timeout(2000)  # Give it some time to produce screenshots.
     page.route("**/empty.html", lambda route: route.continue_())
@@ -155,6 +156,7 @@ def test_should_collect_trace_with_resources_but_no_js(
                 re.compile(r"Click"),
                 re.compile(r"Mouse move"),
                 re.compile(r"Double click"),
+                re.compile(r"GET \"/empty\.html\""),
                 re.compile(r'Insert "abc"'),
                 re.compile(r"Wait for timeout"),
                 re.compile(r'Navigate to "/empty\.html"'),

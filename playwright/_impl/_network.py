@@ -733,10 +733,13 @@ class WebSocketRoute(ChannelOwner):
         if self._connected:
             return
         # Ensure that websocket is "open" and can send messages without an actual server connection.
-        await self._channel.send(
-            "ensureOpened",
-            None,
-        )
+        try:
+            await self._channel.send(
+                "ensureOpened",
+                None,
+            )
+        except Exception:
+            pass
 
 
 class WebSocketRouteHandler:

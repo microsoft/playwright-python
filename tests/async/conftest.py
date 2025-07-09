@@ -153,7 +153,7 @@ class TraceViewerPage:
 
     @property
     def stack_frames(self) -> Locator:
-        return self.page.get_by_test_id("stack-trace-list").locator(".list-view-entry")
+        return self.page.get_by_role("list", name="Stack Trace").get_by_role("listitem")
 
     async def select_action(self, title: str, ordinal: int = 0) -> None:
         await self.page.locator(".action-title", has_text=title).nth(ordinal).click()
