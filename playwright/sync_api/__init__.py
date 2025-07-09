@@ -68,6 +68,7 @@ from playwright.sync_api._generated import (
 
 ChromiumBrowserContext = BrowserContext
 
+ContextCookie = playwright._impl._api_structures.ContextCookie
 Cookie = playwright._impl._api_structures.Cookie
 FilePayload = playwright._impl._api_structures.FilePayload
 FloatRect = playwright._impl._api_structures.FloatRect
@@ -158,6 +159,7 @@ __all__ = [
     "CDPSession",
     "ChromiumBrowserContext",
     "ConsoleMessage",
+    "ContextCookie",
     "Cookie",
     "Dialog",
     "Download",
