@@ -120,6 +120,7 @@ class BrowserContext(ChannelOwner):
         self._background_pages: Set[Page] = set()
         self._service_workers: Set[Worker] = set()
         self._base_url: Optional[str] = self._options.get("baseURL")
+        self._videos_dir: Optional[str] = self._options.get("recordVideo")
         self._tracing = cast(Tracing, from_channel(initializer["tracing"]))
         self._har_recorders: Dict[str, HarRecordingMetadata] = {}
         self._request: APIRequestContext = from_channel(initializer["requestContext"])
@@ -302,14 +303,6 @@ class BrowserContext(ChannelOwner):
     @property
     def browser(self) -> Optional["Browser"]:
         return self._browser
-
-    @property
-    def base_url(self) -> Optional[str]:
-        return self._base_url
-
-    @property
-    def videos_dir(self) -> Optional[str]:
-        return self._options.get("recordVideo")
 
     async def _initialize_har_from_options(
         self,

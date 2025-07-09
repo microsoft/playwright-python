@@ -587,6 +587,18 @@ class Frame(ChannelOwner):
         strict: bool = None,
         force: bool = None,
     ) -> None:
+        await self._fill(**locals())
+
+    async def _fill(
+        self,
+        selector: str,
+        value: str,
+        timeout: float = None,
+        noWaitAfter: bool = None,
+        strict: bool = None,
+        force: bool = None,
+        title: str = None,
+    ) -> None:
         await self._channel.send("fill", self._timeout, locals_to_params(locals()))
 
     def locator(

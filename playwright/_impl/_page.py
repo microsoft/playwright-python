@@ -1181,7 +1181,7 @@ class Page(ChannelOwner):
         # Note: we are creating Video object lazily, because we do not know
         # BrowserContextOptions when constructing the page - it is assigned
         # too late during launchPersistentContext.
-        if not self._browser_context.videos_dir:
+        if not self._browser_context._videos_dir:
             return None
         return self._force_video()
 

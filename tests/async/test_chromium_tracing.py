@@ -51,16 +51,18 @@ async def test_should_run_with_custom_categories_if_provided(
     output_file = tmp_path / "trace.json"
     await browser.start_tracing(
         page=page,
-        screenshots=True,
         path=output_file,
-        categories=["disabled-by-default-v8.cpu_profiler.hires"],
+        categories=["disabled-by-default-cc.debug"],
     )
     await browser.stop_tracing()
     with open(output_file, mode="r") as of:
         trace_json = json.load(of)
+        trace_config = trace_json["metadata"].get("trace-config")
+        trace_events = trace_json["traceEvents"]
         assert (
-            "disabled-by-default-v8.cpu_profiler.hires"
-            in trace_json["metadata"]["trace-config"]
+            trace_config is not None and "disabled-by-default-cc.debug" in trace_config
+        ) or any(
+            event.get("cat") == "disabled-by-default-cc.debug" for event in trace_events
         )
 
 

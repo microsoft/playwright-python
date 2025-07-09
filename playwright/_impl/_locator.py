@@ -217,7 +217,8 @@ class Locator:
         noWaitAfter: bool = None,
         force: bool = None,
     ) -> None:
-        await self.fill("", timeout=timeout, force=force)
+        params = locals_to_params(locals())
+        await self._frame._fill(self._selector, value="", title="Clear", **params)
 
     def locator(
         self,
