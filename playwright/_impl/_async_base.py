@@ -96,9 +96,9 @@ class AsyncContextManager(AsyncBase):
 
     async def __aexit__(
         self,
-        exc_type: Type[BaseException],
-        exc_val: BaseException,
-        traceback: TracebackType,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        traceback: Optional[TracebackType],
     ) -> None:
         await self.close()
 
