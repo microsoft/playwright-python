@@ -224,7 +224,7 @@ class Frame(ChannelOwner):
                 return True
             waiter.log(f'  navigated to "{event["url"]}"')
             return url_matches(
-                cast("Page", self._page)._browser_context.base_url,
+                cast("Page", self._page)._browser_context._base_url,
                 event["url"],
                 url,
             )
@@ -257,7 +257,7 @@ class Frame(ChannelOwner):
         timeout: float = None,
     ) -> None:
         assert self._page
-        if url_matches(self._page._browser_context.base_url, self.url, url):
+        if url_matches(self._page._browser_context._base_url, self.url, url):
             await self._wait_for_load_state_impl(state=waitUntil, timeout=timeout)
             return
         async with self.expect_navigation(

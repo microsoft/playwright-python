@@ -138,7 +138,7 @@ class PageAssertions(AssertionsBase):
         ignoreCase: bool = None,
     ) -> None:
         __tracebackhide__ = True
-        base_url = self._actual_page.context.base_url
+        base_url = self._actual_page.context._base_url
         if isinstance(urlOrRegExp, str) and base_url:
             urlOrRegExp = urljoin(base_url, urlOrRegExp)
         expected_text = to_expected_text_values([urlOrRegExp], ignoreCase=ignoreCase)
