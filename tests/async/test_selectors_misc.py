@@ -61,9 +61,19 @@ async def test_should_work_with_internal_and(page: Page) -> None:
 async def test_should_throw_already_registered_error_when_registering(
     selectors: Selectors,
 ) -> None:
-    await selectors.register("alreadyRegistered", "return []")
+    create_tag_selector = """
+    () => ({
+        query(root, selector) {
+            return root.querySelector(selector);
+        },
+        queryAll(root, selector) {
+            return Array.from(root.querySelectorAll(selector));
+        }
+    });
+    """
+    await selectors.register("alreadyRegistered", create_tag_selector)
     with pytest.raises(
         Error,
         match='Selectors.register: "alreadyRegistered" selector engine has been already registered',
     ):
-        await selectors.register("alreadyRegistered", "return []")
+        await selectors.register("alreadyRegistered", create_tag_selector)
