@@ -69,7 +69,7 @@ async def test_should_throw_already_registered_error_when_registering(
         queryAll(root, selector) {
             return Array.from(root.querySelectorAll(selector));
         }
-    });
+    })
     """
     await selectors.register("alreadyRegistered", create_tag_selector)
     with pytest.raises(
