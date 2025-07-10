@@ -587,7 +587,7 @@ class Frame(ChannelOwner):
         strict: bool = None,
         force: bool = None,
     ) -> None:
-        await self._fill(**locals())
+        await self._fill(**locals_to_params(locals()))
 
     async def _fill(
         self,
