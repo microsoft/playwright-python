@@ -48,7 +48,7 @@ async def test_should_isolate_contexts(
     await page.goto(server.EMPTY_PAGE)
 
     context2 = await browser.new_context(
-        permissions=["geolocation"], geolocation={"latitude": 20, "longitude": 20}
+        permissions=["geolocation"], geolocation={"latitude": 10.5, "longitude": 10.5}
     )
 
     page2 = await context2.new_page()
@@ -66,7 +66,7 @@ async def test_should_isolate_contexts(
       resolve({latitude: position.coords.latitude, longitude: position.coords.longitude})
     }))"""
     )
-    assert geolocation2 == {"latitude": 20, "longitude": 20}
+    assert geolocation2 == {"latitude": 10.5, "longitude": 10.5}
 
     await context2.close()
 

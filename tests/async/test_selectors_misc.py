@@ -12,6 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pytest
+
+from playwright._impl._browser import Browser
+from playwright._impl._errors import Error
+from playwright._impl._selectors import Selectors
 from playwright.async_api import Page
 
 
@@ -52,3 +57,26 @@ async def test_should_work_with_internal_and(page: Page) -> None:
             '.bar >> internal:and="span"', "els => els.map(e => e.textContent)"
         )
     ) == ["world2"]
+
+
+async def test_should_throw_already_registered_error_when_registering(
+    selectors: Selectors,
+    browser: Browser,
+) -> None:
+    create_tag_selector = """
+    () => ({
+        query(root, selector) {
+            return root.querySelector(selector);
+        },
+        queryAll(root, selector) {
+            return Array.from(root.querySelectorAll(selector));
+        }
+    })
+    """
+    name = f"alreadyRegistered-{browser.browser_type.name}"
+    await selectors.register(name, create_tag_selector)
+    with pytest.raises(
+        Error,
+        match=f'Selectors.register: "{name}" selector engine has been already registered',
+    ):
+        await selectors.register(name, create_tag_selector)

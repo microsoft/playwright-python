@@ -118,9 +118,9 @@ async def test_page_event_should_propagate_default_viewport_to_the_page(
 
 
 async def test_page_event_should_respect_device_scale_factor(browser: Browser) -> None:
-    context = await browser.new_context(device_scale_factor=3)
+    context = await browser.new_context(device_scale_factor=3.5)
     page = await context.new_page()
-    assert await page.evaluate("window.devicePixelRatio") == 3
+    assert await page.evaluate("window.devicePixelRatio") == 3.5
     await context.close()
 
 

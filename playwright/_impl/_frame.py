@@ -30,7 +30,13 @@ from typing import (
 
 from pyee import EventEmitter
 
-from playwright._impl._api_structures import AriaRole, FilePayload, Position
+from playwright._impl._api_structures import (
+    AriaRole,
+    FilePayload,
+    FrameExpectOptions,
+    FrameExpectResult,
+    Position,
+)
 from playwright._impl._connection import (
     ChannelOwner,
     from_channel,
@@ -56,6 +62,7 @@ from playwright._impl._js_handle import (
     Serializable,
     add_source_url_to_script,
     parse_result,
+    parse_value,
     serialize_argument,
 )
 from playwright._impl._locator import (
@@ -170,6 +177,29 @@ class Frame(ChannelOwner):
         waiter.reject_on_timeout(timeout, f"Timeout {timeout}ms exceeded.")
         return waiter
 
+    async def _expect(
+        self,
+        selector: Optional[str],
+        expression: str,
+        options: FrameExpectOptions,
+        title: str = None,
+    ) -> FrameExpectResult:
+        if "expectedValue" in options:
+            options["expectedValue"] = serialize_argument(options["expectedValue"])
+        result = await self._channel.send_return_as_dict(
+            "expect",
+            self._timeout,
+            {
+                "selector": selector,
+                "expression": expression,
+                **options,
+            },
+            title=title,
+        )
+        if result.get("received"):
+            result["received"] = parse_value(result["received"])
+        return result
+
     def expect_navigation(
         self,
         url: URLMatch = None,
@@ -194,7 +224,7 @@ class Frame(ChannelOwner):
                 return True
             waiter.log(f'  navigated to "{event["url"]}"')
             return url_matches(
-                cast("Page", self._page)._browser_context._options.get("baseURL"),
+                cast("Page", self._page)._browser_context._base_url,
                 event["url"],
                 url,
             )
@@ -227,9 +257,7 @@ class Frame(ChannelOwner):
         timeout: float = None,
     ) -> None:
         assert self._page
-        if url_matches(
-            self._page._browser_context._options.get("baseURL"), self.url, url
-        ):
+        if url_matches(self._page._browser_context._base_url, self.url, url):
             await self._wait_for_load_state_impl(state=waitUntil, timeout=timeout)
             return
         async with self.expect_navigation(
@@ -559,6 +587,18 @@ class Frame(ChannelOwner):
         strict: bool = None,
         force: bool = None,
     ) -> None:
+        await self._fill(**locals_to_params(locals()))
+
+    async def _fill(
+        self,
+        selector: str,
+        value: str,
+        timeout: float = None,
+        noWaitAfter: bool = None,
+        strict: bool = None,
+        force: bool = None,
+        title: str = None,
+    ) -> None:
         await self._channel.send("fill", self._timeout, locals_to_params(locals()))
 
     def locator(
@@ -801,7 +841,7 @@ class Frame(ChannelOwner):
         await self._channel.send("uncheck", self._timeout, locals_to_params(locals()))
 
     async def wait_for_timeout(self, timeout: float) -> None:
-        await self._channel.send("waitForTimeout", None, locals_to_params(locals()))
+        await self._channel.send("waitForTimeout", None, {"waitTimeout": timeout})
 
     async def wait_for_function(
         self,

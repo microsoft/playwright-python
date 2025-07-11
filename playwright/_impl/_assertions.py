@@ -20,6 +20,7 @@ from playwright._impl._api_structures import (
     AriaRole,
     ExpectedTextValue,
     FrameExpectOptions,
+    FrameExpectResult,
 )
 from playwright._impl._connection import format_call_log
 from playwright._impl._errors import Error
@@ -45,6 +46,13 @@ class AssertionsBase:
         self._is_not = is_not
         self._custom_message = message
 
+    async def _call_expect(
+        self, expression: str, expect_options: FrameExpectOptions, title: Optional[str]
+    ) -> FrameExpectResult:
+        raise NotImplementedError(
+            "_call_expect must be implemented in a derived class."
+        )
+
     async def _expect_impl(
         self,
         expression: str,
@@ -61,7 +69,7 @@ class AssertionsBase:
             message = message.replace("expected to", "expected not to")
         if "useInnerText" in expect_options and expect_options["useInnerText"] is None:
             del expect_options["useInnerText"]
-        result = await self._actual_locator._expect(expression, expect_options, title)
+        result = await self._call_expect(expression, expect_options, title)
         if result["matches"] == self._is_not:
             actual = result.get("received")
             if self._custom_message:
@@ -87,6 +95,14 @@ class PageAssertions(AssertionsBase):
     ) -> None:
         super().__init__(page.locator(":root"), timeout, is_not, message)
         self._actual_page = page
+
+    async def _call_expect(
+        self, expression: str, expect_options: FrameExpectOptions, title: Optional[str]
+    ) -> FrameExpectResult:
+        __tracebackhide__ = True
+        return await self._actual_page.main_frame._expect(
+            None, expression, expect_options, title
+        )
 
     @property
     def _not(self) -> "PageAssertions":
@@ -122,7 +138,7 @@ class PageAssertions(AssertionsBase):
         ignoreCase: bool = None,
     ) -> None:
         __tracebackhide__ = True
-        base_url = self._actual_page.context._options.get("baseURL")
+        base_url = self._actual_page.context._base_url
         if isinstance(urlOrRegExp, str) and base_url:
             urlOrRegExp = urljoin(base_url, urlOrRegExp)
         expected_text = to_expected_text_values([urlOrRegExp], ignoreCase=ignoreCase)
@@ -154,6 +170,12 @@ class LocatorAssertions(AssertionsBase):
     ) -> None:
         super().__init__(locator, timeout, is_not, message)
         self._actual_locator = locator
+
+    async def _call_expect(
+        self, expression: str, expect_options: FrameExpectOptions, title: Optional[str]
+    ) -> FrameExpectResult:
+        __tracebackhide__ = True
+        return await self._actual_locator._expect(expression, expect_options, title)
 
     @property
     def _not(self) -> "LocatorAssertions":

@@ -7083,16 +7083,33 @@ mapping.register(ClockImpl, Clock)
 class ConsoleMessage(SyncBase):
 
     @property
-    def type(self) -> str:
+    def type(
+        self,
+    ) -> typing.Union[
+        Literal["assert"],
+        Literal["clear"],
+        Literal["count"],
+        Literal["debug"],
+        Literal["dir"],
+        Literal["dirxml"],
+        Literal["endGroup"],
+        Literal["error"],
+        Literal["info"],
+        Literal["log"],
+        Literal["profile"],
+        Literal["profileEnd"],
+        Literal["startGroup"],
+        Literal["startGroupCollapsed"],
+        Literal["table"],
+        Literal["timeEnd"],
+        Literal["trace"],
+        Literal["warning"],
+    ]:
         """ConsoleMessage.type
-
-        One of the following values: `'log'`, `'debug'`, `'info'`, `'error'`, `'warning'`, `'dir'`, `'dirxml'`, `'table'`,
-        `'trace'`, `'clear'`, `'startGroup'`, `'startGroupCollapsed'`, `'endGroup'`, `'assert'`, `'profile'`,
-        `'profileEnd'`, `'count'`, `'timeEnd'`.
 
         Returns
         -------
-        str
+        Union["assert", "clear", "count", "debug", "dir", "dirxml", "endGroup", "error", "info", "log", "profile", "profileEnd", "startGroup", "startGroupCollapsed", "table", "timeEnd", "trace", "warning"]
         """
         return mapping.from_maybe_impl(self._impl_obj.type)
 
@@ -12671,7 +12688,8 @@ class BrowserContext(SyncContextManager):
     def browser(self) -> typing.Optional["Browser"]:
         """BrowserContext.browser
 
-        Returns the browser instance of the context. If it was launched as a persistent context null gets returned.
+        Gets the browser instance that owns the context. Returns `null` if the context is created outside of normal
+        browser, e.g. Android or Electron.
 
         Returns
         -------
@@ -12811,7 +12829,7 @@ class BrowserContext(SyncContextManager):
 
         Returns
         -------
-        List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}]
+        List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"], partitionKey: Union[str, None]}]
         """
 
         return mapping.from_impl_list(
@@ -12832,7 +12850,7 @@ class BrowserContext(SyncContextManager):
 
         Parameters
         ----------
-        cookies : Sequence[{name: str, value: str, url: Union[str, None], domain: Union[str, None], path: Union[str, None], expires: Union[float, None], httpOnly: Union[bool, None], secure: Union[bool, None], sameSite: Union["Lax", "None", "Strict", None]}]
+        cookies : Sequence[{name: str, value: str, url: Union[str, None], domain: Union[str, None], path: Union[str, None], expires: Union[float, None], httpOnly: Union[bool, None], secure: Union[bool, None], sameSite: Union["Lax", "None", "Strict", None], partitionKey: Union[str, None]}]
         """
 
         return mapping.from_maybe_impl(
@@ -12908,6 +12926,7 @@ class BrowserContext(SyncContextManager):
             - `'notifications'`
             - `'payment-handler'`
             - `'storage-access'`
+            - `'local-fonts'`
         origin : Union[str, None]
             The [origin] to grant permissions to, e.g. "https://example.com".
         """

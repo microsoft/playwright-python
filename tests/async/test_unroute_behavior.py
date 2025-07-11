@@ -451,3 +451,59 @@ async def test_route_fulfill_should_not_throw_if_page_has_been_closed(
     await page.close()
     # Should not throw.
     await route.fulfill()
+
+
+async def test_should_not_continue_requests_in_flight_page(
+    page: Page, server: Server
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+
+    route_future: "asyncio.Future[Route]" = asyncio.Future()
+
+    async def handle(route: Route) -> None:
+        route_future.set_result(route)
+        await asyncio.sleep(3)
+        await route.fulfill(status=200)
+
+    async def _evaluate_ignore_exceptions() -> None:
+        try:
+            await page.evaluate("() => fetch('/')")
+        except Error:
+            pass
+
+    await page.route(
+        "**/*",
+        handle,
+    )
+
+    asyncio.create_task(_evaluate_ignore_exceptions())
+    await route_future
+    await page.unroute_all(behavior="wait")
+
+
+async def test_should_not_continue_requests_in_flight_context(
+    page: Page, context: BrowserContext, server: Server
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+
+    route_future: "asyncio.Future[Route]" = asyncio.Future()
+
+    async def handle(route: Route) -> None:
+        route_future.set_result(route)
+        await asyncio.sleep(3)
+        await route.fulfill(status=200)
+
+    async def _evaluate_ignore_exceptions() -> None:
+        try:
+            await page.evaluate("() => fetch('/')")
+        except Error:
+            pass
+
+    await context.route(
+        "**/*",
+        handle,
+    )
+
+    asyncio.create_task(_evaluate_ignore_exceptions())
+    await route_future
+    await context.unroute_all(behavior="wait")

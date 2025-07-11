@@ -388,9 +388,7 @@ class Page(ChannelOwner):
         for frame in self._frames:
             if name and frame.name == name:
                 return frame
-            if url and url_matches(
-                self._browser_context._options.get("baseURL"), frame.url, url
-            ):
+            if url and url_matches(self._browser_context._base_url, frame.url, url):
                 return frame
 
         return None
@@ -682,7 +680,7 @@ class Page(ChannelOwner):
         self._routes.insert(
             0,
             RouteHandler(
-                self._browser_context._options.get("baseURL"),
+                self._browser_context._base_url,
                 url,
                 handler,
                 True if self._dispatcher_fiber else False,
@@ -710,24 +708,21 @@ class Page(ChannelOwner):
         behavior: Literal["default", "ignoreErrors", "wait"] = None,
     ) -> None:
         self._routes = remaining
-        await self._update_interception_patterns()
-        if behavior is None or behavior == "default":
-            return
-        await asyncio.gather(
-            *map(
-                lambda route: route.stop(behavior),  # type: ignore
-                removed,
+        if behavior is not None and behavior != "default":
+            await asyncio.gather(
+                *map(
+                    lambda route: route.stop(behavior),  # type: ignore
+                    removed,
+                )
             )
-        )
+        await self._update_interception_patterns()
 
     async def route_web_socket(
         self, url: URLMatch, handler: WebSocketRouteHandlerCallback
     ) -> None:
         self._web_socket_routes.insert(
             0,
-            WebSocketRouteHandler(
-                self._browser_context._options.get("baseURL"), url, handler
-            ),
+            WebSocketRouteHandler(self._browser_context._base_url, url, handler),
         )
         await self._update_web_socket_interception_patterns()
 
@@ -1186,7 +1181,7 @@ class Page(ChannelOwner):
         # Note: we are creating Video object lazily, because we do not know
         # BrowserContextOptions when constructing the page - it is assigned
         # too late during launchPersistentContext.
-        if not self._browser_context._options.get("recordVideo"):
+        if not self._browser_context._videos_dir:
             return None
         return self._force_video()
 
@@ -1273,7 +1268,7 @@ class Page(ChannelOwner):
         def my_predicate(request: Request) -> bool:
             if not callable(urlOrPredicate):
                 return url_matches(
-                    self._browser_context._options.get("baseURL"),
+                    self._browser_context._base_url,
                     request.url,
                     urlOrPredicate,
                 )
@@ -1305,7 +1300,7 @@ class Page(ChannelOwner):
         def my_predicate(request: Response) -> bool:
             if not callable(urlOrPredicate):
                 return url_matches(
-                    self._browser_context._options.get("baseURL"),
+                    self._browser_context._base_url,
                     request.url,
                     urlOrPredicate,
                 )

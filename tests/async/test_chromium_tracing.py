@@ -44,6 +44,13 @@ async def test_should_create_directories_as_needed(
     assert os.path.getsize(output_file) > 0
 
 
+async def rafraf(target: Page, count: int = 1) -> None:
+    for _ in range(count):
+        await target.evaluate(
+            "async () => await new Promise(f => window.requestAnimationFrame(() => window.requestAnimationFrame(f)));"
+        )
+
+
 @pytest.mark.only_browser("chromium")
 async def test_should_run_with_custom_categories_if_provided(
     browser: Browser, page: Page, tmp_path: Path
@@ -51,16 +58,19 @@ async def test_should_run_with_custom_categories_if_provided(
     output_file = tmp_path / "trace.json"
     await browser.start_tracing(
         page=page,
-        screenshots=True,
         path=output_file,
-        categories=["disabled-by-default-v8.cpu_profiler.hires"],
+        categories=["disabled-by-default-cc.debug"],
     )
+    await rafraf(page)
     await browser.stop_tracing()
     with open(output_file, mode="r") as of:
         trace_json = json.load(of)
+        trace_config = trace_json["metadata"].get("trace-config")
+        trace_events = trace_json["traceEvents"]
         assert (
-            "disabled-by-default-v8.cpu_profiler.hires"
-            in trace_json["metadata"]["trace-config"]
+            trace_config is not None and "disabled-by-default-cc.debug" in trace_config
+        ) or any(
+            event.get("cat") == "disabled-by-default-cc.debug" for event in trace_events
         )
 
 

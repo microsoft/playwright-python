@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from asyncio import AbstractEventLoop
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
 
 from playwright._impl._api_structures import SourceLocation
 from playwright._impl._connection import from_channel, from_nullable_channel
@@ -39,7 +39,26 @@ class ConsoleMessage:
         return self.text
 
     @property
-    def type(self) -> str:
+    def type(self) -> Union[
+        Literal["assert"],
+        Literal["clear"],
+        Literal["count"],
+        Literal["debug"],
+        Literal["dir"],
+        Literal["dirxml"],
+        Literal["endGroup"],
+        Literal["error"],
+        Literal["info"],
+        Literal["log"],
+        Literal["profile"],
+        Literal["profileEnd"],
+        Literal["startGroup"],
+        Literal["startGroupCollapsed"],
+        Literal["table"],
+        Literal["timeEnd"],
+        Literal["trace"],
+        Literal["warning"],
+    ]:
         return self._event["type"]
 
     @property

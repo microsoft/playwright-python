@@ -119,6 +119,8 @@ class BrowserContext(ChannelOwner):
         self._options: Dict[str, Any] = initializer["options"]
         self._background_pages: Set[Page] = set()
         self._service_workers: Set[Worker] = set()
+        self._base_url: Optional[str] = self._options.get("baseURL")
+        self._videos_dir: Optional[str] = self._options.get("recordVideo")
         self._tracing = cast(Tracing, from_channel(initializer["tracing"]))
         self._har_recorders: Dict[str, HarRecordingMetadata] = {}
         self._request: APIRequestContext = from_channel(initializer["requestContext"])
@@ -424,7 +426,7 @@ class BrowserContext(ChannelOwner):
         self._routes.insert(
             0,
             RouteHandler(
-                self._options.get("baseURL"),
+                self._base_url,
                 url,
                 handler,
                 True if self._dispatcher_fiber else False,
@@ -452,17 +454,16 @@ class BrowserContext(ChannelOwner):
         behavior: Literal["default", "ignoreErrors", "wait"] = None,
     ) -> None:
         self._routes = remaining
+        if behavior is not None and behavior != "default":
+            await asyncio.gather(*map(lambda router: router.stop(behavior), removed))  # type: ignore
         await self._update_interception_patterns()
-        if behavior is None or behavior == "default":
-            return
-        await asyncio.gather(*map(lambda router: router.stop(behavior), removed))  # type: ignore
 
     async def route_web_socket(
         self, url: URLMatch, handler: WebSocketRouteHandlerCallback
     ) -> None:
         self._web_socket_routes.insert(
             0,
-            WebSocketRouteHandler(self._options.get("baseURL"), url, handler),
+            WebSocketRouteHandler(self._base_url, url, handler),
         )
         await self._update_web_socket_interception_patterns()
 

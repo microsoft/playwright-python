@@ -79,6 +79,7 @@ ProxySettings = playwright._impl._api_structures.ProxySettings
 ResourceTiming = playwright._impl._api_structures.ResourceTiming
 SourceLocation = playwright._impl._api_structures.SourceLocation
 StorageState = playwright._impl._api_structures.StorageState
+StorageStateCookie = playwright._impl._api_structures.StorageStateCookie
 ViewportSize = playwright._impl._api_structures.ViewportSize
 
 Error = playwright._impl._errors.Error
@@ -187,6 +188,7 @@ __all__ = [
     "Selectors",
     "SourceLocation",
     "StorageState",
+    "StorageStateCookie",
     "TimeoutError",
     "Touchscreen",
     "Video",
