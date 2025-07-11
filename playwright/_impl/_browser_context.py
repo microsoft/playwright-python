@@ -32,7 +32,7 @@ from typing import (
 )
 
 from playwright._impl._api_structures import (
-    ContextCookie,
+    Cookie,
     Geolocation,
     SetCookieParam,
     StorageState,
@@ -334,9 +334,7 @@ class BrowserContext(ChannelOwner):
             raise Error("Please use browser.new_context()")
         return from_channel(await self._channel.send("newPage", None))
 
-    async def cookies(
-        self, urls: Union[str, Sequence[str]] = None
-    ) -> List[ContextCookie]:
+    async def cookies(self, urls: Union[str, Sequence[str]] = None) -> List[Cookie]:
         if urls is None:
             urls = []
         if isinstance(urls, str):

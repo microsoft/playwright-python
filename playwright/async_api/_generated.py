@@ -21,7 +21,7 @@ from typing import Literal
 from playwright._impl._accessibility import Accessibility as AccessibilityImpl
 from playwright._impl._api_structures import (
     ClientCertificate,
-    ContextCookie,
+    Cookie,
     FilePayload,
     FloatRect,
     Geolocation,
@@ -12794,7 +12794,7 @@ class BrowserContext(AsyncContextManager):
 
     async def cookies(
         self, urls: typing.Optional[typing.Union[str, typing.Sequence[str]]] = None
-    ) -> typing.List[ContextCookie]:
+    ) -> typing.List[Cookie]:
         """BrowserContext.cookies
 
         If no URLs are specified, this method returns all cookies. If URLs are specified, only cookies that affect those

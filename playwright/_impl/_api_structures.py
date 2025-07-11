@@ -32,9 +32,10 @@ class Cookie(TypedDict, total=False):
     httpOnly: bool
     secure: bool
     sameSite: Literal["Lax", "None", "Strict"]
+    partitionKey: Optional[str]
 
 
-class ContextCookie(TypedDict, total=False):
+class StorageStateCookie(TypedDict, total=False):
     name: str
     value: str
     domain: str
@@ -43,7 +44,6 @@ class ContextCookie(TypedDict, total=False):
     httpOnly: bool
     secure: bool
     sameSite: Literal["Lax", "None", "Strict"]
-    partitionKey: Optional[str]
 
 
 # TODO: We are waiting for PEP705 so SetCookieParam can be readonly and matches Cookie.
@@ -110,7 +110,7 @@ class ProxySettings(TypedDict, total=False):
 
 
 class StorageState(TypedDict, total=False):
-    cookies: List[Cookie]
+    cookies: List[StorageStateCookie]
     origins: List[OriginState]
 
 
