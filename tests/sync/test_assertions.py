@@ -1067,3 +1067,158 @@ def test_to_have_role(page: Page) -> None:
     with pytest.raises(Error) as excinfo:
         expect(page.locator("div")).to_have_role(re.compile(r"button|checkbox"))  # type: ignore
     assert '"role" argument in to_have_role must be a string' in str(excinfo.value)
+
+
+def test_should_collect_soft_failures(page: Page) -> None:
+    page.set_content(
+        """
+        <div id="div1">Text1</div>
+        <div id="div2">Text2</div>
+    """
+    )
+
+    with pytest.raises(AssertionError) as excinfo:
+        with expect.soft() as soft_expect:
+            soft_expect(page.locator("#div1")).to_have_text("wrong", timeout=1000)
+            soft_expect(page.locator("#div2")).to_have_text("wrong2", timeout=1000)
+    assert "1. Locator expected to have text 'wrong'" in str(excinfo.value)
+    assert "2. Locator expected to have text 'wrong2'" in str(excinfo.value)
+
+
+def test_should_support_custom_message_in_soft_assertions(page: Page) -> None:
+    page.set_content('<div id="div1">Text1</div>')
+
+    with pytest.raises(AssertionError) as excinfo:
+        with expect.soft() as soft_expect:
+            soft_expect(page.locator("#div1"), "Custom message 1").to_have_text(
+                "wrong", timeout=1000
+            )
+            soft_expect(page.locator("#div1"), "Custom message 2").to_have_text(
+                "also wrong", timeout=1000
+            )
+    assert "1. Custom message 1" in str(excinfo.value)
+    assert "2. Custom message 2" in str(excinfo.value)
+
+
+def test_should_work_with_different_assertion_types(page: Page, server: Server) -> None:
+    page.set_content(
+        """
+        <div id="div1">Text1</div>
+        <title>Page Title</title>
+    """
+    )
+
+    with pytest.raises(AssertionError) as excinfo:
+        with expect.soft() as soft_expect:
+            soft_expect(page.locator("#div1")).to_have_text("wrong", timeout=1000)
+            soft_expect(page).to_have_title("wrong title", timeout=1000)
+            response = page.request.get(server.PREFIX + "/non-existent")
+            soft_expect(response).to_be_ok()
+
+    error_text = str(excinfo.value)
+    assert "1. Locator expected to have text 'wrong'" in error_text
+    assert "2. Page title expected to be 'wrong title'" in error_text
+    assert "3. Response status expected to be within [200..299] range" in error_text
+
+
+def test_should_report_soft_failures_in_order(page: Page) -> None:
+    page.set_content(
+        """
+        <div id="first">First</div>
+        <div id="second">Second</div>
+        <div id="third">Third</div>
+    """
+    )
+
+    with pytest.raises(AssertionError) as excinfo:
+        with expect.soft() as soft_expect:
+            soft_expect(page.locator("#third")).to_have_text("wrong3", timeout=1000)
+            soft_expect(page.locator("#first")).to_have_text("wrong1", timeout=1000)
+            soft_expect(page.locator("#second")).to_have_text("wrong2", timeout=1000)
+
+    error_text = str(excinfo.value)
+    first_pos = error_text.find("wrong3")
+    second_pos = error_text.find("wrong1")
+    third_pos = error_text.find("wrong2")
+    assert (
+        first_pos < second_pos < third_pos
+    ), "Errors should be reported in order of occurrence"
+
+
+def test_should_pass_successful_soft_assertions(page: Page) -> None:
+    page.set_content("<div>Text</div>")
+
+    try:
+        with expect.soft() as soft_expect:
+            soft_expect(page.locator("div")).to_have_text("Text")
+            soft_expect(page.locator("div")).to_be_visible()
+    except Exception as e:
+        pytest.fail(f"Should not have raised an exception, but got: {e}")
+
+
+def test_should_respect_timeout_in_soft_assertions(page: Page) -> None:
+    page.set_content("<div>Text</div>")
+
+    original_timeout = expect._timeout
+    try:
+        expect.set_options(timeout=2000)
+        with pytest.raises(AssertionError) as excinfo:
+            with expect.soft() as soft_expect:
+                soft_expect(page.locator("div")).to_have_text("wrong", timeout=100)
+                soft_expect(page.locator("div")).to_have_text("also wrong")
+
+        error_text = str(excinfo.value)
+        assert "timeout 100ms" in error_text
+        assert "timeout 2000ms" in error_text
+    finally:
+        expect.set_options(timeout=original_timeout)
+
+
+def test_should_include_soft_failures_in_error_message(page: Page) -> None:
+    page.set_content("<div>Text</div>")
+
+    with pytest.raises(ValueError) as excinfo:
+        with expect.soft() as soft_expect:
+            soft_expect(page.locator("div")).to_have_text("wrong", timeout=1000)
+            raise ValueError("Some error")
+
+    error_text = str(excinfo.value)
+    assert "Some error" in error_text
+    assert "expected to have text 'wrong'" in error_text
+
+
+def test_should_collect_negated_soft_failures(page: Page) -> None:
+    page.set_content(
+        """
+        <div id="div1">Text1</div>
+        <div id="div2">Text2</div>
+        <div id="div3">Text3</div>
+    """
+    )
+
+    with pytest.raises(AssertionError) as excinfo:
+        with expect.soft() as soft_expect:
+            soft_expect(page.locator("#div1")).not_to_have_text("Text1", timeout=1000)
+            soft_expect(page.locator("#div2")).not_to_be_visible(timeout=1000)
+            soft_expect(page.locator("#div3")).not_to_be_attached(timeout=1000)
+
+    error_text = str(excinfo.value)
+    assert "1. Locator expected not to have text 'Text1'" in error_text
+    assert "2. Locator expected not to be visible" in error_text
+    assert "3. Locator expected not to be attached" in error_text
+
+
+def test_should_pass_negated_soft_assertions(page: Page) -> None:
+    page.set_content(
+        """
+        <div id="div1">Text1</div>
+    """
+    )
+
+    try:
+        with expect.soft() as soft_expect:
+            soft_expect(page.locator("#div1")).not_to_have_text("wrong")
+            soft_expect(page.locator("#not-exists")).not_to_be_visible()
+            soft_expect(page.locator("#not-exists")).not_to_be_attached()
+    except Exception as e:
+        pytest.fail(f"Should not have raised an exception, but got: {e}")
