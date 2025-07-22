@@ -30,7 +30,6 @@ async def test_should_work(page: Page, server: Server) -> None:
     original_locator = page.get_by_text("This interstitial covers the button")
 
     async def handler(locator: Locator) -> None:
-        nonlocal original_locator
         assert locator == original_locator
         nonlocal before_count
         nonlocal after_count

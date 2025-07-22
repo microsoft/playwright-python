@@ -199,5 +199,5 @@ async def test_workers_should_format_number_using_context_locale(
             "() => new Worker(URL.createObjectURL(new Blob(['console.log(1)'], {type: 'application/javascript'})))"
         )
     worker = await worker_info.value
-    assert await worker.evaluate("() => (10000.20).toLocaleString()") == "10\u00A0000,2"
+    assert await worker.evaluate("() => (10000.20).toLocaleString()") == "10\u00a0000,2"
     await context.close()

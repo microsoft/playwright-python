@@ -662,7 +662,7 @@ async def test_set_content_should_await_resources_to_load(
 
 
 async def test_set_content_should_work_with_tricky_content(page: Page) -> None:
-    await page.set_content("<div>hello world</div>" + "\x7F")
+    await page.set_content("<div>hello world</div>" + "\x7f")
     assert await page.eval_on_selector("div", "div => div.textContent") == "hello world"
 
 
@@ -1403,7 +1403,6 @@ async def test_should_not_throw_when_continuing_after_page_is_closed(
     async def handle_route(route: Route) -> None:
         await page.close()
         await route.continue_()
-        nonlocal done
         done.set_result(True)
 
     await page.route("**/*", handle_route)

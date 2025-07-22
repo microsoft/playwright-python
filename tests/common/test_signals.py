@@ -50,7 +50,6 @@ def _test_signals_async(
         page = await context.new_page()
         notified = False
         try:
-            nonlocal sigint_received
             while not sigint_received:
                 if not notified:
                     wait_queue.put("ready")

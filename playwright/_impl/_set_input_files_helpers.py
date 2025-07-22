@@ -139,7 +139,7 @@ async def convert_input_files(
 
 
 def resolve_paths_and_directory_for_input_files(
-    items: Sequence[Union[str, Path]]
+    items: Sequence[Union[str, Path]],
 ) -> Tuple[Optional[List[str]], Optional[str]]:
     local_paths: Optional[List[str]] = None
     local_directory: Optional[str] = None
