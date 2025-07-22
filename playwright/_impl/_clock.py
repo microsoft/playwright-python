@@ -89,7 +89,7 @@ class Clock:
 
 
 def parse_time(
-    time: Union[float, str, datetime.datetime]
+    time: Union[float, str, datetime.datetime],
 ) -> Dict[str, Union[int, str]]:
     if isinstance(time, (float, int)):
         return {"timeNumber": int(time * 1_000)}

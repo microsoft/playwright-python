@@ -15,20 +15,20 @@ repos:
       - id: check-executables-have-shebangs
       - id: check-merge-conflict
   - repo: https://github.com/psf/black
-    rev: 24.8.0
+    rev: 25.1.0
     hooks:
       - id: black
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.11.2
+    rev: v1.17.0
     hooks:
       - id: mypy
-        additional_dependencies: [types-pyOpenSSL==24.1.0.20240722, types-requests==2.32.0.20240914]
+        additional_dependencies: [types-pyOpenSSL==24.1.0.20240722, types-requests==2.32.4.20250611]
   - repo: https://github.com/pycqa/flake8
-    rev: 7.1.1
+    rev: 7.3.0
     hooks:
       - id: flake8
   - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
+    rev: 6.0.1
     hooks:
       - id: isort
   - repo: local
@@ -39,7 +39,7 @@ repos:
         language: node
         pass_filenames: false
         types: [python]
-        additional_dependencies: ["pyright@1.1.384"]
+        additional_dependencies: ["pyright@1.1.403"]
   - repo: local
     hooks:
       - id: check-license-header
