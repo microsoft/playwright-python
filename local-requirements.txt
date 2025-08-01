@@ -4,7 +4,7 @@ build==1.2.2.post1
 flake8==7.2.0
 mypy==1.17.0
 objgraph==3.6.2
-Pillow==11.2.1
+Pillow==11.3.0
 pixelmatch==0.3.0
 pre-commit==3.5.0
 pyOpenSSL==25.1.0
