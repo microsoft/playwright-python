@@ -172,23 +172,26 @@ def test_dialog_event_should_work_with_inline_script_tag(
 ) -> None:
     def handle_route(request: TestServerRequest) -> None:
         request.setHeader("content-type", "text/html")
-        request.write(b"""<script>window.result = prompt('hey?')</script>""")
+        request.write(b"<script>window.result = prompt('hey?')</script>")
         request.finish()
 
     server.set_route("/popup.html", handle_route)
     page.goto(server.EMPTY_PAGE)
     page.set_content("<a href='popup.html' target=_blank>Click me</a>")
 
-    def handle_dialog(dialog: Dialog) -> None:
-        assert dialog.message == "hey?"
-        assert dialog.page == popup
-        dialog.accept("hello")
-
-    page.context.on("dialog", handle_dialog)
-
-    with page.expect_popup() as popup_info:
+    with (
+        page.context.expect_event("dialog") as dialog_info,
+        page.expect_popup() as popup_info,
+    ):
         page.click("a")
-    popup = popup_info.value
+
+    dialog: Dialog = dialog_info.value
+    popup: Page = popup_info.value
+
+    assert dialog.message == "hey?"
+    assert dialog.page == popup
+    dialog.accept("hello")
+
     assert popup.evaluate("window.result") == "hello"
 
 
