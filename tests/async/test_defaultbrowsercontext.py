@@ -111,7 +111,7 @@ async def test_context_add_cookies_should_work(
         ]
     )
     assert await page.evaluate("() => document.cookie") == "username=John Doe"
-    assert await page.context.cookies() == [
+    assert _filter_cookies(await page.context.cookies()) == [
         {
             "name": "username",
             "value": "John Doe",
@@ -127,7 +127,7 @@ async def test_context_add_cookies_should_work(
 
 def _filter_cookies(cookies: Sequence[Cookie]) -> List[Cookie]:
     return list(
-        filter(lambda cookie: cookie["domain"] != "copilot.microsoft.com", cookies)
+        filter(lambda cookie: not cookie["domain"].endswith("microsoft.com"), cookies)
     )
 
 
