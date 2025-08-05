@@ -187,11 +187,9 @@ def test_dialog_event_should_work_with_inline_script_tag(
 
     dialog: Dialog = dialog_info.value
     popup: Page = popup_info.value
-
     assert dialog.message == "hey?"
     assert dialog.page == popup
     dialog.accept("hello")
-
     assert popup.evaluate("window.result") == "hello"
 
 
