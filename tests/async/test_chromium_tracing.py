@@ -114,5 +114,6 @@ async def test_should_support_a_buffer_without_a_path(
 ) -> None:
     await browser.start_tracing(page=page, screenshots=True)
     await page.goto(server.PREFIX + "/grid.html")
+    await rafraf(page)
     trace = await browser.stop_tracing()
     assert "screenshot" in trace.decode()
