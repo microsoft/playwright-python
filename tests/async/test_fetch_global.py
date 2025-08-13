@@ -89,6 +89,17 @@ async def test_should_support_global_timeout_option(
         await request.get(server.EMPTY_PAGE)
 
 
+async def test_should_support_timeout_option_in_get_method(
+    playwright: Playwright, server: Server
+) -> None:
+    request = await playwright.request.new_context()
+    server.set_route("/empty.html", lambda req: None)
+    with pytest.raises(
+        Error, match="APIRequestContext.get: Request timed out after 123ms"
+    ):
+        await request.get(server.EMPTY_PAGE, timeout=123)
+
+
 async def test_should_propagate_extra_http_headers_with_redirects(
     playwright: Playwright, server: Server
 ) -> None:

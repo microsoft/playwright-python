@@ -412,6 +412,7 @@ class APIRequestContext(ChannelOwner):
             self._timeout_settings.timeout,
             {
                 "url": url,
+                "timeout": timeout,
                 "params": object_to_array(params) if isinstance(params, dict) else None,
                 "encodedParams": params if isinstance(params, str) else None,
                 "method": method,
