@@ -94,9 +94,7 @@ async def test_should_support_timeout_option_in_get_method(
 ) -> None:
     request = await playwright.request.new_context()
     server.set_route("/empty.html", lambda req: None)
-    with pytest.raises(
-        Error, match="APIRequestContext.get: Request timed out after 123ms"
-    ):
+    with pytest.raises(Error, match="APIRequestContext.get: Timeout 123ms exceeded."):
         await request.get(server.EMPTY_PAGE, timeout=123)
 
 
