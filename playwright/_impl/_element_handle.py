@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import base64
+import mimetypes
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
@@ -323,6 +324,8 @@ class ElementHandle(JSHandle):
     ) -> bytes:
         params = locals_to_params(locals())
         if "path" in params:
+            if "type" not in params:
+                params["type"] = determine_screenshot_type(params["path"])
             del params["path"]
         if "mask" in params:
             params["mask"] = list(
@@ -450,3 +453,12 @@ def convert_select_option_values(
         elements = list(map(lambda e: e._channel, element))
 
     return dict(options=options, elements=elements)
+
+
+def determine_screenshot_type(path: Union[str, Path]) -> Literal["jpeg", "png"]:
+    mime_type, _ = mimetypes.guess_type(path)
+    if mime_type == "image/png":
+        return "png"
+    if mime_type == "image/jpeg":
+        return "jpeg"
+    raise Error(f'Unsupported screenshot mime type for path "{path}": {mime_type}')

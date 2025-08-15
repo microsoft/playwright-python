@@ -51,7 +51,7 @@ from playwright._impl._connection import (
 )
 from playwright._impl._console_message import ConsoleMessage
 from playwright._impl._download import Download
-from playwright._impl._element_handle import ElementHandle
+from playwright._impl._element_handle import ElementHandle, determine_screenshot_type
 from playwright._impl._errors import Error, TargetClosedError, is_target_closed_error
 from playwright._impl._event_context_manager import EventContextManagerImpl
 from playwright._impl._file_chooser import FileChooser
@@ -800,6 +800,8 @@ class Page(ChannelOwner):
     ) -> bytes:
         params = locals_to_params(locals())
         if "path" in params:
+            if "type" not in params:
+                params["type"] = determine_screenshot_type(params["path"])
             del params["path"]
         if "mask" in params:
             params["mask"] = list(
