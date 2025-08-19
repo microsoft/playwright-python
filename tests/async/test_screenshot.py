@@ -12,11 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from pathlib import Path
 from typing import Callable
+
+from PIL import Image
 
 from playwright.async_api import Page
 from tests.server import Server
 from tests.utils import must
+
+
+def assert_image_file_format(path: Path, image_format: str) -> None:
+    with Image.open(path) as img:
+        assert img.format == image_format
 
 
 async def test_should_screenshot_with_mask(
@@ -43,3 +51,29 @@ async def test_should_screenshot_with_mask(
         ),
         "mask-should-work-with-element-handle.png",
     )
+
+
+async def test_should_infer_screenshot_type_from_path(
+    page: Page, tmp_path: Path
+) -> None:
+    output_png_file = tmp_path / "foo.png"
+    await page.screenshot(path=output_png_file)
+    assert_image_file_format(output_png_file, "PNG")
+
+    output_jpeg_file = tmp_path / "bar.jpeg"
+    await page.screenshot(path=output_jpeg_file)
+    assert_image_file_format(output_jpeg_file, "JPEG")
+
+    output_jpg_file = tmp_path / "bar.jpg"
+    await page.screenshot(path=output_jpg_file)
+    assert_image_file_format(output_jpg_file, "JPEG")
+
+
+async def test_should_screenshot_with_type_argument(page: Page, tmp_path: Path) -> None:
+    output_jpeg_with_png_extension = tmp_path / "foo_jpeg.png"
+    await page.screenshot(path=output_jpeg_with_png_extension, type="jpeg")
+    assert_image_file_format(output_jpeg_with_png_extension, "JPEG")
+
+    output_png_with_jpeg_extension = tmp_path / "bar_png.jpeg"
+    await page.screenshot(path=output_png_with_jpeg_extension, type="png")
+    assert_image_file_format(output_png_with_jpeg_extension, "PNG")
