@@ -1128,6 +1128,23 @@ async def test_should_work_with_glob() -> None:
         "http://playwright.dev/foo/", "http://playwright.dev/foo/bar?x=y", "./bar?x=y"
     )
 
+    # Case insensitive matching
+    assert url_matches(
+        None, "https://playwright.dev/fooBAR", "HtTpS://pLaYwRiGhT.dEv/fooBAR"
+    )
+    assert url_matches(
+        "http://ignored",
+        "https://playwright.dev/fooBAR",
+        "HtTpS://pLaYwRiGhT.dEv/fooBAR",
+    )
+    # Path and search query are case-sensitive
+    assert not url_matches(
+        None, "https://playwright.dev/foobar", "https://playwright.dev/fooBAR"
+    )
+    assert not url_matches(
+        None, "https://playwright.dev/foobar?a=b", "https://playwright.dev/foobar?A=B"
+    )
+
     # This is not supported, we treat ? as a query separator.
     assert not url_matches(
         None,

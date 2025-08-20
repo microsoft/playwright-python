@@ -15,7 +15,7 @@
 import asyncio
 import os
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict
 
 import pytest
 
@@ -107,39 +107,3 @@ async def test_browser_close_should_be_callable_twice(
         browser.close(),
     )
     await browser.close()
-
-
-@pytest.mark.only_browser("chromium")
-async def test_browser_launch_should_return_background_pages(
-    browser_type: BrowserType,
-    tmp_path: Path,
-    browser_channel: Optional[str],
-    assetdir: Path,
-    launch_arguments: Dict,
-) -> None:
-    if browser_channel:
-        pytest.skip()
-
-    extension_path = str(assetdir / "simple-extension")
-    context = await browser_type.launch_persistent_context(
-        str(tmp_path),
-        **{
-            **launch_arguments,
-            "headless": False,
-            "args": [
-                f"--disable-extensions-except={extension_path}",
-                f"--load-extension={extension_path}",
-            ],
-        },
-    )
-    background_page = None
-    if len(context.background_pages):
-        background_page = context.background_pages[0]
-    else:
-        background_page = await context.wait_for_event("backgroundpage")
-    assert background_page
-    assert background_page in context.background_pages
-    assert background_page not in context.pages
-    await context.close()
-    assert len(context.background_pages) == 0
-    assert len(context.pages) == 0

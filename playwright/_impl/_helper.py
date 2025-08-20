@@ -29,6 +29,7 @@ from typing import (
     Optional,
     Pattern,
     Set,
+    Tuple,
     TypedDict,
     TypeVar,
     Union,
@@ -221,12 +222,33 @@ def resolve_glob_base(base_url: Optional[str], match: str) -> str:
             processed_parts.append(new_prefix + new_suffix)
 
     relative_path = "/".join(processed_parts)
-    resolved_url = urljoin(base_url if base_url is not None else "", relative_path)
+    resolved_url, case_insensitive_part = resolve_base_url(base_url, relative_path)
 
     for replacement, original in token_map.items():
-        resolved_url = resolved_url.replace(replacement, original, 1)
+        normalize = case_insensitive_part and replacement in case_insensitive_part
+        resolved_url = resolved_url.replace(
+            replacement, original.lower() if normalize else original, 1
+        )
 
     return ensure_trailing_slash(resolved_url)
+
+
+def resolve_base_url(
+    base_url: Optional[str], given_url: str
+) -> Tuple[str, Optional[str]]:
+    try:
+        resolved = urljoin(base_url if base_url is not None else "", given_url)
+        parsed = urlparse(resolved)
+        # Schema and domain are case-insensitive.
+        hostname_port = (
+            parsed.hostname or ""
+        )  # can't use parsed.netloc because it includes userinfo (username:password)
+        if parsed.port:
+            hostname_port += f":{parsed.port}"
+        case_insensitive_prefix = f"{parsed.scheme}://{hostname_port}"
+        return resolved, case_insensitive_prefix
+    except Exception:
+        return given_url, None
 
 
 # In Node.js, new URL('http://localhost') returns 'http://localhost/'.
