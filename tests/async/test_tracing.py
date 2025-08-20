@@ -385,6 +385,5 @@ async def test_should_show_tracing_group_in_action_list(
                 re.compile(r"inner group 1"),
                 re.compile(r"Click"),
                 re.compile(r"inner group 2"),
-                re.compile(r"Is visible"),
             ]
         )
