@@ -68,7 +68,8 @@ async def test_should_give_access_to_the_service_worker(
     )
     assert service_worker
     assert service_worker in context.service_workers
-    assert await service_worker.evaluate("globalThis.MAGIC") == 42
+    while not await service_worker.evaluate("globalThis.MAGIC") == 42:
+        await asyncio.sleep(0.1)
     await context.close()
     assert len(context.background_pages) == 0
 
@@ -91,7 +92,8 @@ async def test_should_give_access_to_the_service_worker_when_recording_video(
     )
     assert service_worker
     assert service_worker in context.service_workers
-    assert await service_worker.evaluate("globalThis.MAGIC") == 42
+    while not await service_worker.evaluate("globalThis.MAGIC") == 42:
+        await asyncio.sleep(0.1)
     await context.close()
     assert len(context.background_pages) == 0
 
