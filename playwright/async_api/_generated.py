@@ -11487,8 +11487,8 @@ class Page(AsyncContextManager):
     async def pause(self) -> None:
         """Page.pause
 
-        Pauses script execution. Playwright will stop executing the script and wait for the user to either press 'Resume'
-        button in the page overlay or to call `playwright.resume()` in the DevTools console.
+        Pauses script execution. Playwright will stop executing the script and wait for the user to either press the
+        'Resume' button in the page overlay or to call `playwright.resume()` in the DevTools console.
 
         User can inspect selectors or perform manual steps while paused. Resume will continue running the original script
         from the place it was paused.
@@ -13921,6 +13921,10 @@ class Browser(AsyncContextManager):
             `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
             with an exact match to the request origin that the certificate is valid for.
 
+            Client certificate authentication is only active when at least one client certificate is provided. If you want to
+            reject all client certificates sent by the server, you need to provide a client certificate with an `origin` that
+            does not match any of the domains you plan to visit.
+
             **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
             work by replacing `localhost` with `local.playwright`.
 
@@ -14151,6 +14155,10 @@ class Browser(AsyncContextManager):
             a single `pfxPath`, or their corresponding direct value equivalents (`cert` and `key`, or `pfx`). Optionally,
             `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
             with an exact match to the request origin that the certificate is valid for.
+
+            Client certificate authentication is only active when at least one client certificate is provided. If you want to
+            reject all client certificates sent by the server, you need to provide a client certificate with an `origin` that
+            does not match any of the domains you plan to visit.
 
             **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
             work by replacing `localhost` with `local.playwright`.
@@ -14559,6 +14567,13 @@ class BrowserType(AsyncBase):
             **parent** directory of the "Profile Path" seen at `chrome://version`.
 
             Note that browsers do not allow launching multiple instances with the same User Data Directory.
+
+            **NOTE** Chromium/Chrome: Due to recent Chrome policy changes, automating the default Chrome user profile is not
+            supported. Pointing `userDataDir` to Chrome's main "User Data" directory (the profile used for your regular
+            browsing) may result in pages not loading or the browser exiting. Create and use a separate directory (for example,
+            an empty folder) as your automation profile instead. See https://developer.chrome.com/blog/remote-debugging-port
+            for details.
+
         channel : Union[str, None]
             Browser distribution channel.
 
@@ -14732,6 +14747,10 @@ class BrowserType(AsyncBase):
             a single `pfxPath`, or their corresponding direct value equivalents (`cert` and `key`, or `pfx`). Optionally,
             `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
             with an exact match to the request origin that the certificate is valid for.
+
+            Client certificate authentication is only active when at least one client certificate is provided. If you want to
+            reject all client certificates sent by the server, you need to provide a client certificate with an `origin` that
+            does not match any of the domains you plan to visit.
 
             **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
             work by replacing `localhost` with `local.playwright`.
@@ -18800,6 +18819,10 @@ class APIRequest(AsyncBase):
             a single `pfxPath`, or their corresponding direct value equivalents (`cert` and `key`, or `pfx`). Optionally,
             `passphrase` property should be provided if the certificate is encrypted. The `origin` property should be provided
             with an exact match to the request origin that the certificate is valid for.
+
+            Client certificate authentication is only active when at least one client certificate is provided. If you want to
+            reject all client certificates sent by the server, you need to provide a client certificate with an `origin` that
+            does not match any of the domains you plan to visit.
 
             **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
             work by replacing `localhost` with `local.playwright`.
