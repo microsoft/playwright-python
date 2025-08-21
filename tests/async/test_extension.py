@@ -12,12 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
 from pathlib import Path
 from typing import Any, Awaitable, Callable, Dict, Generator, Optional
 
 import pytest
 
 from playwright.async_api import BrowserContext, BrowserType
+
+from ..server import Server
 
 
 @pytest.fixture()
@@ -91,3 +94,24 @@ async def test_should_give_access_to_the_service_worker_when_recording_video(
     assert await service_worker.evaluate("globalThis.MAGIC") == 42
     await context.close()
     assert len(context.background_pages) == 0
+
+
+# https://github.com/microsoft/playwright/issues/32762
+@pytest.mark.only_browser("chromium")
+async def test_should_report_console_messages_from_content_script(
+    launch_persistent_context: Any,
+    assetdir: Path,
+    server: Server,
+) -> None:
+    extension_path = str(assetdir / "extension-mv3-with-logging")
+    context: BrowserContext = await launch_persistent_context(extension_path)
+    page = await context.new_page()
+    [message, _] = await asyncio.gather(
+        page.context.wait_for_event(
+            "console",
+            lambda e: "Test console log from a third-party execution context" in e.text,
+        ),
+        page.goto(server.EMPTY_PAGE),
+    )
+    assert "Test console log from a third-party execution context" in message.text
+    await context.close()
