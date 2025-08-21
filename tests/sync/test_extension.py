@@ -14,7 +14,7 @@
 
 from pathlib import Path
 from time import sleep
-from typing import Any, Callable, Dict, Generator, Optional
+from typing import Any, Callable, Dict, Generator, List, Optional
 
 import pytest
 
@@ -28,13 +28,15 @@ def launch_persistent_context(
     tmp_path: Path,
     launch_arguments: Dict[str, Any],
     is_headless_shell: bool,
-) -> Generator[Callable[[str], BrowserContext], None, None]:
+) -> Generator[Callable[..., BrowserContext], None, None]:
     if browser_channel and browser_channel.startswith("chrome"):
         pytest.skip(
             "--load-extension is not supported in Chrome anymore. https://groups.google.com/a/chromium.org/g/chromium-extensions/c/1-g8EFx2BBY/m/S0ET5wPjCAAJ"
         )
     if is_headless_shell:
         pytest.skip("Headless Shell has no support for extensions")
+
+    contexts: List[BrowserContext] = []
 
     def launch(extension_path: str, **kwargs: Any) -> BrowserContext:
         context = browser_type.launch_persistent_context(
@@ -46,23 +48,27 @@ def launch_persistent_context(
                 f"--load-extension={extension_path}",
             ],
         )
+        contexts.append(context)
         return context
 
     yield launch
 
+    for context in contexts:
+        context.close()
+
 
 @pytest.mark.only_browser("chromium")
 def test_should_give_access_to_the_service_worker(
-    launch_persistent_context: Any,
+    launch_persistent_context: Callable[..., BrowserContext],
     assetdir: Path,
 ) -> None:
     extension_path = str(assetdir / "extension-mv3-simple")
-    context: BrowserContext = launch_persistent_context(extension_path)
+    context = launch_persistent_context(extension_path)
     service_workers = context.service_workers
     service_worker = (
         service_workers[0]
         if len(service_workers)
-        else context.wait_for_event("backgroundpage")
+        else context.wait_for_event("serviceworker")
     )
     assert service_worker
     assert service_worker in context.service_workers
@@ -74,19 +80,19 @@ def test_should_give_access_to_the_service_worker(
 
 @pytest.mark.only_browser("chromium")
 def test_should_give_access_to_the_service_worker_when_recording_video(
-    launch_persistent_context: Any,
+    launch_persistent_context: Callable[..., BrowserContext],
     tmp_path: Path,
     assetdir: Path,
 ) -> None:
     extension_path = str(assetdir / "extension-mv3-simple")
-    context: BrowserContext = launch_persistent_context(
+    context = launch_persistent_context(
         extension_path, record_video_dir=(tmp_path / "videos")
     )
     service_workers = context.service_workers
     service_worker = (
         service_workers[0]
         if len(service_workers)
-        else context.wait_for_event("backgroundpage")
+        else context.wait_for_event("serviceworker")
     )
     assert service_worker
     assert service_worker in context.service_workers
