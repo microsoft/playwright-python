@@ -5,10 +5,12 @@
     * create virtual environment, if don't have one: `python -m venv env`
 * activate venv: `source env/bin/activate`
 * install all deps:
-     - `python -m pip install --upgrade pip`
-     - `pip install -r local-requirements.txt`
-     - `pre-commit install`
-     - `pip install -e .`
+```
+python -m pip install --upgrade pip
+pip install -r local-requirements.txt
+pre-commit install
+pip install -e .
+```
 * change driver version in `setup.py`
 * download new driver: `python -m build --wheel`
 * generate API: `./scripts/update_api.sh`
