@@ -457,7 +457,7 @@ def convert_select_option_values(
 
 def determine_screenshot_type(path: Union[str, Path]) -> Literal["jpeg", "png"]:
     mime_type, _ = mimetypes.guess_type(path)
-    if mime_type == "image/png":
+    if mime_type == "image/png" or mime_type is None:
         return "png"
     if mime_type == "image/jpeg":
         return "jpeg"
