@@ -68,6 +68,10 @@ async def test_should_infer_screenshot_type_from_path(
     await page.screenshot(path=output_jpg_file)
     assert_image_file_format(output_jpg_file, "JPEG")
 
+    output_png_file = tmp_path / "foo"
+    await page.screenshot(path=output_png_file)
+    assert_image_file_format(output_png_file, "PNG")
+    
 
 async def test_should_screenshot_with_type_argument(page: Page, tmp_path: Path) -> None:
     output_jpeg_with_png_extension = tmp_path / "foo_jpeg.png"
