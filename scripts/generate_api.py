@@ -57,6 +57,7 @@ from playwright._impl._web_error import WebError
 
 def process_type(value: Any, param: bool = False) -> str:
     value = str(value)
+    value = re.sub("pathlib._local.Path", "pathlib.Path", value)
     value = re.sub(r"<class '([^']+)'>", r"\1", value)
     value = re.sub(r"NoneType", "None", value)
     value = re.sub(r"playwright\._impl\._api_structures.([\w]+)", r"\1", value)

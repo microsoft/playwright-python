@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import json
+import pathlib
 import re
 import subprocess
 from sys import stderr
@@ -359,6 +360,8 @@ class DocumentationProvider:
         match = re.match(r"^<class '((?:pathlib\.)?\w+)'>$", str_value)
         if match:
             return match.group(1)
+        if str_value == str(pathlib.Path):
+            return "pathlib.Path"
         match = re.match(
             r"playwright._impl._event_context_manager.EventContextManagerImpl\[playwright._impl.[^.]+.(.*)\]",
             str_value,
