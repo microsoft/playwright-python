@@ -367,7 +367,6 @@ class Connection(EventEmitter):
             getattr(task, "__pw_stack_trace__", traceback.extract_stack(limit=10)),
         )
         callback.no_reply = no_reply
-        self._callbacks[id] = callback
         stack_trace_information = cast(ParsedStackTrace, self._api_zone.get())
         frames = stack_trace_information.get("frames", [])
         location = (
@@ -399,8 +398,8 @@ class Connection(EventEmitter):
         if self._tracing_count > 0 and frames and object._guid != "localUtils":
             self.local_utils.add_stack_to_tracing_no_reply(id, frames)
 
-        self._transport.send(message)
         self._callbacks[id] = callback
+        self._transport.send(message)
 
         return callback
 
