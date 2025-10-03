@@ -1145,6 +1145,10 @@ async def test_should_work_with_glob() -> None:
         None, "https://playwright.dev/foobar?a=b", "https://playwright.dev/foobar?A=B"
     )
 
+    assert url_matches(None, "https://localhost:3000/?a=b", "**/?a=b")
+    assert url_matches(None, "https://localhost:3000/?a=b", "**?a=b")
+    assert url_matches(None, "https://localhost:3000/?a=b", "**=b")
+
     # This is not supported, we treat ? as a query separator.
     assert not url_matches(
         None,
@@ -1190,7 +1194,7 @@ async def test_should_work_with_glob() -> None:
         "custom://example.com/foo/bar?id=123",
         "{custom,another}://example.com/foo/bar?id=123",
     )
-    assert not url_matches(
+    assert url_matches(
         None, "custom://example.com/foo/bar?id=123", "**example.com/foo/bar?id=123"
     )
 

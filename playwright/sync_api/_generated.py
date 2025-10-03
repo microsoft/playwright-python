@@ -12342,6 +12342,49 @@ class Page(SyncContextManager):
             self._sync(self._impl_obj.remove_locator_handler(locator=locator._impl_obj))
         )
 
+    def requests(self) -> typing.List["Request"]:
+        """Page.requests
+
+        Returns up to (currently) 100 last network request from this page. See `page.on('request')` for more details.
+
+        Returned requests should be accessed immediately, otherwise they might be collected to prevent unbounded memory
+        growth as new requests come in. Once collected, retrieving most information about the request is impossible.
+
+        Note that requests reported through the `page.on('request')` request are not collected, so there is a trade off
+        between efficient memory usage with `page.requests()` and the amount of available information reported
+        through `page.on('request')`.
+
+        Returns
+        -------
+        List[Request]
+        """
+
+        return mapping.from_impl_list(self._sync(self._impl_obj.requests()))
+
+    def console_messages(self) -> typing.List["ConsoleMessage"]:
+        """Page.console_messages
+
+        Returns up to (currently) 200 last console messages from this page. See `page.on('console')` for more details.
+
+        Returns
+        -------
+        List[ConsoleMessage]
+        """
+
+        return mapping.from_impl_list(self._sync(self._impl_obj.console_messages()))
+
+    def page_errors(self) -> typing.List["Error"]:
+        """Page.page_errors
+
+        Returns up to (currently) 200 last page errors from this page. See `page.on('page_error')` for more details.
+
+        Returns
+        -------
+        List[Error]
+        """
+
+        return mapping.from_impl_list(self._sync(self._impl_obj.page_errors()))
+
 
 mapping.register(PageImpl, Page)
 
@@ -12383,13 +12426,7 @@ class BrowserContext(SyncContextManager):
         self, event: Literal["backgroundpage"], f: typing.Callable[["Page"], "None"]
     ) -> None:
         """
-        **NOTE** Only works with Chromium browser's persistent context.
-
-        Emitted when new background page is created in the context.
-
-        ```py
-        background_page = context.wait_for_event(\"backgroundpage\")
-        ```"""
+        This event is not emitted."""
 
     @typing.overload
     def on(
@@ -12529,13 +12566,7 @@ class BrowserContext(SyncContextManager):
         self, event: Literal["backgroundpage"], f: typing.Callable[["Page"], "None"]
     ) -> None:
         """
-        **NOTE** Only works with Chromium browser's persistent context.
-
-        Emitted when new background page is created in the context.
-
-        ```py
-        background_page = context.wait_for_event(\"backgroundpage\")
-        ```"""
+        This event is not emitted."""
 
     @typing.overload
     def once(
@@ -12701,9 +12732,7 @@ class BrowserContext(SyncContextManager):
     def background_pages(self) -> typing.List["Page"]:
         """BrowserContext.background_pages
 
-        **NOTE** Background pages are only supported on Chromium-based browsers.
-
-        All existing background pages in the context.
+        Returns an empty list.
 
         Returns
         -------
@@ -16680,7 +16709,7 @@ class Locator(SyncBase):
         The following example finds a button with a specific title.
 
         ```py
-        button = page.get_by_role(\"button\").and_(page.getByTitle(\"Subscribe\"))
+        button = page.get_by_role(\"button\").and_(page.get_by_title(\"Subscribe\"))
         ```
 
         Parameters
