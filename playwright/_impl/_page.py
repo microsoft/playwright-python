@@ -345,8 +345,6 @@ class Page(ChannelOwner):
         self._is_closed = True
         if self in self._browser_context._pages:
             self._browser_context._pages.remove(self)
-        if self in self._browser_context._background_pages:
-            self._browser_context._background_pages.remove(self)
         self._dispose_har_routers()
         self.emit(Page.Events.Close, self)
 
