@@ -218,6 +218,7 @@ class FrameExpectResult(TypedDict):
     matches: bool
     received: Any
     log: List[str]
+    errorMessage: Optional[str]
 
 
 AriaRole = Literal[
