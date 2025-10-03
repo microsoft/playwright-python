@@ -529,12 +529,10 @@ async def test_page_route_should_work_with_encoded_server___2(
 
     await page.route("**/*", _handle)
 
-    response = await page.goto(
+    await page.set_content(
         f"""data:text/html,<link rel="stylesheet" href="{server.PREFIX}/fonts?helvetica|arial"/>"""
     )
-    assert response is None
-    # TODO: https://github.com/microsoft/playwright/issues/12789
-    assert len(requests) >= 1
+    assert len(requests) == 1
     assert (must(await requests[0].response())).status == 404
 
 
