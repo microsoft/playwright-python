@@ -107,7 +107,7 @@ async def test_console_should_trigger_correct_log(page: Page, server: Server) ->
     async with page.expect_console_message() as message_info:
         await page.evaluate("async url => fetch(url).catch(e => {})", server.EMPTY_PAGE)
     message = await message_info.value
-    assert "Access-Control-Allow-Origin" in message.text
+    assert "Access-Control-Allow-Origin" in message.text or "CORS" in message.text
     assert message.type == "error"
 
 

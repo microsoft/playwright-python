@@ -492,7 +492,7 @@ def test_to_have_values_fails_when_multiple_not_specified(
     )
     locator = page.locator("select")
     locator.select_option(["B"])
-    with pytest.raises(Error) as excinfo:
+    with pytest.raises(AssertionError) as excinfo:
         expect(locator).to_have_values(["R", "G"], timeout=500)
     assert "Error: Not a select element with a multiple attribute" in str(excinfo.value)
 
@@ -506,7 +506,7 @@ def test_to_have_values_fails_when_not_a_select_element(
     """
     )
     locator = page.locator("input")
-    with pytest.raises(Error) as excinfo:
+    with pytest.raises(AssertionError) as excinfo:
         expect(locator).to_have_values(["R", "G"], timeout=500)
     assert "Error: Not a select element with a multiple attribute" in str(excinfo.value)
 
@@ -540,7 +540,7 @@ def test_assertions_boolean_checked_with_intermediate_true_and_checked(
     page.set_content("<input type=checkbox></input>")
     page.locator("input").evaluate("e => e.indeterminate = true")
     with pytest.raises(
-        Error, match="Can't assert indeterminate and checked at the same time"
+        AssertionError, match="Can't assert indeterminate and checked at the same time"
     ):
         expect(page.locator("input")).to_be_checked(checked=False, indeterminate=True)
 
@@ -626,7 +626,7 @@ def test_assertions_locator_to_be_editable_throws(page: Page, server: Server) ->
     page.goto(server.EMPTY_PAGE)
     page.set_content("<button disabled>Text</button>")
     with pytest.raises(
-        Error,
+        AssertionError,
         match=r"Element is not an <input>, <textarea>, <select> or \[contenteditable\] and does not have a role allowing \[aria-readonly\]",
     ):
         expect(page.locator("button")).not_to_be_editable()

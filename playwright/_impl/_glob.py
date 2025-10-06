@@ -28,20 +28,12 @@ def glob_to_regex_pattern(glob: str) -> str:
             tokens.append("\\" + char if char in escaped_chars else char)
             i += 1
         elif c == "*":
-            before_deep = glob[i - 1] if i > 0 else None
             star_count = 1
             while i + 1 < len(glob) and glob[i + 1] == "*":
                 star_count += 1
                 i += 1
-            after_deep = glob[i + 1] if i + 1 < len(glob) else None
-            is_deep = (
-                star_count > 1
-                and (before_deep == "/" or before_deep is None)
-                and (after_deep == "/" or after_deep is None)
-            )
-            if is_deep:
-                tokens.append("((?:[^/]*(?:/|$))*)")
-                i += 1
+            if star_count > 1:
+                tokens.append("(.*)")
             else:
                 tokens.append("([^/]*)")
         else:

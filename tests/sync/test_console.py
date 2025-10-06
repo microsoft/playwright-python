@@ -109,7 +109,10 @@ def test_console_should_trigger_correct_Log(page: Page, server: Server) -> None:
     page.goto("about:blank")
     with page.expect_console_message() as message:
         page.evaluate("url => fetch(url).catch(e => {})", server.EMPTY_PAGE)
-    assert "Access-Control-Allow-Origin" in message.value.text
+    assert (
+        "Access-Control-Allow-Origin" in message.value.text
+        or "CORS" in message.value.text
+    )
     assert message.value.type == "error"
 
 

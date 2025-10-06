@@ -79,6 +79,7 @@ from playwright._impl._helper import (
     async_writefile,
     locals_to_params,
     make_dirs_for_file,
+    parse_error,
     serialize_error,
     url_matches,
 )
@@ -344,8 +345,6 @@ class Page(ChannelOwner):
         self._is_closed = True
         if self in self._browser_context._pages:
             self._browser_context._pages.remove(self)
-        if self in self._browser_context._background_pages:
-            self._browser_context._background_pages.remove(self)
         self._dispose_har_routers()
         self.emit(Page.Events.Close, self)
 
@@ -1433,6 +1432,23 @@ class Page(ChannelOwner):
                     None,
                     {"uid": uid},
                 )
+
+    async def requests(self) -> List[Request]:
+        request_objects = await self._channel.send("requests", None)
+        return [from_channel(r) for r in request_objects]
+
+    async def console_messages(self) -> List[ConsoleMessage]:
+        message_dicts = await self._channel.send("consoleMessages", None)
+        return [
+            ConsoleMessage(
+                {**event, "page": self._channel}, self._loop, self._dispatcher_fiber
+            )
+            for event in message_dicts
+        ]
+
+    async def page_errors(self) -> List[Error]:
+        error_objects = await self._channel.send("pageErrors", None)
+        return [parse_error(error["error"]) for error in error_objects]
 
 
 class Worker(ChannelOwner):

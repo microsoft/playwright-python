@@ -88,6 +88,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
 class BrowserContext(ChannelOwner):
     Events = SimpleNamespace(
+        # Deprecated in v1.56, never emitted anymore.
         BackgroundPage="backgroundpage",
         Close="close",
         Console="console",
@@ -117,7 +118,6 @@ class BrowserContext(ChannelOwner):
         self._timeout_settings = TimeoutSettings(None)
         self._owner_page: Optional[Page] = None
         self._options: Dict[str, Any] = initializer["options"]
-        self._background_pages: Set[Page] = set()
         self._service_workers: Set[Worker] = set()
         self._base_url: Optional[str] = self._options.get("baseURL")
         self._videos_dir: Optional[str] = self._options.get("recordVideo")
@@ -148,10 +148,6 @@ class BrowserContext(ChannelOwner):
                     from_channel(params["webSocketRoute"]),
                 )
             ),
-        )
-        self._channel.on(
-            "backgroundPage",
-            lambda params: self._on_background_page(from_channel(params["page"])),
         )
 
         self._channel.on(
@@ -658,10 +654,6 @@ class BrowserContext(ChannelOwner):
     ) -> EventContextManagerImpl[Page]:
         return self.expect_event(BrowserContext.Events.Page, predicate, timeout)
 
-    def _on_background_page(self, page: Page) -> None:
-        self._background_pages.add(page)
-        self.emit(BrowserContext.Events.BackgroundPage, page)
-
     def _on_service_worker(self, worker: Worker) -> None:
         worker._context = self
         self._service_workers.add(worker)
@@ -736,7 +728,7 @@ class BrowserContext(ChannelOwner):
 
     @property
     def background_pages(self) -> List[Page]:
-        return list(self._background_pages)
+        return []
 
     @property
     def service_workers(self) -> List[Worker]:

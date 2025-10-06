@@ -80,8 +80,10 @@ class AssertionsBase:
                 out_message = (
                     f"{message} '{expected}'" if expected is not None else f"{message}"
                 )
+            error_message = result.get("errorMessage")
+            error_message = f"\n{error_message}" if error_message else ""
             raise AssertionError(
-                f"{out_message}\nActual value: {actual} {format_call_log(result.get('log'))}"
+                f"{out_message}\nActual value: {actual}{error_message} {format_call_log(result.get('log'))}"
             )
 
 

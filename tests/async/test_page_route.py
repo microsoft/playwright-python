@@ -529,12 +529,10 @@ async def test_page_route_should_work_with_encoded_server___2(
 
     await page.route("**/*", _handle)
 
-    response = await page.goto(
+    await page.set_content(
         f"""data:text/html,<link rel="stylesheet" href="{server.PREFIX}/fonts?helvetica|arial"/>"""
     )
-    assert response is None
-    # TODO: https://github.com/microsoft/playwright/issues/12789
-    assert len(requests) >= 1
+    assert len(requests) == 1
     assert (must(await requests[0].response())).status == 404
 
 
@@ -1145,6 +1143,10 @@ async def test_should_work_with_glob() -> None:
         None, "https://playwright.dev/foobar?a=b", "https://playwright.dev/foobar?A=B"
     )
 
+    assert url_matches(None, "https://localhost:3000/?a=b", "**/?a=b")
+    assert url_matches(None, "https://localhost:3000/?a=b", "**?a=b")
+    assert url_matches(None, "https://localhost:3000/?a=b", "**=b")
+
     # This is not supported, we treat ? as a query separator.
     assert not url_matches(
         None,
@@ -1190,7 +1192,7 @@ async def test_should_work_with_glob() -> None:
         "custom://example.com/foo/bar?id=123",
         "{custom,another}://example.com/foo/bar?id=123",
     )
-    assert not url_matches(
+    assert url_matches(
         None, "custom://example.com/foo/bar?id=123", "**example.com/foo/bar?id=123"
     )
 
