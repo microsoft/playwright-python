@@ -204,3 +204,13 @@ def test_should_snapshot_with_restored_contain_mode_inside_deep_equal(
               - listitem: 1.1
       """,
     )
+
+
+def test_match_values_both_against_regex_and_string(page: Page) -> None:
+    page.set_content('<a href="/auth?r=/">Log in</a>')
+    expect(page.locator("body")).to_match_aria_snapshot(
+        """
+        - link "Log in":
+          - /url: /auth?r=/
+      """,
+    )
