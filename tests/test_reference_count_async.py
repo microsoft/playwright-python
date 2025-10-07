@@ -13,6 +13,8 @@
 # limitations under the License.
 
 import gc
+import os
+import tempfile
 from collections import defaultdict
 from typing import Any
 
@@ -71,3 +73,62 @@ async def test_memory_objects(server: Server, browser_name: str) -> None:
     assert "Dialog" not in pw_objects
     assert "Request" not in pw_objects
     assert "Route" not in pw_objects
+
+
+@pytest.mark.asyncio
+async def test_tracing_should_not_leak_protocol_callbacks(browser_name: str) -> None:
+    """
+    Regression test for https://github.com/microsoft/playwright-python/issues/2977
+
+    This test ensures that ProtocolCallback objects don't accumulate when tracing is enabled.
+    The memory leak occurred because no_reply callbacks were created with circular references
+    but never cleaned up.
+    """
+
+    def count_protocol_callbacks() -> int:
+        """Count ProtocolCallback objects in memory."""
+        gc.collect()
+        count = 0
+        for obj in gc.get_objects():
+            if (
+                hasattr(obj, "__class__")
+                and obj.__class__.__name__ == "ProtocolCallback"
+            ):
+                count += 1
+        return count
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        trace_file = os.path.join(temp_dir, "test_trace.zip")
+
+        async with async_playwright() as p:
+            browser = await p[browser_name].launch()
+            context = await browser.new_context()
+
+            # Start tracing to trigger the creation of no_reply callbacks
+            await context.tracing.start(screenshots=True, snapshots=True)
+
+            initial_count = count_protocol_callbacks()
+
+            # Perform operations that would create tracing callbacks
+            for _ in range(3):
+                page = await context.new_page()
+                await page.goto("data:text/html,<h1>Test Page</h1>")
+                await page.wait_for_load_state("networkidle")
+                await page.evaluate(
+                    "document.querySelector('h1').textContent = 'Modified'"
+                )
+                await page.close()
+
+            # Stop tracing
+            await context.tracing.stop(path=trace_file)
+            await browser.close()
+
+    # Force garbage collection and check callback count
+    gc.collect()
+    final_count = count_protocol_callbacks()
+
+    # The key assertion: callback count should not have increased significantly
+    # Allow for a small number of legitimate callbacks but ensure no major leak
+    assert (
+        final_count - initial_count <= 5
+    ), f"ProtocolCallback leak detected: initial={initial_count}, final={final_count}, leaked={final_count - initial_count}"
