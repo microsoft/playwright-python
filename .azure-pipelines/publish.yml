@@ -74,8 +74,8 @@ extends:
               # contentsource: 'folder'
               folderlocation: '$(Build.ArtifactStagingDirectory)/esrp-build'
               waitforreleasecompletion: true
-              owners: 'maxschmitt@microsoft.com'
-              approvers: 'maxschmitt@microsoft.com'
+              owners: 'yurys@microsoft.com'
+              approvers: 'yurys@microsoft.com'
               serviceendpointurl: 'https://api.esrp.microsoft.com'
               mainpublisher: 'Playwright'
               domaintenantid: '975f013f-7f24-47e8-a7d3-abc4752bf346'
