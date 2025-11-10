@@ -12924,6 +12924,8 @@ class BrowserContext(AsyncContextManager):
             - `'clipboard-write'`
             - `'geolocation'`
             - `'gyroscope'`
+            - `'local-fonts'`
+            - `'local-network-access'`
             - `'magnetometer'`
             - `'microphone'`
             - `'midi-sysex'` (system-exclusive midi)
@@ -12931,7 +12933,6 @@ class BrowserContext(AsyncContextManager):
             - `'notifications'`
             - `'payment-handler'`
             - `'storage-access'`
-            - `'local-fonts'`
         origin : Union[str, None]
             The [origin] to grant permissions to, e.g. "https://example.com".
         """
