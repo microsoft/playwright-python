@@ -1320,6 +1320,106 @@ async def test_drag_and_drop_with_position(page: Page, server: Server) -> None:
     ]
 
 
+async def test_drag_and_drop_with_tweened_mouse_movement(page: Page) -> None:
+    await page.set_content(
+        """
+        <body style="margin: 0; padding: 0;">
+          <div style="width:100px;height:100px;background:red;" id="red"></div>
+          <div style="width:300px;height:100px;background:blue;" id="blue"></div>
+        </body>
+        """
+    )
+    events_handle = await page.evaluate_handle(
+        """
+        () => {
+            const events = [];
+            document.addEventListener('mousedown', event => {
+                events.push({
+                    type: 'mousedown',
+                    x: event.pageX,
+                    y: event.pageY,
+                });
+            });
+            document.addEventListener('mouseup', event => {
+                events.push({
+                    type: 'mouseup',
+                    x: event.pageX,
+                    y: event.pageY,
+                });
+            });
+            document.addEventListener('mousemove', event => {
+                events.push({
+                    type: 'mousemove',
+                    x: event.pageX,
+                    y: event.pageY,
+                });
+            });
+            return events;
+        }
+        """
+    )
+    await page.drag_and_drop("#red", "#blue", steps=4)
+    assert await events_handle.json_value() == [
+        {"type": "mousemove", "x": 50, "y": 50},
+        {"type": "mousedown", "x": 50, "y": 50},
+        {"type": "mousemove", "x": 75, "y": 75},
+        {"type": "mousemove", "x": 100, "y": 100},
+        {"type": "mousemove", "x": 125, "y": 125},
+        {"type": "mousemove", "x": 150, "y": 150},
+        {"type": "mouseup", "x": 150, "y": 150},
+    ]
+
+
+async def test_locator_drag_to_with_tweened_mouse_movement(page: Page) -> None:
+    await page.set_content(
+        """
+        <body style="margin: 0; padding: 0;">
+          <div style="width:100px;height:100px;background:red;" id="red"></div>
+          <div style="width:300px;height:100px;background:blue;" id="blue"></div>
+        </body>
+        """
+    )
+    events_handle = await page.evaluate_handle(
+        """
+        () => {
+            const events = [];
+            document.addEventListener('mousedown', event => {
+                events.push({
+                    type: 'mousedown',
+                    x: event.pageX,
+                    y: event.pageY,
+                });
+            });
+            document.addEventListener('mouseup', event => {
+                events.push({
+                    type: 'mouseup',
+                    x: event.pageX,
+                    y: event.pageY,
+                });
+            });
+            document.addEventListener('mousemove', event => {
+                events.push({
+                    type: 'mousemove',
+                    x: event.pageX,
+                    y: event.pageY,
+                });
+            });
+            return events;
+        }
+        """
+    )
+    await page.locator("#red").drag_to(page.locator("#blue"), steps=4)
+    assert await events_handle.json_value() == [
+        {"type": "mousemove", "x": 50, "y": 50},
+        {"type": "mousedown", "x": 50, "y": 50},
+        {"type": "mousemove", "x": 75, "y": 75},
+        {"type": "mousemove", "x": 100, "y": 100},
+        {"type": "mousemove", "x": 125, "y": 125},
+        {"type": "mousemove", "x": 150, "y": 150},
+        {"type": "mouseup", "x": 150, "y": 150},
+    ]
+
+
 async def test_should_check_box_using_set_checked(page: Page) -> None:
     await page.set_content("`<input id='checkbox' type='checkbox'></input>`")
     await page.set_checked("input", True)

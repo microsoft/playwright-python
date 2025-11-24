@@ -18,7 +18,6 @@ from types import FunctionType
 from typing import Any, Dict, List, Match, Optional, Union, cast, get_args, get_origin
 from typing import get_type_hints as typing_get_type_hints
 
-from playwright._impl._accessibility import Accessibility
 from playwright._impl._assertions import (
     APIResponseAssertions,
     LocatorAssertions,
@@ -225,7 +224,6 @@ import datetime
 from typing import Literal
 
 
-from playwright._impl._accessibility import Accessibility as AccessibilityImpl
 from playwright._impl._api_structures import Cookie, SetCookieParam, FloatRect, FilePayload, Geolocation, HttpCredentials, PdfMargins, Position, ProxySettings, ResourceTiming, SourceLocation, StorageState, ClientCertificate, ViewportSize, RemoteAddr, SecurityDetails, RequestSizes, NameValue, TracingGroupLocation
 from playwright._impl._browser import Browser as BrowserImpl
 from playwright._impl._browser_context import BrowserContext as BrowserContextImpl
@@ -265,7 +263,6 @@ generated_types = [
     Touchscreen,
     JSHandle,
     ElementHandle,
-    Accessibility,
     FileChooser,
     Frame,
     FrameLocator,

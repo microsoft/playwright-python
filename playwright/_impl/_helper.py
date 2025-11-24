@@ -35,7 +35,7 @@ from typing import (
     Union,
     cast,
 )
-from urllib.parse import urljoin, urlparse
+from urllib.parse import ParseResult, urljoin, urlparse, urlunparse
 
 from playwright._impl._api_structures import NameValue
 from playwright._impl._errors import (
@@ -210,8 +210,12 @@ def resolve_glob_base(base_url: Optional[str], match: str) -> str:
         # Handle special case of http*://, note that the new schema has to be
         # a web schema so that slashes are properly inserted after domain.
         if index == 0 and token.endswith(":"):
-            # Using a simple replacement for the scheme part
-            processed_parts.append(map_token(token, "http:"))
+            # Replace any pattern with http:
+            if "*" in token or "{" in token:
+                processed_parts.append(map_token(token, "http:"))
+            else:
+                # Preserve explicit schema as is as it may affect trailing slashes after domain.
+                processed_parts.append(token)
             continue
         question_index = token.find("?")
         if question_index == -1:
@@ -222,55 +226,49 @@ def resolve_glob_base(base_url: Optional[str], match: str) -> str:
             processed_parts.append(new_prefix + new_suffix)
 
     relative_path = "/".join(processed_parts)
-    resolved_url, case_insensitive_part = resolve_base_url(base_url, relative_path)
+    resolved, case_insensitive_part = resolve_base_url(base_url, relative_path)
 
-    for replacement, original in token_map.items():
-        normalize = case_insensitive_part and replacement in case_insensitive_part
-        resolved_url = resolved_url.replace(
-            replacement, original.lower() if normalize else original, 1
+    for token, original in token_map.items():
+        normalize = case_insensitive_part and token in case_insensitive_part
+        resolved = resolved.replace(
+            token, original.lower() if normalize else original, 1
         )
 
-    return ensure_trailing_slash(resolved_url)
+    return resolved
 
 
 def resolve_base_url(
     base_url: Optional[str], given_url: str
 ) -> Tuple[str, Optional[str]]:
     try:
-        resolved = urljoin(base_url if base_url is not None else "", given_url)
-        parsed = urlparse(resolved)
+        url = nodelike_urlparse(
+            urljoin(base_url if base_url is not None else "", given_url)
+        )
+        resolved = urlunparse(url)
         # Schema and domain are case-insensitive.
         hostname_port = (
-            parsed.hostname or ""
+            url.hostname or ""
         )  # can't use parsed.netloc because it includes userinfo (username:password)
-        if parsed.port:
-            hostname_port += f":{parsed.port}"
-        case_insensitive_prefix = f"{parsed.scheme}://{hostname_port}"
+        if url.port:
+            hostname_port += f":{url.port}"
+        case_insensitive_prefix = f"{url.scheme}://{hostname_port}"
         return resolved, case_insensitive_prefix
     except Exception:
         return given_url, None
 
 
-# In Node.js, new URL('http://localhost') returns 'http://localhost/'.
-# To ensure the same url matching behavior, do the same.
-def ensure_trailing_slash(url: str) -> str:
-    split = url.split("://", maxsplit=1)
-    if len(split) == 2:
-        # URL parser doesn't like strange/unknown schemes, so we replace it for parsing, then put it back
-        parsable_url = "http://" + split[1]
-    else:
-        # Given current rules, this should never happen _and_ still be a valid matcher. We require the protocol to be part of the match,
-        # so either the user is using a glob that starts with "*" (and none of this code is running), or the user actually has `something://` in `match`
-        parsable_url = url
-    parsed = urlparse(parsable_url, allow_fragments=True)
-    if len(split) == 2:
-        # Replace the scheme that we removed earlier
-        parsed = parsed._replace(scheme=split[0])
-    if parsed.path == "":
-        parsed = parsed._replace(path="/")
-        url = parsed.geturl()
+def nodelike_urlparse(url: str) -> ParseResult:
+    parsed = urlparse(url, allow_fragments=True)
 
-    return url
+    # https://url.spec.whatwg.org/#special-scheme
+    is_special_url = parsed.scheme in ["http", "https", "ws", "wss", "ftp", "file"]
+    if is_special_url:
+        # special urls have a list path, list paths are serialized as follows: https://url.spec.whatwg.org/#url-path-serializer
+        # urllib diverges, so we patch it here
+        if parsed.path == "":
+            parsed = parsed._replace(path="/")
+
+    return parsed
 
 
 class HarLookupResult(TypedDict, total=False):

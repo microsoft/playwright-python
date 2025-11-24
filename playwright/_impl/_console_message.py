@@ -21,6 +21,7 @@ from playwright._impl._js_handle import JSHandle
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._page import Page
+    from playwright._impl._worker import Worker
 
 
 class ConsoleMessage:
@@ -31,6 +32,7 @@ class ConsoleMessage:
         self._loop = loop
         self._dispatcher_fiber = dispatcher_fiber
         self._page: Optional["Page"] = from_nullable_channel(event.get("page"))
+        self._worker: Optional["Worker"] = from_nullable_channel(event.get("worker"))
 
     def __repr__(self) -> str:
         return f"<ConsoleMessage type={self.type} text={self.text}>"
@@ -76,3 +78,7 @@ class ConsoleMessage:
     @property
     def page(self) -> Optional["Page"]:
         return self._page
+
+    @property
+    def worker(self) -> Optional["Worker"]:
+        return self._worker

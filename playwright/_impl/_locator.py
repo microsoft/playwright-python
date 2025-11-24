@@ -14,6 +14,7 @@
 
 import json
 import pathlib
+import re
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -155,9 +156,10 @@ class Locator:
         force: bool = None,
         noWaitAfter: bool = None,
         trial: bool = None,
+        steps: int = None,
     ) -> None:
         params = locals_to_params(locals())
-        return await self._frame.click(self._selector, strict=True, **params)
+        return await self._frame._click(self._selector, strict=True, **params)
 
     async def dblclick(
         self,
@@ -169,6 +171,7 @@ class Locator:
         force: bool = None,
         noWaitAfter: bool = None,
         trial: bool = None,
+        steps: int = None,
     ) -> None:
         params = locals_to_params(locals())
         return await self._frame.dblclick(self._selector, strict=True, **params)
@@ -343,6 +346,20 @@ class Locator:
             f"{self._selector} >> internal:describe={json.dumps(description)}",
         )
 
+    @property
+    def description(self) -> Optional[str]:
+        try:
+            match = re.search(
+                r' >> internal:describe=("(?:[^"\\]|\\.)*")$', self._selector
+            )
+            if match:
+                description = json.loads(match.group(1))
+                if isinstance(description, str):
+                    return description
+        except (json.JSONDecodeError, ValueError):
+            pass
+        return None
+
     def filter(
         self,
         hasText: Union[str, Pattern[str]] = None,
@@ -414,6 +431,7 @@ class Locator:
         trial: bool = None,
         sourcePosition: Position = None,
         targetPosition: Position = None,
+        steps: int = None,
     ) -> None:
         params = locals_to_params(locals())
         del params["target"]

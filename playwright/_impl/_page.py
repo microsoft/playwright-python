@@ -33,7 +33,6 @@ from typing import (
     cast,
 )
 
-from playwright._impl._accessibility import Accessibility
 from playwright._impl._api_structures import (
     AriaRole,
     FilePayload,
@@ -150,7 +149,6 @@ class Page(ChannelOwner):
         WebSocket="websocket",
         Worker="worker",
     )
-    accessibility: Accessibility
     keyboard: Keyboard
     mouse: Mouse
     touchscreen: Touchscreen
@@ -160,7 +158,6 @@ class Page(ChannelOwner):
     ) -> None:
         super().__init__(parent, type, guid, initializer)
         self._browser_context = cast("BrowserContext", parent)
-        self.accessibility = Accessibility(self._channel)
         self.keyboard = Keyboard(self._channel)
         self.mouse = Mouse(self._channel)
         self.touchscreen = Touchscreen(self._channel)
@@ -854,7 +851,7 @@ class Page(ChannelOwner):
         trial: bool = None,
         strict: bool = None,
     ) -> None:
-        return await self._main_frame.click(**locals_to_params(locals()))
+        return await self._main_frame._click(**locals_to_params(locals()))
 
     async def dblclick(
         self,
@@ -1017,6 +1014,7 @@ class Page(ChannelOwner):
         timeout: float = None,
         strict: bool = None,
         trial: bool = None,
+        steps: int = None,
     ) -> None:
         return await self._main_frame.drag_and_drop(**locals_to_params(locals()))
 
@@ -1452,12 +1450,13 @@ class Page(ChannelOwner):
 
 
 class Worker(ChannelOwner):
-    Events = SimpleNamespace(Close="close")
+    Events = SimpleNamespace(Close="close", Console="console")
 
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
+        self._set_event_to_subscription_mapping({Worker.Events.Console: "console"})
         self._channel.on("close", lambda _: self._on_close())
         self._page: Optional[Page] = None
         self._context: Optional["BrowserContext"] = None
@@ -1501,6 +1500,31 @@ class Worker(ChannelOwner):
                 ),
             )
         )
+
+    def expect_event(
+        self,
+        event: str,
+        predicate: Callable = None,
+        timeout: float = None,
+    ) -> EventContextManagerImpl:
+        if timeout is None:
+            if self._page:
+                timeout = self._page._timeout_settings.timeout()
+            elif self._context:
+                timeout = self._context._timeout_settings.timeout()
+            else:
+                timeout = 30000
+        waiter = Waiter(self, f"worker.expect_event({event})")
+        waiter.reject_on_timeout(
+            cast(float, timeout),
+            f'Timeout {timeout}ms exceeded while waiting for event "{event}"',
+        )
+        if event != Worker.Events.Close:
+            waiter.reject_on_event(
+                self, Worker.Events.Close, lambda: TargetClosedError()
+            )
+        waiter.wait_for_event(self, event, predicate)
+        return EventContextManagerImpl(waiter.result())
 
 
 class BindingCall(ChannelOwner):
