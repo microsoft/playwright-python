@@ -35,7 +35,7 @@ from typing import (
     Union,
     cast,
 )
-from urllib.parse import urljoin, urlparse, urlunparse
+from urllib.parse import ParseResult, urljoin, urlparse, urlunparse
 
 from playwright._impl._api_structures import NameValue
 from playwright._impl._errors import (
@@ -241,14 +241,9 @@ def resolve_base_url(
     base_url: Optional[str], given_url: str
 ) -> Tuple[str, Optional[str]]:
     try:
-        url = urlparse(urljoin(base_url if base_url is not None else "", given_url))
-
-        # In Node.js, new URL('http://localhost') returns 'http://localhost/'.
-        if (
-            url.scheme.startswith("http") or url.scheme.startswith("ws")
-        ) and url.path == "":
-            url = url._replace(path="/")
-
+        url = nodelike_urlparse(
+            urljoin(base_url if base_url is not None else "", given_url)
+        )
         resolved = urlunparse(url)
         # Schema and domain are case-insensitive.
         hostname_port = (
@@ -260,6 +255,20 @@ def resolve_base_url(
         return resolved, case_insensitive_prefix
     except Exception:
         return given_url, None
+
+
+def nodelike_urlparse(url: str) -> ParseResult:
+    parsed = urlparse(url, allow_fragments=True)
+
+    # https://url.spec.whatwg.org/#special-scheme
+    is_special_url = parsed.scheme in ["http", "https", "ws", "wss", "ftp", "file"]
+    if is_special_url:
+        # special urls have a list path, list paths are serialized as follows: https://url.spec.whatwg.org/#url-path-serializer
+        # urllib diverges, so we patch it here
+        if parsed.path == "":
+            parsed = parsed._replace(path="/")
+
+    return parsed
 
 
 class HarLookupResult(TypedDict, total=False):
