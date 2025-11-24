@@ -30,7 +30,6 @@ from playwright._impl._assertions import LocatorAssertions as LocatorAssertionsI
 from playwright._impl._assertions import PageAssertions as PageAssertionsImpl
 from playwright.async_api._context_manager import PlaywrightContextManager
 from playwright.async_api._generated import (
-    Accessibility,
     APIRequest,
     APIRequestContext,
     APIResponse,
@@ -150,7 +149,6 @@ expect = Expect()
 __all__ = [
     "expect",
     "async_playwright",
-    "Accessibility",
     "APIRequest",
     "APIRequestContext",
     "APIResponse",

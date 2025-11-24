@@ -688,10 +688,13 @@ class BrowserContext(ChannelOwner):
 
     def _on_console_message(self, event: Dict) -> None:
         message = ConsoleMessage(event, self._loop, self._dispatcher_fiber)
-        self.emit(BrowserContext.Events.Console, message)
+        worker = message.worker
+        if worker:
+            worker.emit(Worker.Events.Console, message)
         page = message.page
         if page:
             page.emit(Page.Events.Console, message)
+        self.emit(BrowserContext.Events.Console, message)
 
     def _on_dialog(self, dialog: Dialog) -> None:
         has_listeners = self.emit(BrowserContext.Events.Dialog, dialog)

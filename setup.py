@@ -21,7 +21,7 @@ import sys
 import zipfile
 from typing import Dict
 
-driver_version = "1.56.1"
+driver_version = "1.57.0-beta-1763718928000"
 
 base_wheel_bundles = [
     {
@@ -102,7 +102,7 @@ def download_driver(zip_name: str) -> None:
     destination_path = "driver/" + zip_file
     if os.path.exists(destination_path):
         return
-    url = "https://playwright.azureedge.net/builds/driver/"
+    url = "https://cdn.playwright.dev/builds/driver/"
     if (
         "-alpha" in driver_version
         or "-beta" in driver_version

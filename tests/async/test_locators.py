@@ -1152,3 +1152,42 @@ async def test_locator_should_ignore_deprecated_is_hidden_and_visible_timeout(
     div = page.locator("div")
     assert await div.is_hidden(timeout=10) is False
     assert await div.is_visible(timeout=10) is True
+
+
+async def test_description_should_return_none_for_locator_without_description(
+    page: Page,
+) -> None:
+    locator = page.locator("button")
+    assert locator.description is None
+
+
+async def test_description_should_return_description_for_locator_with_simple_description(
+    page: Page,
+) -> None:
+    locator = page.locator("button").describe("Submit button")
+    assert locator.description == "Submit button"
+
+
+async def test_description_should_return_description_with_special_characters(
+    page: Page,
+) -> None:
+    locator = page.locator("div").describe("Button with \"quotes\" and 'apostrophes'")
+    assert locator.description == "Button with \"quotes\" and 'apostrophes'"
+
+
+async def test_description_should_return_description_for_chained_locators(
+    page: Page,
+) -> None:
+    locator = page.locator("form").locator("input").describe("Form input field")
+    assert locator.description == "Form input field"
+
+
+async def test_description_should_return_description_for_locator_with_multiple_describe_calls(
+    page: Page,
+) -> None:
+    locator1 = page.locator("foo").describe("First description")
+    assert locator1.description == "First description"
+    locator2 = locator1.locator("button").describe("Second description")
+    assert locator2.description == "Second description"
+    locator3 = locator2.locator("button")
+    assert locator3.description is None

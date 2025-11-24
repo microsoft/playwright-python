@@ -546,6 +546,23 @@ class Frame(ChannelOwner):
         strict: bool = None,
         trial: bool = None,
     ) -> None:
+        await self._click(**locals_to_params(locals()))
+
+    async def _click(
+        self,
+        selector: str,
+        modifiers: Sequence[KeyboardModifier] = None,
+        position: Position = None,
+        delay: float = None,
+        button: MouseButton = None,
+        clickCount: int = None,
+        timeout: float = None,
+        force: bool = None,
+        noWaitAfter: bool = None,
+        strict: bool = None,
+        trial: bool = None,
+        steps: int = None,
+    ) -> None:
         await self._channel.send("click", self._timeout, locals_to_params(locals()))
 
     async def dblclick(
@@ -734,6 +751,7 @@ class Frame(ChannelOwner):
         strict: bool = None,
         timeout: float = None,
         trial: bool = None,
+        steps: int = None,
     ) -> None:
         await self._channel.send(
             "dragAndDrop", self._timeout, locals_to_params(locals())

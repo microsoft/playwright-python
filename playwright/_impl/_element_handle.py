@@ -138,6 +138,7 @@ class ElementHandle(JSHandle):
         force: bool = None,
         noWaitAfter: bool = None,
         trial: bool = None,
+        steps: int = None,
     ) -> None:
         await self._channel.send(
             "click", self._frame._timeout, locals_to_params(locals())
@@ -153,6 +154,7 @@ class ElementHandle(JSHandle):
         force: bool = None,
         noWaitAfter: bool = None,
         trial: bool = None,
+        steps: int = None,
     ) -> None:
         await self._channel.send(
             "dblclick", self._frame._timeout, locals_to_params(locals())

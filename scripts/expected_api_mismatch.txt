@@ -4,9 +4,6 @@
 Parameter not documented: Browser.new_context(default_browser_type=)
 Parameter not documented: Browser.new_page(default_browser_type=)
 
-# We don't expand the type of the return value here.
-Parameter type mismatch in Accessibility.snapshot(return=): documented as Union[{role: str, name: str, value: Union[float, str], description: str, keyshortcuts: str, roledescription: str, valuetext: str, disabled: bool, expanded: bool, focused: bool, modal: bool, multiline: bool, multiselectable: bool, readonly: bool, required: bool, selected: bool, checked: Union["mixed", bool], pressed: Union["mixed", bool], level: int, valuemin: float, valuemax: float, autocomplete: str, haspopup: str, invalid: str, orientation: str, children: List[Dict]}, None], code has Union[Dict, None]
-
 # One vs two arguments in the callback, Python explicitly unions.
 Parameter type mismatch in BrowserContext.route(handler=): documented as Callable[[Route, Request], Union[Any, Any]], code has Union[Callable[[Route, Request], Any], Callable[[Route], Any]]
 Parameter type mismatch in BrowserContext.unroute(handler=): documented as Union[Callable[[Route, Request], Union[Any, Any]], None], code has Union[Callable[[Route, Request], Any], Callable[[Route], Any], None]

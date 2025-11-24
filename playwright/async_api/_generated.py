@@ -18,7 +18,6 @@ import pathlib
 import typing
 from typing import Literal
 
-from playwright._impl._accessibility import Accessibility as AccessibilityImpl
 from playwright._impl._api_structures import (
     ClientCertificate,
     Cookie,
@@ -1458,7 +1457,8 @@ class Mouse(AsyncBase):
         y : float
             Y coordinate relative to the main frame's viewport in CSS pixels.
         steps : Union[int, None]
-            Defaults to 1. Sends intermediate `mousemove` events.
+            Defaults to 1. Sends `n` interpolated `mousemove` events to represent travel between Playwright's current cursor
+            position and the provided destination. When set to 1, emits a single `mousemove` event at the destination location.
         """
 
         return mapping.from_maybe_impl(await self._impl_obj.move(x=x, y=y, steps=steps))
@@ -2084,6 +2084,7 @@ class ElementHandle(JSHandle):
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        steps: typing.Optional[int] = None,
     ) -> None:
         """ElementHandle.click
 
@@ -2126,6 +2127,9 @@ class ElementHandle(JSHandle):
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
+        steps : Union[int, None]
+            Defaults to 1. Sends `n` interpolated `mousemove` events to represent travel between Playwright's current cursor
+            position and the provided destination. When set to 1, emits a single `mousemove` event at the destination location.
         """
 
         return mapping.from_maybe_impl(
@@ -2139,6 +2143,7 @@ class ElementHandle(JSHandle):
                 force=force,
                 noWaitAfter=no_wait_after,
                 trial=trial,
+                steps=steps,
             )
         )
 
@@ -2155,6 +2160,7 @@ class ElementHandle(JSHandle):
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        steps: typing.Optional[int] = None,
     ) -> None:
         """ElementHandle.dblclick
 
@@ -2194,6 +2200,9 @@ class ElementHandle(JSHandle):
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
+        steps : Union[int, None]
+            Defaults to 1. Sends `n` interpolated `mousemove` events to represent travel between Playwright's current cursor
+            position and the provided destination. When set to 1, emits a single `mousemove` event at the destination location.
         """
 
         return mapping.from_maybe_impl(
@@ -2206,6 +2215,7 @@ class ElementHandle(JSHandle):
                 force=force,
                 noWaitAfter=no_wait_after,
                 trial=trial,
+                steps=steps,
             )
         )
 
@@ -3088,72 +3098,6 @@ class ElementHandle(JSHandle):
 
 
 mapping.register(ElementHandleImpl, ElementHandle)
-
-
-class Accessibility(AsyncBase):
-
-    async def snapshot(
-        self,
-        *,
-        interesting_only: typing.Optional[bool] = None,
-        root: typing.Optional["ElementHandle"] = None,
-    ) -> typing.Optional[typing.Dict]:
-        """Accessibility.snapshot
-
-        Captures the current state of the accessibility tree. The returned object represents the root accessible node of
-        the page.
-
-        **NOTE** The Chromium accessibility tree contains nodes that go unused on most platforms and by most screen
-        readers. Playwright will discard them as well for an easier to process tree, unless `interestingOnly` is set to
-        `false`.
-
-        **Usage**
-
-        An example of dumping the entire accessibility tree:
-
-        ```py
-        snapshot = await page.accessibility.snapshot()
-        print(snapshot)
-        ```
-
-        An example of logging the focused node's name:
-
-        ```py
-        def find_focused_node(node):
-            if node.get(\"focused\"):
-                return node
-            for child in (node.get(\"children\") or []):
-                found_node = find_focused_node(child)
-                if found_node:
-                    return found_node
-            return None
-
-        snapshot = await page.accessibility.snapshot()
-        node = find_focused_node(snapshot)
-        if node:
-            print(node[\"name\"])
-        ```
-
-        Parameters
-        ----------
-        interesting_only : Union[bool, None]
-            Prune uninteresting nodes from the tree. Defaults to `true`.
-        root : Union[ElementHandle, None]
-            The root DOM element for the snapshot. Defaults to the whole page.
-
-        Returns
-        -------
-        Union[Dict, None]
-        """
-
-        return mapping.from_maybe_impl(
-            await self._impl_obj.snapshot(
-                interestingOnly=interesting_only, root=mapping.to_impl(root)
-            )
-        )
-
-
-mapping.register(AccessibilityImpl, Accessibility)
 
 
 class FileChooser(AsyncBase):
@@ -5357,6 +5301,7 @@ class Frame(AsyncBase):
         strict: typing.Optional[bool] = None,
         timeout: typing.Optional[float] = None,
         trial: typing.Optional[bool] = None,
+        steps: typing.Optional[int] = None,
     ) -> None:
         """Frame.drag_and_drop
 
@@ -5388,6 +5333,9 @@ class Frame(AsyncBase):
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
+        steps : Union[int, None]
+            Defaults to 1. Sends `n` interpolated `mousemove` events to represent travel between the `mousedown` and `mouseup`
+            of the drag. When set to 1, emits a single `mousemove` event at the destination location.
         """
 
         return mapping.from_maybe_impl(
@@ -5401,6 +5349,7 @@ class Frame(AsyncBase):
                 strict=strict,
                 timeout=timeout,
                 trial=trial,
+                steps=steps,
             )
         )
 
@@ -6600,6 +6549,7 @@ mapping.register(FrameLocatorImpl, FrameLocator)
 
 class Worker(AsyncBase):
 
+    @typing.overload
     def on(
         self,
         event: Literal["close"],
@@ -6608,8 +6558,27 @@ class Worker(AsyncBase):
         """
         Emitted when this dedicated [WebWorker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API) is
         terminated."""
+
+    @typing.overload
+    def on(
+        self,
+        event: Literal["console"],
+        f: typing.Callable[
+            ["ConsoleMessage"], "typing.Union[typing.Awaitable[None], None]"
+        ],
+    ) -> None:
+        """
+        Emitted when JavaScript within the worker calls one of console API methods, e.g. `console.log` or `console.dir`.
+        """
+
+    def on(
+        self,
+        event: str,
+        f: typing.Callable[..., typing.Union[typing.Awaitable[None], None]],
+    ) -> None:
         return super().on(event=event, f=f)
 
+    @typing.overload
     def once(
         self,
         event: Literal["close"],
@@ -6618,6 +6587,24 @@ class Worker(AsyncBase):
         """
         Emitted when this dedicated [WebWorker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API) is
         terminated."""
+
+    @typing.overload
+    def once(
+        self,
+        event: Literal["console"],
+        f: typing.Callable[
+            ["ConsoleMessage"], "typing.Union[typing.Awaitable[None], None]"
+        ],
+    ) -> None:
+        """
+        Emitted when JavaScript within the worker calls one of console API methods, e.g. `console.log` or `console.dir`.
+        """
+
+    def once(
+        self,
+        event: str,
+        f: typing.Callable[..., typing.Union[typing.Awaitable[None], None]],
+    ) -> None:
         return super().once(event=event, f=f)
 
     @property
@@ -6693,6 +6680,47 @@ class Worker(AsyncBase):
             await self._impl_obj.evaluate_handle(
                 expression=expression, arg=mapping.to_impl(arg)
             )
+        )
+
+    def expect_event(
+        self,
+        event: str,
+        predicate: typing.Optional[typing.Callable] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager:
+        """Worker.expect_event
+
+        Waits for event to fire and passes its value into the predicate function. Returns when the predicate returns truthy
+        value. Will throw an error if the page is closed before the event is fired. Returns the event data value.
+
+        **Usage**
+
+        ```py
+        async with worker.expect_event(\"console\") as event_info:
+            await worker.evaluate(\"console.log(42)\")
+        message = await event_info.value
+        ```
+
+        Parameters
+        ----------
+        event : str
+            Event name, same one typically passed into `*.on(event)`.
+        predicate : Union[Callable, None]
+            Receives the event data and resolves to truthy value when the waiting should resolve.
+        timeout : Union[float, None]
+            Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
+            default value can be changed by using the `browser_context.set_default_timeout()`.
+
+        Returns
+        -------
+        EventContextManager
+        """
+
+        return AsyncEventContextManager(
+            self._impl_obj.expect_event(
+                event=event, predicate=self._wrap_handler(predicate), timeout=timeout
+            ).future
         )
 
 
@@ -7050,6 +7078,19 @@ class ConsoleMessage(AsyncBase):
         Union[Page, None]
         """
         return mapping.from_impl_nullable(self._impl_obj.page)
+
+    @property
+    def worker(self) -> typing.Optional["Worker"]:
+        """ConsoleMessage.worker
+
+        The web worker or service worker that produced this console message, if any. Note that console messages from web
+        workers also have non-null `console_message.page()`.
+
+        Returns
+        -------
+        Union[Worker, None]
+        """
+        return mapping.from_impl_nullable(self._impl_obj.worker)
 
 
 mapping.register(ConsoleMessageImpl, ConsoleMessage)
@@ -7824,16 +7865,6 @@ class Page(AsyncContextManager):
         f: typing.Callable[..., typing.Union[typing.Awaitable[None], None]],
     ) -> None:
         return super().once(event=event, f=f)
-
-    @property
-    def accessibility(self) -> "Accessibility":
-        """Page.accessibility
-
-        Returns
-        -------
-        Accessibility
-        """
-        return mapping.from_impl(self._impl_obj.accessibility)
 
     @property
     def keyboard(self) -> "Keyboard":
@@ -10893,6 +10924,7 @@ class Page(AsyncContextManager):
         timeout: typing.Optional[float] = None,
         strict: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        steps: typing.Optional[int] = None,
     ) -> None:
         """Page.drag_and_drop
 
@@ -10940,6 +10972,9 @@ class Page(AsyncContextManager):
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
+        steps : Union[int, None]
+            Defaults to 1. Sends `n` interpolated `mousemove` events to represent travel between the `mousedown` and `mouseup`
+            of the drag. When set to 1, emits a single `mousemove` event at the destination location.
         """
 
         return mapping.from_maybe_impl(
@@ -10953,6 +10988,7 @@ class Page(AsyncContextManager):
                 timeout=timeout,
                 strict=strict,
                 trial=trial,
+                steps=steps,
             )
         )
 
@@ -15338,6 +15374,30 @@ class Locator(AsyncBase):
         """
         return mapping.from_impl(self._impl_obj.content_frame)
 
+    @property
+    def description(self) -> typing.Optional[str]:
+        """Locator.description
+
+        Returns locator description previously set with `locator.describe()`. Returns `null` if no custom
+        description has been set. Prefer `Locator.toString()` for a human-readable representation, as it uses the
+        description when available.
+
+        **Usage**
+
+        ```py
+        button = page.get_by_role(\"button\").describe(\"Subscribe button\")
+        print(button.description())  # \"Subscribe button\"
+
+        input = page.get_by_role(\"textbox\")
+        print(input.description())  # None
+        ```
+
+        Returns
+        -------
+        Union[str, None]
+        """
+        return mapping.from_maybe_impl(self._impl_obj.description)
+
     async def bounding_box(
         self, *, timeout: typing.Optional[float] = None
     ) -> typing.Optional[FloatRect]:
@@ -15457,6 +15517,7 @@ class Locator(AsyncBase):
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        steps: typing.Optional[int] = None,
     ) -> None:
         """Locator.click
 
@@ -15521,6 +15582,9 @@ class Locator(AsyncBase):
             to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
             `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
             are pressed.
+        steps : Union[int, None]
+            Defaults to 1. Sends `n` interpolated `mousemove` events to represent travel between Playwright's current cursor
+            position and the provided destination. When set to 1, emits a single `mousemove` event at the destination location.
         """
 
         return mapping.from_maybe_impl(
@@ -15534,6 +15598,7 @@ class Locator(AsyncBase):
                 force=force,
                 noWaitAfter=no_wait_after,
                 trial=trial,
+                steps=steps,
             )
         )
 
@@ -15550,6 +15615,7 @@ class Locator(AsyncBase):
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        steps: typing.Optional[int] = None,
     ) -> None:
         """Locator.dblclick
 
@@ -15595,6 +15661,9 @@ class Locator(AsyncBase):
             to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
             `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
             are pressed.
+        steps : Union[int, None]
+            Defaults to 1. Sends `n` interpolated `mousemove` events to represent travel between Playwright's current cursor
+            position and the provided destination. When set to 1, emits a single `mousemove` event at the destination location.
         """
 
         return mapping.from_maybe_impl(
@@ -15607,6 +15676,7 @@ class Locator(AsyncBase):
                 force=force,
                 noWaitAfter=no_wait_after,
                 trial=trial,
+                steps=steps,
             )
         )
 
@@ -16750,6 +16820,7 @@ class Locator(AsyncBase):
         trial: typing.Optional[bool] = None,
         source_position: typing.Optional[Position] = None,
         target_position: typing.Optional[Position] = None,
+        steps: typing.Optional[int] = None,
     ) -> None:
         """Locator.drag_to
 
@@ -16796,6 +16867,9 @@ class Locator(AsyncBase):
         target_position : Union[{x: float, y: float}, None]
             Drops on the target element at this point relative to the top-left corner of the element's padding box. If not
             specified, some visible point of the element is used.
+        steps : Union[int, None]
+            Defaults to 1. Sends `n` interpolated `mousemove` events to represent travel between the `mousedown` and `mouseup`
+            of the drag. When set to 1, emits a single `mousemove` event at the destination location.
         """
 
         return mapping.from_maybe_impl(
@@ -16807,6 +16881,7 @@ class Locator(AsyncBase):
                 trial=trial,
                 sourcePosition=source_position,
                 targetPosition=target_position,
+                steps=steps,
             )
         )
 
