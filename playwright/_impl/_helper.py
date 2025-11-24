@@ -244,7 +244,9 @@ def resolve_base_url(
         url = urlparse(urljoin(base_url if base_url is not None else "", given_url))
 
         # In Node.js, new URL('http://localhost') returns 'http://localhost/'.
-        if url.scheme.startswith("http") and url.path == "":
+        if (
+            url.scheme.startswith("http") or url.scheme.startswith("ws")
+        ) and url.path == "":
             url = url._replace(path="/")
 
         resolved = urlunparse(url)
