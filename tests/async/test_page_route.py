@@ -1151,6 +1151,12 @@ async def test_should_work_with_glob() -> None:
     assert url_matches(None, "https://localhost:3000/?a=b", "**?a=b")
     assert url_matches(None, "https://localhost:3000/?a=b", "**=b")
 
+    # Custom schema.
+    assert url_matches(None, "my.custom.protocol://foo", "my.custom.protocol://**")
+    assert not url_matches(None, "my.p://foo", "my.{p,y}://**")
+    assert url_matches(None, "my.p://foo/", "my.{p,y}://**")
+    assert url_matches(None, "file:///foo/", "f*e://**")
+
     # This is not supported, we treat ? as a query separator.
     assert not url_matches(
         None,
