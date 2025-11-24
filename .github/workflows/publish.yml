@@ -25,7 +25,7 @@ jobs:
         # Required for conda-incubator/setup-miniconda@v3
         shell: bash -el {0}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Get conda
