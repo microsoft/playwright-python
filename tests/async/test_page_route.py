@@ -1083,6 +1083,10 @@ async def test_should_work_with_glob() -> None:
         "http://localhost:3000/signin-oidcnice"
     )
 
+    assert glob_to_regex("**/*.js").match("/foo.js")
+    assert not glob_to_regex("asd/**.js").match("/foo.js")
+    assert not glob_to_regex("**/*.js").match("bar_foo.js")
+
     # range [] is NOT supported
     assert glob_to_regex("**/api/v[0-9]").fullmatch("http://example.com/api/v[0-9]")
     assert not glob_to_regex("**/api/v[0-9]").fullmatch(
@@ -1173,6 +1177,10 @@ async def test_should_work_with_glob() -> None:
     )
     assert url_matches("http://first.host/", "http://second.host/foo", "**/foo")
     assert url_matches("http://playwright.dev/", "http://localhost/", "*//localhost/")
+
+    # /**/ should match /.
+    assert url_matches(None, "https://foo/bar.js", "https://foo/**/bar.js")
+    assert url_matches(None, "https://foo/bar.js", "https://foo/**/**/bar.js")
 
     custom_prefixes = ["about", "data", "chrome", "edge", "file"]
     for prefix in custom_prefixes:

@@ -28,12 +28,21 @@ def glob_to_regex_pattern(glob: str) -> str:
             tokens.append("\\" + char if char in escaped_chars else char)
             i += 1
         elif c == "*":
+            char_before = glob[i - 1] if i > 0 else None
             star_count = 1
             while i + 1 < len(glob) and glob[i + 1] == "*":
                 star_count += 1
                 i += 1
             if star_count > 1:
-                tokens.append("(.*)")
+                char_after = glob[i + 1] if i + 1 < len(glob) else None
+                if char_after == "/":
+                    if char_before == "/":
+                        tokens.append("((.+/)|)")
+                    else:
+                        tokens.append("(.*/)")
+                    i += 1
+                else:
+                    tokens.append("(.*)")
             else:
                 tokens.append("([^/]*)")
         else:
