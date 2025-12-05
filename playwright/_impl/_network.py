@@ -66,7 +66,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser_context import BrowserContext
     from playwright._impl._fetch import APIResponse
     from playwright._impl._frame import Frame
-    from playwright._impl._page import Page
+    from playwright._impl._page import Page, Worker
 
 
 class FallbackOverrideParameters(TypedDict, total=False):
@@ -183,6 +183,13 @@ class Request(ChannelOwner):
     @property
     def resource_type(self) -> str:
         return self._initializer["resourceType"]
+
+    @property
+    def service_worker(self) -> Optional["Worker"]:
+        return cast(
+            Optional["Worker"],
+            from_nullable_channel(self._initializer.get("serviceWorker")),
+        )
 
     @property
     def method(self) -> str:
