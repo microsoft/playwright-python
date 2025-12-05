@@ -114,6 +114,24 @@ class Request(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.resource_type)
 
     @property
+    def service_worker(self) -> typing.Optional["Worker"]:
+        """Request.service_worker
+
+        The Service `Worker` that is performing the request.
+
+        **Details**
+
+        This method is Chromium only. It's safe to call when using other browsers, but it will always be `null`.
+
+        Requests originated in a Service Worker do not have a `request.frame()` available.
+
+        Returns
+        -------
+        Union[Worker, None]
+        """
+        return mapping.from_impl_nullable(self._impl_obj.service_worker)
+
+    @property
     def method(self) -> str:
         """Request.method
 

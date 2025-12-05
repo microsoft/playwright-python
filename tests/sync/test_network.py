@@ -92,7 +92,7 @@ def test_should_fulfill_with_global_fetch_result(
     assert response.json() == {"foo": "bar"}
 
 
-def test_should_report_if_request_was_from_service_worker(
+def test_should_report_if_response_was_from_service_worker(
     page: Page, server: Server
 ) -> None:
     response = page.goto(server.PREFIX + "/serviceworkers/fetch/sw.html")
@@ -102,3 +102,15 @@ def test_should_report_if_request_was_from_service_worker(
     with page.expect_response("**/example.txt") as response_info:
         page.evaluate("() => fetch('/example.txt')")
     assert response_info.value.from_service_worker
+
+
+@pytest.mark.only_browser("chromium")
+def test_should_report_service_worker_request(page: Page, server: Server) -> None:
+    with page.context.expect_event("serviceworker") as worker_info:
+        page.goto(server.PREFIX + "/serviceworkers/fetch/sw.html")
+        page.evaluate("() => window.activationPromise")
+    with page.context.expect_event(
+        "request", lambda r: r.service_worker is not None
+    ) as request_info:
+        page.evaluate("() => fetch('/example.txt')")
+    assert request_info.value.service_worker == worker_info.value
