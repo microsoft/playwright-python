@@ -327,6 +327,12 @@ def test_locators_should_upload_a_file(page: Page, server: Server) -> None:
     )
 
 
+def test_locators_upload_nonexistant_file(page: Page, server: Server) -> None:
+    page.goto(server.PREFIX + "/input/fileupload.html")
+    with pytest.raises(FileNotFoundError):
+        page.locator("input[type=file]").set_input_files("nonexistant.html")
+
+
 def test_locators_should_press(page: Page) -> None:
     page.set_content("<input type='text' />")
     page.locator("input").press("h")

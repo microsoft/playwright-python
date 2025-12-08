@@ -14,6 +14,7 @@
 import base64
 import collections.abc
 import os
+import stat
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
@@ -144,7 +145,8 @@ def resolve_paths_and_directory_for_input_files(
     local_paths: Optional[List[str]] = None
     local_directory: Optional[str] = None
     for item in items:
-        if os.path.isdir(item):
+        item_stat = os.stat(item)  # Raises FileNotFoundError if doesn't exist
+        if stat.S_ISDIR(item_stat.st_mode):
             if local_directory:
                 raise Error("Multiple directories are not supported")
             local_directory = str(Path(item).resolve())
