@@ -356,6 +356,8 @@ def normalize_launch_params(params: Dict) -> None:
         if params["ignoreDefaultArgs"] is True:
             params["ignoreAllDefaultArgs"] = True
             del params["ignoreDefaultArgs"]
+        elif params["ignoreDefaultArgs"] is False:
+            del params["ignoreDefaultArgs"]
     if "executablePath" in params:
         params["executablePath"] = str(Path(params["executablePath"]))
     if "downloadsPath" in params:
