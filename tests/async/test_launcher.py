@@ -107,3 +107,12 @@ async def test_browser_close_should_be_callable_twice(
         browser.close(),
     )
     await browser.close()
+
+
+async def test_browser_type_launch_should_accept_ignore_default_args_false(
+    browser_type: BrowserType, launch_arguments: Dict
+) -> None:
+    # Regression for https://github.com/microsoft/playwright-python/issues/3005:
+    # passing False used to crash with "expected array, got boolean".
+    browser = await browser_type.launch(**launch_arguments, ignore_default_args=False)
+    await browser.close()

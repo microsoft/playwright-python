@@ -88,3 +88,10 @@ def test_browser_close_should_be_callable_twice(
     browser = browser_type.launch(**launch_arguments)
     browser.close()
     browser.close()
+
+
+def test_browser_type_launch_should_accept_ignore_default_args_false(
+    browser_type: BrowserType, launch_arguments: Dict
+) -> None:
+    browser = browser_type.launch(**launch_arguments, ignore_default_args=False)
+    browser.close()
