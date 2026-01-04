@@ -105,6 +105,11 @@ class PipeTransport(Transport):
         self._stopped_future: asyncio.Future = asyncio.Future()
 
         try:
+            # Get cwd asynchronously to avoid blocking the event loop.
+            # asyncio.create_subprocess_exec internally calls os.getcwd() when
+            # cwd is not specified, which blocks the event loop in ASGI servers.
+            cwd = await asyncio.to_thread(os.getcwd)
+
             # For pyinstaller and Nuitka
             env = get_driver_env()
             if getattr(sys, "frozen", False) or globals().get("__compiled__"):
@@ -127,6 +132,7 @@ class PipeTransport(Transport):
                 limit=32768,
                 env=env,
                 startupinfo=startupinfo,
+                cwd=cwd,
             )
         except Exception as exc:
             self.on_error_future.set_exception(exc)
