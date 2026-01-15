@@ -4,6 +4,25 @@
 Parameter not documented: Browser.new_context(default_browser_type=)
 Parameter not documented: Browser.new_page(default_browser_type=)
 
+# Hidden/internal property
+Parameter not documented: BrowserType.launch(devtools=)
+Parameter not documented: BrowserType.launch_persistent_context(devtools=)
+
+# JS-only overload (toHaveCSS with CSSProperties object)
+Method not documented: LocatorAssertions.to_have_css
+Method not implemented: LocatorAssertions.to_have_css#1
+
+# PageAgent - Python uses Dict instead of TypedDict for return types and parameters
+# Zod schemas are represented as Dict in Python
+Parameter type mismatch in PageAgent.extract(return=): documented as {result: Any, usage: {turns: int, inputTokens: int, outputTokens: int}}, code has Dict[str, Any]
+Parameter type mismatch in PageAgent.perform(return=): documented as {usage: {turns: int, inputTokens: int, outputTokens: int}}, code has Dict[str, Any]
+Parameter type mismatch in Page.agent(cache=): documented as Union[{cacheFile: Union[str, None], cacheOutFile: Union[str, None]}, None], code has Union[Dict[str, str], None]
+Parameter type mismatch in Page.agent(provider=): documented as Union[{api: Union["anthropic", "google", "openai", "openai-compatible"], apiEndpoint: Union[str, None], apiKey: str, model: str}, None], code has Union[Dict[str, Any], None]
+Parameter type mismatch in PageAgent.extract(schema=): documented as z.ZodSchema, code has Dict[str, Any]
+Parameter type mismatch in PageAgent.expect(timeout=): documented as Union[int, None], code has Union[float, None]
+Parameter type mismatch in PageAgent.extract(timeout=): documented as Union[int, None], code has Union[float, None]
+Parameter type mismatch in PageAgent.perform(timeout=): documented as Union[int, None], code has Union[float, None]
+
 # One vs two arguments in the callback, Python explicitly unions.
 Parameter type mismatch in BrowserContext.route(handler=): documented as Callable[[Route, Request], Union[Any, Any]], code has Union[Callable[[Route, Request], Any], Callable[[Route], Any]]
 Parameter type mismatch in BrowserContext.unroute(handler=): documented as Union[Callable[[Route, Request], Union[Any, Any]], None], code has Union[Callable[[Route, Request], Any], Callable[[Route], Any], None]

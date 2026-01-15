@@ -72,6 +72,7 @@ from playwright._impl._network import WebSocket as WebSocketImpl
 from playwright._impl._network import WebSocketRoute as WebSocketRouteImpl
 from playwright._impl._page import Page as PageImpl
 from playwright._impl._page import Worker as WorkerImpl
+from playwright._impl._page_agent import PageAgent as PageAgentImpl
 from playwright._impl._playwright import Playwright as PlaywrightImpl
 from playwright._impl._selectors import Selectors as SelectorsImpl
 from playwright._impl._sync_base import (
@@ -960,9 +961,12 @@ class Route(SyncBase):
         `route.continue_()` will immediately send the request to the network, other matching handlers won't be
         invoked. Use `route.fallback()` If you want next matching handler in the chain to be invoked.
 
-        **NOTE** The `Cookie` header cannot be overridden using this method. If a value is provided, it will be ignored,
-        and the cookie will be loaded from the browser's cookie store. To set custom cookies, use
-        `browser_context.add_cookies()`.
+        **NOTE** Some request headers are **forbidden** and cannot be overridden (for example, `Cookie`, `Host`,
+        `Content-Length` and others, see
+        [this MDN page](https://developer.mozilla.org/en-US/docs/Glossary/Forbidden_request_header) for full list). If an
+        override is provided for a forbidden header, it will be ignored and the original request header will be used.
+
+        To set custom cookies, use `browser_context.add_cookies()`.
 
         Parameters
         ----------
@@ -7129,6 +7133,7 @@ class ConsoleMessage(SyncBase):
         Literal["startGroup"],
         Literal["startGroupCollapsed"],
         Literal["table"],
+        Literal["time"],
         Literal["timeEnd"],
         Literal["trace"],
         Literal["warning"],
@@ -7137,7 +7142,7 @@ class ConsoleMessage(SyncBase):
 
         Returns
         -------
-        Union["assert", "clear", "count", "debug", "dir", "dirxml", "endGroup", "error", "info", "log", "profile", "profileEnd", "startGroup", "startGroupCollapsed", "table", "timeEnd", "trace", "warning"]
+        Union["assert", "clear", "count", "debug", "dir", "dirxml", "endGroup", "error", "info", "log", "profile", "profileEnd", "startGroup", "startGroupCollapsed", "table", "time", "timeEnd", "trace", "warning"]
         """
         return mapping.from_maybe_impl(self._impl_obj.type)
 
@@ -11602,6 +11607,50 @@ class Page(SyncContextManager):
             )
         )
 
+    def agent(
+        self,
+        *,
+        provider: typing.Optional[typing.Dict[str, typing.Any]] = None,
+        cache: typing.Optional[typing.Dict[str, str]] = None,
+        max_tokens: typing.Optional[int] = None,
+        max_turns: typing.Optional[int] = None,
+        secrets: typing.Optional[typing.Dict[str, str]] = None,
+        system_prompt: typing.Optional[str] = None,
+    ) -> "PageAgent":
+        """Page.agent
+
+        Initialize page agent with the llm provider and cache.
+
+        Parameters
+        ----------
+        provider : Union[Dict[str, Any], None]
+        cache : Union[Dict[str, str], None]
+        max_tokens : Union[int, None]
+        max_turns : Union[int, None]
+            Maximum number of agentic turns to take per call. Defaults to 10.
+        secrets : Union[Dict[str, str], None]
+            Secrets to hide from the LLM.
+        system_prompt : Union[str, None]
+            System prompt for the agent's loop.
+
+        Returns
+        -------
+        PageAgent
+        """
+
+        return mapping.from_impl(
+            self._sync(
+                self._impl_obj.agent(
+                    provider=mapping.to_impl(provider),
+                    cache=mapping.to_impl(cache),
+                    maxTokens=max_tokens,
+                    maxTurns=max_turns,
+                    secrets=mapping.to_impl(secrets),
+                    systemPrompt=system_prompt,
+                )
+            )
+        )
+
     def pause(self) -> None:
         """Page.pause
 
@@ -12423,6 +12472,174 @@ class Page(SyncContextManager):
 
 
 mapping.register(PageImpl, Page)
+
+
+class PageAgent(SyncBase):
+
+    def on(
+        self, event: Literal["turn"], f: typing.Callable[["typing.Dict"], "None"]
+    ) -> None:
+        """
+        Emitted when the agent makes a turn."""
+        return super().on(event=event, f=f)
+
+    def once(
+        self, event: Literal["turn"], f: typing.Callable[["typing.Dict"], "None"]
+    ) -> None:
+        """
+        Emitted when the agent makes a turn."""
+        return super().once(event=event, f=f)
+
+    def expect(
+        self,
+        expectation: str,
+        *,
+        cache_key: typing.Optional[str] = None,
+        max_tokens: typing.Optional[int] = None,
+        max_turns: typing.Optional[int] = None,
+        timeout: typing.Optional[float] = None,
+    ) -> None:
+        """PageAgent.expect
+
+        Expect certain condition to be met.
+
+        **Usage**
+
+        Parameters
+        ----------
+        expectation : str
+            Expectation to assert.
+        cache_key : Union[str, None]
+            All the agentic actions are converted to the Playwright calls and are cached. By default, they are cached globally
+            with the `task` as a key. This option allows controlling the cache key explicitly.
+        max_tokens : Union[int, None]
+            Maximum number of tokens to consume. The agentic loop will stop after input + output tokens exceed this value.
+            Defaults to context-wide value specified in `agent` property.
+        max_turns : Union[int, None]
+            Maximum number of agentic turns during this call, defaults to context-wide value specified in `agent` property.
+        timeout : Union[float, None]
+            Request timeout in milliseconds. Defaults to action timeout. Pass `0` to disable timeout.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.expect(
+                    expectation=expectation,
+                    cacheKey=cache_key,
+                    maxTokens=max_tokens,
+                    maxTurns=max_turns,
+                    timeout=timeout,
+                )
+            )
+        )
+
+    def perform(
+        self,
+        task: str,
+        *,
+        cache_key: typing.Optional[str] = None,
+        max_tokens: typing.Optional[int] = None,
+        max_turns: typing.Optional[int] = None,
+        timeout: typing.Optional[float] = None,
+    ) -> typing.Dict[str, typing.Any]:
+        """PageAgent.perform
+
+        Perform action using agentic loop.
+
+        **Usage**
+
+        Parameters
+        ----------
+        task : str
+            Task to perform using agentic loop.
+        cache_key : Union[str, None]
+            All the agentic actions are converted to the Playwright calls and are cached. By default, they are cached globally
+            with the `task` as a key. This option allows controlling the cache key explicitly.
+        max_tokens : Union[int, None]
+            Maximum number of tokens to consume. The agentic loop will stop after input + output tokens exceed this value.
+            Defaults to context-wide value specified in `agent` property.
+        max_turns : Union[int, None]
+            Maximum number of agentic turns during this call, defaults to context-wide value specified in `agent` property.
+        timeout : Union[float, None]
+            Request timeout in milliseconds. Defaults to action timeout. Pass `0` to disable timeout.
+
+        Returns
+        -------
+        Dict[str, Any]
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.perform(
+                    task=task,
+                    cacheKey=cache_key,
+                    maxTokens=max_tokens,
+                    maxTurns=max_turns,
+                    timeout=timeout,
+                )
+            )
+        )
+
+    def extract(
+        self,
+        query: str,
+        schema: typing.Dict[str, typing.Any],
+        *,
+        cache_key: typing.Optional[str] = None,
+        max_tokens: typing.Optional[int] = None,
+        max_turns: typing.Optional[int] = None,
+        timeout: typing.Optional[float] = None,
+    ) -> typing.Dict[str, typing.Any]:
+        """PageAgent.extract
+
+        Extract information from the page using the agentic loop, return it in a given Zod format.
+
+        **Usage**
+
+        Parameters
+        ----------
+        query : str
+            Task to perform using agentic loop.
+        schema : Dict[str, Any]
+        cache_key : Union[str, None]
+            All the agentic actions are converted to the Playwright calls and are cached. By default, they are cached globally
+            with the `task` as a key. This option allows controlling the cache key explicitly.
+        max_tokens : Union[int, None]
+            Maximum number of tokens to consume. The agentic loop will stop after input + output tokens exceed this value.
+            Defaults to context-wide value specified in `agent` property.
+        max_turns : Union[int, None]
+            Maximum number of agentic turns during this call, defaults to context-wide value specified in `agent` property.
+        timeout : Union[float, None]
+            Request timeout in milliseconds. Defaults to action timeout. Pass `0` to disable timeout.
+
+        Returns
+        -------
+        Dict[str, Any]
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.extract(
+                    query=query,
+                    schema=mapping.to_impl(schema),
+                    cacheKey=cache_key,
+                    maxTokens=max_tokens,
+                    maxTurns=max_turns,
+                    timeout=timeout,
+                )
+            )
+        )
+
+    def dispose(self) -> None:
+        """PageAgent.dispose
+
+        Dispose this agent.
+        """
+
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.dispose()))
+
+
+mapping.register(PageAgentImpl, PageAgent)
 
 
 class WebError(SyncBase):
@@ -14533,12 +14750,7 @@ class BrowserType(SyncBase):
         headless : Union[bool, None]
             Whether to run browser in headless mode. More details for
             [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and
-            [Firefox](https://hacks.mozilla.org/2017/12/using-headless-mode-in-firefox/). Defaults to `true` unless the
-            `devtools` option is `true`.
-        devtools : Union[bool, None]
-            **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the
-            `headless` option will be set `false`.
-            Deprecated: Use [debugging tools](../debug.md) instead.
+            [Firefox](https://hacks.mozilla.org/2017/12/using-headless-mode-in-firefox/). Defaults to `true`.
         proxy : Union[{server: str, bypass: Union[str, None], username: Union[str, None], password: Union[str, None]}, None]
             Network proxy settings.
         downloads_path : Union[pathlib.Path, str, None]
@@ -14712,12 +14924,7 @@ class BrowserType(SyncBase):
         headless : Union[bool, None]
             Whether to run browser in headless mode. More details for
             [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and
-            [Firefox](https://hacks.mozilla.org/2017/12/using-headless-mode-in-firefox/). Defaults to `true` unless the
-            `devtools` option is `true`.
-        devtools : Union[bool, None]
-            **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the
-            `headless` option will be set `false`.
-            Deprecated: Use [debugging tools](../debug.md) instead.
+            [Firefox](https://hacks.mozilla.org/2017/12/using-headless-mode-in-firefox/). Defaults to `true`.
         proxy : Union[{server: str, bypass: Union[str, None], username: Union[str, None], password: Union[str, None]}, None]
             Network proxy settings.
         downloads_path : Union[pathlib.Path, str, None]
@@ -14931,6 +15138,7 @@ class BrowserType(SyncBase):
         timeout: typing.Optional[float] = None,
         slow_mo: typing.Optional[float] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
+        is_local: typing.Optional[bool] = None,
     ) -> "Browser":
         """BrowserType.connect_over_cdp
 
@@ -14965,6 +15173,9 @@ class BrowserType(SyncBase):
             on. Defaults to 0.
         headers : Union[Dict[str, str], None]
             Additional HTTP headers to be sent with connect request. Optional.
+        is_local : Union[bool, None]
+            Tells Playwright that it runs on the same host as the CDP server. It will enable certain optimizations that rely
+            upon the file system being the same between Playwright and the Browser.
 
         Returns
         -------
@@ -14978,6 +15189,7 @@ class BrowserType(SyncBase):
                     timeout=timeout,
                     slowMo=slow_mo,
                     headers=mapping.to_impl(headers),
+                    isLocal=is_local,
                 )
             )
         )
@@ -15423,8 +15635,7 @@ class Locator(SyncBase):
         """Locator.description
 
         Returns locator description previously set with `locator.describe()`. Returns `null` if no custom
-        description has been set. Prefer `Locator.toString()` for a human-readable representation, as it uses the
-        description when available.
+        description has been set.
 
         **Usage**
 
@@ -19684,28 +19895,6 @@ class LocatorAssertions(SyncBase):
         *,
         timeout: typing.Optional[float] = None,
     ) -> None:
-        """LocatorAssertions.to_have_css
-
-        Ensures the `Locator` resolves to an element with the given computed CSS style.
-
-        **Usage**
-
-        ```py
-        from playwright.sync_api import expect
-
-        locator = page.get_by_role(\"button\")
-        expect(locator).to_have_css(\"display\", \"flex\")
-        ```
-
-        Parameters
-        ----------
-        name : str
-            CSS property name.
-        value : Union[Pattern[str], str]
-            CSS property value.
-        timeout : Union[float, None]
-            Time to retry the assertion for in milliseconds. Defaults to `5000`.
-        """
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
@@ -19723,7 +19912,7 @@ class LocatorAssertions(SyncBase):
     ) -> None:
         """LocatorAssertions.not_to_have_css
 
-        The opposite of `locator_assertions.to_have_css()`.
+        The opposite of `locator_assertions.to_have_css#1()`.
 
         Parameters
         ----------

@@ -34,6 +34,7 @@ from playwright._impl._network import (
     WebSocketRoute,
 )
 from playwright._impl._page import BindingCall, Page, Worker
+from playwright._impl._page_agent import PageAgent
 from playwright._impl._playwright import Playwright
 from playwright._impl._stream import Stream
 from playwright._impl._tracing import Tracing
@@ -79,6 +80,8 @@ def create_remote_object(
         return local_utils
     if type == "Page":
         return Page(parent, type, guid, initializer)
+    if type == "PageAgent":
+        return PageAgent(parent, type, guid, initializer)
     if type == "Playwright":
         return Playwright(parent, type, guid, initializer)
     if type == "Request":

@@ -200,6 +200,7 @@ class BrowserType(ChannelOwner):
         timeout: float = None,
         slowMo: float = None,
         headers: Dict[str, str] = None,
+        isLocal: bool = None,
     ) -> Browser:
         params = locals_to_params(locals())
         if params.get("headers"):

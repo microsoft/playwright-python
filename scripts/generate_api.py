@@ -47,6 +47,7 @@ from playwright._impl._network import (
     WebSocketRoute,
 )
 from playwright._impl._page import Page, Worker
+from playwright._impl._page_agent import PageAgent
 from playwright._impl._playwright import Playwright
 from playwright._impl._selectors import Selectors
 from playwright._impl._tracing import Tracing
@@ -240,6 +241,7 @@ from playwright._impl._input import Keyboard as KeyboardImpl, Mouse as MouseImpl
 from playwright._impl._js_handle import JSHandle as JSHandleImpl
 from playwright._impl._network import Request as RequestImpl, Response as ResponseImpl, Route as RouteImpl, WebSocket as WebSocketImpl, WebSocketRoute as WebSocketRouteImpl
 from playwright._impl._page import Page as PageImpl, Worker as WorkerImpl
+from playwright._impl._page_agent import PageAgent as PageAgentImpl
 from playwright._impl._web_error import WebError as WebErrorImpl
 from playwright._impl._playwright import Playwright as PlaywrightImpl
 from playwright._impl._selectors import Selectors as SelectorsImpl
@@ -274,6 +276,7 @@ generated_types = [
     Download,
     Video,
     Page,
+    PageAgent,
     WebError,
     BrowserContext,
     CDPSession,
