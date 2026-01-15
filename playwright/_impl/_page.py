@@ -106,6 +106,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._fetch import APIRequestContext
     from playwright._impl._locator import FrameLocator, Locator
     from playwright._impl._network import WebSocket
+    from playwright._impl._page_agent import PageAgent
 
 
 class LocatorHandler:
@@ -1116,6 +1117,45 @@ class Page(ChannelOwner):
     @property
     def request(self) -> "APIRequestContext":
         return self.context.request
+
+    async def agent(
+        self,
+        provider: Dict[str, Any] = None,
+        cache: Dict[str, str] = None,
+        maxTokens: int = None,
+        maxTurns: int = None,
+        secrets: Dict[str, str] = None,
+        systemPrompt: str = None,
+    ) -> "PageAgent":
+        from playwright._impl._page_agent import PageAgent
+
+        params: Dict[str, Any] = {}
+        if provider is not None:
+            if "api" in provider:
+                params["api"] = provider["api"]
+            if "apiEndpoint" in provider:
+                params["apiEndpoint"] = provider["apiEndpoint"]
+            if "apiKey" in provider:
+                params["apiKey"] = provider["apiKey"]
+            if "model" in provider:
+                params["model"] = provider["model"]
+        if cache is not None:
+            if "cacheFile" in cache:
+                params["cacheFile"] = cache["cacheFile"]
+            if "cacheOutFile" in cache:
+                params["cacheOutFile"] = cache["cacheOutFile"]
+        if maxTokens is not None:
+            params["maxTokens"] = maxTokens
+        if maxTurns is not None:
+            params["maxTurns"] = maxTurns
+        if secrets is not None:
+            params["secrets"] = [
+                {"name": name, "value": value} for name, value in secrets.items()
+            ]
+        if systemPrompt is not None:
+            params["systemPrompt"] = systemPrompt
+        result = await self._channel.send_return_as_dict("agent", None, params)
+        return from_channel(result["agent"])
 
     async def pause(self) -> None:
         default_navigation_timeout = (
