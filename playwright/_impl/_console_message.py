@@ -57,6 +57,7 @@ class ConsoleMessage:
         Literal["startGroup"],
         Literal["startGroupCollapsed"],
         Literal["table"],
+        Literal["time"],
         Literal["timeEnd"],
         Literal["trace"],
         Literal["warning"],

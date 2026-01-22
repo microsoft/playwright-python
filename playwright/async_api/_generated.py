@@ -946,9 +946,12 @@ class Route(AsyncBase):
         `route.continue_()` will immediately send the request to the network, other matching handlers won't be
         invoked. Use `route.fallback()` If you want next matching handler in the chain to be invoked.
 
-        **NOTE** The `Cookie` header cannot be overridden using this method. If a value is provided, it will be ignored,
-        and the cookie will be loaded from the browser's cookie store. To set custom cookies, use
-        `browser_context.add_cookies()`.
+        **NOTE** Some request headers are **forbidden** and cannot be overridden (for example, `Cookie`, `Host`,
+        `Content-Length` and others, see
+        [this MDN page](https://developer.mozilla.org/en-US/docs/Glossary/Forbidden_request_header) for full list). If an
+        override is provided for a forbidden header, it will be ignored and the original request header will be used.
+
+        To set custom cookies, use `browser_context.add_cookies()`.
 
         Parameters
         ----------
@@ -7039,6 +7042,7 @@ class ConsoleMessage(AsyncBase):
         Literal["startGroup"],
         Literal["startGroupCollapsed"],
         Literal["table"],
+        Literal["time"],
         Literal["timeEnd"],
         Literal["trace"],
         Literal["warning"],
@@ -7047,7 +7051,7 @@ class ConsoleMessage(AsyncBase):
 
         Returns
         -------
-        Union["assert", "clear", "count", "debug", "dir", "dirxml", "endGroup", "error", "info", "log", "profile", "profileEnd", "startGroup", "startGroupCollapsed", "table", "timeEnd", "trace", "warning"]
+        Union["assert", "clear", "count", "debug", "dir", "dirxml", "endGroup", "error", "info", "log", "profile", "profileEnd", "startGroup", "startGroupCollapsed", "table", "time", "timeEnd", "trace", "warning"]
         """
         return mapping.from_maybe_impl(self._impl_obj.type)
 
@@ -14440,7 +14444,6 @@ class BrowserType(AsyncBase):
         timeout: typing.Optional[float] = None,
         env: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         headless: typing.Optional[bool] = None,
-        devtools: typing.Optional[bool] = None,
         proxy: typing.Optional[ProxySettings] = None,
         downloads_path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         slow_mo: typing.Optional[float] = None,
@@ -14514,12 +14517,7 @@ class BrowserType(AsyncBase):
         headless : Union[bool, None]
             Whether to run browser in headless mode. More details for
             [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and
-            [Firefox](https://hacks.mozilla.org/2017/12/using-headless-mode-in-firefox/). Defaults to `true` unless the
-            `devtools` option is `true`.
-        devtools : Union[bool, None]
-            **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the
-            `headless` option will be set `false`.
-            Deprecated: Use [debugging tools](../debug.md) instead.
+            [Firefox](https://hacks.mozilla.org/2017/12/using-headless-mode-in-firefox/). Defaults to `true`.
         proxy : Union[{server: str, bypass: Union[str, None], username: Union[str, None], password: Union[str, None]}, None]
             Network proxy settings.
         downloads_path : Union[pathlib.Path, str, None]
@@ -14557,7 +14555,6 @@ class BrowserType(AsyncBase):
                 timeout=timeout,
                 env=mapping.to_impl(env),
                 headless=headless,
-                devtools=devtools,
                 proxy=proxy,
                 downloadsPath=downloads_path,
                 slowMo=slow_mo,
@@ -14583,7 +14580,6 @@ class BrowserType(AsyncBase):
         timeout: typing.Optional[float] = None,
         env: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         headless: typing.Optional[bool] = None,
-        devtools: typing.Optional[bool] = None,
         proxy: typing.Optional[ProxySettings] = None,
         downloads_path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         slow_mo: typing.Optional[float] = None,
@@ -14691,12 +14687,7 @@ class BrowserType(AsyncBase):
         headless : Union[bool, None]
             Whether to run browser in headless mode. More details for
             [Chromium](https://developers.google.com/web/updates/2017/04/headless-chrome) and
-            [Firefox](https://hacks.mozilla.org/2017/12/using-headless-mode-in-firefox/). Defaults to `true` unless the
-            `devtools` option is `true`.
-        devtools : Union[bool, None]
-            **Chromium-only** Whether to auto-open a Developer Tools panel for each tab. If this option is `true`, the
-            `headless` option will be set `false`.
-            Deprecated: Use [debugging tools](../debug.md) instead.
+            [Firefox](https://hacks.mozilla.org/2017/12/using-headless-mode-in-firefox/). Defaults to `true`.
         proxy : Union[{server: str, bypass: Union[str, None], username: Union[str, None], password: Union[str, None]}, None]
             Network proxy settings.
         downloads_path : Union[pathlib.Path, str, None]
@@ -14858,7 +14849,6 @@ class BrowserType(AsyncBase):
                 timeout=timeout,
                 env=mapping.to_impl(env),
                 headless=headless,
-                devtools=devtools,
                 proxy=proxy,
                 downloadsPath=downloads_path,
                 slowMo=slow_mo,
@@ -14908,6 +14898,7 @@ class BrowserType(AsyncBase):
         timeout: typing.Optional[float] = None,
         slow_mo: typing.Optional[float] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
+        is_local: typing.Optional[bool] = None,
     ) -> "Browser":
         """BrowserType.connect_over_cdp
 
@@ -14942,6 +14933,9 @@ class BrowserType(AsyncBase):
             on. Defaults to 0.
         headers : Union[Dict[str, str], None]
             Additional HTTP headers to be sent with connect request. Optional.
+        is_local : Union[bool, None]
+            Tells Playwright that it runs on the same host as the CDP server. It will enable certain optimizations that rely
+            upon the file system being the same between Playwright and the Browser.
 
         Returns
         -------
@@ -14954,6 +14948,7 @@ class BrowserType(AsyncBase):
                 timeout=timeout,
                 slowMo=slow_mo,
                 headers=mapping.to_impl(headers),
+                isLocal=is_local,
             )
         )
 
@@ -15397,8 +15392,7 @@ class Locator(AsyncBase):
         """Locator.description
 
         Returns locator description previously set with `locator.describe()`. Returns `null` if no custom
-        description has been set. Prefer `Locator.toString()` for a human-readable representation, as it uses the
-        description when available.
+        description has been set.
 
         **Usage**
 
@@ -19176,7 +19170,7 @@ class LocatorAssertions(AsyncBase):
         from playwright.async_api import expect
 
         # ✓ Contains the right items in the right order
-        await expect(page.locator(\"ul > li\")).to_contain_text([\"Text 1\", \"Text 3\", \"Text 4\"])
+        await expect(page.locator(\"ul > li\")).to_contain_text([\"Text 1\", \"Text 3\"])
 
         # ✖ Wrong order
         await expect(page.locator(\"ul > li\")).to_contain_text([\"Text 3\", \"Text 2\"])
