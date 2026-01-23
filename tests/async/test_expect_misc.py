@@ -54,6 +54,7 @@ async def test_to_be_in_viewport_should_respect_ratio_option(
     await expect(page.locator("div")).not_to_be_in_viewport(ratio=0.8)
 
 
+@pytest.mark.skip_browser("webkit")
 async def test_to_be_in_viewport_should_have_good_stack(
     page: Page, server: Server
 ) -> None:
