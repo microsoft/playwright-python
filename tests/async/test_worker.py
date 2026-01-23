@@ -200,7 +200,7 @@ async def test_workers_should_format_number_using_context_locale(
         )
     worker = await worker_info.value
     # https://github.com/microsoft/playwright/issues/38919
-    expected = "10.000,2" if browser_name == "firefox" else "10\u00a0000,2"
+    expected = "10,000.2" if browser_name == "firefox" else "10\u00a0000,2"
     assert await worker.evaluate("() => (10000.20).toLocaleString()") == expected
     await context.close()
 
