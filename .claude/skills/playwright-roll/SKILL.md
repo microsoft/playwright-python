@@ -20,3 +20,4 @@ Rolling includes:
 ## Tips & Tricks
 - Project checkouts are in the parent directory (`../`).
 - when updating checkboxes, store the issue content into /tmp and edit it there, then update the issue based on the file
+- use the "gh" cli to interact with GitHub
