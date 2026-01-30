@@ -56,7 +56,7 @@ def test_to_be_in_viewport_should_respect_ratio_option(
 
 def test_to_be_in_viewport_should_have_good_stack(page: Page, server: Server) -> None:
     with pytest.raises(AssertionError) as exc_info:
-        expect(page.locator("body")).not_to_be_in_viewport(timeout=100)
+        expect(page.locator("body")).not_to_be_in_viewport(timeout=1000)
     assert 'unexpected value "viewport ratio' in str(exc_info.value)
 
 
