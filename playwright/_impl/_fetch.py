@@ -40,6 +40,7 @@ from playwright._impl._helper import (
     async_readfile,
     async_writefile,
     is_file_payload,
+    is_file_array_payload,
     locals_to_params,
     object_to_array,
     to_impl,
@@ -394,6 +395,14 @@ class APIRequestContext(ChannelOwner):
                     multipart_data.append(
                         FormField(name=name, file=file_payload_to_json(payload))
                     )
+                elif is_file_array_payload(value):
+                    for item in value:
+                        payload = cast(FilePayload, item)
+                        assert isinstance(payload["buffer"], bytes)
+                        multipart_data.append(FormField(name=name, file=file_payload_to_json(payload)))
+                elif isinstance(value, list):
+                    for item in value:
+                        multipart_data.append(FormField(name=name, value=str(item)))
                 elif isinstance(value, str):
                     multipart_data.append(FormField(name=name, value=value))
         if (

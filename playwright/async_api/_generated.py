@@ -18229,9 +18229,7 @@ class APIRequestContext(AsyncBase):
         headers: typing.Optional[typing.Dict[str, str]] = None,
         data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None,
         form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
-        multipart: typing.Optional[
-            typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
-        ] = None,
+        multipart: typing.Dict[str,typing.Union[bytes,bool,float,str,FilePayload,typing.List[typing.Union[str, FilePayload]]]] = None,
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
         ignore_https_errors: typing.Optional[bool] = None,
