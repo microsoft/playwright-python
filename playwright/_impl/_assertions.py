@@ -67,6 +67,8 @@ class AssertionsBase:
             expect_options["timeout"] = self._timeout or 5_000
         if expect_options["isNot"]:
             message = message.replace("expected to", "expected not to")
+            if title:
+                title = title.replace('"to_', '"not_to_')
         if "useInnerText" in expect_options and expect_options["useInnerText"] is None:
             del expect_options["useInnerText"]
         result = await self._call_expect(expression, expect_options, title)
