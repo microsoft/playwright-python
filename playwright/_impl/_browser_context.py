@@ -124,6 +124,7 @@ class BrowserContext(ChannelOwner):
         self._tracing = cast(Tracing, from_channel(initializer["tracing"]))
         self._har_recorders: Dict[str, HarRecordingMetadata] = {}
         self._request: APIRequestContext = from_channel(initializer["requestContext"])
+        self._request._timeout_settings = self._timeout_settings
         self._clock = Clock(self)
         self._channel.on(
             "bindingCall",
