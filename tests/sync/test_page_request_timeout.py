@@ -23,14 +23,14 @@ def test_context_request_should_support_timeout_option(
 ) -> None:
     # https://github.com/microsoft/playwright/issues/39220
 
-    server.set_route("/empty.html", lambda req: None)
+    server.set_route("/", lambda req: None)
     with pytest.raises(Error, match="Timeout 123ms exceeded"):
-        page.request.get(server.EMPTY_PAGE, timeout=123)
+        page.request.get(server.PREFIX, timeout=123)
     with pytest.raises(Error, match="Timeout 123ms exceeded"):
-        context.request.get(server.EMPTY_PAGE, timeout=123)
+        context.request.get(server.PREFIX, timeout=123)
 
     context.set_default_timeout(123)
     with pytest.raises(Error, match="Timeout 123ms exceeded"):
-        page.request.get(server.EMPTY_PAGE)
+        page.request.get(server.PREFIX)
     with pytest.raises(Error, match="Timeout 123ms exceeded"):
-        context.request.get(server.EMPTY_PAGE)
+        context.request.get(server.PREFIX)
