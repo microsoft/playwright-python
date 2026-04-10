@@ -181,6 +181,9 @@ class Page(ChannelOwner):
         self._video: Optional[Video] = None
         self._screencast: Screencast = Screencast(self)
         self._opener = cast("Page", from_nullable_channel(initializer.get("opener")))
+        self._video = Video(
+            self, self._connection, from_nullable_channel(initializer.get("video"))
+        )
         self._close_reason: Optional[str] = None
         self._close_was_called = False
         self._har_routers: List[HarRouter] = []
@@ -228,7 +231,6 @@ class Page(ChannelOwner):
                 self._on_web_socket_route(from_channel(params["webSocketRoute"]))
             ),
         )
-        self._channel.on("video", lambda params: self._on_video(params))
         self._channel.on("viewportSizeChanged", self._on_viewport_size_changed)
         self._channel.on(
             "webSocket",
@@ -359,10 +361,6 @@ class Page(ChannelOwner):
         self.emit(
             Page.Events.Download, Download(self, url, suggested_filename, artifact)
         )
-
-    def _on_video(self, params: Any) -> None:
-        artifact = from_channel(params["artifact"])
-        self._force_video()._artifact_ready(artifact)
 
     def _on_viewport_size_changed(self, params: Any) -> None:
         self._viewport_size = params["viewportSize"]
@@ -1196,11 +1194,6 @@ class Page(ChannelOwner):
             await async_writefile(path, decoded_binary)
         return decoded_binary
 
-    def _force_video(self) -> Video:
-        if not self._video:
-            self._video = Video(self)
-        return self._video
-
     @property
     def video(
         self,
@@ -1210,7 +1203,7 @@ class Page(ChannelOwner):
         # too late during launchPersistentContext.
         if not self._browser_context._videos_dir:
             return None
-        return self._force_video()
+        return self._video
 
     @property
     def screencast(self) -> Screencast:
