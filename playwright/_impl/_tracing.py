@@ -18,6 +18,7 @@ from typing import Dict, Optional, Union, cast
 from playwright._impl._api_structures import TracingGroupLocation
 from playwright._impl._artifact import Artifact
 from playwright._impl._connection import ChannelOwner, from_nullable_channel
+from playwright._impl._disposable import DisposableStub
 from playwright._impl._helper import locals_to_params
 
 
@@ -29,6 +30,7 @@ class Tracing(ChannelOwner):
         self._include_sources: bool = False
         self._stacks_id: Optional[str] = None
         self._is_tracing: bool = False
+        self._is_live: bool = False
         self._traces_dir: Optional[str] = None
 
     async def start(
@@ -38,27 +40,29 @@ class Tracing(ChannelOwner):
         snapshots: bool = None,
         screenshots: bool = None,
         sources: bool = None,
+        live: bool = None,
     ) -> None:
         params = locals_to_params(locals())
         self._include_sources = bool(sources)
+        self._is_live = bool(live)
 
         await self._channel.send("tracingStart", None, params)
         trace_name = await self._channel.send(
             "tracingStartChunk", None, {"title": title, "name": name}
         )
-        await self._start_collecting_stacks(trace_name)
+        await self._start_collecting_stacks(trace_name, self._is_live)
 
     async def start_chunk(self, title: str = None, name: str = None) -> None:
         params = locals_to_params(locals())
         trace_name = await self._channel.send("tracingStartChunk", None, params)
-        await self._start_collecting_stacks(trace_name)
+        await self._start_collecting_stacks(trace_name, self._is_live)
 
-    async def _start_collecting_stacks(self, trace_name: str) -> None:
+    async def _start_collecting_stacks(self, trace_name: str, live: bool) -> None:
         if not self._is_tracing:
             self._is_tracing = True
             self._connection.set_is_tracing(True)
         self._stacks_id = await self._connection.local_utils.tracing_started(
-            self._traces_dir, trace_name
+            self._traces_dir, trace_name, live
         )
 
     async def stop_chunk(self, path: Union[pathlib.Path, str] = None) -> None:
@@ -136,8 +140,11 @@ class Tracing(ChannelOwner):
             self._is_tracing = False
             self._connection.set_is_tracing(False)
 
-    async def group(self, name: str, location: TracingGroupLocation = None) -> None:
+    async def group(
+        self, name: str, location: TracingGroupLocation = None
+    ) -> DisposableStub:
         await self._channel.send("tracingGroup", None, locals_to_params(locals()))
+        return DisposableStub(lambda: self.group_end())
 
     async def group_end(self) -> None:
         await self._channel.send(

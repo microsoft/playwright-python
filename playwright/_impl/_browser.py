@@ -27,6 +27,7 @@ from typing import (
 )
 
 from playwright._impl._api_structures import (
+    BindResult,
     ClientCertificate,
     Geolocation,
     HttpCredentials,
@@ -239,6 +240,19 @@ class Browser(ChannelOwner):
         except Exception as e:
             if not is_target_closed_error(e):
                 raise e
+
+    async def bind(
+        self,
+        title: str,
+        workspaceDir: str = None,
+        host: str = None,
+        port: int = None,
+    ) -> BindResult:
+        params = locals_to_params(locals())
+        return await self._channel.send("startServer", None, params)
+
+    async def unbind(self) -> None:
+        await self._channel.send("stopServer", None)
 
     @property
     def version(self) -> str:

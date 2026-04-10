@@ -29,7 +29,9 @@ from playwright._impl._browser_type import BrowserType
 from playwright._impl._cdp_session import CDPSession
 from playwright._impl._clock import Clock
 from playwright._impl._console_message import ConsoleMessage
+from playwright._impl._debugger import Debugger
 from playwright._impl._dialog import Dialog
+from playwright._impl._disposable import Disposable
 from playwright._impl._download import Download
 from playwright._impl._element_handle import ElementHandle
 from playwright._impl._fetch import APIRequest, APIRequestContext, APIResponse
@@ -48,6 +50,7 @@ from playwright._impl._network import (
 )
 from playwright._impl._page import Page, Worker
 from playwright._impl._playwright import Playwright
+from playwright._impl._screencast import Screencast
 from playwright._impl._selectors import Selectors
 from playwright._impl._tracing import Tracing
 from playwright._impl._video import Video
@@ -224,7 +227,7 @@ import datetime
 from typing import Literal
 
 
-from playwright._impl._api_structures import Cookie, SetCookieParam, FloatRect, FilePayload, Geolocation, HttpCredentials, PdfMargins, Position, ProxySettings, ResourceTiming, SourceLocation, StorageState, ClientCertificate, ViewportSize, RemoteAddr, SecurityDetails, RequestSizes, NameValue, TracingGroupLocation
+from playwright._impl._api_structures import Cookie, SetCookieParam, FloatRect, FilePayload, Geolocation, HttpCredentials, PdfMargins, Position, ProxySettings, ResourceTiming, SourceLocation, StorageState, ClientCertificate, ViewportSize, RemoteAddr, SecurityDetails, RequestSizes, NameValue, TracingGroupLocation, PausedDetails, PausedDetailsLocation, OnFrame, BindResult
 from playwright._impl._browser import Browser as BrowserImpl
 from playwright._impl._browser_context import BrowserContext as BrowserContextImpl
 from playwright._impl._browser_type import BrowserType as BrowserTypeImpl
@@ -232,6 +235,7 @@ from playwright._impl._clock import Clock as ClockImpl
 from playwright._impl._cdp_session import CDPSession as CDPSessionImpl
 from playwright._impl._console_message import ConsoleMessage as ConsoleMessageImpl
 from playwright._impl._dialog import Dialog as DialogImpl
+from playwright._impl._disposable import Disposable as DisposableImpl, DisposableStub
 from playwright._impl._download import Download as DownloadImpl
 from playwright._impl._element_handle import ElementHandle as ElementHandleImpl
 from playwright._impl._file_chooser import FileChooser as FileChooserImpl
@@ -249,6 +253,8 @@ from playwright._impl._locator import Locator as LocatorImpl, FrameLocator as Fr
 from playwright._impl._errors import Error
 from playwright._impl._fetch import APIRequest as APIRequestImpl, APIResponse as APIResponseImpl, APIRequestContext as APIRequestContextImpl
 from playwright._impl._assertions import PageAssertions as PageAssertionsImpl, LocatorAssertions as LocatorAssertionsImpl, APIResponseAssertions as APIResponseAssertionsImpl
+from playwright._impl._debugger import Debugger as DebuggerImpl
+from playwright._impl._screencast import Screencast as ScreencastImpl
 """
 
 
@@ -288,6 +294,9 @@ generated_types = [
     PageAssertions,
     LocatorAssertions,
     APIResponseAssertions,
+    Debugger,
+    Screencast,
+    Disposable,
 ]
 
 all_types = generated_types + [

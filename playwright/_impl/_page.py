@@ -49,6 +49,7 @@ from playwright._impl._connection import (
     from_nullable_channel,
 )
 from playwright._impl._console_message import ConsoleMessage
+from playwright._impl._disposable import Disposable, DisposableStub
 from playwright._impl._download import Download
 from playwright._impl._element_handle import ElementHandle, determine_screenshot_type
 from playwright._impl._errors import Error, TargetClosedError, is_target_closed_error
@@ -90,6 +91,7 @@ from playwright._impl._js_handle import (
     parse_result,
     serialize_argument,
 )
+from playwright._impl._locator import Locator
 from playwright._impl._network import (
     Request,
     Response,
@@ -98,13 +100,14 @@ from playwright._impl._network import (
     WebSocketRouteHandler,
     serialize_headers,
 )
+from playwright._impl._screencast import Screencast
 from playwright._impl._video import Video
 from playwright._impl._waiter import Waiter
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser_context import BrowserContext
     from playwright._impl._fetch import APIRequestContext
-    from playwright._impl._locator import FrameLocator, Locator
+    from playwright._impl._locator import FrameLocator
     from playwright._impl._network import WebSocket
 
 
@@ -176,6 +179,7 @@ class Page(ChannelOwner):
             self._browser_context._timeout_settings
         )
         self._video: Optional[Video] = None
+        self._screencast: Screencast = Screencast(self)
         self._opener = cast("Page", from_nullable_channel(initializer.get("opener")))
         self._close_reason: Optional[str] = None
         self._close_was_called = False
@@ -501,12 +505,12 @@ class Page(ChannelOwner):
     ) -> ElementHandle:
         return await self._main_frame.add_style_tag(**locals_to_params(locals()))
 
-    async def expose_function(self, name: str, callback: Callable) -> None:
-        await self.expose_binding(name, lambda source, *args: callback(*args))
+    async def expose_function(self, name: str, callback: Callable) -> Disposable:
+        return await self.expose_binding(name, lambda source, *args: callback(*args))
 
     async def expose_binding(
         self, name: str, callback: Callable, handle: bool = None
-    ) -> None:
+    ) -> Disposable:
         if name in self._bindings:
             raise Error(f'Function "{name}" has been already registered')
         if name in self._browser_context._bindings:
@@ -514,10 +518,12 @@ class Page(ChannelOwner):
                 f'Function "{name}" has been already registered in the browser context'
             )
         self._bindings[name] = callback
-        await self._channel.send(
-            "exposeBinding",
-            None,
-            dict(name=name, needsHandle=handle or False),
+        return from_channel(
+            await self._channel.send(
+                "exposeBinding",
+                None,
+                dict(name=name, needsHandle=handle or False),
+            )
         )
 
     async def set_extra_http_headers(self, headers: Dict[str, str]) -> None:
@@ -661,18 +667,20 @@ class Page(ChannelOwner):
 
     async def add_init_script(
         self, script: str = None, path: Union[str, Path] = None
-    ) -> None:
+    ) -> Disposable:
         if path:
             script = add_source_url_to_script(
                 (await async_readfile(path)).decode(), path
             )
         if not isinstance(script, str):
             raise Error("Either path or script parameter must be specified")
-        await self._channel.send("addInitScript", None, dict(source=script))
+        return from_channel(
+            await self._channel.send("addInitScript", None, dict(source=script))
+        )
 
     async def route(
         self, url: URLMatch, handler: RouteHandlerCallback, times: int = None
-    ) -> None:
+    ) -> DisposableStub:
         self._routes.insert(
             0,
             RouteHandler(
@@ -684,6 +692,7 @@ class Page(ChannelOwner):
             ),
         )
         await self._update_interception_patterns()
+        return DisposableStub(lambda: self.unroute(url, handler))
 
     async def unroute(
         self, url: URLMatch, handler: Optional[RouteHandlerCallback] = None
@@ -819,6 +828,25 @@ class Page(ChannelOwner):
             make_dirs_for_file(path)
             await async_writefile(path, decoded_binary)
         return decoded_binary
+
+    async def aria_snapshot(
+        self,
+        timeout: float = None,
+        mode: Literal["ai", "default"] = None,
+        depth: int = None,
+    ) -> str:
+        return await self._main_frame._channel.send(
+            "ariaSnapshot",
+            self._timeout_settings.timeout,
+            locals_to_params(locals()),
+        )
+
+    async def pick_locator(self) -> "Locator":
+        result = await self._channel.send("pickLocator", None, {})
+        return Locator(self._main_frame, result["selector"])
+
+    async def cancel_pick_locator(self) -> None:
+        await self._channel.send("cancelPickLocator", None, {})
 
     async def title(self) -> str:
         return await self._main_frame.title()
@@ -1184,6 +1212,10 @@ class Page(ChannelOwner):
             return None
         return self._force_video()
 
+    @property
+    def screencast(self) -> Screencast:
+        return self._screencast
+
     def _close_error_with_reason(self) -> TargetClosedError:
         return TargetClosedError(
             self._close_reason or self._browser_context._effective_close_reason()
@@ -1435,8 +1467,12 @@ class Page(ChannelOwner):
         request_objects = await self._channel.send("requests", None)
         return [from_channel(r) for r in request_objects]
 
-    async def console_messages(self) -> List[ConsoleMessage]:
-        message_dicts = await self._channel.send("consoleMessages", None)
+    async def console_messages(
+        self, filter: Literal["all", "since-navigation"] = None
+    ) -> List[ConsoleMessage]:
+        message_dicts = await self._channel.send(
+            "consoleMessages", None, {"filter": filter}
+        )
         return [
             ConsoleMessage(
                 {**event, "page": self._channel}, self._loop, self._dispatcher_fiber
@@ -1444,9 +1480,17 @@ class Page(ChannelOwner):
             for event in message_dicts
         ]
 
-    async def page_errors(self) -> List[Error]:
-        error_objects = await self._channel.send("pageErrors", None)
+    async def clear_console_messages(self) -> None:
+        await self._channel.send("clearConsoleMessages", None)
+
+    async def page_errors(
+        self, filter: Literal["all", "since-navigation"] = None
+    ) -> List[Error]:
+        error_objects = await self._channel.send("pageErrors", None, {"filter": filter})
         return [parse_error(error["error"]) for error in error_objects]
+
+    async def clear_page_errors(self) -> None:
+        await self._channel.send("clearPageErrors", None)
 
 
 class Worker(ChannelOwner):

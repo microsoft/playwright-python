@@ -62,7 +62,9 @@ class LocalUtils(ChannelOwner):
         params = locals_to_params(locals())
         await self._channel.send("harUnzip", None, params)
 
-    async def tracing_started(self, tracesDir: Optional[str], traceName: str) -> str:
+    async def tracing_started(
+        self, tracesDir: Optional[str], traceName: str, live: bool
+    ) -> str:
         params = locals_to_params(locals())
         return await self._channel.send("tracingStarted", None, params)
 

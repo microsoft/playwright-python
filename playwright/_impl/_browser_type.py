@@ -88,6 +88,7 @@ class BrowserType(ChannelOwner):
         tracesDir: Union[pathlib.Path, str] = None,
         chromiumSandbox: bool = None,
         firefoxUserPrefs: Dict[str, Union[str, float, bool]] = None,
+        artifactsDir: Union[Path, str] = None,
     ) -> Browser:
         params = locals_to_params(locals())
         normalize_launch_params(params)
@@ -156,6 +157,7 @@ class BrowserType(ChannelOwner):
         recordHarMode: HarMode = None,
         recordHarContent: HarContentPolicy = None,
         clientCertificates: List[ClientCertificate] = None,
+        artifactsDir: Union[Path, str] = None,
     ) -> BrowserContext:
         userDataDir = self._user_data_dir(userDataDir)
         params = locals_to_params(locals())
@@ -213,7 +215,7 @@ class BrowserType(ChannelOwner):
 
     async def connect(
         self,
-        wsEndpoint: str,
+        endpoint: str,
         timeout: float = None,
         slowMo: float = None,
         headers: Dict[str, str] = None,
@@ -229,7 +231,7 @@ class BrowserType(ChannelOwner):
                 "connect",
                 None,
                 {
-                    "wsEndpoint": wsEndpoint,
+                    "endpoint": endpoint,
                     "headers": headers,
                     "slowMo": slowMo,
                     "timeout": timeout if timeout is not None else 0,

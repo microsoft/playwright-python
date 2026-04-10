@@ -218,11 +218,8 @@ class DocumentationProvider:
                         func_arg = "typing.Dict"
                     if "Union[" in func_arg:
                         func_arg = func_arg.replace("Union[", "typing.Union[")
-                    if len(events) > 1:
-                        doc.append("    @typing.overload")
+                    doc.append("    @typing.overload")
                     impl = ""
-                    if len(events) == 1:
-                        impl = f"        return super().{event_type}(event=event,f=f)"
                     doc.append(
                         f"    def {event_type}(self, event: Literal['{event['name'].lower()}'], f: typing.Callable[['{func_arg}'], '{return_type}']) -> None:"
                     )
@@ -230,11 +227,17 @@ class DocumentationProvider:
                         f'        """{self.beautify_method_comment(event["comment"], " " * 8)}"""'
                     )
                     doc.append(impl)
-                if len(events) > 1:
-                    doc.append(
-                        f"    def {event_type}(self, event: str, f: typing.Callable[...,{return_type}]) -> None:"
-                    )
-                    doc.append(f"        return super().{event_type}(event=event,f=f)")
+                doc.append("")
+                doc.append("    @typing.overload")
+                doc.append(
+                    f"    def {event_type}(self, event: str, f: typing.Callable[..., '{return_type}']) -> None:"
+                )
+                doc.append("        ...")
+                doc.append("")
+                doc.append(
+                    f"    def {event_type}(self, event: str, f: typing.Callable[..., '{return_type}']) -> None:"
+                )
+                doc.append(f"        return super().{event_type}(event=event,f=f)")
             print("\n".join(doc))
 
     def indent_paragraph(self, p: str, indent: str) -> str:
@@ -343,6 +346,8 @@ class DocumentationProvider:
             doc_type = self.make_optional(doc_type)
 
         if doc_type != code_type:
+            if doc_type == "Disposable" and code_type == "DisposableStub":
+                return
             self.errors.add(
                 f"Parameter type mismatch in {fqname}: documented as {doc_type}, code has {code_type}"
             )
@@ -437,6 +442,8 @@ class DocumentationProvider:
 
     def inner_serialize_doc_type(self, type: Any, direction: str) -> str:
         if type["name"] == "Promise":
+            if "templates" not in type:
+                return "typing.Awaitable[typing.Any]"
             type = type["templates"][0]
 
         if "union" in type:
@@ -492,6 +499,8 @@ class DocumentationProvider:
             return "int"
         if type_name.lower() == "string":
             return "str"
+        if type_name == "void":
+            return "None"
         if type_name == "any" or type_name == "unknown" or type_name == "Serializable":
             return "Any"
         if type_name == "Object":
@@ -540,6 +549,9 @@ class DocumentationProvider:
 
 
 def works_for_python(item: Any) -> bool:
+    # todo: update upstream, this should also exist in python
+    if item["name"] == "Disposable":
+        return True
     return not item["langs"].get("only") or "python" in item["langs"]["only"]
 
 

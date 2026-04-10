@@ -214,7 +214,7 @@ class FrameExpectOptions(TypedDict, total=False):
     timeout: Optional[float]
 
 
-class FrameExpectResult(TypedDict):
+class FrameExpectResult(TypedDict, total=False):
     matches: bool
     received: Any
     log: List[str]
@@ -307,7 +307,26 @@ AriaRole = Literal[
 ]
 
 
-class TracingGroupLocation(TypedDict):
+class TracingGroupLocation(TypedDict, total=False):
     file: str
     line: Optional[int]
     column: Optional[int]
+
+
+class BindResult(TypedDict):
+    endpoint: str
+
+
+class PausedDetailsLocation(TypedDict, total=False):
+    file: str
+    line: Optional[int]
+    column: Optional[int]
+
+
+class PausedDetails(TypedDict):
+    location: PausedDetailsLocation
+    title: str
+
+
+class OnFrame(TypedDict):
+    data: bytes

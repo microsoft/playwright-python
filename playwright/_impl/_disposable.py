@@ -12,28 +12,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, Dict
+from typing import Awaitable, Callable, Dict
 
 from playwright._impl._connection import ChannelOwner
-from playwright._impl._helper import locals_to_params
+from playwright._impl._errors import is_target_closed_error
 
 
-class CDPSession(ChannelOwner):
+class Disposable(ChannelOwner):
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
-        self._channel.on("event", lambda params: self._on_event(params))
-        self._channel.on("close", lambda _: self.emit("close"))
 
-    def _on_event(self, params: Any) -> None:
-        self.emit(params["method"], params.get("params"))
+    async def dispose(self) -> None:
+        try:
+            await self._channel.send(
+                "dispose",
+                None,
+            )
+        except Exception as e:
+            if not is_target_closed_error(e):
+                raise e
 
-    async def send(self, method: str, params: Dict = None) -> Dict:
-        return await self._channel.send("send", None, locals_to_params(locals()))
+    def __repr__(self) -> str:
+        return "<Disposable>"
 
-    async def detach(self) -> None:
-        await self._channel.send(
-            "detach",
-            None,
-        )
+
+class DisposableStub:
+    def __init__(self, dispose_fn: Callable[[], Awaitable[None]]) -> None:
+        self._dispose_fn = dispose_fn
+
+    async def dispose(self) -> None:
+        await self._dispose_fn()
+
+    def __repr__(self) -> str:
+        return "<Disposable>"

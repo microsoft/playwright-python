@@ -19,6 +19,7 @@ import typing
 from typing import Literal
 
 from playwright._impl._api_structures import (
+    BindResult,
     ClientCertificate,
     Cookie,
     FilePayload,
@@ -26,6 +27,9 @@ from playwright._impl._api_structures import (
     Geolocation,
     HttpCredentials,
     NameValue,
+    OnFrame,
+    PausedDetails,
+    PausedDetailsLocation,
     PdfMargins,
     Position,
     ProxySettings,
@@ -50,7 +54,10 @@ from playwright._impl._browser_type import BrowserType as BrowserTypeImpl
 from playwright._impl._cdp_session import CDPSession as CDPSessionImpl
 from playwright._impl._clock import Clock as ClockImpl
 from playwright._impl._console_message import ConsoleMessage as ConsoleMessageImpl
+from playwright._impl._debugger import Debugger as DebuggerImpl
 from playwright._impl._dialog import Dialog as DialogImpl
+from playwright._impl._disposable import Disposable as DisposableImpl
+from playwright._impl._disposable import DisposableStub
 from playwright._impl._download import Download as DownloadImpl
 from playwright._impl._element_handle import ElementHandle as ElementHandleImpl
 from playwright._impl._errors import Error
@@ -73,6 +80,7 @@ from playwright._impl._network import WebSocketRoute as WebSocketRouteImpl
 from playwright._impl._page import Page as PageImpl
 from playwright._impl._page import Worker as WorkerImpl
 from playwright._impl._playwright import Playwright as PlaywrightImpl
+from playwright._impl._screencast import Screencast as ScreencastImpl
 from playwright._impl._selectors import Selectors as SelectorsImpl
 from playwright._impl._sync_base import (
     EventContextManager,
@@ -181,6 +189,21 @@ class Request(SyncBase):
         Union[bytes, None]
         """
         return mapping.from_maybe_impl(self._impl_obj.post_data_buffer)
+
+    @property
+    def existing_response(self) -> typing.Optional["Response"]:
+        """Request.existing_response
+
+        Returns the `Response` object if the response has already been received, `null` otherwise.
+
+        Unlike `request.response()`, this method does not wait for the response to arrive. It returns immediately
+        with the response object if the response has been received, or `null` if the response has not been received yet.
+
+        Returns
+        -------
+        Union[Response, None]
+        """
+        return mapping.from_impl_nullable(self._impl_obj.existing_response)
 
     @property
     def frame(self) -> "Frame":
@@ -643,6 +666,18 @@ class Response(SyncBase):
 
         return mapping.from_maybe_impl(self._sync(self._impl_obj.json()))
 
+    def http_version(self) -> str:
+        """Response.http_version
+
+        Returns the http version used by the response.
+
+        Returns
+        -------
+        str
+        """
+
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.http_version()))
+
 
 mapping.register(ResponseImpl, Response)
 
@@ -1028,7 +1063,10 @@ class WebSocket(SyncBase):
         """
         Fired when the websocket has an error."""
 
-    def on(self, event: str, f: typing.Callable[..., None]) -> None:
+    @typing.overload
+    def on(self, event: str, f: typing.Callable[..., "None"]) -> None: ...
+
+    def on(self, event: str, f: typing.Callable[..., "None"]) -> None:
         return super().on(event=event, f=f)
 
     @typing.overload
@@ -1063,7 +1101,10 @@ class WebSocket(SyncBase):
         """
         Fired when the websocket has an error."""
 
-    def once(self, event: str, f: typing.Callable[..., None]) -> None:
+    @typing.overload
+    def once(self, event: str, f: typing.Callable[..., "None"]) -> None: ...
+
+    def once(self, event: str, f: typing.Callable[..., "None"]) -> None:
         return super().once(event=event, f=f)
 
     @property
@@ -3411,7 +3452,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         url : Union[Callable[[str], bool], Pattern[str], str, None]
-            A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation. Note that if
+            A glob pattern, regex pattern, or predicate receiving [URL] to match while waiting for the navigation. Note that if
             the parameter is a string without wildcard characters, the method will wait for navigation to URL that is exactly
             equal to the string.
         wait_until : Union["commit", "domcontentloaded", "load", "networkidle", None]
@@ -3462,7 +3503,7 @@ class Frame(SyncBase):
         Parameters
         ----------
         url : Union[Callable[[str], bool], Pattern[str], str]
-            A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation. Note that if
+            A glob pattern, regex pattern, or predicate receiving [URL] to match while waiting for the navigation. Note that if
             the parameter is a string without wildcard characters, the method will wait for navigation to URL that is exactly
             equal to the string.
         wait_until : Union["commit", "domcontentloaded", "load", "networkidle", None]
@@ -4896,7 +4937,7 @@ class Frame(SyncBase):
         <button>Submit</button>
         ```
 
-        You can locate each element by it's implicit role:
+        You can locate each element by its implicit role:
 
         ```py
         expect(page.get_by_role(\"heading\", name=\"Sign up\")).to_be_visible()
@@ -4996,7 +5037,7 @@ class Frame(SyncBase):
         <button data-testid=\"directions\">Itinéraire</button>
         ```
 
-        You can locate the element by it's test id:
+        You can locate the element by its test id:
 
         ```py
         page.get_by_test_id(\"directions\").click()
@@ -6410,7 +6451,7 @@ class FrameLocator(SyncBase):
         <button>Submit</button>
         ```
 
-        You can locate each element by it's implicit role:
+        You can locate each element by its implicit role:
 
         ```py
         expect(page.get_by_role(\"heading\", name=\"Sign up\")).to_be_visible()
@@ -6510,7 +6551,7 @@ class FrameLocator(SyncBase):
         <button data-testid=\"directions\">Itinéraire</button>
         ```
 
-        You can locate the element by it's test id:
+        You can locate the element by its test id:
 
         ```py
         page.get_by_test_id(\"directions\").click()
@@ -6692,7 +6733,10 @@ class Worker(SyncBase):
         Emitted when JavaScript within the worker calls one of console API methods, e.g. `console.log` or `console.dir`.
         """
 
-    def on(self, event: str, f: typing.Callable[..., None]) -> None:
+    @typing.overload
+    def on(self, event: str, f: typing.Callable[..., "None"]) -> None: ...
+
+    def on(self, event: str, f: typing.Callable[..., "None"]) -> None:
         return super().on(event=event, f=f)
 
     @typing.overload
@@ -6711,7 +6755,10 @@ class Worker(SyncBase):
         Emitted when JavaScript within the worker calls one of console API methods, e.g. `console.log` or `console.dir`.
         """
 
-    def once(self, event: str, f: typing.Callable[..., None]) -> None:
+    @typing.overload
+    def once(self, event: str, f: typing.Callable[..., "None"]) -> None: ...
+
+    def once(self, event: str, f: typing.Callable[..., "None"]) -> None:
         return super().once(event=event, f=f)
 
     @property
@@ -7178,6 +7225,18 @@ class ConsoleMessage(SyncBase):
         {url: str, lineNumber: int, columnNumber: int}
         """
         return mapping.from_impl(self._impl_obj.location)
+
+    @property
+    def timestamp(self) -> float:
+        """ConsoleMessage.timestamp
+
+        The timestamp of the console message in milliseconds since the Unix epoch.
+
+        Returns
+        -------
+        float
+        """
+        return mapping.from_maybe_impl(self._impl_obj.timestamp)
 
     @property
     def page(self) -> typing.Optional["Page"]:
@@ -7649,7 +7708,10 @@ class Page(SyncContextManager):
         Emitted when a dedicated [WebWorker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API) is spawned
         by the page."""
 
-    def on(self, event: str, f: typing.Callable[..., None]) -> None:
+    @typing.overload
+    def on(self, event: str, f: typing.Callable[..., "None"]) -> None: ...
+
+    def on(self, event: str, f: typing.Callable[..., "None"]) -> None:
         return super().on(event=event, f=f)
 
     @typing.overload
@@ -7871,7 +7933,10 @@ class Page(SyncContextManager):
         Emitted when a dedicated [WebWorker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API) is spawned
         by the page."""
 
-    def once(self, event: str, f: typing.Callable[..., None]) -> None:
+    @typing.overload
+    def once(self, event: str, f: typing.Callable[..., "None"]) -> None: ...
+
+    def once(self, event: str, f: typing.Callable[..., "None"]) -> None:
         return super().once(event=event, f=f)
 
     @property
@@ -8005,13 +8070,28 @@ class Page(SyncContextManager):
     def video(self) -> typing.Optional["Video"]:
         """Page.video
 
-        Video object associated with this page.
+        Video object associated with this page. Can be used to access the video file when using the `recordVideo` context
+        option.
 
         Returns
         -------
         Union[Video, None]
         """
         return mapping.from_impl_nullable(self._impl_obj.video)
+
+    @property
+    def screencast(self) -> "Screencast":
+        """Page.screencast
+
+        `Screencast` object associated with this page.
+
+        **Usage**
+
+        Returns
+        -------
+        Screencast
+        """
+        return mapping.from_impl(self._impl_obj.screencast)
 
     def opener(self) -> typing.Optional["Page"]:
         """Page.opener
@@ -8789,7 +8869,7 @@ class Page(SyncContextManager):
             )
         )
 
-    def expose_function(self, name: str, callback: typing.Callable) -> None:
+    def expose_function(self, name: str, callback: typing.Callable) -> "Disposable":
         """Page.expose_function
 
         The method adds a function called `name` on the `window` object of every frame in the page. When called, the
@@ -8840,9 +8920,13 @@ class Page(SyncContextManager):
             Name of the function on the window object
         callback : Callable
             Callback function which will be called in Playwright's context.
+
+        Returns
+        -------
+        Disposable
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             self._sync(
                 self._impl_obj.expose_function(
                     name=name, callback=self._wrap_handler(callback)
@@ -8856,7 +8940,7 @@ class Page(SyncContextManager):
         callback: typing.Callable,
         *,
         handle: typing.Optional[bool] = None,
-    ) -> None:
+    ) -> "Disposable":
         """Page.expose_binding
 
         The method adds a function called `name` on the `window` object of every frame in this page. When called, the
@@ -8908,9 +8992,13 @@ class Page(SyncContextManager):
             Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is
             supported. When passing by value, multiple arguments are supported.
             Deprecated: This option will be removed in the future.
+
+        Returns
+        -------
+        Disposable
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             self._sync(
                 self._impl_obj.expose_binding(
                     name=name, callback=self._wrap_handler(callback), handle=handle
@@ -9175,7 +9263,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         url : Union[Callable[[str], bool], Pattern[str], str]
-            A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation. Note that if
+            A glob pattern, regex pattern, or predicate receiving [URL] to match while waiting for the navigation. Note that if
             the parameter is a string without wildcard characters, the method will wait for navigation to URL that is exactly
             equal to the string.
         wait_until : Union["commit", "domcontentloaded", "load", "networkidle", None]
@@ -9459,7 +9547,7 @@ class Page(SyncContextManager):
         script: typing.Optional[str] = None,
         *,
         path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
-    ) -> None:
+    ) -> "Disposable":
         """Page.add_init_script
 
         Adds a script which would be evaluated in one of the following scenarios:
@@ -9489,9 +9577,13 @@ class Page(SyncContextManager):
         path : Union[pathlib.Path, str, None]
             Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the current working
             directory. Optional.
+
+        Returns
+        -------
+        Disposable
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             self._sync(self._impl_obj.add_init_script(script=script, path=path))
         )
 
@@ -9504,7 +9596,7 @@ class Page(SyncContextManager):
         ],
         *,
         times: typing.Optional[int] = None,
-    ) -> None:
+    ) -> "DisposableStub":
         """Page.route
 
         Routing provides the capability to modify network requests that are made by a page.
@@ -9553,6 +9645,8 @@ class Page(SyncContextManager):
         page.route(\"/api/**\", handle_route)
         ```
 
+        If a request matches multiple registered routes, the most recently registered route takes precedence.
+
         Page routes take precedence over browser context routes (set up with `browser_context.route()`) when request
         matches both handlers.
 
@@ -9570,9 +9664,13 @@ class Page(SyncContextManager):
             handler function to route the request.
         times : Union[int, None]
             How often a route should be used. By default it will be used every time.
+
+        Returns
+        -------
+        DisposableStub
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             self._sync(
                 self._impl_obj.route(
                     url=self._wrap_handler(url),
@@ -9600,7 +9698,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         url : Union[Callable[[str], bool], Pattern[str], str]
-            A glob pattern, regex pattern or predicate receiving [URL] to match while routing.
+            A glob pattern, regex pattern, or predicate receiving [URL] to match while routing.
         handler : Union[Callable[[Route, Request], Any], Callable[[Route], Any], None]
             Optional handler function to route the request.
         """
@@ -9834,6 +9932,68 @@ class Page(SyncContextManager):
                 )
             )
         )
+
+    def aria_snapshot(
+        self,
+        *,
+        timeout: typing.Optional[float] = None,
+        mode: typing.Optional[Literal["ai", "default"]] = None,
+        depth: typing.Optional[int] = None,
+    ) -> str:
+        """Page.aria_snapshot
+
+        Captures the aria snapshot of the page. Read more about [aria snapshots](https://playwright.dev/python/docs/aria-snapshots).
+
+        Parameters
+        ----------
+        timeout : Union[float, None]
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        mode : Union["ai", "default", None]
+            When set to `"ai"`, returns a snapshot optimized for AI consumption: including element references like `[ref=e2]`
+            and snapshots of `<iframe>`s. Defaults to `"default"`.
+        depth : Union[int, None]
+            When specified, limits the depth of the snapshot.
+
+        Returns
+        -------
+        str
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.aria_snapshot(timeout=timeout, mode=mode, depth=depth)
+            )
+        )
+
+    def pick_locator(self) -> "Locator":
+        """Page.pick_locator
+
+        Enters pick locator mode where hovering over page elements highlights them and shows the corresponding locator.
+        Once the user clicks an element, the mode is deactivated and the `Locator` for the picked element is returned.
+
+        **Usage**
+
+        ```py
+        locator = page.pick_locator()
+        print(locator)
+        ```
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._sync(self._impl_obj.pick_locator()))
+
+    def cancel_pick_locator(self) -> None:
+        """Page.cancel_pick_locator
+
+        Cancels an ongoing `page.pick_locator()` call by deactivating pick locator mode. If no pick locator mode is
+        active, this method is a no-op.
+        """
+
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.cancel_pick_locator()))
 
     def title(self) -> str:
         """Page.title
@@ -10480,7 +10640,7 @@ class Page(SyncContextManager):
         <button>Submit</button>
         ```
 
-        You can locate each element by it's implicit role:
+        You can locate each element by its implicit role:
 
         ```py
         expect(page.get_by_role(\"heading\", name=\"Sign up\")).to_be_visible()
@@ -10580,7 +10740,7 @@ class Page(SyncContextManager):
         <button data-testid=\"directions\">Itinéraire</button>
         ```
 
-        You can locate the element by it's test id:
+        You can locate the element by its test id:
 
         ```py
         page.get_by_test_id(\"directions\").click()
@@ -11926,7 +12086,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         url : Union[Callable[[str], bool], Pattern[str], str, None]
-            A glob pattern, regex pattern or predicate receiving [URL] to match while waiting for the navigation. Note that if
+            A glob pattern, regex pattern, or predicate receiving [URL] to match while waiting for the navigation. Note that if
             the parameter is a string without wildcard characters, the method will wait for navigation to URL that is exactly
             equal to the string.
         wait_until : Union["commit", "domcontentloaded", "load", "networkidle", None]
@@ -12401,29 +12561,67 @@ class Page(SyncContextManager):
 
         return mapping.from_impl_list(self._sync(self._impl_obj.requests()))
 
-    def console_messages(self) -> typing.List["ConsoleMessage"]:
+    def console_messages(
+        self, *, filter: typing.Optional[Literal["all", "since-navigation"]] = None
+    ) -> typing.List["ConsoleMessage"]:
         """Page.console_messages
 
         Returns up to (currently) 200 last console messages from this page. See `page.on('console')` for more details.
+
+        Parameters
+        ----------
+        filter : Union["all", "since-navigation", None]
+            Controls which messages are returned:
 
         Returns
         -------
         List[ConsoleMessage]
         """
 
-        return mapping.from_impl_list(self._sync(self._impl_obj.console_messages()))
+        return mapping.from_impl_list(
+            self._sync(self._impl_obj.console_messages(filter=filter))
+        )
 
-    def page_errors(self) -> typing.List["Error"]:
+    def clear_console_messages(self) -> None:
+        """Page.clear_console_messages
+
+        Clears all stored console messages from this page. Subsequent calls to `page.console_messages()` will only
+        return messages logged after the clear.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(self._impl_obj.clear_console_messages())
+        )
+
+    def page_errors(
+        self, *, filter: typing.Optional[Literal["all", "since-navigation"]] = None
+    ) -> typing.List["Error"]:
         """Page.page_errors
 
         Returns up to (currently) 200 last page errors from this page. See `page.on('page_error')` for more details.
+
+        Parameters
+        ----------
+        filter : Union["all", "since-navigation", None]
+            Controls which errors are returned:
 
         Returns
         -------
         List[Error]
         """
 
-        return mapping.from_impl_list(self._sync(self._impl_obj.page_errors()))
+        return mapping.from_impl_list(
+            self._sync(self._impl_obj.page_errors(filter=filter))
+        )
+
+    def clear_page_errors(self) -> None:
+        """Page.clear_page_errors
+
+        Clears all stored page errors from this page. Subsequent calls to `page.page_errors()` will only return
+        errors thrown after the clear.
+        """
+
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.clear_page_errors()))
 
 
 mapping.register(PageImpl, Page)
@@ -12598,7 +12796,10 @@ class BrowserContext(SyncContextManager):
 
         Emitted when new service worker is created in the context."""
 
-    def on(self, event: str, f: typing.Callable[..., None]) -> None:
+    @typing.overload
+    def on(self, event: str, f: typing.Callable[..., "None"]) -> None: ...
+
+    def on(self, event: str, f: typing.Callable[..., "None"]) -> None:
         return super().on(event=event, f=f)
 
     @typing.overload
@@ -12740,7 +12941,10 @@ class BrowserContext(SyncContextManager):
 
         Emitted when new service worker is created in the context."""
 
-    def once(self, event: str, f: typing.Callable[..., None]) -> None:
+    @typing.overload
+    def once(self, event: str, f: typing.Callable[..., "None"]) -> None: ...
+
+    def once(self, event: str, f: typing.Callable[..., "None"]) -> None:
         return super().once(event=event, f=f)
 
     @property
@@ -12803,6 +13007,18 @@ class BrowserContext(SyncContextManager):
         Tracing
         """
         return mapping.from_impl(self._impl_obj.tracing)
+
+    @property
+    def debugger(self) -> "Debugger":
+        """BrowserContext.debugger
+
+        Debugger allows to pause and resume the execution.
+
+        Returns
+        -------
+        Debugger
+        """
+        return mapping.from_impl(self._impl_obj.debugger)
 
     @property
     def request(self) -> "APIRequestContext":
@@ -12997,6 +13213,7 @@ class BrowserContext(SyncContextManager):
             - `'notifications'`
             - `'payment-handler'`
             - `'storage-access'`
+            - `'screen-wake-lock'`
         origin : Union[str, None]
             The [origin] to grant permissions to, e.g. "https://example.com".
         """
@@ -13089,7 +13306,7 @@ class BrowserContext(SyncContextManager):
         script: typing.Optional[str] = None,
         *,
         path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
-    ) -> None:
+    ) -> "Disposable":
         """BrowserContext.add_init_script
 
         Adds a script which would be evaluated in one of the following scenarios:
@@ -13119,9 +13336,13 @@ class BrowserContext(SyncContextManager):
         path : Union[pathlib.Path, str, None]
             Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the current working
             directory. Optional.
+
+        Returns
+        -------
+        Disposable
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             self._sync(self._impl_obj.add_init_script(script=script, path=path))
         )
 
@@ -13131,7 +13352,7 @@ class BrowserContext(SyncContextManager):
         callback: typing.Callable,
         *,
         handle: typing.Optional[bool] = None,
-    ) -> None:
+    ) -> "Disposable":
         """BrowserContext.expose_binding
 
         The method adds a function called `name` on the `window` object of every frame in every page in the context. When
@@ -13181,9 +13402,13 @@ class BrowserContext(SyncContextManager):
             Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is
             supported. When passing by value, multiple arguments are supported.
             Deprecated: This option will be removed in the future.
+
+        Returns
+        -------
+        Disposable
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             self._sync(
                 self._impl_obj.expose_binding(
                     name=name, callback=self._wrap_handler(callback), handle=handle
@@ -13191,7 +13416,7 @@ class BrowserContext(SyncContextManager):
             )
         )
 
-    def expose_function(self, name: str, callback: typing.Callable) -> None:
+    def expose_function(self, name: str, callback: typing.Callable) -> "Disposable":
         """BrowserContext.expose_function
 
         The method adds a function called `name` on the `window` object of every frame in every page in the context. When
@@ -13241,9 +13466,13 @@ class BrowserContext(SyncContextManager):
             Name of the function on the window object.
         callback : Callable
             Callback function that will be called in the Playwright's context.
+
+        Returns
+        -------
+        Disposable
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             self._sync(
                 self._impl_obj.expose_function(
                     name=name, callback=self._wrap_handler(callback)
@@ -13260,7 +13489,7 @@ class BrowserContext(SyncContextManager):
         ],
         *,
         times: typing.Optional[int] = None,
-    ) -> None:
+    ) -> "DisposableStub":
         """BrowserContext.route
 
         Routing provides the capability to modify network requests that are made by any page in the browser context. Once
@@ -13323,9 +13552,13 @@ class BrowserContext(SyncContextManager):
             handler function to route the request.
         times : Union[int, None]
             How often a route should be used. By default it will be used every time.
+
+        Returns
+        -------
+        DisposableStub
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             self._sync(
                 self._impl_obj.route(
                     url=self._wrap_handler(url),
@@ -13353,7 +13586,7 @@ class BrowserContext(SyncContextManager):
         Parameters
         ----------
         url : Union[Callable[[str], bool], Pattern[str], str]
-            A glob pattern, regex pattern or predicate receiving [URL] used to register a routing with
+            A glob pattern, regex pattern, or predicate receiving [URL] used to register a routing with
             `browser_context.route()`.
         handler : Union[Callable[[Route, Request], Any], Callable[[Route], Any], None]
             Optional handler function used to register a routing with `browser_context.route()`.
@@ -13536,6 +13769,18 @@ class BrowserContext(SyncContextManager):
             ).future,
         )
 
+    def is_closed(self) -> bool:
+        """BrowserContext.is_closed
+
+        Indicates that the browser context is in the process of closing or has already been closed.
+
+        Returns
+        -------
+        bool
+        """
+
+        return mapping.from_maybe_impl(self._impl_obj.is_closed())
+
     def close(self, *, reason: typing.Optional[str] = None) -> None:
         """BrowserContext.close
 
@@ -13579,6 +13824,33 @@ class BrowserContext(SyncContextManager):
 
         return mapping.from_impl(
             self._sync(self._impl_obj.storage_state(path=path, indexedDB=indexed_db))
+        )
+
+    def set_storage_state(
+        self, storage_state: typing.Union[StorageState, str, pathlib.Path]
+    ) -> None:
+        """BrowserContext.set_storage_state
+
+        Clears the existing cookies, local storage and IndexedDB entries for all origins and sets the new storage state.
+
+        **Usage**
+
+        ```py
+        # Load storage state from a file and apply it to the context.
+        context.set_storage_state(\"state.json\")
+        ```
+
+        Parameters
+        ----------
+        storage_state : Union[pathlib.Path, str, {cookies: Sequence[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: Sequence[{origin: str, localStorage: Sequence[{name: str, value: str}]}]}]
+            Learn more about [storage state and auth](../auth.md).
+
+            Populates context with given storage state. This option can be used to initialize context with logged-in
+            information obtained via `browser_context.storage_state()`.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(self._impl_obj.set_storage_state(storageState=storage_state))
         )
 
     def wait_for_event(
@@ -13710,6 +13982,34 @@ mapping.register(BrowserContextImpl, BrowserContext)
 
 class CDPSession(SyncBase):
 
+    @typing.overload
+    def on(
+        self, event: Literal["close"], f: typing.Callable[["CDPSession"], "None"]
+    ) -> None:
+        """
+        Emitted when the session is closed, either because the target was closed or `session.detach()` was called.
+        """
+
+    @typing.overload
+    def on(self, event: str, f: typing.Callable[..., "None"]) -> None: ...
+
+    def on(self, event: str, f: typing.Callable[..., "None"]) -> None:
+        return super().on(event=event, f=f)
+
+    @typing.overload
+    def once(
+        self, event: Literal["close"], f: typing.Callable[["CDPSession"], "None"]
+    ) -> None:
+        """
+        Emitted when the session is closed, either because the target was closed or `session.detach()` was called.
+        """
+
+    @typing.overload
+    def once(self, event: str, f: typing.Callable[..., "None"]) -> None: ...
+
+    def once(self, event: str, f: typing.Callable[..., "None"]) -> None:
+        return super().once(event=event, f=f)
+
     def send(
         self, method: str, params: typing.Optional[typing.Dict] = None
     ) -> typing.Dict:
@@ -13748,6 +14048,7 @@ mapping.register(CDPSessionImpl, CDPSession)
 
 class Browser(SyncContextManager):
 
+    @typing.overload
     def on(
         self, event: Literal["disconnected"], f: typing.Callable[["Browser"], "None"]
     ) -> None:
@@ -13756,8 +14057,14 @@ class Browser(SyncContextManager):
         following:
         - Browser application is closed or crashed.
         - The `browser.close()` method was called."""
+
+    @typing.overload
+    def on(self, event: str, f: typing.Callable[..., "None"]) -> None: ...
+
+    def on(self, event: str, f: typing.Callable[..., "None"]) -> None:
         return super().on(event=event, f=f)
 
+    @typing.overload
     def once(
         self, event: Literal["disconnected"], f: typing.Callable[["Browser"], "None"]
     ) -> None:
@@ -13766,6 +14073,11 @@ class Browser(SyncContextManager):
         following:
         - Browser application is closed or crashed.
         - The `browser.close()` method was called."""
+
+    @typing.overload
+    def once(self, event: str, f: typing.Callable[..., "None"]) -> None: ...
+
+    def once(self, event: str, f: typing.Callable[..., "None"]) -> None:
         return super().once(event=event, f=f)
 
     @property
@@ -14338,6 +14650,51 @@ class Browser(SyncContextManager):
 
         return mapping.from_maybe_impl(self._sync(self._impl_obj.close(reason=reason)))
 
+    def bind(
+        self,
+        title: str,
+        *,
+        workspace_dir: typing.Optional[str] = None,
+        host: typing.Optional[str] = None,
+        port: typing.Optional[int] = None,
+    ) -> BindResult:
+        """Browser.bind
+
+        Binds the browser to a named pipe or web socket, making it available for other clients to connect to.
+
+        Parameters
+        ----------
+        title : str
+            Title of the browser server, used for identification.
+        workspace_dir : Union[str, None]
+            Working directory associated with this browser server.
+        host : Union[str, None]
+            Host to bind the web socket server to. When specified, a web socket server is created instead of a named pipe.
+        port : Union[int, None]
+            Port to bind the web socket server to. When specified, a web socket server is created instead of a named pipe. Use
+            `0` to let the OS pick an available port.
+
+        Returns
+        -------
+        {endpoint: str}
+        """
+
+        return mapping.from_impl(
+            self._sync(
+                self._impl_obj.bind(
+                    title=title, workspaceDir=workspace_dir, host=host, port=port
+                )
+            )
+        )
+
+    def unbind(self) -> None:
+        """Browser.unbind
+
+        Unbinds the browser server previously bound with `browser.bind()`.
+        """
+
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.unbind()))
+
     def new_browser_cdp_session(self) -> "CDPSession":
         """Browser.new_browser_cdp_session
 
@@ -14471,6 +14828,7 @@ class BrowserType(SyncBase):
         firefox_user_prefs: typing.Optional[
             typing.Dict[str, typing.Union[str, float, bool]]
         ] = None,
+        artifacts_dir: typing.Optional[typing.Union[pathlib.Path, str]] = None,
     ) -> "Browser":
         """BrowserType.launch
 
@@ -14556,6 +14914,10 @@ class BrowserType(SyncBase):
 
             You can also provide a path to a custom [`policies.json` file](https://mozilla.github.io/policy-templates/) via
             `PLAYWRIGHT_FIREFOX_POLICIES_JSON` environment variable.
+        artifacts_dir : Union[pathlib.Path, str, None]
+            If specified, artifacts (traces, videos, downloads, HAR files, etc.) are saved into this directory. The directory
+            is not cleaned up when the browser closes. If not specified, a temporary directory is used and cleaned up when the
+            browser closes.
 
         Returns
         -------
@@ -14581,6 +14943,7 @@ class BrowserType(SyncBase):
                     tracesDir=traces_dir,
                     chromiumSandbox=chromium_sandbox,
                     firefoxUserPrefs=mapping.to_impl(firefox_user_prefs),
+                    artifactsDir=artifacts_dir,
                 )
             )
         )
@@ -14648,6 +15011,7 @@ class BrowserType(SyncBase):
         record_har_mode: typing.Optional[Literal["full", "minimal"]] = None,
         record_har_content: typing.Optional[Literal["attach", "embed", "omit"]] = None,
         client_certificates: typing.Optional[typing.List[ClientCertificate]] = None,
+        artifacts_dir: typing.Optional[typing.Union[pathlib.Path, str]] = None,
     ) -> "BrowserContext":
         """BrowserType.launch_persistent_context
 
@@ -14851,6 +15215,10 @@ class BrowserType(SyncBase):
             **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
             work by replacing `localhost` with `local.playwright`.
 
+        artifacts_dir : Union[pathlib.Path, str, None]
+            If specified, artifacts (traces, videos, downloads, HAR files, etc.) are saved into this directory. The directory
+            is not cleaned up when the browser closes. If not specified, a temporary directory is used and cleaned up when the
+            browser closes.
 
         Returns
         -------
@@ -14910,6 +15278,7 @@ class BrowserType(SyncBase):
                     recordHarMode=record_har_mode,
                     recordHarContent=record_har_content,
                     clientCertificates=client_certificates,
+                    artifactsDir=artifacts_dir,
                 )
             )
         )
@@ -14979,7 +15348,7 @@ class BrowserType(SyncBase):
 
     def connect(
         self,
-        ws_endpoint: str,
+        endpoint: str,
         *,
         timeout: typing.Optional[float] = None,
         slow_mo: typing.Optional[float] = None,
@@ -14995,7 +15364,7 @@ class BrowserType(SyncBase):
 
         Parameters
         ----------
-        ws_endpoint : str
+        endpoint : str
             A Playwright browser websocket endpoint to connect to. You obtain this endpoint via `BrowserServer.wsEndpoint`.
         timeout : Union[float, None]
             Maximum time in milliseconds to wait for the connection to be established. Defaults to `0` (no timeout).
@@ -15027,7 +15396,7 @@ class BrowserType(SyncBase):
         return mapping.from_impl(
             self._sync(
                 self._impl_obj.connect(
-                    wsEndpoint=ws_endpoint,
+                    endpoint=endpoint,
                     timeout=timeout,
                     slowMo=slow_mo,
                     headers=mapping.to_impl(headers),
@@ -15173,6 +15542,7 @@ class Tracing(SyncBase):
         snapshots: typing.Optional[bool] = None,
         screenshots: typing.Optional[bool] = None,
         sources: typing.Optional[bool] = None,
+        live: typing.Optional[bool] = None,
     ) -> None:
         """Tracing.start
 
@@ -15212,6 +15582,10 @@ class Tracing(SyncBase):
             Whether to capture screenshots during tracing. Screenshots are used to build a timeline preview.
         sources : Union[bool, None]
             Whether to include source files for trace actions.
+        live : Union[bool, None]
+            When enabled, the trace is written to an unarchived file that is updated in real time as actions occur, instead of
+            caching changes and archiving them into a zip file at the end. This is useful for live trace viewing during test
+            execution.
         """
 
         return mapping.from_maybe_impl(
@@ -15222,6 +15596,7 @@ class Tracing(SyncBase):
                     snapshots=snapshots,
                     screenshots=screenshots,
                     sources=sources,
+                    live=live,
                 )
             )
         )
@@ -15299,7 +15674,7 @@ class Tracing(SyncBase):
 
     def group(
         self, name: str, *, location: typing.Optional[TracingGroupLocation] = None
-    ) -> None:
+    ) -> "DisposableStub":
         """Tracing.group
 
         **NOTE** Use `test.step` instead when available.
@@ -15325,9 +15700,13 @@ class Tracing(SyncBase):
         location : Union[{file: str, line: Union[int, None], column: Union[int, None]}, None]
             Specifies a custom location for the group to be shown in the trace viewer. Defaults to the location of the
             `tracing.group()` call.
+
+        Returns
+        -------
+        DisposableStub
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             self._sync(self._impl_obj.group(name=name, location=location))
         )
 
@@ -16327,7 +16706,7 @@ class Locator(SyncBase):
         <button>Submit</button>
         ```
 
-        You can locate each element by it's implicit role:
+        You can locate each element by its implicit role:
 
         ```py
         expect(page.get_by_role(\"heading\", name=\"Sign up\")).to_be_visible()
@@ -16427,7 +16806,7 @@ class Locator(SyncBase):
         <button data-testid=\"directions\">Itinéraire</button>
         ```
 
-        You can locate the element by it's test id:
+        You can locate the element by its test id:
 
         ```py
         page.get_by_test_id(\"directions\").click()
@@ -17473,7 +17852,13 @@ class Locator(SyncBase):
             )
         )
 
-    def aria_snapshot(self, *, timeout: typing.Optional[float] = None) -> str:
+    def aria_snapshot(
+        self,
+        *,
+        timeout: typing.Optional[float] = None,
+        mode: typing.Optional[Literal["ai", "default"]] = None,
+        depth: typing.Optional[int] = None,
+    ) -> str:
         """Locator.aria_snapshot
 
         Captures the aria snapshot of the given element. Read more about [aria snapshots](https://playwright.dev/python/docs/aria-snapshots) and
@@ -17513,11 +17898,20 @@ class Locator(SyncBase):
             - link \"About\"
         ```
 
+        An AI-optimized snapshot, controlled by `mode`, is different from a default snapshot:
+        1. Includes element references `[ref=e2]`. 2. Does not wait for an element matching the locator, and throws when
+           no elements match. 3. Includes snapshots of `<iframe>`s inside the target.
+
         Parameters
         ----------
         timeout : Union[float, None]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        mode : Union["ai", "default", None]
+            When set to `"ai"`, returns a snapshot optimized for AI consumption. Defaults to `"default"`. See details for more
+            information.
+        depth : Union[int, None]
+            When specified, limits the depth of the snapshot.
 
         Returns
         -------
@@ -17525,8 +17919,24 @@ class Locator(SyncBase):
         """
 
         return mapping.from_maybe_impl(
-            self._sync(self._impl_obj.aria_snapshot(timeout=timeout))
+            self._sync(
+                self._impl_obj.aria_snapshot(timeout=timeout, mode=mode, depth=depth)
+            )
         )
+
+    def normalize(self) -> "Locator":
+        """Locator.normalize
+
+        Returns a new locator that uses best practices for referencing the matched element, prioritizing test ids, aria
+        roles, and other user-facing attributes over CSS selectors. This is useful for converting implementation-detail
+        selectors into more resilient, human-readable locators.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._sync(self._impl_obj.normalize()))
 
     def scroll_into_view_if_needed(
         self, *, timeout: typing.Optional[float] = None
@@ -18306,7 +18716,7 @@ class APIRequestContext(SyncBase):
             typing.Union[typing.Dict[str, typing.Union[str, float, bool]], str]
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
-        data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None,
+        data: typing.Optional[typing.Union[typing.Any, bytes, str]] = None,
         form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         multipart: typing.Optional[
             typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
@@ -18389,7 +18799,7 @@ class APIRequestContext(SyncBase):
             typing.Union[typing.Dict[str, typing.Union[str, float, bool]], str]
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
-        data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None,
+        data: typing.Optional[typing.Union[typing.Any, bytes, str]] = None,
         form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         multipart: typing.Optional[
             typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
@@ -18472,7 +18882,7 @@ class APIRequestContext(SyncBase):
             typing.Union[typing.Dict[str, typing.Union[str, float, bool]], str]
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
-        data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None,
+        data: typing.Optional[typing.Union[typing.Any, bytes, str]] = None,
         form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         multipart: typing.Optional[
             typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
@@ -18567,7 +18977,7 @@ class APIRequestContext(SyncBase):
             typing.Union[typing.Dict[str, typing.Union[str, float, bool]], str]
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
-        data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None,
+        data: typing.Optional[typing.Union[typing.Any, bytes, str]] = None,
         form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         multipart: typing.Optional[
             typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
@@ -18650,7 +19060,7 @@ class APIRequestContext(SyncBase):
             typing.Union[typing.Dict[str, typing.Union[str, float, bool]], str]
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
-        data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None,
+        data: typing.Optional[typing.Union[typing.Any, bytes, str]] = None,
         form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         multipart: typing.Optional[
             typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
@@ -18733,7 +19143,7 @@ class APIRequestContext(SyncBase):
             typing.Union[typing.Dict[str, typing.Union[str, float, bool]], str]
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
-        data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None,
+        data: typing.Optional[typing.Union[typing.Any, bytes, str]] = None,
         form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         multipart: typing.Optional[
             typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
@@ -18848,7 +19258,7 @@ class APIRequestContext(SyncBase):
         ] = None,
         method: typing.Optional[str] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
-        data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None,
+        data: typing.Optional[typing.Union[typing.Any, bytes, str]] = None,
         form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         multipart: typing.Optional[
             typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
@@ -21175,3 +21585,278 @@ class APIResponseAssertions(SyncBase):
 
 
 mapping.register(APIResponseAssertionsImpl, APIResponseAssertions)
+
+
+class Debugger(SyncBase):
+
+    @typing.overload
+    def on(
+        self, event: Literal["pausedstatechanged"], f: typing.Callable[["None"], "None"]
+    ) -> None:
+        """
+        Emitted when the debugger pauses or resumes."""
+
+    @typing.overload
+    def on(self, event: str, f: typing.Callable[..., "None"]) -> None: ...
+
+    def on(self, event: str, f: typing.Callable[..., "None"]) -> None:
+        return super().on(event=event, f=f)
+
+    @typing.overload
+    def once(
+        self, event: Literal["pausedstatechanged"], f: typing.Callable[["None"], "None"]
+    ) -> None:
+        """
+        Emitted when the debugger pauses or resumes."""
+
+    @typing.overload
+    def once(self, event: str, f: typing.Callable[..., "None"]) -> None: ...
+
+    def once(self, event: str, f: typing.Callable[..., "None"]) -> None:
+        return super().once(event=event, f=f)
+
+    @property
+    def paused_details(self) -> typing.Optional[PausedDetails]:
+        """Debugger.paused_details
+
+        Returns details about the currently paused call. Returns `null` if the debugger is not paused.
+
+        Returns
+        -------
+        Union[{location: {file: str, line: Union[int, None], column: Union[int, None]}, title: str}, None]
+        """
+        return mapping.from_impl_nullable(self._impl_obj.paused_details)
+
+    def request_pause(self) -> None:
+        """Debugger.request_pause
+
+        Configures the debugger to pause before the next action is executed.
+
+        Throws if the debugger is already paused. Use `debugger.next()` or `debugger.run_to()` to step while
+        paused.
+
+        Note that `page.pause()` is equivalent to a \"debugger\" statement — it pauses execution at the call site
+        immediately. On the contrary, `debugger.request_pause()` is equivalent to \"pause on next statement\" — it
+        configures the debugger to pause before the next action is executed.
+        """
+
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.request_pause()))
+
+    def resume(self) -> None:
+        """Debugger.resume
+
+        Resumes script execution. Throws if the debugger is not paused.
+        """
+
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.resume()))
+
+    def next(self) -> None:
+        """Debugger.next
+
+        Resumes script execution and pauses again before the next action. Throws if the debugger is not paused.
+        """
+
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.next()))
+
+    def run_to(self, location: PausedDetailsLocation) -> None:
+        """Debugger.run_to
+
+        Resumes script execution and pauses when an action originates from the given source location. Throws if the
+        debugger is not paused.
+
+        Parameters
+        ----------
+        location : {file: str, line: Union[int, None], column: Union[int, None]}
+            The source location to pause at.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(self._impl_obj.run_to(location=location))
+        )
+
+
+mapping.register(DebuggerImpl, Debugger)
+
+
+class Screencast(SyncBase):
+
+    def start(
+        self,
+        *,
+        path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
+        quality: typing.Optional[int] = None,
+        on_frame: typing.Optional[
+            typing.Callable[[OnFrame], typing.Awaitable[typing.Any]]
+        ] = None,
+    ) -> "DisposableStub":
+        """Screencast.start
+
+        Starts the screencast. When `path` is provided, it saves video recording to the specified file. When `onFrame` is
+        provided, delivers JPEG-encoded frames to the callback. Both can be used together.
+
+        **Usage**
+
+        Parameters
+        ----------
+        path : Union[pathlib.Path, str, None]
+            Path where the video should be saved when the screencast is stopped. When provided, video recording is started.
+        quality : Union[int, None]
+            The quality of the image, between 0-100.
+        on_frame : Union[Callable[[{data: bytes}], typing.Awaitable[typing.Any]], None]
+            Callback that receives JPEG-encoded frame data.
+
+        Returns
+        -------
+        DisposableStub
+        """
+
+        return mapping.from_impl(
+            self._sync(
+                self._impl_obj.start(
+                    path=path, quality=quality, onFrame=self._wrap_handler(on_frame)
+                )
+            )
+        )
+
+    def stop(self) -> None:
+        """Screencast.stop
+
+        Stops the screencast and video recording if active. If a video was being recorded, saves it to the path specified
+        in `screencast.start()`.
+        """
+
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.stop()))
+
+    def show_actions(
+        self,
+        *,
+        duration: typing.Optional[float] = None,
+        position: typing.Optional[
+            Literal[
+                "bottom", "bottom-left", "bottom-right", "top", "top-left", "top-right"
+            ]
+        ] = None,
+        font_size: typing.Optional[int] = None,
+    ) -> "DisposableStub":
+        """Screencast.show_actions
+
+        Enables visual annotations on interacted elements. Returns a disposable that stops showing actions when disposed.
+
+        Parameters
+        ----------
+        duration : Union[float, None]
+            How long each annotation is displayed in milliseconds. Defaults to `500`.
+        position : Union["bottom", "bottom-left", "bottom-right", "top", "top-left", "top-right", None]
+            Position of the action title overlay. Defaults to `"top-right"`.
+        font_size : Union[int, None]
+            Font size of the action title in pixels. Defaults to `24`.
+
+        Returns
+        -------
+        DisposableStub
+        """
+
+        return mapping.from_impl(
+            self._sync(
+                self._impl_obj.show_actions(
+                    duration=duration, position=position, fontSize=font_size
+                )
+            )
+        )
+
+    def hide_actions(self) -> None:
+        """Screencast.hide_actions
+
+        Removes action decorations.
+        """
+
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.hide_actions()))
+
+    def show_overlay(
+        self, html: str, *, duration: typing.Optional[float] = None
+    ) -> "DisposableStub":
+        """Screencast.show_overlay
+
+        Adds an overlay with the given HTML content. The overlay is displayed on top of the page until removed. Returns a
+        disposable that removes the overlay when disposed.
+
+        Parameters
+        ----------
+        html : str
+            HTML content for the overlay.
+        duration : Union[float, None]
+            Duration in milliseconds after which the overlay is automatically removed. Overlay stays until dismissed if not
+            provided.
+
+        Returns
+        -------
+        DisposableStub
+        """
+
+        return mapping.from_impl(
+            self._sync(self._impl_obj.show_overlay(html=html, duration=duration))
+        )
+
+    def show_chapter(
+        self,
+        title: str,
+        *,
+        description: typing.Optional[str] = None,
+        duration: typing.Optional[float] = None,
+    ) -> None:
+        """Screencast.show_chapter
+
+        Shows a chapter overlay with a title and optional description, centered on the page with a blurred backdrop. Useful
+        for narrating video recordings. The overlay is removed after the specified duration, or 2000ms.
+
+        Parameters
+        ----------
+        title : str
+            Title text displayed prominently in the overlay.
+        description : Union[str, None]
+            Optional description text displayed below the title.
+        duration : Union[float, None]
+            Duration in milliseconds after which the overlay is automatically removed. Defaults to `2000`.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(
+                self._impl_obj.show_chapter(
+                    title=title, description=description, duration=duration
+                )
+            )
+        )
+
+    def show_overlays(self) -> None:
+        """Screencast.show_overlays
+
+        Shows overlays.
+        """
+
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.show_overlays()))
+
+    def hide_overlays(self) -> None:
+        """Screencast.hide_overlays
+
+        Hides overlays without removing them.
+        """
+
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.hide_overlays()))
+
+
+mapping.register(ScreencastImpl, Screencast)
+
+
+class Disposable(SyncBase):
+
+    def dispose(self) -> None:
+        """Disposable.dispose
+
+        Removes the associated resource. For example, removes the init script installed via `page.add_init_script()`
+        or `browser_context.add_init_script()`.
+        """
+
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.dispose()))
+
+
+mapping.register(DisposableImpl, Disposable)
