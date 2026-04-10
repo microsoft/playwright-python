@@ -34,6 +34,9 @@ class Disposable(ChannelOwner):
             if not is_target_closed_error(e):
                 raise e
 
+    async def close(self) -> None:
+        await self.dispose()
+
     def __repr__(self) -> str:
         return "<Disposable>"
 
@@ -44,6 +47,9 @@ class DisposableStub:
 
     async def dispose(self) -> None:
         await self._dispose_fn()
+
+    async def close(self) -> None:
+        await self.dispose()
 
     def __repr__(self) -> str:
         return "<Disposable>"

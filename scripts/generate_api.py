@@ -235,7 +235,7 @@ from playwright._impl._clock import Clock as ClockImpl
 from playwright._impl._cdp_session import CDPSession as CDPSessionImpl
 from playwright._impl._console_message import ConsoleMessage as ConsoleMessageImpl
 from playwright._impl._dialog import Dialog as DialogImpl
-from playwright._impl._disposable import Disposable as DisposableImpl, DisposableStub
+from playwright._impl._disposable import Disposable as DisposableImpl
 from playwright._impl._download import Download as DownloadImpl
 from playwright._impl._element_handle import ElementHandle as ElementHandleImpl
 from playwright._impl._file_chooser import FileChooser as FileChooserImpl

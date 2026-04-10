@@ -57,7 +57,6 @@ from playwright._impl._console_message import ConsoleMessage as ConsoleMessageIm
 from playwright._impl._debugger import Debugger as DebuggerImpl
 from playwright._impl._dialog import Dialog as DialogImpl
 from playwright._impl._disposable import Disposable as DisposableImpl
-from playwright._impl._disposable import DisposableStub
 from playwright._impl._download import Download as DownloadImpl
 from playwright._impl._element_handle import ElementHandle as ElementHandleImpl
 from playwright._impl._errors import Error
@@ -8869,7 +8868,9 @@ class Page(SyncContextManager):
             )
         )
 
-    def expose_function(self, name: str, callback: typing.Callable) -> "Disposable":
+    def expose_function(
+        self, name: str, callback: typing.Callable
+    ) -> "SyncContextManager":
         """Page.expose_function
 
         The method adds a function called `name` on the `window` object of every frame in the page. When called, the
@@ -8923,7 +8924,7 @@ class Page(SyncContextManager):
 
         Returns
         -------
-        Disposable
+        SyncContextManager
         """
 
         return mapping.from_impl(
@@ -8940,7 +8941,7 @@ class Page(SyncContextManager):
         callback: typing.Callable,
         *,
         handle: typing.Optional[bool] = None,
-    ) -> "Disposable":
+    ) -> "SyncContextManager":
         """Page.expose_binding
 
         The method adds a function called `name` on the `window` object of every frame in this page. When called, the
@@ -8995,7 +8996,7 @@ class Page(SyncContextManager):
 
         Returns
         -------
-        Disposable
+        SyncContextManager
         """
 
         return mapping.from_impl(
@@ -9547,7 +9548,7 @@ class Page(SyncContextManager):
         script: typing.Optional[str] = None,
         *,
         path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
-    ) -> "Disposable":
+    ) -> "SyncContextManager":
         """Page.add_init_script
 
         Adds a script which would be evaluated in one of the following scenarios:
@@ -9580,7 +9581,7 @@ class Page(SyncContextManager):
 
         Returns
         -------
-        Disposable
+        SyncContextManager
         """
 
         return mapping.from_impl(
@@ -9596,7 +9597,7 @@ class Page(SyncContextManager):
         ],
         *,
         times: typing.Optional[int] = None,
-    ) -> "DisposableStub":
+    ) -> "SyncContextManager":
         """Page.route
 
         Routing provides the capability to modify network requests that are made by a page.
@@ -9667,7 +9668,7 @@ class Page(SyncContextManager):
 
         Returns
         -------
-        DisposableStub
+        SyncContextManager
         """
 
         return mapping.from_impl(
@@ -13306,7 +13307,7 @@ class BrowserContext(SyncContextManager):
         script: typing.Optional[str] = None,
         *,
         path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
-    ) -> "Disposable":
+    ) -> "SyncContextManager":
         """BrowserContext.add_init_script
 
         Adds a script which would be evaluated in one of the following scenarios:
@@ -13339,7 +13340,7 @@ class BrowserContext(SyncContextManager):
 
         Returns
         -------
-        Disposable
+        SyncContextManager
         """
 
         return mapping.from_impl(
@@ -13352,7 +13353,7 @@ class BrowserContext(SyncContextManager):
         callback: typing.Callable,
         *,
         handle: typing.Optional[bool] = None,
-    ) -> "Disposable":
+    ) -> "SyncContextManager":
         """BrowserContext.expose_binding
 
         The method adds a function called `name` on the `window` object of every frame in every page in the context. When
@@ -13405,7 +13406,7 @@ class BrowserContext(SyncContextManager):
 
         Returns
         -------
-        Disposable
+        SyncContextManager
         """
 
         return mapping.from_impl(
@@ -13416,7 +13417,9 @@ class BrowserContext(SyncContextManager):
             )
         )
 
-    def expose_function(self, name: str, callback: typing.Callable) -> "Disposable":
+    def expose_function(
+        self, name: str, callback: typing.Callable
+    ) -> "SyncContextManager":
         """BrowserContext.expose_function
 
         The method adds a function called `name` on the `window` object of every frame in every page in the context. When
@@ -13469,7 +13472,7 @@ class BrowserContext(SyncContextManager):
 
         Returns
         -------
-        Disposable
+        SyncContextManager
         """
 
         return mapping.from_impl(
@@ -13489,7 +13492,7 @@ class BrowserContext(SyncContextManager):
         ],
         *,
         times: typing.Optional[int] = None,
-    ) -> "DisposableStub":
+    ) -> "SyncContextManager":
         """BrowserContext.route
 
         Routing provides the capability to modify network requests that are made by any page in the browser context. Once
@@ -13555,7 +13558,7 @@ class BrowserContext(SyncContextManager):
 
         Returns
         -------
-        DisposableStub
+        SyncContextManager
         """
 
         return mapping.from_impl(
@@ -15674,7 +15677,7 @@ class Tracing(SyncBase):
 
     def group(
         self, name: str, *, location: typing.Optional[TracingGroupLocation] = None
-    ) -> "DisposableStub":
+    ) -> "SyncContextManager":
         """Tracing.group
 
         **NOTE** Use `test.step` instead when available.
@@ -15703,7 +15706,7 @@ class Tracing(SyncBase):
 
         Returns
         -------
-        DisposableStub
+        SyncContextManager
         """
 
         return mapping.from_impl(
@@ -21688,7 +21691,7 @@ class Screencast(SyncBase):
         on_frame: typing.Optional[
             typing.Callable[[OnFrame], typing.Awaitable[typing.Any]]
         ] = None,
-    ) -> "DisposableStub":
+    ) -> "SyncContextManager":
         """Screencast.start
 
         Starts the screencast. When `path` is provided, it saves video recording to the specified file. When `onFrame` is
@@ -21707,7 +21710,7 @@ class Screencast(SyncBase):
 
         Returns
         -------
-        DisposableStub
+        SyncContextManager
         """
 
         return mapping.from_impl(
@@ -21737,7 +21740,7 @@ class Screencast(SyncBase):
             ]
         ] = None,
         font_size: typing.Optional[int] = None,
-    ) -> "DisposableStub":
+    ) -> "SyncContextManager":
         """Screencast.show_actions
 
         Enables visual annotations on interacted elements. Returns a disposable that stops showing actions when disposed.
@@ -21753,7 +21756,7 @@ class Screencast(SyncBase):
 
         Returns
         -------
-        DisposableStub
+        SyncContextManager
         """
 
         return mapping.from_impl(
@@ -21774,7 +21777,7 @@ class Screencast(SyncBase):
 
     def show_overlay(
         self, html: str, *, duration: typing.Optional[float] = None
-    ) -> "DisposableStub":
+    ) -> "SyncContextManager":
         """Screencast.show_overlay
 
         Adds an overlay with the given HTML content. The overlay is displayed on top of the page until removed. Returns a
@@ -21790,7 +21793,7 @@ class Screencast(SyncBase):
 
         Returns
         -------
-        DisposableStub
+        SyncContextManager
         """
 
         return mapping.from_impl(
@@ -21847,7 +21850,7 @@ class Screencast(SyncBase):
 mapping.register(ScreencastImpl, Screencast)
 
 
-class Disposable(SyncBase):
+class Disposable(SyncContextManager):
 
     def dispose(self) -> None:
         """Disposable.dispose
@@ -21857,6 +21860,10 @@ class Disposable(SyncBase):
         """
 
         return mapping.from_maybe_impl(self._sync(self._impl_obj.dispose()))
+
+    def close(self) -> None:
+
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.close()))
 
 
 mapping.register(DisposableImpl, Disposable)
