@@ -303,7 +303,6 @@ class Connection(EventEmitter):
         await self.run()
 
     async def run(self) -> None:
-        self._loop = asyncio.get_running_loop()
         self._root_object = RootChannelOwner(self)
 
         async def init() -> None:
