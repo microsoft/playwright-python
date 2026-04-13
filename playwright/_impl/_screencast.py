@@ -24,7 +24,7 @@ from typing import (
     Union,
 )
 
-from playwright._impl._api_structures import OnFrame
+from playwright._impl._api_structures import ScreencastFrame
 from playwright._impl._artifact import Artifact
 from playwright._impl._connection import from_channel
 from playwright._impl._disposable import DisposableStub
@@ -38,7 +38,7 @@ class Screencast:
         self._page = page
         self._started = False
         self._save_path: Optional[Union[str, Path]] = None
-        self._on_frame: Optional[Callable[[OnFrame], Awaitable[Any]]] = None
+        self._on_frame: Optional[Callable[[ScreencastFrame], Awaitable[Any]]] = None
         self._artifact: Optional[Artifact] = None
         self._page._channel.on("screencastFrame", self._handle_frame)
 
@@ -50,7 +50,7 @@ class Screencast:
         self,
         path: Union[str, Path] = None,
         quality: int = None,
-        onFrame: Callable[[OnFrame], Awaitable[Any]] = None,
+        onFrame: Callable[[ScreencastFrame], Awaitable[Any]] = None,
     ) -> DisposableStub:
         if self._started:
             raise Exception("Screencast is already started")

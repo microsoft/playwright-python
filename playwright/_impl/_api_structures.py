@@ -328,5 +328,5 @@ class PausedDetails(TypedDict):
     title: str
 
 
-class OnFrame(TypedDict):
+class ScreencastFrame(TypedDict):
     data: bytes

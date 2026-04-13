@@ -27,7 +27,6 @@ from playwright._impl._api_structures import (
     Geolocation,
     HttpCredentials,
     NameValue,
-    OnFrame,
     PausedDetails,
     PausedDetailsLocation,
     PdfMargins,
@@ -36,6 +35,7 @@ from playwright._impl._api_structures import (
     RemoteAddr,
     RequestSizes,
     ResourceTiming,
+    ScreencastFrame,
     SecurityDetails,
     SetCookieParam,
     SourceLocation,
@@ -21599,7 +21599,7 @@ class Screencast(AsyncBase):
         path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         quality: typing.Optional[int] = None,
         on_frame: typing.Optional[
-            typing.Callable[[OnFrame], typing.Awaitable[typing.Any]]
+            typing.Callable[[ScreencastFrame], typing.Awaitable[typing.Any]]
         ] = None,
     ) -> "AsyncContextManager":
         """Screencast.start
