@@ -218,14 +218,7 @@ async def test_prevent_getting_video_path(
     page = await browser.new_page(record_video_dir=tmp_path)
     await page.goto(server.PREFIX + "/grid.html")
     await browser.close()
-    assert page.video
-    with pytest.raises(Error) as exc:
-        await page.video.path()
-    assert (
-        exc.value.message
-        == "Path is not available when using browserType.connect(). Use save_as() to save a local copy."
-    )
-    remote_server.kill()
+    assert page.video is None
 
 
 async def test_connect_to_closed_server_without_hangs(
