@@ -20,3 +20,6 @@ Parameter type mismatch in BrowserContext.route_web_socket(handler=): documented
 Parameter type mismatch in Page.route_web_socket(handler=): documented as Callable[[WebSocketRoute], Union[Any, Any]], code has Callable[[WebSocketRoute], Any]
 Parameter type mismatch in WebSocketRoute.on_close(handler=): documented as Callable[[Union[int, undefined]], Union[Any, Any]], code has Callable[[Union[int, None], Union[str, None]], Any]
 Parameter type mismatch in WebSocketRoute.on_message(handler=): documented as Callable[[str], Union[Any, Any]], code has Callable[[Union[bytes, str]], Any]
+
+# Python on_frame callback is sync, not async
+Parameter type mismatch in Screencast.start(on_frame=): documented as Union[Callable[[{data: bytes}], typing.Awaitable[typing.Any]], None], code has Union[Callable[[{data: bytes}], None], None]

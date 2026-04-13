@@ -12,11 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import base64
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
-    Any,
-    Awaitable,
     Callable,
     Dict,
     Literal,
@@ -36,21 +35,22 @@ if TYPE_CHECKING:
 class Screencast:
     def __init__(self, page: "Page") -> None:
         self._page = page
+        self._loop = page._loop
         self._started = False
         self._save_path: Optional[Union[str, Path]] = None
-        self._on_frame: Optional[Callable[[ScreencastFrame], Awaitable[Any]]] = None
+        self._on_frame: Optional[Callable[[ScreencastFrame], None]] = None
         self._artifact: Optional[Artifact] = None
         self._page._channel.on("screencastFrame", self._handle_frame)
 
     def _handle_frame(self, params: Dict) -> None:
         if self._on_frame:
-            self._on_frame({"data": params["data"]})
+            self._on_frame({"data": base64.b64decode(params["data"])})
 
     async def start(
         self,
         path: Union[str, Path] = None,
         quality: int = None,
-        onFrame: Callable[[ScreencastFrame], Awaitable[Any]] = None,
+        onFrame: Callable[[ScreencastFrame], None] = None,
     ) -> DisposableStub:
         if self._started:
             raise Exception("Screencast is already started")
@@ -66,8 +66,8 @@ class Screencast:
                 "record": path is not None,
             },
         )
-        if result.get("artifact"):
-            self._artifact = from_channel(result["artifact"])
+        if result:
+            self._artifact = from_channel(result)
             self._save_path = path
 
         return DisposableStub(lambda: self.stop())
@@ -100,7 +100,7 @@ class Screencast:
         await self._page._channel.send("screencastHideActions", None)
 
     async def show_overlay(self, html: str, duration: float = None) -> DisposableStub:
-        result = await self._page._channel.send(
+        overlay_id = await self._page._channel.send(
             "screencastShowOverlay",
             None,
             {"html": html, "duration": duration},
@@ -110,7 +110,7 @@ class Screencast:
             lambda: self._page._channel.send(
                 "screencastRemoveOverlay",
                 None,
-                {"id": result["id"]},
+                {"id": overlay_id},
             )
         )
 

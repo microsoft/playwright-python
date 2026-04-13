@@ -21688,9 +21688,7 @@ class Screencast(SyncBase):
         *,
         path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         quality: typing.Optional[int] = None,
-        on_frame: typing.Optional[
-            typing.Callable[[ScreencastFrame], typing.Awaitable[typing.Any]]
-        ] = None,
+        on_frame: typing.Optional[typing.Callable[[ScreencastFrame], None]] = None,
     ) -> "SyncContextManager":
         """Screencast.start
 
@@ -21705,7 +21703,7 @@ class Screencast(SyncBase):
             Path where the video should be saved when the screencast is stopped. When provided, video recording is started.
         quality : Union[int, None]
             The quality of the image, between 0-100.
-        on_frame : Union[Callable[[{data: bytes}], typing.Awaitable[typing.Any]], None]
+        on_frame : Union[Callable[[{data: bytes}], None], None]
             Callback that receives JPEG-encoded frame data.
 
         Returns

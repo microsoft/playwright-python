@@ -19,7 +19,7 @@ from playwright._impl._connection import ChannelOwner
 
 
 class Debugger(ChannelOwner):
-    Events = {"PausedStateChanged": "pausedStateChanged"}
+    Events = {"PausedStateChanged": "pausedstatechanged"}
 
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict

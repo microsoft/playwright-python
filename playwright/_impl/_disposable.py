@@ -48,6 +48,12 @@ class DisposableStub:
     async def dispose(self) -> None:
         await self._dispose_fn()
 
+    async def __aenter__(self) -> "DisposableStub":
+        return self
+
+    async def __aexit__(self, *args: object) -> None:
+        await self.dispose()
+
     async def close(self) -> None:
         await self.dispose()
 
