@@ -15,6 +15,8 @@
 import asyncio
 from typing import List, Optional
 
+import pytest
+
 from playwright.async_api import Browser, BrowserContext, Request, Route
 from tests.server import Server
 from tests.utils import must
@@ -137,8 +139,10 @@ async def test_should_inherit_http_credentials_from_browser_context(
 
 
 async def test_should_inherit_touch_support_from_browser_context(
-    browser: Browser, server: Server
+    browser: Browser, server: Server, is_firefox: bool, browser_version: str
 ) -> None:
+    if is_firefox and int(browser_version.split(".")[0]) >= 148:
+        pytest.skip("https://bugzilla.mozilla.org/show_bug.cgi?id=2014330")
     context = await browser.new_context(
         viewport={"width": 400, "height": 500}, has_touch=True
     )

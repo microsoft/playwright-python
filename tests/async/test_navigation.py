@@ -816,7 +816,7 @@ async def test_wait_for_load_state_should_wait_for_load_state_of_empty_url_popup
 
     popup = await popup_info.value
     await popup.wait_for_load_state()
-    assert ready_state == ["uninitialized"] if is_firefox else ["complete"]
+    assert ready_state == ["complete"]
     assert await popup.evaluate("() => document.readyState") == ready_state[0]
 
 
