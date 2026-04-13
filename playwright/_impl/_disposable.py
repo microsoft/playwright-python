@@ -12,10 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
+import inspect
+import traceback
+from asyncio import AbstractEventLoop
 from typing import Awaitable, Callable, Dict
 
+import greenlet
+
 from playwright._impl._connection import ChannelOwner
-from playwright._impl._errors import is_target_closed_error
+from playwright._impl._errors import Error, is_target_closed_error
 
 
 class Disposable(ChannelOwner):
@@ -42,8 +48,15 @@ class Disposable(ChannelOwner):
 
 
 class DisposableStub:
-    def __init__(self, dispose_fn: Callable[[], Awaitable[None]]) -> None:
+    def __init__(
+        self,
+        dispose_fn: Callable[[], Awaitable[None]],
+        loop: AbstractEventLoop,
+        dispatcher_fiber: object,
+    ) -> None:
         self._dispose_fn = dispose_fn
+        self._loop = loop
+        self._dispatcher_fiber = dispatcher_fiber
 
     async def dispose(self) -> None:
         await self._dispose_fn()
@@ -53,6 +66,25 @@ class DisposableStub:
 
     async def __aexit__(self, *args: object) -> None:
         await self.dispose()
+
+    def __enter__(self) -> "DisposableStub":
+        return self
+
+    def __exit__(self, *args: object) -> None:
+        self._sync(self.dispose())
+
+    def _sync(self, coro: object) -> object:
+        if self._loop.is_closed():
+            raise Error("Event loop is closed! Is Playwright already stopped?")
+        g_self = greenlet.getcurrent()
+        task = self._loop.create_task(coro)  # type: ignore
+        setattr(task, "__pw_stack__", inspect.stack(0))
+        setattr(task, "__pw_stack_trace__", traceback.extract_stack(limit=10))
+        task.add_done_callback(lambda _: g_self.switch())
+        while not task.done():
+            self._dispatcher_fiber.switch()  # type: ignore
+        asyncio._set_running_loop(self._loop)
+        return task.result()
 
     async def close(self) -> None:
         await self.dispose()
