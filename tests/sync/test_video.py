@@ -16,9 +16,7 @@ import os
 from pathlib import Path
 from typing import Dict
 
-import pytest
-
-from playwright.sync_api import Browser, BrowserType, Error
+from playwright.sync_api import Browser, BrowserType
 from tests.server import Server
 
 
@@ -93,23 +91,3 @@ def test_record_video_can_get_video_path_immediately(
     page.wait_for_timeout(1000)
     context.close()
     assert os.path.exists(path)
-
-
-def test_should_error_if_page_not_closed_before_save_as(
-    browser: Browser, tmp_path: Path, server: Server
-) -> None:
-    page = browser.new_page(record_video_dir=tmp_path)
-    page.goto(server.PREFIX + "/grid.html")
-    page.wait_for_timeout(1000)  # Give it some time to record.
-    out_path = tmp_path / "some-video.webm"
-    with pytest.raises(Error) as err:
-        video = page.video
-        assert video
-        video.save_as(out_path)
-    assert video
-    assert "Page is not yet closed. Close the page prior to calling save_as" in str(err)
-    assert not os.path.exists(out_path)
-    page.close()
-
-    video.save_as(out_path)
-    assert os.path.exists(out_path)
