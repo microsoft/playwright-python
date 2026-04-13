@@ -71,7 +71,7 @@ class Screencast:
             self._artifact = from_channel(result)
             self._save_path = path
 
-        return DisposableStub(lambda: self.stop(), self._loop, self._dispatcher_fiber)
+        return DisposableStub(lambda: self.stop(), self._page)
 
     async def stop(self) -> None:
         self._started = False
@@ -95,9 +95,7 @@ class Screencast:
             None,
             {"duration": duration, "position": position, "fontSize": fontSize},
         )
-        return DisposableStub(
-            lambda: self.hide_actions(), self._loop, self._dispatcher_fiber
-        )
+        return DisposableStub(lambda: self.hide_actions(), self._page)
 
     async def hide_actions(self) -> None:
         await self._page._channel.send("screencastHideActions", None)
@@ -115,8 +113,7 @@ class Screencast:
                 None,
                 {"id": overlay_id},
             ),
-            self._loop,
-            self._dispatcher_fiber,
+            self._page,
         )
 
     async def show_chapter(

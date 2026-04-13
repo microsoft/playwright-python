@@ -438,9 +438,7 @@ class BrowserContext(ChannelOwner):
             ),
         )
         await self._update_interception_patterns()
-        return DisposableStub(
-            lambda: self.unroute(url, handler), self._loop, self._dispatcher_fiber
-        )
+        return DisposableStub(lambda: self.unroute(url, handler), self)
 
     async def unroute(
         self, url: URLMatch, handler: Optional[RouteHandlerCallback] = None

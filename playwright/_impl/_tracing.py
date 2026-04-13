@@ -144,9 +144,7 @@ class Tracing(ChannelOwner):
         self, name: str, location: TracingGroupLocation = None
     ) -> DisposableStub:
         await self._channel.send("tracingGroup", None, locals_to_params(locals()))
-        return DisposableStub(
-            lambda: self.group_end(), self._loop, self._dispatcher_fiber
-        )
+        return DisposableStub(lambda: self.group_end(), self)
 
     async def group_end(self) -> None:
         await self._channel.send(

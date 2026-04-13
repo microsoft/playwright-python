@@ -15,7 +15,6 @@
 import asyncio
 import inspect
 import traceback
-from asyncio import AbstractEventLoop
 from typing import Awaitable, Callable, Dict
 
 import greenlet
@@ -51,12 +50,11 @@ class DisposableStub:
     def __init__(
         self,
         dispose_fn: Callable[[], Awaitable[None]],
-        loop: AbstractEventLoop,
-        dispatcher_fiber: object,
+        parent: ChannelOwner,
     ) -> None:
         self._dispose_fn = dispose_fn
-        self._loop = loop
-        self._dispatcher_fiber = dispatcher_fiber
+        self._loop = parent._loop
+        self._dispatcher_fiber = parent._dispatcher_fiber
 
     async def dispose(self) -> None:
         await self._dispose_fn()
@@ -74,7 +72,9 @@ class DisposableStub:
         self._sync(self.dispose())
 
     def _sync(self, coro: object) -> object:
+        __tracebackhide__ = True
         if self._loop.is_closed():
+            coro.close()  # type: ignore
             raise Error("Event loop is closed! Is Playwright already stopped?")
         g_self = greenlet.getcurrent()
         task = self._loop.create_task(coro)  # type: ignore
