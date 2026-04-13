@@ -313,7 +313,7 @@ class TracingGroupLocation(TypedDict, total=False):
     column: Optional[int]
 
 
-class BindResult(TypedDict):
+class Bind(TypedDict):
     endpoint: str
 
 

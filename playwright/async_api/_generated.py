@@ -19,7 +19,7 @@ import typing
 from typing import Literal
 
 from playwright._impl._api_structures import (
-    BindResult,
+    Bind,
     ClientCertificate,
     Cookie,
     FilePayload,
@@ -14709,7 +14709,7 @@ class Browser(AsyncContextManager):
         workspace_dir: typing.Optional[str] = None,
         host: typing.Optional[str] = None,
         port: typing.Optional[int] = None,
-    ) -> BindResult:
+    ) -> Bind:
         """Browser.bind
 
         Binds the browser to a named pipe or web socket, making it available for other clients to connect to.

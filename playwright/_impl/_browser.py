@@ -27,7 +27,7 @@ from typing import (
 )
 
 from playwright._impl._api_structures import (
-    BindResult,
+    Bind,
     ClientCertificate,
     Geolocation,
     HttpCredentials,
@@ -247,9 +247,10 @@ class Browser(ChannelOwner):
         workspaceDir: str = None,
         host: str = None,
         port: int = None,
-    ) -> BindResult:
+    ) -> Bind:
         params = locals_to_params(locals())
-        return await self._channel.send("startServer", None, params)
+        result = await self._channel.send("startServer", None, params)
+        return Bind(endpoint=result)
 
     async def unbind(self) -> None:
         await self._channel.send("stopServer", None)
