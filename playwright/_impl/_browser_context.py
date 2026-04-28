@@ -46,6 +46,7 @@ from playwright._impl._connection import (
     from_nullable_channel,
 )
 from playwright._impl._console_message import ConsoleMessage
+from playwright._impl._debugger import Debugger
 from playwright._impl._dialog import Dialog
 from playwright._impl._errors import Error, TargetClosedError
 from playwright._impl._event_context_manager import EventContextManagerImpl
@@ -122,6 +123,7 @@ class BrowserContext(ChannelOwner):
         self._base_url: Optional[str] = self._options.get("baseURL")
         self._videos_dir: Optional[str] = self._options.get("recordVideo")
         self._tracing = cast(Tracing, from_channel(initializer["tracing"]))
+        self._debugger: Debugger = cast(Debugger, from_channel(initializer["debugger"]))
         self._har_recorders: Dict[str, HarRecordingMetadata] = {}
         self._request: APIRequestContext = from_channel(initializer["requestContext"])
         self._request._timeout_settings = self._timeout_settings
@@ -582,6 +584,9 @@ class BrowserContext(ChannelOwner):
         self._tracing._reset_stack_counter()
         self.emit(BrowserContext.Events.Close, self)
 
+    def is_closed(self) -> bool:
+        return self._closing_or_closed
+
     async def close(self, reason: str = None) -> None:
         if self._closing_or_closed:
             return
@@ -626,6 +631,15 @@ class BrowserContext(ChannelOwner):
         if path:
             await async_writefile(path, json.dumps(result))
         return result
+
+    async def set_storage_state(
+        self, storageState: Union[StorageState, str, Path]
+    ) -> None:
+        if isinstance(storageState, (str, Path)):
+            state = json.loads(await async_readfile(storageState))
+        else:
+            state = storageState
+        await self._channel.send("setStorageState", None, {"storageState": state})
 
     def _effective_close_reason(self) -> Optional[str]:
         if self._close_reason:
@@ -752,6 +766,10 @@ class BrowserContext(ChannelOwner):
     @property
     def tracing(self) -> Tracing:
         return self._tracing
+
+    @property
+    def debugger(self) -> Debugger:
+        return self._debugger
 
     @property
     def request(self) -> "APIRequestContext":

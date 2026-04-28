@@ -435,32 +435,30 @@ async def test_click_the_button_with_device_scale_factor_set(
 
 
 async def test_click_the_button_with_px_border_with_offset(
-    page: Page, server: Server, is_webkit: bool
+    page: Page, server: Server
 ) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.eval_on_selector("button", "button => button.style.borderWidth = '8px'")
     await page.click("button", position={"x": 20, "y": 10})
     assert await page.evaluate("result") == "Clicked"
-    # Safari reports border-relative offsetX/offsetY.
-    assert await page.evaluate("offsetX") == 20 + 8 if is_webkit else 20
-    assert await page.evaluate("offsetY") == 10 + 8 if is_webkit else 10
+    assert await page.evaluate("offsetX") == 20
+    assert await page.evaluate("offsetY") == 10
 
 
 async def test_click_the_button_with_em_border_with_offset(
-    page: Page, server: Server, is_webkit: bool
+    page: Page, server: Server
 ) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.eval_on_selector("button", "button => button.style.borderWidth = '2em'")
     await page.eval_on_selector("button", "button => button.style.fontSize = '12px'")
     await page.click("button", position={"x": 20, "y": 10})
     assert await page.evaluate("result") == "Clicked"
-    # Safari reports border-relative offsetX/offsetY.
-    assert await page.evaluate("offsetX") == 12 * 2 + 20 if is_webkit else 20
-    assert await page.evaluate("offsetY") == 12 * 2 + 10 if is_webkit else 10
+    assert await page.evaluate("offsetX") == 20
+    assert await page.evaluate("offsetY") == 10
 
 
 async def test_click_a_very_large_button_with_offset(
-    page: Page, server: Server, is_webkit: bool
+    page: Page, server: Server
 ) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.eval_on_selector("button", "button => button.style.borderWidth = '8px'")
@@ -469,13 +467,12 @@ async def test_click_a_very_large_button_with_offset(
     )
     await page.click("button", position={"x": 1900, "y": 1910})
     assert await page.evaluate("() => window.result") == "Clicked"
-    # Safari reports border-relative offsetX/offsetY.
-    assert await page.evaluate("() => offsetX") == 1900 + 8 if is_webkit else 1900
-    assert await page.evaluate("() => offsetY") == 1910 + 8 if is_webkit else 1910
+    assert await page.evaluate("() => offsetX") == 1900
+    assert await page.evaluate("() => offsetY") == 1910
 
 
 async def test_click_a_button_in_scrolling_container_with_offset(
-    page: Page, server: Server, is_webkit: bool
+    page: Page, server: Server
 ) -> None:
     await page.goto(server.PREFIX + "/input/button.html")
     await page.eval_on_selector(
@@ -495,9 +492,8 @@ async def test_click_a_button_in_scrolling_container_with_offset(
 
     await page.click("button", position={"x": 1900, "y": 1910})
     assert await page.evaluate("window.result") == "Clicked"
-    # Safari reports border-relative offsetX/offsetY.
-    assert await page.evaluate("offsetX") == 1900 + 8 if is_webkit else 1900
-    assert await page.evaluate("offsetY") == 1910 + 8 if is_webkit else 1910
+    assert await page.evaluate("offsetX") == 1900
+    assert await page.evaluate("offsetY") == 1910
 
 
 @pytest.mark.skip_browser("firefox")

@@ -27,6 +27,7 @@ class Tracing(ChannelOwner):
     ) -> None:
         super().__init__(parent, type, guid, initializer)
         self._include_sources: bool = False
+        self._is_live: bool = False
         self._stacks_id: Optional[str] = None
         self._is_tracing: bool = False
         self._traces_dir: Optional[str] = None
@@ -38,11 +39,22 @@ class Tracing(ChannelOwner):
         snapshots: bool = None,
         screenshots: bool = None,
         sources: bool = None,
+        live: bool = None,
     ) -> None:
         params = locals_to_params(locals())
         self._include_sources = bool(sources)
+        self._is_live = bool(live)
 
-        await self._channel.send("tracingStart", None, params)
+        await self._channel.send(
+            "tracingStart",
+            None,
+            {
+                "name": name,
+                "snapshots": snapshots,
+                "screenshots": screenshots,
+                "live": live,
+            },
+        )
         trace_name = await self._channel.send(
             "tracingStartChunk", None, {"title": title, "name": name}
         )
@@ -58,7 +70,7 @@ class Tracing(ChannelOwner):
             self._is_tracing = True
             self._connection.set_is_tracing(True)
         self._stacks_id = await self._connection.local_utils.tracing_started(
-            self._traces_dir, trace_name
+            self._traces_dir, trace_name, self._is_live
         )
 
     async def stop_chunk(self, path: Union[pathlib.Path, str] = None) -> None:

@@ -31,11 +31,11 @@ jobs:
       - name: Get conda
         uses: conda-incubator/setup-miniconda@v3
         with:
-          python-version: 3.9
+          python-version: '3.12'
           channels: conda-forge
           miniconda-version: latest
       - name: Prepare
-        run: conda install anaconda-client conda-build conda-verify
+        run: conda install -n base anaconda-client "conda-build>=26" conda-verify
       - name: Build and Upload
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}

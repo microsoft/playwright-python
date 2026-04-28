@@ -61,3 +61,24 @@ async def test_should_parse_the_data_if_content_type_is_application_x_www_form_u
     request = await request_info.value
     assert request
     assert request.post_data_json == {"foo": "bar", "baz": "123"}
+
+
+async def test_existing_response_should_return_response_after_it_is_received(
+    page: Page, server: Server
+) -> None:
+    async with page.expect_event("requestfinished") as request_finished_info:
+        await page.goto(server.EMPTY_PAGE)
+    request = await request_finished_info.value
+    assert request.existing_response is not None
+    assert request.existing_response.status == 200
+
+
+async def test_existing_response_should_return_none_before_response_arrives(
+    page: Page, server: Server
+) -> None:
+    captured = []
+    page.on("request", lambda req: captured.append(req.existing_response))
+    await page.goto(server.EMPTY_PAGE)
+    assert captured
+    # When the "request" event fires, the response has not been received yet.
+    assert captured[0] is None

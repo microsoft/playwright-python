@@ -133,6 +133,32 @@ async def test_should_round_trip_through_the_file(
     await context2.close()
 
 
+async def test_set_storage_state_should_apply_state_to_existing_context(
+    browser: Browser,
+) -> None:
+    src = await browser.new_context()
+    src_page = await src.new_page()
+    await src_page.route(
+        "**/*",
+        lambda route: asyncio.create_task(route.fulfill(body="<html></html>")),
+    )
+    await src_page.goto("https://www.example.com")
+    await src_page.evaluate('() => localStorage.setItem("k", "v")')
+    state = await src.storage_state()
+    await src.close()
+
+    dst = await browser.new_context()
+    dst_page = await dst.new_page()
+    await dst_page.route(
+        "**/*",
+        lambda route: asyncio.create_task(route.fulfill(body="<html></html>")),
+    )
+    await dst.set_storage_state(state)
+    await dst_page.goto("https://www.example.com")
+    assert await dst_page.evaluate('() => localStorage.getItem("k")') == "v"
+    await dst.close()
+
+
 async def test_should_serialiser_storage_state_with_lone_surrogates(
     page: Page, context: BrowserContext, server: Server
 ) -> None:

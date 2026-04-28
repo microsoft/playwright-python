@@ -214,3 +214,20 @@ def test_match_values_both_against_regex_and_string(page: Page) -> None:
           - /url: /auth?r=/
       """,
     )
+
+
+def test_should_snapshot_with_depth(page: Page) -> None:
+    page.set_content("<ul><li><a href=about:blank>link</a></li></ul>")
+    snapshot = page.locator("body").aria_snapshot(depth=1)
+    assert "listitem" in snapshot
+    assert "/url" not in snapshot
+
+
+def test_page_aria_snapshot_should_work(page: Page) -> None:
+    page.set_content("<h1>title</h1>")
+    snapshot = page.aria_snapshot()
+    assert _unshift(snapshot) == _unshift(
+        """
+      - heading "title" [level=1]
+    """
+    )

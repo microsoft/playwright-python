@@ -22,6 +22,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, Generator, List, Optional, cast
 
 import pytest
+from _pytest.terminal import TerminalReporter
 from PIL import Image
 from pixelmatch import pixelmatch
 from pixelmatch.contrib.PIL import from_PIL_to_raw_data
@@ -261,6 +262,25 @@ class RemoteServer:
             return
         self.process.kill()
         self.process.wait()
+
+
+_failed_node_ids: List[str] = []
+
+
+def pytest_runtest_logreport(report: pytest.TestReport) -> None:
+    if report.failed and report.when in ("setup", "call"):
+        if report.nodeid not in _failed_node_ids:
+            _failed_node_ids.append(report.nodeid)
+
+
+def pytest_terminal_summary(
+    terminalreporter: TerminalReporter, exitstatus: int, config: pytest.Config
+) -> None:
+    if not _failed_node_ids:
+        return
+    terminalreporter.write_sep("=", "Failed tests", red=True, bold=True)
+    for index, nodeid in enumerate(_failed_node_ids, 1):
+        terminalreporter.write_line(f"  {index}) {nodeid}", red=True)
 
 
 @pytest.fixture

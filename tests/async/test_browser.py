@@ -53,3 +53,17 @@ async def test_should_return_browser_type(
     browser: Browser, browser_type: BrowserType
 ) -> None:
     assert browser.browser_type is browser_type
+
+
+async def test_bind_should_return_endpoint_and_allow_unbind(
+    browser_type: BrowserType,
+) -> None:
+    browser = await browser_type.launch()
+    try:
+        result = await browser.bind("test-server")
+        assert "endpoint" in result
+        assert isinstance(result["endpoint"], str)
+        assert len(result["endpoint"]) > 0
+        await browser.unbind()
+    finally:
+        await browser.close()

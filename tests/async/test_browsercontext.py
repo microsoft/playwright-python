@@ -168,6 +168,13 @@ async def test_close_should_be_callable_twice(browser: Browser) -> None:
     await context.close()
 
 
+async def test_is_closed_should_reflect_state(browser: Browser) -> None:
+    context = await browser.new_context()
+    assert context.is_closed() is False
+    await context.close()
+    assert context.is_closed() is True
+
+
 async def test_user_agent_should_work(browser: Browser, server: Server) -> None:
     async def baseline() -> None:
         context = await browser.new_context()

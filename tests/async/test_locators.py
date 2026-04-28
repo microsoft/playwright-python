@@ -1191,3 +1191,9 @@ async def test_description_should_return_description_for_locator_with_multiple_d
     assert locator2.description == "Second description"
     locator3 = locator2.locator("button")
     assert locator3.description is None
+
+
+async def test_normalize_should_resolve_to_a_locator(page: Page) -> None:
+    await page.set_content("<button>Click me</button>")
+    normalized = await page.get_by_role("button").normalize()
+    assert await normalized.text_content() == "Click me"

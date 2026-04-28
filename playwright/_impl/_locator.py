@@ -564,7 +564,12 @@ class Locator:
             ),
         )
 
-    async def aria_snapshot(self, timeout: float = None) -> str:
+    async def aria_snapshot(
+        self,
+        timeout: float = None,
+        depth: int = None,
+        mode: Literal["ai", "default"] = None,
+    ) -> str:
         return await self._frame._channel.send(
             "ariaSnapshot",
             self._frame._timeout,
@@ -573,6 +578,14 @@ class Locator:
                 **locals_to_params(locals()),
             },
         )
+
+    async def normalize(self) -> "Locator":
+        result = await self._frame._channel.send(
+            "resolveSelector",
+            None,
+            {"selector": self._selector},
+        )
+        return Locator(self._frame, result)
 
     async def scroll_into_view_if_needed(
         self,

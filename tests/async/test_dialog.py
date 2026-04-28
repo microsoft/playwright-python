@@ -102,3 +102,15 @@ async def test_should_auto_dismiss_the_alert_without_listeners(page: Page) -> No
     )
     await page.click("div")
     assert await page.evaluate('"window._clicked"')
+
+
+async def test_dismiss_should_swallow_target_closed_error(browser: Browser) -> None:
+    context = await browser.new_context()
+    page = await context.new_page()
+    async with page.expect_event("dialog") as dialog_info:
+        await page.evaluate("() => setTimeout(() => alert('hello'), 0)", None)
+    dialog = await dialog_info.value
+    await page.close()
+    # Dialog.dismiss should be a no-op once the target is closed.
+    await dialog.dismiss()
+    await context.close()

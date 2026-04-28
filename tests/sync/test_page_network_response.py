@@ -64,3 +64,9 @@ def test_should_reject_response_finished_if_context_closes(
         page_response.finished()
     error = exc_info.value
     assert "closed" in error.message
+
+
+def test_should_return_http_version(page: Page, server: Server) -> None:
+    response = page.goto(server.EMPTY_PAGE)
+    assert response
+    assert response.http_version() in ("HTTP/1.0", "HTTP/1.1", "HTTP/2.0")

@@ -20,6 +20,7 @@ from playwright._impl._browser_context import BrowserContext
 from playwright._impl._browser_type import BrowserType
 from playwright._impl._cdp_session import CDPSession
 from playwright._impl._connection import ChannelOwner
+from playwright._impl._debugger import Debugger
 from playwright._impl._dialog import Dialog
 from playwright._impl._element_handle import ElementHandle
 from playwright._impl._fetch import APIRequestContext
@@ -64,6 +65,8 @@ def create_remote_object(
         return BrowserContext(parent, type, guid, initializer)
     if type == "CDPSession":
         return CDPSession(parent, type, guid, initializer)
+    if type == "Debugger":
+        return Debugger(parent, type, guid, initializer)
     if type == "Dialog":
         return Dialog(parent, type, guid, initializer)
     if type == "ElementHandle":
