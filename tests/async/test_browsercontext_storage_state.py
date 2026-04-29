@@ -15,6 +15,9 @@
 import asyncio
 import json
 from pathlib import Path
+from typing import Optional
+
+import pytest
 
 from playwright.async_api import Browser, BrowserContext, Page, StorageState
 from tests.server import Server
@@ -134,18 +137,17 @@ async def test_should_round_trip_through_the_file(
 
 
 async def test_set_storage_state_should_apply_state_to_existing_context(
-    browser: Browser,
+    browser: Browser, browser_channel: Optional[str]
 ) -> None:
-    # http (not https) avoids TLS setup on Edge stable on Windows where the
-    # network path is taken before route intercept short-circuits.
-    origin = "http://example.com"
+    if browser_channel and browser_channel.startswith("msedge"):
+        pytest.skip("Network.clearBrowserCache sometimes stalls on msedge")
     src = await browser.new_context()
     src_page = await src.new_page()
     await src_page.route(
         "**/*",
         lambda route: asyncio.create_task(route.fulfill(body="<html></html>")),
     )
-    await src_page.goto(origin)
+    await src_page.goto("https://www.example.com")
     await src_page.evaluate('() => localStorage.setItem("k", "v")')
     state = await src.storage_state()
     await src.close()
@@ -157,7 +159,7 @@ async def test_set_storage_state_should_apply_state_to_existing_context(
         lambda route: asyncio.create_task(route.fulfill(body="<html></html>")),
     )
     await dst.set_storage_state(state)
-    await dst_page.goto(origin)
+    await dst_page.goto("https://www.example.com")
     assert await dst_page.evaluate('() => localStorage.getItem("k")') == "v"
     await dst.close()
 
