@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Any, Callable, Literal, Optional, Union
 from playwright._impl._api_structures import ScreencastFrame
 from playwright._impl._artifact import Artifact
 from playwright._impl._connection import from_nullable_channel
+from playwright._impl._disposable import DisposableStub
 from playwright._impl._errors import Error
 from playwright._impl._helper import locals_to_params
 
@@ -63,7 +64,7 @@ class Screencast:
         onFrame: ScreencastFrameCallback = None,
         path: Union[str, Path] = None,
         quality: int = None,
-    ) -> None:
+    ) -> DisposableStub:
         if self._started:
             raise Error("Screencast is already started")
         self._started = True
@@ -81,6 +82,7 @@ class Screencast:
         if artifact_channel:
             self._artifact = from_nullable_channel(artifact_channel)
             self._save_path = path
+        return DisposableStub(lambda: self.stop(), self._page)
 
     async def stop(self) -> None:
         self._started = False
@@ -96,17 +98,25 @@ class Screencast:
         duration: float = None,
         position: ScreencastPosition = None,
         fontSize: int = None,
-    ) -> None:
+    ) -> DisposableStub:
         await self._page._channel.send(
             "screencastShowActions", None, locals_to_params(locals())
         )
+        return DisposableStub(lambda: self.hide_actions(), self._page)
 
     async def hide_actions(self) -> None:
         await self._page._channel.send("screencastHideActions", None)
 
-    async def show_overlay(self, html: str, duration: float = None) -> None:
-        await self._page._channel.send(
+    async def show_overlay(self, html: str, duration: float = None) -> DisposableStub:
+        result = await self._page._channel.send_return_as_dict(
             "screencastShowOverlay", None, locals_to_params(locals())
+        )
+        overlay_id = (result or {}).get("id")
+        return DisposableStub(
+            lambda: self._page._channel.send(
+                "screencastRemoveOverlay", None, {"id": overlay_id}
+            ),
+            self._page,
         )
 
     async def show_chapter(

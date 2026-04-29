@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright.sync_api import BrowserContext, Page
+from playwright.sync_api import BrowserContext, Page, Route
 from tests.server import Server
 from tests.utils import must
 
@@ -44,3 +44,18 @@ def test_page_unroute_all_removes_all_routes(page: Page, server: Server) -> None
     page.unroute_all()
     response = must(page.goto(server.EMPTY_PAGE))
     assert response.ok
+
+
+def test_page_route_returns_disposable(page: Page, server: Server) -> None:
+    intercepted: list = []
+
+    def handler(route: Route) -> None:
+        intercepted.append(route.request.url)
+        route.continue_()
+
+    with page.route("**/*", handler):
+        page.goto(server.EMPTY_PAGE)
+        assert any(server.EMPTY_PAGE in url for url in intercepted)
+    intercepted.clear()
+    page.goto(server.EMPTY_PAGE)
+    assert intercepted == []

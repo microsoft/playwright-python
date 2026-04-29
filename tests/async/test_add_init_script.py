@@ -89,3 +89,13 @@ async def test_should_work_with_trailing_comments(page: Page) -> None:
     await page.add_init_script("window.secret = 42;")
     await page.goto("data:text/html,<html></html>")
     assert await page.evaluate("secret") == 42
+
+
+async def test_add_init_script_returns_disposable(page: Page) -> None:
+    async with await page.add_init_script("window.injected = 123"):
+        await page.goto(
+            "data:text/html,<script>window.result = window.injected</script>"
+        )
+        assert await page.evaluate("window.result") == 123
+    await page.goto("data:text/html,<script>window.result = window.injected</script>")
+    assert await page.evaluate("window.result") is None

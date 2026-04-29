@@ -40,7 +40,7 @@ def generate(t: Any) -> None:
     print("")
     class_name = short_name(t)
     base_class = t.__bases__[0].__name__
-    if class_name in ["Page", "BrowserContext", "Browser"]:
+    if class_name in ["Page", "BrowserContext", "Browser", "Disposable"]:
         base_sync_class = "SyncContextManager"
     elif base_class in ["ChannelOwner", "object", "AssertionsBase"]:
         base_sync_class = "SyncBase"
@@ -86,6 +86,9 @@ def generate(t: Any) -> None:
             is_async = inspect.iscoroutinefunction(value)
             return_type_value = return_type(value)
             return_type_value = re.sub(r"\"([^\"]+)Impl\"", r"\1", return_type_value)
+            return_type_value = return_type_value.replace(
+                '"Disposable"', '"SyncContextManager"'
+            ).replace('"DisposableStub"', '"SyncContextManager"')
             print("")
             print(
                 f"    def {name}({signature(value, len(name) + 9)}) -> {return_type_value}:"
