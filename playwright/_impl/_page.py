@@ -49,6 +49,7 @@ from playwright._impl._connection import (
     from_nullable_channel,
 )
 from playwright._impl._console_message import ConsoleMessage
+from playwright._impl._disposable import Disposable, DisposableStub
 from playwright._impl._download import Download
 from playwright._impl._element_handle import ElementHandle, determine_screenshot_type
 from playwright._impl._errors import Error, TargetClosedError, is_target_closed_error
@@ -501,12 +502,12 @@ class Page(ChannelOwner):
     ) -> ElementHandle:
         return await self._main_frame.add_style_tag(**locals_to_params(locals()))
 
-    async def expose_function(self, name: str, callback: Callable) -> None:
-        await self.expose_binding(name, lambda source, *args: callback(*args))
+    async def expose_function(self, name: str, callback: Callable) -> Disposable:
+        return await self.expose_binding(name, lambda source, *args: callback(*args))
 
     async def expose_binding(
         self, name: str, callback: Callable, handle: bool = None
-    ) -> None:
+    ) -> Disposable:
         if name in self._bindings:
             raise Error(f'Function "{name}" has been already registered')
         if name in self._browser_context._bindings:
@@ -514,10 +515,12 @@ class Page(ChannelOwner):
                 f'Function "{name}" has been already registered in the browser context'
             )
         self._bindings[name] = callback
-        await self._channel.send(
-            "exposeBinding",
-            None,
-            dict(name=name, needsHandle=handle or False),
+        return from_channel(
+            await self._channel.send(
+                "exposeBinding",
+                None,
+                dict(name=name, needsHandle=handle or False),
+            )
         )
 
     async def set_extra_http_headers(self, headers: Dict[str, str]) -> None:
@@ -661,18 +664,20 @@ class Page(ChannelOwner):
 
     async def add_init_script(
         self, script: str = None, path: Union[str, Path] = None
-    ) -> None:
+    ) -> Disposable:
         if path:
             script = add_source_url_to_script(
                 (await async_readfile(path)).decode(), path
             )
         if not isinstance(script, str):
             raise Error("Either path or script parameter must be specified")
-        await self._channel.send("addInitScript", None, dict(source=script))
+        return from_channel(
+            await self._channel.send("addInitScript", None, dict(source=script))
+        )
 
     async def route(
         self, url: URLMatch, handler: RouteHandlerCallback, times: int = None
-    ) -> None:
+    ) -> DisposableStub:
         self._routes.insert(
             0,
             RouteHandler(
@@ -684,6 +689,7 @@ class Page(ChannelOwner):
             ),
         )
         await self._update_interception_patterns()
+        return DisposableStub(lambda: self.unroute(url, handler), self)
 
     async def unroute(
         self, url: URLMatch, handler: Optional[RouteHandlerCallback] = None

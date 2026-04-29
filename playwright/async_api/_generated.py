@@ -62,6 +62,7 @@ from playwright._impl._clock import Clock as ClockImpl
 from playwright._impl._console_message import ConsoleMessage as ConsoleMessageImpl
 from playwright._impl._debugger import Debugger as DebuggerImpl
 from playwright._impl._dialog import Dialog as DialogImpl
+from playwright._impl._disposable import Disposable as DisposableImpl
 from playwright._impl._download import Download as DownloadImpl
 from playwright._impl._element_handle import ElementHandle as ElementHandleImpl
 from playwright._impl._errors import Error
@@ -7469,7 +7470,7 @@ class Screencast(AsyncBase):
         ] = None,
         path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         quality: typing.Optional[int] = None,
-    ) -> None:
+    ) -> "AsyncContextManager":
         """Screencast.start
 
         Starts the screencast. When `path` is provided, it saves video recording to the specified file. When `onFrame` is
@@ -7485,9 +7486,13 @@ class Screencast(AsyncBase):
             Path where the video should be saved when the screencast is stopped. When provided, video recording is started.
         quality : Union[int, None]
             The quality of the image, between 0-100.
+
+        Returns
+        -------
+        AsyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             await self._impl_obj.start(
                 onFrame=self._wrap_handler(on_frame), path=path, quality=quality
             )
@@ -7512,7 +7517,7 @@ class Screencast(AsyncBase):
             ]
         ] = None,
         font_size: typing.Optional[int] = None,
-    ) -> None:
+    ) -> "AsyncContextManager":
         """Screencast.show_actions
 
         Enables visual annotations on interacted elements. Returns a disposable that stops showing actions when disposed.
@@ -7525,9 +7530,13 @@ class Screencast(AsyncBase):
             Position of the action title overlay. Defaults to `"top-right"`.
         font_size : Union[int, None]
             Font size of the action title in pixels. Defaults to `24`.
+
+        Returns
+        -------
+        AsyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             await self._impl_obj.show_actions(
                 duration=duration, position=position, fontSize=font_size
             )
@@ -7543,7 +7552,7 @@ class Screencast(AsyncBase):
 
     async def show_overlay(
         self, html: str, *, duration: typing.Optional[float] = None
-    ) -> None:
+    ) -> "AsyncContextManager":
         """Screencast.show_overlay
 
         Adds an overlay with the given HTML content. The overlay is displayed on top of the page until removed. Returns a
@@ -7556,9 +7565,13 @@ class Screencast(AsyncBase):
         duration : Union[float, None]
             Duration in milliseconds after which the overlay is automatically removed. Overlay stays until dismissed if not
             provided.
+
+        Returns
+        -------
+        AsyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             await self._impl_obj.show_overlay(html=html, duration=duration)
         )
 
@@ -9100,7 +9113,9 @@ class Page(AsyncContextManager):
             await self._impl_obj.add_style_tag(url=url, path=path, content=content)
         )
 
-    async def expose_function(self, name: str, callback: typing.Callable) -> None:
+    async def expose_function(
+        self, name: str, callback: typing.Callable
+    ) -> "AsyncContextManager":
         """Page.expose_function
 
         The method adds a function called `name` on the `window` object of every frame in the page. When called, the
@@ -9154,9 +9169,13 @@ class Page(AsyncContextManager):
             Name of the function on the window object
         callback : Callable
             Callback function which will be called in Playwright's context.
+
+        Returns
+        -------
+        AsyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             await self._impl_obj.expose_function(
                 name=name, callback=self._wrap_handler(callback)
             )
@@ -9168,7 +9187,7 @@ class Page(AsyncContextManager):
         callback: typing.Callable,
         *,
         handle: typing.Optional[bool] = None,
-    ) -> None:
+    ) -> "AsyncContextManager":
         """Page.expose_binding
 
         The method adds a function called `name` on the `window` object of every frame in this page. When called, the
@@ -9223,9 +9242,13 @@ class Page(AsyncContextManager):
             Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is
             supported. When passing by value, multiple arguments are supported.
             Deprecated: This option will be removed in the future.
+
+        Returns
+        -------
+        AsyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             await self._impl_obj.expose_binding(
                 name=name, callback=self._wrap_handler(callback), handle=handle
             )
@@ -9760,7 +9783,7 @@ class Page(AsyncContextManager):
         script: typing.Optional[str] = None,
         *,
         path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
-    ) -> None:
+    ) -> "AsyncContextManager":
         """Page.add_init_script
 
         Adds a script which would be evaluated in one of the following scenarios:
@@ -9790,9 +9813,13 @@ class Page(AsyncContextManager):
         path : Union[pathlib.Path, str, None]
             Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the current working
             directory. Optional.
+
+        Returns
+        -------
+        AsyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             await self._impl_obj.add_init_script(script=script, path=path)
         )
 
@@ -9805,7 +9832,7 @@ class Page(AsyncContextManager):
         ],
         *,
         times: typing.Optional[int] = None,
-    ) -> None:
+    ) -> "AsyncContextManager":
         """Page.route
 
         Routing provides the capability to modify network requests that are made by a page.
@@ -9873,9 +9900,13 @@ class Page(AsyncContextManager):
             handler function to route the request.
         times : Union[int, None]
             How often a route should be used. By default it will be used every time.
+
+        Returns
+        -------
+        AsyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             await self._impl_obj.route(
                 url=self._wrap_handler(url),
                 handler=self._wrap_handler(handler),
@@ -13512,7 +13543,7 @@ class BrowserContext(AsyncContextManager):
         script: typing.Optional[str] = None,
         *,
         path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
-    ) -> None:
+    ) -> "AsyncContextManager":
         """BrowserContext.add_init_script
 
         Adds a script which would be evaluated in one of the following scenarios:
@@ -13542,9 +13573,13 @@ class BrowserContext(AsyncContextManager):
         path : Union[pathlib.Path, str, None]
             Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the current working
             directory. Optional.
+
+        Returns
+        -------
+        AsyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             await self._impl_obj.add_init_script(script=script, path=path)
         )
 
@@ -13554,7 +13589,7 @@ class BrowserContext(AsyncContextManager):
         callback: typing.Callable,
         *,
         handle: typing.Optional[bool] = None,
-    ) -> None:
+    ) -> "AsyncContextManager":
         """BrowserContext.expose_binding
 
         The method adds a function called `name` on the `window` object of every frame in every page in the context. When
@@ -13607,15 +13642,21 @@ class BrowserContext(AsyncContextManager):
             Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is
             supported. When passing by value, multiple arguments are supported.
             Deprecated: This option will be removed in the future.
+
+        Returns
+        -------
+        AsyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             await self._impl_obj.expose_binding(
                 name=name, callback=self._wrap_handler(callback), handle=handle
             )
         )
 
-    async def expose_function(self, name: str, callback: typing.Callable) -> None:
+    async def expose_function(
+        self, name: str, callback: typing.Callable
+    ) -> "AsyncContextManager":
         """BrowserContext.expose_function
 
         The method adds a function called `name` on the `window` object of every frame in every page in the context. When
@@ -13668,9 +13709,13 @@ class BrowserContext(AsyncContextManager):
             Name of the function on the window object.
         callback : Callable
             Callback function that will be called in the Playwright's context.
+
+        Returns
+        -------
+        AsyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             await self._impl_obj.expose_function(
                 name=name, callback=self._wrap_handler(callback)
             )
@@ -13685,7 +13730,7 @@ class BrowserContext(AsyncContextManager):
         ],
         *,
         times: typing.Optional[int] = None,
-    ) -> None:
+    ) -> "AsyncContextManager":
         """BrowserContext.route
 
         Routing provides the capability to modify network requests that are made by any page in the browser context. Once
@@ -13747,9 +13792,13 @@ class BrowserContext(AsyncContextManager):
             handler function to route the request.
         times : Union[int, None]
             How often a route should be used. By default it will be used every time.
+
+        Returns
+        -------
+        AsyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             await self._impl_obj.route(
                 url=self._wrap_handler(url),
                 handler=self._wrap_handler(handler),
@@ -15882,7 +15931,7 @@ class Tracing(AsyncBase):
 
     async def group(
         self, name: str, *, location: typing.Optional[TracingGroupLocation] = None
-    ) -> None:
+    ) -> "AsyncContextManager":
         """Tracing.group
 
         **NOTE** Use `test.step` instead when available.
@@ -15908,9 +15957,13 @@ class Tracing(AsyncBase):
         location : Union[{file: str, line: Union[int, None], column: Union[int, None]}, None]
             Specifies a custom location for the group to be shown in the trace viewer. Defaults to the location of the
             `tracing.group()` call.
+
+        Returns
+        -------
+        AsyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             await self._impl_obj.group(name=name, location=location)
         )
 
@@ -21643,3 +21696,22 @@ class APIResponseAssertions(AsyncBase):
 
 
 mapping.register(APIResponseAssertionsImpl, APIResponseAssertions)
+
+
+class Disposable(AsyncContextManager):
+
+    async def dispose(self) -> None:
+        """Disposable.dispose
+
+        Removes the associated resource. For example, removes the init script installed via `page.add_init_script()`
+        or `browser_context.add_init_script()`.
+        """
+
+        return mapping.from_maybe_impl(await self._impl_obj.dispose())
+
+    async def close(self) -> None:
+
+        return mapping.from_maybe_impl(await self._impl_obj.close())
+
+
+mapping.register(DisposableImpl, Disposable)

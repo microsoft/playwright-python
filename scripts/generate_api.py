@@ -31,6 +31,7 @@ from playwright._impl._clock import Clock
 from playwright._impl._console_message import ConsoleMessage
 from playwright._impl._debugger import Debugger
 from playwright._impl._dialog import Dialog
+from playwright._impl._disposable import Disposable
 from playwright._impl._download import Download
 from playwright._impl._element_handle import ElementHandle
 from playwright._impl._fetch import APIRequest, APIRequestContext, APIResponse
@@ -235,6 +236,7 @@ from playwright._impl._cdp_session import CDPSession as CDPSessionImpl
 from playwright._impl._console_message import ConsoleMessage as ConsoleMessageImpl
 from playwright._impl._debugger import Debugger as DebuggerImpl
 from playwright._impl._dialog import Dialog as DialogImpl
+from playwright._impl._disposable import Disposable as DisposableImpl
 from playwright._impl._download import Download as DownloadImpl
 from playwright._impl._element_handle import ElementHandle as ElementHandleImpl
 from playwright._impl._file_chooser import FileChooser as FileChooserImpl
@@ -294,6 +296,7 @@ generated_types = [
     PageAssertions,
     LocatorAssertions,
     APIResponseAssertions,
+    Disposable,
 ]
 
 all_types = generated_types + [

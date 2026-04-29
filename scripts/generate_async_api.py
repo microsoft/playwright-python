@@ -39,7 +39,7 @@ def generate(t: Any) -> None:
     print("")
     class_name = short_name(t)
     base_class = t.__bases__[0].__name__
-    if class_name in ["Page", "BrowserContext", "Browser"]:
+    if class_name in ["Page", "BrowserContext", "Browser", "Disposable"]:
         base_sync_class = "AsyncContextManager"
     elif base_class in ["ChannelOwner", "object", "AssertionsBase"]:
         base_sync_class = "AsyncBase"
@@ -88,6 +88,9 @@ def generate(t: Any) -> None:
             return_type_value = return_type_value.replace(
                 "EventContextManager", "AsyncEventContextManager"
             )
+            return_type_value = return_type_value.replace(
+                '"Disposable"', '"AsyncContextManager"'
+            ).replace('"DisposableStub"', '"AsyncContextManager"')
             print("")
             async_prefix = "async " if is_async else ""
             print(

@@ -56,6 +56,7 @@ from playwright._impl._clock import Clock as ClockImpl
 from playwright._impl._console_message import ConsoleMessage as ConsoleMessageImpl
 from playwright._impl._debugger import Debugger as DebuggerImpl
 from playwright._impl._dialog import Dialog as DialogImpl
+from playwright._impl._disposable import Disposable as DisposableImpl
 from playwright._impl._download import Download as DownloadImpl
 from playwright._impl._element_handle import ElementHandle as ElementHandleImpl
 from playwright._impl._errors import Error
@@ -7541,7 +7542,7 @@ class Screencast(SyncBase):
         ] = None,
         path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         quality: typing.Optional[int] = None,
-    ) -> None:
+    ) -> "SyncContextManager":
         """Screencast.start
 
         Starts the screencast. When `path` is provided, it saves video recording to the specified file. When `onFrame` is
@@ -7557,9 +7558,13 @@ class Screencast(SyncBase):
             Path where the video should be saved when the screencast is stopped. When provided, video recording is started.
         quality : Union[int, None]
             The quality of the image, between 0-100.
+
+        Returns
+        -------
+        SyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             self._sync(
                 self._impl_obj.start(
                     onFrame=self._wrap_handler(on_frame), path=path, quality=quality
@@ -7586,7 +7591,7 @@ class Screencast(SyncBase):
             ]
         ] = None,
         font_size: typing.Optional[int] = None,
-    ) -> None:
+    ) -> "SyncContextManager":
         """Screencast.show_actions
 
         Enables visual annotations on interacted elements. Returns a disposable that stops showing actions when disposed.
@@ -7599,9 +7604,13 @@ class Screencast(SyncBase):
             Position of the action title overlay. Defaults to `"top-right"`.
         font_size : Union[int, None]
             Font size of the action title in pixels. Defaults to `24`.
+
+        Returns
+        -------
+        SyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             self._sync(
                 self._impl_obj.show_actions(
                     duration=duration, position=position, fontSize=font_size
@@ -7619,7 +7628,7 @@ class Screencast(SyncBase):
 
     def show_overlay(
         self, html: str, *, duration: typing.Optional[float] = None
-    ) -> None:
+    ) -> "SyncContextManager":
         """Screencast.show_overlay
 
         Adds an overlay with the given HTML content. The overlay is displayed on top of the page until removed. Returns a
@@ -7632,9 +7641,13 @@ class Screencast(SyncBase):
         duration : Union[float, None]
             Duration in milliseconds after which the overlay is automatically removed. Overlay stays until dismissed if not
             provided.
+
+        Returns
+        -------
+        SyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             self._sync(self._impl_obj.show_overlay(html=html, duration=duration))
         )
 
@@ -9097,7 +9110,9 @@ class Page(SyncContextManager):
             )
         )
 
-    def expose_function(self, name: str, callback: typing.Callable) -> None:
+    def expose_function(
+        self, name: str, callback: typing.Callable
+    ) -> "SyncContextManager":
         """Page.expose_function
 
         The method adds a function called `name` on the `window` object of every frame in the page. When called, the
@@ -9148,9 +9163,13 @@ class Page(SyncContextManager):
             Name of the function on the window object
         callback : Callable
             Callback function which will be called in Playwright's context.
+
+        Returns
+        -------
+        SyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             self._sync(
                 self._impl_obj.expose_function(
                     name=name, callback=self._wrap_handler(callback)
@@ -9164,7 +9183,7 @@ class Page(SyncContextManager):
         callback: typing.Callable,
         *,
         handle: typing.Optional[bool] = None,
-    ) -> None:
+    ) -> "SyncContextManager":
         """Page.expose_binding
 
         The method adds a function called `name` on the `window` object of every frame in this page. When called, the
@@ -9216,9 +9235,13 @@ class Page(SyncContextManager):
             Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is
             supported. When passing by value, multiple arguments are supported.
             Deprecated: This option will be removed in the future.
+
+        Returns
+        -------
+        SyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             self._sync(
                 self._impl_obj.expose_binding(
                     name=name, callback=self._wrap_handler(callback), handle=handle
@@ -9767,7 +9790,7 @@ class Page(SyncContextManager):
         script: typing.Optional[str] = None,
         *,
         path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
-    ) -> None:
+    ) -> "SyncContextManager":
         """Page.add_init_script
 
         Adds a script which would be evaluated in one of the following scenarios:
@@ -9797,9 +9820,13 @@ class Page(SyncContextManager):
         path : Union[pathlib.Path, str, None]
             Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the current working
             directory. Optional.
+
+        Returns
+        -------
+        SyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             self._sync(self._impl_obj.add_init_script(script=script, path=path))
         )
 
@@ -9812,7 +9839,7 @@ class Page(SyncContextManager):
         ],
         *,
         times: typing.Optional[int] = None,
-    ) -> None:
+    ) -> "SyncContextManager":
         """Page.route
 
         Routing provides the capability to modify network requests that are made by a page.
@@ -9880,9 +9907,13 @@ class Page(SyncContextManager):
             handler function to route the request.
         times : Union[int, None]
             How often a route should be used. By default it will be used every time.
+
+        Returns
+        -------
+        SyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             self._sync(
                 self._impl_obj.route(
                     url=self._wrap_handler(url),
@@ -13512,7 +13543,7 @@ class BrowserContext(SyncContextManager):
         script: typing.Optional[str] = None,
         *,
         path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
-    ) -> None:
+    ) -> "SyncContextManager":
         """BrowserContext.add_init_script
 
         Adds a script which would be evaluated in one of the following scenarios:
@@ -13542,9 +13573,13 @@ class BrowserContext(SyncContextManager):
         path : Union[pathlib.Path, str, None]
             Path to the JavaScript file. If `path` is a relative path, then it is resolved relative to the current working
             directory. Optional.
+
+        Returns
+        -------
+        SyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             self._sync(self._impl_obj.add_init_script(script=script, path=path))
         )
 
@@ -13554,7 +13589,7 @@ class BrowserContext(SyncContextManager):
         callback: typing.Callable,
         *,
         handle: typing.Optional[bool] = None,
-    ) -> None:
+    ) -> "SyncContextManager":
         """BrowserContext.expose_binding
 
         The method adds a function called `name` on the `window` object of every frame in every page in the context. When
@@ -13604,9 +13639,13 @@ class BrowserContext(SyncContextManager):
             Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is
             supported. When passing by value, multiple arguments are supported.
             Deprecated: This option will be removed in the future.
+
+        Returns
+        -------
+        SyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             self._sync(
                 self._impl_obj.expose_binding(
                     name=name, callback=self._wrap_handler(callback), handle=handle
@@ -13614,7 +13653,9 @@ class BrowserContext(SyncContextManager):
             )
         )
 
-    def expose_function(self, name: str, callback: typing.Callable) -> None:
+    def expose_function(
+        self, name: str, callback: typing.Callable
+    ) -> "SyncContextManager":
         """BrowserContext.expose_function
 
         The method adds a function called `name` on the `window` object of every frame in every page in the context. When
@@ -13664,9 +13705,13 @@ class BrowserContext(SyncContextManager):
             Name of the function on the window object.
         callback : Callable
             Callback function that will be called in the Playwright's context.
+
+        Returns
+        -------
+        SyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             self._sync(
                 self._impl_obj.expose_function(
                     name=name, callback=self._wrap_handler(callback)
@@ -13683,7 +13728,7 @@ class BrowserContext(SyncContextManager):
         ],
         *,
         times: typing.Optional[int] = None,
-    ) -> None:
+    ) -> "SyncContextManager":
         """BrowserContext.route
 
         Routing provides the capability to modify network requests that are made by any page in the browser context. Once
@@ -13746,9 +13791,13 @@ class BrowserContext(SyncContextManager):
             handler function to route the request.
         times : Union[int, None]
             How often a route should be used. By default it will be used every time.
+
+        Returns
+        -------
+        SyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             self._sync(
                 self._impl_obj.route(
                     url=self._wrap_handler(url),
@@ -15864,7 +15913,7 @@ class Tracing(SyncBase):
 
     def group(
         self, name: str, *, location: typing.Optional[TracingGroupLocation] = None
-    ) -> None:
+    ) -> "SyncContextManager":
         """Tracing.group
 
         **NOTE** Use `test.step` instead when available.
@@ -15890,9 +15939,13 @@ class Tracing(SyncBase):
         location : Union[{file: str, line: Union[int, None], column: Union[int, None]}, None]
             Specifies a custom location for the group to be shown in the trace viewer. Defaults to the location of the
             `tracing.group()` call.
+
+        Returns
+        -------
+        SyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             self._sync(self._impl_obj.group(name=name, location=location))
         )
 
@@ -21771,3 +21824,22 @@ class APIResponseAssertions(SyncBase):
 
 
 mapping.register(APIResponseAssertionsImpl, APIResponseAssertions)
+
+
+class Disposable(SyncContextManager):
+
+    def dispose(self) -> None:
+        """Disposable.dispose
+
+        Removes the associated resource. For example, removes the init script installed via `page.add_init_script()`
+        or `browser_context.add_init_script()`.
+        """
+
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.dispose()))
+
+    def close(self) -> None:
+
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.close()))
+
+
+mapping.register(DisposableImpl, Disposable)

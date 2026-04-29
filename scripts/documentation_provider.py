@@ -39,12 +39,18 @@ class DocumentationProvider:
         )
         self.api = json.loads(process_output.stdout)
         self.errors: Set[str] = set()
+        self.class_aliases: Dict[str, str] = {
+            "Disposable": "AsyncContextManager" if is_async else "SyncContextManager",
+            "DisposableStub": (
+                "AsyncContextManager" if is_async else "SyncContextManager"
+            ),
+        }
         self._patch_case()
 
     def _patch_case(self) -> None:
         self.classes = {}
         for clazz in self.api:
-            if not works_for_python(clazz):
+            if not works_for_python(clazz) and clazz["name"] not in self.class_aliases:
                 continue
             members = {}
             self.classes[clazz["name"]] = clazz
@@ -343,6 +349,11 @@ class DocumentationProvider:
             doc_type = self.make_optional(doc_type)
 
         if doc_type != code_type:
+            if (
+                code_type in self.class_aliases
+                and doc_type == self.class_aliases[code_type]
+            ):
+                return
             self.errors.add(
                 f"Parameter type mismatch in {fqname}: documented as {doc_type}, code has {code_type}"
             )
@@ -372,7 +383,10 @@ class DocumentationProvider:
         if match and "_api_structures" not in str_value and "_errors" not in str_value:
             if match.group(1) == "EventContextManagerImpl":
                 return "EventContextManager"
-            return match.group(1)
+            class_name = match.group(1)
+            if class_name in self.class_aliases:
+                return self.class_aliases[class_name]
+            return class_name
 
         match = re.match(r"^typing\.(\w+)$", str_value)
         if match:
@@ -512,6 +526,8 @@ class DocumentationProvider:
             return "None"
         if type_name == "EvaluationArgument":
             return "Dict"
+        if type_name in self.class_aliases:
+            return self.class_aliases[type_name]
         return type["name"]
 
     def print_remainder(self) -> None:

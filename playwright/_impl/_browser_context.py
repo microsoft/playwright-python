@@ -48,6 +48,7 @@ from playwright._impl._connection import (
 from playwright._impl._console_message import ConsoleMessage
 from playwright._impl._debugger import Debugger
 from playwright._impl._dialog import Dialog
+from playwright._impl._disposable import Disposable, DisposableStub
 from playwright._impl._errors import Error, TargetClosedError
 from playwright._impl._event_context_manager import EventContextManagerImpl
 from playwright._impl._fetch import APIRequestContext
@@ -394,16 +395,18 @@ class BrowserContext(ChannelOwner):
 
     async def add_init_script(
         self, script: str = None, path: Union[str, Path] = None
-    ) -> None:
+    ) -> Disposable:
         if path:
             script = (await async_readfile(path)).decode()
         if not isinstance(script, str):
             raise Error("Either path or script parameter must be specified")
-        await self._channel.send("addInitScript", None, dict(source=script))
+        return from_channel(
+            await self._channel.send("addInitScript", None, dict(source=script))
+        )
 
     async def expose_binding(
         self, name: str, callback: Callable, handle: bool = None
-    ) -> None:
+    ) -> Disposable:
         for page in self._pages:
             if name in page._bindings:
                 raise Error(
@@ -412,16 +415,18 @@ class BrowserContext(ChannelOwner):
         if name in self._bindings:
             raise Error(f'Function "{name}" has been already registered')
         self._bindings[name] = callback
-        await self._channel.send(
-            "exposeBinding", None, dict(name=name, needsHandle=handle or False)
+        return from_channel(
+            await self._channel.send(
+                "exposeBinding", None, dict(name=name, needsHandle=handle or False)
+            )
         )
 
-    async def expose_function(self, name: str, callback: Callable) -> None:
-        await self.expose_binding(name, lambda source, *args: callback(*args))
+    async def expose_function(self, name: str, callback: Callable) -> Disposable:
+        return await self.expose_binding(name, lambda source, *args: callback(*args))
 
     async def route(
         self, url: URLMatch, handler: RouteHandlerCallback, times: int = None
-    ) -> None:
+    ) -> DisposableStub:
         self._routes.insert(
             0,
             RouteHandler(
@@ -433,6 +438,7 @@ class BrowserContext(ChannelOwner):
             ),
         )
         await self._update_interception_patterns()
+        return DisposableStub(lambda: self.unroute(url, handler), self)
 
     async def unroute(
         self, url: URLMatch, handler: Optional[RouteHandlerCallback] = None

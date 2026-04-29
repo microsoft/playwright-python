@@ -1246,3 +1246,18 @@ async def test_should_not_support_question_in_glob_pattern(
 
     await page.goto(server.PREFIX + "/index123hello")
     await expect(page.locator("body")).to_have_text("index123hello")
+
+
+async def test_page_route_returns_disposable(page: Page, server: Server) -> None:
+    intercepted: List[str] = []
+
+    async def handler(route: Route) -> None:
+        intercepted.append(route.request.url)
+        await route.continue_()
+
+    async with await page.route("**/*", handler):
+        await page.goto(server.EMPTY_PAGE)
+        assert any(server.EMPTY_PAGE in url for url in intercepted)
+    intercepted.clear()
+    await page.goto(server.EMPTY_PAGE)
+    assert intercepted == []

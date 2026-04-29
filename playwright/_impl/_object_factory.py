@@ -22,6 +22,7 @@ from playwright._impl._cdp_session import CDPSession
 from playwright._impl._connection import ChannelOwner
 from playwright._impl._debugger import Debugger
 from playwright._impl._dialog import Dialog
+from playwright._impl._disposable import Disposable
 from playwright._impl._element_handle import ElementHandle
 from playwright._impl._fetch import APIRequestContext
 from playwright._impl._frame import Frame
@@ -69,6 +70,8 @@ def create_remote_object(
         return Debugger(parent, type, guid, initializer)
     if type == "Dialog":
         return Dialog(parent, type, guid, initializer)
+    if type == "Disposable":
+        return Disposable(parent, type, guid, initializer)
     if type == "ElementHandle":
         return ElementHandle(parent, type, guid, initializer)
     if type == "Frame":

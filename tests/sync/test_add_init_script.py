@@ -85,3 +85,11 @@ def test_should_work_with_trailing_comments(page: Page) -> None:
     page.add_init_script("window.secret = 42;")
     page.goto("data:text/html,<html></html>")
     assert page.evaluate("secret") == 42
+
+
+def test_add_init_script_returns_disposable(page: Page) -> None:
+    with page.add_init_script("window.injected = 123"):
+        page.goto("data:text/html,<script>window.result = window.injected</script>")
+        assert page.evaluate("window.result") == 123
+    page.goto("data:text/html,<script>window.result = window.injected</script>")
+    assert page.evaluate("window.result") is None
