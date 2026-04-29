@@ -71,6 +71,34 @@ async def test_should_reject_response_finished_if_context_closes(
     error = exc_info.value
     assert "closed" in error.message
 
+async def test_response_finished_should_not_leave_page_close_waiter(
+    page: Page, server: Server
+) -> None:
+    def response_finished_waiters() -> list[asyncio.Task]:
+        return [
+            task
+            for task in asyncio.all_tasks()
+            if not task.done()
+            and getattr(task.get_coro(), "__qualname__", "")
+            == "Response.finished.<locals>.on_finished"
+        ]
+
+    baseline = set(response_finished_waiters())
+    leaked_waiters = []
+    try:
+        response = await page.goto(server.EMPTY_PAGE)
+        assert response
+        await response.finished()
+        await asyncio.sleep(0)
+
+        leaked_waiters = [
+            task for task in response_finished_waiters() if task not in baseline
+        ]
+        assert not leaked_waiters, "Response.finished() leaked page-close waiter tasks"
+    finally:
+        await page.close()
+        if leaked_waiters:
+            await asyncio.gather(*leaked_waiters, return_exceptions=True)
 
 async def test_should_return_http_version(page: Page, server: Server) -> None:
     response = await page.goto(server.EMPTY_PAGE)
