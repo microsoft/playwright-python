@@ -15,6 +15,9 @@
 import asyncio
 import json
 from pathlib import Path
+from typing import Optional
+
+import pytest
 
 from playwright.async_api import Browser, BrowserContext, Page, StorageState
 from tests.server import Server
@@ -134,8 +137,10 @@ async def test_should_round_trip_through_the_file(
 
 
 async def test_set_storage_state_should_apply_state_to_existing_context(
-    browser: Browser,
+    browser: Browser, browser_channel: Optional[str]
 ) -> None:
+    if browser_channel and browser_channel.startswith("msedge"):
+        pytest.skip("Network.clearBrowserCache sometimes stalls on msedge")
     src = await browser.new_context()
     src_page = await src.new_page()
     await src_page.route(

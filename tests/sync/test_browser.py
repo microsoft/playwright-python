@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Dict
+
 from playwright.sync_api import Browser, BrowserType
 
 
@@ -19,3 +21,17 @@ def test_should_return_browser_type(
     browser: Browser, browser_type: BrowserType
 ) -> None:
     assert browser.browser_type is browser_type
+
+
+def test_bind_should_return_endpoint_and_allow_unbind(
+    browser_type: BrowserType, launch_arguments: Dict
+) -> None:
+    browser = browser_type.launch(**launch_arguments)
+    try:
+        result = browser.bind("test-server")
+        assert "endpoint" in result
+        assert isinstance(result["endpoint"], str)
+        assert len(result["endpoint"]) > 0
+        browser.unbind()
+    finally:
+        browser.close()

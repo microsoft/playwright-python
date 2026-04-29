@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import re
+from typing import Dict
 
 import pytest
 
@@ -56,9 +57,9 @@ async def test_should_return_browser_type(
 
 
 async def test_bind_should_return_endpoint_and_allow_unbind(
-    browser_type: BrowserType,
+    browser_type: BrowserType, launch_arguments: Dict
 ) -> None:
-    browser = await browser_type.launch()
+    browser = await browser_type.launch(**launch_arguments)
     try:
         result = await browser.bind("test-server")
         assert "endpoint" in result

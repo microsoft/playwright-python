@@ -50,7 +50,18 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ['3.9', '3.10']
         browser: [chromium, firefox, webkit]
+        exclude:
+        # WebKit on standard macOS-latest (currently macos-15-arm64) is unstable;
+        # upstream pins paid macos-15-xlarge for cross-browser webkit too.
+        - os: macos-latest
+          browser: webkit
         include:
+        - os: macos-15-xlarge
+          python-version: '3.9'
+          browser: webkit
+        - os: macos-15-xlarge
+          python-version: '3.10'
+          browser: webkit
         - os: windows-latest
           python-version: '3.11'
           browser: chromium
@@ -160,7 +171,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, macos-13, windows-2022]
+        os: [ubuntu-22.04, macos-latest, windows-2022]
     runs-on: ${{ matrix.os }}
     defaults:
       run:
