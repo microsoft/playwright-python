@@ -166,6 +166,10 @@ class RemoteAddr(TypedDict):
     port: int
 
 
+class BrowserBindResult(TypedDict):
+    endpoint: str
+
+
 class SecurityDetails(TypedDict):
     issuer: Optional[str]
     protocol: Optional[str]
@@ -311,3 +315,18 @@ class TracingGroupLocation(TypedDict):
     file: str
     line: Optional[int]
     column: Optional[int]
+
+
+class DebuggerLocation(TypedDict):
+    file: str
+    line: Optional[int]
+    column: Optional[int]
+
+
+class DebuggerPausedDetails(TypedDict):
+    location: DebuggerLocation
+    title: str
+
+
+class ScreencastFrame(TypedDict):
+    data: bytes

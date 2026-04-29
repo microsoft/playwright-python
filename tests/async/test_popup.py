@@ -15,6 +15,8 @@
 import asyncio
 from typing import List, Optional
 
+import pytest
+
 from playwright.async_api import Browser, BrowserContext, Request, Route
 from tests.server import Server
 from tests.utils import must
@@ -136,9 +138,13 @@ async def test_should_inherit_http_credentials_from_browser_context(
     await context.close()
 
 
+@pytest.mark.skip_browser("firefox")
 async def test_should_inherit_touch_support_from_browser_context(
     browser: Browser, server: Server
 ) -> None:
+    # Firefox 148+ does not expose `ontouchstart` on freshly window.open()'d
+    # popups (https://bugzilla.mozilla.org/show_bug.cgi?id=2014330);
+    # upstream marks this as fixme for the same reason.
     context = await browser.new_context(
         viewport={"width": 400, "height": 500}, has_touch=True
     )

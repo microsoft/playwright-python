@@ -77,6 +77,10 @@ class ConsoleMessage:
         return self._event["location"]
 
     @property
+    def timestamp(self) -> float:
+        return self._event["timestamp"]
+
+    @property
     def page(self) -> Optional["Page"]:
         return self._page
 

@@ -34,3 +34,16 @@ def test_console_messages_should_work(page: Page) -> None:
     assert len(objects) >= 100, "should be at least 100 messages"
     message_count = len(messages) - len(expected)
     assert objects[message_count:] == expected, "should return last messages"
+
+
+def test_should_have_a_timestamp(page: Page) -> None:
+    with page.expect_console_message() as message_info:
+        page.evaluate("() => console.log('hello')")
+    assert message_info.value.timestamp > 0
+
+
+def test_clear_console_messages_should_drop_buffered_messages(page: Page) -> None:
+    page.evaluate("() => console.log('first')")
+    assert any(m.text == "first" for m in page.console_messages())
+    page.clear_console_messages()
+    assert not any(m.text == "first" for m in page.console_messages())

@@ -38,10 +38,10 @@ def assert_equal(
 
 def setup_ws(
     target: Union[Page, Frame],
-    port: int,
+    server: Server,
     protocol: Union[Literal["blob"], Literal["arraybuffer"]],
 ) -> None:
-    target.goto("about:blank")
+    target.goto(server.EMPTY_PAGE)
     target.evaluate(
         """({ port, binaryType }) => {
     window.log = [];
@@ -62,7 +62,7 @@ def setup_ws(
     });
     window.wsOpened = new Promise(f => window.ws.addEventListener('open', () => f()));
   }""",
-        {"port": port, "binaryType": protocol},
+        {"port": server.PORT, "binaryType": protocol},
     )
 
 
@@ -77,7 +77,7 @@ def test_should_work_with_ws_close(page: Page, server: Server) -> None:
     page.route_web_socket(re.compile(".*"), _handle_ws)
 
     with server.expect_websocket() as ws_task:
-        setup_ws(page, server.PORT, "blob")
+        setup_ws(page, server, "blob")
     page.evaluate("window.wsOpened")
     ws = ws_task.value
     assert route
@@ -110,7 +110,7 @@ def test_should_pattern_match(page: Page, server: Server) -> None:
         "**/mock-ws", lambda ws: ws.on_message(lambda message: ws.send("mock-response"))
     )
 
-    page.goto("about:blank")
+    page.goto(server.EMPTY_PAGE)
     with server.expect_websocket() as ws_info:
         page.evaluate(
             """async ({ port }) => {
@@ -185,7 +185,7 @@ def test_should_work_with_server(page: Page, server: Server) -> None:
     server.once_web_socket_connection(_once_web_socket_connection)
 
     with server.expect_websocket() as ws_info:
-        setup_ws(page, server.PORT, "blob")
+        setup_ws(page, server, "blob")
     page.evaluate("window.wsOpened")
     ws = ws_info.value
     assert_equal(lambda: log, ["message: fake"])
@@ -280,7 +280,7 @@ def test_should_work_without_server(page: Page, server: Server) -> None:
         route = ws
 
     page.route_web_socket(re.compile(".*"), _handle_ws)
-    setup_ws(page, server.PORT, "blob")
+    setup_ws(page, server, "blob")
 
     page.evaluate(
         """async () => {
@@ -324,7 +324,7 @@ def test_should_work_with_base_url(browser: Browser, server: Server) -> None:
         ws.on_message(lambda message: ws.send(message))
 
     page.route_web_socket("/ws", _handle_ws)
-    setup_ws(page, server.PORT, "blob")
+    setup_ws(page, server, "blob")
 
     page.evaluate(
         """async () => {
@@ -357,7 +357,7 @@ def test_should_work_with_no_trailing_slash(page: Page, server: Server) -> None:
     # No trailing slash in the route pattern
     page.route_web_socket(f"ws://localhost:{server.PORT}", handle_ws)
 
-    page.goto("about:blank")
+    page.goto(server.EMPTY_PAGE)
     page.evaluate(
         """({ port }) => {
             window.log = [];

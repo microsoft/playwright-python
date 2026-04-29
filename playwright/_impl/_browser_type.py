@@ -86,6 +86,7 @@ class BrowserType(ChannelOwner):
         downloadsPath: Union[str, Path] = None,
         slowMo: float = None,
         tracesDir: Union[pathlib.Path, str] = None,
+        artifactsDir: Union[pathlib.Path, str] = None,
         chromiumSandbox: bool = None,
         firefoxUserPrefs: Dict[str, Union[str, float, bool]] = None,
     ) -> Browser:
@@ -143,6 +144,7 @@ class BrowserType(ChannelOwner):
         contrast: Contrast = None,
         acceptDownloads: bool = None,
         tracesDir: Union[pathlib.Path, str] = None,
+        artifactsDir: Union[pathlib.Path, str] = None,
         chromiumSandbox: bool = None,
         firefoxUserPrefs: Dict[str, Union[str, float, bool]] = None,
         recordHarPath: Union[Path, str] = None,
@@ -213,7 +215,7 @@ class BrowserType(ChannelOwner):
 
     async def connect(
         self,
-        wsEndpoint: str,
+        endpoint: str,
         timeout: float = None,
         slowMo: float = None,
         headers: Dict[str, str] = None,
@@ -229,7 +231,7 @@ class BrowserType(ChannelOwner):
                 "connect",
                 None,
                 {
-                    "wsEndpoint": wsEndpoint,
+                    "endpoint": endpoint,
                     "headers": headers,
                     "slowMo": slowMo,
                     "timeout": timeout if timeout is not None else 0,
@@ -361,3 +363,5 @@ def normalize_launch_params(params: Dict) -> None:
         params["downloadsPath"] = str(Path(params["downloadsPath"]))
     if "tracesDir" in params:
         params["tracesDir"] = str(Path(params["tracesDir"]))
+    if "artifactsDir" in params:
+        params["artifactsDir"] = str(Path(params["artifactsDir"]))

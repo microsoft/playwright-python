@@ -27,6 +27,7 @@ from typing import (
 )
 
 from playwright._impl._api_structures import (
+    BrowserBindResult,
     ClientCertificate,
     Geolocation,
     HttpCredentials,
@@ -246,6 +247,20 @@ class Browser(ChannelOwner):
 
     async def new_browser_cdp_session(self) -> CDPSession:
         return from_channel(await self._channel.send("newBrowserCDPSession", None))
+
+    async def bind(
+        self,
+        title: str,
+        workspaceDir: str = None,
+        host: str = None,
+        port: int = None,
+    ) -> BrowserBindResult:
+        return await self._channel.send_return_as_dict(
+            "startServer", None, locals_to_params(locals())
+        )
+
+    async def unbind(self) -> None:
+        await self._channel.send("stopServer", None)
 
     async def start_tracing(
         self,

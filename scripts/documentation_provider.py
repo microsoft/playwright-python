@@ -207,34 +207,34 @@ class DocumentationProvider:
         if events:
             doc = []
             for event_type in ["on", "once"]:
+                return_type = (
+                    "typing.Union[typing.Awaitable[None], None]"
+                    if self.is_async
+                    else "None"
+                )
                 for event in events:
-                    return_type = (
-                        "typing.Union[typing.Awaitable[None], None]"
-                        if self.is_async
-                        else "None"
-                    )
                     func_arg = self.serialize_doc_type(event["type"], "")
                     if func_arg.startswith("{"):
                         func_arg = "typing.Dict"
                     if "Union[" in func_arg:
                         func_arg = func_arg.replace("Union[", "typing.Union[")
-                    if len(events) > 1:
-                        doc.append("    @typing.overload")
-                    impl = ""
-                    if len(events) == 1:
-                        impl = f"        return super().{event_type}(event=event,f=f)"
+                    doc.append("    @typing.overload")
                     doc.append(
                         f"    def {event_type}(self, event: Literal['{event['name'].lower()}'], f: typing.Callable[['{func_arg}'], '{return_type}']) -> None:"
                     )
                     doc.append(
                         f'        """{self.beautify_method_comment(event["comment"], " " * 8)}"""'
                     )
-                    doc.append(impl)
-                if len(events) > 1:
+                if len(events) == 1:
+                    doc.append("    @typing.overload")
                     doc.append(
-                        f"    def {event_type}(self, event: str, f: typing.Callable[...,{return_type}]) -> None:"
+                        f"    def {event_type}(self, event: str, f: typing.Callable[...,{return_type}]) -> None: ..."
                     )
-                    doc.append(f"        return super().{event_type}(event=event,f=f)")
+                    doc.append("")
+                doc.append(
+                    f"    def {event_type}(self, event: str, f: typing.Callable[...,{return_type}]) -> None:"
+                )
+                doc.append(f"        return super().{event_type}(event=event,f=f)")
             print("\n".join(doc))
 
     def indent_paragraph(self, p: str, indent: str) -> str:
@@ -437,6 +437,8 @@ class DocumentationProvider:
 
     def inner_serialize_doc_type(self, type: Any, direction: str) -> str:
         if type["name"] == "Promise":
+            if "templates" not in type:
+                return "Any"
             type = type["templates"][0]
 
         if "union" in type:
@@ -506,7 +508,7 @@ class DocumentationProvider:
             return "str"
         if type_name == "RegExp":
             return "Pattern[str]"
-        if type_name == "null":
+        if type_name == "null" or type_name == "void":
             return "None"
         if type_name == "EvaluationArgument":
             return "Dict"

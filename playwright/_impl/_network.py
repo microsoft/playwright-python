@@ -154,6 +154,7 @@ class Request(ChannelOwner):
         self._fallback_overrides: SerializedFallbackOverrides = (
             SerializedFallbackOverrides()
         )
+        self._response: Optional["Response"] = None
 
     def __repr__(self) -> str:
         return f"<Request url={self.url!r} method={self.method!r}>"
@@ -242,6 +243,10 @@ class Request(ChannelOwner):
                 None,
             )
         )
+
+    @property
+    def existing_response(self) -> Optional["Response"]:
+        return self._response
 
     @property
     def frame(self) -> "Frame":
@@ -799,6 +804,7 @@ class Response(ChannelOwner):
     ) -> None:
         super().__init__(parent, type, guid, initializer)
         self._request: Request = from_channel(self._initializer["request"])
+        self._request._response = self
         timing = self._initializer["timing"]
         self._request._timing["startTime"] = timing["startTime"]
         self._request._timing["domainLookupStart"] = timing["domainLookupStart"]
@@ -878,6 +884,12 @@ class Response(ChannelOwner):
     async def security_details(self) -> Optional[SecurityDetails]:
         return await self._channel.send(
             "securityDetails",
+            None,
+        )
+
+    async def http_version(self) -> str:
+        return await self._channel.send(
+            "httpVersion",
             None,
         )
 

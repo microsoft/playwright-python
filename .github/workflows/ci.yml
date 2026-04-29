@@ -162,6 +162,13 @@ jobs:
       matrix:
         os: [ubuntu-22.04, macos-13, windows-2022]
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        # `setup-miniconda` activates the env only for login shells; using
+        # `bash -el` (recommended by the action) ensures `conda` and the
+        # installed `conda-build` are on PATH on every OS, including Windows
+        # where the default shell is pwsh and skips the activation hooks.
+        shell: bash -el {0}
     steps:
       - uses: actions/checkout@v5
         with:
@@ -169,11 +176,11 @@ jobs:
       - name: Get conda
         uses: conda-incubator/setup-miniconda@v3
         with:
-          python-version: 3.9
+          python-version: '3.12'
           channels: conda-forge
           miniconda-version: latest
       - name: Prepare
-        run: conda install conda-build conda-verify
+        run: conda install -n base "conda-build>=26" conda-verify
       - name: Build
         run: conda build .
 

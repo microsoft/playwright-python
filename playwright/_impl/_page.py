@@ -98,6 +98,7 @@ from playwright._impl._network import (
     WebSocketRouteHandler,
     serialize_headers,
 )
+from playwright._impl._screencast import Screencast
 from playwright._impl._video import Video
 from playwright._impl._waiter import Waiter
 
@@ -175,7 +176,11 @@ class Page(ChannelOwner):
         self._timeout_settings: TimeoutSettings = TimeoutSettings(
             self._browser_context._timeout_settings
         )
-        self._video: Optional[Video] = None
+        self._video: Video = Video(
+            self,
+            cast(Optional[Artifact], from_nullable_channel(initializer.get("video"))),
+        )
+        self._screencast: Screencast = Screencast(self)
         self._opener = cast("Page", from_nullable_channel(initializer.get("opener")))
         self._close_reason: Optional[str] = None
         self._close_was_called = False
@@ -224,7 +229,6 @@ class Page(ChannelOwner):
                 self._on_web_socket_route(from_channel(params["webSocketRoute"]))
             ),
         )
-        self._channel.on("video", lambda params: self._on_video(params))
         self._channel.on("viewportSizeChanged", self._on_viewport_size_changed)
         self._channel.on(
             "webSocket",
@@ -355,10 +359,6 @@ class Page(ChannelOwner):
         self.emit(
             Page.Events.Download, Download(self, url, suggested_filename, artifact)
         )
-
-    def _on_video(self, params: Any) -> None:
-        artifact = from_channel(params["artifact"])
-        self._force_video()._artifact_ready(artifact)
 
     def _on_viewport_size_changed(self, params: Any) -> None:
         self._viewport_size = params["viewportSize"]
@@ -823,6 +823,18 @@ class Page(ChannelOwner):
     async def title(self) -> str:
         return await self._main_frame.title()
 
+    async def aria_snapshot(
+        self,
+        timeout: float = None,
+        depth: int = None,
+        mode: Literal["ai", "default"] = None,
+    ) -> str:
+        return await self._main_frame._channel.send(
+            "ariaSnapshot",
+            self._main_frame._timeout,
+            locals_to_params(locals()),
+        )
+
     async def close(self, runBeforeUnload: bool = None, reason: str = None) -> None:
         self._close_reason = reason
         self._close_was_called = True
@@ -1168,21 +1180,17 @@ class Page(ChannelOwner):
             await async_writefile(path, decoded_binary)
         return decoded_binary
 
-    def _force_video(self) -> Video:
-        if not self._video:
-            self._video = Video(self)
+    @property
+    def video(self) -> Optional[Video]:
+        # Video is only exposed when the page actually produced a recording artifact.
+        # The initializer carries the artifact; if absent, no video was recorded.
+        if not self._video._artifact:
+            return None
         return self._video
 
     @property
-    def video(
-        self,
-    ) -> Optional[Video]:
-        # Note: we are creating Video object lazily, because we do not know
-        # BrowserContextOptions when constructing the page - it is assigned
-        # too late during launchPersistentContext.
-        if not self._browser_context._videos_dir:
-            return None
-        return self._force_video()
+    def screencast(self) -> Screencast:
+        return self._screencast
 
     def _close_error_with_reason(self) -> TargetClosedError:
         return TargetClosedError(
@@ -1435,8 +1443,12 @@ class Page(ChannelOwner):
         request_objects = await self._channel.send("requests", None)
         return [from_channel(r) for r in request_objects]
 
-    async def console_messages(self) -> List[ConsoleMessage]:
-        message_dicts = await self._channel.send("consoleMessages", None)
+    async def console_messages(
+        self, filter: Literal["all", "since-navigation"] = None
+    ) -> List[ConsoleMessage]:
+        message_dicts = await self._channel.send(
+            "consoleMessages", None, locals_to_params(locals())
+        )
         return [
             ConsoleMessage(
                 {**event, "page": self._channel}, self._loop, self._dispatcher_fiber
@@ -1444,9 +1456,26 @@ class Page(ChannelOwner):
             for event in message_dicts
         ]
 
-    async def page_errors(self) -> List[Error]:
-        error_objects = await self._channel.send("pageErrors", None)
+    async def page_errors(
+        self, filter: Literal["all", "since-navigation"] = None
+    ) -> List[Error]:
+        error_objects = await self._channel.send(
+            "pageErrors", None, locals_to_params(locals())
+        )
         return [parse_error(error["error"]) for error in error_objects]
+
+    async def clear_console_messages(self) -> None:
+        await self._channel.send("clearConsoleMessages", None)
+
+    async def clear_page_errors(self) -> None:
+        await self._channel.send("clearPageErrors", None)
+
+    async def pick_locator(self) -> "Locator":
+        selector = await self._channel.send("pickLocator", None, {})
+        return self.locator(selector)
+
+    async def cancel_pick_locator(self) -> None:
+        await self._channel.send("cancelPickLocator", None, {})
 
 
 class Worker(ChannelOwner):

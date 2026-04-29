@@ -72,10 +72,14 @@ FilePayload = playwright._impl._api_structures.FilePayload
 FloatRect = playwright._impl._api_structures.FloatRect
 Geolocation = playwright._impl._api_structures.Geolocation
 HttpCredentials = playwright._impl._api_structures.HttpCredentials
+BrowserBindResult = playwright._impl._api_structures.BrowserBindResult
+DebuggerLocation = playwright._impl._api_structures.DebuggerLocation
+DebuggerPausedDetails = playwright._impl._api_structures.DebuggerPausedDetails
 PdfMargins = playwright._impl._api_structures.PdfMargins
 Position = playwright._impl._api_structures.Position
 ProxySettings = playwright._impl._api_structures.ProxySettings
 ResourceTiming = playwright._impl._api_structures.ResourceTiming
+ScreencastFrame = playwright._impl._api_structures.ScreencastFrame
 SourceLocation = playwright._impl._api_structures.SourceLocation
 StorageState = playwright._impl._api_structures.StorageState
 StorageStateCookie = playwright._impl._api_structures.StorageStateCookie
@@ -152,6 +156,7 @@ __all__ = [
     "APIRequestContext",
     "APIResponse",
     "Browser",
+    "BrowserBindResult",
     "BrowserContext",
     "BrowserType",
     "CDPSession",
@@ -173,6 +178,8 @@ __all__ = [
     "Keyboard",
     "Locator",
     "Mouse",
+    "DebuggerLocation",
+    "DebuggerPausedDetails",
     "Page",
     "PdfMargins",
     "Position",
@@ -182,6 +189,7 @@ __all__ = [
     "ResourceTiming",
     "Response",
     "Route",
+    "ScreencastFrame",
     "Selectors",
     "SourceLocation",
     "StorageState",
