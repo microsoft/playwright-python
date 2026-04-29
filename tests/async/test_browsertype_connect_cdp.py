@@ -96,7 +96,9 @@ async def test_connect_over_cdp_passing_header_works(
     request = asyncio.create_task(server.wait_for_request("/ws"))
     with pytest.raises(Error):
         await browser_type.connect_over_cdp(
-            f"ws://127.0.0.1:{server.PORT}/ws", headers={"foo": "bar"}
+            f"ws://127.0.0.1:{server.PORT}/ws",
+            headers={"foo": "bar"},
+            timeout=5000,
         )
     assert (await request).getHeader("foo") == "bar"
 

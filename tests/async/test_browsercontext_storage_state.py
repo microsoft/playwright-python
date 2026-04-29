@@ -136,13 +136,16 @@ async def test_should_round_trip_through_the_file(
 async def test_set_storage_state_should_apply_state_to_existing_context(
     browser: Browser,
 ) -> None:
+    # http (not https) avoids TLS setup on Edge stable on Windows where the
+    # network path is taken before route intercept short-circuits.
+    origin = "http://example.com"
     src = await browser.new_context()
     src_page = await src.new_page()
     await src_page.route(
         "**/*",
         lambda route: asyncio.create_task(route.fulfill(body="<html></html>")),
     )
-    await src_page.goto("https://www.example.com")
+    await src_page.goto(origin)
     await src_page.evaluate('() => localStorage.setItem("k", "v")')
     state = await src.storage_state()
     await src.close()
@@ -154,7 +157,7 @@ async def test_set_storage_state_should_apply_state_to_existing_context(
         lambda route: asyncio.create_task(route.fulfill(body="<html></html>")),
     )
     await dst.set_storage_state(state)
-    await dst_page.goto("https://www.example.com")
+    await dst_page.goto(origin)
     assert await dst_page.evaluate('() => localStorage.getItem("k")') == "v"
     await dst.close()
 
