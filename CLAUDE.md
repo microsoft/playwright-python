@@ -48,6 +48,10 @@ This is the recurring high-stakes task. Use the dedicated skill:
 
 It documents the full process: the upstream commit-range diff over `docs/src/api/`, how to classify each commit (PORT / MISMATCH / N/A), how to handle the `langs:` filter, the recurring failure modes, and the tests/sync-mirroring conventions.
 
+## Working on PRs
+
+- Never post comments, replies, or reviews on GitHub PRs/issues under my account without my explicit approval. Draft the proposed text and wait for me to approve before sending.
+
 ## House style
 
 - Don't hand-edit generated files.

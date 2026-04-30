@@ -12306,7 +12306,9 @@ class Page(AsyncContextManager):
     def expect_request(
         self,
         url_or_predicate: typing.Union[
-            str, typing.Pattern[str], typing.Callable[["Request"], bool]
+            str,
+            typing.Pattern[str],
+            typing.Callable[["Request"], typing.Union[bool, typing.Awaitable[bool]]],
         ],
         *,
         timeout: typing.Optional[float] = None,
@@ -12331,7 +12333,7 @@ class Page(AsyncContextManager):
 
         Parameters
         ----------
-        url_or_predicate : Union[Callable[[Request], bool], Pattern[str], str]
+        url_or_predicate : Union[Callable[[Request], Union[bool, typing.Awaitable[bool]]], Pattern[str], str]
             Request URL string, regex or predicate receiving `Request` object. When a `baseURL` via the context options was
             provided and the passed URL is a path, it gets merged via the
             [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
@@ -12384,7 +12386,9 @@ class Page(AsyncContextManager):
     def expect_response(
         self,
         url_or_predicate: typing.Union[
-            str, typing.Pattern[str], typing.Callable[["Response"], bool]
+            str,
+            typing.Pattern[str],
+            typing.Callable[["Response"], typing.Union[bool, typing.Awaitable[bool]]],
         ],
         *,
         timeout: typing.Optional[float] = None,
@@ -12411,7 +12415,7 @@ class Page(AsyncContextManager):
 
         Parameters
         ----------
-        url_or_predicate : Union[Callable[[Response], bool], Pattern[str], str]
+        url_or_predicate : Union[Callable[[Response], Union[bool, typing.Awaitable[bool]]], Pattern[str], str]
             Request URL string, regex or predicate receiving `Response` object. When a `baseURL` via the context options was
             provided and the passed URL is a path, it gets merged via the
             [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.

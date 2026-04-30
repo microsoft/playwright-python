@@ -19,6 +19,7 @@ import sys
 from types import FunctionType
 from typing import Any
 
+import generate_api
 from documentation_provider import DocumentationProvider
 from generate_api import (
     api_globals,
@@ -32,6 +33,8 @@ from generate_api import (
     short_name,
     signature,
 )
+
+generate_api.SYNC_API = True
 
 documentation_provider = DocumentationProvider(False)
 

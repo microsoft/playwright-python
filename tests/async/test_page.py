@@ -16,7 +16,7 @@ import asyncio
 import os
 import re
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import pytest
 
@@ -350,6 +350,53 @@ async def test_wait_for_response_should_work_with_predicate(
         )
     response = await response_info.value
     assert response.url == server.PREFIX + "/digits/2.png"
+
+
+async def test_wait_for_response_should_work_with_async_predicate(
+    page: Page, server: Server
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+
+    async def predicate(response: Any) -> bool:
+        await asyncio.sleep(0)
+        return response.url == server.PREFIX + "/digits/2.png"
+
+    async with page.expect_response(predicate) as response_info:
+        await page.evaluate(
+            """() => {
+                fetch('/digits/1.png')
+                fetch('/digits/2.png')
+                fetch('/digits/3.png')
+            }"""
+        )
+    response = await response_info.value
+    assert response.url == server.PREFIX + "/digits/2.png"
+
+
+async def test_expect_response_should_reject_when_async_predicate_throws(
+    page: Page, server: Server
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+
+    async def predicate(response: Any) -> bool:
+        raise Exception("Async oops!")
+
+    with pytest.raises(Exception, match="Async oops!"):
+        async with page.expect_response(predicate):
+            await page.evaluate("() => fetch('/digits/1.png')")
+
+
+async def test_expect_response_should_reject_when_sync_predicate_throws(
+    page: Page, server: Server
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+
+    def predicate(response: Any) -> bool:
+        raise Exception("Sync oops!")
+
+    with pytest.raises(Exception, match="Sync oops!"):
+        async with page.expect_response(predicate):
+            await page.evaluate("() => fetch('/digits/1.png')")
 
 
 async def test_wait_for_response_should_work_with_no_timeout(
