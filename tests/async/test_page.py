@@ -1605,3 +1605,41 @@ async def test_page_should_ignore_deprecated_is_hidden_and_visible_timeout(
     await page.set_content("<div>foo</div>")
     assert await page.is_hidden("div", timeout=10) is False
     assert await page.is_visible("div", timeout=10) is True
+
+
+async def test_should_propagate_contextvars_to_event_handlers(
+    page: Page, server: Server
+) -> None:
+    import contextvars
+
+    shared_var: "contextvars.ContextVar[str]" = contextvars.ContextVar("shared_var")
+    shared_var.set("expected value")
+
+    sync_seen: List[Optional[str]] = []
+    async_seen: List[Optional[str]] = []
+
+    def on_request_sync(request: Any) -> None:
+        try:
+            sync_seen.append(shared_var.get())
+        except LookupError:
+            sync_seen.append(None)
+
+    async def on_request_async(request: Any) -> None:
+        try:
+            async_seen.append(shared_var.get())
+        except LookupError:
+            async_seen.append(None)
+        await asyncio.sleep(0)
+        try:
+            async_seen.append(shared_var.get())
+        except LookupError:
+            async_seen.append(None)
+
+    page.on("request", on_request_sync)
+    page.on("request", on_request_async)
+    await page.goto(server.EMPTY_PAGE)
+    await asyncio.sleep(0.1)
+    assert sync_seen
+    assert all(v == "expected value" for v in sync_seen)
+    assert async_seen
+    assert all(v == "expected value" for v in async_seen)

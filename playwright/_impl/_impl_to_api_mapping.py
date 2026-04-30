@@ -12,8 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
+import contextvars
 import inspect
 from typing import Any, Callable, Dict, List, Optional, Sequence, Union
+
+import greenlet
 
 from playwright._impl._errors import Error
 from playwright._impl._map import Map
@@ -118,11 +122,47 @@ class ImplToApiMapping:
             raise Error("Maximum argument depth exceeded")
 
     def wrap_handler(self, handler: Callable[..., Any]) -> Callable[..., None]:
+        # Capture the caller's context at registration time so contextvars
+        # set in user code are available when the event handler runs, even
+        # though events are dispatched from a different greenlet/task.
+        # See: https://github.com/microsoft/playwright-python/issues/1816
+        context = contextvars.copy_context()
+        is_coroutine = inspect.iscoroutinefunction(handler)
+
         def wrapper_func(*args: Any) -> Any:
             arg_count = len(inspect.signature(handler).parameters)
-            return handler(
-                *list(map(lambda a: self.from_maybe_impl(a), args))[:arg_count]
-            )
+            mapped_args = list(map(lambda a: self.from_maybe_impl(a), args))[:arg_count]
+            if is_coroutine:
+                # Async-mode coroutine handler: propagate context to the
+                # handler's awaits by spawning an inner Task inside our
+                # captured context (Tasks copy the active context at
+                # construction).
+                async def _coro_wrapper() -> Any:
+                    loop = asyncio.get_running_loop()
+                    inner = context.run(lambda: loop.create_task(handler(*mapped_args)))
+                    return await inner
+
+                return _coro_wrapper()
+            # Sync handler. Two cases:
+            #   * Async mode: no greenlet is involved in event dispatch
+            #     (asyncio Task), so we use Context.run to run the handler
+            #     in the captured context.
+            #   * Sync mode: events are dispatched inside a fresh
+            #     EventGreenlet whose default gr_context is empty. We can't
+            #     use Context.run here because handlers like route.fulfill
+            #     internally use greenlet.switch, and Context.run does not
+            #     compose with greenlet switches. Instead we set the
+            #     greenlet's gr_context to our captured context for the
+            #     duration of the handler, then restore it.
+            current = greenlet.getcurrent()
+            if current.parent is None:
+                return context.run(handler, *mapped_args)
+            saved_context = current.gr_context
+            current.gr_context = context
+            try:
+                return handler(*mapped_args)
+            finally:
+                current.gr_context = saved_context
 
         if inspect.ismethod(handler):
             wrapper = getattr(handler.__self__, IMPL_ATTR + handler.__name__, None)
