@@ -386,6 +386,19 @@ async def test_expect_response_should_reject_when_async_predicate_throws(
             await page.evaluate("() => fetch('/digits/1.png')")
 
 
+async def test_expect_response_should_reject_when_sync_predicate_throws(
+    page: Page, server: Server
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+
+    def predicate(response: Any) -> bool:
+        raise Exception("Sync oops!")
+
+    with pytest.raises(Exception, match="Sync oops!"):
+        async with page.expect_response(predicate):
+            await page.evaluate("() => fetch('/digits/1.png')")
+
+
 async def test_wait_for_response_should_work_with_no_timeout(
     page: Page, server: Server
 ) -> None:
