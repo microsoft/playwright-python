@@ -1112,6 +1112,55 @@ class WebSocket(SyncBase):
         """
         return mapping.from_maybe_impl(self._impl_obj.url)
 
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["close"],
+        predicate: typing.Optional[typing.Callable[["WebSocket"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["WebSocket"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["framereceived"],
+        predicate: typing.Optional[
+            typing.Callable[["typing.Union[bytes, str]"], bool]
+        ] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["typing.Union[bytes, str]"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["framesent"],
+        predicate: typing.Optional[
+            typing.Callable[["typing.Union[bytes, str]"], bool]
+        ] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["typing.Union[bytes, str]"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["socketerror"],
+        predicate: typing.Optional[typing.Callable[["str"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["str"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: str,
+        predicate: typing.Optional[typing.Callable[..., bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager[typing.Any]: ...
+
     def expect_event(
         self,
         event: str,
@@ -1144,6 +1193,55 @@ class WebSocket(SyncBase):
                 event=event, predicate=self._wrap_handler(predicate), timeout=timeout
             ).future,
         )
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["close"],
+        predicate: typing.Optional[typing.Callable[["WebSocket"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "WebSocket": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["framereceived"],
+        predicate: typing.Optional[
+            typing.Callable[["typing.Union[bytes, str]"], bool]
+        ] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "typing.Union[bytes, str]": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["framesent"],
+        predicate: typing.Optional[
+            typing.Callable[["typing.Union[bytes, str]"], bool]
+        ] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "typing.Union[bytes, str]": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["socketerror"],
+        predicate: typing.Optional[typing.Callable[["str"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "str": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: str,
+        predicate: typing.Optional[typing.Callable[..., bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> typing.Any: ...
 
     def wait_for_event(
         self,
@@ -6825,6 +6923,33 @@ class Worker(SyncBase):
             )
         )
 
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["close"],
+        predicate: typing.Optional[typing.Callable[["Worker"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Worker"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["console"],
+        predicate: typing.Optional[typing.Callable[["ConsoleMessage"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["ConsoleMessage"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: str,
+        predicate: typing.Optional[typing.Callable[..., bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager[typing.Any]: ...
+
     def expect_event(
         self,
         event: str,
@@ -9532,6 +9657,186 @@ class Page(SyncContextManager):
             )
         )
 
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["close"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Page": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["console"],
+        predicate: typing.Optional[typing.Callable[["ConsoleMessage"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "ConsoleMessage": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["crash"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Page": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["dialog"],
+        predicate: typing.Optional[typing.Callable[["Dialog"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Dialog": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["domcontentloaded"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Page": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["download"],
+        predicate: typing.Optional[typing.Callable[["Download"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Download": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["filechooser"],
+        predicate: typing.Optional[typing.Callable[["FileChooser"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "FileChooser": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["frameattached"],
+        predicate: typing.Optional[typing.Callable[["Frame"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Frame": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["framedetached"],
+        predicate: typing.Optional[typing.Callable[["Frame"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Frame": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["framenavigated"],
+        predicate: typing.Optional[typing.Callable[["Frame"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Frame": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["load"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Page": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["pageerror"],
+        predicate: typing.Optional[typing.Callable[["Error"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Error": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["popup"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Page": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["request"],
+        predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Request": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["requestfailed"],
+        predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Request": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["requestfinished"],
+        predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Request": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["response"],
+        predicate: typing.Optional[typing.Callable[["Response"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Response": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["websocket"],
+        predicate: typing.Optional[typing.Callable[["WebSocket"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "WebSocket": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["worker"],
+        predicate: typing.Optional[typing.Callable[["Worker"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Worker": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: str,
+        predicate: typing.Optional[typing.Callable[..., bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> typing.Any: ...
+
     def wait_for_event(
         self,
         event: str,
@@ -12130,6 +12435,186 @@ class Page(SyncContextManager):
             )
         )
 
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["close"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Page"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["console"],
+        predicate: typing.Optional[typing.Callable[["ConsoleMessage"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["ConsoleMessage"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["crash"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Page"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["dialog"],
+        predicate: typing.Optional[typing.Callable[["Dialog"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Dialog"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["domcontentloaded"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Page"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["download"],
+        predicate: typing.Optional[typing.Callable[["Download"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Download"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["filechooser"],
+        predicate: typing.Optional[typing.Callable[["FileChooser"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["FileChooser"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["frameattached"],
+        predicate: typing.Optional[typing.Callable[["Frame"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Frame"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["framedetached"],
+        predicate: typing.Optional[typing.Callable[["Frame"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Frame"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["framenavigated"],
+        predicate: typing.Optional[typing.Callable[["Frame"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Frame"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["load"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Page"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["pageerror"],
+        predicate: typing.Optional[typing.Callable[["Error"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Error"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["popup"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Page"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["request"],
+        predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Request"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["requestfailed"],
+        predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Request"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["requestfinished"],
+        predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Request"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["response"],
+        predicate: typing.Optional[typing.Callable[["Response"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Response"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["websocket"],
+        predicate: typing.Optional[typing.Callable[["WebSocket"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["WebSocket"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["worker"],
+        predicate: typing.Optional[typing.Callable[["Worker"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Worker"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: str,
+        predicate: typing.Optional[typing.Callable[..., bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager[typing.Any]: ...
+
     def expect_event(
         self,
         event: str,
@@ -13967,6 +14452,114 @@ class BrowserContext(SyncContextManager):
             )
         )
 
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["backgroundpage"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Page"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["close"],
+        predicate: typing.Optional[typing.Callable[["BrowserContext"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["BrowserContext"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["console"],
+        predicate: typing.Optional[typing.Callable[["ConsoleMessage"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["ConsoleMessage"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["dialog"],
+        predicate: typing.Optional[typing.Callable[["Dialog"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Dialog"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["page"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Page"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["weberror"],
+        predicate: typing.Optional[typing.Callable[["WebError"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["WebError"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["request"],
+        predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Request"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["requestfailed"],
+        predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Request"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["requestfinished"],
+        predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Request"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["response"],
+        predicate: typing.Optional[typing.Callable[["Response"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Response"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["serviceworker"],
+        predicate: typing.Optional[typing.Callable[["Worker"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Worker"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: str,
+        predicate: typing.Optional[typing.Callable[..., bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager[typing.Any]: ...
+
     def expect_event(
         self,
         event: str,
@@ -14091,6 +14684,114 @@ class BrowserContext(SyncContextManager):
         return mapping.from_maybe_impl(
             self._sync(self._impl_obj.set_storage_state(storageState=storage_state))
         )
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["backgroundpage"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Page": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["close"],
+        predicate: typing.Optional[typing.Callable[["BrowserContext"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "BrowserContext": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["console"],
+        predicate: typing.Optional[typing.Callable[["ConsoleMessage"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "ConsoleMessage": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["dialog"],
+        predicate: typing.Optional[typing.Callable[["Dialog"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Dialog": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["page"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Page": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["weberror"],
+        predicate: typing.Optional[typing.Callable[["WebError"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "WebError": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["request"],
+        predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Request": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["requestfailed"],
+        predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Request": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["requestfinished"],
+        predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Request": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["response"],
+        predicate: typing.Optional[typing.Callable[["Response"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Response": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["serviceworker"],
+        predicate: typing.Optional[typing.Callable[["Worker"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Worker": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: str,
+        predicate: typing.Optional[typing.Callable[..., bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> typing.Any: ...
 
     def wait_for_event(
         self,
