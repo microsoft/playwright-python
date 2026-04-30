@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import asyncio
-from typing import cast
 
 import pytest
 
@@ -98,4 +97,4 @@ async def test_should_fulfill_popup_main_request_using_alias(
     [popup, _] = await asyncio.gather(
         page.wait_for_event("popup"), page.get_by_text("click me").click()
     )
-    await expect(cast(Page, popup).locator("body")).to_have_text("hello")
+    await expect(popup.locator("body")).to_have_text("hello")
