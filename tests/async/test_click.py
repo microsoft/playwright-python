@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+from datetime import timedelta
 from typing import Optional
 
 import pytest
@@ -1139,3 +1140,8 @@ async def test_click_with_tweened_mouse_movement(page: Page, browser_name: str) 
         [180, 260],
         [200, 300],
     ]
+
+
+async def test_click_should_accept_timedelta_for_timeout(page: Page) -> None:
+    with pytest.raises(TimeoutError, match="Timeout 1ms exceeded"):
+        await page.click("does-not-exist", timeout=timedelta(milliseconds=1))
