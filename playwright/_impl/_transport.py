@@ -137,38 +137,44 @@ class PipeTransport(Transport):
     async def run(self) -> None:
         assert self._proc.stdout
         assert self._proc.stdin
-        while not self._stopped:
-            try:
-                buffer = await self._proc.stdout.readexactly(4)
-                if self._stopped:
-                    break
-                length = int.from_bytes(buffer, byteorder="little", signed=False)
-                buffer = bytes(0)
-                while length:
-                    to_read = min(length, 32768)
-                    data = await self._proc.stdout.readexactly(to_read)
+        try:
+            while not self._stopped:
+                try:
+                    buffer = await self._proc.stdout.readexactly(4)
                     if self._stopped:
                         break
-                    length -= to_read
-                    if len(buffer):
-                        buffer = buffer + data
-                    else:
-                        buffer = data
-                if self._stopped:
+                    length = int.from_bytes(buffer, byteorder="little", signed=False)
+                    buffer = bytes(0)
+                    while length:
+                        to_read = min(length, 32768)
+                        data = await self._proc.stdout.readexactly(to_read)
+                        if self._stopped:
+                            break
+                        length -= to_read
+                        if len(buffer):
+                            buffer = buffer + data
+                        else:
+                            buffer = data
+                    if self._stopped:
+                        break
+
+                    obj = self.deserialize_message(buffer)
+                    self.on_message(obj)
+                except asyncio.IncompleteReadError:
+                    if not self._stopped:
+                        self.on_error_future.set_exception(
+                            Exception("Connection closed while reading from the driver")
+                        )
                     break
+                await asyncio.sleep(0)
 
-                obj = self.deserialize_message(buffer)
-                self.on_message(obj)
-            except asyncio.IncompleteReadError:
-                if not self._stopped:
-                    self.on_error_future.set_exception(
-                        Exception("Connection closed while reading from the driver")
-                    )
-                break
-            await asyncio.sleep(0)
-
-        await self._proc.communicate()
-        self._stopped_future.set_result(None)
+            await self._proc.communicate()
+        finally:
+            # Release waiters on wait_until_stopped() even if this task was
+            # cancelled before reaching the end (e.g. by asyncio.run()'s
+            # task-cancellation phase that runs before asyncio-atexit hooks).
+            if not self._stopped_future.done():
+                self._stopped_future.set_result(None)
 
     def send(self, message: Dict) -> None:
         assert self._output
