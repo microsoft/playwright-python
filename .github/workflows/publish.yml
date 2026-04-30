@@ -22,14 +22,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     defaults:
       run:
-        # Required for conda-incubator/setup-miniconda@v3
+        # Required for conda-incubator/setup-miniconda@v4
         shell: bash -el {0}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Get conda
-        uses: conda-incubator/setup-miniconda@v3
+        uses: conda-incubator/setup-miniconda@v4
         with:
           python-version: '3.12'
           channels: conda-forge
