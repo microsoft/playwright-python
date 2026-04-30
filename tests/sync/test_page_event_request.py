@@ -52,3 +52,25 @@ def test_should_return_last_requests(page: Page, server: Server) -> None:
         url = server.PREFIX + f"/fetch?{i}"
         expected.append({"url": url, "text": f"url:{url}"})
     assert received == expected
+
+
+def test_should_propagate_contextvars_to_event_handlers(
+    page: Page, server: Server
+) -> None:
+    import contextvars
+
+    shared_var: "contextvars.ContextVar[str]" = contextvars.ContextVar("shared_var")
+    shared_var.set("expected value")
+
+    seen: list = []
+
+    def on_request(request: Request) -> None:
+        try:
+            seen.append(shared_var.get())
+        except LookupError:
+            seen.append(None)
+
+    page.on("request", on_request)
+    page.goto(server.EMPTY_PAGE)
+    assert seen
+    assert all(v == "expected value" for v in seen)
