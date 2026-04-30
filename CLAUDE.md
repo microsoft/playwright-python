@@ -59,3 +59,40 @@ It documents the full process: the upstream commit-range diff over `docs/src/api
 - New public methods on impl classes need a sync test mirror under `tests/sync/`.
 - Keep `expected_api_mismatch.txt` minimal — every entry needs a one-line rationale comment above it.
 - Prefer `locals_to_params(locals())` for forwarding optional kwargs to channel sends, matching the rest of the codebase.
+
+## Commit Convention
+
+Before committing, run `mypy playwright` and fix errors.
+
+Semantic commit messages: `label(scope): description`
+
+Labels: `fix`, `feat`, `chore`, `docs`, `test`, `devops`
+
+```bash
+git checkout -b fix-12345
+# ... make changes ...
+git add <changed-files>
+git commit -m "$(cat <<'EOF'
+fix(asyncio): do not deadlock in atexit handler
+
+Fixes: https://github.com/microsoft/playwright-python/issues/12345
+EOF
+)"
+git push origin fix-12345
+gh pr create --repo microsoft/playwright-python --head username:fix-12345 \
+  --title "fix(asyncio): do not deadlock in atexit handler" \
+  --body "$(cat <<'EOF'
+## Summary
+- <describe the change very! briefly>
+
+Fixes https://github.com/microsoft/playwright-python/issues/12345
+EOF
+)"
+```
+
+Never add Co-Authored-By agents in commit message.
+Never add "Generated with" in commit message.
+Never add test plan to PR description. Keep PR description short — a few bullet points at most.
+Branch naming for issue fixes: `fix-<issue-number>`
+
+**Never `git push` without an explicit instruction to push.** Applies even when a PR is already open for the branch — additional commits are immediately visible to reviewers. Commit locally, report what was committed, and wait. Only push when the user's message contains "push", "upload", "create PR", "ship it", or equivalent.

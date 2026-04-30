@@ -13,7 +13,10 @@
 # limitations under the License.
 import asyncio
 import gc
+import subprocess
 import sys
+import textwrap
+from pathlib import Path
 from typing import Dict
 
 import pytest
@@ -87,6 +90,46 @@ async def test_should_not_throw_with_taskgroup(page: Page) -> None:
     assert "Something went wrong" in str(exc_info.value.exceptions[0])
     assert isinstance(exc_info.value.exceptions[0], ValueError)
     assert await page.evaluate("() => 11 * 11") == 121
+
+
+def test_stop_does_not_deadlock_with_asyncio_atexit(tmp_path: Path) -> None:
+    # Regression test for https://github.com/microsoft/playwright-python/issues/3004.
+    # asyncio.run() cancels all remaining tasks (including transport.run()) before
+    # calling loop.close(). asyncio-atexit hooks loop.close() to run async cleanup,
+    # so awaiting playwright.stop() at that point used to deadlock on a future that
+    # the (already cancelled) run task would never set.
+    script = tmp_path / "atexit_stop.py"
+    script.write_text(
+        textwrap.dedent(
+            """
+            import asyncio
+
+            import asyncio_atexit
+            from playwright.async_api import async_playwright
+
+
+            async def main():
+                pw = await async_playwright().start()
+                asyncio_atexit.register(lambda: stop(pw))
+
+
+            async def stop(pw):
+                await pw.stop()
+                print("STOPPED", flush=True)
+
+
+            asyncio.run(main())
+            """
+        )
+    )
+    result = subprocess.run(
+        [sys.executable, str(script)],
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "STOPPED" in result.stdout
 
 
 async def test_should_return_proper_api_name_on_error(page: Page) -> None:
