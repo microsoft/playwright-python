@@ -99,6 +99,14 @@ class PipeTransport(Transport):
         self._output.close()
 
     async def wait_until_stopped(self) -> None:
+        # In atexit scenarios, the original event loop might be closed.
+        # If so, we can't wait for _stopped_future (it's tied to the closed loop).
+        if self._loop.is_closed():
+            # Loop is closed. The process is being terminated by run() already.
+            # Just wait for it directly without asyncio (it will self-clean in time).
+            return
+        
+        # Normal case: original loop still exists, wait for the stopped signal
         await self._stopped_future
 
     async def connect(self) -> None:
@@ -165,10 +173,25 @@ class PipeTransport(Transport):
                         Exception("Connection closed while reading from the driver")
                     )
                 break
+            except asyncio.CancelledError:
+                break
             await asyncio.sleep(0)
-
-        await self._proc.communicate()
-        self._stopped_future.set_result(None)
+        
+        # Graceful shutdown: only if event loop is still running
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            # No running loop, OS will clean up the process during exit
+            return
+        
+        # Process is still running and we have an event loop
+        if self._proc.returncode is None:
+            self._proc.terminate()
+            # Let OS clean up if process doesn't respond to SIGTERM
+        
+        # Notify anyone waiting that the transport has fully stopped
+        if not self._stopped_future.done():
+            self._stopped_future.set_result(None)
 
     def send(self, message: Dict) -> None:
         assert self._output
