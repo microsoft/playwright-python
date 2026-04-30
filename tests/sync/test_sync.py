@@ -14,6 +14,7 @@
 
 import multiprocessing
 import os
+from datetime import timedelta
 from typing import Any, Callable, Dict
 
 import pytest
@@ -358,3 +359,8 @@ def test_should_return_proper_api_name_on_error(page: Page) -> None:
     except Exception as error:
         # Each browser returns slightly different error messages, but they should all start with "Page.evaluate:", because that was the Playwright method where the error originated
         assert str(error).startswith("Page.evaluate:")
+
+
+def test_click_should_accept_timedelta_for_timeout(page: Page) -> None:
+    with pytest.raises(TimeoutError, match="Timeout 1ms exceeded"):
+        page.click("does-not-exist", timeout=timedelta(milliseconds=1))
