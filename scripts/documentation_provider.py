@@ -545,7 +545,7 @@ class DocumentationProvider:
             for [member_name, member] in clazz["members"].items():
                 if member.get("deprecated"):
                     continue
-                if class_name in ["Error"]:
+                if class_name in ["Error", "FormData"]:
                     continue
                 entry = f"{class_name}.{member_name}"
                 if entry not in self.printed_entries:

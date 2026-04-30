@@ -70,6 +70,7 @@ from playwright._impl._fetch import APIRequest as APIRequestImpl
 from playwright._impl._fetch import APIRequestContext as APIRequestContextImpl
 from playwright._impl._fetch import APIResponse as APIResponseImpl
 from playwright._impl._file_chooser import FileChooser as FileChooserImpl
+from playwright._impl._form_data import FormData
 from playwright._impl._frame import Frame as FrameImpl
 from playwright._impl._input import Keyboard as KeyboardImpl
 from playwright._impl._input import Mouse as MouseImpl
@@ -18917,9 +18918,14 @@ class APIRequestContext(AsyncBase):
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
         data: typing.Optional[typing.Union[typing.Any, bytes, str]] = None,
-        form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
+        form: typing.Optional[
+            typing.Union[typing.Dict[str, typing.Union[str, float, bool]], "FormData"]
+        ] = None,
         multipart: typing.Optional[
-            typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
+            typing.Union[
+                typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]],
+                "FormData",
+            ]
         ] = None,
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
@@ -18946,14 +18952,16 @@ class APIRequestContext(AsyncBase):
             Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
             and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type`
             header will be set to `application/octet-stream` if not explicitly set.
-        form : Union[Dict[str, Union[bool, float, str]], None]
+        form : Union[Dict[str, Union[bool, float, str]], FormData, None]
             Provides an object that will be serialized as html form using `application/x-www-form-urlencoded` encoding and sent
             as this request body. If this parameter is specified `content-type` header will be set to
-            `application/x-www-form-urlencoded` unless explicitly provided.
-        multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
+            `application/x-www-form-urlencoded` unless explicitly provided. Use `FormData` to send multiple values for the same
+            field.
+        multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], FormData, None]
             Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
             request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
             explicitly provided. File values can be passed as file-like object containing file name, mime-type and its content.
+            Use `FormData` to send multiple files in the same field.
         timeout : Union[float, None]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
         fail_on_status_code : Union[bool, None]
@@ -18998,9 +19006,14 @@ class APIRequestContext(AsyncBase):
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
         data: typing.Optional[typing.Union[typing.Any, bytes, str]] = None,
-        form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
+        form: typing.Optional[
+            typing.Union[typing.Dict[str, typing.Union[str, float, bool]], "FormData"]
+        ] = None,
         multipart: typing.Optional[
-            typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
+            typing.Union[
+                typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]],
+                "FormData",
+            ]
         ] = None,
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
@@ -19027,14 +19040,16 @@ class APIRequestContext(AsyncBase):
             Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
             and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type`
             header will be set to `application/octet-stream` if not explicitly set.
-        form : Union[Dict[str, Union[bool, float, str]], None]
+        form : Union[Dict[str, Union[bool, float, str]], FormData, None]
             Provides an object that will be serialized as html form using `application/x-www-form-urlencoded` encoding and sent
             as this request body. If this parameter is specified `content-type` header will be set to
-            `application/x-www-form-urlencoded` unless explicitly provided.
-        multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
+            `application/x-www-form-urlencoded` unless explicitly provided. Use `FormData` to send multiple values for the same
+            field.
+        multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], FormData, None]
             Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
             request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
             explicitly provided. File values can be passed as file-like object containing file name, mime-type and its content.
+            Use `FormData` to send multiple files in the same field.
         timeout : Union[float, None]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
         fail_on_status_code : Union[bool, None]
@@ -19079,9 +19094,14 @@ class APIRequestContext(AsyncBase):
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
         data: typing.Optional[typing.Union[typing.Any, bytes, str]] = None,
-        form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
+        form: typing.Optional[
+            typing.Union[typing.Dict[str, typing.Union[str, float, bool]], "FormData"]
+        ] = None,
         multipart: typing.Optional[
-            typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
+            typing.Union[
+                typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]],
+                "FormData",
+            ]
         ] = None,
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
@@ -19120,14 +19140,16 @@ class APIRequestContext(AsyncBase):
             Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
             and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type`
             header will be set to `application/octet-stream` if not explicitly set.
-        form : Union[Dict[str, Union[bool, float, str]], None]
+        form : Union[Dict[str, Union[bool, float, str]], FormData, None]
             Provides an object that will be serialized as html form using `application/x-www-form-urlencoded` encoding and sent
             as this request body. If this parameter is specified `content-type` header will be set to
-            `application/x-www-form-urlencoded` unless explicitly provided.
-        multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
+            `application/x-www-form-urlencoded` unless explicitly provided. Use `FormData` to send multiple values for the same
+            field.
+        multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], FormData, None]
             Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
             request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
             explicitly provided. File values can be passed as file-like object containing file name, mime-type and its content.
+            Use `FormData` to send multiple files in the same field.
         timeout : Union[float, None]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
         fail_on_status_code : Union[bool, None]
@@ -19172,9 +19194,14 @@ class APIRequestContext(AsyncBase):
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
         data: typing.Optional[typing.Union[typing.Any, bytes, str]] = None,
-        form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
+        form: typing.Optional[
+            typing.Union[typing.Dict[str, typing.Union[str, float, bool]], "FormData"]
+        ] = None,
         multipart: typing.Optional[
-            typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
+            typing.Union[
+                typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]],
+                "FormData",
+            ]
         ] = None,
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
@@ -19201,14 +19228,16 @@ class APIRequestContext(AsyncBase):
             Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
             and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type`
             header will be set to `application/octet-stream` if not explicitly set.
-        form : Union[Dict[str, Union[bool, float, str]], None]
+        form : Union[Dict[str, Union[bool, float, str]], FormData, None]
             Provides an object that will be serialized as html form using `application/x-www-form-urlencoded` encoding and sent
             as this request body. If this parameter is specified `content-type` header will be set to
-            `application/x-www-form-urlencoded` unless explicitly provided.
-        multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
+            `application/x-www-form-urlencoded` unless explicitly provided. Use `FormData` to send multiple values for the same
+            field.
+        multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], FormData, None]
             Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
             request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
             explicitly provided. File values can be passed as file-like object containing file name, mime-type and its content.
+            Use `FormData` to send multiple files in the same field.
         timeout : Union[float, None]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
         fail_on_status_code : Union[bool, None]
@@ -19253,9 +19282,14 @@ class APIRequestContext(AsyncBase):
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
         data: typing.Optional[typing.Union[typing.Any, bytes, str]] = None,
-        form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
+        form: typing.Optional[
+            typing.Union[typing.Dict[str, typing.Union[str, float, bool]], "FormData"]
+        ] = None,
         multipart: typing.Optional[
-            typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
+            typing.Union[
+                typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]],
+                "FormData",
+            ]
         ] = None,
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
@@ -19282,14 +19316,16 @@ class APIRequestContext(AsyncBase):
             Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
             and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type`
             header will be set to `application/octet-stream` if not explicitly set.
-        form : Union[Dict[str, Union[bool, float, str]], None]
+        form : Union[Dict[str, Union[bool, float, str]], FormData, None]
             Provides an object that will be serialized as html form using `application/x-www-form-urlencoded` encoding and sent
             as this request body. If this parameter is specified `content-type` header will be set to
-            `application/x-www-form-urlencoded` unless explicitly provided.
-        multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
+            `application/x-www-form-urlencoded` unless explicitly provided. Use `FormData` to send multiple values for the same
+            field.
+        multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], FormData, None]
             Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
             request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
             explicitly provided. File values can be passed as file-like object containing file name, mime-type and its content.
+            Use `FormData` to send multiple files in the same field.
         timeout : Union[float, None]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
         fail_on_status_code : Union[bool, None]
@@ -19334,9 +19370,14 @@ class APIRequestContext(AsyncBase):
         ] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
         data: typing.Optional[typing.Union[typing.Any, bytes, str]] = None,
-        form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
+        form: typing.Optional[
+            typing.Union[typing.Dict[str, typing.Union[str, float, bool]], "FormData"]
+        ] = None,
         multipart: typing.Optional[
-            typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
+            typing.Union[
+                typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]],
+                "FormData",
+            ]
         ] = None,
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
@@ -19394,14 +19435,16 @@ class APIRequestContext(AsyncBase):
             Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
             and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type`
             header will be set to `application/octet-stream` if not explicitly set.
-        form : Union[Dict[str, Union[bool, float, str]], None]
+        form : Union[Dict[str, Union[bool, float, str]], FormData, None]
             Provides an object that will be serialized as html form using `application/x-www-form-urlencoded` encoding and sent
             as this request body. If this parameter is specified `content-type` header will be set to
-            `application/x-www-form-urlencoded` unless explicitly provided.
-        multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
+            `application/x-www-form-urlencoded` unless explicitly provided. Use `FormData` to send multiple values for the same
+            field.
+        multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], FormData, None]
             Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
             request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
             explicitly provided. File values can be passed as file-like object containing file name, mime-type and its content.
+            Use `FormData` to send multiple files in the same field.
         timeout : Union[float, None]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
         fail_on_status_code : Union[bool, None]
@@ -19447,9 +19490,14 @@ class APIRequestContext(AsyncBase):
         method: typing.Optional[str] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
         data: typing.Optional[typing.Union[typing.Any, bytes, str]] = None,
-        form: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
+        form: typing.Optional[
+            typing.Union[typing.Dict[str, typing.Union[str, float, bool]], "FormData"]
+        ] = None,
         multipart: typing.Optional[
-            typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]]
+            typing.Union[
+                typing.Dict[str, typing.Union[bytes, bool, float, str, FilePayload]],
+                "FormData",
+            ]
         ] = None,
         timeout: typing.Optional[float] = None,
         fail_on_status_code: typing.Optional[bool] = None,
@@ -19493,14 +19541,16 @@ class APIRequestContext(AsyncBase):
             Allows to set post data of the request. If the data parameter is an object, it will be serialized to json string
             and `content-type` header will be set to `application/json` if not explicitly set. Otherwise the `content-type`
             header will be set to `application/octet-stream` if not explicitly set.
-        form : Union[Dict[str, Union[bool, float, str]], None]
+        form : Union[Dict[str, Union[bool, float, str]], FormData, None]
             Provides an object that will be serialized as html form using `application/x-www-form-urlencoded` encoding and sent
             as this request body. If this parameter is specified `content-type` header will be set to
-            `application/x-www-form-urlencoded` unless explicitly provided.
-        multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
+            `application/x-www-form-urlencoded` unless explicitly provided. Use `FormData` to send multiple values for the same
+            field.
+        multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], FormData, None]
             Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
             request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
             explicitly provided. File values can be passed as file-like object containing file name, mime-type and its content.
+            Use `FormData` to send multiple files in the same field.
         timeout : Union[float, None]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
         fail_on_status_code : Union[bool, None]
