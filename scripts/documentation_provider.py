@@ -408,6 +408,16 @@ class DocumentationProvider:
             return f"{{{', '.join(signature)}}}"
         if origin == Union:
             args = get_args(value)
+            if not self.is_async:
+                # Sync API doesn't accept awaitable callbacks; drop the
+                # Awaitable arm so docstring types match the sync signature.
+                args = tuple(
+                    a
+                    for a in args
+                    if str(get_origin(a)) != "<class 'collections.abc.Awaitable'>"
+                )
+                if len(args) == 1:
+                    return self.serialize_python_type(args[0], direction)
             if len(args) == 2 and str(args[1]) == "<class 'NoneType'>":
                 return self.make_optional(
                     self.serialize_python_type(args[0], direction)

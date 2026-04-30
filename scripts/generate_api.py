@@ -56,6 +56,8 @@ from playwright._impl._tracing import Tracing
 from playwright._impl._video import Video
 from playwright._impl._web_error import WebError
 
+SYNC_API = False
+
 
 def process_type(value: Any, param: bool = False) -> str:
     value = str(value)
@@ -65,6 +67,15 @@ def process_type(value: Any, param: bool = False) -> str:
     value = re.sub(r"playwright\._impl\._api_structures.([\w]+)", r"\1", value)
     value = re.sub(r"playwright\._impl\.[\w]+\.([\w]+)", r'"\1"', value)
     value = re.sub(r"typing.Literal", "Literal", value)
+    if SYNC_API:
+        # Sync API does not accept awaitable callbacks; collapse
+        # Union[X, Awaitable[X]] (used for predicates the async API also
+        # accepts as `async def`) down to just X.
+        value = re.sub(
+            r"typing\.Union\[([^\[\],]+),\s*typing\.Awaitable\[\1\]\]",
+            r"\1",
+            value,
+        )
     if param:
         value = re.sub(r"^typing.Union\[([^,]+), None\]$", r"\1 = None", value)
         value = re.sub(

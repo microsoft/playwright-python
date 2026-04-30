@@ -22,6 +22,7 @@ from types import TracebackType
 from typing import (
     TYPE_CHECKING,
     Any,
+    Awaitable,
     Callable,
     Dict,
     List,
@@ -54,8 +55,12 @@ if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._network import Request, Response, Route, WebSocketRoute
 
 URLMatch = Union[str, Pattern[str], Callable[[str], bool]]
-URLMatchRequest = Union[str, Pattern[str], Callable[["Request"], bool]]
-URLMatchResponse = Union[str, Pattern[str], Callable[["Response"], bool]]
+URLMatchRequest = Union[
+    str, Pattern[str], Callable[["Request"], Union[bool, Awaitable[bool]]]
+]
+URLMatchResponse = Union[
+    str, Pattern[str], Callable[["Response"], Union[bool, Awaitable[bool]]]
+]
 RouteHandlerCallback = Union[
     Callable[["Route"], Any], Callable[["Route", "Request"], Any]
 ]

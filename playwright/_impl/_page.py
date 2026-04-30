@@ -22,6 +22,7 @@ from types import SimpleNamespace
 from typing import (
     TYPE_CHECKING,
     Any,
+    Awaitable,
     Callable,
     Dict,
     List,
@@ -1278,7 +1279,7 @@ class Page(ChannelOwner):
         urlOrPredicate: URLMatchRequest,
         timeout: float = None,
     ) -> EventContextManagerImpl[Request]:
-        def my_predicate(request: Request) -> bool:
+        def my_predicate(request: Request) -> Union[bool, Awaitable[bool]]:
             if not callable(urlOrPredicate):
                 return url_matches(
                     self._browser_context._base_url,
@@ -1310,7 +1311,7 @@ class Page(ChannelOwner):
         urlOrPredicate: URLMatchResponse,
         timeout: float = None,
     ) -> EventContextManagerImpl[Response]:
-        def my_predicate(request: Response) -> bool:
+        def my_predicate(request: Response) -> Union[bool, Awaitable[bool]]:
             if not callable(urlOrPredicate):
                 return url_matches(
                     self._browser_context._base_url,
