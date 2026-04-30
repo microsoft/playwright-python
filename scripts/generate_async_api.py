@@ -92,6 +92,8 @@ def generate(t: Any) -> None:
                 '"Disposable"', '"AsyncContextManager"'
             ).replace('"DisposableStub"', '"AsyncContextManager"')
             print("")
+            if name in ("expect_event", "wait_for_event"):
+                documentation_provider.print_event_overloads(class_name, name)
             async_prefix = "async " if is_async else ""
             print(
                 f"    {async_prefix}def {name}({signature(value, len(name) + 9)}) -> {return_type_value}:"
