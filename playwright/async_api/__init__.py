@@ -22,6 +22,7 @@ from typing import Any, Optional, Union, overload
 
 import playwright._impl._api_structures
 import playwright._impl._errors
+import playwright._impl._form_data
 import playwright.async_api._generated
 from playwright._impl._assertions import (
     APIResponseAssertions as APIResponseAssertionsImpl,
@@ -69,6 +70,7 @@ ChromiumBrowserContext = BrowserContext
 
 Cookie = playwright._impl._api_structures.Cookie
 FilePayload = playwright._impl._api_structures.FilePayload
+FormData = playwright._impl._form_data.FormData
 FloatRect = playwright._impl._api_structures.FloatRect
 Geolocation = playwright._impl._api_structures.Geolocation
 HttpCredentials = playwright._impl._api_structures.HttpCredentials
@@ -171,6 +173,7 @@ __all__ = [
     "FileChooser",
     "FilePayload",
     "FloatRect",
+    "FormData",
     "Frame",
     "FrameLocator",
     "Geolocation",

@@ -15,12 +15,20 @@
 import asyncio
 import base64
 import json
+from pathlib import Path
 from typing import Any, Callable, cast
 from urllib.parse import parse_qs
 
 import pytest
 
-from playwright.async_api import Browser, BrowserContext, Error, FilePayload, Page
+from playwright.async_api import (
+    Browser,
+    BrowserContext,
+    Error,
+    FilePayload,
+    FormData,
+    Page,
+)
 from tests.server import Server, TestServerRequest
 from tests.utils import must
 
@@ -330,6 +338,96 @@ async def test_should_support_multipart_form_data(
     assert request.args[b"firstName"] == [b"John"]
     assert request.args[b"lastName"] == [b"Doe"]
     assert request.args[b"file"][0] == file["buffer"]
+
+
+async def test_should_support_form_data_with_repeated_keys(
+    context: BrowserContext, server: Server
+) -> None:
+    form = FormData()
+    form.append("name", "John")
+    form.append("name", "Doe")
+    form.set("email", "john@example.com")
+    [request, _] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        context.request.post(server.EMPTY_PAGE, form=form),
+    )
+    assert request.getHeader("Content-Type") == "application/x-www-form-urlencoded"
+    params = parse_qs(must(request.post_body))
+    assert params[b"name"] == [b"John", b"Doe"]
+    assert params[b"email"] == [b"john@example.com"]
+
+
+async def test_should_support_form_data_set_overwrites_previous_values(
+    context: BrowserContext, server: Server
+) -> None:
+    form = FormData()
+    form.append("name", "first")
+    form.append("name", "second")
+    form.set("name", "final")
+    form.set("age", 30)
+    [request, _] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        context.request.post(server.EMPTY_PAGE, form=form),
+    )
+    params = parse_qs(must(request.post_body))
+    assert params[b"name"] == [b"final"]
+    assert params[b"age"] == [b"30"]
+
+
+async def test_should_reject_file_value_in_form(
+    context: BrowserContext, server: Server, tmp_path: Path
+) -> None:
+    file = tmp_path / "f.txt"
+    file.write_bytes(b"hello")
+    form = FormData()
+    form.set("attachment", file)
+    with pytest.raises(Error, match="Use 'multipart' for file uploads"):
+        await context.request.post(server.EMPTY_PAGE, form=form)
+
+
+async def test_should_support_multipart_form_data_with_multiple_files_in_one_field(
+    context: BrowserContext, server: Server
+) -> None:
+    file1: FilePayload = {
+        "name": "f1.txt",
+        "mimeType": "text/plain",
+        "buffer": b"file 1 content",
+    }
+    file2: FilePayload = {
+        "name": "f2.txt",
+        "mimeType": "text/plain",
+        "buffer": b"file 2 content",
+    }
+    form = FormData()
+    form.append("files", file1)
+    form.append("files", file2)
+    form.set("user", "alice")
+    [request, _] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        context.request.post(server.EMPTY_PAGE, multipart=form),
+    )
+    assert cast(str, request.getHeader("Content-Type")).startswith(
+        "multipart/form-data; "
+    )
+    assert request.args[b"user"] == [b"alice"]
+    assert request.args[b"files"] == [file1["buffer"], file2["buffer"]]
+
+
+async def test_should_support_multipart_form_data_with_path_value(
+    context: BrowserContext, server: Server, tmp_path: Path
+) -> None:
+    file = tmp_path / "data.csv"
+    file.write_bytes(b"a,b,c\n1,2,3\n")
+    form = FormData()
+    form.set("attachment", file)
+    [request, _] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        context.request.post(server.EMPTY_PAGE, multipart=form),
+    )
+    assert cast(str, request.getHeader("Content-Type")).startswith(
+        "multipart/form-data; "
+    )
+    assert request.args[b"attachment"] == [b"a,b,c\n1,2,3\n"]
 
 
 async def test_should_add_default_headers(

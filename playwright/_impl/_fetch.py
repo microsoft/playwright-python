@@ -14,6 +14,7 @@
 
 import base64
 import json
+import mimetypes
 import pathlib
 import typing
 from pathlib import Path
@@ -32,6 +33,7 @@ from playwright._impl._api_structures import (
 )
 from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._errors import is_target_closed_error
+from playwright._impl._form_data import FormData
 from playwright._impl._helper import (
     Error,
     NameValue,
@@ -51,9 +53,9 @@ if typing.TYPE_CHECKING:
     from playwright._impl._playwright import Playwright
 
 
-FormType = Dict[str, Union[bool, float, str]]
+FormType = Union[Dict[str, Union[bool, float, str]], FormData]
 DataType = Union[Any, bytes, str]
-MultipartType = Dict[str, Union[bytes, bool, float, str, FilePayload]]
+MultipartType = Union[Dict[str, Union[bytes, bool, float, str, FilePayload]], FormData]
 ParamsType = Union[Dict[str, Union[bool, float, str]], str]
 
 
@@ -212,7 +214,7 @@ class APIRequestContext(ChannelOwner):
         headers: Headers = None,
         data: DataType = None,
         form: FormType = None,
-        multipart: Dict[str, Union[bytes, bool, float, str, FilePayload]] = None,
+        multipart: MultipartType = None,
         timeout: float = None,
         failOnStatusCode: bool = None,
         ignoreHTTPSErrors: bool = None,
@@ -241,7 +243,7 @@ class APIRequestContext(ChannelOwner):
         headers: Headers = None,
         data: DataType = None,
         form: FormType = None,
-        multipart: Dict[str, Union[bytes, bool, float, str, FilePayload]] = None,
+        multipart: MultipartType = None,
         timeout: float = None,
         failOnStatusCode: bool = None,
         ignoreHTTPSErrors: bool = None,
@@ -270,7 +272,7 @@ class APIRequestContext(ChannelOwner):
         headers: Headers = None,
         data: DataType = None,
         form: FormType = None,
-        multipart: Dict[str, Union[bytes, bool, float, str, FilePayload]] = None,
+        multipart: MultipartType = None,
         timeout: float = None,
         failOnStatusCode: bool = None,
         ignoreHTTPSErrors: bool = None,
@@ -300,7 +302,7 @@ class APIRequestContext(ChannelOwner):
         headers: Headers = None,
         data: DataType = None,
         form: FormType = None,
-        multipart: Dict[str, Union[bytes, bool, float, str, FilePayload]] = None,
+        multipart: MultipartType = None,
         timeout: float = None,
         failOnStatusCode: bool = None,
         ignoreHTTPSErrors: bool = None,
@@ -341,7 +343,7 @@ class APIRequestContext(ChannelOwner):
         data: DataType = None,
         params: ParamsType = None,
         form: FormType = None,
-        multipart: Dict[str, Union[bytes, bool, float, str, FilePayload]] = None,
+        multipart: MultipartType = None,
         timeout: float = None,
         failOnStatusCode: bool = None,
         ignoreHTTPSErrors: bool = None,
@@ -381,21 +383,36 @@ class APIRequestContext(ChannelOwner):
             else:
                 raise Error(f"Unsupported 'data' type: {type(data)}")
         elif form:
-            form_data = object_to_array(form)
+            if isinstance(form, FormData):
+                form_data = []
+                for fd_name, fd_value in form._fields:
+                    if isinstance(fd_value, (pathlib.Path, dict)):
+                        raise Error(
+                            f"Form field {fd_name!r} must be a string, number or boolean. Use 'multipart' for file uploads."
+                        )
+                    form_data.append(NameValue(name=fd_name, value=str(fd_value)))
+            else:
+                form_data = object_to_array(form)
         elif multipart:
             multipart_data = []
-            # Convert file-like values to ServerFilePayload structs.
-            for name, value in multipart.items():
-                if is_file_payload(value):
-                    payload = cast(FilePayload, value)
-                    assert isinstance(
-                        payload["buffer"], bytes
-                    ), f"Unexpected buffer type of 'data.{name}'"
+            if isinstance(multipart, FormData):
+                for fd_name, fd_value in multipart._fields:
                     multipart_data.append(
-                        FormField(name=name, file=file_payload_to_json(payload))
+                        await _form_data_field_to_form_field(fd_name, fd_value)
                     )
-                elif isinstance(value, str):
-                    multipart_data.append(FormField(name=name, value=value))
+            else:
+                # Convert file-like values to ServerFilePayload structs.
+                for name, value in multipart.items():
+                    if is_file_payload(value):
+                        payload = cast(FilePayload, value)
+                        assert isinstance(
+                            payload["buffer"], bytes
+                        ), f"Unexpected buffer type of 'data.{name}'"
+                        multipart_data.append(
+                            FormField(name=name, file=file_payload_to_json(payload))
+                        )
+                    elif isinstance(value, str):
+                        multipart_data.append(FormField(name=name, value=value))
         if (
             post_data_buffer is None
             and json_data is None
@@ -448,6 +465,28 @@ def file_payload_to_json(payload: FilePayload) -> ServerFilePayload:
         mimeType=payload["mimeType"],
         buffer=base64.b64encode(payload["buffer"]).decode(),
     )
+
+
+async def _form_data_field_to_form_field(name: str, value: Any) -> FormField:
+    if isinstance(value, pathlib.Path):
+        mime_type, _ = mimetypes.guess_type(str(value))
+        return FormField(
+            name=name,
+            file=ServerFilePayload(
+                name=value.name,
+                mimeType=mime_type or "application/octet-stream",
+                buffer=base64.b64encode(await async_readfile(str(value))).decode(),
+            ),
+        )
+    if is_file_payload(value):
+        payload = cast(FilePayload, value)
+        assert isinstance(
+            payload["buffer"], bytes
+        ), f"Unexpected buffer type of form field {name!r}"
+        return FormField(name=name, file=file_payload_to_json(payload))
+    if isinstance(value, (str, int, float, bool)):
+        return FormField(name=name, value=str(value))
+    raise Error(f"Unsupported form field {name!r} value type: {type(value).__name__}")
 
 
 class APIResponse:
