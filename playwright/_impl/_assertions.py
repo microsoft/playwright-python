@@ -13,7 +13,8 @@
 # limitations under the License.
 
 import collections.abc
-from typing import Any, List, Optional, Pattern, Sequence, Union
+from contextlib import contextmanager
+from typing import Any, Iterator, List, Optional, Pattern, Sequence, Union
 from urllib.parse import urljoin
 
 from playwright._impl._api_structures import (
@@ -30,6 +31,33 @@ from playwright._impl._locator import Locator
 from playwright._impl._page import Page
 from playwright._impl._str_utils import escape_regex_flags
 
+_soft_errors: Optional[List[AssertionError]] = None
+
+
+@contextmanager
+def _soft_scope() -> Iterator[List[AssertionError]]:
+    global _soft_errors
+    assert _soft_errors is None, "nested soft assertion scopes are not supported"
+    _soft_errors = []
+    try:
+        yield _soft_errors
+    finally:
+        _soft_errors = None
+
+
+def _record_soft_or_raise(error: AssertionError, is_soft: bool) -> None:
+    __tracebackhide__ = True
+    if is_soft:
+        if _soft_errors is None:
+            raise RuntimeError(
+                "expect.soft(...) requires pytest-playwright>=0.7.3 "
+                "(or pytest-playwright-asyncio>=0.7.3). Upgrade the plugin, "
+                "or use a regular expect(...) assertion."
+            )
+        _soft_errors.append(error)
+        return
+    raise error
+
 
 class AssertionsBase:
     def __init__(
@@ -38,6 +66,7 @@ class AssertionsBase:
         timeout: float = None,
         is_not: bool = False,
         message: Optional[str] = None,
+        is_soft: bool = False,
     ) -> None:
         self._actual_locator = locator
         self._loop = locator._loop
@@ -45,6 +74,7 @@ class AssertionsBase:
         self._timeout = timeout
         self._is_not = is_not
         self._custom_message = message
+        self._is_soft = is_soft
 
     async def _call_expect(
         self, expression: str, expect_options: FrameExpectOptions, title: Optional[str]
@@ -82,8 +112,11 @@ class AssertionsBase:
                 )
             error_message = result.get("errorMessage")
             error_message = f"\n{error_message}" if error_message else ""
-            raise AssertionError(
-                f"{out_message}\nActual value: {actual}{error_message} {format_call_log(result.get('log'))}"
+            _record_soft_or_raise(
+                AssertionError(
+                    f"{out_message}\nActual value: {actual}{error_message} {format_call_log(result.get('log'))}"
+                ),
+                self._is_soft,
             )
 
 
@@ -94,8 +127,9 @@ class PageAssertions(AssertionsBase):
         timeout: float = None,
         is_not: bool = False,
         message: Optional[str] = None,
+        is_soft: bool = False,
     ) -> None:
-        super().__init__(page.locator(":root"), timeout, is_not, message)
+        super().__init__(page.locator(":root"), timeout, is_not, message, is_soft)
         self._actual_page = page
 
     async def _call_expect(
@@ -109,7 +143,11 @@ class PageAssertions(AssertionsBase):
     @property
     def _not(self) -> "PageAssertions":
         return PageAssertions(
-            self._actual_page, self._timeout, not self._is_not, self._custom_message
+            self._actual_page,
+            self._timeout,
+            not self._is_not,
+            self._custom_message,
+            self._is_soft,
         )
 
     async def to_have_title(
@@ -169,8 +207,9 @@ class LocatorAssertions(AssertionsBase):
         timeout: float = None,
         is_not: bool = False,
         message: Optional[str] = None,
+        is_soft: bool = False,
     ) -> None:
-        super().__init__(locator, timeout, is_not, message)
+        super().__init__(locator, timeout, is_not, message, is_soft)
         self._actual_locator = locator
 
     async def _call_expect(
@@ -182,7 +221,11 @@ class LocatorAssertions(AssertionsBase):
     @property
     def _not(self) -> "LocatorAssertions":
         return LocatorAssertions(
-            self._actual_locator, self._timeout, not self._is_not, self._custom_message
+            self._actual_locator,
+            self._timeout,
+            not self._is_not,
+            self._custom_message,
+            self._is_soft,
         )
 
     async def to_contain_text(
@@ -944,6 +987,7 @@ class APIResponseAssertions:
         timeout: float = None,
         is_not: bool = False,
         message: Optional[str] = None,
+        is_soft: bool = False,
     ) -> None:
         self._loop = response._loop
         self._dispatcher_fiber = response._dispatcher_fiber
@@ -951,11 +995,16 @@ class APIResponseAssertions:
         self._is_not = is_not
         self._actual = response
         self._custom_message = message
+        self._is_soft = is_soft
 
     @property
     def _not(self) -> "APIResponseAssertions":
         return APIResponseAssertions(
-            self._actual, self._timeout, not self._is_not, self._custom_message
+            self._actual,
+            self._timeout,
+            not self._is_not,
+            self._custom_message,
+            self._is_soft,
         )
 
     async def to_be_ok(
@@ -976,7 +1025,7 @@ class APIResponseAssertions:
         if text is not None:
             out_message += f"\n Response Text:\n{text[:1000]}"
 
-        raise AssertionError(out_message)
+        _record_soft_or_raise(AssertionError(out_message), self._is_soft)
 
     async def not_to_be_ok(self) -> None:
         __tracebackhide__ = True

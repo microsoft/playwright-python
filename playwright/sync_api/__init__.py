@@ -130,18 +130,63 @@ class Expect:
     def __call__(
         self, actual: Union[Page, Locator, APIResponse], message: Optional[str] = None
     ) -> Union[PageAssertions, LocatorAssertions, APIResponseAssertions]:
+        return self._dispatch(actual, message, is_soft=False)
+
+    @overload
+    def soft(self, actual: Page, message: Optional[str] = None) -> PageAssertions: ...
+
+    @overload
+    def soft(
+        self, actual: Locator, message: Optional[str] = None
+    ) -> LocatorAssertions: ...
+
+    @overload
+    def soft(
+        self, actual: APIResponse, message: Optional[str] = None
+    ) -> APIResponseAssertions: ...
+
+    def soft(
+        self, actual: Union[Page, Locator, APIResponse], message: Optional[str] = None
+    ) -> Union[PageAssertions, LocatorAssertions, APIResponseAssertions]:
+        """
+        Creates a [soft assertion](https://playwright.dev/python/docs/test-assertions#soft-assertions).
+        Failing soft assertions do not abort test execution, but mark the test
+        as failed. Multiple failures from the same test are surfaced together
+        at the end of the test.
+        """
+        return self._dispatch(actual, message, is_soft=True)
+
+    def _dispatch(
+        self,
+        actual: Union[Page, Locator, APIResponse],
+        message: Optional[str],
+        is_soft: bool,
+    ) -> Union[PageAssertions, LocatorAssertions, APIResponseAssertions]:
         if isinstance(actual, Page):
             return PageAssertions(
-                PageAssertionsImpl(actual._impl_obj, self._timeout, message=message)
+                PageAssertionsImpl(
+                    actual._impl_obj,
+                    self._timeout,
+                    message=message,
+                    is_soft=is_soft,
+                )
             )
         elif isinstance(actual, Locator):
             return LocatorAssertions(
-                LocatorAssertionsImpl(actual._impl_obj, self._timeout, message=message)
+                LocatorAssertionsImpl(
+                    actual._impl_obj,
+                    self._timeout,
+                    message=message,
+                    is_soft=is_soft,
+                )
             )
         elif isinstance(actual, APIResponse):
             return APIResponseAssertions(
                 APIResponseAssertionsImpl(
-                    actual._impl_obj, self._timeout, message=message
+                    actual._impl_obj,
+                    self._timeout,
+                    message=message,
+                    is_soft=is_soft,
                 )
             )
         raise ValueError(f"Unsupported type: {type(actual)}")

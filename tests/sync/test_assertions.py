@@ -1067,3 +1067,25 @@ def test_to_have_role(page: Page) -> None:
     with pytest.raises(Error) as excinfo:
         expect(page.locator("div")).to_have_role(re.compile(r"button|checkbox"))  # type: ignore
     assert '"role" argument in to_have_role must be a string' in str(excinfo.value)
+
+
+def test_soft_outside_scope_raises_runtime_error(page: Page, server: Server) -> None:
+    page.set_content("<div>hello</div>")
+    with pytest.raises(RuntimeError, match="pytest-playwright"):
+        expect.soft(page.locator("div")).to_have_text("nope", timeout=500)
+
+
+def test_soft_inside_scope_collects_failures(page: Page, server: Server) -> None:
+    from playwright._impl._assertions import _soft_scope
+
+    page.goto(server.EMPTY_PAGE)
+    page.set_content("<title>actual</title><div>hello</div>")
+
+    with _soft_scope() as errors:
+        expect.soft(page).to_have_title("expected", timeout=500)
+        expect.soft(page.locator("div")).to_have_text("goodbye", timeout=500)
+        expect.soft(page.locator("div")).to_have_text("hello")
+        expect.soft(page.locator("div")).not_to_have_text("hello", timeout=500)
+
+    assert len(errors) == 3
+    assert all(isinstance(e, AssertionError) for e in errors)

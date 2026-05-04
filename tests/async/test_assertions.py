@@ -1132,3 +1132,50 @@ async def test_to_have_role(page: Page) -> None:
     with pytest.raises(Error) as excinfo:
         await expect(page.locator("div")).to_have_role(re.compile(r"button|checkbox"))  # type: ignore
     assert '"role" argument in to_have_role must be a string' in str(excinfo.value)
+
+
+async def test_soft_outside_scope_raises_runtime_error(
+    page: Page, server: Server
+) -> None:
+    await page.set_content("<div>hello</div>")
+    with pytest.raises(RuntimeError, match="pytest-playwright"):
+        await expect.soft(page.locator("div")).to_have_text("nope", timeout=500)
+
+
+async def test_soft_inside_scope_collects_failures(page: Page, server: Server) -> None:
+    from playwright._impl._assertions import _soft_scope
+
+    await page.goto(server.EMPTY_PAGE)
+    await page.set_content("<title>actual</title><div>hello</div>")
+
+    with _soft_scope() as errors:
+        # should collect, not raise
+        await expect.soft(page).to_have_title("expected", timeout=500)
+        await expect.soft(page.locator("div")).to_have_text("goodbye", timeout=500)
+        # passing soft should not affect the collector
+        await expect.soft(page.locator("div")).to_have_text("hello")
+        # nested .not_ should still be soft
+        await expect.soft(page.locator("div")).not_to_have_text("hello", timeout=500)
+
+    assert len(errors) == 3
+    assert all(isinstance(e, AssertionError) for e in errors)
+
+
+async def test_soft_does_not_leak_between_scopes(page: Page, server: Server) -> None:
+    from playwright._impl._assertions import _soft_scope
+
+    await page.goto(server.EMPTY_PAGE)
+    await page.set_content("<title>actual</title>")
+
+    with _soft_scope() as errors_a:
+        await expect.soft(page).to_have_title("nope", timeout=500)
+    assert len(errors_a) == 1
+
+    with _soft_scope() as errors_b:
+        pass
+    assert errors_b == []
+
+    # After scope ends, soft assertions raise RuntimeError again.
+    await page.set_content("<div>hello</div>")
+    with pytest.raises(RuntimeError, match="pytest-playwright"):
+        await expect.soft(page.locator("div")).to_have_text("nope", timeout=500)
