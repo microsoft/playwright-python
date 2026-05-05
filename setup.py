@@ -177,7 +177,10 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
             if InWheel:
                 wheelhouse_whl = os.path.join("wheelhouse", os.path.basename(whlfile))
                 shutil.move(whlfile, wheelhouse_whl)
-                with InWheel(in_wheel=Path(wheelhouse_whl), out_wheel=Path(whlfile)):
+                with InWheel(
+                    in_wheel=Path(wheelhouse_whl).resolve(),
+                    out_wheel=Path(whlfile).resolve(),
+                ):
                     print(f"Updating RECORD file of {whlfile}")
         print("Copying new wheels")
         shutil.rmtree("wheelhouse")
