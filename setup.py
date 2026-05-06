@@ -18,17 +18,9 @@ import platform
 import shutil
 import subprocess
 import sys
-import tempfile
 import zipfile
 from pathlib import Path
 from typing import Dict
-
-# auditwheel 6.3.0's InWheel uses tempfile.TemporaryDirectory for its bdist_dir,
-# but its rewrite_record helper walks files via Path.resolve(strict=True). On
-# macOS (and any system whose tempdir traverses a symlink, e.g. /var ->
-# /private/var) the walked paths don't share a prefix with bdist_dir, causing
-# Path.relative_to() to fail. Resolve the tempdir up front so both sides match.
-tempfile.tempdir = str(Path(tempfile.gettempdir()).resolve())
 
 driver_version = "1.59.1"
 
