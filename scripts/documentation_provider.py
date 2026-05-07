@@ -474,7 +474,7 @@ class DocumentationProvider:
             return f"Union[{', '.join(ll)}]"
 
         type_name = type["name"]
-        if type_name in ("path", "Path"):
+        if type_name == "path":
             if direction == "in":
                 return "Union[pathlib.Path, str]"
             else:
