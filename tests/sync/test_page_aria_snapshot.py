@@ -231,3 +231,44 @@ def test_page_aria_snapshot_should_work(page: Page) -> None:
       - heading "title" [level=1]
     """
     )
+
+
+def test_to_match_aria_snapshot_should_match_page(page: Page) -> None:
+    page.set_content("<h1>title</h1>")
+    expect(page).to_match_aria_snapshot(
+        """
+        - heading "title"
+        """
+    )
+
+
+def test_to_match_aria_snapshot_should_match_page_complex(page: Page) -> None:
+    page.set_content(
+        """
+        <h1>Microsoft</h1>
+        <div>Open source projects and samples from Microsoft</div>
+        <ul>
+          <li>
+            <a href="about:blank">Playwright</a>
+          </li>
+        </ul>
+        """
+    )
+    expect(page).to_match_aria_snapshot(
+        """
+        - heading "Microsoft"
+        - text: Open source projects and samples from Microsoft
+        - list:
+          - listitem:
+            - link "Playwright"
+        """
+    )
+
+
+def test_to_match_aria_snapshot_should_match_page_with_not(page: Page) -> None:
+    page.set_content("<h1>title</h1>")
+    expect(page).not_to_match_aria_snapshot(
+        """
+        - heading "wrong"
+        """
+    )

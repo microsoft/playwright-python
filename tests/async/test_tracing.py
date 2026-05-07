@@ -13,7 +13,9 @@
 # limitations under the License.
 
 import asyncio
+import json
 import re
+import zipfile
 from pathlib import Path
 from typing import AsyncContextManager, Callable
 
@@ -22,6 +24,7 @@ from playwright.async_api import (
     BrowserContext,
     BrowserType,
     Page,
+    Playwright,
     Response,
     expect,
 )
@@ -387,3 +390,56 @@ async def test_should_show_tracing_group_in_action_list(
                 re.compile(r"inner group 2"),
             ]
         )
+
+
+async def test_should_start_and_stop_har(
+    browser: Browser, server: Server, tmp_path: Path
+) -> None:
+    context = await browser.new_context()
+    page = await context.new_page()
+    har_path = tmp_path / "test.har"
+    await context.tracing.start_har(path=har_path, content="embed", mode="full")
+    await page.goto(server.PREFIX + "/empty.html")
+    await context.tracing.stop_har()
+    await context.close()
+    assert har_path.exists()
+    assert har_path.stat().st_size > 0
+
+
+async def test_should_record_a_har_with_options(
+    browser: Browser, server: Server, tmp_path: Path
+) -> None:
+    # Ported from upstream tests/library/har.spec.ts.
+    context = await browser.new_context()
+    har_path = tmp_path / "tracing.har"
+    await context.tracing.start_har(
+        path=har_path, mode="minimal", url_filter="**/one-style.css"
+    )
+    page = await context.new_page()
+    await page.goto(server.PREFIX + "/one-style.html")
+    await context.tracing.stop_har()
+    await context.close()
+
+    log = json.loads(har_path.read_text())["log"]
+    urls = [e["request"]["url"] for e in log["entries"]]
+    assert urls == [server.PREFIX + "/one-style.css"]
+    # Minimal mode drops body sizes.
+    assert log["entries"][0]["request"]["bodySize"] == -1
+
+
+async def test_should_record_a_zipped_har_for_apirequestcontext(
+    playwright: Playwright, server: Server, tmp_path: Path
+) -> None:
+    # Ported from upstream tests/library/har.spec.ts.
+    request = await playwright.request.new_context()
+    har_path = tmp_path / "tracing.har.zip"
+    await request.tracing.start_har(path=har_path, content="attach")
+    await request.get(server.PREFIX + "/simple.json")
+    await request.tracing.stop_har()
+    await request.dispose()
+
+    with zipfile.ZipFile(har_path) as zf:
+        log = json.loads(zf.read("har.har"))["log"]
+    assert any(
+        e["request"]["url"] == server.PREFIX + "/simple.json" for e in log["entries"]
+    )

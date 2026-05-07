@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import collections.abc
-from typing import Any, List, Optional, Pattern, Sequence, Union
+from typing import Any, List, Literal, Optional, Pattern, Sequence, Union
 from urllib.parse import urljoin
 
 from playwright._impl._api_structures import (
@@ -26,6 +26,7 @@ from playwright._impl._connection import format_call_log
 from playwright._impl._errors import Error
 from playwright._impl._fetch import APIResponse
 from playwright._impl._helper import is_textual_mime_type
+from playwright._impl._js_handle import parse_value
 from playwright._impl._locator import Locator
 from playwright._impl._page import Page
 from playwright._impl._str_utils import escape_regex_flags
@@ -71,7 +72,14 @@ class AssertionsBase:
             del expect_options["useInnerText"]
         result = await self._call_expect(expression, expect_options, title)
         if result["matches"] == self._is_not:
-            actual = result.get("received")
+            received = result.get("received") or {}
+            if isinstance(received, dict):
+                if "value" in received and received["value"] is not None:
+                    actual = parse_value(received["value"])
+                else:
+                    actual = received.get("ariaSnapshot")
+            else:
+                actual = received
             if self._custom_message:
                 out_message = self._custom_message
                 if expected is not None:
@@ -160,6 +168,24 @@ class PageAssertions(AssertionsBase):
     ) -> None:
         __tracebackhide__ = True
         await self._not.to_have_url(urlOrRegExp, timeout, ignoreCase)
+
+    async def to_match_aria_snapshot(
+        self, expected: str, timeout: float = None
+    ) -> None:
+        __tracebackhide__ = True
+        await self._expect_impl(
+            "to.match.aria",
+            FrameExpectOptions(expectedValue=expected, timeout=timeout),
+            expected,
+            "Page expected to match Aria snapshot",
+            'Expect "to_match_aria_snapshot"',
+        )
+
+    async def not_to_match_aria_snapshot(
+        self, expected: str, timeout: float = None
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_match_aria_snapshot(expected, timeout)
 
 
 class LocatorAssertions(AssertionsBase):
@@ -400,13 +426,17 @@ class LocatorAssertions(AssertionsBase):
         name: str,
         value: Union[str, Pattern[str]],
         timeout: float = None,
+        pseudo: Literal["after", "before"] = None,
     ) -> None:
         __tracebackhide__ = True
         expected_text = to_expected_text_values([value])
         await self._expect_impl(
             "to.have.css",
             FrameExpectOptions(
-                expressionArg=name, expectedText=expected_text, timeout=timeout
+                expressionArg=name,
+                expectedText=expected_text,
+                timeout=timeout,
+                pseudo=pseudo,
             ),
             value,
             "Locator expected to have CSS",

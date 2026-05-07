@@ -208,3 +208,111 @@ def test_weberror_event_should_work(context: BrowserContext, page: Page) -> None
     error = error_info.value
     assert error.page == page
     assert error.error.message == "Test"
+
+
+def test_weberror_event_should_include_location(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    def handle_error_js(request: TestServerRequest) -> None:
+        request.setHeader("content-type", "application/javascript")
+        request.write(
+            b"""
+            function foo() {
+                throw new Error('boom');
+            }
+            foo();
+            """
+        )
+        request.finish()
+
+    def handle_error_html(request: TestServerRequest) -> None:
+        request.setHeader("content-type", "text/html")
+        request.write(b'<script src="/error.js"></script>')
+        request.finish()
+
+    server.set_route("/error.js", handle_error_js)
+    server.set_route("/error.html", handle_error_html)
+
+    with context.expect_event("weberror") as error_info:
+        page.goto(server.PREFIX + "/error.html")
+    web_error = error_info.value
+    location = web_error.location
+    assert location["url"] == f"{server.PREFIX}/error.js"
+    assert location["line"] == 2
+    assert location["column"] > 0
+
+
+def test_pageload_event_should_work(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    with context.expect_event("pageload") as info:
+        page.goto(server.EMPTY_PAGE)
+    assert info.value == page
+
+
+def test_framenavigated_event_should_work(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    with context.expect_event("framenavigated") as info:
+        page.goto(server.EMPTY_PAGE)
+    frame = info.value
+    assert frame == page.main_frame
+    assert frame.url == server.EMPTY_PAGE
+
+
+def test_pageclose_event_should_work(context: BrowserContext) -> None:
+    page = context.new_page()
+    with context.expect_event("pageclose") as info:
+        page.close()
+    assert info.value == page
+
+
+def test_frameattached_event_should_work(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    page.goto(server.EMPTY_PAGE)
+    with context.expect_event("frameattached") as info:
+        page.evaluate(
+            """() => {
+                const iframe = document.createElement('iframe');
+                iframe.src = 'about:blank';
+                document.body.appendChild(iframe);
+            }"""
+        )
+    assert info.value.parent_frame == page.main_frame
+
+
+def test_framedetached_event_should_work(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    page.goto(server.EMPTY_PAGE)
+    page.evaluate(
+        """() => {
+            const iframe = document.createElement('iframe');
+            iframe.id = 'x';
+            iframe.src = 'about:blank';
+            document.body.appendChild(iframe);
+        }"""
+    )
+    page.wait_for_selector("iframe")
+    with context.expect_event("framedetached") as info:
+        page.evaluate("() => document.getElementById('x').remove()")
+    assert info.value.parent_frame == page.main_frame
+
+
+def test_download_event_should_work(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    def handle_download(request: TestServerRequest) -> None:
+        request.setHeader("Content-Type", "application/octet-stream")
+        request.setHeader("Content-Disposition", "attachment; filename=file.txt")
+        request.write(b"Hello world")
+        request.finish()
+
+    server.set_route("/download", handle_download)
+    page.set_content(f'<a href="{server.PREFIX}/download">download</a>')
+    with context.expect_event("download") as info:
+        page.click("a")
+    download = info.value
+    assert download.suggested_filename == "file.txt"
+    assert download.page == page

@@ -21,6 +21,24 @@ Parameter type mismatch in Page.route_web_socket(handler=): documented as Callab
 Parameter type mismatch in WebSocketRoute.on_close(handler=): documented as Callable[[Union[int, undefined]], Union[Any, Any]], code has Callable[[Union[int, None], Union[str, None]], Any]
 Parameter type mismatch in WebSocketRoute.on_message(handler=): documented as Callable[[str], Union[Any, Any]], code has Callable[[Union[bytes, str]], Any]
 
+# FormData support is not in this roll; tracked separately in PR #3060.
+Method not implemented: FormData.append
+Method not implemented: FormData.set
+Parameter type mismatch in APIRequestContext.delete(form=): documented as Union[Dict[str, Union[bool, float, str]], FormData, None], code has Union[Dict[str, Union[bool, float, str]], None]
+Parameter type mismatch in APIRequestContext.delete(multipart=): documented as Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], FormData, None], code has Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
+Parameter type mismatch in APIRequestContext.fetch(form=): documented as Union[Dict[str, Union[bool, float, str]], FormData, None], code has Union[Dict[str, Union[bool, float, str]], None]
+Parameter type mismatch in APIRequestContext.fetch(multipart=): documented as Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], FormData, None], code has Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
+Parameter type mismatch in APIRequestContext.get(form=): documented as Union[Dict[str, Union[bool, float, str]], FormData, None], code has Union[Dict[str, Union[bool, float, str]], None]
+Parameter type mismatch in APIRequestContext.get(multipart=): documented as Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], FormData, None], code has Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
+Parameter type mismatch in APIRequestContext.head(form=): documented as Union[Dict[str, Union[bool, float, str]], FormData, None], code has Union[Dict[str, Union[bool, float, str]], None]
+Parameter type mismatch in APIRequestContext.head(multipart=): documented as Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], FormData, None], code has Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
+Parameter type mismatch in APIRequestContext.patch(form=): documented as Union[Dict[str, Union[bool, float, str]], FormData, None], code has Union[Dict[str, Union[bool, float, str]], None]
+Parameter type mismatch in APIRequestContext.patch(multipart=): documented as Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], FormData, None], code has Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
+Parameter type mismatch in APIRequestContext.post(form=): documented as Union[Dict[str, Union[bool, float, str]], FormData, None], code has Union[Dict[str, Union[bool, float, str]], None]
+Parameter type mismatch in APIRequestContext.post(multipart=): documented as Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], FormData, None], code has Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
+Parameter type mismatch in APIRequestContext.put(form=): documented as Union[Dict[str, Union[bool, float, str]], FormData, None], code has Union[Dict[str, Union[bool, float, str]], None]
+Parameter type mismatch in APIRequestContext.put(multipart=): documented as Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], FormData, None], code has Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
+
 # Async API additionally accepts an `async def` predicate.
 Parameter type mismatch in Page.expect_request(url_or_predicate=): documented as Union[Callable[[Request], bool], Pattern[str], str], code has Union[Callable[[Request], Union[bool, typing.Awaitable[bool]]], Pattern[str], str]
 Parameter type mismatch in Page.expect_response(url_or_predicate=): documented as Union[Callable[[Response], bool], Pattern[str], str], code has Union[Callable[[Response], Union[bool, typing.Awaitable[bool]]], Pattern[str], str]

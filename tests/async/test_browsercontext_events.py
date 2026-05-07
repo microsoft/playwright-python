@@ -206,3 +206,115 @@ async def test_weberror_event_should_work(context: BrowserContext, page: Page) -
     error = await error_info.value
     assert error.page == page
     assert error.error.message == "Test"
+
+
+async def test_weberror_event_should_include_location(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    def handle_error_js(request: TestServerRequest) -> None:
+        request.setHeader("content-type", "application/javascript")
+        request.write(
+            b"""
+            function foo() {
+                throw new Error('boom');
+            }
+            foo();
+            """
+        )
+        request.finish()
+
+    def handle_error_html(request: TestServerRequest) -> None:
+        request.setHeader("content-type", "text/html")
+        request.write(b'<script src="/error.js"></script>')
+        request.finish()
+
+    server.set_route("/error.js", handle_error_js)
+    server.set_route("/error.html", handle_error_html)
+
+    async with context.expect_event("weberror") as error_info:
+        await page.goto(server.PREFIX + "/error.html")
+    web_error = await error_info.value
+    location = web_error.location
+    assert location["url"] == f"{server.PREFIX}/error.js"
+    assert location["line"] == 2
+    assert location["column"] > 0
+
+
+async def test_pageload_event_should_work(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    async with context.expect_event("pageload") as info:
+        await page.goto(server.EMPTY_PAGE)
+    event_page = await info.value
+    assert event_page == page
+
+
+async def test_framenavigated_event_should_work(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    async with context.expect_event("framenavigated") as info:
+        await page.goto(server.EMPTY_PAGE)
+    frame = await info.value
+    assert frame == page.main_frame
+    assert frame.url == server.EMPTY_PAGE
+
+
+async def test_pageclose_event_should_work(context: BrowserContext) -> None:
+    page = await context.new_page()
+    async with context.expect_event("pageclose") as info:
+        await page.close()
+    closed = await info.value
+    assert closed == page
+
+
+async def test_frameattached_event_should_work(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+    async with context.expect_event("frameattached") as info:
+        await page.evaluate(
+            """() => {
+                const iframe = document.createElement('iframe');
+                iframe.src = 'about:blank';
+                document.body.appendChild(iframe);
+            }"""
+        )
+    frame = await info.value
+    assert frame.parent_frame == page.main_frame
+
+
+async def test_framedetached_event_should_work(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+    await page.evaluate(
+        """() => {
+            const iframe = document.createElement('iframe');
+            iframe.id = 'x';
+            iframe.src = 'about:blank';
+            document.body.appendChild(iframe);
+        }"""
+    )
+    await page.wait_for_selector("iframe")
+    async with context.expect_event("framedetached") as info:
+        await page.evaluate("() => document.getElementById('x').remove()")
+    frame = await info.value
+    assert frame.parent_frame == page.main_frame
+
+
+async def test_download_event_should_work(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    def handle_download(request: TestServerRequest) -> None:
+        request.setHeader("Content-Type", "application/octet-stream")
+        request.setHeader("Content-Disposition", "attachment; filename=file.txt")
+        request.write(b"Hello world")
+        request.finish()
+
+    server.set_route("/download", handle_download)
+    await page.set_content(f'<a href="{server.PREFIX}/download">download</a>')
+    async with context.expect_event("download") as info:
+        await page.click("a")
+    download = await info.value
+    assert download.suggested_filename == "file.txt"
+    assert download.page == page

@@ -32,6 +32,7 @@ from pyee import EventEmitter
 
 from playwright._impl._api_structures import (
     AriaRole,
+    DropPayload,
     FilePayload,
     FrameExpectOptions,
     FrameExpectResult,
@@ -122,6 +123,7 @@ class Frame(ChannelOwner):
             self._load_states.remove(remove)
         if not self._parent_frame and add == "load" and self._page:
             self._page.emit("load", self._page)
+            self._page.context.emit("pageload", self._page)
         if not self._parent_frame and add == "domcontentloaded" and self._page:
             self._page.emit("domcontentloaded", self._page)
 
@@ -131,6 +133,7 @@ class Frame(ChannelOwner):
         self._event_emitter.emit("navigated", event)
         if "error" not in event and self._page:
             self._page.emit("framenavigated", self)
+            self._page.context.emit("framenavigated", self)
 
     async def _query_count(self, selector: str) -> int:
         return await self._channel.send("queryCount", None, {"selector": selector})
@@ -662,6 +665,7 @@ class Frame(ChannelOwner):
         pressed: bool = None,
         selected: bool = None,
         exact: bool = None,
+        description: Union[str, Pattern[str]] = None,
     ) -> "Locator":
         return self.locator(
             get_by_role_selector(
@@ -675,6 +679,7 @@ class Frame(ChannelOwner):
                 pressed=pressed,
                 selected=selected,
                 exact=exact,
+                description=description,
             )
         )
 
@@ -812,6 +817,33 @@ class Frame(ChannelOwner):
             },
         )
 
+    async def _drop(
+        self,
+        selector: str,
+        payload: "DropPayload",
+        strict: bool = None,
+        position: Position = None,
+        timeout: float = None,
+    ) -> None:
+        params: Dict[str, Any] = {
+            "selector": selector,
+            "strict": strict,
+            "position": position,
+            "timeout": self._timeout(timeout),
+        }
+        files = payload.get("files") if payload else None
+        if files is not None:
+            converted = await convert_input_files(files, self.page.context)
+            if "directoryStream" in converted or "directoryLocalPath" in converted:
+                raise Error(
+                    "Dropping a directory is not supported, pass individual files instead."
+                )
+            params.update(converted)
+        data = payload.get("data") if payload else None
+        if data is not None:
+            params["data"] = [{"mimeType": k, "value": v} for k, v in data.items()]
+        await self._channel.send("drop", self._timeout, params)
+
     async def type(
         self,
         selector: str,
@@ -911,5 +943,10 @@ class Frame(ChannelOwner):
                 trial=trial,
             )
 
-    async def _highlight(self, selector: str) -> None:
-        await self._channel.send("highlight", None, {"selector": selector})
+    async def _highlight(self, selector: str, style: str = None) -> None:
+        await self._channel.send(
+            "highlight", None, {"selector": selector, "style": style}
+        )
+
+    async def _hide_highlight(self, selector: str) -> None:
+        await self._channel.send("hideHighlight", None, {"selector": selector})

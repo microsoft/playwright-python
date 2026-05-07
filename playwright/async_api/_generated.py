@@ -24,6 +24,7 @@ from playwright._impl._api_structures import (
     Cookie,
     DebuggerLocation,
     DebuggerPausedDetails,
+    DropPayload,
     FilePayload,
     FloatRect,
     Geolocation,
@@ -42,6 +43,7 @@ from playwright._impl._api_structures import (
     StorageState,
     TracingGroupLocation,
     ViewportSize,
+    WebErrorLocation,
 )
 from playwright._impl._assertions import (
     APIResponseAssertions as APIResponseAssertionsImpl,
@@ -1218,6 +1220,34 @@ class WebSocketRoute(AsyncBase):
         str
         """
         return mapping.from_maybe_impl(self._impl_obj.url)
+
+    @property
+    def protocols(self) -> typing.List[str]:
+        """WebSocketRoute.protocols
+
+        The list of WebSocket subprotocols requested by the page, as passed via the second argument to the
+        [`WebSocket` constructor](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/WebSocket). Corresponds to the
+        `Sec-WebSocket-Protocol` request header.
+
+        Returns an empty array if no protocols were specified.
+
+        **Usage**
+
+        ```py
+        async def handler(ws: WebSocketRoute):
+          if \"chat.v2\" in ws.protocols:
+            ws.on_message(lambda message: ws.send(f\"v2:{message}\"))
+          else:
+            await ws.close(code=1002, reason=\"Unsupported protocol\")
+
+        await page.route_web_socket(\"wss://example.com/ws\", handler)
+        ```
+
+        Returns
+        -------
+        List[str]
+        """
+        return mapping.from_maybe_impl(self._impl_obj.protocols)
 
     async def close(
         self, *, code: typing.Optional[int] = None, reason: typing.Optional[str] = None
@@ -4831,6 +4861,7 @@ class Frame(AsyncBase):
         pressed: typing.Optional[bool] = None,
         selected: typing.Optional[bool] = None,
         exact: typing.Optional[bool] = None,
+        description: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
     ) -> "Locator":
         """Frame.get_by_role
 
@@ -4913,8 +4944,13 @@ class Frame(AsyncBase):
 
             Learn more about [`aria-selected`](https://www.w3.org/TR/wai-aria-1.2/#aria-selected).
         exact : Union[bool, None]
-            Whether `name` is matched exactly: case-sensitive and whole-string. Defaults to false. Ignored when `name` is a
-            regular expression. Note that exact match still trims whitespace.
+            Whether `name` and `description` are matched exactly: case-sensitive and whole-string. Defaults to false. Ignored
+            when the value is a regular expression. Note that exact match still trims whitespace.
+        description : Union[Pattern[str], str, None]
+            Option to match the [accessible description](https://w3c.github.io/accname/#dfn-accessible-description). By
+            default, matching is case-insensitive and searches for a substring, use `exact` to control this behavior.
+
+            Learn more about [accessible description](https://w3c.github.io/accname/#dfn-accessible-description).
 
         Returns
         -------
@@ -4933,6 +4969,7 @@ class Frame(AsyncBase):
                 pressed=pressed,
                 selected=selected,
                 exact=exact,
+                description=description,
             )
         )
 
@@ -6318,6 +6355,7 @@ class FrameLocator(AsyncBase):
         pressed: typing.Optional[bool] = None,
         selected: typing.Optional[bool] = None,
         exact: typing.Optional[bool] = None,
+        description: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
     ) -> "Locator":
         """FrameLocator.get_by_role
 
@@ -6400,8 +6438,13 @@ class FrameLocator(AsyncBase):
 
             Learn more about [`aria-selected`](https://www.w3.org/TR/wai-aria-1.2/#aria-selected).
         exact : Union[bool, None]
-            Whether `name` is matched exactly: case-sensitive and whole-string. Defaults to false. Ignored when `name` is a
-            regular expression. Note that exact match still trims whitespace.
+            Whether `name` and `description` are matched exactly: case-sensitive and whole-string. Defaults to false. Ignored
+            when the value is a regular expression. Note that exact match still trims whitespace.
+        description : Union[Pattern[str], str, None]
+            Option to match the [accessible description](https://w3c.github.io/accname/#dfn-accessible-description). By
+            default, matching is case-insensitive and searches for a substring, use `exact` to control this behavior.
+
+            Learn more about [accessible description](https://w3c.github.io/accname/#dfn-accessible-description).
 
         Returns
         -------
@@ -6420,6 +6463,7 @@ class FrameLocator(AsyncBase):
                 pressed=pressed,
                 selected=selected,
                 exact=exact,
+                description=description,
             )
         )
 
@@ -7119,7 +7163,7 @@ class ConsoleMessage(AsyncBase):
 
         Returns
         -------
-        {url: str, lineNumber: int, columnNumber: int}
+        {url: str, line: int, column: int, lineNumber: int, columnNumber: int}
         """
         return mapping.from_impl(self._impl_obj.location)
 
@@ -7480,8 +7524,8 @@ class Screencast(AsyncBase):
 
         Parameters
         ----------
-        on_frame : Union[Callable[[{data: bytes}], Any], None]
-            Callback that receives JPEG-encoded frame data.
+        on_frame : Union[Callable[[{data: bytes, viewportWidth: int, viewportHeight: int}], Any], None]
+            Callback that receives JPEG-encoded frame data along with the page viewport size at the time of capture.
         path : Union[pathlib.Path, str, None]
             Path where the video should be saved when the screencast is stopped. When provided, video recording is started.
         quality : Union[int, None]
@@ -9182,11 +9226,7 @@ class Page(AsyncContextManager):
         )
 
     async def expose_binding(
-        self,
-        name: str,
-        callback: typing.Callable,
-        *,
-        handle: typing.Optional[bool] = None,
+        self, name: str, callback: typing.Callable
     ) -> "AsyncContextManager":
         """Page.expose_binding
 
@@ -9238,10 +9278,6 @@ class Page(AsyncContextManager):
             Name of the function on the window object.
         callback : Callable
             Callback function that will be called in the Playwright's context.
-        handle : Union[bool, None]
-            Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is
-            supported. When passing by value, multiple arguments are supported.
-            Deprecated: This option will be removed in the future.
 
         Returns
         -------
@@ -9250,7 +9286,7 @@ class Page(AsyncContextManager):
 
         return mapping.from_impl(
             await self._impl_obj.expose_binding(
-                name=name, callback=self._wrap_handler(callback), handle=handle
+                name=name, callback=self._wrap_handler(callback)
             )
         )
 
@@ -9778,6 +9814,14 @@ class Page(AsyncContextManager):
 
         return mapping.from_maybe_impl(await self._impl_obj.bring_to_front())
 
+    async def hide_highlight(self) -> None:
+        """Page.hide_highlight
+
+        Hide all locator highlight overlays previously added by `locator.highlight()` on this page.
+        """
+
+        return mapping.from_maybe_impl(await self._impl_obj.hide_highlight())
+
     async def add_init_script(
         self,
         script: typing.Optional[str] = None,
@@ -10177,6 +10221,7 @@ class Page(AsyncContextManager):
         timeout: typing.Optional[float] = None,
         depth: typing.Optional[int] = None,
         mode: typing.Optional[Literal["ai", "default"]] = None,
+        boxes: typing.Optional[bool] = None,
     ) -> str:
         """Page.aria_snapshot
 
@@ -10192,6 +10237,11 @@ class Page(AsyncContextManager):
         mode : Union["ai", "default", None]
             When set to `"ai"`, returns a snapshot optimized for AI consumption: including element references like `[ref=e2]`
             and snapshots of `<iframe>`s. Defaults to `"default"`.
+        boxes : Union[bool, None]
+            When `true`, appends each element's bounding box as `[box=x,y,width,height]` to the snapshot. Coordinates are
+            relative to the viewport, in CSS pixels, as returned by
+            [`Element.getBoundingClientRect()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect).
+            Defaults to `false`.
 
         Returns
         -------
@@ -10199,7 +10249,9 @@ class Page(AsyncContextManager):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.aria_snapshot(timeout=timeout, depth=depth, mode=mode)
+            await self._impl_obj.aria_snapshot(
+                timeout=timeout, depth=depth, mode=mode, boxes=boxes
+            )
         )
 
     async def close(
@@ -10805,6 +10857,7 @@ class Page(AsyncContextManager):
         pressed: typing.Optional[bool] = None,
         selected: typing.Optional[bool] = None,
         exact: typing.Optional[bool] = None,
+        description: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
     ) -> "Locator":
         """Page.get_by_role
 
@@ -10887,8 +10940,13 @@ class Page(AsyncContextManager):
 
             Learn more about [`aria-selected`](https://www.w3.org/TR/wai-aria-1.2/#aria-selected).
         exact : Union[bool, None]
-            Whether `name` is matched exactly: case-sensitive and whole-string. Defaults to false. Ignored when `name` is a
-            regular expression. Note that exact match still trims whitespace.
+            Whether `name` and `description` are matched exactly: case-sensitive and whole-string. Defaults to false. Ignored
+            when the value is a regular expression. Note that exact match still trims whitespace.
+        description : Union[Pattern[str], str, None]
+            Option to match the [accessible description](https://w3c.github.io/accname/#dfn-accessible-description). By
+            default, matching is case-insensitive and searches for a substring, use `exact` to control this behavior.
+
+            Learn more about [accessible description](https://w3c.github.io/accname/#dfn-accessible-description).
 
         Returns
         -------
@@ -10907,6 +10965,7 @@ class Page(AsyncContextManager):
                 pressed=pressed,
                 selected=selected,
                 exact=exact,
+                description=description,
             )
         )
 
@@ -12836,6 +12895,16 @@ class WebError(AsyncBase):
         """
         return mapping.from_impl(self._impl_obj.error)
 
+    @property
+    def location(self) -> WebErrorLocation:
+        """WebError.location
+
+        Returns
+        -------
+        {url: str, line: int, column: int}
+        """
+        return mapping.from_impl(self._impl_obj.location)
+
 
 mapping.register(WebErrorImpl, WebError)
 
@@ -12915,6 +12984,48 @@ class BrowserContext(AsyncContextManager):
     @typing.overload
     def on(
         self,
+        event: Literal["download"],
+        f: typing.Callable[["Download"], "typing.Union[typing.Awaitable[None], None]"],
+    ) -> None:
+        """
+        Emitted when attachment download started in any page belonging to this context. User can access basic file
+        operations on downloaded content via the passed `Download` instance. See also `page.on('download')` to receive
+        events about a specific page."""
+
+    @typing.overload
+    def on(
+        self,
+        event: Literal["frameattached"],
+        f: typing.Callable[["Frame"], "typing.Union[typing.Awaitable[None], None]"],
+    ) -> None:
+        """
+        Emitted when a frame is attached in any page belonging to this context. See also `page.on('frame_attached')` to
+        receive events about a specific page."""
+
+    @typing.overload
+    def on(
+        self,
+        event: Literal["framedetached"],
+        f: typing.Callable[["Frame"], "typing.Union[typing.Awaitable[None], None]"],
+    ) -> None:
+        """
+        Emitted when a frame is detached in any page belonging to this context. See also `page.on('frame_detached')` to
+        receive events about a specific page."""
+
+    @typing.overload
+    def on(
+        self,
+        event: Literal["framenavigated"],
+        f: typing.Callable[["Frame"], "typing.Union[typing.Awaitable[None], None]"],
+    ) -> None:
+        """
+        Emitted when a frame is navigated to a new url in any page belonging to this context. See also
+        `page.on('frame_navigated')` to receive events about navigations in a specific page.
+        """
+
+    @typing.overload
+    def on(
+        self,
         event: Literal["page"],
         f: typing.Callable[["Page"], "typing.Union[typing.Awaitable[None], None]"],
     ) -> None:
@@ -12938,6 +13049,27 @@ class BrowserContext(AsyncContextManager):
 
         **NOTE** Use `page.wait_for_load_state()` to wait until the page gets to a particular state (you should not
         need it in most cases)."""
+
+    @typing.overload
+    def on(
+        self,
+        event: Literal["pageclose"],
+        f: typing.Callable[["Page"], "typing.Union[typing.Awaitable[None], None]"],
+    ) -> None:
+        """
+        Emitted when a page in this context is closed. See also `page.on('close')` to receive events about a specific
+        page."""
+
+    @typing.overload
+    def on(
+        self,
+        event: Literal["pageload"],
+        f: typing.Callable[["Page"], "typing.Union[typing.Awaitable[None], None]"],
+    ) -> None:
+        """
+        Emitted when the JavaScript [`load`](https://developer.mozilla.org/en-US/docs/Web/Events/load) event is dispatched
+        in any page belonging to this context. See also `page.on('load')` to receive events about a specific page.
+        """
 
     @typing.overload
     def on(
@@ -13089,6 +13221,48 @@ class BrowserContext(AsyncContextManager):
     @typing.overload
     def once(
         self,
+        event: Literal["download"],
+        f: typing.Callable[["Download"], "typing.Union[typing.Awaitable[None], None]"],
+    ) -> None:
+        """
+        Emitted when attachment download started in any page belonging to this context. User can access basic file
+        operations on downloaded content via the passed `Download` instance. See also `page.on('download')` to receive
+        events about a specific page."""
+
+    @typing.overload
+    def once(
+        self,
+        event: Literal["frameattached"],
+        f: typing.Callable[["Frame"], "typing.Union[typing.Awaitable[None], None]"],
+    ) -> None:
+        """
+        Emitted when a frame is attached in any page belonging to this context. See also `page.on('frame_attached')` to
+        receive events about a specific page."""
+
+    @typing.overload
+    def once(
+        self,
+        event: Literal["framedetached"],
+        f: typing.Callable[["Frame"], "typing.Union[typing.Awaitable[None], None]"],
+    ) -> None:
+        """
+        Emitted when a frame is detached in any page belonging to this context. See also `page.on('frame_detached')` to
+        receive events about a specific page."""
+
+    @typing.overload
+    def once(
+        self,
+        event: Literal["framenavigated"],
+        f: typing.Callable[["Frame"], "typing.Union[typing.Awaitable[None], None]"],
+    ) -> None:
+        """
+        Emitted when a frame is navigated to a new url in any page belonging to this context. See also
+        `page.on('frame_navigated')` to receive events about navigations in a specific page.
+        """
+
+    @typing.overload
+    def once(
+        self,
         event: Literal["page"],
         f: typing.Callable[["Page"], "typing.Union[typing.Awaitable[None], None]"],
     ) -> None:
@@ -13112,6 +13286,27 @@ class BrowserContext(AsyncContextManager):
 
         **NOTE** Use `page.wait_for_load_state()` to wait until the page gets to a particular state (you should not
         need it in most cases)."""
+
+    @typing.overload
+    def once(
+        self,
+        event: Literal["pageclose"],
+        f: typing.Callable[["Page"], "typing.Union[typing.Awaitable[None], None]"],
+    ) -> None:
+        """
+        Emitted when a page in this context is closed. See also `page.on('close')` to receive events about a specific
+        page."""
+
+    @typing.overload
+    def once(
+        self,
+        event: Literal["pageload"],
+        f: typing.Callable[["Page"], "typing.Union[typing.Awaitable[None], None]"],
+    ) -> None:
+        """
+        Emitted when the JavaScript [`load`](https://developer.mozilla.org/en-US/docs/Web/Events/load) event is dispatched
+        in any page belonging to this context. See also `page.on('load')` to receive events about a specific page.
+        """
 
     @typing.overload
     def once(
@@ -13588,11 +13783,7 @@ class BrowserContext(AsyncContextManager):
         )
 
     async def expose_binding(
-        self,
-        name: str,
-        callback: typing.Callable,
-        *,
-        handle: typing.Optional[bool] = None,
+        self, name: str, callback: typing.Callable
     ) -> "AsyncContextManager":
         """BrowserContext.expose_binding
 
@@ -13642,10 +13833,6 @@ class BrowserContext(AsyncContextManager):
             Name of the function on the window object.
         callback : Callable
             Callback function that will be called in the Playwright's context.
-        handle : Union[bool, None]
-            Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is
-            supported. When passing by value, multiple arguments are supported.
-            Deprecated: This option will be removed in the future.
 
         Returns
         -------
@@ -13654,7 +13841,7 @@ class BrowserContext(AsyncContextManager):
 
         return mapping.from_impl(
             await self._impl_obj.expose_binding(
-                name=name, callback=self._wrap_handler(callback), handle=handle
+                name=name, callback=self._wrap_handler(callback)
             )
         )
 
@@ -14307,6 +14494,17 @@ class Browser(AsyncContextManager):
     @typing.overload
     def on(
         self,
+        event: Literal["context"],
+        f: typing.Callable[
+            ["BrowserContext"], "typing.Union[typing.Awaitable[None], None]"
+        ],
+    ) -> None:
+        """
+        Emitted when a new browser context is created."""
+
+    @typing.overload
+    def on(
+        self,
         event: Literal["disconnected"],
         f: typing.Callable[["Browser"], "typing.Union[typing.Awaitable[None], None]"],
     ) -> None:
@@ -14315,13 +14513,6 @@ class Browser(AsyncContextManager):
         following:
         - Browser application is closed or crashed.
         - The `browser.close()` method was called."""
-
-    @typing.overload
-    def on(
-        self,
-        event: str,
-        f: typing.Callable[..., typing.Union[typing.Awaitable[None], None]],
-    ) -> None: ...
 
     def on(
         self,
@@ -14333,6 +14524,17 @@ class Browser(AsyncContextManager):
     @typing.overload
     def once(
         self,
+        event: Literal["context"],
+        f: typing.Callable[
+            ["BrowserContext"], "typing.Union[typing.Awaitable[None], None]"
+        ],
+    ) -> None:
+        """
+        Emitted when a new browser context is created."""
+
+    @typing.overload
+    def once(
+        self,
         event: Literal["disconnected"],
         f: typing.Callable[["Browser"], "typing.Union[typing.Awaitable[None], None]"],
     ) -> None:
@@ -14341,13 +14543,6 @@ class Browser(AsyncContextManager):
         following:
         - Browser application is closed or crashed.
         - The `browser.close()` method was called."""
-
-    @typing.overload
-    def once(
-        self,
-        event: str,
-        f: typing.Callable[..., typing.Union[typing.Awaitable[None], None]],
-    ) -> None: ...
 
     def once(
         self,
@@ -15555,6 +15750,7 @@ class BrowserType(AsyncBase):
         slow_mo: typing.Optional[float] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
         is_local: typing.Optional[bool] = None,
+        no_defaults: typing.Optional[bool] = None,
     ) -> "Browser":
         """BrowserType.connect_over_cdp
 
@@ -15592,6 +15788,12 @@ class BrowserType(AsyncBase):
         is_local : Union[bool, None]
             Tells Playwright that it runs on the same host as the CDP server. It will enable certain optimizations that rely
             upon the file system being the same between Playwright and the Browser.
+        no_defaults : Union[bool, None]
+            When true, Playwright will not apply its default overrides to the existing default browser context. Specifically,
+            `acceptDownloads` is left at the browser's setting, focus emulation is not enabled, and media emulation options
+            (such as `colorScheme`, `reducedMotion`, `forcedColors`, and `contrast`) are not applied. Useful when attaching to
+            a user's daily-driver browser where these overrides would interfere with existing browser state. New contexts
+            created via `browser.new_context()` are not affected. Defaults to `false`.
 
         Returns
         -------
@@ -15605,6 +15807,7 @@ class BrowserType(AsyncBase):
                 slowMo=slow_mo,
                 headers=mapping.to_impl(headers),
                 isLocal=is_local,
+                noDefaults=no_defaults,
             )
         )
 
@@ -15978,6 +16181,65 @@ class Tracing(AsyncBase):
         """
 
         return mapping.from_maybe_impl(await self._impl_obj.group_end())
+
+    async def start_har(
+        self,
+        path: typing.Union[pathlib.Path, str],
+        *,
+        content: typing.Optional[Literal["attach", "embed", "omit"]] = None,
+        mode: typing.Optional[Literal["full", "minimal"]] = None,
+        url_filter: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+    ) -> "AsyncContextManager":
+        """Tracing.start_har
+
+        Start recording a HAR (HTTP Archive) of network activity in this context. The HAR file is written to disk when
+        `tracing.stop_har()` is called, or when the returned `Disposable` is disposed.
+
+        Only one HAR recording can be active at a time per `BrowserContext`.
+
+        **Usage**
+
+        ```py
+        await context.tracing.start_har(\"trace.har\")
+        page = await context.new_page()
+        await page.goto(\"https://playwright.dev\")
+        await context.tracing.stop_har()
+        ```
+
+        Parameters
+        ----------
+        path : Union[pathlib.Path, str]
+            Path on the filesystem to write the HAR file to. If the file name ends with `.zip`, the HAR is saved as a zip
+            archive with response bodies attached as separate files.
+        content : Union["attach", "embed", "omit", None]
+            Optional setting to control resource content management. If `omit` is specified, content is not persisted. If
+            `attach` is specified, resources are persisted as separate files or entries in the ZIP archive. If `embed` is
+            specified, content is stored inline the HAR file as per HAR specification. Defaults to `attach` for `.zip` output
+            files and to `embed` for all other file extensions.
+        mode : Union["full", "minimal", None]
+            When set to `minimal`, only record information necessary for routing from HAR. This omits sizes, timing, page,
+            cookies, security and other types of HAR information that are not used when replaying from HAR. Defaults to `full`.
+        url_filter : Union[Pattern[str], str, None]
+            A glob or regex pattern to filter requests that are stored in the HAR. Defaults to none.
+
+        Returns
+        -------
+        AsyncContextManager
+        """
+
+        return mapping.from_impl(
+            await self._impl_obj.start_har(
+                path=path, content=content, mode=mode, urlFilter=url_filter
+            )
+        )
+
+    async def stop_har(self) -> None:
+        """Tracing.stop_har
+
+        Stop HAR recording and save the HAR file to the path given to `tracing.start_har()`.
+        """
+
+        return mapping.from_maybe_impl(await self._impl_obj.stop_har())
 
 
 mapping.register(TracingImpl, Tracing)
@@ -16929,6 +17191,7 @@ class Locator(AsyncBase):
         pressed: typing.Optional[bool] = None,
         selected: typing.Optional[bool] = None,
         exact: typing.Optional[bool] = None,
+        description: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
     ) -> "Locator":
         """Locator.get_by_role
 
@@ -17011,8 +17274,13 @@ class Locator(AsyncBase):
 
             Learn more about [`aria-selected`](https://www.w3.org/TR/wai-aria-1.2/#aria-selected).
         exact : Union[bool, None]
-            Whether `name` is matched exactly: case-sensitive and whole-string. Defaults to false. Ignored when `name` is a
-            regular expression. Note that exact match still trims whitespace.
+            Whether `name` and `description` are matched exactly: case-sensitive and whole-string. Defaults to false. Ignored
+            when the value is a regular expression. Note that exact match still trims whitespace.
+        description : Union[Pattern[str], str, None]
+            Option to match the [accessible description](https://w3c.github.io/accname/#dfn-accessible-description). By
+            default, matching is case-insensitive and searches for a substring, use `exact` to control this behavior.
+
+            Learn more about [accessible description](https://w3c.github.io/accname/#dfn-accessible-description).
 
         Returns
         -------
@@ -17031,6 +17299,7 @@ class Locator(AsyncBase):
                 pressed=pressed,
                 selected=selected,
                 exact=exact,
+                description=description,
             )
         )
 
@@ -17563,6 +17832,51 @@ class Locator(AsyncBase):
             )
         )
 
+    async def drop(
+        self,
+        payload: DropPayload,
+        *,
+        position: typing.Optional[Position] = None,
+        timeout: typing.Optional[float] = None,
+    ) -> None:
+        """Locator.drop
+
+        Simulate an external drag-and-drop of files or clipboard-like data onto this locator.
+
+        **Details**
+
+        Dispatches the native `dragenter`, `dragover`, and `drop` events at the center of the target element with a
+        synthetic [DataTransfer] carrying the provided files and/or data entries. Works cross-browser by constructing the
+        [DataTransfer] in the page context.
+
+        If the target element's `dragover` listener does not call `preventDefault()`, the target is considered to have
+        rejected the drop: Playwright dispatches `dragleave` and this method throws.
+
+        **Usage**
+
+        Drop a file buffer onto an upload area:
+
+        Drop plain text and a URL together:
+
+        Parameters
+        ----------
+        payload : {files: Union[Sequence[Union[pathlib.Path, str]], Sequence[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}, None], data: Union[Dict[str, str], None]}
+            Data to drop onto the target. Provide `files` (file paths or in-memory buffers), `data` (a mime-type → string map
+            for clipboard-like content such as `text/plain`, `text/html`, `text/uri-list`), or both.
+        position : Union[{x: float, y: float}, None]
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
+            the element.
+        timeout : Union[float, None]
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.drop(
+                payload=payload, position=position, timeout=timeout
+            )
+        )
+
     async def get_attribute(
         self, name: str, *, timeout: typing.Optional[float] = None
     ) -> typing.Optional[str]:
@@ -18078,6 +18392,7 @@ class Locator(AsyncBase):
         timeout: typing.Optional[float] = None,
         depth: typing.Optional[int] = None,
         mode: typing.Optional[Literal["ai", "default"]] = None,
+        boxes: typing.Optional[bool] = None,
     ) -> str:
         """Locator.aria_snapshot
 
@@ -18132,6 +18447,11 @@ class Locator(AsyncBase):
         mode : Union["ai", "default", None]
             When set to `"ai"`, returns a snapshot optimized for AI consumption. Defaults to `"default"`. See details for more
             information.
+        boxes : Union[bool, None]
+            When `true`, appends each element's bounding box as `[box=x,y,width,height]` to the snapshot. Coordinates are
+            relative to the viewport, in CSS pixels, as returned by
+            [`Element.getBoundingClientRect()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect).
+            Defaults to `false`.
 
         Returns
         -------
@@ -18139,7 +18459,9 @@ class Locator(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.aria_snapshot(timeout=timeout, depth=depth, mode=mode)
+            await self._impl_obj.aria_snapshot(
+                timeout=timeout, depth=depth, mode=mode, boxes=boxes
+            )
         )
 
     async def normalize(self) -> "Locator":
@@ -18753,14 +19075,27 @@ class Locator(AsyncBase):
             )
         )
 
-    async def highlight(self) -> None:
+    async def highlight(self, *, style: typing.Optional[str] = None) -> None:
         """Locator.highlight
 
         Highlight the corresponding element(s) on the screen. Useful for debugging, don't commit the code that uses
         `locator.highlight()`.
+
+        Parameters
+        ----------
+        style : Union[str, None]
+            Additional inline CSS applied to the highlight overlay, e.g. `"outline: 2px dashed red"`.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.highlight())
+        return mapping.from_maybe_impl(await self._impl_obj.highlight(style=style))
+
+    async def hide_highlight(self) -> None:
+        """Locator.hide_highlight
+
+        Hides the element highlight previously added by `locator.highlight()`.
+        """
+
+        return mapping.from_maybe_impl(await self._impl_obj.hide_highlight())
 
 
 mapping.register(LocatorImpl, Locator)
@@ -18893,6 +19228,16 @@ mapping.register(APIResponseImpl, APIResponse)
 
 class APIRequestContext(AsyncBase):
 
+    @property
+    def tracing(self) -> "Tracing":
+        """APIRequestContext.tracing
+
+        Returns
+        -------
+        Tracing
+        """
+        return mapping.from_impl(self._impl_obj.tracing)
+
     async def dispose(self, *, reason: typing.Optional[str] = None) -> None:
         """APIRequestContext.dispose
 
@@ -18949,11 +19294,13 @@ class APIRequestContext(AsyncBase):
         form : Union[Dict[str, Union[bool, float, str]], None]
             Provides an object that will be serialized as html form using `application/x-www-form-urlencoded` encoding and sent
             as this request body. If this parameter is specified `content-type` header will be set to
-            `application/x-www-form-urlencoded` unless explicitly provided.
+            `application/x-www-form-urlencoded` unless explicitly provided. Use `FormData` to send multiple values for the same
+            field.
         multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
             Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
             request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
             explicitly provided. File values can be passed as file-like object containing file name, mime-type and its content.
+            Use `FormData` to send multiple files in the same field.
         timeout : Union[float, None]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
         fail_on_status_code : Union[bool, None]
@@ -19030,11 +19377,13 @@ class APIRequestContext(AsyncBase):
         form : Union[Dict[str, Union[bool, float, str]], None]
             Provides an object that will be serialized as html form using `application/x-www-form-urlencoded` encoding and sent
             as this request body. If this parameter is specified `content-type` header will be set to
-            `application/x-www-form-urlencoded` unless explicitly provided.
+            `application/x-www-form-urlencoded` unless explicitly provided. Use `FormData` to send multiple values for the same
+            field.
         multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
             Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
             request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
             explicitly provided. File values can be passed as file-like object containing file name, mime-type and its content.
+            Use `FormData` to send multiple files in the same field.
         timeout : Union[float, None]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
         fail_on_status_code : Union[bool, None]
@@ -19123,11 +19472,13 @@ class APIRequestContext(AsyncBase):
         form : Union[Dict[str, Union[bool, float, str]], None]
             Provides an object that will be serialized as html form using `application/x-www-form-urlencoded` encoding and sent
             as this request body. If this parameter is specified `content-type` header will be set to
-            `application/x-www-form-urlencoded` unless explicitly provided.
+            `application/x-www-form-urlencoded` unless explicitly provided. Use `FormData` to send multiple values for the same
+            field.
         multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
             Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
             request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
             explicitly provided. File values can be passed as file-like object containing file name, mime-type and its content.
+            Use `FormData` to send multiple files in the same field.
         timeout : Union[float, None]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
         fail_on_status_code : Union[bool, None]
@@ -19204,11 +19555,13 @@ class APIRequestContext(AsyncBase):
         form : Union[Dict[str, Union[bool, float, str]], None]
             Provides an object that will be serialized as html form using `application/x-www-form-urlencoded` encoding and sent
             as this request body. If this parameter is specified `content-type` header will be set to
-            `application/x-www-form-urlencoded` unless explicitly provided.
+            `application/x-www-form-urlencoded` unless explicitly provided. Use `FormData` to send multiple values for the same
+            field.
         multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
             Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
             request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
             explicitly provided. File values can be passed as file-like object containing file name, mime-type and its content.
+            Use `FormData` to send multiple files in the same field.
         timeout : Union[float, None]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
         fail_on_status_code : Union[bool, None]
@@ -19285,11 +19638,13 @@ class APIRequestContext(AsyncBase):
         form : Union[Dict[str, Union[bool, float, str]], None]
             Provides an object that will be serialized as html form using `application/x-www-form-urlencoded` encoding and sent
             as this request body. If this parameter is specified `content-type` header will be set to
-            `application/x-www-form-urlencoded` unless explicitly provided.
+            `application/x-www-form-urlencoded` unless explicitly provided. Use `FormData` to send multiple values for the same
+            field.
         multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
             Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
             request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
             explicitly provided. File values can be passed as file-like object containing file name, mime-type and its content.
+            Use `FormData` to send multiple files in the same field.
         timeout : Union[float, None]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
         fail_on_status_code : Union[bool, None]
@@ -19397,11 +19752,13 @@ class APIRequestContext(AsyncBase):
         form : Union[Dict[str, Union[bool, float, str]], None]
             Provides an object that will be serialized as html form using `application/x-www-form-urlencoded` encoding and sent
             as this request body. If this parameter is specified `content-type` header will be set to
-            `application/x-www-form-urlencoded` unless explicitly provided.
+            `application/x-www-form-urlencoded` unless explicitly provided. Use `FormData` to send multiple values for the same
+            field.
         multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
             Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
             request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
             explicitly provided. File values can be passed as file-like object containing file name, mime-type and its content.
+            Use `FormData` to send multiple files in the same field.
         timeout : Union[float, None]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
         fail_on_status_code : Union[bool, None]
@@ -19496,11 +19853,13 @@ class APIRequestContext(AsyncBase):
         form : Union[Dict[str, Union[bool, float, str]], None]
             Provides an object that will be serialized as html form using `application/x-www-form-urlencoded` encoding and sent
             as this request body. If this parameter is specified `content-type` header will be set to
-            `application/x-www-form-urlencoded` unless explicitly provided.
+            `application/x-www-form-urlencoded` unless explicitly provided. Use `FormData` to send multiple values for the same
+            field.
         multipart : Union[Dict[str, Union[bool, bytes, float, str, {name: str, mimeType: str, buffer: bytes}]], None]
             Provides an object that will be serialized as html form using `multipart/form-data` encoding and sent as this
             request body. If this parameter is specified `content-type` header will be set to `multipart/form-data` unless
             explicitly provided. File values can be passed as file-like object containing file name, mime-type and its content.
+            Use `FormData` to send multiple files in the same field.
         timeout : Union[float, None]
             Request timeout in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout.
         fail_on_status_code : Union[bool, None]
@@ -19799,6 +20158,58 @@ class PageAssertions(AsyncBase):
         return mapping.from_maybe_impl(
             await self._impl_obj.not_to_have_url(
                 urlOrRegExp=url_or_reg_exp, timeout=timeout, ignoreCase=ignore_case
+            )
+        )
+
+    async def to_match_aria_snapshot(
+        self, expected: str, *, timeout: typing.Optional[float] = None
+    ) -> None:
+        """PageAssertions.to_match_aria_snapshot
+
+        Asserts that the page body matches the given [accessibility snapshot](https://playwright.dev/python/docs/aria-snapshots).
+
+        **Usage**
+
+        ```py
+        await page.goto(\"https://demo.playwright.dev/todomvc/\")
+        await expect(page).to_match_aria_snapshot('''
+          - heading \"todos\"
+          - textbox \"What needs to be done?\"
+        ''')
+        ```
+
+        Parameters
+        ----------
+        expected : str
+        timeout : Union[float, None]
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.to_match_aria_snapshot(
+                expected=expected, timeout=timeout
+            )
+        )
+
+    async def not_to_match_aria_snapshot(
+        self, expected: str, *, timeout: typing.Optional[float] = None
+    ) -> None:
+        """PageAssertions.not_to_match_aria_snapshot
+
+        The opposite of `page_assertions.to_match_aria_snapshot()`.
+
+        Parameters
+        ----------
+        expected : str
+        timeout : Union[float, None]
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.not_to_match_aria_snapshot(
+                expected=expected, timeout=timeout
             )
         )
 
@@ -20243,6 +20654,7 @@ class LocatorAssertions(AsyncBase):
         value: typing.Union[str, typing.Pattern[str]],
         *,
         timeout: typing.Optional[float] = None,
+        pseudo: typing.Optional[Literal["after", "before"]] = None,
     ) -> None:
         """LocatorAssertions.to_have_css
 
@@ -20265,11 +20677,15 @@ class LocatorAssertions(AsyncBase):
             CSS property value.
         timeout : Union[float, None]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
+        pseudo : Union["after", "before", None]
+            Pseudo-element to read computed styles from.
         """
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.to_have_css(name=name, value=value, timeout=timeout)
+            await self._impl_obj.to_have_css(
+                name=name, value=value, timeout=timeout, pseudo=pseudo
+            )
         )
 
     async def not_to_have_css(

@@ -231,3 +231,47 @@ async def test_page_aria_snapshot_should_work(page: Page) -> None:
       - heading "title" [level=1]
     """
     )
+
+
+async def test_to_match_aria_snapshot_should_match_page(page: Page) -> None:
+    # Ported from upstream tests/page/to-match-aria-snapshot.spec.ts.
+    await page.set_content("<h1>title</h1>")
+    await expect(page).to_match_aria_snapshot(
+        """
+        - heading "title"
+        """
+    )
+
+
+async def test_to_match_aria_snapshot_should_match_page_complex(page: Page) -> None:
+    # Ported from upstream tests/page/to-match-aria-snapshot.spec.ts.
+    await page.set_content(
+        """
+        <h1>Microsoft</h1>
+        <div>Open source projects and samples from Microsoft</div>
+        <ul>
+          <li>
+            <a href="about:blank">Playwright</a>
+          </li>
+        </ul>
+        """
+    )
+    await expect(page).to_match_aria_snapshot(
+        """
+        - heading "Microsoft"
+        - text: Open source projects and samples from Microsoft
+        - list:
+          - listitem:
+            - link "Playwright"
+        """
+    )
+
+
+async def test_to_match_aria_snapshot_should_match_page_with_not(page: Page) -> None:
+    # Ported from upstream tests/page/to-match-aria-snapshot.spec.ts.
+    await page.set_content("<h1>title</h1>")
+    await expect(page).not_to_match_aria_snapshot(
+        """
+        - heading "wrong"
+        """
+    )

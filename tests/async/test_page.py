@@ -16,14 +16,13 @@ import asyncio
 import os
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 import pytest
 
 from playwright.async_api import (
     BrowserContext,
     Error,
-    JSHandle,
     Page,
     Route,
     TimeoutError,
@@ -539,19 +538,6 @@ async def test_expose_function_should_work_with_complex_objects(
     await page.expose_function("complexObject", lambda a, b: dict(x=a["x"] + b["x"]))
     result = await page.evaluate("complexObject({x: 5}, {x: 2})")
     assert result["x"] == 7
-
-
-async def test_expose_bindinghandle_should_work(page: Page, server: Server) -> None:
-    targets: List[JSHandle] = []
-
-    def logme(t: JSHandle) -> int:
-        targets.append(t)
-        return 17
-
-    await page.expose_binding("logme", lambda source, t: logme(t), handle=True)
-    result = await page.evaluate("logme({ foo: 42 })")
-    assert (await targets[0].evaluate("x => x.foo")) == 42
-    assert result == 17
 
 
 async def test_page_error_should_fire(

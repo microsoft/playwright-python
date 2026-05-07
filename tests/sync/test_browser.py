@@ -35,3 +35,13 @@ def test_bind_should_return_endpoint_and_allow_unbind(
         browser.unbind()
     finally:
         browser.close()
+
+
+def test_should_fire_context_event_on_new_context(browser: Browser) -> None:
+    events = []
+    browser.on("context", lambda ctx: events.append(ctx))
+    context = browser.new_context()
+    try:
+        assert events == [context]
+    finally:
+        context.close()

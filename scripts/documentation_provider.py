@@ -479,6 +479,8 @@ class DocumentationProvider:
                 return "Union[pathlib.Path, str]"
             else:
                 return "pathlib.Path"
+        if type_name == "Path":
+            return "pathlib.Path"
 
         if type_name == "function" and "args" not in type:
             return "Callable"
