@@ -474,13 +474,11 @@ class DocumentationProvider:
             return f"Union[{', '.join(ll)}]"
 
         type_name = type["name"]
-        if type_name == "path":
+        if type_name in ("path", "Path"):
             if direction == "in":
                 return "Union[pathlib.Path, str]"
             else:
                 return "pathlib.Path"
-        if type_name == "Path":
-            return "pathlib.Path"
 
         if type_name == "function" and "args" not in type:
             return "Callable"

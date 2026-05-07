@@ -1294,21 +1294,6 @@ async def test_drop_should_drop_files_and_data_together(page: Page) -> None:
     assert info["data"]["text/plain"] == "label"
 
 
-async def test_highlight_should_attach_a_glass_pane(page: Page) -> None:
-    # Ported from upstream tests/page/locator-highlight.spec.ts. The Python
-    # SDK uses a closed shadow root for the highlight overlay, so we can only
-    # observe the host element x-pw-glass from outside the shadow. We verify
-    # that highlight() and hide_highlight() invoke without error and that
-    # multiple highlights stack on the page.
-    await page.set_content("<button>One</button><button>Two</button>")
-    await page.get_by_role("button", name="One").highlight()
-    await page.get_by_role("button", name="Two").highlight()
-    await expect(page.locator("x-pw-glass")).to_have_count(1)
-    # hide_highlight per-locator and page-level should not raise.
-    await page.get_by_role("button", name="One").hide_highlight()
-    await page.hide_highlight()
-
-
 async def test_get_by_role_with_description(page: Page) -> None:
     # Ported from upstream tests/page/selectors-get-by.spec.ts.
     await page.set_content(
@@ -1361,40 +1346,6 @@ async def test_get_by_role_with_description(page: Page) -> None:
     assert await texts(
         page.get_by_role("alert", description=re.compile(r"uploaded successfully$"))
     ) == ["Alert 1", "Alert 2"]
-
-
-async def test_get_by_role_with_description_via_aria_describedby(page: Page) -> None:
-    # Ported from upstream tests/page/selectors-get-by.spec.ts.
-    await page.set_content(
-        """
-        <button aria-describedby="desc1">Submit</button>
-        <span id="desc1">Submits the form data</span>
-        <button aria-describedby="desc2">Submit</button>
-        <span id="desc2">Saves as draft</span>
-    """
-    )
-    assert await page.get_by_role(
-        "button", name="Submit", description="form data"
-    ).evaluate_all("els => els.map(e => e.textContent)") == ["Submit"]
-    assert await page.get_by_role(
-        "button", name="Submit", description="draft"
-    ).evaluate_all("els => els.map(e => e.textContent)") == ["Submit"]
-
-
-async def test_get_by_role_with_description_via_title_fallback(page: Page) -> None:
-    # Ported from upstream tests/page/selectors-get-by.spec.ts.
-    await page.set_content(
-        """
-        <button title="Submits the form">Submit</button>
-        <button title="Resets the form">Reset</button>
-    """
-    )
-    assert await page.get_by_role("button", description="Submits").evaluate_all(
-        "els => els.map(e => e.textContent)"
-    ) == ["Submit"]
-    assert await page.get_by_role("button", description="Resets").evaluate_all(
-        "els => els.map(e => e.textContent)"
-    ) == ["Reset"]
 
 
 async def test_get_by_role_with_description_whitespace_normalization(

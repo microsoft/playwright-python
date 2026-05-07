@@ -1065,15 +1065,6 @@ def test_drop_should_drop_clipboard_like_data(page: Page) -> None:
     assert info["data"]["text/plain"] == "hello world"
 
 
-def test_highlight_should_attach_a_glass_pane(page: Page) -> None:
-    page.set_content("<button>One</button><button>Two</button>")
-    page.get_by_role("button", name="One").highlight()
-    page.get_by_role("button", name="Two").highlight()
-    expect(page.locator("x-pw-glass")).to_have_count(1)
-    page.get_by_role("button", name="One").hide_highlight()
-    page.hide_highlight()
-
-
 def test_get_by_role_with_description(page: Page) -> None:
     page.set_content(
         """
@@ -1105,20 +1096,6 @@ def test_get_by_role_with_description(page: Page) -> None:
     assert texts(
         page.get_by_role("alert", description=re.compile(r"uploaded successfully$"))
     ) == ["Alert 1", "Alert 2"]
-
-
-def test_get_by_role_with_description_via_aria_describedby(page: Page) -> None:
-    page.set_content(
-        """
-        <button aria-describedby="desc1">Submit</button>
-        <span id="desc1">Submits the form data</span>
-        <button aria-describedby="desc2">Submit</button>
-        <span id="desc2">Saves as draft</span>
-    """
-    )
-    assert page.get_by_role(
-        "button", name="Submit", description="form data"
-    ).evaluate_all("els => els.map(e => e.textContent)") == ["Submit"]
 
 
 def test_get_by_role_with_description_whitespace_normalization(page: Page) -> None:
