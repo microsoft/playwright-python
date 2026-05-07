@@ -12,11 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict
-
 import pytest
 
-from playwright.sync_api import Browser, Page
+from playwright.sync_api import Browser, Page, ResourceTiming
 from tests.server import Server
 
 
@@ -99,7 +97,7 @@ def verify_timing_value(value: float, previous: float) -> None:
     assert value == -1 or value > 0 and value >= previous
 
 
-def verify_connections_timing_consistency(timing: Dict) -> None:
+def verify_connections_timing_consistency(timing: ResourceTiming) -> None:
     verify_timing_value(timing["domainLookupStart"], -1)
     verify_timing_value(timing["domainLookupEnd"], timing["domainLookupStart"])
     verify_timing_value(timing["connectStart"], timing["domainLookupEnd"])

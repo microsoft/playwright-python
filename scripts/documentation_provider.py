@@ -243,6 +243,55 @@ class DocumentationProvider:
                 doc.append(f"        return super().{event_type}(event=event,f=f)")
             print("\n".join(doc))
 
+    def print_event_overloads(self, class_name: str, method_name: str) -> None:
+        """Emit ``@typing.overload`` stubs for ``expect_event`` / ``wait_for_event``
+        keyed on ``Literal`` event names with their payload types from api.json,
+        so pyright/mypy can narrow the return type at call sites.
+        Must be called right before the implementation signature is emitted.
+        """
+        if class_name not in self.classes:
+            return
+        events = self.classes[class_name].get("events") or []
+        if not events:
+            return
+        is_expect = method_name == "expect_event"
+        async_prefix = "async " if not is_expect and self.is_async else ""
+        if is_expect:
+            ctx_mgr = (
+                "AsyncEventContextManager" if self.is_async else "EventContextManager"
+            )
+        for event in events:
+            payload = self.serialize_doc_type(event["type"], "")
+            if payload.startswith("{"):
+                payload = "typing.Dict"
+            if "Union[" in payload:
+                payload = payload.replace("Union[", "typing.Union[")
+            return_type = f'{ctx_mgr}["{payload}"]' if is_expect else f'"{payload}"'
+            event_literal = event["name"].lower()
+            print("    @typing.overload")
+            print(f"    {async_prefix}def {method_name}(")
+            print("        self,")
+            print(f'        event: typing.Literal["{event_literal}"],')
+            print(
+                f'        predicate: typing.Optional[typing.Callable[["{payload}"], bool]] = None,'
+            )
+            print("        *,")
+            print("        timeout: typing.Optional[float] = None,")
+            print(f"    ) -> {return_type}: ...")
+            print("")
+        # Catch-all overload for non-literal event names — keeps pyright happy
+        # with `event: str` callers without falling through to `Unknown`.
+        catchall_return = f"{ctx_mgr}[typing.Any]" if is_expect else "typing.Any"
+        print("    @typing.overload")
+        print(f"    {async_prefix}def {method_name}(")
+        print("        self,")
+        print("        event: str,")
+        print("        predicate: typing.Optional[typing.Callable[..., bool]] = None,")
+        print("        *,")
+        print("        timeout: typing.Optional[float] = None,")
+        print(f"    ) -> {catchall_return}: ...")
+        print("")
+
     def indent_paragraph(self, p: str, indent: str) -> str:
         lines = p.split("\n")
         result = [lines[0]]

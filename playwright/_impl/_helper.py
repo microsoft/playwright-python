@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import asyncio
+import datetime
 import math
 import os
 import re
@@ -574,3 +575,13 @@ TEXTUAL_MIME_TYPE = re.compile(
 
 def is_textual_mime_type(mime_type: str) -> bool:
     return bool(TEXTUAL_MIME_TYPE.match(mime_type))
+
+
+def to_milliseconds(
+    value: Union[float, datetime.timedelta, None],
+) -> Optional[float]:
+    if value is None:
+        return None
+    if isinstance(value, datetime.timedelta):
+        return value / datetime.timedelta(milliseconds=1)
+    return value

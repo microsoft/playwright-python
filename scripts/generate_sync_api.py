@@ -93,6 +93,8 @@ def generate(t: Any) -> None:
                 '"Disposable"', '"SyncContextManager"'
             ).replace('"DisposableStub"', '"SyncContextManager"')
             print("")
+            if name in ("expect_event", "wait_for_event"):
+                documentation_provider.print_event_overloads(class_name, name)
             print(
                 f"    def {name}({signature(value, len(name) + 9)}) -> {return_type_value}:"
             )

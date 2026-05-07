@@ -197,7 +197,7 @@ async def test_page_error_event_should_work(page: Page) -> None:
         await page.set_content('<script>throw new Error("boom")</script>')
     page_error = await page_error_info.value
     assert page_error.page == page
-    assert "boom" in page_error.error.stack
+    assert page_error.error.stack and "boom" in page_error.error.stack
 
 
 async def test_weberror_event_should_work(context: BrowserContext, page: Page) -> None:
