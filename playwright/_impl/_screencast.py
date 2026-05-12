@@ -55,7 +55,13 @@ class Screencast:
         data = params["data"]
         if isinstance(data, str):
             data = base64.b64decode(data)
-        result = self._on_frame({"data": data})
+        result = self._on_frame(
+            {
+                "data": data,
+                "viewportWidth": params["viewportWidth"],
+                "viewportHeight": params["viewportHeight"],
+            }
+        )
         if hasattr(result, "__await__"):
             self._page._loop.create_task(result)
 

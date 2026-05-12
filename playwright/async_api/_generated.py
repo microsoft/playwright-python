@@ -24,6 +24,7 @@ from playwright._impl._api_structures import (
     Cookie,
     DebuggerLocation,
     DebuggerPausedDetails,
+    DropPayload,
     FilePayload,
     FloatRect,
     Geolocation,
@@ -42,6 +43,7 @@ from playwright._impl._api_structures import (
     StorageState,
     TracingGroupLocation,
     ViewportSize,
+    WebErrorLocation,
 )
 from playwright._impl._assertions import (
     APIResponseAssertions as APIResponseAssertionsImpl,
@@ -72,6 +74,7 @@ from playwright._impl._fetch import APIResponse as APIResponseImpl
 from playwright._impl._file_chooser import FileChooser as FileChooserImpl
 from playwright._impl._form_data import FormData
 from playwright._impl._frame import Frame as FrameImpl
+from playwright._impl._helper import to_milliseconds
 from playwright._impl._input import Keyboard as KeyboardImpl
 from playwright._impl._input import Mouse as MouseImpl
 from playwright._impl._input import Touchscreen as TouchscreenImpl
@@ -792,7 +795,7 @@ class Route(AsyncBase):
         post_data: typing.Optional[typing.Union[typing.Any, str, bytes]] = None,
         max_redirects: typing.Optional[int] = None,
         max_retries: typing.Optional[int] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> "APIResponse":
         """Route.fetch
 
@@ -851,7 +854,7 @@ class Route(AsyncBase):
                 postData=mapping.to_impl(post_data),
                 maxRedirects=max_redirects,
                 maxRetries=max_retries,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
             )
         )
 
@@ -1121,12 +1124,61 @@ class WebSocket(AsyncBase):
         """
         return mapping.from_maybe_impl(self._impl_obj.url)
 
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["close"],
+        predicate: typing.Optional[typing.Callable[["WebSocket"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["WebSocket"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["framereceived"],
+        predicate: typing.Optional[
+            typing.Callable[["typing.Union[bytes, str]"], bool]
+        ] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["typing.Union[bytes, str]"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["framesent"],
+        predicate: typing.Optional[
+            typing.Callable[["typing.Union[bytes, str]"], bool]
+        ] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["typing.Union[bytes, str]"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["socketerror"],
+        predicate: typing.Optional[typing.Callable[["str"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["str"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: str,
+        predicate: typing.Optional[typing.Callable[..., bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager[typing.Any]: ...
+
     def expect_event(
         self,
         event: str,
         predicate: typing.Optional[typing.Callable] = None,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> AsyncEventContextManager:
         """WebSocket.expect_event
 
@@ -1150,16 +1202,67 @@ class WebSocket(AsyncBase):
 
         return AsyncEventContextManager(
             self._impl_obj.expect_event(
-                event=event, predicate=self._wrap_handler(predicate), timeout=timeout
+                event=event,
+                predicate=self._wrap_handler(predicate),
+                timeout=to_milliseconds(timeout),
             ).future
         )
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["close"],
+        predicate: typing.Optional[typing.Callable[["WebSocket"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "WebSocket": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["framereceived"],
+        predicate: typing.Optional[
+            typing.Callable[["typing.Union[bytes, str]"], bool]
+        ] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "typing.Union[bytes, str]": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["framesent"],
+        predicate: typing.Optional[
+            typing.Callable[["typing.Union[bytes, str]"], bool]
+        ] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "typing.Union[bytes, str]": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["socketerror"],
+        predicate: typing.Optional[typing.Callable[["str"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "str": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: str,
+        predicate: typing.Optional[typing.Callable[..., bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> typing.Any: ...
 
     async def wait_for_event(
         self,
         event: str,
         predicate: typing.Optional[typing.Callable] = None,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> typing.Any:
         """WebSocket.wait_for_event
 
@@ -1186,7 +1289,9 @@ class WebSocket(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.wait_for_event(
-                event=event, predicate=self._wrap_handler(predicate), timeout=timeout
+                event=event,
+                predicate=self._wrap_handler(predicate),
+                timeout=to_milliseconds(timeout),
             )
         )
 
@@ -1219,6 +1324,34 @@ class WebSocketRoute(AsyncBase):
         str
         """
         return mapping.from_maybe_impl(self._impl_obj.url)
+
+    @property
+    def protocols(self) -> typing.List[str]:
+        """WebSocketRoute.protocols
+
+        The list of WebSocket subprotocols requested by the page, as passed via the second argument to the
+        [`WebSocket` constructor](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/WebSocket). Corresponds to the
+        `Sec-WebSocket-Protocol` request header.
+
+        Returns an empty array if no protocols were specified.
+
+        **Usage**
+
+        ```py
+        async def handler(ws: WebSocketRoute):
+          if \"chat.v2\" in ws.protocols:
+            ws.on_message(lambda message: ws.send(f\"v2:{message}\"))
+          else:
+            await ws.close(code=1002, reason=\"Unsupported protocol\")
+
+        await page.route_web_socket(\"wss://example.com/ws\", handler)
+        ```
+
+        Returns
+        -------
+        List[str]
+        """
+        return mapping.from_maybe_impl(self._impl_obj.protocols)
 
     async def close(
         self, *, code: typing.Optional[int] = None, reason: typing.Optional[str] = None
@@ -2045,7 +2178,9 @@ class ElementHandle(JSHandle):
         )
 
     async def scroll_into_view_if_needed(
-        self, *, timeout: typing.Optional[float] = None
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """ElementHandle.scroll_into_view_if_needed
 
@@ -2066,7 +2201,9 @@ class ElementHandle(JSHandle):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.scroll_into_view_if_needed(timeout=timeout)
+            await self._impl_obj.scroll_into_view_if_needed(
+                timeout=to_milliseconds(timeout)
+            )
         )
 
     async def hover(
@@ -2076,7 +2213,7 @@ class ElementHandle(JSHandle):
             typing.Sequence[Literal["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         no_wait_after: typing.Optional[bool] = None,
         force: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
@@ -2119,7 +2256,7 @@ class ElementHandle(JSHandle):
             await self._impl_obj.hover(
                 modifiers=mapping.to_impl(modifiers),
                 position=position,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 noWaitAfter=no_wait_after,
                 force=force,
                 trial=trial,
@@ -2136,7 +2273,7 @@ class ElementHandle(JSHandle):
         delay: typing.Optional[float] = None,
         button: typing.Optional[Literal["left", "middle", "right"]] = None,
         click_count: typing.Optional[int] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
@@ -2195,7 +2332,7 @@ class ElementHandle(JSHandle):
                 delay=delay,
                 button=button,
                 clickCount=click_count,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 force=force,
                 noWaitAfter=no_wait_after,
                 trial=trial,
@@ -2212,7 +2349,7 @@ class ElementHandle(JSHandle):
         position: typing.Optional[Position] = None,
         delay: typing.Optional[float] = None,
         button: typing.Optional[Literal["left", "middle", "right"]] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
@@ -2267,7 +2404,7 @@ class ElementHandle(JSHandle):
                 position=position,
                 delay=delay,
                 button=button,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 force=force,
                 noWaitAfter=no_wait_after,
                 trial=trial,
@@ -2284,7 +2421,7 @@ class ElementHandle(JSHandle):
         element: typing.Optional[
             typing.Union["ElementHandle", typing.Sequence["ElementHandle"]]
         ] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
     ) -> typing.List[str]:
@@ -2345,7 +2482,7 @@ class ElementHandle(JSHandle):
                 index=mapping.to_impl(index),
                 label=mapping.to_impl(label),
                 element=mapping.to_impl(element),
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 force=force,
                 noWaitAfter=no_wait_after,
             )
@@ -2358,7 +2495,7 @@ class ElementHandle(JSHandle):
             typing.Sequence[Literal["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
@@ -2403,7 +2540,7 @@ class ElementHandle(JSHandle):
             await self._impl_obj.tap(
                 modifiers=mapping.to_impl(modifiers),
                 position=position,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 force=force,
                 noWaitAfter=no_wait_after,
                 trial=trial,
@@ -2414,7 +2551,7 @@ class ElementHandle(JSHandle):
         self,
         value: str,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         no_wait_after: typing.Optional[bool] = None,
         force: typing.Optional[bool] = None,
     ) -> None:
@@ -2446,7 +2583,10 @@ class ElementHandle(JSHandle):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.fill(
-                value=value, timeout=timeout, noWaitAfter=no_wait_after, force=force
+                value=value,
+                timeout=to_milliseconds(timeout),
+                noWaitAfter=no_wait_after,
+                force=force,
             )
         )
 
@@ -2454,7 +2594,7 @@ class ElementHandle(JSHandle):
         self,
         *,
         force: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """ElementHandle.select_text
 
@@ -2475,10 +2615,16 @@ class ElementHandle(JSHandle):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.select_text(force=force, timeout=timeout)
+            await self._impl_obj.select_text(
+                force=force, timeout=to_milliseconds(timeout)
+            )
         )
 
-    async def input_value(self, *, timeout: typing.Optional[float] = None) -> str:
+    async def input_value(
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
+    ) -> str:
         """ElementHandle.input_value
 
         Returns `input.value` for the selected `<input>` or `<textarea>` or `<select>` element.
@@ -2499,7 +2645,7 @@ class ElementHandle(JSHandle):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.input_value(timeout=timeout)
+            await self._impl_obj.input_value(timeout=to_milliseconds(timeout))
         )
 
     async def set_input_files(
@@ -2512,7 +2658,7 @@ class ElementHandle(JSHandle):
             typing.Sequence[FilePayload],
         ],
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         no_wait_after: typing.Optional[bool] = None,
     ) -> None:
         """ElementHandle.set_input_files
@@ -2539,7 +2685,9 @@ class ElementHandle(JSHandle):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.set_input_files(
-                files=mapping.to_impl(files), timeout=timeout, noWaitAfter=no_wait_after
+                files=mapping.to_impl(files),
+                timeout=to_milliseconds(timeout),
+                noWaitAfter=no_wait_after,
             )
         )
 
@@ -2556,7 +2704,7 @@ class ElementHandle(JSHandle):
         text: str,
         *,
         delay: typing.Optional[float] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         no_wait_after: typing.Optional[bool] = None,
     ) -> None:
         """ElementHandle.type
@@ -2584,7 +2732,10 @@ class ElementHandle(JSHandle):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.type(
-                text=text, delay=delay, timeout=timeout, noWaitAfter=no_wait_after
+                text=text,
+                delay=delay,
+                timeout=to_milliseconds(timeout),
+                noWaitAfter=no_wait_after,
             )
         )
 
@@ -2593,7 +2744,7 @@ class ElementHandle(JSHandle):
         key: str,
         *,
         delay: typing.Optional[float] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         no_wait_after: typing.Optional[bool] = None,
     ) -> None:
         """ElementHandle.press
@@ -2638,7 +2789,10 @@ class ElementHandle(JSHandle):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.press(
-                key=key, delay=delay, timeout=timeout, noWaitAfter=no_wait_after
+                key=key,
+                delay=delay,
+                timeout=to_milliseconds(timeout),
+                noWaitAfter=no_wait_after,
             )
         )
 
@@ -2647,7 +2801,7 @@ class ElementHandle(JSHandle):
         checked: bool,
         *,
         position: typing.Optional[Position] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
@@ -2690,7 +2844,7 @@ class ElementHandle(JSHandle):
             await self._impl_obj.set_checked(
                 checked=checked,
                 position=position,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 force=force,
                 noWaitAfter=no_wait_after,
                 trial=trial,
@@ -2701,7 +2855,7 @@ class ElementHandle(JSHandle):
         self,
         *,
         position: typing.Optional[Position] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
@@ -2742,7 +2896,7 @@ class ElementHandle(JSHandle):
         return mapping.from_maybe_impl(
             await self._impl_obj.check(
                 position=position,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 force=force,
                 noWaitAfter=no_wait_after,
                 trial=trial,
@@ -2753,7 +2907,7 @@ class ElementHandle(JSHandle):
         self,
         *,
         position: typing.Optional[Position] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
@@ -2794,7 +2948,7 @@ class ElementHandle(JSHandle):
         return mapping.from_maybe_impl(
             await self._impl_obj.uncheck(
                 position=position,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 force=force,
                 noWaitAfter=no_wait_after,
                 trial=trial,
@@ -2834,7 +2988,7 @@ class ElementHandle(JSHandle):
     async def screenshot(
         self,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         type: typing.Optional[Literal["jpeg", "png"]] = None,
         path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         quality: typing.Optional[int] = None,
@@ -2909,7 +3063,7 @@ class ElementHandle(JSHandle):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.screenshot(
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 type=type,
                 path=path,
                 quality=quality,
@@ -3059,7 +3213,7 @@ class ElementHandle(JSHandle):
             "disabled", "editable", "enabled", "hidden", "stable", "visible"
         ],
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """ElementHandle.wait_for_element_state
 
@@ -3088,7 +3242,9 @@ class ElementHandle(JSHandle):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.wait_for_element_state(state=state, timeout=timeout)
+            await self._impl_obj.wait_for_element_state(
+                state=state, timeout=to_milliseconds(timeout)
+            )
         )
 
     async def wait_for_selector(
@@ -3098,7 +3254,7 @@ class ElementHandle(JSHandle):
         state: typing.Optional[
             Literal["attached", "detached", "hidden", "visible"]
         ] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         strict: typing.Optional[bool] = None,
     ) -> typing.Optional["ElementHandle"]:
         """ElementHandle.wait_for_selector
@@ -3148,7 +3304,10 @@ class ElementHandle(JSHandle):
 
         return mapping.from_impl_nullable(
             await self._impl_obj.wait_for_selector(
-                selector=selector, state=state, timeout=timeout, strict=strict
+                selector=selector,
+                state=state,
+                timeout=to_milliseconds(timeout),
+                strict=strict,
             )
         )
 
@@ -3204,7 +3363,7 @@ class FileChooser(AsyncBase):
             typing.Sequence[FilePayload],
         ],
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         no_wait_after: typing.Optional[bool] = None,
     ) -> None:
         """FileChooser.set_files
@@ -3225,7 +3384,9 @@ class FileChooser(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.set_files(
-                files=mapping.to_impl(files), timeout=timeout, noWaitAfter=no_wait_after
+                files=mapping.to_impl(files),
+                timeout=to_milliseconds(timeout),
+                noWaitAfter=no_wait_after,
             )
         )
 
@@ -3302,7 +3463,7 @@ class Frame(AsyncBase):
         self,
         url: str,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         wait_until: typing.Optional[
             Literal["commit", "domcontentloaded", "load", "networkidle"]
         ] = None,
@@ -3358,7 +3519,10 @@ class Frame(AsyncBase):
 
         return mapping.from_impl_nullable(
             await self._impl_obj.goto(
-                url=url, timeout=timeout, waitUntil=wait_until, referer=referer
+                url=url,
+                timeout=to_milliseconds(timeout),
+                waitUntil=wait_until,
+                referer=referer,
             )
         )
 
@@ -3371,7 +3535,7 @@ class Frame(AsyncBase):
         wait_until: typing.Optional[
             Literal["commit", "domcontentloaded", "load", "networkidle"]
         ] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> AsyncEventContextManager["Response"]:
         """Frame.expect_navigation
 
@@ -3420,7 +3584,9 @@ class Frame(AsyncBase):
 
         return AsyncEventContextManager(
             self._impl_obj.expect_navigation(
-                url=self._wrap_handler(url), waitUntil=wait_until, timeout=timeout
+                url=self._wrap_handler(url),
+                waitUntil=wait_until,
+                timeout=to_milliseconds(timeout),
             ).future
         )
 
@@ -3431,7 +3597,7 @@ class Frame(AsyncBase):
         wait_until: typing.Optional[
             Literal["commit", "domcontentloaded", "load", "networkidle"]
         ] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """Frame.wait_for_url
 
@@ -3467,7 +3633,9 @@ class Frame(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.wait_for_url(
-                url=self._wrap_handler(url), waitUntil=wait_until, timeout=timeout
+                url=self._wrap_handler(url),
+                waitUntil=wait_until,
+                timeout=to_milliseconds(timeout),
             )
         )
 
@@ -3477,7 +3645,7 @@ class Frame(AsyncBase):
             Literal["domcontentloaded", "load", "networkidle"]
         ] = None,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """Frame.wait_for_load_state
 
@@ -3514,7 +3682,9 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.wait_for_load_state(state=state, timeout=timeout)
+            await self._impl_obj.wait_for_load_state(
+                state=state, timeout=to_milliseconds(timeout)
+            )
         )
 
     async def frame_element(self) -> "ElementHandle":
@@ -3710,7 +3880,7 @@ class Frame(AsyncBase):
         selector: str,
         *,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         state: typing.Optional[
             Literal["attached", "detached", "hidden", "visible"]
         ] = None,
@@ -3777,7 +3947,10 @@ class Frame(AsyncBase):
 
         return mapping.from_impl_nullable(
             await self._impl_obj.wait_for_selector(
-                selector=selector, strict=strict, timeout=timeout, state=state
+                selector=selector,
+                strict=strict,
+                timeout=to_milliseconds(timeout),
+                state=state,
             )
         )
 
@@ -3786,7 +3959,7 @@ class Frame(AsyncBase):
         selector: str,
         *,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> bool:
         """Frame.is_checked
 
@@ -3811,7 +3984,7 @@ class Frame(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.is_checked(
-                selector=selector, strict=strict, timeout=timeout
+                selector=selector, strict=strict, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -3820,7 +3993,7 @@ class Frame(AsyncBase):
         selector: str,
         *,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> bool:
         """Frame.is_disabled
 
@@ -3845,7 +4018,7 @@ class Frame(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.is_disabled(
-                selector=selector, strict=strict, timeout=timeout
+                selector=selector, strict=strict, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -3854,7 +4027,7 @@ class Frame(AsyncBase):
         selector: str,
         *,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> bool:
         """Frame.is_editable
 
@@ -3879,7 +4052,7 @@ class Frame(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.is_editable(
-                selector=selector, strict=strict, timeout=timeout
+                selector=selector, strict=strict, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -3888,7 +4061,7 @@ class Frame(AsyncBase):
         selector: str,
         *,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> bool:
         """Frame.is_enabled
 
@@ -3913,7 +4086,7 @@ class Frame(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.is_enabled(
-                selector=selector, strict=strict, timeout=timeout
+                selector=selector, strict=strict, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -3976,7 +4149,7 @@ class Frame(AsyncBase):
         event_init: typing.Optional[typing.Dict] = None,
         *,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """Frame.dispatch_event
 
@@ -4036,7 +4209,7 @@ class Frame(AsyncBase):
                 type=type,
                 eventInit=mapping.to_impl(event_init),
                 strict=strict,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
             )
         )
 
@@ -4149,7 +4322,7 @@ class Frame(AsyncBase):
         self,
         html: str,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         wait_until: typing.Optional[
             Literal["commit", "domcontentloaded", "load", "networkidle"]
         ] = None,
@@ -4180,7 +4353,7 @@ class Frame(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.set_content(
-                html=html, timeout=timeout, waitUntil=wait_until
+                html=html, timeout=to_milliseconds(timeout), waitUntil=wait_until
             )
         )
 
@@ -4278,7 +4451,7 @@ class Frame(AsyncBase):
         delay: typing.Optional[float] = None,
         button: typing.Optional[Literal["left", "middle", "right"]] = None,
         click_count: typing.Optional[int] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
@@ -4343,7 +4516,7 @@ class Frame(AsyncBase):
                 delay=delay,
                 button=button,
                 clickCount=click_count,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 force=force,
                 noWaitAfter=no_wait_after,
                 strict=strict,
@@ -4361,7 +4534,7 @@ class Frame(AsyncBase):
         position: typing.Optional[Position] = None,
         delay: typing.Optional[float] = None,
         button: typing.Optional[Literal["left", "middle", "right"]] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
@@ -4423,7 +4596,7 @@ class Frame(AsyncBase):
                 position=position,
                 delay=delay,
                 button=button,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 force=force,
                 noWaitAfter=no_wait_after,
                 strict=strict,
@@ -4439,7 +4612,7 @@ class Frame(AsyncBase):
             typing.Sequence[Literal["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
@@ -4494,7 +4667,7 @@ class Frame(AsyncBase):
                 selector=selector,
                 modifiers=mapping.to_impl(modifiers),
                 position=position,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 force=force,
                 noWaitAfter=no_wait_after,
                 strict=strict,
@@ -4507,7 +4680,7 @@ class Frame(AsyncBase):
         selector: str,
         value: str,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
         force: typing.Optional[bool] = None,
@@ -4549,7 +4722,7 @@ class Frame(AsyncBase):
             await self._impl_obj.fill(
                 selector=selector,
                 value=value,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 noWaitAfter=no_wait_after,
                 strict=strict,
                 force=force,
@@ -4832,6 +5005,7 @@ class Frame(AsyncBase):
         pressed: typing.Optional[bool] = None,
         selected: typing.Optional[bool] = None,
         exact: typing.Optional[bool] = None,
+        description: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
     ) -> "Locator":
         """Frame.get_by_role
 
@@ -4914,8 +5088,13 @@ class Frame(AsyncBase):
 
             Learn more about [`aria-selected`](https://www.w3.org/TR/wai-aria-1.2/#aria-selected).
         exact : Union[bool, None]
-            Whether `name` is matched exactly: case-sensitive and whole-string. Defaults to false. Ignored when `name` is a
-            regular expression. Note that exact match still trims whitespace.
+            Whether `name` and `description` are matched exactly: case-sensitive and whole-string. Defaults to false. Ignored
+            when the value is a regular expression. Note that exact match still trims whitespace.
+        description : Union[Pattern[str], str, None]
+            Option to match the [accessible description](https://w3c.github.io/accname/#dfn-accessible-description). By
+            default, matching is case-insensitive and searches for a substring, use `exact` to control this behavior.
+
+            Learn more about [accessible description](https://w3c.github.io/accname/#dfn-accessible-description).
 
         Returns
         -------
@@ -4934,6 +5113,7 @@ class Frame(AsyncBase):
                 pressed=pressed,
                 selected=selected,
                 exact=exact,
+                description=description,
             )
         )
 
@@ -5111,7 +5291,7 @@ class Frame(AsyncBase):
         selector: str,
         *,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """Frame.focus
 
@@ -5133,7 +5313,7 @@ class Frame(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.focus(
-                selector=selector, strict=strict, timeout=timeout
+                selector=selector, strict=strict, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -5142,7 +5322,7 @@ class Frame(AsyncBase):
         selector: str,
         *,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> typing.Optional[str]:
         """Frame.text_content
 
@@ -5167,7 +5347,7 @@ class Frame(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.text_content(
-                selector=selector, strict=strict, timeout=timeout
+                selector=selector, strict=strict, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -5176,7 +5356,7 @@ class Frame(AsyncBase):
         selector: str,
         *,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> str:
         """Frame.inner_text
 
@@ -5201,7 +5381,7 @@ class Frame(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.inner_text(
-                selector=selector, strict=strict, timeout=timeout
+                selector=selector, strict=strict, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -5210,7 +5390,7 @@ class Frame(AsyncBase):
         selector: str,
         *,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> str:
         """Frame.inner_html
 
@@ -5235,7 +5415,7 @@ class Frame(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.inner_html(
-                selector=selector, strict=strict, timeout=timeout
+                selector=selector, strict=strict, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -5245,7 +5425,7 @@ class Frame(AsyncBase):
         name: str,
         *,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> typing.Optional[str]:
         """Frame.get_attribute
 
@@ -5272,7 +5452,10 @@ class Frame(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.get_attribute(
-                selector=selector, name=name, strict=strict, timeout=timeout
+                selector=selector,
+                name=name,
+                strict=strict,
+                timeout=to_milliseconds(timeout),
             )
         )
 
@@ -5284,7 +5467,7 @@ class Frame(AsyncBase):
             typing.Sequence[Literal["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         no_wait_after: typing.Optional[bool] = None,
         force: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
@@ -5337,7 +5520,7 @@ class Frame(AsyncBase):
                 selector=selector,
                 modifiers=mapping.to_impl(modifiers),
                 position=position,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 noWaitAfter=no_wait_after,
                 force=force,
                 strict=strict,
@@ -5355,7 +5538,7 @@ class Frame(AsyncBase):
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         trial: typing.Optional[bool] = None,
         steps: typing.Optional[int] = None,
     ) -> None:
@@ -5403,7 +5586,7 @@ class Frame(AsyncBase):
                 force=force,
                 noWaitAfter=no_wait_after,
                 strict=strict,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 trial=trial,
                 steps=steps,
             )
@@ -5419,7 +5602,7 @@ class Frame(AsyncBase):
         element: typing.Optional[
             typing.Union["ElementHandle", typing.Sequence["ElementHandle"]]
         ] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
         force: typing.Optional[bool] = None,
@@ -5487,7 +5670,7 @@ class Frame(AsyncBase):
                 index=mapping.to_impl(index),
                 label=mapping.to_impl(label),
                 element=mapping.to_impl(element),
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 noWaitAfter=no_wait_after,
                 strict=strict,
                 force=force,
@@ -5499,7 +5682,7 @@ class Frame(AsyncBase):
         selector: str,
         *,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> str:
         """Frame.input_value
 
@@ -5528,7 +5711,7 @@ class Frame(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.input_value(
-                selector=selector, strict=strict, timeout=timeout
+                selector=selector, strict=strict, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -5544,7 +5727,7 @@ class Frame(AsyncBase):
         ],
         *,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         no_wait_after: typing.Optional[bool] = None,
     ) -> None:
         """Frame.set_input_files
@@ -5579,7 +5762,7 @@ class Frame(AsyncBase):
                 selector=selector,
                 files=mapping.to_impl(files),
                 strict=strict,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 noWaitAfter=no_wait_after,
             )
         )
@@ -5591,7 +5774,7 @@ class Frame(AsyncBase):
         *,
         delay: typing.Optional[float] = None,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         no_wait_after: typing.Optional[bool] = None,
     ) -> None:
         """Frame.type
@@ -5629,7 +5812,7 @@ class Frame(AsyncBase):
                 text=text,
                 delay=delay,
                 strict=strict,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 noWaitAfter=no_wait_after,
             )
         )
@@ -5641,7 +5824,7 @@ class Frame(AsyncBase):
         *,
         delay: typing.Optional[float] = None,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         no_wait_after: typing.Optional[bool] = None,
     ) -> None:
         """Frame.press
@@ -5694,7 +5877,7 @@ class Frame(AsyncBase):
                 key=key,
                 delay=delay,
                 strict=strict,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 noWaitAfter=no_wait_after,
             )
         )
@@ -5704,7 +5887,7 @@ class Frame(AsyncBase):
         selector: str,
         *,
         position: typing.Optional[Position] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
@@ -5753,7 +5936,7 @@ class Frame(AsyncBase):
             await self._impl_obj.check(
                 selector=selector,
                 position=position,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 force=force,
                 noWaitAfter=no_wait_after,
                 strict=strict,
@@ -5766,7 +5949,7 @@ class Frame(AsyncBase):
         selector: str,
         *,
         position: typing.Optional[Position] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
@@ -5815,7 +5998,7 @@ class Frame(AsyncBase):
             await self._impl_obj.uncheck(
                 selector=selector,
                 position=position,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 force=force,
                 noWaitAfter=no_wait_after,
                 strict=strict,
@@ -5823,7 +6006,9 @@ class Frame(AsyncBase):
             )
         )
 
-    async def wait_for_timeout(self, timeout: float) -> None:
+    async def wait_for_timeout(
+        self, timeout: typing.Union[float, datetime.timedelta]
+    ) -> None:
         """Frame.wait_for_timeout
 
         Waits for the given `timeout` in milliseconds.
@@ -5838,7 +6023,7 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.wait_for_timeout(timeout=timeout)
+            await self._impl_obj.wait_for_timeout(timeout=to_milliseconds(timeout))
         )
 
     async def wait_for_function(
@@ -5846,7 +6031,7 @@ class Frame(AsyncBase):
         expression: str,
         *,
         arg: typing.Optional[typing.Any] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         polling: typing.Optional[typing.Union[float, Literal["raf"]]] = None,
     ) -> "JSHandle":
         """Frame.wait_for_function
@@ -5907,7 +6092,7 @@ class Frame(AsyncBase):
             await self._impl_obj.wait_for_function(
                 expression=expression,
                 arg=mapping.to_impl(arg),
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 polling=polling,
             )
         )
@@ -5930,7 +6115,7 @@ class Frame(AsyncBase):
         checked: bool,
         *,
         position: typing.Optional[Position] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
@@ -5982,7 +6167,7 @@ class Frame(AsyncBase):
                 selector=selector,
                 checked=checked,
                 position=position,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 force=force,
                 noWaitAfter=no_wait_after,
                 strict=strict,
@@ -6319,6 +6504,7 @@ class FrameLocator(AsyncBase):
         pressed: typing.Optional[bool] = None,
         selected: typing.Optional[bool] = None,
         exact: typing.Optional[bool] = None,
+        description: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
     ) -> "Locator":
         """FrameLocator.get_by_role
 
@@ -6401,8 +6587,13 @@ class FrameLocator(AsyncBase):
 
             Learn more about [`aria-selected`](https://www.w3.org/TR/wai-aria-1.2/#aria-selected).
         exact : Union[bool, None]
-            Whether `name` is matched exactly: case-sensitive and whole-string. Defaults to false. Ignored when `name` is a
-            regular expression. Note that exact match still trims whitespace.
+            Whether `name` and `description` are matched exactly: case-sensitive and whole-string. Defaults to false. Ignored
+            when the value is a regular expression. Note that exact match still trims whitespace.
+        description : Union[Pattern[str], str, None]
+            Option to match the [accessible description](https://w3c.github.io/accname/#dfn-accessible-description). By
+            default, matching is case-insensitive and searches for a substring, use `exact` to control this behavior.
+
+            Learn more about [accessible description](https://w3c.github.io/accname/#dfn-accessible-description).
 
         Returns
         -------
@@ -6421,6 +6612,7 @@ class FrameLocator(AsyncBase):
                 pressed=pressed,
                 selected=selected,
                 exact=exact,
+                description=description,
             )
         )
 
@@ -6738,12 +6930,39 @@ class Worker(AsyncBase):
             )
         )
 
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["close"],
+        predicate: typing.Optional[typing.Callable[["Worker"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Worker"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["console"],
+        predicate: typing.Optional[typing.Callable[["ConsoleMessage"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["ConsoleMessage"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: str,
+        predicate: typing.Optional[typing.Callable[..., bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager[typing.Any]: ...
+
     def expect_event(
         self,
         event: str,
         predicate: typing.Optional[typing.Callable] = None,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> AsyncEventContextManager:
         """Worker.expect_event
 
@@ -6775,7 +6994,9 @@ class Worker(AsyncBase):
 
         return AsyncEventContextManager(
             self._impl_obj.expect_event(
-                event=event, predicate=self._wrap_handler(predicate), timeout=timeout
+                event=event,
+                predicate=self._wrap_handler(predicate),
+                timeout=to_milliseconds(timeout),
             ).future
         )
 
@@ -7120,7 +7341,7 @@ class ConsoleMessage(AsyncBase):
 
         Returns
         -------
-        {url: str, lineNumber: int, columnNumber: int}
+        {url: str, line: int, column: int, lineNumber: int, columnNumber: int}
         """
         return mapping.from_impl(self._impl_obj.location)
 
@@ -7481,8 +7702,8 @@ class Screencast(AsyncBase):
 
         Parameters
         ----------
-        on_frame : Union[Callable[[{data: bytes}], Any], None]
-            Callback that receives JPEG-encoded frame data.
+        on_frame : Union[Callable[[{data: bytes, viewportWidth: int, viewportHeight: int}], Any], None]
+            Callback that receives JPEG-encoded frame data along with the page viewport size at the time of capture.
         path : Union[pathlib.Path, str, None]
             Path where the video should be saved when the screencast is stopped. When provided, video recording is started.
         quality : Union[int, None]
@@ -8407,7 +8628,9 @@ class Page(AsyncContextManager):
             self._impl_obj.frame(name=name, url=self._wrap_handler(url))
         )
 
-    def set_default_navigation_timeout(self, timeout: float) -> None:
+    def set_default_navigation_timeout(
+        self, timeout: typing.Union[float, datetime.timedelta]
+    ) -> None:
         """Page.set_default_navigation_timeout
 
         This setting will change the default maximum navigation time for the following methods and related shortcuts:
@@ -8429,10 +8652,14 @@ class Page(AsyncContextManager):
         """
 
         return mapping.from_maybe_impl(
-            self._impl_obj.set_default_navigation_timeout(timeout=timeout)
+            self._impl_obj.set_default_navigation_timeout(
+                timeout=to_milliseconds(timeout)
+            )
         )
 
-    def set_default_timeout(self, timeout: float) -> None:
+    def set_default_timeout(
+        self, timeout: typing.Union[float, datetime.timedelta]
+    ) -> None:
         """Page.set_default_timeout
 
         This setting will change the default maximum time for all the methods accepting `timeout` option.
@@ -8446,7 +8673,7 @@ class Page(AsyncContextManager):
         """
 
         return mapping.from_maybe_impl(
-            self._impl_obj.set_default_timeout(timeout=timeout)
+            self._impl_obj.set_default_timeout(timeout=to_milliseconds(timeout))
         )
 
     async def query_selector(
@@ -8498,7 +8725,7 @@ class Page(AsyncContextManager):
         self,
         selector: str,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         state: typing.Optional[
             Literal["attached", "detached", "hidden", "visible"]
         ] = None,
@@ -8566,7 +8793,10 @@ class Page(AsyncContextManager):
 
         return mapping.from_impl_nullable(
             await self._impl_obj.wait_for_selector(
-                selector=selector, timeout=timeout, state=state, strict=strict
+                selector=selector,
+                timeout=to_milliseconds(timeout),
+                state=state,
+                strict=strict,
             )
         )
 
@@ -8575,7 +8805,7 @@ class Page(AsyncContextManager):
         selector: str,
         *,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> bool:
         """Page.is_checked
 
@@ -8600,7 +8830,7 @@ class Page(AsyncContextManager):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.is_checked(
-                selector=selector, strict=strict, timeout=timeout
+                selector=selector, strict=strict, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -8609,7 +8839,7 @@ class Page(AsyncContextManager):
         selector: str,
         *,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> bool:
         """Page.is_disabled
 
@@ -8634,7 +8864,7 @@ class Page(AsyncContextManager):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.is_disabled(
-                selector=selector, strict=strict, timeout=timeout
+                selector=selector, strict=strict, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -8643,7 +8873,7 @@ class Page(AsyncContextManager):
         selector: str,
         *,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> bool:
         """Page.is_editable
 
@@ -8668,7 +8898,7 @@ class Page(AsyncContextManager):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.is_editable(
-                selector=selector, strict=strict, timeout=timeout
+                selector=selector, strict=strict, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -8677,7 +8907,7 @@ class Page(AsyncContextManager):
         selector: str,
         *,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> bool:
         """Page.is_enabled
 
@@ -8702,7 +8932,7 @@ class Page(AsyncContextManager):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.is_enabled(
-                selector=selector, strict=strict, timeout=timeout
+                selector=selector, strict=strict, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -8711,7 +8941,7 @@ class Page(AsyncContextManager):
         selector: str,
         *,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> bool:
         """Page.is_hidden
 
@@ -8736,7 +8966,7 @@ class Page(AsyncContextManager):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.is_hidden(
-                selector=selector, strict=strict, timeout=timeout
+                selector=selector, strict=strict, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -8745,7 +8975,7 @@ class Page(AsyncContextManager):
         selector: str,
         *,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> bool:
         """Page.is_visible
 
@@ -8770,7 +9000,7 @@ class Page(AsyncContextManager):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.is_visible(
-                selector=selector, strict=strict, timeout=timeout
+                selector=selector, strict=strict, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -8780,7 +9010,7 @@ class Page(AsyncContextManager):
         type: str,
         event_init: typing.Optional[typing.Dict] = None,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         strict: typing.Optional[bool] = None,
     ) -> None:
         """Page.dispatch_event
@@ -8840,7 +9070,7 @@ class Page(AsyncContextManager):
                 selector=selector,
                 type=type,
                 eventInit=mapping.to_impl(event_init),
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 strict=strict,
             )
         )
@@ -9183,11 +9413,7 @@ class Page(AsyncContextManager):
         )
 
     async def expose_binding(
-        self,
-        name: str,
-        callback: typing.Callable,
-        *,
-        handle: typing.Optional[bool] = None,
+        self, name: str, callback: typing.Callable
     ) -> "AsyncContextManager":
         """Page.expose_binding
 
@@ -9239,10 +9465,6 @@ class Page(AsyncContextManager):
             Name of the function on the window object.
         callback : Callable
             Callback function that will be called in the Playwright's context.
-        handle : Union[bool, None]
-            Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is
-            supported. When passing by value, multiple arguments are supported.
-            Deprecated: This option will be removed in the future.
 
         Returns
         -------
@@ -9251,7 +9473,7 @@ class Page(AsyncContextManager):
 
         return mapping.from_impl(
             await self._impl_obj.expose_binding(
-                name=name, callback=self._wrap_handler(callback), handle=handle
+                name=name, callback=self._wrap_handler(callback)
             )
         )
 
@@ -9290,7 +9512,7 @@ class Page(AsyncContextManager):
         self,
         html: str,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         wait_until: typing.Optional[
             Literal["commit", "domcontentloaded", "load", "networkidle"]
         ] = None,
@@ -9321,7 +9543,7 @@ class Page(AsyncContextManager):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.set_content(
-                html=html, timeout=timeout, waitUntil=wait_until
+                html=html, timeout=to_milliseconds(timeout), waitUntil=wait_until
             )
         )
 
@@ -9329,7 +9551,7 @@ class Page(AsyncContextManager):
         self,
         url: str,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         wait_until: typing.Optional[
             Literal["commit", "domcontentloaded", "load", "networkidle"]
         ] = None,
@@ -9387,14 +9609,17 @@ class Page(AsyncContextManager):
 
         return mapping.from_impl_nullable(
             await self._impl_obj.goto(
-                url=url, timeout=timeout, waitUntil=wait_until, referer=referer
+                url=url,
+                timeout=to_milliseconds(timeout),
+                waitUntil=wait_until,
+                referer=referer,
             )
         )
 
     async def reload(
         self,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         wait_until: typing.Optional[
             Literal["commit", "domcontentloaded", "load", "networkidle"]
         ] = None,
@@ -9427,7 +9652,9 @@ class Page(AsyncContextManager):
         """
 
         return mapping.from_impl_nullable(
-            await self._impl_obj.reload(timeout=timeout, waitUntil=wait_until)
+            await self._impl_obj.reload(
+                timeout=to_milliseconds(timeout), waitUntil=wait_until
+            )
         )
 
     async def wait_for_load_state(
@@ -9436,7 +9663,7 @@ class Page(AsyncContextManager):
             Literal["domcontentloaded", "load", "networkidle"]
         ] = None,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """Page.wait_for_load_state
 
@@ -9482,7 +9709,9 @@ class Page(AsyncContextManager):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.wait_for_load_state(state=state, timeout=timeout)
+            await self._impl_obj.wait_for_load_state(
+                state=state, timeout=to_milliseconds(timeout)
+            )
         )
 
     async def wait_for_url(
@@ -9492,7 +9721,7 @@ class Page(AsyncContextManager):
         wait_until: typing.Optional[
             Literal["commit", "domcontentloaded", "load", "networkidle"]
         ] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """Page.wait_for_url
 
@@ -9528,16 +9757,198 @@ class Page(AsyncContextManager):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.wait_for_url(
-                url=self._wrap_handler(url), waitUntil=wait_until, timeout=timeout
+                url=self._wrap_handler(url),
+                waitUntil=wait_until,
+                timeout=to_milliseconds(timeout),
             )
         )
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["close"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Page": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["console"],
+        predicate: typing.Optional[typing.Callable[["ConsoleMessage"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "ConsoleMessage": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["crash"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Page": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["dialog"],
+        predicate: typing.Optional[typing.Callable[["Dialog"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Dialog": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["domcontentloaded"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Page": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["download"],
+        predicate: typing.Optional[typing.Callable[["Download"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Download": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["filechooser"],
+        predicate: typing.Optional[typing.Callable[["FileChooser"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "FileChooser": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["frameattached"],
+        predicate: typing.Optional[typing.Callable[["Frame"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Frame": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["framedetached"],
+        predicate: typing.Optional[typing.Callable[["Frame"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Frame": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["framenavigated"],
+        predicate: typing.Optional[typing.Callable[["Frame"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Frame": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["load"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Page": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["pageerror"],
+        predicate: typing.Optional[typing.Callable[["Error"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Error": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["popup"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Page": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["request"],
+        predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Request": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["requestfailed"],
+        predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Request": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["requestfinished"],
+        predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Request": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["response"],
+        predicate: typing.Optional[typing.Callable[["Response"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Response": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["websocket"],
+        predicate: typing.Optional[typing.Callable[["WebSocket"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "WebSocket": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["worker"],
+        predicate: typing.Optional[typing.Callable[["Worker"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Worker": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: str,
+        predicate: typing.Optional[typing.Callable[..., bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> typing.Any: ...
 
     async def wait_for_event(
         self,
         event: str,
         predicate: typing.Optional[typing.Callable] = None,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> typing.Any:
         """Page.wait_for_event
 
@@ -9564,14 +9975,16 @@ class Page(AsyncContextManager):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.wait_for_event(
-                event=event, predicate=self._wrap_handler(predicate), timeout=timeout
+                event=event,
+                predicate=self._wrap_handler(predicate),
+                timeout=to_milliseconds(timeout),
             )
         )
 
     async def go_back(
         self,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         wait_until: typing.Optional[
             Literal["commit", "domcontentloaded", "load", "networkidle"]
         ] = None,
@@ -9605,13 +10018,15 @@ class Page(AsyncContextManager):
         """
 
         return mapping.from_impl_nullable(
-            await self._impl_obj.go_back(timeout=timeout, waitUntil=wait_until)
+            await self._impl_obj.go_back(
+                timeout=to_milliseconds(timeout), waitUntil=wait_until
+            )
         )
 
     async def go_forward(
         self,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         wait_until: typing.Optional[
             Literal["commit", "domcontentloaded", "load", "networkidle"]
         ] = None,
@@ -9645,7 +10060,9 @@ class Page(AsyncContextManager):
         """
 
         return mapping.from_impl_nullable(
-            await self._impl_obj.go_forward(timeout=timeout, waitUntil=wait_until)
+            await self._impl_obj.go_forward(
+                timeout=to_milliseconds(timeout), waitUntil=wait_until
+            )
         )
 
     async def request_gc(self) -> None:
@@ -9778,6 +10195,14 @@ class Page(AsyncContextManager):
         """
 
         return mapping.from_maybe_impl(await self._impl_obj.bring_to_front())
+
+    async def hide_highlight(self) -> None:
+        """Page.hide_highlight
+
+        Hide all locator highlight overlays previously added by `locator.highlight()` on this page.
+        """
+
+        return mapping.from_maybe_impl(await self._impl_obj.hide_highlight())
 
     async def add_init_script(
         self,
@@ -10069,7 +10494,7 @@ class Page(AsyncContextManager):
     async def screenshot(
         self,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         type: typing.Optional[Literal["jpeg", "png"]] = None,
         path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         quality: typing.Optional[int] = None,
@@ -10144,7 +10569,7 @@ class Page(AsyncContextManager):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.screenshot(
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 type=type,
                 path=path,
                 quality=quality,
@@ -10175,9 +10600,10 @@ class Page(AsyncContextManager):
     async def aria_snapshot(
         self,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         depth: typing.Optional[int] = None,
         mode: typing.Optional[Literal["ai", "default"]] = None,
+        boxes: typing.Optional[bool] = None,
     ) -> str:
         """Page.aria_snapshot
 
@@ -10193,6 +10619,11 @@ class Page(AsyncContextManager):
         mode : Union["ai", "default", None]
             When set to `"ai"`, returns a snapshot optimized for AI consumption: including element references like `[ref=e2]`
             and snapshots of `<iframe>`s. Defaults to `"default"`.
+        boxes : Union[bool, None]
+            When `true`, appends each element's bounding box as `[box=x,y,width,height]` to the snapshot. Coordinates are
+            relative to the viewport, in CSS pixels, as returned by
+            [`Element.getBoundingClientRect()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect).
+            Defaults to `false`.
 
         Returns
         -------
@@ -10200,7 +10631,9 @@ class Page(AsyncContextManager):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.aria_snapshot(timeout=timeout, depth=depth, mode=mode)
+            await self._impl_obj.aria_snapshot(
+                timeout=to_milliseconds(timeout), depth=depth, mode=mode, boxes=boxes
+            )
         )
 
     async def close(
@@ -10255,7 +10688,7 @@ class Page(AsyncContextManager):
         delay: typing.Optional[float] = None,
         button: typing.Optional[Literal["left", "middle", "right"]] = None,
         click_count: typing.Optional[int] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
@@ -10320,7 +10753,7 @@ class Page(AsyncContextManager):
                 delay=delay,
                 button=button,
                 clickCount=click_count,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 force=force,
                 noWaitAfter=no_wait_after,
                 trial=trial,
@@ -10338,7 +10771,7 @@ class Page(AsyncContextManager):
         position: typing.Optional[Position] = None,
         delay: typing.Optional[float] = None,
         button: typing.Optional[Literal["left", "middle", "right"]] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
@@ -10399,7 +10832,7 @@ class Page(AsyncContextManager):
                 position=position,
                 delay=delay,
                 button=button,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 force=force,
                 noWaitAfter=no_wait_after,
                 strict=strict,
@@ -10415,7 +10848,7 @@ class Page(AsyncContextManager):
             typing.Sequence[Literal["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
@@ -10470,7 +10903,7 @@ class Page(AsyncContextManager):
                 selector=selector,
                 modifiers=mapping.to_impl(modifiers),
                 position=position,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 force=force,
                 noWaitAfter=no_wait_after,
                 strict=strict,
@@ -10483,7 +10916,7 @@ class Page(AsyncContextManager):
         selector: str,
         value: str,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
         force: typing.Optional[bool] = None,
@@ -10525,7 +10958,7 @@ class Page(AsyncContextManager):
             await self._impl_obj.fill(
                 selector=selector,
                 value=value,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 noWaitAfter=no_wait_after,
                 strict=strict,
                 force=force,
@@ -10806,6 +11239,7 @@ class Page(AsyncContextManager):
         pressed: typing.Optional[bool] = None,
         selected: typing.Optional[bool] = None,
         exact: typing.Optional[bool] = None,
+        description: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
     ) -> "Locator":
         """Page.get_by_role
 
@@ -10888,8 +11322,13 @@ class Page(AsyncContextManager):
 
             Learn more about [`aria-selected`](https://www.w3.org/TR/wai-aria-1.2/#aria-selected).
         exact : Union[bool, None]
-            Whether `name` is matched exactly: case-sensitive and whole-string. Defaults to false. Ignored when `name` is a
-            regular expression. Note that exact match still trims whitespace.
+            Whether `name` and `description` are matched exactly: case-sensitive and whole-string. Defaults to false. Ignored
+            when the value is a regular expression. Note that exact match still trims whitespace.
+        description : Union[Pattern[str], str, None]
+            Option to match the [accessible description](https://w3c.github.io/accname/#dfn-accessible-description). By
+            default, matching is case-insensitive and searches for a substring, use `exact` to control this behavior.
+
+            Learn more about [accessible description](https://w3c.github.io/accname/#dfn-accessible-description).
 
         Returns
         -------
@@ -10908,6 +11347,7 @@ class Page(AsyncContextManager):
                 pressed=pressed,
                 selected=selected,
                 exact=exact,
+                description=description,
             )
         )
 
@@ -11085,7 +11525,7 @@ class Page(AsyncContextManager):
         selector: str,
         *,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """Page.focus
 
@@ -11107,7 +11547,7 @@ class Page(AsyncContextManager):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.focus(
-                selector=selector, strict=strict, timeout=timeout
+                selector=selector, strict=strict, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -11116,7 +11556,7 @@ class Page(AsyncContextManager):
         selector: str,
         *,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> typing.Optional[str]:
         """Page.text_content
 
@@ -11141,7 +11581,7 @@ class Page(AsyncContextManager):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.text_content(
-                selector=selector, strict=strict, timeout=timeout
+                selector=selector, strict=strict, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -11150,7 +11590,7 @@ class Page(AsyncContextManager):
         selector: str,
         *,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> str:
         """Page.inner_text
 
@@ -11175,7 +11615,7 @@ class Page(AsyncContextManager):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.inner_text(
-                selector=selector, strict=strict, timeout=timeout
+                selector=selector, strict=strict, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -11184,7 +11624,7 @@ class Page(AsyncContextManager):
         selector: str,
         *,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> str:
         """Page.inner_html
 
@@ -11209,7 +11649,7 @@ class Page(AsyncContextManager):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.inner_html(
-                selector=selector, strict=strict, timeout=timeout
+                selector=selector, strict=strict, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -11219,7 +11659,7 @@ class Page(AsyncContextManager):
         name: str,
         *,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> typing.Optional[str]:
         """Page.get_attribute
 
@@ -11246,7 +11686,10 @@ class Page(AsyncContextManager):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.get_attribute(
-                selector=selector, name=name, strict=strict, timeout=timeout
+                selector=selector,
+                name=name,
+                strict=strict,
+                timeout=to_milliseconds(timeout),
             )
         )
 
@@ -11258,7 +11701,7 @@ class Page(AsyncContextManager):
             typing.Sequence[Literal["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         no_wait_after: typing.Optional[bool] = None,
         force: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
@@ -11311,7 +11754,7 @@ class Page(AsyncContextManager):
                 selector=selector,
                 modifiers=mapping.to_impl(modifiers),
                 position=position,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 noWaitAfter=no_wait_after,
                 force=force,
                 strict=strict,
@@ -11328,7 +11771,7 @@ class Page(AsyncContextManager):
         target_position: typing.Optional[Position] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         strict: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
         steps: typing.Optional[int] = None,
@@ -11392,7 +11835,7 @@ class Page(AsyncContextManager):
                 targetPosition=target_position,
                 force=force,
                 noWaitAfter=no_wait_after,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 strict=strict,
                 trial=trial,
                 steps=steps,
@@ -11409,7 +11852,7 @@ class Page(AsyncContextManager):
         element: typing.Optional[
             typing.Union["ElementHandle", typing.Sequence["ElementHandle"]]
         ] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         no_wait_after: typing.Optional[bool] = None,
         force: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
@@ -11478,7 +11921,7 @@ class Page(AsyncContextManager):
                 index=mapping.to_impl(index),
                 label=mapping.to_impl(label),
                 element=mapping.to_impl(element),
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 noWaitAfter=no_wait_after,
                 force=force,
                 strict=strict,
@@ -11490,7 +11933,7 @@ class Page(AsyncContextManager):
         selector: str,
         *,
         strict: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> str:
         """Page.input_value
 
@@ -11519,7 +11962,7 @@ class Page(AsyncContextManager):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.input_value(
-                selector=selector, strict=strict, timeout=timeout
+                selector=selector, strict=strict, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -11534,7 +11977,7 @@ class Page(AsyncContextManager):
             typing.Sequence[FilePayload],
         ],
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         strict: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
     ) -> None:
@@ -11570,7 +12013,7 @@ class Page(AsyncContextManager):
             await self._impl_obj.set_input_files(
                 selector=selector,
                 files=mapping.to_impl(files),
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 strict=strict,
                 noWaitAfter=no_wait_after,
             )
@@ -11582,7 +12025,7 @@ class Page(AsyncContextManager):
         text: str,
         *,
         delay: typing.Optional[float] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
     ) -> None:
@@ -11620,7 +12063,7 @@ class Page(AsyncContextManager):
                 selector=selector,
                 text=text,
                 delay=delay,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 noWaitAfter=no_wait_after,
                 strict=strict,
             )
@@ -11632,7 +12075,7 @@ class Page(AsyncContextManager):
         key: str,
         *,
         delay: typing.Optional[float] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
     ) -> None:
@@ -11701,7 +12144,7 @@ class Page(AsyncContextManager):
                 selector=selector,
                 key=key,
                 delay=delay,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 noWaitAfter=no_wait_after,
                 strict=strict,
             )
@@ -11712,7 +12155,7 @@ class Page(AsyncContextManager):
         selector: str,
         *,
         position: typing.Optional[Position] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
@@ -11761,7 +12204,7 @@ class Page(AsyncContextManager):
             await self._impl_obj.check(
                 selector=selector,
                 position=position,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 force=force,
                 noWaitAfter=no_wait_after,
                 strict=strict,
@@ -11774,7 +12217,7 @@ class Page(AsyncContextManager):
         selector: str,
         *,
         position: typing.Optional[Position] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
@@ -11823,7 +12266,7 @@ class Page(AsyncContextManager):
             await self._impl_obj.uncheck(
                 selector=selector,
                 position=position,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 force=force,
                 noWaitAfter=no_wait_after,
                 strict=strict,
@@ -11831,7 +12274,9 @@ class Page(AsyncContextManager):
             )
         )
 
-    async def wait_for_timeout(self, timeout: float) -> None:
+    async def wait_for_timeout(
+        self, timeout: typing.Union[float, datetime.timedelta]
+    ) -> None:
         """Page.wait_for_timeout
 
         Waits for the given `timeout` in milliseconds.
@@ -11853,7 +12298,7 @@ class Page(AsyncContextManager):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.wait_for_timeout(timeout=timeout)
+            await self._impl_obj.wait_for_timeout(timeout=to_milliseconds(timeout))
         )
 
     async def wait_for_function(
@@ -11861,7 +12306,7 @@ class Page(AsyncContextManager):
         expression: str,
         *,
         arg: typing.Optional[typing.Any] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         polling: typing.Optional[typing.Union[float, Literal["raf"]]] = None,
     ) -> "JSHandle":
         """Page.wait_for_function
@@ -11922,7 +12367,7 @@ class Page(AsyncContextManager):
             await self._impl_obj.wait_for_function(
                 expression=expression,
                 arg=mapping.to_impl(arg),
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 polling=polling,
             )
         )
@@ -12075,12 +12520,192 @@ class Page(AsyncContextManager):
             )
         )
 
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["close"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Page"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["console"],
+        predicate: typing.Optional[typing.Callable[["ConsoleMessage"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["ConsoleMessage"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["crash"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Page"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["dialog"],
+        predicate: typing.Optional[typing.Callable[["Dialog"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Dialog"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["domcontentloaded"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Page"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["download"],
+        predicate: typing.Optional[typing.Callable[["Download"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Download"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["filechooser"],
+        predicate: typing.Optional[typing.Callable[["FileChooser"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["FileChooser"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["frameattached"],
+        predicate: typing.Optional[typing.Callable[["Frame"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Frame"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["framedetached"],
+        predicate: typing.Optional[typing.Callable[["Frame"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Frame"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["framenavigated"],
+        predicate: typing.Optional[typing.Callable[["Frame"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Frame"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["load"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Page"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["pageerror"],
+        predicate: typing.Optional[typing.Callable[["Error"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Error"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["popup"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Page"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["request"],
+        predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Request"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["requestfailed"],
+        predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Request"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["requestfinished"],
+        predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Request"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["response"],
+        predicate: typing.Optional[typing.Callable[["Response"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Response"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["websocket"],
+        predicate: typing.Optional[typing.Callable[["WebSocket"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["WebSocket"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["worker"],
+        predicate: typing.Optional[typing.Callable[["Worker"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Worker"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: str,
+        predicate: typing.Optional[typing.Callable[..., bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager[typing.Any]: ...
+
     def expect_event(
         self,
         event: str,
         predicate: typing.Optional[typing.Callable] = None,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> AsyncEventContextManager:
         """Page.expect_event
 
@@ -12112,7 +12737,9 @@ class Page(AsyncContextManager):
 
         return AsyncEventContextManager(
             self._impl_obj.expect_event(
-                event=event, predicate=self._wrap_handler(predicate), timeout=timeout
+                event=event,
+                predicate=self._wrap_handler(predicate),
+                timeout=to_milliseconds(timeout),
             ).future
         )
 
@@ -12120,7 +12747,7 @@ class Page(AsyncContextManager):
         self,
         predicate: typing.Optional[typing.Callable[["ConsoleMessage"], bool]] = None,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> AsyncEventContextManager["ConsoleMessage"]:
         """Page.expect_console_message
 
@@ -12143,7 +12770,8 @@ class Page(AsyncContextManager):
 
         return AsyncEventContextManager(
             self._impl_obj.expect_console_message(
-                predicate=self._wrap_handler(predicate), timeout=timeout
+                predicate=self._wrap_handler(predicate),
+                timeout=to_milliseconds(timeout),
             ).future
         )
 
@@ -12151,7 +12779,7 @@ class Page(AsyncContextManager):
         self,
         predicate: typing.Optional[typing.Callable[["Download"], bool]] = None,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> AsyncEventContextManager["Download"]:
         """Page.expect_download
 
@@ -12174,7 +12802,8 @@ class Page(AsyncContextManager):
 
         return AsyncEventContextManager(
             self._impl_obj.expect_download(
-                predicate=self._wrap_handler(predicate), timeout=timeout
+                predicate=self._wrap_handler(predicate),
+                timeout=to_milliseconds(timeout),
             ).future
         )
 
@@ -12182,7 +12811,7 @@ class Page(AsyncContextManager):
         self,
         predicate: typing.Optional[typing.Callable[["FileChooser"], bool]] = None,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> AsyncEventContextManager["FileChooser"]:
         """Page.expect_file_chooser
 
@@ -12205,7 +12834,8 @@ class Page(AsyncContextManager):
 
         return AsyncEventContextManager(
             self._impl_obj.expect_file_chooser(
-                predicate=self._wrap_handler(predicate), timeout=timeout
+                predicate=self._wrap_handler(predicate),
+                timeout=to_milliseconds(timeout),
             ).future
         )
 
@@ -12218,7 +12848,7 @@ class Page(AsyncContextManager):
         wait_until: typing.Optional[
             Literal["commit", "domcontentloaded", "load", "networkidle"]
         ] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> AsyncEventContextManager["Response"]:
         """Page.expect_navigation
 
@@ -12269,7 +12899,9 @@ class Page(AsyncContextManager):
 
         return AsyncEventContextManager(
             self._impl_obj.expect_navigation(
-                url=self._wrap_handler(url), waitUntil=wait_until, timeout=timeout
+                url=self._wrap_handler(url),
+                waitUntil=wait_until,
+                timeout=to_milliseconds(timeout),
             ).future
         )
 
@@ -12277,7 +12909,7 @@ class Page(AsyncContextManager):
         self,
         predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> AsyncEventContextManager["Page"]:
         """Page.expect_popup
 
@@ -12300,17 +12932,20 @@ class Page(AsyncContextManager):
 
         return AsyncEventContextManager(
             self._impl_obj.expect_popup(
-                predicate=self._wrap_handler(predicate), timeout=timeout
+                predicate=self._wrap_handler(predicate),
+                timeout=to_milliseconds(timeout),
             ).future
         )
 
     def expect_request(
         self,
         url_or_predicate: typing.Union[
-            str, typing.Pattern[str], typing.Callable[["Request"], bool]
+            str,
+            typing.Pattern[str],
+            typing.Callable[["Request"], typing.Union[bool, typing.Awaitable[bool]]],
         ],
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> AsyncEventContextManager["Request"]:
         """Page.expect_request
 
@@ -12332,7 +12967,7 @@ class Page(AsyncContextManager):
 
         Parameters
         ----------
-        url_or_predicate : Union[Callable[[Request], bool], Pattern[str], str]
+        url_or_predicate : Union[Callable[[Request], Union[bool, typing.Awaitable[bool]]], Pattern[str], str]
             Request URL string, regex or predicate receiving `Request` object. When a `baseURL` via the context options was
             provided and the passed URL is a path, it gets merged via the
             [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
@@ -12347,7 +12982,8 @@ class Page(AsyncContextManager):
 
         return AsyncEventContextManager(
             self._impl_obj.expect_request(
-                urlOrPredicate=self._wrap_handler(url_or_predicate), timeout=timeout
+                urlOrPredicate=self._wrap_handler(url_or_predicate),
+                timeout=to_milliseconds(timeout),
             ).future
         )
 
@@ -12355,7 +12991,7 @@ class Page(AsyncContextManager):
         self,
         predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> AsyncEventContextManager["Request"]:
         """Page.expect_request_finished
 
@@ -12378,17 +13014,20 @@ class Page(AsyncContextManager):
 
         return AsyncEventContextManager(
             self._impl_obj.expect_request_finished(
-                predicate=self._wrap_handler(predicate), timeout=timeout
+                predicate=self._wrap_handler(predicate),
+                timeout=to_milliseconds(timeout),
             ).future
         )
 
     def expect_response(
         self,
         url_or_predicate: typing.Union[
-            str, typing.Pattern[str], typing.Callable[["Response"], bool]
+            str,
+            typing.Pattern[str],
+            typing.Callable[["Response"], typing.Union[bool, typing.Awaitable[bool]]],
         ],
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> AsyncEventContextManager["Response"]:
         """Page.expect_response
 
@@ -12412,7 +13051,7 @@ class Page(AsyncContextManager):
 
         Parameters
         ----------
-        url_or_predicate : Union[Callable[[Response], bool], Pattern[str], str]
+        url_or_predicate : Union[Callable[[Response], Union[bool, typing.Awaitable[bool]]], Pattern[str], str]
             Request URL string, regex or predicate receiving `Response` object. When a `baseURL` via the context options was
             provided and the passed URL is a path, it gets merged via the
             [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
@@ -12427,7 +13066,8 @@ class Page(AsyncContextManager):
 
         return AsyncEventContextManager(
             self._impl_obj.expect_response(
-                urlOrPredicate=self._wrap_handler(url_or_predicate), timeout=timeout
+                urlOrPredicate=self._wrap_handler(url_or_predicate),
+                timeout=to_milliseconds(timeout),
             ).future
         )
 
@@ -12435,7 +13075,7 @@ class Page(AsyncContextManager):
         self,
         predicate: typing.Optional[typing.Callable[["WebSocket"], bool]] = None,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> AsyncEventContextManager["WebSocket"]:
         """Page.expect_websocket
 
@@ -12458,7 +13098,8 @@ class Page(AsyncContextManager):
 
         return AsyncEventContextManager(
             self._impl_obj.expect_websocket(
-                predicate=self._wrap_handler(predicate), timeout=timeout
+                predicate=self._wrap_handler(predicate),
+                timeout=to_milliseconds(timeout),
             ).future
         )
 
@@ -12466,7 +13107,7 @@ class Page(AsyncContextManager):
         self,
         predicate: typing.Optional[typing.Callable[["Worker"], bool]] = None,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> AsyncEventContextManager["Worker"]:
         """Page.expect_worker
 
@@ -12489,7 +13130,8 @@ class Page(AsyncContextManager):
 
         return AsyncEventContextManager(
             self._impl_obj.expect_worker(
-                predicate=self._wrap_handler(predicate), timeout=timeout
+                predicate=self._wrap_handler(predicate),
+                timeout=to_milliseconds(timeout),
             ).future
         )
 
@@ -12499,7 +13141,7 @@ class Page(AsyncContextManager):
         checked: bool,
         *,
         position: typing.Optional[Position] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
@@ -12551,7 +13193,7 @@ class Page(AsyncContextManager):
                 selector=selector,
                 checked=checked,
                 position=position,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 force=force,
                 noWaitAfter=no_wait_after,
                 strict=strict,
@@ -12833,6 +13475,16 @@ class WebError(AsyncBase):
         """
         return mapping.from_impl(self._impl_obj.error)
 
+    @property
+    def location(self) -> WebErrorLocation:
+        """WebError.location
+
+        Returns
+        -------
+        {url: str, line: int, column: int}
+        """
+        return mapping.from_impl(self._impl_obj.location)
+
 
 mapping.register(WebErrorImpl, WebError)
 
@@ -12912,6 +13564,48 @@ class BrowserContext(AsyncContextManager):
     @typing.overload
     def on(
         self,
+        event: Literal["download"],
+        f: typing.Callable[["Download"], "typing.Union[typing.Awaitable[None], None]"],
+    ) -> None:
+        """
+        Emitted when attachment download started in any page belonging to this context. User can access basic file
+        operations on downloaded content via the passed `Download` instance. See also `page.on('download')` to receive
+        events about a specific page."""
+
+    @typing.overload
+    def on(
+        self,
+        event: Literal["frameattached"],
+        f: typing.Callable[["Frame"], "typing.Union[typing.Awaitable[None], None]"],
+    ) -> None:
+        """
+        Emitted when a frame is attached in any page belonging to this context. See also `page.on('frame_attached')` to
+        receive events about a specific page."""
+
+    @typing.overload
+    def on(
+        self,
+        event: Literal["framedetached"],
+        f: typing.Callable[["Frame"], "typing.Union[typing.Awaitable[None], None]"],
+    ) -> None:
+        """
+        Emitted when a frame is detached in any page belonging to this context. See also `page.on('frame_detached')` to
+        receive events about a specific page."""
+
+    @typing.overload
+    def on(
+        self,
+        event: Literal["framenavigated"],
+        f: typing.Callable[["Frame"], "typing.Union[typing.Awaitable[None], None]"],
+    ) -> None:
+        """
+        Emitted when a frame is navigated to a new url in any page belonging to this context. See also
+        `page.on('frame_navigated')` to receive events about navigations in a specific page.
+        """
+
+    @typing.overload
+    def on(
+        self,
         event: Literal["page"],
         f: typing.Callable[["Page"], "typing.Union[typing.Awaitable[None], None]"],
     ) -> None:
@@ -12935,6 +13629,27 @@ class BrowserContext(AsyncContextManager):
 
         **NOTE** Use `page.wait_for_load_state()` to wait until the page gets to a particular state (you should not
         need it in most cases)."""
+
+    @typing.overload
+    def on(
+        self,
+        event: Literal["pageclose"],
+        f: typing.Callable[["Page"], "typing.Union[typing.Awaitable[None], None]"],
+    ) -> None:
+        """
+        Emitted when a page in this context is closed. See also `page.on('close')` to receive events about a specific
+        page."""
+
+    @typing.overload
+    def on(
+        self,
+        event: Literal["pageload"],
+        f: typing.Callable[["Page"], "typing.Union[typing.Awaitable[None], None]"],
+    ) -> None:
+        """
+        Emitted when the JavaScript [`load`](https://developer.mozilla.org/en-US/docs/Web/Events/load) event is dispatched
+        in any page belonging to this context. See also `page.on('load')` to receive events about a specific page.
+        """
 
     @typing.overload
     def on(
@@ -13086,6 +13801,48 @@ class BrowserContext(AsyncContextManager):
     @typing.overload
     def once(
         self,
+        event: Literal["download"],
+        f: typing.Callable[["Download"], "typing.Union[typing.Awaitable[None], None]"],
+    ) -> None:
+        """
+        Emitted when attachment download started in any page belonging to this context. User can access basic file
+        operations on downloaded content via the passed `Download` instance. See also `page.on('download')` to receive
+        events about a specific page."""
+
+    @typing.overload
+    def once(
+        self,
+        event: Literal["frameattached"],
+        f: typing.Callable[["Frame"], "typing.Union[typing.Awaitable[None], None]"],
+    ) -> None:
+        """
+        Emitted when a frame is attached in any page belonging to this context. See also `page.on('frame_attached')` to
+        receive events about a specific page."""
+
+    @typing.overload
+    def once(
+        self,
+        event: Literal["framedetached"],
+        f: typing.Callable[["Frame"], "typing.Union[typing.Awaitable[None], None]"],
+    ) -> None:
+        """
+        Emitted when a frame is detached in any page belonging to this context. See also `page.on('frame_detached')` to
+        receive events about a specific page."""
+
+    @typing.overload
+    def once(
+        self,
+        event: Literal["framenavigated"],
+        f: typing.Callable[["Frame"], "typing.Union[typing.Awaitable[None], None]"],
+    ) -> None:
+        """
+        Emitted when a frame is navigated to a new url in any page belonging to this context. See also
+        `page.on('frame_navigated')` to receive events about navigations in a specific page.
+        """
+
+    @typing.overload
+    def once(
+        self,
         event: Literal["page"],
         f: typing.Callable[["Page"], "typing.Union[typing.Awaitable[None], None]"],
     ) -> None:
@@ -13109,6 +13866,27 @@ class BrowserContext(AsyncContextManager):
 
         **NOTE** Use `page.wait_for_load_state()` to wait until the page gets to a particular state (you should not
         need it in most cases)."""
+
+    @typing.overload
+    def once(
+        self,
+        event: Literal["pageclose"],
+        f: typing.Callable[["Page"], "typing.Union[typing.Awaitable[None], None]"],
+    ) -> None:
+        """
+        Emitted when a page in this context is closed. See also `page.on('close')` to receive events about a specific
+        page."""
+
+    @typing.overload
+    def once(
+        self,
+        event: Literal["pageload"],
+        f: typing.Callable[["Page"], "typing.Union[typing.Awaitable[None], None]"],
+    ) -> None:
+        """
+        Emitted when the JavaScript [`load`](https://developer.mozilla.org/en-US/docs/Web/Events/load) event is dispatched
+        in any page belonging to this context. See also `page.on('load')` to receive events about a specific page.
+        """
 
     @typing.overload
     def once(
@@ -13284,7 +14062,9 @@ class BrowserContext(AsyncContextManager):
         """
         return mapping.from_impl(self._impl_obj.clock)
 
-    def set_default_navigation_timeout(self, timeout: float) -> None:
+    def set_default_navigation_timeout(
+        self, timeout: typing.Union[float, datetime.timedelta]
+    ) -> None:
         """BrowserContext.set_default_navigation_timeout
 
         This setting will change the default maximum navigation time for the following methods and related shortcuts:
@@ -13305,10 +14085,14 @@ class BrowserContext(AsyncContextManager):
         """
 
         return mapping.from_maybe_impl(
-            self._impl_obj.set_default_navigation_timeout(timeout=timeout)
+            self._impl_obj.set_default_navigation_timeout(
+                timeout=to_milliseconds(timeout)
+            )
         )
 
-    def set_default_timeout(self, timeout: float) -> None:
+    def set_default_timeout(
+        self, timeout: typing.Union[float, datetime.timedelta]
+    ) -> None:
         """BrowserContext.set_default_timeout
 
         This setting will change the default maximum time for all the methods accepting `timeout` option.
@@ -13324,7 +14108,7 @@ class BrowserContext(AsyncContextManager):
         """
 
         return mapping.from_maybe_impl(
-            self._impl_obj.set_default_timeout(timeout=timeout)
+            self._impl_obj.set_default_timeout(timeout=to_milliseconds(timeout))
         )
 
     async def new_page(self) -> "Page":
@@ -13585,11 +14369,7 @@ class BrowserContext(AsyncContextManager):
         )
 
     async def expose_binding(
-        self,
-        name: str,
-        callback: typing.Callable,
-        *,
-        handle: typing.Optional[bool] = None,
+        self, name: str, callback: typing.Callable
     ) -> "AsyncContextManager":
         """BrowserContext.expose_binding
 
@@ -13639,10 +14419,6 @@ class BrowserContext(AsyncContextManager):
             Name of the function on the window object.
         callback : Callable
             Callback function that will be called in the Playwright's context.
-        handle : Union[bool, None]
-            Whether to pass the argument as a handle, instead of passing by value. When passing a handle, only one argument is
-            supported. When passing by value, multiple arguments are supported.
-            Deprecated: This option will be removed in the future.
 
         Returns
         -------
@@ -13651,7 +14427,7 @@ class BrowserContext(AsyncContextManager):
 
         return mapping.from_impl(
             await self._impl_obj.expose_binding(
-                name=name, callback=self._wrap_handler(callback), handle=handle
+                name=name, callback=self._wrap_handler(callback)
             )
         )
 
@@ -13961,12 +14737,174 @@ class BrowserContext(AsyncContextManager):
             )
         )
 
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["backgroundpage"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Page"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["close"],
+        predicate: typing.Optional[typing.Callable[["BrowserContext"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["BrowserContext"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["console"],
+        predicate: typing.Optional[typing.Callable[["ConsoleMessage"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["ConsoleMessage"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["dialog"],
+        predicate: typing.Optional[typing.Callable[["Dialog"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Dialog"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["download"],
+        predicate: typing.Optional[typing.Callable[["Download"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Download"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["frameattached"],
+        predicate: typing.Optional[typing.Callable[["Frame"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Frame"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["framedetached"],
+        predicate: typing.Optional[typing.Callable[["Frame"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Frame"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["framenavigated"],
+        predicate: typing.Optional[typing.Callable[["Frame"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Frame"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["page"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Page"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["pageclose"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Page"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["pageload"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Page"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["weberror"],
+        predicate: typing.Optional[typing.Callable[["WebError"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["WebError"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["request"],
+        predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Request"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["requestfailed"],
+        predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Request"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["requestfinished"],
+        predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Request"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["response"],
+        predicate: typing.Optional[typing.Callable[["Response"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Response"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: typing.Literal["serviceworker"],
+        predicate: typing.Optional[typing.Callable[["Worker"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager["Worker"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
+        event: str,
+        predicate: typing.Optional[typing.Callable[..., bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> AsyncEventContextManager[typing.Any]: ...
+
     def expect_event(
         self,
         event: str,
         predicate: typing.Optional[typing.Callable] = None,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> AsyncEventContextManager:
         """BrowserContext.expect_event
 
@@ -13998,7 +14936,9 @@ class BrowserContext(AsyncContextManager):
 
         return AsyncEventContextManager(
             self._impl_obj.expect_event(
-                event=event, predicate=self._wrap_handler(predicate), timeout=timeout
+                event=event,
+                predicate=self._wrap_handler(predicate),
+                timeout=to_milliseconds(timeout),
             ).future
         )
 
@@ -14086,12 +15026,174 @@ class BrowserContext(AsyncContextManager):
             await self._impl_obj.set_storage_state(storageState=storage_state)
         )
 
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["backgroundpage"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Page": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["close"],
+        predicate: typing.Optional[typing.Callable[["BrowserContext"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "BrowserContext": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["console"],
+        predicate: typing.Optional[typing.Callable[["ConsoleMessage"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "ConsoleMessage": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["dialog"],
+        predicate: typing.Optional[typing.Callable[["Dialog"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Dialog": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["download"],
+        predicate: typing.Optional[typing.Callable[["Download"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Download": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["frameattached"],
+        predicate: typing.Optional[typing.Callable[["Frame"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Frame": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["framedetached"],
+        predicate: typing.Optional[typing.Callable[["Frame"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Frame": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["framenavigated"],
+        predicate: typing.Optional[typing.Callable[["Frame"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Frame": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["page"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Page": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["pageclose"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Page": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["pageload"],
+        predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Page": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["weberror"],
+        predicate: typing.Optional[typing.Callable[["WebError"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "WebError": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["request"],
+        predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Request": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["requestfailed"],
+        predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Request": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["requestfinished"],
+        predicate: typing.Optional[typing.Callable[["Request"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Request": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["response"],
+        predicate: typing.Optional[typing.Callable[["Response"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Response": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: typing.Literal["serviceworker"],
+        predicate: typing.Optional[typing.Callable[["Worker"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Worker": ...
+
+    @typing.overload
+    async def wait_for_event(
+        self,
+        event: str,
+        predicate: typing.Optional[typing.Callable[..., bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> typing.Any: ...
+
     async def wait_for_event(
         self,
         event: str,
         predicate: typing.Optional[typing.Callable] = None,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> typing.Any:
         """BrowserContext.wait_for_event
 
@@ -14118,7 +15220,9 @@ class BrowserContext(AsyncContextManager):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.wait_for_event(
-                event=event, predicate=self._wrap_handler(predicate), timeout=timeout
+                event=event,
+                predicate=self._wrap_handler(predicate),
+                timeout=to_milliseconds(timeout),
             )
         )
 
@@ -14126,7 +15230,7 @@ class BrowserContext(AsyncContextManager):
         self,
         predicate: typing.Optional[typing.Callable[["ConsoleMessage"], bool]] = None,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> AsyncEventContextManager["ConsoleMessage"]:
         """BrowserContext.expect_console_message
 
@@ -14150,7 +15254,8 @@ class BrowserContext(AsyncContextManager):
 
         return AsyncEventContextManager(
             self._impl_obj.expect_console_message(
-                predicate=self._wrap_handler(predicate), timeout=timeout
+                predicate=self._wrap_handler(predicate),
+                timeout=to_milliseconds(timeout),
             ).future
         )
 
@@ -14158,7 +15263,7 @@ class BrowserContext(AsyncContextManager):
         self,
         predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> AsyncEventContextManager["Page"]:
         """BrowserContext.expect_page
 
@@ -14181,7 +15286,8 @@ class BrowserContext(AsyncContextManager):
 
         return AsyncEventContextManager(
             self._impl_obj.expect_page(
-                predicate=self._wrap_handler(predicate), timeout=timeout
+                predicate=self._wrap_handler(predicate),
+                timeout=to_milliseconds(timeout),
             ).future
         )
 
@@ -14304,6 +15410,17 @@ class Browser(AsyncContextManager):
     @typing.overload
     def on(
         self,
+        event: Literal["context"],
+        f: typing.Callable[
+            ["BrowserContext"], "typing.Union[typing.Awaitable[None], None]"
+        ],
+    ) -> None:
+        """
+        Emitted when a new browser context is created."""
+
+    @typing.overload
+    def on(
+        self,
         event: Literal["disconnected"],
         f: typing.Callable[["Browser"], "typing.Union[typing.Awaitable[None], None]"],
     ) -> None:
@@ -14312,13 +15429,6 @@ class Browser(AsyncContextManager):
         following:
         - Browser application is closed or crashed.
         - The `browser.close()` method was called."""
-
-    @typing.overload
-    def on(
-        self,
-        event: str,
-        f: typing.Callable[..., typing.Union[typing.Awaitable[None], None]],
-    ) -> None: ...
 
     def on(
         self,
@@ -14330,6 +15440,17 @@ class Browser(AsyncContextManager):
     @typing.overload
     def once(
         self,
+        event: Literal["context"],
+        f: typing.Callable[
+            ["BrowserContext"], "typing.Union[typing.Awaitable[None], None]"
+        ],
+    ) -> None:
+        """
+        Emitted when a new browser context is created."""
+
+    @typing.overload
+    def once(
+        self,
         event: Literal["disconnected"],
         f: typing.Callable[["Browser"], "typing.Union[typing.Awaitable[None], None]"],
     ) -> None:
@@ -14338,13 +15459,6 @@ class Browser(AsyncContextManager):
         following:
         - Browser application is closed or crashed.
         - The `browser.close()` method was called."""
-
-    @typing.overload
-    def once(
-        self,
-        event: str,
-        f: typing.Callable[..., typing.Union[typing.Awaitable[None], None]],
-    ) -> None: ...
 
     def once(
         self,
@@ -15082,7 +16196,7 @@ class BrowserType(AsyncBase):
         handle_sigint: typing.Optional[bool] = None,
         handle_sigterm: typing.Optional[bool] = None,
         handle_sighup: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         env: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         headless: typing.Optional[bool] = None,
         proxy: typing.Optional[ProxySettings] = None,
@@ -15198,7 +16312,7 @@ class BrowserType(AsyncBase):
                 handleSIGINT=handle_sigint,
                 handleSIGTERM=handle_sigterm,
                 handleSIGHUP=handle_sighup,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 env=mapping.to_impl(env),
                 headless=headless,
                 proxy=proxy,
@@ -15224,7 +16338,7 @@ class BrowserType(AsyncBase):
         handle_sigint: typing.Optional[bool] = None,
         handle_sigterm: typing.Optional[bool] = None,
         handle_sighup: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         env: typing.Optional[typing.Dict[str, typing.Union[str, float, bool]]] = None,
         headless: typing.Optional[bool] = None,
         proxy: typing.Optional[ProxySettings] = None,
@@ -15498,7 +16612,7 @@ class BrowserType(AsyncBase):
                 handleSIGINT=handle_sigint,
                 handleSIGTERM=handle_sigterm,
                 handleSIGHUP=handle_sighup,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 env=mapping.to_impl(env),
                 headless=headless,
                 proxy=proxy,
@@ -15548,10 +16662,11 @@ class BrowserType(AsyncBase):
         self,
         endpoint_url: str,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         slow_mo: typing.Optional[float] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
         is_local: typing.Optional[bool] = None,
+        no_defaults: typing.Optional[bool] = None,
     ) -> "Browser":
         """BrowserType.connect_over_cdp
 
@@ -15589,6 +16704,12 @@ class BrowserType(AsyncBase):
         is_local : Union[bool, None]
             Tells Playwright that it runs on the same host as the CDP server. It will enable certain optimizations that rely
             upon the file system being the same between Playwright and the Browser.
+        no_defaults : Union[bool, None]
+            When true, Playwright will not apply its default overrides to the existing default browser context. Specifically,
+            `acceptDownloads` is left at the browser's setting, focus emulation is not enabled, and media emulation options
+            (such as `colorScheme`, `reducedMotion`, `forcedColors`, and `contrast`) are not applied. Useful when attaching to
+            a user's daily-driver browser where these overrides would interfere with existing browser state. New contexts
+            created via `browser.new_context()` are not affected. Defaults to `false`.
 
         Returns
         -------
@@ -15598,10 +16719,11 @@ class BrowserType(AsyncBase):
         return mapping.from_impl(
             await self._impl_obj.connect_over_cdp(
                 endpointURL=endpoint_url,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 slowMo=slow_mo,
                 headers=mapping.to_impl(headers),
                 isLocal=is_local,
+                noDefaults=no_defaults,
             )
         )
 
@@ -15609,7 +16731,7 @@ class BrowserType(AsyncBase):
         self,
         endpoint: str,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         slow_mo: typing.Optional[float] = None,
         headers: typing.Optional[typing.Dict[str, str]] = None,
         expose_network: typing.Optional[str] = None,
@@ -15655,7 +16777,7 @@ class BrowserType(AsyncBase):
         return mapping.from_impl(
             await self._impl_obj.connect(
                 endpoint=endpoint,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 slowMo=slow_mo,
                 headers=mapping.to_impl(headers),
                 exposeNetwork=expose_network,
@@ -15976,6 +17098,65 @@ class Tracing(AsyncBase):
 
         return mapping.from_maybe_impl(await self._impl_obj.group_end())
 
+    async def start_har(
+        self,
+        path: typing.Union[pathlib.Path, str],
+        *,
+        content: typing.Optional[Literal["attach", "embed", "omit"]] = None,
+        mode: typing.Optional[Literal["full", "minimal"]] = None,
+        url_filter: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+    ) -> "AsyncContextManager":
+        """Tracing.start_har
+
+        Start recording a HAR (HTTP Archive) of network activity in this context. The HAR file is written to disk when
+        `tracing.stop_har()` is called, or when the returned `Disposable` is disposed.
+
+        Only one HAR recording can be active at a time per `BrowserContext`.
+
+        **Usage**
+
+        ```py
+        await context.tracing.start_har(\"trace.har\")
+        page = await context.new_page()
+        await page.goto(\"https://playwright.dev\")
+        await context.tracing.stop_har()
+        ```
+
+        Parameters
+        ----------
+        path : Union[pathlib.Path, str]
+            Path on the filesystem to write the HAR file to. If the file name ends with `.zip`, the HAR is saved as a zip
+            archive with response bodies attached as separate files.
+        content : Union["attach", "embed", "omit", None]
+            Optional setting to control resource content management. If `omit` is specified, content is not persisted. If
+            `attach` is specified, resources are persisted as separate files or entries in the ZIP archive. If `embed` is
+            specified, content is stored inline the HAR file as per HAR specification. Defaults to `attach` for `.zip` output
+            files and to `embed` for all other file extensions.
+        mode : Union["full", "minimal", None]
+            When set to `minimal`, only record information necessary for routing from HAR. This omits sizes, timing, page,
+            cookies, security and other types of HAR information that are not used when replaying from HAR. Defaults to `full`.
+        url_filter : Union[Pattern[str], str, None]
+            A glob or regex pattern to filter requests that are stored in the HAR. Defaults to none.
+
+        Returns
+        -------
+        AsyncContextManager
+        """
+
+        return mapping.from_impl(
+            await self._impl_obj.start_har(
+                path=path, content=content, mode=mode, urlFilter=url_filter
+            )
+        )
+
+    async def stop_har(self) -> None:
+        """Tracing.stop_har
+
+        Stop HAR recording and save the HAR file to the path given to `tracing.start_har()`.
+        """
+
+        return mapping.from_maybe_impl(await self._impl_obj.stop_har())
+
 
 mapping.register(TracingImpl, Tracing)
 
@@ -16074,7 +17255,9 @@ class Locator(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.description)
 
     async def bounding_box(
-        self, *, timeout: typing.Optional[float] = None
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> typing.Optional[FloatRect]:
         """Locator.bounding_box
 
@@ -16113,14 +17296,14 @@ class Locator(AsyncBase):
         """
 
         return mapping.from_impl_nullable(
-            await self._impl_obj.bounding_box(timeout=timeout)
+            await self._impl_obj.bounding_box(timeout=to_milliseconds(timeout))
         )
 
     async def check(
         self,
         *,
         position: typing.Optional[Position] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
@@ -16171,7 +17354,7 @@ class Locator(AsyncBase):
         return mapping.from_maybe_impl(
             await self._impl_obj.check(
                 position=position,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 force=force,
                 noWaitAfter=no_wait_after,
                 trial=trial,
@@ -16188,7 +17371,7 @@ class Locator(AsyncBase):
         delay: typing.Optional[float] = None,
         button: typing.Optional[Literal["left", "middle", "right"]] = None,
         click_count: typing.Optional[int] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
@@ -16269,7 +17452,7 @@ class Locator(AsyncBase):
                 delay=delay,
                 button=button,
                 clickCount=click_count,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 force=force,
                 noWaitAfter=no_wait_after,
                 trial=trial,
@@ -16286,7 +17469,7 @@ class Locator(AsyncBase):
         position: typing.Optional[Position] = None,
         delay: typing.Optional[float] = None,
         button: typing.Optional[Literal["left", "middle", "right"]] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
@@ -16347,7 +17530,7 @@ class Locator(AsyncBase):
                 position=position,
                 delay=delay,
                 button=button,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 force=force,
                 noWaitAfter=no_wait_after,
                 trial=trial,
@@ -16360,7 +17543,7 @@ class Locator(AsyncBase):
         type: str,
         event_init: typing.Optional[typing.Dict] = None,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """Locator.dispatch_event
 
@@ -16413,7 +17596,9 @@ class Locator(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.dispatch_event(
-                type=type, eventInit=mapping.to_impl(event_init), timeout=timeout
+                type=type,
+                eventInit=mapping.to_impl(event_init),
+                timeout=to_milliseconds(timeout),
             )
         )
 
@@ -16422,7 +17607,7 @@ class Locator(AsyncBase):
         expression: str,
         arg: typing.Optional[typing.Any] = None,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> typing.Any:
         """Locator.evaluate
 
@@ -16464,7 +17649,9 @@ class Locator(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.evaluate(
-                expression=expression, arg=mapping.to_impl(arg), timeout=timeout
+                expression=expression,
+                arg=mapping.to_impl(arg),
+                timeout=to_milliseconds(timeout),
             )
         )
 
@@ -16515,7 +17702,7 @@ class Locator(AsyncBase):
         expression: str,
         arg: typing.Optional[typing.Any] = None,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> "JSHandle":
         """Locator.evaluate_handle
 
@@ -16554,7 +17741,9 @@ class Locator(AsyncBase):
 
         return mapping.from_impl(
             await self._impl_obj.evaluate_handle(
-                expression=expression, arg=mapping.to_impl(arg), timeout=timeout
+                expression=expression,
+                arg=mapping.to_impl(arg),
+                timeout=to_milliseconds(timeout),
             )
         )
 
@@ -16562,7 +17751,7 @@ class Locator(AsyncBase):
         self,
         value: str,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         no_wait_after: typing.Optional[bool] = None,
         force: typing.Optional[bool] = None,
     ) -> None:
@@ -16604,14 +17793,17 @@ class Locator(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.fill(
-                value=value, timeout=timeout, noWaitAfter=no_wait_after, force=force
+                value=value,
+                timeout=to_milliseconds(timeout),
+                noWaitAfter=no_wait_after,
+                force=force,
             )
         )
 
     async def clear(
         self,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         no_wait_after: typing.Optional[bool] = None,
         force: typing.Optional[bool] = None,
     ) -> None:
@@ -16649,7 +17841,7 @@ class Locator(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.clear(
-                timeout=timeout, noWaitAfter=no_wait_after, force=force
+                timeout=to_milliseconds(timeout), noWaitAfter=no_wait_after, force=force
             )
         )
 
@@ -16926,6 +18118,7 @@ class Locator(AsyncBase):
         pressed: typing.Optional[bool] = None,
         selected: typing.Optional[bool] = None,
         exact: typing.Optional[bool] = None,
+        description: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
     ) -> "Locator":
         """Locator.get_by_role
 
@@ -17008,8 +18201,13 @@ class Locator(AsyncBase):
 
             Learn more about [`aria-selected`](https://www.w3.org/TR/wai-aria-1.2/#aria-selected).
         exact : Union[bool, None]
-            Whether `name` is matched exactly: case-sensitive and whole-string. Defaults to false. Ignored when `name` is a
-            regular expression. Note that exact match still trims whitespace.
+            Whether `name` and `description` are matched exactly: case-sensitive and whole-string. Defaults to false. Ignored
+            when the value is a regular expression. Note that exact match still trims whitespace.
+        description : Union[Pattern[str], str, None]
+            Option to match the [accessible description](https://w3c.github.io/accname/#dfn-accessible-description). By
+            default, matching is case-insensitive and searches for a substring, use `exact` to control this behavior.
+
+            Learn more about [accessible description](https://w3c.github.io/accname/#dfn-accessible-description).
 
         Returns
         -------
@@ -17028,6 +18226,7 @@ class Locator(AsyncBase):
                 pressed=pressed,
                 selected=selected,
                 exact=exact,
+                description=description,
             )
         )
 
@@ -17198,7 +18397,9 @@ class Locator(AsyncBase):
         return mapping.from_impl(self._impl_obj.frame_locator(selector=selector))
 
     async def element_handle(
-        self, *, timeout: typing.Optional[float] = None
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> "ElementHandle":
         """Locator.element_handle
 
@@ -17216,7 +18417,9 @@ class Locator(AsyncBase):
         ElementHandle
         """
 
-        return mapping.from_impl(await self._impl_obj.element_handle(timeout=timeout))
+        return mapping.from_impl(
+            await self._impl_obj.element_handle(timeout=to_milliseconds(timeout))
+        )
 
     async def element_handles(self) -> typing.List["ElementHandle"]:
         """Locator.element_handles
@@ -17407,7 +18610,11 @@ class Locator(AsyncBase):
 
         return mapping.from_impl(self._impl_obj.and_(locator=locator._impl_obj))
 
-    async def focus(self, *, timeout: typing.Optional[float] = None) -> None:
+    async def focus(
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
+    ) -> None:
         """Locator.focus
 
         Calls [focus](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus) on the matching element.
@@ -17419,9 +18626,15 @@ class Locator(AsyncBase):
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.focus(timeout=timeout))
+        return mapping.from_maybe_impl(
+            await self._impl_obj.focus(timeout=to_milliseconds(timeout))
+        )
 
-    async def blur(self, *, timeout: typing.Optional[float] = None) -> None:
+    async def blur(
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
+    ) -> None:
         """Locator.blur
 
         Calls [blur](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/blur) on the element.
@@ -17433,7 +18646,9 @@ class Locator(AsyncBase):
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.blur(timeout=timeout))
+        return mapping.from_maybe_impl(
+            await self._impl_obj.blur(timeout=to_milliseconds(timeout))
+        )
 
     async def all(self) -> typing.List["Locator"]:
         """Locator.all
@@ -17491,7 +18706,7 @@ class Locator(AsyncBase):
         *,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         trial: typing.Optional[bool] = None,
         source_position: typing.Optional[Position] = None,
         target_position: typing.Optional[Position] = None,
@@ -17552,7 +18767,7 @@ class Locator(AsyncBase):
                 target=target._impl_obj,
                 force=force,
                 noWaitAfter=no_wait_after,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 trial=trial,
                 sourcePosition=source_position,
                 targetPosition=target_position,
@@ -17560,8 +18775,56 @@ class Locator(AsyncBase):
             )
         )
 
+    async def drop(
+        self,
+        payload: DropPayload,
+        *,
+        position: typing.Optional[Position] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
+    ) -> None:
+        """Locator.drop
+
+        Simulate an external drag-and-drop of files or clipboard-like data onto this locator.
+
+        **Details**
+
+        Dispatches the native `dragenter`, `dragover`, and `drop` events at the center of the target element with a
+        synthetic [DataTransfer] carrying the provided files and/or data entries. Works cross-browser by constructing the
+        [DataTransfer] in the page context.
+
+        If the target element's `dragover` listener does not call `preventDefault()`, the target is considered to have
+        rejected the drop: Playwright dispatches `dragleave` and this method throws.
+
+        **Usage**
+
+        Drop a file buffer onto an upload area:
+
+        Drop plain text and a URL together:
+
+        Parameters
+        ----------
+        payload : {files: Union[Sequence[Union[pathlib.Path, str]], Sequence[{name: str, mimeType: str, buffer: bytes}], pathlib.Path, str, {name: str, mimeType: str, buffer: bytes}, None], data: Union[Dict[str, str], None]}
+            Data to drop onto the target. Provide `files` (file paths or in-memory buffers), `data` (a mime-type → string map
+            for clipboard-like content such as `text/plain`, `text/html`, `text/uri-list`), or both.
+        position : Union[{x: float, y: float}, None]
+            A point to use relative to the top-left corner of element padding box. If not specified, uses some visible point of
+            the element.
+        timeout : Union[float, None]
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.drop(
+                payload=payload, position=position, timeout=to_milliseconds(timeout)
+            )
+        )
+
     async def get_attribute(
-        self, name: str, *, timeout: typing.Optional[float] = None
+        self,
+        name: str,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> typing.Optional[str]:
         """Locator.get_attribute
 
@@ -17584,7 +18847,9 @@ class Locator(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.get_attribute(name=name, timeout=timeout)
+            await self._impl_obj.get_attribute(
+                name=name, timeout=to_milliseconds(timeout)
+            )
         )
 
     async def hover(
@@ -17594,7 +18859,7 @@ class Locator(AsyncBase):
             typing.Sequence[Literal["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         no_wait_after: typing.Optional[bool] = None,
         force: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
@@ -17649,14 +18914,18 @@ class Locator(AsyncBase):
             await self._impl_obj.hover(
                 modifiers=mapping.to_impl(modifiers),
                 position=position,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 noWaitAfter=no_wait_after,
                 force=force,
                 trial=trial,
             )
         )
 
-    async def inner_html(self, *, timeout: typing.Optional[float] = None) -> str:
+    async def inner_html(
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
+    ) -> str:
         """Locator.inner_html
 
         Returns the [`element.innerHTML`](https://developer.mozilla.org/en-US/docs/Web/API/Element/innerHTML).
@@ -17672,9 +18941,15 @@ class Locator(AsyncBase):
         str
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.inner_html(timeout=timeout))
+        return mapping.from_maybe_impl(
+            await self._impl_obj.inner_html(timeout=to_milliseconds(timeout))
+        )
 
-    async def inner_text(self, *, timeout: typing.Optional[float] = None) -> str:
+    async def inner_text(
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
+    ) -> str:
         """Locator.inner_text
 
         Returns the [`element.innerText`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/innerText).
@@ -17693,9 +18968,15 @@ class Locator(AsyncBase):
         str
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.inner_text(timeout=timeout))
+        return mapping.from_maybe_impl(
+            await self._impl_obj.inner_text(timeout=to_milliseconds(timeout))
+        )
 
-    async def input_value(self, *, timeout: typing.Optional[float] = None) -> str:
+    async def input_value(
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
+    ) -> str:
         """Locator.input_value
 
         Returns the value for the matching `<input>` or `<textarea>` or `<select>` element.
@@ -17728,10 +19009,14 @@ class Locator(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.input_value(timeout=timeout)
+            await self._impl_obj.input_value(timeout=to_milliseconds(timeout))
         )
 
-    async def is_checked(self, *, timeout: typing.Optional[float] = None) -> bool:
+    async def is_checked(
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
+    ) -> bool:
         """Locator.is_checked
 
         Returns whether the element is checked. Throws if the element is not a checkbox or radio input.
@@ -17756,9 +19041,15 @@ class Locator(AsyncBase):
         bool
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.is_checked(timeout=timeout))
+        return mapping.from_maybe_impl(
+            await self._impl_obj.is_checked(timeout=to_milliseconds(timeout))
+        )
 
-    async def is_disabled(self, *, timeout: typing.Optional[float] = None) -> bool:
+    async def is_disabled(
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
+    ) -> bool:
         """Locator.is_disabled
 
         Returns whether the element is disabled, the opposite of [enabled](https://playwright.dev/python/docs/actionability#enabled).
@@ -17784,10 +19075,14 @@ class Locator(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.is_disabled(timeout=timeout)
+            await self._impl_obj.is_disabled(timeout=to_milliseconds(timeout))
         )
 
-    async def is_editable(self, *, timeout: typing.Optional[float] = None) -> bool:
+    async def is_editable(
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
+    ) -> bool:
         """Locator.is_editable
 
         Returns whether the element is [editable](https://playwright.dev/python/docs/actionability#editable). If the target element is not an `<input>`,
@@ -17815,10 +19110,14 @@ class Locator(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.is_editable(timeout=timeout)
+            await self._impl_obj.is_editable(timeout=to_milliseconds(timeout))
         )
 
-    async def is_enabled(self, *, timeout: typing.Optional[float] = None) -> bool:
+    async def is_enabled(
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
+    ) -> bool:
         """Locator.is_enabled
 
         Returns whether the element is [enabled](https://playwright.dev/python/docs/actionability#enabled).
@@ -17843,9 +19142,15 @@ class Locator(AsyncBase):
         bool
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.is_enabled(timeout=timeout))
+        return mapping.from_maybe_impl(
+            await self._impl_obj.is_enabled(timeout=to_milliseconds(timeout))
+        )
 
-    async def is_hidden(self, *, timeout: typing.Optional[float] = None) -> bool:
+    async def is_hidden(
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
+    ) -> bool:
         """Locator.is_hidden
 
         Returns whether the element is hidden, the opposite of [visible](https://playwright.dev/python/docs/actionability#visible).
@@ -17869,9 +19174,15 @@ class Locator(AsyncBase):
         bool
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.is_hidden(timeout=timeout))
+        return mapping.from_maybe_impl(
+            await self._impl_obj.is_hidden(timeout=to_milliseconds(timeout))
+        )
 
-    async def is_visible(self, *, timeout: typing.Optional[float] = None) -> bool:
+    async def is_visible(
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
+    ) -> bool:
         """Locator.is_visible
 
         Returns whether the element is [visible](https://playwright.dev/python/docs/actionability#visible).
@@ -17895,14 +19206,16 @@ class Locator(AsyncBase):
         bool
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.is_visible(timeout=timeout))
+        return mapping.from_maybe_impl(
+            await self._impl_obj.is_visible(timeout=to_milliseconds(timeout))
+        )
 
     async def press(
         self,
         key: str,
         *,
         delay: typing.Optional[float] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         no_wait_after: typing.Optional[bool] = None,
     ) -> None:
         """Locator.press
@@ -17957,14 +19270,17 @@ class Locator(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.press(
-                key=key, delay=delay, timeout=timeout, noWaitAfter=no_wait_after
+                key=key,
+                delay=delay,
+                timeout=to_milliseconds(timeout),
+                noWaitAfter=no_wait_after,
             )
         )
 
     async def screenshot(
         self,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         type: typing.Optional[Literal["jpeg", "png"]] = None,
         path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         quality: typing.Optional[int] = None,
@@ -18055,7 +19371,7 @@ class Locator(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.screenshot(
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 type=type,
                 path=path,
                 quality=quality,
@@ -18072,9 +19388,10 @@ class Locator(AsyncBase):
     async def aria_snapshot(
         self,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         depth: typing.Optional[int] = None,
         mode: typing.Optional[Literal["ai", "default"]] = None,
+        boxes: typing.Optional[bool] = None,
     ) -> str:
         """Locator.aria_snapshot
 
@@ -18129,6 +19446,11 @@ class Locator(AsyncBase):
         mode : Union["ai", "default", None]
             When set to `"ai"`, returns a snapshot optimized for AI consumption. Defaults to `"default"`. See details for more
             information.
+        boxes : Union[bool, None]
+            When `true`, appends each element's bounding box as `[box=x,y,width,height]` to the snapshot. Coordinates are
+            relative to the viewport, in CSS pixels, as returned by
+            [`Element.getBoundingClientRect()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect).
+            Defaults to `false`.
 
         Returns
         -------
@@ -18136,7 +19458,9 @@ class Locator(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.aria_snapshot(timeout=timeout, depth=depth, mode=mode)
+            await self._impl_obj.aria_snapshot(
+                timeout=to_milliseconds(timeout), depth=depth, mode=mode, boxes=boxes
+            )
         )
 
     async def normalize(self) -> "Locator":
@@ -18154,7 +19478,9 @@ class Locator(AsyncBase):
         return mapping.from_impl(await self._impl_obj.normalize())
 
     async def scroll_into_view_if_needed(
-        self, *, timeout: typing.Optional[float] = None
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """Locator.scroll_into_view_if_needed
 
@@ -18172,7 +19498,9 @@ class Locator(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.scroll_into_view_if_needed(timeout=timeout)
+            await self._impl_obj.scroll_into_view_if_needed(
+                timeout=to_milliseconds(timeout)
+            )
         )
 
     async def select_option(
@@ -18184,7 +19512,7 @@ class Locator(AsyncBase):
         element: typing.Optional[
             typing.Union["ElementHandle", typing.Sequence["ElementHandle"]]
         ] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         no_wait_after: typing.Optional[bool] = None,
         force: typing.Optional[bool] = None,
     ) -> typing.List[str]:
@@ -18257,7 +19585,7 @@ class Locator(AsyncBase):
                 index=mapping.to_impl(index),
                 label=mapping.to_impl(label),
                 element=mapping.to_impl(element),
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 noWaitAfter=no_wait_after,
                 force=force,
             )
@@ -18267,7 +19595,7 @@ class Locator(AsyncBase):
         self,
         *,
         force: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """Locator.select_text
 
@@ -18288,7 +19616,9 @@ class Locator(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.select_text(force=force, timeout=timeout)
+            await self._impl_obj.select_text(
+                force=force, timeout=to_milliseconds(timeout)
+            )
         )
 
     async def set_input_files(
@@ -18301,7 +19631,7 @@ class Locator(AsyncBase):
             typing.Sequence[FilePayload],
         ],
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         no_wait_after: typing.Optional[bool] = None,
     ) -> None:
         """Locator.set_input_files
@@ -18355,7 +19685,9 @@ class Locator(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.set_input_files(
-                files=mapping.to_impl(files), timeout=timeout, noWaitAfter=no_wait_after
+                files=mapping.to_impl(files),
+                timeout=to_milliseconds(timeout),
+                noWaitAfter=no_wait_after,
             )
         )
 
@@ -18366,7 +19698,7 @@ class Locator(AsyncBase):
             typing.Sequence[Literal["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]]
         ] = None,
         position: typing.Optional[Position] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
@@ -18418,7 +19750,7 @@ class Locator(AsyncBase):
             await self._impl_obj.tap(
                 modifiers=mapping.to_impl(modifiers),
                 position=position,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 force=force,
                 noWaitAfter=no_wait_after,
                 trial=trial,
@@ -18426,7 +19758,9 @@ class Locator(AsyncBase):
         )
 
     async def text_content(
-        self, *, timeout: typing.Optional[float] = None
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> typing.Optional[str]:
         """Locator.text_content
 
@@ -18447,7 +19781,7 @@ class Locator(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.text_content(timeout=timeout)
+            await self._impl_obj.text_content(timeout=to_milliseconds(timeout))
         )
 
     async def type(
@@ -18455,7 +19789,7 @@ class Locator(AsyncBase):
         text: str,
         *,
         delay: typing.Optional[float] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         no_wait_after: typing.Optional[bool] = None,
     ) -> None:
         """Locator.type
@@ -18483,7 +19817,10 @@ class Locator(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.type(
-                text=text, delay=delay, timeout=timeout, noWaitAfter=no_wait_after
+                text=text,
+                delay=delay,
+                timeout=to_milliseconds(timeout),
+                noWaitAfter=no_wait_after,
             )
         )
 
@@ -18492,7 +19829,7 @@ class Locator(AsyncBase):
         text: str,
         *,
         delay: typing.Optional[float] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         no_wait_after: typing.Optional[bool] = None,
     ) -> None:
         """Locator.press_sequentially
@@ -18536,7 +19873,10 @@ class Locator(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.press_sequentially(
-                text=text, delay=delay, timeout=timeout, noWaitAfter=no_wait_after
+                text=text,
+                delay=delay,
+                timeout=to_milliseconds(timeout),
+                noWaitAfter=no_wait_after,
             )
         )
 
@@ -18544,7 +19884,7 @@ class Locator(AsyncBase):
         self,
         *,
         position: typing.Optional[Position] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
@@ -18595,7 +19935,7 @@ class Locator(AsyncBase):
         return mapping.from_maybe_impl(
             await self._impl_obj.uncheck(
                 position=position,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 force=force,
                 noWaitAfter=no_wait_after,
                 trial=trial,
@@ -18647,7 +19987,7 @@ class Locator(AsyncBase):
     async def wait_for(
         self,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         state: typing.Optional[
             Literal["attached", "detached", "hidden", "visible"]
         ] = None,
@@ -18682,7 +20022,7 @@ class Locator(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.wait_for(timeout=timeout, state=state)
+            await self._impl_obj.wait_for(timeout=to_milliseconds(timeout), state=state)
         )
 
     async def set_checked(
@@ -18690,7 +20030,7 @@ class Locator(AsyncBase):
         checked: bool,
         *,
         position: typing.Optional[Position] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
@@ -18743,21 +20083,34 @@ class Locator(AsyncBase):
             await self._impl_obj.set_checked(
                 checked=checked,
                 position=position,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 force=force,
                 noWaitAfter=no_wait_after,
                 trial=trial,
             )
         )
 
-    async def highlight(self) -> None:
+    async def highlight(self, *, style: typing.Optional[str] = None) -> None:
         """Locator.highlight
 
         Highlight the corresponding element(s) on the screen. Useful for debugging, don't commit the code that uses
         `locator.highlight()`.
+
+        Parameters
+        ----------
+        style : Union[str, None]
+            Additional inline CSS applied to the highlight overlay, e.g. `"outline: 2px dashed red"`.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.highlight())
+        return mapping.from_maybe_impl(await self._impl_obj.highlight(style=style))
+
+    async def hide_highlight(self) -> None:
+        """Locator.hide_highlight
+
+        Hides the element highlight previously added by `locator.highlight()`.
+        """
+
+        return mapping.from_maybe_impl(await self._impl_obj.hide_highlight())
 
 
 mapping.register(LocatorImpl, Locator)
@@ -18890,6 +20243,16 @@ mapping.register(APIResponseImpl, APIResponse)
 
 class APIRequestContext(AsyncBase):
 
+    @property
+    def tracing(self) -> "Tracing":
+        """APIRequestContext.tracing
+
+        Returns
+        -------
+        Tracing
+        """
+        return mapping.from_impl(self._impl_obj.tracing)
+
     async def dispose(self, *, reason: typing.Optional[str] = None) -> None:
         """APIRequestContext.dispose
 
@@ -18923,7 +20286,7 @@ class APIRequestContext(AsyncBase):
                 "FormData",
             ]
         ] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         fail_on_status_code: typing.Optional[bool] = None,
         ignore_https_errors: typing.Optional[bool] = None,
         max_redirects: typing.Optional[int] = None,
@@ -18985,7 +20348,7 @@ class APIRequestContext(AsyncBase):
                 data=mapping.to_impl(data),
                 form=mapping.to_impl(form),
                 multipart=mapping.to_impl(multipart),
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 failOnStatusCode=fail_on_status_code,
                 ignoreHTTPSErrors=ignore_https_errors,
                 maxRedirects=max_redirects,
@@ -19011,7 +20374,7 @@ class APIRequestContext(AsyncBase):
                 "FormData",
             ]
         ] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         fail_on_status_code: typing.Optional[bool] = None,
         ignore_https_errors: typing.Optional[bool] = None,
         max_redirects: typing.Optional[int] = None,
@@ -19073,7 +20436,7 @@ class APIRequestContext(AsyncBase):
                 data=mapping.to_impl(data),
                 form=mapping.to_impl(form),
                 multipart=mapping.to_impl(multipart),
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 failOnStatusCode=fail_on_status_code,
                 ignoreHTTPSErrors=ignore_https_errors,
                 maxRedirects=max_redirects,
@@ -19099,7 +20462,7 @@ class APIRequestContext(AsyncBase):
                 "FormData",
             ]
         ] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         fail_on_status_code: typing.Optional[bool] = None,
         ignore_https_errors: typing.Optional[bool] = None,
         max_redirects: typing.Optional[int] = None,
@@ -19173,7 +20536,7 @@ class APIRequestContext(AsyncBase):
                 data=mapping.to_impl(data),
                 form=mapping.to_impl(form),
                 multipart=mapping.to_impl(multipart),
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 failOnStatusCode=fail_on_status_code,
                 ignoreHTTPSErrors=ignore_https_errors,
                 maxRedirects=max_redirects,
@@ -19199,7 +20562,7 @@ class APIRequestContext(AsyncBase):
                 "FormData",
             ]
         ] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         fail_on_status_code: typing.Optional[bool] = None,
         ignore_https_errors: typing.Optional[bool] = None,
         max_redirects: typing.Optional[int] = None,
@@ -19261,7 +20624,7 @@ class APIRequestContext(AsyncBase):
                 data=mapping.to_impl(data),
                 form=mapping.to_impl(form),
                 multipart=mapping.to_impl(multipart),
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 failOnStatusCode=fail_on_status_code,
                 ignoreHTTPSErrors=ignore_https_errors,
                 maxRedirects=max_redirects,
@@ -19287,7 +20650,7 @@ class APIRequestContext(AsyncBase):
                 "FormData",
             ]
         ] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         fail_on_status_code: typing.Optional[bool] = None,
         ignore_https_errors: typing.Optional[bool] = None,
         max_redirects: typing.Optional[int] = None,
@@ -19349,7 +20712,7 @@ class APIRequestContext(AsyncBase):
                 data=mapping.to_impl(data),
                 form=mapping.to_impl(form),
                 multipart=mapping.to_impl(multipart),
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 failOnStatusCode=fail_on_status_code,
                 ignoreHTTPSErrors=ignore_https_errors,
                 maxRedirects=max_redirects,
@@ -19375,7 +20738,7 @@ class APIRequestContext(AsyncBase):
                 "FormData",
             ]
         ] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         fail_on_status_code: typing.Optional[bool] = None,
         ignore_https_errors: typing.Optional[bool] = None,
         max_redirects: typing.Optional[int] = None,
@@ -19468,7 +20831,7 @@ class APIRequestContext(AsyncBase):
                 data=mapping.to_impl(data),
                 form=mapping.to_impl(form),
                 multipart=mapping.to_impl(multipart),
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 failOnStatusCode=fail_on_status_code,
                 ignoreHTTPSErrors=ignore_https_errors,
                 maxRedirects=max_redirects,
@@ -19495,7 +20858,7 @@ class APIRequestContext(AsyncBase):
                 "FormData",
             ]
         ] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         fail_on_status_code: typing.Optional[bool] = None,
         ignore_https_errors: typing.Optional[bool] = None,
         max_redirects: typing.Optional[int] = None,
@@ -19575,7 +20938,7 @@ class APIRequestContext(AsyncBase):
                 data=mapping.to_impl(data),
                 form=mapping.to_impl(form),
                 multipart=mapping.to_impl(multipart),
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 failOnStatusCode=fail_on_status_code,
                 ignoreHTTPSErrors=ignore_https_errors,
                 maxRedirects=max_redirects,
@@ -19626,7 +20989,7 @@ class APIRequest(AsyncBase):
         ignore_https_errors: typing.Optional[bool] = None,
         proxy: typing.Optional[ProxySettings] = None,
         user_agent: typing.Optional[str] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         storage_state: typing.Optional[
             typing.Union[StorageState, str, pathlib.Path]
         ] = None,
@@ -19706,7 +21069,7 @@ class APIRequest(AsyncBase):
                 ignoreHTTPSErrors=ignore_https_errors,
                 proxy=proxy,
                 userAgent=user_agent,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 storageState=storage_state,
                 clientCertificates=client_certificates,
                 failOnStatusCode=fail_on_status_code,
@@ -19724,7 +21087,7 @@ class PageAssertions(AsyncBase):
         self,
         title_or_reg_exp: typing.Union[typing.Pattern[str], str],
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """PageAssertions.to_have_title
 
@@ -19751,7 +21114,7 @@ class PageAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.to_have_title(
-                titleOrRegExp=title_or_reg_exp, timeout=timeout
+                titleOrRegExp=title_or_reg_exp, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -19759,7 +21122,7 @@ class PageAssertions(AsyncBase):
         self,
         title_or_reg_exp: typing.Union[typing.Pattern[str], str],
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """PageAssertions.not_to_have_title
 
@@ -19776,7 +21139,7 @@ class PageAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.not_to_have_title(
-                titleOrRegExp=title_or_reg_exp, timeout=timeout
+                titleOrRegExp=title_or_reg_exp, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -19784,7 +21147,7 @@ class PageAssertions(AsyncBase):
         self,
         url_or_reg_exp: typing.Union[str, typing.Pattern[str]],
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         ignore_case: typing.Optional[bool] = None,
     ) -> None:
         """PageAssertions.to_have_url
@@ -19815,7 +21178,9 @@ class PageAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.to_have_url(
-                urlOrRegExp=url_or_reg_exp, timeout=timeout, ignoreCase=ignore_case
+                urlOrRegExp=url_or_reg_exp,
+                timeout=to_milliseconds(timeout),
+                ignoreCase=ignore_case,
             )
         )
 
@@ -19823,7 +21188,7 @@ class PageAssertions(AsyncBase):
         self,
         url_or_reg_exp: typing.Union[typing.Pattern[str], str],
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         ignore_case: typing.Optional[bool] = None,
     ) -> None:
         """PageAssertions.not_to_have_url
@@ -19844,7 +21209,67 @@ class PageAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.not_to_have_url(
-                urlOrRegExp=url_or_reg_exp, timeout=timeout, ignoreCase=ignore_case
+                urlOrRegExp=url_or_reg_exp,
+                timeout=to_milliseconds(timeout),
+                ignoreCase=ignore_case,
+            )
+        )
+
+    async def to_match_aria_snapshot(
+        self,
+        expected: str,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
+    ) -> None:
+        """PageAssertions.to_match_aria_snapshot
+
+        Asserts that the page body matches the given [accessibility snapshot](https://playwright.dev/python/docs/aria-snapshots).
+
+        **Usage**
+
+        ```py
+        await page.goto(\"https://demo.playwright.dev/todomvc/\")
+        await expect(page).to_match_aria_snapshot('''
+          - heading \"todos\"
+          - textbox \"What needs to be done?\"
+        ''')
+        ```
+
+        Parameters
+        ----------
+        expected : str
+        timeout : Union[float, None]
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.to_match_aria_snapshot(
+                expected=expected, timeout=to_milliseconds(timeout)
+            )
+        )
+
+    async def not_to_match_aria_snapshot(
+        self,
+        expected: str,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
+    ) -> None:
+        """PageAssertions.not_to_match_aria_snapshot
+
+        The opposite of `page_assertions.to_match_aria_snapshot()`.
+
+        Parameters
+        ----------
+        expected : str
+        timeout : Union[float, None]
+            Time to retry the assertion for in milliseconds. Defaults to `5000`.
+        """
+        __tracebackhide__ = True
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.not_to_match_aria_snapshot(
+                expected=expected, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -19865,7 +21290,7 @@ class LocatorAssertions(AsyncBase):
         ],
         *,
         use_inner_text: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         ignore_case: typing.Optional[bool] = None,
     ) -> None:
         """LocatorAssertions.to_contain_text
@@ -19941,7 +21366,7 @@ class LocatorAssertions(AsyncBase):
             await self._impl_obj.to_contain_text(
                 expected=mapping.to_impl(expected),
                 useInnerText=use_inner_text,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 ignoreCase=ignore_case,
             )
         )
@@ -19957,7 +21382,7 @@ class LocatorAssertions(AsyncBase):
         ],
         *,
         use_inner_text: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         ignore_case: typing.Optional[bool] = None,
     ) -> None:
         """LocatorAssertions.not_to_contain_text
@@ -19982,7 +21407,7 @@ class LocatorAssertions(AsyncBase):
             await self._impl_obj.not_to_contain_text(
                 expected=mapping.to_impl(expected),
                 useInnerText=use_inner_text,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 ignoreCase=ignore_case,
             )
         )
@@ -19993,7 +21418,7 @@ class LocatorAssertions(AsyncBase):
         value: typing.Union[str, typing.Pattern[str]],
         *,
         ignore_case: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.to_have_attribute
 
@@ -20024,7 +21449,10 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.to_have_attribute(
-                name=name, value=value, ignoreCase=ignore_case, timeout=timeout
+                name=name,
+                value=value,
+                ignoreCase=ignore_case,
+                timeout=to_milliseconds(timeout),
             )
         )
 
@@ -20034,7 +21462,7 @@ class LocatorAssertions(AsyncBase):
         value: typing.Union[str, typing.Pattern[str]],
         *,
         ignore_case: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.not_to_have_attribute
 
@@ -20056,7 +21484,10 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.not_to_have_attribute(
-                name=name, value=value, ignoreCase=ignore_case, timeout=timeout
+                name=name,
+                value=value,
+                ignoreCase=ignore_case,
+                timeout=to_milliseconds(timeout),
             )
         )
 
@@ -20070,7 +21501,7 @@ class LocatorAssertions(AsyncBase):
             str,
         ],
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.to_have_class
 
@@ -20113,7 +21544,7 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.to_have_class(
-                expected=mapping.to_impl(expected), timeout=timeout
+                expected=mapping.to_impl(expected), timeout=to_milliseconds(timeout)
             )
         )
 
@@ -20127,7 +21558,7 @@ class LocatorAssertions(AsyncBase):
             str,
         ],
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.not_to_have_class
 
@@ -20144,7 +21575,7 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.not_to_have_class(
-                expected=mapping.to_impl(expected), timeout=timeout
+                expected=mapping.to_impl(expected), timeout=to_milliseconds(timeout)
             )
         )
 
@@ -20152,7 +21583,7 @@ class LocatorAssertions(AsyncBase):
         self,
         expected: typing.Union[typing.Sequence[str], str],
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.to_contain_class
 
@@ -20205,7 +21636,7 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.to_contain_class(
-                expected=mapping.to_impl(expected), timeout=timeout
+                expected=mapping.to_impl(expected), timeout=to_milliseconds(timeout)
             )
         )
 
@@ -20213,7 +21644,7 @@ class LocatorAssertions(AsyncBase):
         self,
         expected: typing.Union[typing.Sequence[str], str],
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.not_to_contain_class
 
@@ -20230,12 +21661,15 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.not_to_contain_class(
-                expected=mapping.to_impl(expected), timeout=timeout
+                expected=mapping.to_impl(expected), timeout=to_milliseconds(timeout)
             )
         )
 
     async def to_have_count(
-        self, count: int, *, timeout: typing.Optional[float] = None
+        self,
+        count: int,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.to_have_count
 
@@ -20260,11 +21694,16 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.to_have_count(count=count, timeout=timeout)
+            await self._impl_obj.to_have_count(
+                count=count, timeout=to_milliseconds(timeout)
+            )
         )
 
     async def not_to_have_count(
-        self, count: int, *, timeout: typing.Optional[float] = None
+        self,
+        count: int,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.not_to_have_count
 
@@ -20280,7 +21719,9 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_have_count(count=count, timeout=timeout)
+            await self._impl_obj.not_to_have_count(
+                count=count, timeout=to_milliseconds(timeout)
+            )
         )
 
     async def to_have_css(
@@ -20288,7 +21729,8 @@ class LocatorAssertions(AsyncBase):
         name: str,
         value: typing.Union[str, typing.Pattern[str]],
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
+        pseudo: typing.Optional[Literal["after", "before"]] = None,
     ) -> None:
         """LocatorAssertions.to_have_css
 
@@ -20311,11 +21753,15 @@ class LocatorAssertions(AsyncBase):
             CSS property value.
         timeout : Union[float, None]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
+        pseudo : Union["after", "before", None]
+            Pseudo-element to read computed styles from.
         """
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.to_have_css(name=name, value=value, timeout=timeout)
+            await self._impl_obj.to_have_css(
+                name=name, value=value, timeout=to_milliseconds(timeout), pseudo=pseudo
+            )
         )
 
     async def not_to_have_css(
@@ -20323,7 +21769,7 @@ class LocatorAssertions(AsyncBase):
         name: str,
         value: typing.Union[str, typing.Pattern[str]],
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.not_to_have_css
 
@@ -20342,7 +21788,7 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.not_to_have_css(
-                name=name, value=value, timeout=timeout
+                name=name, value=value, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -20350,7 +21796,7 @@ class LocatorAssertions(AsyncBase):
         self,
         id: typing.Union[str, typing.Pattern[str]],
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.to_have_id
 
@@ -20375,14 +21821,14 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.to_have_id(id=id, timeout=timeout)
+            await self._impl_obj.to_have_id(id=id, timeout=to_milliseconds(timeout))
         )
 
     async def not_to_have_id(
         self,
         id: typing.Union[str, typing.Pattern[str]],
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.not_to_have_id
 
@@ -20398,11 +21844,15 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_have_id(id=id, timeout=timeout)
+            await self._impl_obj.not_to_have_id(id=id, timeout=to_milliseconds(timeout))
         )
 
     async def to_have_js_property(
-        self, name: str, value: typing.Any, *, timeout: typing.Optional[float] = None
+        self,
+        name: str,
+        value: typing.Any,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.to_have_js_property
 
@@ -20431,12 +21881,18 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.to_have_js_property(
-                name=name, value=mapping.to_impl(value), timeout=timeout
+                name=name,
+                value=mapping.to_impl(value),
+                timeout=to_milliseconds(timeout),
             )
         )
 
     async def not_to_have_js_property(
-        self, name: str, value: typing.Any, *, timeout: typing.Optional[float] = None
+        self,
+        name: str,
+        value: typing.Any,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.not_to_have_js_property
 
@@ -20455,7 +21911,9 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.not_to_have_js_property(
-                name=name, value=mapping.to_impl(value), timeout=timeout
+                name=name,
+                value=mapping.to_impl(value),
+                timeout=to_milliseconds(timeout),
             )
         )
 
@@ -20463,7 +21921,7 @@ class LocatorAssertions(AsyncBase):
         self,
         value: typing.Union[str, typing.Pattern[str]],
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.to_have_value
 
@@ -20490,14 +21948,16 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.to_have_value(value=value, timeout=timeout)
+            await self._impl_obj.to_have_value(
+                value=value, timeout=to_milliseconds(timeout)
+            )
         )
 
     async def not_to_have_value(
         self,
         value: typing.Union[str, typing.Pattern[str]],
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.not_to_have_value
 
@@ -20513,7 +21973,9 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_have_value(value=value, timeout=timeout)
+            await self._impl_obj.not_to_have_value(
+                value=value, timeout=to_milliseconds(timeout)
+            )
         )
 
     async def to_have_values(
@@ -20524,7 +21986,7 @@ class LocatorAssertions(AsyncBase):
             typing.Sequence[typing.Union[typing.Pattern[str], str]],
         ],
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.to_have_values
 
@@ -20563,7 +22025,7 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.to_have_values(
-                values=mapping.to_impl(values), timeout=timeout
+                values=mapping.to_impl(values), timeout=to_milliseconds(timeout)
             )
         )
 
@@ -20575,7 +22037,7 @@ class LocatorAssertions(AsyncBase):
             typing.Sequence[typing.Union[typing.Pattern[str], str]],
         ],
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.not_to_have_values
 
@@ -20592,7 +22054,7 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.not_to_have_values(
-                values=mapping.to_impl(values), timeout=timeout
+                values=mapping.to_impl(values), timeout=to_milliseconds(timeout)
             )
         )
 
@@ -20607,7 +22069,7 @@ class LocatorAssertions(AsyncBase):
         ],
         *,
         use_inner_text: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         ignore_case: typing.Optional[bool] = None,
     ) -> None:
         """LocatorAssertions.to_have_text
@@ -20682,7 +22144,7 @@ class LocatorAssertions(AsyncBase):
             await self._impl_obj.to_have_text(
                 expected=mapping.to_impl(expected),
                 useInnerText=use_inner_text,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 ignoreCase=ignore_case,
             )
         )
@@ -20698,7 +22160,7 @@ class LocatorAssertions(AsyncBase):
         ],
         *,
         use_inner_text: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         ignore_case: typing.Optional[bool] = None,
     ) -> None:
         """LocatorAssertions.not_to_have_text
@@ -20723,7 +22185,7 @@ class LocatorAssertions(AsyncBase):
             await self._impl_obj.not_to_have_text(
                 expected=mapping.to_impl(expected),
                 useInnerText=use_inner_text,
-                timeout=timeout,
+                timeout=to_milliseconds(timeout),
                 ignoreCase=ignore_case,
             )
         )
@@ -20732,7 +22194,7 @@ class LocatorAssertions(AsyncBase):
         self,
         *,
         attached: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.to_be_attached
 
@@ -20754,13 +22216,15 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.to_be_attached(attached=attached, timeout=timeout)
+            await self._impl_obj.to_be_attached(
+                attached=attached, timeout=to_milliseconds(timeout)
+            )
         )
 
     async def to_be_checked(
         self,
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         checked: typing.Optional[bool] = None,
         indeterminate: typing.Optional[bool] = None,
     ) -> None:
@@ -20792,7 +22256,9 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.to_be_checked(
-                timeout=timeout, checked=checked, indeterminate=indeterminate
+                timeout=to_milliseconds(timeout),
+                checked=checked,
+                indeterminate=indeterminate,
             )
         )
 
@@ -20800,7 +22266,7 @@ class LocatorAssertions(AsyncBase):
         self,
         *,
         attached: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.not_to_be_attached
 
@@ -20815,11 +22281,15 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_be_attached(attached=attached, timeout=timeout)
+            await self._impl_obj.not_to_be_attached(
+                attached=attached, timeout=to_milliseconds(timeout)
+            )
         )
 
     async def not_to_be_checked(
-        self, *, timeout: typing.Optional[float] = None
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.not_to_be_checked
 
@@ -20833,10 +22303,14 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_be_checked(timeout=timeout)
+            await self._impl_obj.not_to_be_checked(timeout=to_milliseconds(timeout))
         )
 
-    async def to_be_disabled(self, *, timeout: typing.Optional[float] = None) -> None:
+    async def to_be_disabled(
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
+    ) -> None:
         """LocatorAssertions.to_be_disabled
 
         Ensures the `Locator` points to a disabled element. Element is disabled if it has \"disabled\" attribute or is
@@ -20862,11 +22336,13 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.to_be_disabled(timeout=timeout)
+            await self._impl_obj.to_be_disabled(timeout=to_milliseconds(timeout))
         )
 
     async def not_to_be_disabled(
-        self, *, timeout: typing.Optional[float] = None
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.not_to_be_disabled
 
@@ -20880,14 +22356,14 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_be_disabled(timeout=timeout)
+            await self._impl_obj.not_to_be_disabled(timeout=to_milliseconds(timeout))
         )
 
     async def to_be_editable(
         self,
         *,
         editable: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.to_be_editable
 
@@ -20911,14 +22387,16 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.to_be_editable(editable=editable, timeout=timeout)
+            await self._impl_obj.to_be_editable(
+                editable=editable, timeout=to_milliseconds(timeout)
+            )
         )
 
     async def not_to_be_editable(
         self,
         *,
         editable: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.not_to_be_editable
 
@@ -20933,10 +22411,16 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_be_editable(editable=editable, timeout=timeout)
+            await self._impl_obj.not_to_be_editable(
+                editable=editable, timeout=to_milliseconds(timeout)
+            )
         )
 
-    async def to_be_empty(self, *, timeout: typing.Optional[float] = None) -> None:
+    async def to_be_empty(
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
+    ) -> None:
         """LocatorAssertions.to_be_empty
 
         Ensures the `Locator` points to an empty editable element or to a DOM node that has no text.
@@ -20958,10 +22442,14 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.to_be_empty(timeout=timeout)
+            await self._impl_obj.to_be_empty(timeout=to_milliseconds(timeout))
         )
 
-    async def not_to_be_empty(self, *, timeout: typing.Optional[float] = None) -> None:
+    async def not_to_be_empty(
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
+    ) -> None:
         """LocatorAssertions.not_to_be_empty
 
         The opposite of `locator_assertions.to_be_empty()`.
@@ -20974,14 +22462,14 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_be_empty(timeout=timeout)
+            await self._impl_obj.not_to_be_empty(timeout=to_milliseconds(timeout))
         )
 
     async def to_be_enabled(
         self,
         *,
         enabled: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.to_be_enabled
 
@@ -21005,14 +22493,16 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.to_be_enabled(enabled=enabled, timeout=timeout)
+            await self._impl_obj.to_be_enabled(
+                enabled=enabled, timeout=to_milliseconds(timeout)
+            )
         )
 
     async def not_to_be_enabled(
         self,
         *,
         enabled: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.not_to_be_enabled
 
@@ -21027,10 +22517,16 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_be_enabled(enabled=enabled, timeout=timeout)
+            await self._impl_obj.not_to_be_enabled(
+                enabled=enabled, timeout=to_milliseconds(timeout)
+            )
         )
 
-    async def to_be_hidden(self, *, timeout: typing.Optional[float] = None) -> None:
+    async def to_be_hidden(
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
+    ) -> None:
         """LocatorAssertions.to_be_hidden
 
         Ensures that `Locator` either does not resolve to any DOM node, or resolves to a
@@ -21053,10 +22549,14 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.to_be_hidden(timeout=timeout)
+            await self._impl_obj.to_be_hidden(timeout=to_milliseconds(timeout))
         )
 
-    async def not_to_be_hidden(self, *, timeout: typing.Optional[float] = None) -> None:
+    async def not_to_be_hidden(
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
+    ) -> None:
         """LocatorAssertions.not_to_be_hidden
 
         The opposite of `locator_assertions.to_be_hidden()`.
@@ -21069,14 +22569,14 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_be_hidden(timeout=timeout)
+            await self._impl_obj.not_to_be_hidden(timeout=to_milliseconds(timeout))
         )
 
     async def to_be_visible(
         self,
         *,
         visible: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.to_be_visible
 
@@ -21110,14 +22610,16 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.to_be_visible(visible=visible, timeout=timeout)
+            await self._impl_obj.to_be_visible(
+                visible=visible, timeout=to_milliseconds(timeout)
+            )
         )
 
     async def not_to_be_visible(
         self,
         *,
         visible: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.not_to_be_visible
 
@@ -21132,10 +22634,16 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_be_visible(visible=visible, timeout=timeout)
+            await self._impl_obj.not_to_be_visible(
+                visible=visible, timeout=to_milliseconds(timeout)
+            )
         )
 
-    async def to_be_focused(self, *, timeout: typing.Optional[float] = None) -> None:
+    async def to_be_focused(
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
+    ) -> None:
         """LocatorAssertions.to_be_focused
 
         Ensures the `Locator` points to a focused DOM node.
@@ -21157,11 +22665,13 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.to_be_focused(timeout=timeout)
+            await self._impl_obj.to_be_focused(timeout=to_milliseconds(timeout))
         )
 
     async def not_to_be_focused(
-        self, *, timeout: typing.Optional[float] = None
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.not_to_be_focused
 
@@ -21175,14 +22685,14 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_be_focused(timeout=timeout)
+            await self._impl_obj.not_to_be_focused(timeout=to_milliseconds(timeout))
         )
 
     async def to_be_in_viewport(
         self,
         *,
         ratio: typing.Optional[float] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.to_be_in_viewport
 
@@ -21214,14 +22724,16 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.to_be_in_viewport(ratio=ratio, timeout=timeout)
+            await self._impl_obj.to_be_in_viewport(
+                ratio=ratio, timeout=to_milliseconds(timeout)
+            )
         )
 
     async def not_to_be_in_viewport(
         self,
         *,
         ratio: typing.Optional[float] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.not_to_be_in_viewport
 
@@ -21236,7 +22748,9 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_be_in_viewport(ratio=ratio, timeout=timeout)
+            await self._impl_obj.not_to_be_in_viewport(
+                ratio=ratio, timeout=to_milliseconds(timeout)
+            )
         )
 
     async def to_have_accessible_description(
@@ -21244,7 +22758,7 @@ class LocatorAssertions(AsyncBase):
         description: typing.Union[str, typing.Pattern[str]],
         *,
         ignore_case: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.to_have_accessible_description
 
@@ -21272,7 +22786,9 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.to_have_accessible_description(
-                description=description, ignoreCase=ignore_case, timeout=timeout
+                description=description,
+                ignoreCase=ignore_case,
+                timeout=to_milliseconds(timeout),
             )
         )
 
@@ -21281,7 +22797,7 @@ class LocatorAssertions(AsyncBase):
         name: typing.Union[str, typing.Pattern[str]],
         *,
         ignore_case: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.not_to_have_accessible_description
 
@@ -21301,7 +22817,7 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.not_to_have_accessible_description(
-                name=name, ignoreCase=ignore_case, timeout=timeout
+                name=name, ignoreCase=ignore_case, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -21310,7 +22826,7 @@ class LocatorAssertions(AsyncBase):
         name: typing.Union[str, typing.Pattern[str]],
         *,
         ignore_case: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.to_have_accessible_name
 
@@ -21338,7 +22854,7 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.to_have_accessible_name(
-                name=name, ignoreCase=ignore_case, timeout=timeout
+                name=name, ignoreCase=ignore_case, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -21347,7 +22863,7 @@ class LocatorAssertions(AsyncBase):
         name: typing.Union[str, typing.Pattern[str]],
         *,
         ignore_case: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.not_to_have_accessible_name
 
@@ -21367,7 +22883,7 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.not_to_have_accessible_name(
-                name=name, ignoreCase=ignore_case, timeout=timeout
+                name=name, ignoreCase=ignore_case, timeout=to_milliseconds(timeout)
             )
         )
 
@@ -21458,7 +22974,7 @@ class LocatorAssertions(AsyncBase):
             "treeitem",
         ],
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.to_have_role
 
@@ -21484,7 +23000,9 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.to_have_role(role=role, timeout=timeout)
+            await self._impl_obj.to_have_role(
+                role=role, timeout=to_milliseconds(timeout)
+            )
         )
 
     async def to_have_accessible_error_message(
@@ -21492,7 +23010,7 @@ class LocatorAssertions(AsyncBase):
         error_message: typing.Union[str, typing.Pattern[str]],
         *,
         ignore_case: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.to_have_accessible_error_message
 
@@ -21520,7 +23038,9 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.to_have_accessible_error_message(
-                errorMessage=error_message, ignoreCase=ignore_case, timeout=timeout
+                errorMessage=error_message,
+                ignoreCase=ignore_case,
+                timeout=to_milliseconds(timeout),
             )
         )
 
@@ -21529,7 +23049,7 @@ class LocatorAssertions(AsyncBase):
         error_message: typing.Union[str, typing.Pattern[str]],
         *,
         ignore_case: typing.Optional[bool] = None,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.not_to_have_accessible_error_message
 
@@ -21549,7 +23069,9 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.not_to_have_accessible_error_message(
-                errorMessage=error_message, ignoreCase=ignore_case, timeout=timeout
+                errorMessage=error_message,
+                ignoreCase=ignore_case,
+                timeout=to_milliseconds(timeout),
             )
         )
 
@@ -21640,7 +23162,7 @@ class LocatorAssertions(AsyncBase):
             "treeitem",
         ],
         *,
-        timeout: typing.Optional[float] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.not_to_have_role
 
@@ -21656,11 +23178,16 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_have_role(role=role, timeout=timeout)
+            await self._impl_obj.not_to_have_role(
+                role=role, timeout=to_milliseconds(timeout)
+            )
         )
 
     async def to_match_aria_snapshot(
-        self, expected: str, *, timeout: typing.Optional[float] = None
+        self,
+        expected: str,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.to_match_aria_snapshot
 
@@ -21686,12 +23213,15 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.to_match_aria_snapshot(
-                expected=expected, timeout=timeout
+                expected=expected, timeout=to_milliseconds(timeout)
             )
         )
 
     async def not_to_match_aria_snapshot(
-        self, expected: str, *, timeout: typing.Optional[float] = None
+        self,
+        expected: str,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.not_to_match_aria_snapshot
 
@@ -21707,7 +23237,7 @@ class LocatorAssertions(AsyncBase):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.not_to_match_aria_snapshot(
-                expected=expected, timeout=timeout
+                expected=expected, timeout=to_milliseconds(timeout)
             )
         )
 

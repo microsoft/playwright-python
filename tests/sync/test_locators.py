@@ -21,7 +21,7 @@ from urllib.parse import urlparse
 import pytest
 
 from playwright._impl._path_utils import get_file_dirname
-from playwright.sync_api import Error, Page, expect
+from playwright.sync_api import Error, Locator, Page, expect
 from tests.server import Server
 
 _dirname = get_file_dirname()
@@ -1012,3 +1012,96 @@ def test_locator_should_ignore_deprecated_is_hidden_and_visible_timeout(
     div = page.locator("div")
     assert div.is_hidden(timeout=10) is False
     assert div.is_visible(timeout=10) is True
+
+
+_DROPZONE_HTML = """
+    <style>#dropzone { width: 300px; height: 200px; border: 2px dashed #888; }</style>
+    <div id="dropzone"></div>
+    <script>
+      window.__dropInfo = null;
+      const zone = document.getElementById('dropzone');
+      zone.addEventListener('dragenter', e => e.preventDefault());
+      zone.addEventListener('dragover', e => e.preventDefault());
+      zone.addEventListener('drop', async e => {
+        e.preventDefault();
+        const files = [];
+        for (const file of e.dataTransfer.files)
+          files.push({ name: file.name, type: file.type, size: file.size, text: await file.text() });
+        const data = {};
+        for (const t of e.dataTransfer.types) {
+          if (t !== 'Files')
+            data[t] = e.dataTransfer.getData(t);
+        }
+        window.__dropInfo = { files, data };
+      });
+    </script>
+"""
+
+
+def _get_drop_info(page: Page) -> dict:
+    handle = page.wait_for_function("() => window.__dropInfo")
+    return handle.json_value()
+
+
+def test_drop_should_drop_a_file_payload(page: Page) -> None:
+    page.set_content(_DROPZONE_HTML)
+    page.locator("#dropzone").drop(
+        {"files": {"name": "note.txt", "mimeType": "text/plain", "buffer": b"hello"}}
+    )
+    info = _get_drop_info(page)
+    assert info == {
+        "files": [
+            {"name": "note.txt", "type": "text/plain", "size": 5, "text": "hello"}
+        ],
+        "data": {},
+    }
+
+
+def test_drop_should_drop_clipboard_like_data(page: Page) -> None:
+    page.set_content(_DROPZONE_HTML)
+    page.locator("#dropzone").drop({"data": {"text/plain": "hello world"}})
+    info = _get_drop_info(page)
+    assert info["files"] == []
+    assert info["data"]["text/plain"] == "hello world"
+
+
+def test_get_by_role_with_description(page: Page) -> None:
+    page.set_content(
+        """
+        <div role="alert" aria-label="Upload successful" aria-description="File doc-2025.pdf was uploaded successfully">Alert 1</div>
+        <div role="alert" aria-label="Upload successful" aria-description="File report-2026.pdf was uploaded successfully">Alert 2</div>
+        <div role="alert" aria-label="Invalid file" aria-description="File demo.doc has an invalid file format">Alert 3</div>
+    """
+    )
+
+    def texts(locator: Locator) -> list:
+        return locator.evaluate_all("els => els.map(e => e.textContent)")
+
+    assert texts(page.get_by_role("alert", description="doc-2025")) == ["Alert 1"]
+    assert texts(page.get_by_role("alert", description="report-2026")) == ["Alert 2"]
+    assert texts(
+        page.get_by_role("alert", name="Upload successful", description="doc-2025")
+    ) == ["Alert 1"]
+    assert texts(page.get_by_role("alert", description="doc-2025", exact=True)) == []
+    assert texts(
+        page.get_by_role(
+            "alert",
+            description="File doc-2025.pdf was uploaded successfully",
+            exact=True,
+        )
+    ) == ["Alert 1"]
+    assert texts(page.get_by_role("alert", description=re.compile(r"report-\d+"))) == [
+        "Alert 2"
+    ]
+    assert texts(
+        page.get_by_role("alert", description=re.compile(r"uploaded successfully$"))
+    ) == ["Alert 1", "Alert 2"]
+
+
+def test_get_by_role_with_description_whitespace_normalization(page: Page) -> None:
+    page.set_content(
+        '<div role="alert" aria-description="File  doc-2025.pdf   was uploaded   successfully">Alert</div>'
+    )
+    assert page.get_by_role(
+        "alert", description="  doc-2025.pdf \n was  uploaded "
+    ).evaluate_all("els => els.map(e => e.textContent)") == ["Alert"]

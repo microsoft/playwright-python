@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import re
 import threading
+import zipfile
 from pathlib import Path
 from typing import Callable, ContextManager
 
@@ -22,6 +24,7 @@ from playwright.sync_api import (
     BrowserContext,
     BrowserType,
     Page,
+    Playwright,
     Response,
     expect,
 )
@@ -388,3 +391,53 @@ def test_should_show_tracing_group_in_action_list(
                 re.compile(r"inner group 2"),
             ]
         )
+
+
+def test_should_start_and_stop_har(
+    browser: Browser, server: Server, tmp_path: Path
+) -> None:
+    context = browser.new_context()
+    page = context.new_page()
+    har_path = tmp_path / "test.har"
+    context.tracing.start_har(path=har_path, content="embed", mode="full")
+    page.goto(server.PREFIX + "/empty.html")
+    context.tracing.stop_har()
+    context.close()
+    assert har_path.exists()
+    assert har_path.stat().st_size > 0
+
+
+def test_should_record_a_har_with_options(
+    browser: Browser, server: Server, tmp_path: Path
+) -> None:
+    context = browser.new_context()
+    har_path = tmp_path / "tracing.har"
+    context.tracing.start_har(
+        path=har_path, mode="minimal", url_filter="**/one-style.css"
+    )
+    page = context.new_page()
+    page.goto(server.PREFIX + "/one-style.html")
+    context.tracing.stop_har()
+    context.close()
+
+    log = json.loads(har_path.read_text())["log"]
+    urls = [e["request"]["url"] for e in log["entries"]]
+    assert urls == [server.PREFIX + "/one-style.css"]
+    assert log["entries"][0]["request"]["bodySize"] == -1
+
+
+def test_should_record_a_zipped_har_for_apirequestcontext(
+    playwright: Playwright, server: Server, tmp_path: Path
+) -> None:
+    request = playwright.request.new_context()
+    har_path = tmp_path / "tracing.har.zip"
+    request.tracing.start_har(path=har_path, content="attach")
+    request.get(server.PREFIX + "/simple.json")
+    request.tracing.stop_har()
+    request.dispose()
+
+    with zipfile.ZipFile(har_path) as zf:
+        log = json.loads(zf.read("har.har"))["log"]
+    assert any(
+        e["request"]["url"] == server.PREFIX + "/simple.json" for e in log["entries"]
+    )

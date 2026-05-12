@@ -22,6 +22,7 @@ from types import SimpleNamespace
 from typing import (
     TYPE_CHECKING,
     Any,
+    Awaitable,
     Callable,
     Dict,
     List,
@@ -279,11 +280,13 @@ class Page(ChannelOwner):
         frame._page = self
         self._frames.append(frame)
         self.emit(Page.Events.FrameAttached, frame)
+        self._browser_context.emit("frameattached", frame)
 
     def _on_frame_detached(self, frame: Frame) -> None:
         self._frames.remove(frame)
         frame._detached = True
         self.emit(Page.Events.FrameDetached, frame)
+        self._browser_context.emit("framedetached", frame)
 
     async def _on_route(self, route: Route) -> None:
         route._context = self.context
@@ -349,6 +352,7 @@ class Page(ChannelOwner):
             self._browser_context._pages.remove(self)
         self._dispose_har_routers()
         self.emit(Page.Events.Close, self)
+        self._browser_context.emit("pageclose", self)
 
     def _on_crash(self) -> None:
         self.emit(Page.Events.Crash, self)
@@ -357,9 +361,9 @@ class Page(ChannelOwner):
         url = params["url"]
         suggested_filename = params["suggestedFilename"]
         artifact = cast(Artifact, from_channel(params["artifact"]))
-        self.emit(
-            Page.Events.Download, Download(self, url, suggested_filename, artifact)
-        )
+        download = Download(self, url, suggested_filename, artifact)
+        self.emit(Page.Events.Download, download)
+        self._browser_context.emit("download", download)
 
     def _on_viewport_size_changed(self, params: Any) -> None:
         self._viewport_size = params["viewportSize"]
@@ -505,9 +509,7 @@ class Page(ChannelOwner):
     async def expose_function(self, name: str, callback: Callable) -> Disposable:
         return await self.expose_binding(name, lambda source, *args: callback(*args))
 
-    async def expose_binding(
-        self, name: str, callback: Callable, handle: bool = None
-    ) -> Disposable:
+    async def expose_binding(self, name: str, callback: Callable) -> Disposable:
         if name in self._bindings:
             raise Error(f'Function "{name}" has been already registered')
         if name in self._browser_context._bindings:
@@ -519,7 +521,7 @@ class Page(ChannelOwner):
             await self._channel.send(
                 "exposeBinding",
                 None,
-                dict(name=name, needsHandle=handle or False),
+                dict(name=name),
             )
         )
 
@@ -662,6 +664,9 @@ class Page(ChannelOwner):
     async def bring_to_front(self) -> None:
         await self._channel.send("bringToFront", None)
 
+    async def hide_highlight(self) -> None:
+        await self._channel.send("hideHighlight", None)
+
     async def add_init_script(
         self, script: str = None, path: Union[str, Path] = None
     ) -> Disposable:
@@ -749,7 +754,7 @@ class Page(ChannelOwner):
         updateMode: HarMode = None,
     ) -> None:
         if update:
-            await self._browser_context._record_into_har(
+            await self._browser_context._tracing._record_into_har(
                 har=har,
                 page=self,
                 url=url,
@@ -834,6 +839,7 @@ class Page(ChannelOwner):
         timeout: float = None,
         depth: int = None,
         mode: Literal["ai", "default"] = None,
+        boxes: bool = None,
     ) -> str:
         return await self._main_frame._channel.send(
             "ariaSnapshot",
@@ -953,6 +959,7 @@ class Page(ChannelOwner):
         pressed: bool = None,
         selected: bool = None,
         exact: bool = None,
+        description: Union[str, Pattern[str]] = None,
     ) -> "Locator":
         return self._main_frame.get_by_role(
             role,
@@ -965,6 +972,7 @@ class Page(ChannelOwner):
             pressed=pressed,
             selected=selected,
             exact=exact,
+            description=description,
         )
 
     def get_by_test_id(self, testId: Union[str, Pattern[str]]) -> "Locator":
@@ -1278,7 +1286,7 @@ class Page(ChannelOwner):
         urlOrPredicate: URLMatchRequest,
         timeout: float = None,
     ) -> EventContextManagerImpl[Request]:
-        def my_predicate(request: Request) -> bool:
+        def my_predicate(request: Request) -> Union[bool, Awaitable[bool]]:
             if not callable(urlOrPredicate):
                 return url_matches(
                     self._browser_context._base_url,
@@ -1310,7 +1318,7 @@ class Page(ChannelOwner):
         urlOrPredicate: URLMatchResponse,
         timeout: float = None,
     ) -> EventContextManagerImpl[Response]:
-        def my_predicate(request: Response) -> bool:
+        def my_predicate(request: Response) -> Union[bool, Awaitable[bool]]:
             if not callable(urlOrPredicate):
                 return url_matches(
                     self._browser_context._base_url,

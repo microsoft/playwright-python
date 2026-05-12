@@ -13,10 +13,11 @@
 # limitations under the License.
 
 import asyncio
+import inspect
 import math
 import uuid
 from asyncio.tasks import Task
-from typing import Any, Callable, List, Tuple, Union
+from typing import Any, Callable, List, Optional, Tuple, Union
 
 from pyee import EventEmitter
 
@@ -71,9 +72,11 @@ class Waiter:
         error: Union[Error, Callable[..., Error]],
         predicate: Callable = None,
     ) -> None:
+        def on_match() -> None:
+            self._reject(error() if callable(error) else error)
+
         def listener(event_data: Any = None) -> None:
-            if not predicate or predicate(event_data):
-                self._reject(error() if callable(error) else error)
+            self._evaluate_predicate(predicate, event_data, on_match)
 
         emitter.on(event, listener)
         self._registered_listeners.append((emitter, event, listener))
@@ -117,11 +120,42 @@ class Waiter:
         predicate: Callable = None,
     ) -> None:
         def listener(event_data: Any = None) -> None:
-            if not predicate or predicate(event_data):
-                self._fulfill(event_data)
+            self._evaluate_predicate(
+                predicate, event_data, lambda: self._fulfill(event_data)
+            )
 
         emitter.on(event, listener)
         self._registered_listeners.append((emitter, event, listener))
+
+    def _evaluate_predicate(
+        self,
+        predicate: Optional[Callable],
+        event_data: Any,
+        on_match: Callable[[], None],
+    ) -> None:
+        if predicate is None:
+            on_match()
+            return
+        try:
+            result = predicate(event_data)
+        except Exception as e:
+            self._reject(e)
+            return
+        if inspect.iscoroutine(result):
+
+            async def _await_predicate(coro: Any) -> None:
+                try:
+                    matched = await coro
+                except Exception as e:
+                    self._reject(e)
+                    return
+                if matched and not self._result.done():
+                    on_match()
+
+            self._pending_tasks.append(self._loop.create_task(_await_predicate(result)))
+            return
+        if result:
+            on_match()
 
     def result(self) -> asyncio.Future:
         return self._result

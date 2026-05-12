@@ -112,6 +112,7 @@ class APIRequestContext(ChannelOwner):
 
     async def dispose(self, reason: str = None) -> None:
         self._close_reason = reason
+        await self._tracing._export_all_hars()
         try:
             await self._channel.send("dispose", None, {"reason": reason})
         except Error as e:
@@ -119,6 +120,10 @@ class APIRequestContext(ChannelOwner):
                 return
             raise e
         self._tracing._reset_stack_counter()
+
+    @property
+    def tracing(self) -> Tracing:
+        return self._tracing
 
     async def delete(
         self,

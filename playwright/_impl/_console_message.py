@@ -74,7 +74,16 @@ class ConsoleMessage:
 
     @property
     def location(self) -> SourceLocation:
-        return self._event["location"]
+        # Wire format uses `lineNumber`/`columnNumber`; docs expose both `line`/`column`
+        # (legacy) and `lineNumber`/`columnNumber` (added upstream in 1.60).
+        loc = self._event["location"]
+        return {
+            "url": loc["url"],
+            "line": loc["lineNumber"],
+            "column": loc["columnNumber"],
+            "lineNumber": loc["lineNumber"],
+            "columnNumber": loc["columnNumber"],
+        }
 
     @property
     def timestamp(self) -> float:

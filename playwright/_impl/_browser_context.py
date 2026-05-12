@@ -36,8 +36,8 @@ from playwright._impl._api_structures import (
     Geolocation,
     SetCookieParam,
     StorageState,
+    WebErrorLocation,
 )
-from playwright._impl._artifact import Artifact
 from playwright._impl._cdp_session import CDPSession
 from playwright._impl._clock import Clock
 from playwright._impl._connection import (
@@ -57,7 +57,6 @@ from playwright._impl._har_router import HarRouter
 from playwright._impl._helper import (
     HarContentPolicy,
     HarMode,
-    HarRecordingMetadata,
     RouteFromHarNotFoundPolicy,
     RouteHandler,
     RouteHandlerCallback,
@@ -95,7 +94,13 @@ class BrowserContext(ChannelOwner):
         Close="close",
         Console="console",
         Dialog="dialog",
+        Download="download",
+        FrameAttached="frameattached",
+        FrameDetached="framedetached",
+        FrameNavigated="framenavigated",
         Page="page",
+        PageClose="pageclose",
+        PageLoad="pageload",
         WebError="weberror",
         ServiceWorker="serviceworker",
         Request="request",
@@ -125,7 +130,6 @@ class BrowserContext(ChannelOwner):
         self._videos_dir: Optional[str] = self._options.get("recordVideo")
         self._tracing = cast(Tracing, from_channel(initializer["tracing"]))
         self._debugger: Debugger = cast(Debugger, from_channel(initializer["debugger"]))
-        self._har_recorders: Dict[str, HarRecordingMetadata] = {}
         self._request: APIRequestContext = from_channel(initializer["requestContext"])
         self._request._timeout_settings = self._timeout_settings
         self._clock = Clock(self)
@@ -171,6 +175,10 @@ class BrowserContext(ChannelOwner):
             lambda params: self._on_page_error(
                 parse_error(params["error"]["error"]),
                 from_nullable_channel(params["page"]),
+                cast(
+                    WebErrorLocation,
+                    params.get("location") or {"url": "", "line": 0, "column": 0},
+                ),
             ),
         )
         self._channel.on(
@@ -321,7 +329,7 @@ class BrowserContext(ChannelOwner):
         content_policy: HarContentPolicy = record_har_content or (
             "omit" if record_har_omit_content is True else default_policy
         )
-        await self._record_into_har(
+        await self._tracing._record_into_har(
             har=record_har_path,
             page=None,
             url=record_har_url_filter,
@@ -404,9 +412,7 @@ class BrowserContext(ChannelOwner):
             await self._channel.send("addInitScript", None, dict(source=script))
         )
 
-    async def expose_binding(
-        self, name: str, callback: Callable, handle: bool = None
-    ) -> Disposable:
+    async def expose_binding(self, name: str, callback: Callable) -> Disposable:
         for page in self._pages:
             if name in page._bindings:
                 raise Error(
@@ -416,9 +422,7 @@ class BrowserContext(ChannelOwner):
             raise Error(f'Function "{name}" has been already registered')
         self._bindings[name] = callback
         return from_channel(
-            await self._channel.send(
-                "exposeBinding", None, dict(name=name, needsHandle=handle or False)
-            )
+            await self._channel.send("exposeBinding", None, dict(name=name))
         )
 
     async def expose_function(self, name: str, callback: Callable) -> Disposable:
@@ -483,35 +487,6 @@ class BrowserContext(ChannelOwner):
         await self._unroute_internal(self._routes, [], behavior)
         self._dispose_har_routers()
 
-    async def _record_into_har(
-        self,
-        har: Union[Path, str],
-        page: Optional[Page] = None,
-        url: Union[Pattern[str], str] = None,
-        update_content: HarContentPolicy = None,
-        update_mode: HarMode = None,
-    ) -> None:
-        update_content = update_content or "attach"
-        params: Dict[str, Any] = {
-            "options": {
-                "zip": str(har).endswith(".zip"),
-                "content": update_content,
-                "urlGlob": url if isinstance(url, str) else None,
-                "urlRegexSource": url.pattern if isinstance(url, Pattern) else None,
-                "urlRegexFlags": (
-                    escape_regex_flags(url) if isinstance(url, Pattern) else None
-                ),
-                "mode": update_mode or "minimal",
-            }
-        }
-        if page:
-            params["page"] = page._channel
-        har_id = await self._channel.send("harStart", None, params)
-        self._har_recorders[har_id] = {
-            "path": str(har),
-            "content": update_content,
-        }
-
     async def route_from_har(
         self,
         har: Union[Path, str],
@@ -522,7 +497,7 @@ class BrowserContext(ChannelOwner):
         updateMode: HarMode = None,
     ) -> None:
         if update:
-            await self._record_into_har(
+            await self._tracing._record_into_har(
                 har=har,
                 page=None,
                 url=url,
@@ -602,27 +577,7 @@ class BrowserContext(ChannelOwner):
         await self.request.dispose(reason=reason)
 
         async def _inner_close() -> None:
-            for har_id, params in self._har_recorders.items():
-                har = cast(
-                    Artifact,
-                    from_channel(
-                        await self._channel.send("harExport", None, {"harId": har_id})
-                    ),
-                )
-                # Server side will compress artifact if content is attach or if file is .zip.
-                is_compressed = params.get("content") == "attach" or params[
-                    "path"
-                ].endswith(".zip")
-                need_compressed = params["path"].endswith(".zip")
-                if is_compressed and not need_compressed:
-                    tmp_path = params["path"] + ".tmp"
-                    await har.save_as(tmp_path)
-                    await self._connection.local_utils.har_unzip(
-                        zipFile=tmp_path, harFile=params["path"]
-                    )
-                else:
-                    await har.save_as(params["path"])
-                await har.delete()
+            await self._tracing._export_all_hars()
 
         await self._channel._connection.wrap_api_call(_inner_close, True)
         await self._channel.send("close", None, {"reason": reason})
@@ -732,10 +687,12 @@ class BrowserContext(ChannelOwner):
             else:
                 asyncio.create_task(dialog.dismiss())
 
-    def _on_page_error(self, error: Error, page: Optional[Page]) -> None:
+    def _on_page_error(
+        self, error: Error, page: Optional[Page], location: WebErrorLocation
+    ) -> None:
         self.emit(
             BrowserContext.Events.WebError,
-            WebError(self._loop, self._dispatcher_fiber, page, error),
+            WebError(self._loop, self._dispatcher_fiber, page, error, location),
         )
         if page:
             page.emit(Page.Events.PageError, error)

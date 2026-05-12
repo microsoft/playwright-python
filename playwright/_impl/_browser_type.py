@@ -201,6 +201,7 @@ class BrowserType(ChannelOwner):
         slowMo: float = None,
         headers: Dict[str, str] = None,
         isLocal: bool = None,
+        noDefaults: bool = None,
     ) -> Browser:
         params = locals_to_params(locals())
         if params.get("headers"):
@@ -356,6 +357,8 @@ def normalize_launch_params(params: Dict) -> None:
     if "ignoreDefaultArgs" in params:
         if params["ignoreDefaultArgs"] is True:
             params["ignoreAllDefaultArgs"] = True
+            del params["ignoreDefaultArgs"]
+        elif params["ignoreDefaultArgs"] is False:
             del params["ignoreDefaultArgs"]
     if "executablePath" in params:
         params["executablePath"] = str(Path(params["executablePath"]))

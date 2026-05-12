@@ -596,6 +596,10 @@ class ServerWebSocketRoute:
     def url(self) -> str:
         return self._ws._initializer["url"]
 
+    @property
+    def protocols(self) -> List[str]:
+        return list(self._ws._initializer.get("protocols", []))
+
     def close(self, code: int = None, reason: str = None) -> None:
         _create_task_and_ignore_exception(
             self._ws._loop,
@@ -693,6 +697,10 @@ class WebSocketRoute(ChannelOwner):
     @property
     def url(self) -> str:
         return self._initializer["url"]
+
+    @property
+    def protocols(self) -> List[str]:
+        return list(self._initializer.get("protocols", []))
 
     async def close(self, code: int = None, reason: str = None) -> None:
         try:

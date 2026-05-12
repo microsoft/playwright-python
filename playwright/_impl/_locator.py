@@ -33,6 +33,7 @@ from typing import (
 
 from playwright._impl._api_structures import (
     AriaRole,
+    DropPayload,
     FilePayload,
     FloatRect,
     FrameExpectOptions,
@@ -279,6 +280,7 @@ class Locator:
         pressed: bool = None,
         selected: bool = None,
         exact: bool = None,
+        description: Union[str, Pattern[str]] = None,
     ) -> "Locator":
         return self.locator(
             get_by_role_selector(
@@ -292,6 +294,7 @@ class Locator:
                 pressed=pressed,
                 selected=selected,
                 exact=exact,
+                description=description,
             )
         )
 
@@ -439,6 +442,20 @@ class Locator:
             self._selector, target._selector, strict=True, **params
         )
 
+    async def drop(
+        self,
+        payload: DropPayload,
+        position: Position = None,
+        timeout: float = None,
+    ) -> None:
+        await self._frame._drop(
+            self._selector,
+            payload,
+            strict=True,
+            position=position,
+            timeout=timeout,
+        )
+
     async def get_attribute(self, name: str, timeout: float = None) -> Optional[str]:
         params = locals_to_params(locals())
         return await self._frame.get_attribute(
@@ -569,6 +586,7 @@ class Locator:
         timeout: float = None,
         depth: int = None,
         mode: Literal["ai", "default"] = None,
+        boxes: bool = None,
     ) -> str:
         return await self._frame._channel.send(
             "ariaSnapshot",
@@ -756,8 +774,11 @@ class Locator:
     ) -> FrameExpectResult:
         return await self._frame._expect(self._selector, expression, options, title)
 
-    async def highlight(self) -> None:
-        await self._frame._highlight(self._selector)
+    async def highlight(self, style: str = None) -> None:
+        await self._frame._highlight(self._selector, style)
+
+    async def hide_highlight(self) -> None:
+        await self._frame._hide_highlight(self._selector)
 
 
 class FrameLocator:
@@ -823,6 +844,7 @@ class FrameLocator:
         pressed: bool = None,
         selected: bool = None,
         exact: bool = None,
+        description: Union[str, Pattern[str]] = None,
     ) -> "Locator":
         return self.locator(
             get_by_role_selector(
@@ -836,6 +858,7 @@ class FrameLocator:
                 pressed=pressed,
                 selected=selected,
                 exact=exact,
+                description=description,
             )
         )
 
@@ -938,6 +961,7 @@ def get_by_role_selector(
     pressed: bool = None,
     selected: bool = None,
     exact: bool = None,
+    description: Union[str, Pattern[str]] = None,
 ) -> str:
     props: List[Tuple[str, str]] = []
     if checked is not None:
@@ -957,6 +981,13 @@ def get_by_role_selector(
             (
                 "name",
                 escape_for_attribute_selector(name, exact=exact),
+            )
+        )
+    if description is not None:
+        props.append(
+            (
+                "description",
+                escape_for_attribute_selector(description, exact=exact),
             )
         )
     if pressed is not None:

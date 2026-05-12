@@ -60,7 +60,7 @@ extends:
             targetPath: $(Build.ArtifactStagingDirectory)/esrp-build
         steps:
           - checkout: none
-          - task: EsrpRelease@9
+          - task: EsrpRelease@11
             inputs:
               connectedservicename: 'Playwright-ESRP-PME'
               usemanagedidentity: true

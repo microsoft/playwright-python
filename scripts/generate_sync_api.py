@@ -19,6 +19,7 @@ import sys
 from types import FunctionType
 from typing import Any
 
+import generate_api
 from documentation_provider import DocumentationProvider
 from generate_api import (
     api_globals,
@@ -32,6 +33,8 @@ from generate_api import (
     short_name,
     signature,
 )
+
+generate_api.SYNC_API = True
 
 documentation_provider = DocumentationProvider(False)
 
@@ -90,6 +93,8 @@ def generate(t: Any) -> None:
                 '"Disposable"', '"SyncContextManager"'
             ).replace('"DisposableStub"', '"SyncContextManager"')
             print("")
+            if name in ("expect_event", "wait_for_event"):
+                documentation_provider.print_event_overloads(class_name, name)
             print(
                 f"    def {name}({signature(value, len(name) + 9)}) -> {return_type_value}:"
             )

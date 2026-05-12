@@ -56,6 +56,8 @@ from playwright._impl._tracing import Tracing
 from playwright._impl._video import Video
 from playwright._impl._web_error import WebError
 
+SYNC_API = False
+
 
 def process_type(value: Any, param: bool = False) -> str:
     value = str(value)
@@ -65,6 +67,15 @@ def process_type(value: Any, param: bool = False) -> str:
     value = re.sub(r"playwright\._impl\._api_structures.([\w]+)", r"\1", value)
     value = re.sub(r"playwright\._impl\.[\w]+\.([\w]+)", r'"\1"', value)
     value = re.sub(r"typing.Literal", "Literal", value)
+    if SYNC_API:
+        # Sync API does not accept awaitable callbacks; collapse
+        # Union[X, Awaitable[X]] (used for predicates the async API also
+        # accepts as `async def`) down to just X.
+        value = re.sub(
+            r"typing\.Union\[([^\[\],]+),\s*typing\.Awaitable\[\1\]\]",
+            r"\1",
+            value,
+        )
     if param:
         value = re.sub(r"^typing.Union\[([^,]+), None\]$", r"\1 = None", value)
         value = re.sub(
@@ -124,6 +135,12 @@ def signature(func: FunctionType, indent: int) -> str:
                 + f"{func.__name__}.{name}"
             )
         processed = process_type(value, True)
+        if name == "timeout":
+            processed = re.sub(
+                r"\bfloat\b",
+                "typing.Union[float, datetime.timedelta]",
+                processed,
+            )
         if (
             not positional_exception
             and not saw_optional
@@ -148,6 +165,8 @@ def arguments(func: FunctionType, indent: int) -> str:
         ), f"Underscore in impl classes is not allowed, use camel case, func={func}, name={name}"
         if "Callable" in value_str:
             tokens.append(f"{name}=self._wrap_handler({to_snake_case(name)})")
+        elif name == "timeout" and "float" in value_str:
+            tokens.append(f"{name}=to_milliseconds({to_snake_case(name)})")
         elif (
             "typing.Any" in value_str
             or "typing.Dict" in value_str
@@ -227,7 +246,7 @@ import datetime
 from typing import Literal
 
 
-from playwright._impl._api_structures import Cookie, SetCookieParam, FloatRect, FilePayload, Geolocation, HttpCredentials, PdfMargins, Position, ProxySettings, ResourceTiming, SourceLocation, StorageState, ClientCertificate, ViewportSize, RemoteAddr, SecurityDetails, RequestSizes, NameValue, TracingGroupLocation, DebuggerLocation, DebuggerPausedDetails, ScreencastFrame, BrowserBindResult
+from playwright._impl._api_structures import Cookie, SetCookieParam, FloatRect, FilePayload, Geolocation, HttpCredentials, PdfMargins, Position, ProxySettings, ResourceTiming, SourceLocation, StorageState, ClientCertificate, ViewportSize, RemoteAddr, SecurityDetails, RequestSizes, NameValue, TracingGroupLocation, DebuggerLocation, DebuggerPausedDetails, ScreencastFrame, BrowserBindResult, WebErrorLocation, DropPayload
 from playwright._impl._browser import Browser as BrowserImpl
 from playwright._impl._browser_context import BrowserContext as BrowserContextImpl
 from playwright._impl._browser_type import BrowserType as BrowserTypeImpl
@@ -254,6 +273,7 @@ from playwright._impl._tracing import Tracing as TracingImpl
 from playwright._impl._locator import Locator as LocatorImpl, FrameLocator as FrameLocatorImpl
 from playwright._impl._errors import Error
 from playwright._impl._form_data import FormData
+from playwright._impl._helper import to_milliseconds
 from playwright._impl._fetch import APIRequest as APIRequestImpl, APIResponse as APIResponseImpl, APIRequestContext as APIRequestContextImpl
 from playwright._impl._assertions import PageAssertions as PageAssertionsImpl, LocatorAssertions as LocatorAssertionsImpl, APIResponseAssertions as APIResponseAssertionsImpl
 """
