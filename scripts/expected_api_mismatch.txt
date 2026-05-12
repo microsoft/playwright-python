@@ -20,3 +20,7 @@ Parameter type mismatch in BrowserContext.route_web_socket(handler=): documented
 Parameter type mismatch in Page.route_web_socket(handler=): documented as Callable[[WebSocketRoute], Union[Any, Any]], code has Callable[[WebSocketRoute], Any]
 Parameter type mismatch in WebSocketRoute.on_close(handler=): documented as Callable[[Union[int, undefined]], Union[Any, Any]], code has Callable[[Union[int, None], Union[str, None]], Any]
 Parameter type mismatch in WebSocketRoute.on_message(handler=): documented as Callable[[str], Union[Any, Any]], code has Callable[[Union[bytes, str]], Any]
+
+# Async API additionally accepts an `async def` predicate.
+Parameter type mismatch in Page.expect_request(url_or_predicate=): documented as Union[Callable[[Request], bool], Pattern[str], str], code has Union[Callable[[Request], Union[bool, typing.Awaitable[bool]]], Pattern[str], str]
+Parameter type mismatch in Page.expect_response(url_or_predicate=): documented as Union[Callable[[Response], bool], Pattern[str], str], code has Union[Callable[[Response], Union[bool, typing.Awaitable[bool]]], Pattern[str], str]

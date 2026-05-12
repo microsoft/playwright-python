@@ -22,6 +22,7 @@ from typing import Any, Optional, Union, overload
 
 import playwright._impl._api_structures
 import playwright._impl._errors
+import playwright._impl._form_data
 import playwright.sync_api._generated
 from playwright._impl._assertions import (
     APIResponseAssertions as APIResponseAssertionsImpl,
@@ -69,6 +70,7 @@ ChromiumBrowserContext = BrowserContext
 
 Cookie = playwright._impl._api_structures.Cookie
 FilePayload = playwright._impl._api_structures.FilePayload
+FormData = playwright._impl._form_data.FormData
 FloatRect = playwright._impl._api_structures.FloatRect
 Geolocation = playwright._impl._api_structures.Geolocation
 HttpCredentials = playwright._impl._api_structures.HttpCredentials
@@ -153,6 +155,10 @@ class Expect:
         Failing soft assertions do not abort test execution, but mark the test
         as failed. Multiple failures from the same test are surfaced together
         at the end of the test.
+
+        Requires the [pytest-playwright](https://pypi.org/project/pytest-playwright/)
+        plugin to establish the per-test scope that collects soft assertion
+        failures.
         """
         return self._dispatch(actual, message, is_soft=True)
 
@@ -215,6 +221,7 @@ __all__ = [
     "FileChooser",
     "FilePayload",
     "FloatRect",
+    "FormData",
     "Frame",
     "FrameLocator",
     "Geolocation",

@@ -16,14 +16,13 @@ import asyncio
 import os
 import re
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, Optional
 
 import pytest
 
 from playwright.async_api import (
     BrowserContext,
     Error,
-    JSHandle,
     Page,
     Route,
     TimeoutError,
@@ -352,6 +351,53 @@ async def test_wait_for_response_should_work_with_predicate(
     assert response.url == server.PREFIX + "/digits/2.png"
 
 
+async def test_wait_for_response_should_work_with_async_predicate(
+    page: Page, server: Server
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+
+    async def predicate(response: Any) -> bool:
+        await asyncio.sleep(0)
+        return response.url == server.PREFIX + "/digits/2.png"
+
+    async with page.expect_response(predicate) as response_info:
+        await page.evaluate(
+            """() => {
+                fetch('/digits/1.png')
+                fetch('/digits/2.png')
+                fetch('/digits/3.png')
+            }"""
+        )
+    response = await response_info.value
+    assert response.url == server.PREFIX + "/digits/2.png"
+
+
+async def test_expect_response_should_reject_when_async_predicate_throws(
+    page: Page, server: Server
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+
+    async def predicate(response: Any) -> bool:
+        raise Exception("Async oops!")
+
+    with pytest.raises(Exception, match="Async oops!"):
+        async with page.expect_response(predicate):
+            await page.evaluate("() => fetch('/digits/1.png')")
+
+
+async def test_expect_response_should_reject_when_sync_predicate_throws(
+    page: Page, server: Server
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+
+    def predicate(response: Any) -> bool:
+        raise Exception("Sync oops!")
+
+    with pytest.raises(Exception, match="Sync oops!"):
+        async with page.expect_response(predicate):
+            await page.evaluate("() => fetch('/digits/1.png')")
+
+
 async def test_wait_for_response_should_work_with_no_timeout(
     page: Page, server: Server
 ) -> None:
@@ -492,19 +538,6 @@ async def test_expose_function_should_work_with_complex_objects(
     await page.expose_function("complexObject", lambda a, b: dict(x=a["x"] + b["x"]))
     result = await page.evaluate("complexObject({x: 5}, {x: 2})")
     assert result["x"] == 7
-
-
-async def test_expose_bindinghandle_should_work(page: Page, server: Server) -> None:
-    targets: List[JSHandle] = []
-
-    def logme(t: JSHandle) -> int:
-        targets.append(t)
-        return 17
-
-    await page.expose_binding("logme", lambda source, t: logme(t), handle=True)
-    result = await page.evaluate("logme({ foo: 42 })")
-    assert (await targets[0].evaluate("x => x.foo")) == 42
-    assert result == 17
 
 
 async def test_page_error_should_fire(

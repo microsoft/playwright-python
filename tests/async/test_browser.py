@@ -68,3 +68,14 @@ async def test_bind_should_return_endpoint_and_allow_unbind(
         await browser.unbind()
     finally:
         await browser.close()
+
+
+async def test_should_fire_context_event_on_new_context(browser: Browser) -> None:
+    # Ported from upstream tests/library/browser.spec.ts.
+    events = []
+    browser.on("context", lambda ctx: events.append(ctx))
+    context = await browser.new_context()
+    try:
+        assert events == [context]
+    finally:
+        await context.close()

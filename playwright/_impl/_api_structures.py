@@ -151,14 +151,29 @@ class ViewportSize(TypedDict):
 
 class SourceLocation(TypedDict):
     url: str
+    line: int
+    column: int
     lineNumber: int
     columnNumber: int
+
+
+class WebErrorLocation(TypedDict):
+    url: str
+    line: int
+    column: int
 
 
 class FilePayload(TypedDict):
     name: str
     mimeType: str
     buffer: bytes
+
+
+class DropPayload(TypedDict, total=False):
+    files: Optional[
+        Union[str, Path, FilePayload, Sequence[Union[str, Path]], Sequence[FilePayload]]
+    ]
+    data: Optional[Dict[str, str]]
 
 
 class RemoteAddr(TypedDict):
@@ -216,6 +231,7 @@ class FrameExpectOptions(TypedDict, total=False):
     useInnerText: Optional[bool]
     isNot: bool
     timeout: Optional[float]
+    pseudo: Optional[str]
 
 
 class FrameExpectResult(TypedDict):
@@ -330,3 +346,5 @@ class DebuggerPausedDetails(TypedDict):
 
 class ScreencastFrame(TypedDict):
     data: bytes
+    viewportWidth: int
+    viewportHeight: int

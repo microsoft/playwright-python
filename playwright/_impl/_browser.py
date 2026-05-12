@@ -59,6 +59,7 @@ if TYPE_CHECKING:  # pragma: no cover
 
 class Browser(ChannelOwner):
     Events = SimpleNamespace(
+        Context="context",
         Disconnected="disconnected",
     )
 
@@ -104,6 +105,7 @@ class Browser(ChannelOwner):
         # and will be configured later in `ConnectToBrowserType`.
         if self._browser_type:
             self._setup_browser_context(context)
+        self.emit(Browser.Events.Context, context)
 
     def _setup_browser_context(self, context: BrowserContext) -> None:
         context._tracing._traces_dir = self._traces_dir

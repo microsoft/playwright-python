@@ -124,6 +124,9 @@ async def test_console_should_have_location_for_console_api_calls(
     # Engines have different column notion.
     assert location["url"] == server.PREFIX + "/consolelog.html"
     assert location["lineNumber"] == 7
+    # Added in 1.60: location now also exposes line/column aliases for parity with WebError.location.
+    assert location["line"] == 7
+    assert location["column"] == location["columnNumber"]
 
 
 async def test_console_should_not_throw_when_there_are_console_messages_in_detached_iframes(

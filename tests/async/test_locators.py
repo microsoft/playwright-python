@@ -15,13 +15,14 @@
 import os
 import re
 import traceback
+from pathlib import Path
 from typing import Callable
 from urllib.parse import urlparse
 
 import pytest
 
 from playwright._impl._path_utils import get_file_dirname
-from playwright.async_api import Error, Page, expect
+from playwright.async_api import Error, Locator, Page, expect
 from tests.server import Server
 
 _dirname = get_file_dirname()
@@ -1197,3 +1198,163 @@ async def test_normalize_should_resolve_to_a_locator(page: Page) -> None:
     await page.set_content("<button>Click me</button>")
     normalized = await page.get_by_role("button").normalize()
     assert await normalized.text_content() == "Click me"
+
+
+_DROPZONE_HTML = """
+    <style>#dropzone { width: 300px; height: 200px; border: 2px dashed #888; }</style>
+    <div id="dropzone"></div>
+    <script>
+      window.__dropInfo = null;
+      const zone = document.getElementById('dropzone');
+      zone.addEventListener('dragenter', e => e.preventDefault());
+      zone.addEventListener('dragover', e => e.preventDefault());
+      zone.addEventListener('drop', async e => {
+        e.preventDefault();
+        const files = [];
+        for (const file of e.dataTransfer.files)
+          files.push({ name: file.name, type: file.type, size: file.size, text: await file.text() });
+        const data = {};
+        for (const t of e.dataTransfer.types) {
+          if (t !== 'Files')
+            data[t] = e.dataTransfer.getData(t);
+        }
+        window.__dropInfo = { files, data };
+      });
+    </script>
+"""
+
+
+async def _get_drop_info(page: Page) -> dict:
+    handle = await page.wait_for_function("() => window.__dropInfo")
+    return await handle.json_value()
+
+
+async def test_drop_should_drop_a_file_payload(page: Page) -> None:
+    await page.set_content(_DROPZONE_HTML)
+    await page.locator("#dropzone").drop(
+        {"files": {"name": "note.txt", "mimeType": "text/plain", "buffer": b"hello"}}
+    )
+    info = await _get_drop_info(page)
+    assert info == {
+        "files": [
+            {"name": "note.txt", "type": "text/plain", "size": 5, "text": "hello"}
+        ],
+        "data": {},
+    }
+
+
+async def test_drop_should_drop_multiple_file_payloads(page: Page) -> None:
+    await page.set_content(_DROPZONE_HTML)
+    files: list = [
+        {"name": "a.txt", "mimeType": "text/plain", "buffer": b"AAA"},
+        {"name": "b.txt", "mimeType": "text/plain", "buffer": b"BB"},
+    ]
+    await page.locator("#dropzone").drop({"files": files})
+    info = await _get_drop_info(page)
+    assert [(f["name"], f["text"]) for f in info["files"]] == [
+        ("a.txt", "AAA"),
+        ("b.txt", "BB"),
+    ]
+
+
+async def test_drop_should_drop_a_file_by_local_path(
+    page: Page, tmp_path: Path
+) -> None:
+    await page.set_content(_DROPZONE_HTML)
+    file_path = tmp_path / "hello.txt"
+    file_path.write_text("path-content")
+    await page.locator("#dropzone").drop({"files": str(file_path)})
+    info = await _get_drop_info(page)
+    assert len(info["files"]) == 1
+    assert info["files"][0]["name"] == "hello.txt"
+    assert info["files"][0]["text"] == "path-content"
+
+
+async def test_drop_should_drop_clipboard_like_data(page: Page) -> None:
+    await page.set_content(_DROPZONE_HTML)
+    await page.locator("#dropzone").drop(
+        {"data": {"text/plain": "hello world", "text/uri-list": "https://example.com"}}
+    )
+    info = await _get_drop_info(page)
+    assert info["files"] == []
+    assert info["data"]["text/plain"] == "hello world"
+    assert info["data"]["text/uri-list"] == "https://example.com"
+
+
+async def test_drop_should_drop_files_and_data_together(page: Page) -> None:
+    await page.set_content(_DROPZONE_HTML)
+    await page.locator("#dropzone").drop(
+        {
+            "files": {"name": "mix.txt", "mimeType": "text/plain", "buffer": b"mix"},
+            "data": {"text/plain": "label"},
+        }
+    )
+    info = await _get_drop_info(page)
+    assert info["files"][0]["text"] == "mix"
+    assert info["data"]["text/plain"] == "label"
+
+
+async def test_get_by_role_with_description(page: Page) -> None:
+    # Ported from upstream tests/page/selectors-get-by.spec.ts.
+    await page.set_content(
+        """
+        <div role="alert" aria-label="Upload successful" aria-description="File doc-2025.pdf was uploaded successfully">Alert 1</div>
+        <div role="alert" aria-label="Upload successful" aria-description="File report-2026.pdf was uploaded successfully">Alert 2</div>
+        <div role="alert" aria-label="Invalid file" aria-description="File demo.doc has an invalid file format">Alert 3</div>
+    """
+    )
+
+    async def texts(locator: Locator) -> list:
+        return await locator.evaluate_all("els => els.map(e => e.textContent)")
+
+    # description substring match (default)
+    assert await texts(page.get_by_role("alert", description="doc-2025")) == ["Alert 1"]
+    assert await texts(page.get_by_role("alert", description="report-2026")) == [
+        "Alert 2"
+    ]
+
+    # description with name combined
+    assert await texts(
+        page.get_by_role("alert", name="Upload successful", description="doc-2025")
+    ) == ["Alert 1"]
+    assert await texts(
+        page.get_by_role("alert", name="Upload successful", description="report-2026")
+    ) == ["Alert 2"]
+    assert (
+        await texts(
+            page.get_by_role("alert", name="Invalid file", description="doc-2025")
+        )
+        == []
+    )
+
+    # description exact match
+    assert (
+        await texts(page.get_by_role("alert", description="doc-2025", exact=True)) == []
+    )
+    assert await texts(
+        page.get_by_role(
+            "alert",
+            description="File doc-2025.pdf was uploaded successfully",
+            exact=True,
+        )
+    ) == ["Alert 1"]
+
+    # description regex match
+    assert await texts(
+        page.get_by_role("alert", description=re.compile(r"report-\d+"))
+    ) == ["Alert 2"]
+    assert await texts(
+        page.get_by_role("alert", description=re.compile(r"uploaded successfully$"))
+    ) == ["Alert 1", "Alert 2"]
+
+
+async def test_get_by_role_with_description_whitespace_normalization(
+    page: Page,
+) -> None:
+    # Ported from upstream tests/page/selectors-get-by.spec.ts.
+    await page.set_content(
+        '<div role="alert" aria-description="File  doc-2025.pdf   was uploaded   successfully">Alert</div>'
+    )
+    assert await page.get_by_role(
+        "alert", description="  doc-2025.pdf \n was  uploaded "
+    ).evaluate_all("els => els.map(e => e.textContent)") == ["Alert"]

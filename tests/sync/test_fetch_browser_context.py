@@ -13,12 +13,19 @@
 # limitations under the License.
 
 import json
-from typing import Any, Dict, List
+from pathlib import Path
+from typing import Any, Dict, List, cast
 from urllib.parse import parse_qs
 
 import pytest
 
-from playwright.sync_api import BrowserContext, Error, FilePayload, Page
+from playwright.sync_api import (
+    BrowserContext,
+    Error,
+    FilePayload,
+    FormData,
+    Page,
+)
 from tests.server import Server
 from tests.utils import must
 
@@ -253,6 +260,72 @@ def test_should_support_multipart_form_data(
     assert server_req.value.args[b"firstName"] == [b"John"]
     assert server_req.value.args[b"lastName"] == [b"Doe"]
     assert server_req.value.args[b"file"][0] == file["buffer"]
+
+
+def test_should_support_form_data_with_repeated_keys(
+    context: BrowserContext, server: Server
+) -> None:
+    form = FormData()
+    form.append("name", "John")
+    form.append("name", "Doe")
+    form.set("email", "john@example.com")
+    with server.expect_request("/empty.html") as server_req:
+        context.request.post(server.EMPTY_PAGE, form=form)
+    params = parse_qs(must(server_req.value.post_body))
+    assert params[b"name"] == [b"John", b"Doe"]
+    assert params[b"email"] == [b"john@example.com"]
+
+
+def test_should_reject_file_value_in_form(
+    context: BrowserContext, server: Server, tmp_path: Path
+) -> None:
+    file = tmp_path / "f.txt"
+    file.write_bytes(b"hello")
+    form = FormData()
+    form.set("attachment", file)
+    with pytest.raises(Error, match="Use 'multipart' for file uploads"):
+        context.request.post(server.EMPTY_PAGE, form=form)
+
+
+def test_should_support_multipart_form_data_with_multiple_files_in_one_field(
+    context: BrowserContext, server: Server
+) -> None:
+    file1: FilePayload = {
+        "name": "f1.txt",
+        "mimeType": "text/plain",
+        "buffer": b"file 1 content",
+    }
+    file2: FilePayload = {
+        "name": "f2.txt",
+        "mimeType": "text/plain",
+        "buffer": b"file 2 content",
+    }
+    form = FormData()
+    form.append("files", file1)
+    form.append("files", file2)
+    form.set("user", "alice")
+    with server.expect_request("/empty.html") as server_req:
+        context.request.post(server.EMPTY_PAGE, multipart=form)
+    assert cast(str, server_req.value.getHeader("Content-Type")).startswith(
+        "multipart/form-data; "
+    )
+    assert server_req.value.args[b"user"] == [b"alice"]
+    assert server_req.value.args[b"files"] == [file1["buffer"], file2["buffer"]]
+
+
+def test_should_support_multipart_form_data_with_path_value(
+    context: BrowserContext, server: Server, tmp_path: Path
+) -> None:
+    file = tmp_path / "data.csv"
+    file.write_bytes(b"a,b,c\n1,2,3\n")
+    form = FormData()
+    form.set("attachment", file)
+    with server.expect_request("/empty.html") as server_req:
+        context.request.post(server.EMPTY_PAGE, multipart=form)
+    assert cast(str, server_req.value.getHeader("Content-Type")).startswith(
+        "multipart/form-data; "
+    )
+    assert server_req.value.args[b"attachment"] == [b"a,b,c\n1,2,3\n"]
 
 
 def test_should_add_default_headers(
