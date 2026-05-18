@@ -22,7 +22,7 @@ import zipfile
 from pathlib import Path
 from typing import Dict
 
-driver_version = "1.60.0-beta-1778142790000"
+driver_version = "1.60.0"
 
 base_wheel_bundles = [
     {
