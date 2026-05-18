@@ -300,7 +300,7 @@ class DocumentationProvider:
         return "\n".join(result)
 
     def beautify_method_comment(self, comment: str, indent: str) -> str:
-        comment = self.filter_out_redudant_python_code_snippets(comment)
+        comment = self.filter_out_redundant_python_code_snippets(comment)
         comment = comment.replace("\\", "\\\\")
         comment = comment.replace('"', '\\"')
         lines = comment.split("\n")
@@ -331,7 +331,7 @@ class DocumentationProvider:
         comment = self.indent_paragraph("\n".join(result), indent)
         return self.resolve_playwright_dev_links(comment)
 
-    def filter_out_redudant_python_code_snippets(self, comment: str) -> str:
+    def filter_out_redundant_python_code_snippets(self, comment: str) -> str:
         groups = []
         current_group = []
         lines = comment.split("\n")
