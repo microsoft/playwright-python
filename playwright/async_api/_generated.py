@@ -7692,6 +7692,7 @@ class Screencast(AsyncBase):
         ] = None,
         path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         quality: typing.Optional[int] = None,
+        size: typing.Optional[ViewportSize] = None,
     ) -> "AsyncContextManager":
         """Screencast.start
 
@@ -7708,6 +7709,8 @@ class Screencast(AsyncBase):
             Path where the video should be saved when the screencast is stopped. When provided, video recording is started.
         quality : Union[int, None]
             The quality of the image, between 0-100.
+        size : Union[{width: int, height: int}, None]
+            Output frame size.
 
         Returns
         -------
@@ -7716,7 +7719,10 @@ class Screencast(AsyncBase):
 
         return mapping.from_impl(
             await self._impl_obj.start(
-                onFrame=self._wrap_handler(on_frame), path=path, quality=quality
+                onFrame=self._wrap_handler(on_frame),
+                path=path,
+                quality=quality,
+                size=size,
             )
         )
 

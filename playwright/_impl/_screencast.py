@@ -16,7 +16,7 @@ import base64
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Literal, Optional, Union
 
-from playwright._impl._api_structures import ScreencastFrame
+from playwright._impl._api_structures import ScreencastFrame, ViewportSize
 from playwright._impl._artifact import Artifact
 from playwright._impl._connection import from_nullable_channel
 from playwright._impl._disposable import DisposableStub
@@ -70,6 +70,7 @@ class Screencast:
         onFrame: ScreencastFrameCallback = None,
         path: Union[str, Path] = None,
         quality: int = None,
+        size: ViewportSize = None,
     ) -> DisposableStub:
         if self._started:
             raise Error("Screencast is already started")
@@ -80,6 +81,7 @@ class Screencast:
             None,
             {
                 "quality": quality,
+                "size": size,
                 "sendFrames": bool(onFrame),
                 "record": bool(path),
             },
