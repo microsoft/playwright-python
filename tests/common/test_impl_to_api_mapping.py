@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from playwright._impl._impl_to_api_mapping import ImplToApiMapping
 
@@ -27,3 +27,14 @@ def test_wrap_handler_ignores_keyword_only_parameters() -> None:
     ImplToApiMapping().wrap_handler(Input().blur)("locator")
 
     assert calls == [None]
+
+
+def test_wrap_handler_passes_all_args_for_varargs_handler() -> None:
+    calls: List[Tuple[object, ...]] = []
+
+    def handler(*args: object) -> None:
+        calls.append(args)
+
+    ImplToApiMapping().wrap_handler(handler)("a", "b", "c")
+
+    assert calls == [("a", "b", "c")]
