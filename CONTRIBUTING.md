@@ -21,6 +21,12 @@ pip install -r local-requirements.txt
 
 Build and install drivers:
 
+The driver is built from upstream `microsoft/playwright` source, so building a
+wheel requires **Node.js (with npm), git and bash** on your PATH. The commit to
+build from is pinned in the `DRIVER_SHA` file. The first
+`python -m build --wheel` clones that commit and runs its full
+build, which is slow.
+
 ```sh
 pip install -e .
 python -m build --wheel
