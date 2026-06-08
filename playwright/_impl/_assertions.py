@@ -103,11 +103,11 @@ class AssertionsBase:
         result = await self._call_expect(expression, expect_options, title)
         if result["matches"] == self._is_not:
             received = result.get("received") or {}
+            aria_snapshot = None
             if isinstance(received, dict):
-                if "value" in received and received["value"] is not None:
-                    actual = parse_value(received["value"])
-                else:
-                    actual = received.get("ariaSnapshot")
+                aria_snapshot = received.get("ariaSnapshot")
+                value = received.get("value")
+                actual = parse_value(value) if value is not None else None
             else:
                 actual = received
             if self._custom_message:
@@ -120,9 +120,12 @@ class AssertionsBase:
                 )
             error_message = result.get("errorMessage")
             error_message = f"\n{error_message}" if error_message else ""
+            aria_snapshot_message = (
+                f"\nAria snapshot:\n{aria_snapshot}" if aria_snapshot else ""
+            )
             _record_soft_or_raise(
                 AssertionError(
-                    f"{out_message}\nActual value: {actual}{error_message} {format_call_log(result.get('log'))}"
+                    f"{out_message}\nActual value: {actual}{error_message} {format_call_log(result.get('log'))}{aria_snapshot_message}"
                 ),
                 self._is_soft,
             )

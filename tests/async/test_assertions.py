@@ -1179,3 +1179,23 @@ async def test_soft_does_not_leak_between_scopes(page: Page, server: Server) -> 
     await page.set_content("<div>hello</div>")
     with pytest.raises(RuntimeError, match="pytest-playwright"):
         await expect.soft(page.locator("div")).to_have_text("nope", timeout=500)
+
+
+async def test_assertions_should_include_aria_snapshot_in_separate_section(
+    page: Page,
+) -> None:
+    await page.set_content(
+        """
+        <div id="hidden" style="display: none"><span>secret</span></div>
+        <main><h1>Page Heading</h1></main>
+        """
+    )
+    with pytest.raises(AssertionError) as excinfo:
+        await expect(page.locator("#hidden")).to_be_visible(timeout=500)
+    message = str(excinfo.value)
+    assert "Aria snapshot:" in message
+    # The aria snapshot lives in its own section, not in the "Actual value" line.
+    assert "Actual value: hidden" in message
+    actual_line = message.split("\n")[1]
+    assert 'heading "Page Heading"' not in actual_line
+    assert message.index('heading "Page Heading"') > message.index("Aria snapshot:")

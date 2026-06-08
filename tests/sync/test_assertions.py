@@ -1089,3 +1089,23 @@ def test_soft_inside_scope_collects_failures(page: Page, server: Server) -> None
 
     assert len(errors) == 3
     assert all(isinstance(e, AssertionError) for e in errors)
+
+
+def test_assertions_should_include_aria_snapshot_in_separate_section(
+    page: Page,
+) -> None:
+    page.set_content(
+        """
+        <div id="hidden" style="display: none"><span>secret</span></div>
+        <main><h1>Page Heading</h1></main>
+        """
+    )
+    with pytest.raises(AssertionError) as excinfo:
+        expect(page.locator("#hidden")).to_be_visible(timeout=500)
+    message = str(excinfo.value)
+    assert "Aria snapshot:" in message
+    # The aria snapshot lives in its own section, not in the "Actual value" line.
+    assert "Actual value: hidden" in message
+    actual_line = message.split("\n")[1]
+    assert 'heading "Page Heading"' not in actual_line
+    assert message.index('heading "Page Heading"') > message.index("Aria snapshot:")
