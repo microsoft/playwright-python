@@ -119,7 +119,23 @@ class ImplToApiMapping:
 
     def wrap_handler(self, handler: Callable[..., Any]) -> Callable[..., None]:
         def wrapper_func(*args: Any) -> Any:
-            arg_count = len(inspect.signature(handler).parameters)
+            parameters = inspect.signature(handler).parameters
+            has_varargs = any(
+                parameter.kind == inspect.Parameter.VAR_POSITIONAL
+                for parameter in parameters.values()
+            )
+            arg_count = (
+                len(args)
+                if has_varargs
+                else sum(
+                    parameter.kind
+                    in (
+                        inspect.Parameter.POSITIONAL_ONLY,
+                        inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                    )
+                    for parameter in parameters.values()
+                )
+            )
             return handler(
                 *list(map(lambda a: self.from_maybe_impl(a), args))[:arg_count]
             )
