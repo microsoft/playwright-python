@@ -91,6 +91,57 @@ async def test_should_work_with_a_custom_check(page: Page, server: Server) -> No
         await expect(page.locator("#interstitial")).not_to_be_visible()
 
 
+async def test_should_work_with_keyword_only_handler(
+    page: Page, server: Server
+) -> None:
+    await page.goto(server.PREFIX + "/input/handle-locator.html")
+
+    called = False
+
+    async def handler(*, timeout: object = None) -> None:
+        nonlocal called
+        assert timeout is None
+        called = True
+        await page.locator("#close").click()
+
+    await page.add_locator_handler(
+        page.get_by_text("This interstitial covers the button"), handler
+    )
+
+    await page.locator("#aside").hover()
+    await page.evaluate(
+        '() => { window.clicked = 0; window.setupAnnoyingInterstitial("mouseover", 1); }'
+    )
+    await page.locator("#target").click()
+    assert called
+    assert await page.evaluate("window.clicked") == 1
+    await expect(page.locator("#interstitial")).not_to_be_visible()
+
+
+async def test_should_work_with_varargs_handler(page: Page, server: Server) -> None:
+    await page.goto(server.PREFIX + "/input/handle-locator.html")
+
+    called = False
+    original_locator = page.get_by_text("This interstitial covers the button")
+
+    async def handler(*locators: Locator) -> None:
+        nonlocal called
+        assert locators == (original_locator,)
+        called = True
+        await page.locator("#close").click()
+
+    await page.add_locator_handler(original_locator, handler)
+
+    await page.locator("#aside").hover()
+    await page.evaluate(
+        '() => { window.clicked = 0; window.setupAnnoyingInterstitial("mouseover", 1); }'
+    )
+    await page.locator("#target").click()
+    assert called
+    assert await page.evaluate("window.clicked") == 1
+    await expect(page.locator("#interstitial")).not_to_be_visible()
+
+
 async def test_should_work_with_locator_hover(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/input/handle-locator.html")
 

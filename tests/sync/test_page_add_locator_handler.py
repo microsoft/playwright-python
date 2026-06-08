@@ -90,6 +90,55 @@ def test_should_work_with_a_custom_check(page: Page, server: Server) -> None:
         expect(page.locator("#interstitial")).not_to_be_visible()
 
 
+def test_should_work_with_keyword_only_handler(page: Page, server: Server) -> None:
+    page.goto(server.PREFIX + "/input/handle-locator.html")
+
+    called = False
+
+    def handler(*, timeout: object = None) -> None:
+        nonlocal called
+        assert timeout is None
+        called = True
+        page.locator("#close").click()
+
+    page.add_locator_handler(
+        page.get_by_text("This interstitial covers the button"), handler
+    )
+
+    page.locator("#aside").hover()
+    page.evaluate(
+        '() => { window.clicked = 0; window.setupAnnoyingInterstitial("mouseover", 1); }'
+    )
+    page.locator("#target").click()
+    assert called
+    assert page.evaluate("window.clicked") == 1
+    expect(page.locator("#interstitial")).not_to_be_visible()
+
+
+def test_should_work_with_varargs_handler(page: Page, server: Server) -> None:
+    page.goto(server.PREFIX + "/input/handle-locator.html")
+
+    called = False
+    original_locator = page.get_by_text("This interstitial covers the button")
+
+    def handler(*locators: Locator) -> None:
+        nonlocal called
+        assert locators == (original_locator,)
+        called = True
+        page.locator("#close").click()
+
+    page.add_locator_handler(original_locator, handler)
+
+    page.locator("#aside").hover()
+    page.evaluate(
+        '() => { window.clicked = 0; window.setupAnnoyingInterstitial("mouseover", 1); }'
+    )
+    page.locator("#target").click()
+    assert called
+    assert page.evaluate("window.clicked") == 1
+    expect(page.locator("#interstitial")).not_to_be_visible()
+
+
 def test_should_work_with_locator_hover(page: Page, server: Server) -> None:
     page.goto(server.PREFIX + "/input/handle-locator.html")
 
