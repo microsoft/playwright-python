@@ -485,6 +485,23 @@ async def test_should_work_with_binary_post_data(page: Page, server: Server) -> 
         assert buffer[i] == i
 
 
+async def test_should_not_throw_for_non_utf8_post_data(
+    page: Page, server: Server
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+    server.set_route("/post", lambda req: req.finish())
+    requests = []
+    page.on("request", lambda r: requests.append(r))
+    await page.evaluate(
+        """async () => {
+        await fetch('./post', { method: 'POST', body: new Uint8Array([255, 254, 65]) })
+    }"""
+    )
+    assert len(requests) == 1
+    assert requests[0].post_data == "\ufffd\ufffdA"
+    assert requests[0].post_data_buffer == b"\xff\xfeA"
+
+
 async def test_should_work_with_binary_post_data_and_interception(
     page: Page, server: Server
 ) -> None:
