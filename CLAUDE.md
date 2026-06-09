@@ -10,11 +10,11 @@ Python bindings for [Playwright](https://playwright.dev). The Python client talk
 
 - `playwright/_impl/` — hand-written client implementation (one module per object: `_browser.py`, `_page.py`, `_locator.py`, `_network.py`, etc.). Edit these to add or change behavior.
 - `playwright/async_api/_generated.py`, `playwright/sync_api/_generated.py` — **auto-generated**. Never edit by hand; rerun `./scripts/update_api.sh` after changing `_impl/` or the driver.
-- `scripts/generate_api.py`, `scripts/generate_async_api.py`, `scripts/generate_sync_api.py`, `scripts/documentation_provider.py` — codegen and validation. They diff the Python implementation against the driver's `playwright/driver/package/api.json` and abort if either side is out of sync.
+- `scripts/generate_api.py`, `scripts/generate_async_api.py`, `scripts/generate_sync_api.py`, `scripts/documentation_provider.py` — codegen and validation. They diff the Python implementation against `driver/playwright-<sha>-api.json` and abort if either side is out of sync.
 - `scripts/expected_api_mismatch.txt` — explicit allowlist of "documented in JS, not in Python" or "named differently in Python" gaps. Lines that no longer apply must be removed.
 - `tests/async/`, `tests/sync/` — pytest suites. Most new tests are added to the async file with a sync mirror.
 - `DRIVER_SHA` — the single source of truth for which Playwright commit the driver is built from (one line, the 40-char `microsoft/playwright` commit SHA). Read by `setup.py`, `scripts/build_driver.sh`, and CI. The wheel build clones `microsoft/playwright` at this commit and builds the driver from source (via `scripts/build_driver.sh` + upstream's `utils/build/build-playwright-driver.sh`). The SHA is baked into the staged bundle filenames (`driver/playwright-<sha>-<suffix>.zip`), so it doubles as the build cache key.
-- `scripts/build_driver.sh` — clones and builds the upstream driver bundles into `driver/`. A portable bash script (shareable with the other language forks) that needs Node.js, npm, git and bash; invoked from `setup.py`'s `bdist_wheel`. Reads the pin from `DRIVER_SHA`; takes no arguments.
+- `scripts/build_driver.sh` — clones and builds the upstream driver bundles into `driver/`, and stages `driver/playwright-<sha>-api.json` alongside them. A portable bash script (shareable with the other language forks) that needs Node.js, npm, git and bash; invoked from `setup.py`'s `bdist_wheel`. Reads the pin from `DRIVER_SHA`; takes no arguments.
 - `ROLLING.md`, `CONTRIBUTING.md` — human-facing setup and roll docs.
 
 ## Setup
@@ -39,7 +39,7 @@ If the system lacks `python3-venv`, `uv venv env` is an acceptable substitute (t
 - Type-check: `mypy playwright`.
 - Run tests: `pytest --browser chromium [-k name]`. Browsers are installed via `playwright install chromium` (do **not** use `--with-deps`, which requires sudo).
 
-When changing public API, edit `_impl/`, then run `./scripts/update_api.sh`. The script regenerates `_generated.py` and validates against the driver's `api.json`. If validation fails, fix the mismatch in `_impl/`, in `expected_api_mismatch.txt`, or in `documentation_provider.py` — not by hand-editing `_generated.py`.
+When changing public API, edit `_impl/`, then run `./scripts/update_api.sh`. The script regenerates `_generated.py` and validates against `driver/playwright-<sha>-api.json` (staged by `scripts/build_driver.sh`, which `update_api.sh` runs first). If validation fails, fix the mismatch in `_impl/`, in `expected_api_mismatch.txt`, or in `documentation_provider.py` — not by hand-editing `_generated.py`.
 
 ## Rolling Playwright to a new version
 

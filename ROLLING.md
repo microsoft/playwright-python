@@ -20,6 +20,9 @@ pip install -e .
 
 ## Fix typing issues with Playwright ToT
 
+To generate the API from a local Playwright checkout (e.g. tip of tree) instead of
+the pinned `DRIVER_SHA`, overwrite the staged `api.json` and rerun codegen:
+
 1. `cd playwright`
-1. `API_JSON_MODE=1 node utils/doclint/generateApiJson.js > ../playwright-python/playwright/driver/package/api.json`
-1. `./scripts/update_api.sh`
+1. `API_JSON_MODE=1 node utils/doclint/generateApiJson.js > "../playwright-python/driver/playwright-$(cat ../playwright-python/DRIVER_SHA)-api.json"`
+1. `cd ../playwright-python && ./scripts/update_api.sh`

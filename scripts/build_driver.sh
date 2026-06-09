@@ -55,12 +55,14 @@ fi
 # Bundle suffixes produced by utils/build/build-playwright-driver.sh. Keep in
 # sync with the "zip_name" values in setup.py.
 SUFFIXES=(mac mac-arm64 linux linux-arm64 win32_x64 win32_arm64)
+API_JSON_FILE="$DRIVER_DIR/playwright-$EXPECTED_SHA-api.json"
 
 bundles_present() {
   local suffix
   for suffix in "${SUFFIXES[@]}"; do
     [[ -f "$DRIVER_DIR/playwright-$EXPECTED_SHA-$suffix.zip" ]] || return 1
   done
+  [[ -f "$API_JSON_FILE" ]] || return 1
   return 0
 }
 
@@ -143,6 +145,11 @@ copy_bundles() {
   done
 }
 
+generate_api_json() {
+  echo "Generating api.json"
+  API_JSON_MODE=1 node "$SOURCE_DIR/utils/doclint/generateApiJson.js" > "$API_JSON_FILE"
+}
+
 # Fast path: the bundles for this exact pin are already staged, so there is
 # nothing to (re)build. This keeps repeat invocations cheap and lets consumers
 # that only downloaded the prebuilt bundles skip the build entirely (no Node).
@@ -155,3 +162,4 @@ require_tools
 clone_source
 build_source
 copy_bundles
+generate_api_json

@@ -15,7 +15,6 @@
 import json
 import pathlib
 import re
-import subprocess
 from sys import stderr
 from typing import Any, Dict, List, Set, Union, get_args, get_origin, get_type_hints
 from urllib.parse import urljoin
@@ -32,12 +31,10 @@ class DocumentationProvider:
         self.api: Any = {}
         self.links: Dict[str, str] = {}
         self.printed_entries: List[str] = []
-        process_output = subprocess.run(
-            ["python", "-m", "playwright", "print-api-json"],
-            check=True,
-            capture_output=True,
-        )
-        self.api = json.loads(process_output.stdout)
+        repo_root = pathlib.Path(__file__).resolve().parents[1]
+        driver_sha = (repo_root / "DRIVER_SHA").read_text().strip()
+        api_json_path = repo_root / "driver" / f"playwright-{driver_sha}-api.json"
+        self.api = json.loads(api_json_path.read_text())
         self.errors: Set[str] = set()
         self.class_aliases: Dict[str, str] = {
             "Disposable": "AsyncContextManager" if is_async else "SyncContextManager",

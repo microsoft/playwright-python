@@ -33,7 +33,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: driver-bundles
-        path: driver/playwright-*.zip
+        path: |
+          driver/**
+          !driver/playwright-src/**
         if-no-files-found: error
         # The bundles are already-compressed zips; skip re-compression.
         compression-level: 0
