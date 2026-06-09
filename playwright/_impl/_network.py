@@ -220,8 +220,8 @@ class Request(ChannelOwner):
         post_data = self.post_data
         if not post_data:
             return None
-        content_type = self.headers["content-type"]
-        if "application/x-www-form-urlencoded" in content_type:
+        content_type = self.headers.get("content-type")
+        if content_type and "application/x-www-form-urlencoded" in content_type:
             return dict(parse.parse_qsl(post_data))
         try:
             return json.loads(post_data)

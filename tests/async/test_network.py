@@ -468,6 +468,46 @@ async def test_should_throw_on_invalid_json_in_post_data(
     assert "POST data is not a valid JSON object: <not a json>" in str(exc_info.value)
 
 
+async def test_should_return_post_data_for_put_requests(
+    page: Page, server: Server
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+    async with page.expect_request("**/*") as request_info:
+        await page.evaluate(
+            """({url}) => {
+            const request = new Request(url, {
+                method: 'PUT',
+                body: JSON.stringify({ value: 42 }),
+            });
+            return fetch(request);
+        }""",
+            {"url": server.PREFIX + "/title.html"},
+        )
+    request = await request_info.value
+    assert request.post_data_json == {"value": 42}
+
+
+async def test_should_parse_the_json_post_data_when_content_type_header_is_missing(
+    page: Page, server: Server
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+    async with page.expect_request("**/*") as request_info:
+        await page.evaluate(
+            """({url}) => {
+            const request = new Request(url, {
+                method: 'POST',
+                body: JSON.stringify({ value: 42 }),
+            });
+            request.headers.delete('content-type');
+            return fetch(request);
+        }""",
+            {"url": server.PREFIX + "/title.html"},
+        )
+    request = await request_info.value
+    assert "content-type" not in request.headers
+    assert request.post_data_json == {"value": 42}
+
+
 async def test_should_work_with_binary_post_data(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     server.set_route("/post", lambda req: req.finish())
