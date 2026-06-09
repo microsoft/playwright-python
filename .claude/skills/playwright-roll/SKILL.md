@@ -5,7 +5,7 @@ description: Roll Playwright Python to a new driver version. Walks the upstream 
 
 # Rolling Playwright Python
 
-The goal of a roll is to move `driver_version` in `setup.py` to a new release, port every public API change introduced upstream during that interval, and suppress the rest, so that `./scripts/update_api.sh` runs clean and the test suite still passes.
+The goal of a roll is to move the driver pin in `DRIVER_SHA` to a new release, port every public API change introduced upstream during that interval, and suppress the rest, so that `./scripts/update_api.sh` runs clean and the test suite still passes.
 
 The previous human-facing summary lives in `../../../ROLLING.md`. This skill is the operational playbook — read it end to end before starting.
 
@@ -15,7 +15,7 @@ The Python port is hand-written code in `playwright/_impl/`, plus a generator (`
 
 1. introspects the Python `_impl` classes via `inspect`,
 2. emits typed wrapper classes into `playwright/{async,sync}_api/_generated.py`, and
-3. diffs the introspected surface against `playwright/driver/package/api.json` (downloaded inside the new driver wheel).
+3. diffs the introspected surface against `playwright/driver/package/api.json` (built into the new driver from source).
 
 Anything in `api.json` that is missing or differently typed in `_impl/` causes generation to fail. Three resolutions:
 
@@ -52,18 +52,27 @@ There is sometimes no `vX.Y.0` tag for the latest release (the bots cut release 
 - If `python3-venv` is missing system-wide, use `uv venv env` instead, then `uv pip install --python env/bin/python --upgrade pip`. Don't try to `apt install` — sudo is denied in the harness.
 - Always activate the venv before any `pip`, `pytest`, `mypy`, or `pre-commit` invocation.
 
-### 2. Bump the driver and download it
+### 2. Bump the driver and build it from source
 
 ```sh
-# Edit setup.py
-driver_version = "<new>"     # e.g. "1.59.1"
+# Edit DRIVER_SHA (repo root): replace with the microsoft/playwright commit SHA
+# for the new release, e.g. the commit that v<new> points at.
+#   87bb9ddbd78f329df18c2b24847bc9409240cd07
+# Update the "# microsoft/playwright @ v<new>" comment in scripts/build_driver.sh too.
 
 source env/bin/activate
-python -m build --wheel       # downloads the new driver from cdn.playwright.dev
+python -m build --wheel       # clones microsoft/playwright @ DRIVER_SHA and builds the driver from source
 playwright install chromium   # NOT --with-deps; sudo is denied
 ```
 
-The wheel build prints `Fetching https://cdn.playwright.dev/builds/driver/playwright-<new>-linux.zip` and unpacks the driver under `playwright/driver/package/`. From this point, `playwright/driver/package/api.json` reflects the new release.
+The wheel build clones `microsoft/playwright` at the commit in `DRIVER_SHA`
+into `driver/playwright-src`, runs `npm ci && npm run build`, and runs upstream's
+`utils/build/build-playwright-driver.sh` to produce the per-platform driver
+bundles (`driver/playwright-<sha>-*.zip`), then unpacks the driver under
+`playwright/driver/package/`. From this point,
+`playwright/driver/package/api.json` reflects the new release. This requires
+**Node.js, npm, git and bash** on PATH; the first build is slow (full upstream
+build + per-platform Node downloads).
 
 ### 3. Identify the commit range
 
@@ -240,7 +249,7 @@ For each PORT, add one async test and a matching sync test. Conventions:
 
 ### 7. Update existing high-touch artifacts
 
-- `setup.py`: already done in step 2.
+- `DRIVER_SHA` (and the version comment in `scripts/build_driver.sh`): already done in step 2.
 - `README.md`: gets the chromium/firefox/webkit version table updated automatically by `scripts/update_versions.py` (called from `update_api.sh`). Don't edit by hand.
 - The "Backport changes" tracking issue on GitHub (filed by `microsoft-playwright-automation`) is the *intent* tracker, but it's frequently out of sync with what's actually been ported. Treat it as a starting point, not the source of truth — the `docs/src/api/` commit walk is authoritative.
 

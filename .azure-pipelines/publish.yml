@@ -40,6 +40,10 @@ extends:
           inputs:
             versionSpec: '3.9'
           displayName: 'Use Python'
+        - task: NodeTool@0
+          inputs:
+            versionSpec: '24.x'
+          displayName: 'Use Node.js'
         - script: |
             python -m pip install --upgrade pip
             pip install -r local-requirements.txt

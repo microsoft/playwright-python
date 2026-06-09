@@ -13,19 +13,20 @@ Python bindings for [Playwright](https://playwright.dev). The Python client talk
 - `scripts/generate_api.py`, `scripts/generate_async_api.py`, `scripts/generate_sync_api.py`, `scripts/documentation_provider.py` — codegen and validation. They diff the Python implementation against the driver's `playwright/driver/package/api.json` and abort if either side is out of sync.
 - `scripts/expected_api_mismatch.txt` — explicit allowlist of "documented in JS, not in Python" or "named differently in Python" gaps. Lines that no longer apply must be removed.
 - `tests/async/`, `tests/sync/` — pytest suites. Most new tests are added to the async file with a sync mirror.
-- `setup.py` — `driver_version = "X.Y.Z"` is the source of truth for which driver build is downloaded from `cdn.playwright.dev`.
+- `DRIVER_SHA` — the single source of truth for which Playwright commit the driver is built from (one line, the 40-char `microsoft/playwright` commit SHA). Read by `setup.py`, `scripts/build_driver.sh`, and CI. The wheel build clones `microsoft/playwright` at this commit and builds the driver from source (via `scripts/build_driver.sh` + upstream's `utils/build/build-playwright-driver.sh`). The SHA is baked into the staged bundle filenames (`driver/playwright-<sha>-<suffix>.zip`), so it doubles as the build cache key.
+- `scripts/build_driver.sh` — clones and builds the upstream driver bundles into `driver/`. A portable bash script (shareable with the other language forks) that needs Node.js, npm, git and bash; invoked from `setup.py`'s `bdist_wheel`. Reads the pin from `DRIVER_SHA`; takes no arguments.
 - `ROLLING.md`, `CONTRIBUTING.md` — human-facing setup and roll docs.
 
 ## Setup
 
-`CONTRIBUTING.md` has the full sequence. The short version:
+`CONTRIBUTING.md` has the full sequence. The short version (needs Node.js, npm, git and bash for the driver build):
 
 ```sh
 python3 -m venv env && source env/bin/activate
 pip install --upgrade pip
 pip install -r local-requirements.txt
 pip install -e .
-python -m build --wheel        # downloads the driver listed in setup.py
+python -m build --wheel        # clones microsoft/playwright @ DRIVER_SHA and builds the driver from source
 pre-commit install
 ```
 
