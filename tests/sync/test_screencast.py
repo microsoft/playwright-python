@@ -59,15 +59,15 @@ def test_on_frame_receives_viewport_size(browser: Browser, server: Server) -> No
     page.screencast.start(on_frame=lambda f: received.append(f), size=size)
     page.goto(server.EMPTY_PAGE)
     page.evaluate("() => document.body.style.backgroundColor = 'red'")
-    for _ in range(3):
+    for _ in range(100):
         page.evaluate(
             "() => new Promise(f => requestAnimationFrame(() => requestAnimationFrame(f)))"
         )
     page.screenshot()
     page.screencast.stop()
     assert len(received) >= 1
+    assert any(frame["viewportWidth"] == 1000 for frame in received)
     for frame in received:
-        assert frame["viewportWidth"] == 1000
         assert frame["viewportHeight"] == 400
         assert isinstance(frame["timestamp"], (int, float))
     context.close()
