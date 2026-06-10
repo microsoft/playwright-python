@@ -28,20 +28,15 @@ def test_install_create_get_and_delete_credentials(
     page.goto(https_server.EMPTY_PAGE, wait_until="networkidle")
     creds = context.credentials
     creds.install()
-    result = creds.create(
-        rp_id="localhost",
-        id="test-credential-id",
-        private_key="private-key-data",
-        public_key="public-key-data",
-    )
-    assert result["id"] == "test-credential-id"
+    result = creds.create(rp_id="localhost")
     assert result["rpId"] == "localhost"
+    assert "id" in result
 
     credentials = creds.get()
     assert len(credentials) == 1
-    assert credentials[0]["id"] == "test-credential-id"
+    assert credentials[0]["id"] == result["id"]
 
-    creds.delete(id="test-credential-id")
+    creds.delete(id=result["id"])
     credentials = creds.get()
     assert len(credentials) == 0
     context.close()

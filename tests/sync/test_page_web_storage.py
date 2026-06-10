@@ -26,15 +26,16 @@ def test_should_expose_session_storage_property(page: Page) -> None:
 
 def test_local_storage_set_and_get_item(page: Page, server: Server) -> None:
     page.goto(server.EMPTY_PAGE)
-    page.evaluate("() => localStorage.setItem('foo', 'bar')")
+    page.local_storage.set_item("foo", "bar")
     value = page.local_storage.get_item("foo")
     assert value == "bar"
+    assert page.evaluate("() => localStorage.getItem('foo')") == "bar"
 
 
 def test_local_storage_items(page: Page, server: Server) -> None:
     page.goto(server.EMPTY_PAGE)
-    page.evaluate("() => localStorage.setItem('a', '1')")
-    page.evaluate("() => localStorage.setItem('b', '2')")
+    page.local_storage.set_item("a", "1")
+    page.local_storage.set_item("b", "2")
     items = page.local_storage.items()
     assert len(items) == 2
     assert {"name": "a", "value": "1"} in items
@@ -43,7 +44,7 @@ def test_local_storage_items(page: Page, server: Server) -> None:
 
 def test_local_storage_remove_item(page: Page, server: Server) -> None:
     page.goto(server.EMPTY_PAGE)
-    page.evaluate("() => localStorage.setItem('foo', 'bar')")
+    page.local_storage.set_item("foo", "bar")
     page.local_storage.remove_item("foo")
     result = page.evaluate("() => localStorage.getItem('foo')")
     assert result is None
@@ -51,7 +52,7 @@ def test_local_storage_remove_item(page: Page, server: Server) -> None:
 
 def test_local_storage_clear(page: Page, server: Server) -> None:
     page.goto(server.EMPTY_PAGE)
-    page.evaluate("() => localStorage.setItem('foo', 'bar')")
+    page.local_storage.set_item("foo", "bar")
     page.local_storage.clear()
     length = page.evaluate("() => localStorage.length")
     assert length == 0
@@ -59,14 +60,15 @@ def test_local_storage_clear(page: Page, server: Server) -> None:
 
 def test_session_storage_set_and_get_item(page: Page, server: Server) -> None:
     page.goto(server.EMPTY_PAGE)
-    page.evaluate("() => sessionStorage.setItem('foo', 'bar')")
+    page.session_storage.set_item("foo", "bar")
     value = page.session_storage.get_item("foo")
     assert value == "bar"
+    assert page.evaluate("() => sessionStorage.getItem('foo')") == "bar"
 
 
 def test_session_storage_items(page: Page, server: Server) -> None:
     page.goto(server.EMPTY_PAGE)
-    page.evaluate("() => sessionStorage.setItem('a', '1')")
+    page.session_storage.set_item("a", "1")
     items = page.session_storage.items()
     assert len(items) == 1
     assert items[0] == {"name": "a", "value": "1"}
@@ -74,7 +76,7 @@ def test_session_storage_items(page: Page, server: Server) -> None:
 
 def test_session_storage_remove_item(page: Page, server: Server) -> None:
     page.goto(server.EMPTY_PAGE)
-    page.evaluate("() => sessionStorage.setItem('foo', 'bar')")
+    page.session_storage.set_item("foo", "bar")
     page.session_storage.remove_item("foo")
     result = page.evaluate("() => sessionStorage.getItem('foo')")
     assert result is None
@@ -82,7 +84,7 @@ def test_session_storage_remove_item(page: Page, server: Server) -> None:
 
 def test_session_storage_clear(page: Page, server: Server) -> None:
     page.goto(server.EMPTY_PAGE)
-    page.evaluate("() => sessionStorage.setItem('foo', 'bar')")
+    page.session_storage.set_item("foo", "bar")
     page.session_storage.clear()
     length = page.evaluate("() => sessionStorage.length")
     assert length == 0

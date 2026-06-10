@@ -31,19 +31,14 @@ async def test_install_create_get_and_delete_credentials(
         await page.goto(https_server.EMPTY_PAGE, wait_until="networkidle")
         creds = context.credentials
         await creds.install()
-        result = await creds.create(
-            rp_id="localhost",
-            id="test-credential-id",
-            private_key="private-key-data",
-            public_key="public-key-data",
-        )
-        assert result["id"] == "test-credential-id"
+        result = await creds.create(rp_id="localhost")
         assert result["rpId"] == "localhost"
+        assert "id" in result
 
         credentials = await creds.get()
         assert len(credentials) == 1
-        assert credentials[0]["id"] == "test-credential-id"
+        assert credentials[0]["id"] == result["id"]
 
-        await creds.delete(id="test-credential-id")
+        await creds.delete(id=result["id"])
         credentials = await creds.get()
         assert len(credentials) == 0
