@@ -22,7 +22,7 @@ from typing import Any, Callable, List, Optional, Tuple, Union
 from pyee import EventEmitter
 
 from playwright._impl._connection import ChannelOwner
-from playwright._impl._errors import Error, TimeoutError
+from playwright._impl._errors import Error, TimeoutError, is_target_closed_error
 
 
 class Waiter:
@@ -50,20 +50,29 @@ class Waiter:
         )
 
     def _wait_for_event_info_after(self, wait_id: str, error: Exception = None) -> None:
-        self._channel._connection.wrap_api_call_sync(
-            lambda: self._channel.send_no_reply(
-                "waitForEventInfo",
-                None,
-                {
-                    "info": {
-                        "waitId": wait_id,
-                        "phase": "after",
-                        **({"error": str(error)} if error else {}),
+        try:
+            self._channel._connection.wrap_api_call_sync(
+                lambda: self._channel.send_no_reply(
+                    "waitForEventInfo",
+                    None,
+                    {
+                        "info": {
+                            "waitId": wait_id,
+                            "phase": "after",
+                            **({"error": str(error)} if error else {}),
+                        },
                     },
-                },
-            ),
-            True,
-        )
+                ),
+                True,
+            )
+        except Error as e:
+            # This is best-effort telemetry. During remote browser shutdown, the
+            # waiter result has already been resolved, but the pipe may be closing.
+            if (
+                not is_target_closed_error(e)
+                and e.message != "Playwright connection closed"
+            ):
+                raise
 
     def reject_on_event(
         self,
