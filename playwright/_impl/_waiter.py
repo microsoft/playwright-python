@@ -70,7 +70,7 @@ class Waiter:
             # waiter result has already been resolved, but the pipe may be closing.
             if (
                 not is_target_closed_error(e)
-                and e.message != "Playwright connection closed"
+                and "Playwright connection closed" not in e.message
             ):
                 raise
 
