@@ -35,7 +35,6 @@ from playwright._impl._api_structures import (
     DropPayload,
     FilePayload,
     FrameExpectOptions,
-    FrameExpectResult,
     Position,
 )
 from playwright._impl._connection import (
@@ -186,7 +185,7 @@ class Frame(ChannelOwner):
         expression: str,
         options: FrameExpectOptions,
         title: str = None,
-    ) -> FrameExpectResult:
+    ) -> dict:
         if "expectedValue" in options:
             options["expectedValue"] = serialize_argument(options["expectedValue"])
         result = await self._channel.send_return_as_dict(
@@ -199,6 +198,8 @@ class Frame(ChannelOwner):
             },
             title=title,
         )
+        if result is None:
+            return {}
         if result.get("received"):
             result["received"] = parse_value(result["received"])
         return result

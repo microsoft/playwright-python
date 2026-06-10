@@ -21,13 +21,11 @@ from playwright._impl._api_structures import (
     AriaRole,
     ExpectedTextValue,
     FrameExpectOptions,
-    FrameExpectResult,
 )
 from playwright._impl._connection import format_call_log
 from playwright._impl._errors import Error
 from playwright._impl._fetch import APIResponse
 from playwright._impl._helper import is_textual_mime_type
-from playwright._impl._js_handle import parse_value
 from playwright._impl._locator import Locator
 from playwright._impl._page import Page
 from playwright._impl._str_utils import escape_regex_flags
@@ -79,7 +77,7 @@ class AssertionsBase:
 
     async def _call_expect(
         self, expression: str, expect_options: FrameExpectOptions, title: Optional[str]
-    ) -> FrameExpectResult:
+    ) -> None:
         raise NotImplementedError(
             "_call_expect must be implemented in a derived class."
         )
@@ -100,35 +98,16 @@ class AssertionsBase:
             message = message.replace("expected to", "expected not to")
         if "useInnerText" in expect_options and expect_options["useInnerText"] is None:
             del expect_options["useInnerText"]
-        result = await self._call_expect(expression, expect_options, title)
-        if result["matches"] == self._is_not:
-            received = result.get("received") or {}
-            aria_snapshot = None
-            if isinstance(received, dict):
-                aria_snapshot = received.get("ariaSnapshot")
-                value = received.get("value")
-                actual = parse_value(value) if value is not None else None
-            else:
-                actual = received
+        try:
+            await self._call_expect(expression, expect_options, title)
+        except Error as e:
             if self._custom_message:
                 out_message = self._custom_message
                 if expected is not None:
                     out_message += f"\nExpected value: '{expected or '<None>'}'"
             else:
-                out_message = (
-                    f"{message} '{expected}'" if expected is not None else f"{message}"
-                )
-            error_message = result.get("errorMessage")
-            error_message = f"\n{error_message}" if error_message else ""
-            aria_snapshot_message = (
-                f"\nAria snapshot:\n{aria_snapshot}" if aria_snapshot else ""
-            )
-            _record_soft_or_raise(
-                AssertionError(
-                    f"{out_message}\nActual value: {actual}{error_message} {format_call_log(result.get('log'))}{aria_snapshot_message}"
-                ),
-                self._is_soft,
-            )
+                out_message = str(e)
+            _record_soft_or_raise(AssertionError(out_message), self._is_soft)
 
 
 class PageAssertions(AssertionsBase):
@@ -145,9 +124,9 @@ class PageAssertions(AssertionsBase):
 
     async def _call_expect(
         self, expression: str, expect_options: FrameExpectOptions, title: Optional[str]
-    ) -> FrameExpectResult:
+    ) -> None:
         __tracebackhide__ = True
-        return await self._actual_page.main_frame._expect(
+        await self._actual_page.main_frame._expect(
             None, expression, expect_options, title
         )
 
@@ -243,9 +222,9 @@ class LocatorAssertions(AssertionsBase):
 
     async def _call_expect(
         self, expression: str, expect_options: FrameExpectOptions, title: Optional[str]
-    ) -> FrameExpectResult:
+    ) -> None:
         __tracebackhide__ = True
-        return await self._actual_locator._expect(expression, expect_options, title)
+        await self._actual_locator._expect(expression, expect_options, title)
 
     @property
     def _not(self) -> "LocatorAssertions":
