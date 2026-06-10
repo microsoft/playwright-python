@@ -37,12 +37,14 @@ from playwright._impl._api_structures import (
     RequestSizes,
     ResourceTiming,
     ScreencastFrame,
+    ScreencastSize,
     SecurityDetails,
     SetCookieParam,
     SourceLocation,
     StorageState,
     TracingGroupLocation,
     ViewportSize,
+    VirtualCredential,
     WebErrorLocation,
 )
 from playwright._impl._assertions import (
@@ -56,6 +58,7 @@ from playwright._impl._browser_type import BrowserType as BrowserTypeImpl
 from playwright._impl._cdp_session import CDPSession as CDPSessionImpl
 from playwright._impl._clock import Clock as ClockImpl
 from playwright._impl._console_message import ConsoleMessage as ConsoleMessageImpl
+from playwright._impl._credentials import Credentials as CredentialsImpl
 from playwright._impl._debugger import Debugger as DebuggerImpl
 from playwright._impl._dialog import Dialog as DialogImpl
 from playwright._impl._disposable import Disposable as DisposableImpl
@@ -94,6 +97,7 @@ from playwright._impl._sync_base import (
 from playwright._impl._tracing import Tracing as TracingImpl
 from playwright._impl._video import Video as VideoImpl
 from playwright._impl._web_error import WebError as WebErrorImpl
+from playwright._impl._web_storage import WebStorage as WebStorageImpl
 
 
 class Request(SyncBase):
@@ -1790,7 +1794,7 @@ class Touchscreen(SyncBase):
 
         Dispatches a `touchstart` and `touchend` event with a single touch at the position (`x`,`y`).
 
-        **NOTE** `page.tap()` the method will throw if `hasTouch` option of the browser context is false.
+        **NOTE** `touchscreen.tap()` will throw if the `hasTouch` option of the browser context is false.
 
         Parameters
         ----------
@@ -3796,7 +3800,7 @@ class Frame(SyncBase):
         `ElementHandle` instances can be passed as an argument to the `frame.evaluate()`:
 
         ```py
-        body_handle = frame.evaluate(\"document.body\")
+        body_handle = frame.evaluate_handle(\"document.body\")
         html = frame.evaluate(\"([body, suffix]) => body.innerHTML + suffix\", [body_handle, \"hello\"])
         body_handle.dispose()
         ```
@@ -3843,14 +3847,14 @@ class Frame(SyncBase):
         A string can also be passed in instead of a function.
 
         ```py
-        a_handle = page.evaluate_handle(\"document\") # handle for the \"document\"
+        a_handle = frame.evaluate_handle(\"document\") # handle for the \"document\"
         ```
 
         `JSHandle` instances can be passed as an argument to the `frame.evaluate_handle()`:
 
         ```py
-        a_handle = page.evaluate_handle(\"document.body\")
-        result_handle = page.evaluate_handle(\"body => body.innerHTML\", a_handle)
+        a_handle = frame.evaluate_handle(\"document.body\")
+        result_handle = frame.evaluate_handle(\"body => body.innerHTML\", a_handle)
         print(result_handle.json_value())
         result_handle.dispose()
         ```
@@ -7181,7 +7185,8 @@ class Selectors(SyncBase):
         Parameters
         ----------
         attribute_name : str
-            Test id attribute name.
+            Test id attribute name. To match elements with any of several attributes, pass them as a comma-separated list, e.g.
+            `"data-pw,data-ti"`.
         """
 
         return mapping.from_maybe_impl(
@@ -7369,6 +7374,120 @@ class Clock(SyncBase):
 
 
 mapping.register(ClockImpl, Clock)
+
+
+class Credentials(SyncBase):
+
+    def install(self) -> None:
+        """Credentials.install
+
+        Installs the virtual WebAuthn authenticator into the context, overriding `navigator.credentials.create()` and
+        `navigator.credentials.get()` in all current and future pages. Call this before the page first touches
+        `navigator.credentials`.
+
+        Required: until `install()` is called, no interception is in place and the page sees the platform's native (or
+        absent) WebAuthn behaviour. Seeding credentials with `credentials.create()` without `install()` populates
+        the authenticator, but the page will never see those credentials.
+        """
+
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.install()))
+
+    def create(
+        self,
+        rp_id: str,
+        *,
+        id: typing.Optional[str] = None,
+        user_handle: typing.Optional[str] = None,
+        private_key: typing.Optional[str] = None,
+        public_key: typing.Optional[str] = None,
+    ) -> VirtualCredential:
+        """Credentials.create
+
+        Seeds a virtual WebAuthn credential and returns it.
+
+        With only `rpId`, generates a fresh **ECDSA P-256** keypair, credential id and user handle. The seeded credential
+        is discoverable (resident), so the page can resolve it from both username-then-passkey and usernameless passkey
+        flows. The returned object carries the `privateKey` and `publicKey`, so it can be persisted to disk and re-seeded
+        in a later test.
+
+        To **import a known credential**, supply all four of `id`, `userHandle`, `privateKey` and `publicKey` together.
+
+        Call `credentials.install()` before navigating to a page that uses WebAuthn.
+
+        Parameters
+        ----------
+        rp_id : str
+            Relying party id (typically the site's effective domain).
+        id : Union[str, None]
+            Base64url-encoded credential id. Auto-generated if omitted.
+        user_handle : Union[str, None]
+            Base64url-encoded user handle. Auto-generated if omitted.
+        private_key : Union[str, None]
+            Base64url-encoded PKCS#8 (DER) private key. Auto-generated if omitted.
+        public_key : Union[str, None]
+            Base64url-encoded SPKI (DER) public key. Auto-generated if omitted.
+
+        Returns
+        -------
+        {id: str, rpId: str, userHandle: str, privateKey: str, publicKey: str}
+        """
+
+        return mapping.from_impl(
+            self._sync(
+                self._impl_obj.create(
+                    rpId=rp_id,
+                    id=id,
+                    userHandle=user_handle,
+                    privateKey=private_key,
+                    publicKey=public_key,
+                )
+            )
+        )
+
+    def delete(self, id: str) -> None:
+        """Credentials.delete
+
+        Removes a credential from the authenticator by its id. Works for any credential currently held — both those seeded
+        with `credentials.create()` and those the page registered itself by calling
+        `navigator.credentials.create()`.
+
+        Parameters
+        ----------
+        id : str
+            Base64url-encoded credential id.
+        """
+
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.delete(id=id)))
+
+    def get(
+        self, *, rp_id: typing.Optional[str] = None, id: typing.Optional[str] = None
+    ) -> typing.List[VirtualCredential]:
+        """Credentials.get
+
+        Returns every credential currently held by the authenticator, optionally filtered by `rpId` or `id`. This includes
+        both credentials seeded with `credentials.create()` and credentials the page registered itself by calling
+        `navigator.credentials.create()`.
+
+        Each returned credential includes its `privateKey` and `publicKey`, so a passkey the app just registered can be
+        saved and re-seeded into a later test with `credentials.create()` — see the second example in the class
+        overview.
+
+        Parameters
+        ----------
+        rp_id : Union[str, None]
+            Only return credentials for this relying party id.
+        id : Union[str, None]
+            Only return the credential with this base64url-encoded id.
+
+        Returns
+        -------
+        List[{id: str, rpId: str, userHandle: str, privateKey: str, publicKey: str}]
+        """
+
+        return mapping.from_impl_list(self._sync(self._impl_obj.get(rpId=rp_id, id=id)))
+
+
+mapping.register(CredentialsImpl, Credentials)
 
 
 class ConsoleMessage(SyncBase):
@@ -7768,6 +7887,7 @@ class Screencast(SyncBase):
         ] = None,
         path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         quality: typing.Optional[int] = None,
+        size: typing.Optional[ScreencastSize] = None,
     ) -> "SyncContextManager":
         """Screencast.start
 
@@ -7778,12 +7898,17 @@ class Screencast(SyncBase):
 
         Parameters
         ----------
-        on_frame : Union[Callable[[{data: bytes, viewportWidth: int, viewportHeight: int}], Any], None]
+        on_frame : Union[Callable[[{data: bytes, timestamp: float, viewportWidth: int, viewportHeight: int}], Any], None]
             Callback that receives JPEG-encoded frame data along with the page viewport size at the time of capture.
         path : Union[pathlib.Path, str, None]
             Path where the video should be saved when the screencast is stopped. When provided, video recording is started.
         quality : Union[int, None]
             The quality of the image, between 0-100.
+        size : Union[{width: int, height: int}, None]
+            Specifies the dimensions of screencast frames. The actual frame is scaled to preserve the page's aspect ratio and
+            may be smaller than these bounds. If a screencast is already active (e.g. started by tracing or video recording),
+            the existing configuration takes precedence and the frame size may exceed these bounds or this option may be
+            ignored. If not specified the size will be equal to page viewport scaled down to fit into 800×800.
 
         Returns
         -------
@@ -7793,7 +7918,10 @@ class Screencast(SyncBase):
         return mapping.from_impl(
             self._sync(
                 self._impl_obj.start(
-                    onFrame=self._wrap_handler(on_frame), path=path, quality=quality
+                    onFrame=self._wrap_handler(on_frame),
+                    path=path,
+                    quality=quality,
+                    size=size,
                 )
             )
         )
@@ -7817,6 +7945,7 @@ class Screencast(SyncBase):
             ]
         ] = None,
         font_size: typing.Optional[int] = None,
+        cursor: typing.Optional[Literal["none", "pointer"]] = None,
     ) -> "SyncContextManager":
         """Screencast.show_actions
 
@@ -7830,6 +7959,9 @@ class Screencast(SyncBase):
             Position of the action title overlay. Defaults to `"top-right"`.
         font_size : Union[int, None]
             Font size of the action title in pixels. Defaults to `24`.
+        cursor : Union["none", "pointer", None]
+            Cursor decoration shown for pointer actions. `"pointer"` (the default) renders a mouse pointer that animates from
+            the previous action point to the next one. `"none"` disables the cursor decoration.
 
         Returns
         -------
@@ -7839,7 +7971,10 @@ class Screencast(SyncBase):
         return mapping.from_impl(
             self._sync(
                 self._impl_obj.show_actions(
-                    duration=duration, position=position, fontSize=font_size
+                    duration=duration,
+                    position=position,
+                    fontSize=font_size,
+                    cursor=cursor,
                 )
             )
         )
@@ -8560,6 +8695,30 @@ class Page(SyncContextManager):
         """
         return mapping.from_impl(self._impl_obj.screencast)
 
+    @property
+    def local_storage(self) -> "WebStorage":
+        """Page.local_storage
+
+        Provides access to the page's `localStorage` for the current origin. See `WebStorage`.
+
+        Returns
+        -------
+        WebStorage
+        """
+        return mapping.from_impl(self._impl_obj.local_storage)
+
+    @property
+    def session_storage(self) -> "WebStorage":
+        """Page.session_storage
+
+        Provides access to the page's `sessionStorage` for the current origin. See `WebStorage`.
+
+        Returns
+        -------
+        WebStorage
+        """
+        return mapping.from_impl(self._impl_obj.session_storage)
+
     def opener(self) -> typing.Optional["Page"]:
         """Page.opener
 
@@ -9100,7 +9259,7 @@ class Page(SyncContextManager):
         `ElementHandle` instances can be passed as an argument to the `page.evaluate()`:
 
         ```py
-        body_handle = page.evaluate(\"document.body\")
+        body_handle = page.evaluate_handle(\"document.body\")
         html = page.evaluate(\"([body, suffix]) => body.innerHTML + suffix\", [body_handle, \"hello\"])
         body_handle.dispose()
         ```
@@ -10904,7 +11063,7 @@ class Page(SyncContextManager):
         When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
         Passing zero timeout disables this.
 
-        **NOTE** `page.tap()` the method will throw if `hasTouch` option of the browser context is false.
+        **NOTE** `page.tap()` will throw if the `hasTouch` option of the browser context is false.
 
         Parameters
         ----------
@@ -13566,6 +13725,81 @@ class WebError(SyncBase):
 mapping.register(WebErrorImpl, WebError)
 
 
+class WebStorage(SyncBase):
+
+    def items(self) -> typing.List[NameValue]:
+        """WebStorage.items
+
+        Returns all items in the storage as `name`/`value` pairs.
+
+        Returns
+        -------
+        List[{name: str, value: str}]
+        """
+
+        return mapping.from_impl_list(self._sync(self._impl_obj.items()))
+
+    def get_item(self, name: str) -> typing.Optional[str]:
+        """WebStorage.get_item
+
+        Returns the value for the given `name`, or `null` if the key is not present.
+
+        Parameters
+        ----------
+        name : str
+            Name of the item to retrieve.
+
+        Returns
+        -------
+        Union[str, None]
+        """
+
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.get_item(name=name)))
+
+    def set_item(self, name: str, value: str) -> None:
+        """WebStorage.set_item
+
+        Sets the value for the given `name`. Overwrites any existing value for that name.
+
+        Parameters
+        ----------
+        name : str
+            Name of the item to set.
+        value : str
+            New value for the item.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(self._impl_obj.set_item(name=name, value=value))
+        )
+
+    def remove_item(self, name: str) -> None:
+        """WebStorage.remove_item
+
+        Removes the item with the given `name`. No-op if the item is absent.
+
+        Parameters
+        ----------
+        name : str
+            Name of the item to remove.
+        """
+
+        return mapping.from_maybe_impl(
+            self._sync(self._impl_obj.remove_item(name=name))
+        )
+
+    def clear(self) -> None:
+        """WebStorage.clear
+
+        Removes all items from the storage.
+        """
+
+        return mapping.from_maybe_impl(self._sync(self._impl_obj.clear()))
+
+
+mapping.register(WebStorageImpl, WebStorage)
+
+
 class BrowserContext(SyncContextManager):
 
     @typing.overload
@@ -14048,6 +14282,19 @@ class BrowserContext(SyncContextManager):
         Clock
         """
         return mapping.from_impl(self._impl_obj.clock)
+
+    @property
+    def credentials(self) -> "Credentials":
+        """BrowserContext.credentials
+
+        Virtual WebAuthn authenticator for this context. Lets tests seed credentials and intercept
+        `navigator.credentials.create()` / `navigator.credentials.get()` ceremonies.
+
+        Returns
+        -------
+        Credentials
+        """
+        return mapping.from_impl(self._impl_obj.credentials)
 
     def set_default_navigation_timeout(
         self, timeout: typing.Union[float, datetime.timedelta]
@@ -16633,6 +16880,7 @@ class BrowserType(SyncBase):
         headers: typing.Optional[typing.Dict[str, str]] = None,
         is_local: typing.Optional[bool] = None,
         no_defaults: typing.Optional[bool] = None,
+        artifacts_dir: typing.Optional[typing.Union[pathlib.Path, str]] = None,
     ) -> "Browser":
         """BrowserType.connect_over_cdp
 
@@ -16676,6 +16924,8 @@ class BrowserType(SyncBase):
             (such as `colorScheme`, `reducedMotion`, `forcedColors`, and `contrast`) are not applied. Useful when attaching to
             a user's daily-driver browser where these overrides would interfere with existing browser state. New contexts
             created via `browser.new_context()` are not affected. Defaults to `false`.
+        artifacts_dir : Union[pathlib.Path, str, None]
+            If specified, browser artifacts (such as traces and downloads) are saved into this directory.
 
         Returns
         -------
@@ -16691,6 +16941,7 @@ class BrowserType(SyncBase):
                     headers=mapping.to_impl(headers),
                     isLocal=is_local,
                     noDefaults=no_defaults,
+                    artifactsDir=artifacts_dir,
                 )
             )
         )
@@ -20257,6 +20508,32 @@ class APIResponse(SyncBase):
         """
 
         return mapping.from_maybe_impl(self._sync(self._impl_obj.json()))
+
+    def security_details(self) -> typing.Optional[SecurityDetails]:
+        """APIResponse.security_details
+
+        Returns SSL and other security information. Resolves to `null` for non-HTTPS responses. For redirected requests,
+        returns the information for the last request in the redirect chain.
+
+        Returns
+        -------
+        Union[{issuer: Union[str, None], protocol: Union[str, None], subjectName: Union[str, None], validFrom: Union[float, None], validTo: Union[float, None]}, None]
+        """
+
+        return mapping.from_impl_nullable(self._sync(self._impl_obj.security_details()))
+
+    def server_addr(self) -> typing.Optional[RemoteAddr]:
+        """APIResponse.server_addr
+
+        Returns the IP address and port of the server. Resolves to `null` if the server address is not available. For
+        redirected requests, returns the information for the last request in the redirect chain.
+
+        Returns
+        -------
+        Union[{ipAddress: str, port: int}, None]
+        """
+
+        return mapping.from_impl_nullable(self._sync(self._impl_obj.server_addr()))
 
     def dispose(self) -> None:
         """APIResponse.dispose

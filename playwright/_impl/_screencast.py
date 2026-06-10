@@ -16,7 +16,7 @@ import base64
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Literal, Optional, Union
 
-from playwright._impl._api_structures import ScreencastFrame
+from playwright._impl._api_structures import ScreencastFrame, ScreencastSize
 from playwright._impl._artifact import Artifact
 from playwright._impl._connection import from_nullable_channel
 from playwright._impl._disposable import DisposableStub
@@ -35,6 +35,10 @@ ScreencastPosition = Literal[
     "top",
     "top-left",
     "top-right",
+]
+ScreencastCursor = Literal[
+    "none",
+    "pointer",
 ]
 
 
@@ -58,6 +62,7 @@ class Screencast:
         result = self._on_frame(
             {
                 "data": data,
+                "timestamp": params.get("timestamp", 0),
                 "viewportWidth": params["viewportWidth"],
                 "viewportHeight": params["viewportHeight"],
             }
@@ -70,6 +75,7 @@ class Screencast:
         onFrame: ScreencastFrameCallback = None,
         path: Union[str, Path] = None,
         quality: int = None,
+        size: ScreencastSize = None,
     ) -> DisposableStub:
         if self._started:
             raise Error("Screencast is already started")
@@ -79,6 +85,7 @@ class Screencast:
             "screencastStart",
             None,
             {
+                "size": size,
                 "quality": quality,
                 "sendFrames": bool(onFrame),
                 "record": bool(path),
@@ -104,6 +111,7 @@ class Screencast:
         duration: float = None,
         position: ScreencastPosition = None,
         fontSize: int = None,
+        cursor: ScreencastCursor = None,
     ) -> DisposableStub:
         await self._page._channel.send(
             "screencastShowActions", None, locals_to_params(locals())

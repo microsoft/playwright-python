@@ -344,7 +344,21 @@ class DebuggerPausedDetails(TypedDict):
     title: str
 
 
+class ScreencastSize(TypedDict):
+    width: int
+    height: int
+
+
+class VirtualCredential(TypedDict):
+    id: str
+    rpId: str
+    userHandle: str
+    privateKey: str
+    publicKey: str
+
+
 class ScreencastFrame(TypedDict):
     data: bytes
+    timestamp: float
     viewportWidth: int
     viewportHeight: int

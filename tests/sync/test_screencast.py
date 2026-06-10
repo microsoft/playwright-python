@@ -16,7 +16,7 @@ import time
 
 import pytest
 
-from playwright.sync_api import Page
+from playwright.sync_api import Page, ScreencastSize
 from tests.server import Server
 
 
@@ -51,3 +51,38 @@ def test_starting_twice_should_throw(page: Page) -> None:
             page.screencast.start(on_frame=lambda f: None)
     finally:
         page.screencast.stop()
+
+
+def test_start_should_accept_size_param(page: Page, server: Server) -> None:
+    received: list = []
+    size: ScreencastSize = {"width": 800, "height": 600}
+    page.screencast.start(on_frame=lambda f: received.append(f), size=size)
+    page.goto(server.EMPTY_PAGE)
+    page.screenshot()
+    deadline = time.time() + 10
+    while not received and time.time() < deadline:
+        page.wait_for_timeout(100)
+    page.screencast.stop()
+    assert len(received) >= 1
+
+
+def test_show_actions_should_accept_cursor_param(page: Page) -> None:
+    page.screencast.start(on_frame=lambda f: None)
+    with page.screencast.show_actions(duration=100, cursor="pointer"):
+        pass
+    with page.screencast.show_actions(duration=100, cursor="none"):
+        pass
+    page.screencast.stop()
+
+
+def test_frames_should_include_timestamp(page: Page, server: Server) -> None:
+    received: list = []
+    page.screencast.start(on_frame=lambda f: received.append(f))
+    page.goto(server.EMPTY_PAGE)
+    page.screenshot()
+    deadline = time.time() + 10
+    while not received and time.time() < deadline:
+        page.wait_for_timeout(100)
+    page.screencast.stop()
+    assert len(received) >= 1
+    assert received[0]["timestamp"] > 0

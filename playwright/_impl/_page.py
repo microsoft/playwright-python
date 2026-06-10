@@ -103,6 +103,7 @@ from playwright._impl._network import (
 from playwright._impl._screencast import Screencast
 from playwright._impl._video import Video
 from playwright._impl._waiter import Waiter
+from playwright._impl._web_storage import WebStorage
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser_context import BrowserContext
@@ -183,6 +184,8 @@ class Page(ChannelOwner):
             cast(Optional[Artifact], from_nullable_channel(initializer.get("video"))),
         )
         self._screencast: Screencast = Screencast(self)
+        self._local_storage = WebStorage(self, "local")
+        self._session_storage = WebStorage(self, "session")
         self._opener = cast("Page", from_nullable_channel(initializer.get("opener")))
         self._close_reason: Optional[str] = None
         self._close_was_called = False
@@ -1205,6 +1208,14 @@ class Page(ChannelOwner):
     @property
     def screencast(self) -> Screencast:
         return self._screencast
+
+    @property
+    def local_storage(self) -> WebStorage:
+        return self._local_storage
+
+    @property
+    def session_storage(self) -> WebStorage:
+        return self._session_storage
 
     def _close_error_with_reason(self) -> TargetClosedError:
         return TargetClosedError(

@@ -16,7 +16,7 @@ import asyncio
 
 import pytest
 
-from playwright.async_api import Page, ScreencastFrame
+from playwright.async_api import Page, ScreencastFrame, ScreencastSize
 from tests.server import Server
 
 
@@ -70,3 +70,48 @@ async def test_show_overlays_and_overlay_apis_should_not_throw(page: Page) -> No
         await page.screencast.hide_actions()
     finally:
         await page.screencast.stop()
+
+
+async def test_start_should_accept_size_param(page: Page, server: Server) -> None:
+    received: list = []
+    event = asyncio.Event()
+
+    def on_frame(frame: ScreencastFrame) -> None:
+        received.append(frame)
+        event.set()
+
+    size: ScreencastSize = {"width": 800, "height": 600}
+    await page.screencast.start(on_frame=on_frame, size=size)
+    await page.goto(server.EMPTY_PAGE)
+    await page.screenshot()
+    await asyncio.wait_for(event.wait(), timeout=10)
+    await page.screencast.stop()
+    assert len(received) >= 1
+
+
+async def test_show_actions_should_accept_cursor_param(page: Page) -> None:
+    await page.screencast.start(on_frame=lambda f: None)
+    try:
+        async with await page.screencast.show_actions(duration=100, cursor="pointer"):
+            pass
+        async with await page.screencast.show_actions(duration=100, cursor="none"):
+            pass
+    finally:
+        await page.screencast.stop()
+
+
+async def test_frames_should_include_timestamp(page: Page, server: Server) -> None:
+    received: list = []
+    event = asyncio.Event()
+
+    def on_frame(frame: ScreencastFrame) -> None:
+        received.append(frame)
+        event.set()
+
+    await page.screencast.start(on_frame=on_frame)
+    await page.goto(server.EMPTY_PAGE)
+    await page.screenshot()
+    await asyncio.wait_for(event.wait(), timeout=10)
+    await page.screencast.stop()
+    assert len(received) >= 1
+    assert received[0]["timestamp"] > 0

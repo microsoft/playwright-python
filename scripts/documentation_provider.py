@@ -82,7 +82,6 @@ class DocumentationProvider:
                                 option = self_or_override(option)
                                 option_name = to_snake_case(name_or_alias(option))
                                 option["name"] = option_name
-                                option["required"] = False
                                 args[option_name] = option
                         else:
                             arg = self_or_override(arg)

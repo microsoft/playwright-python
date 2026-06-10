@@ -46,6 +46,7 @@ from playwright._impl._connection import (
     from_nullable_channel,
 )
 from playwright._impl._console_message import ConsoleMessage
+from playwright._impl._credentials import Credentials
 from playwright._impl._debugger import Debugger
 from playwright._impl._dialog import Dialog
 from playwright._impl._disposable import Disposable, DisposableStub
@@ -133,6 +134,7 @@ class BrowserContext(ChannelOwner):
         self._request: APIRequestContext = from_channel(initializer["requestContext"])
         self._request._timeout_settings = self._timeout_settings
         self._clock = Clock(self)
+        self._credentials = Credentials(self)
         self._channel.on(
             "bindingCall",
             lambda params: self._on_binding(from_channel(params["binding"])),
@@ -741,3 +743,7 @@ class BrowserContext(ChannelOwner):
     @property
     def clock(self) -> Clock:
         return self._clock
+
+    @property
+    def credentials(self) -> Credentials:
+        return self._credentials

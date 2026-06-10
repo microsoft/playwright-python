@@ -45,7 +45,7 @@ SOURCE_DIR="$DRIVER_DIR/playwright-src"
 PLAYWRIGHT_REPO="https://github.com/microsoft/playwright"
 
 # The driver pin: an immutable commit in microsoft/playwright.
-# microsoft/playwright @ v1.60.0
+# microsoft/playwright @ main
 EXPECTED_SHA="$(tr -d '[:space:]' < "$REPO_ROOT/DRIVER_SHA")"
 if [[ -z "$EXPECTED_SHA" ]]; then
   echo "DRIVER_SHA is empty or missing at $REPO_ROOT/DRIVER_SHA" >&2

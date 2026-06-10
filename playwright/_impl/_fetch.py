@@ -28,6 +28,8 @@ from playwright._impl._api_structures import (
     Headers,
     HttpCredentials,
     ProxySettings,
+    RemoteAddr,
+    SecurityDetails,
     ServerFilePayload,
     StorageState,
 )
@@ -556,6 +558,12 @@ class APIResponse:
     async def json(self) -> Any:
         content = await self.text()
         return json.loads(content)
+
+    async def security_details(self) -> Optional[SecurityDetails]:
+        return self._initializer.get("securityDetails") or None
+
+    async def server_addr(self) -> Optional[RemoteAddr]:
+        return self._initializer.get("serverAddr") or None
 
     async def dispose(self) -> None:
         await self._request._channel.send(
