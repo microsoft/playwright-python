@@ -35,71 +35,81 @@ async def test_start_should_deliver_frames_via_callback(
         event.set()
 
     await page.screencast.start(on_frame=on_frame)
-    await page.goto(server.EMPTY_PAGE)
-    await page.evaluate("() => document.body.style.backgroundColor = 'red'")
-    # Force a couple of paint cycles so engines that only emit on visual change
-    # still produce a frame. Mirrors upstream `ensureSomeFrames`.
-    for _ in range(3):
-        await page.evaluate(
-            "() => new Promise(f => requestAnimationFrame(() => requestAnimationFrame(f)))"
-        )
-    await page.screenshot()
-    await asyncio.wait_for(event.wait(), timeout=10)
-    await page.screencast.stop()
+    try:
+        await page.goto(server.EMPTY_PAGE)
+        await page.evaluate("() => document.body.style.backgroundColor = 'red'")
+        # Force a couple of paint cycles so engines that only emit on visual change
+        # still produce a frame. Mirrors upstream `ensureSomeFrames`.
+        for _ in range(3):
+            await page.evaluate(
+                "() => new Promise(f => requestAnimationFrame(() => requestAnimationFrame(f)))"
+            )
+        await page.screenshot()
+        await asyncio.wait_for(event.wait(), timeout=10)
+    finally:
+        await page.screencast.stop()
     assert len(received) >= 1
     assert all(isinstance(d, bytes) and len(d) > 0 for d in received)
 
 
 async def test_starting_twice_should_throw(page: Page) -> None:
     await page.screencast.start(on_frame=lambda f: None)
-    with pytest.raises(Exception, match="already started"):
-        await page.screencast.start(on_frame=lambda f: None)
-    await page.screencast.stop()
+    try:
+        with pytest.raises(Exception, match="already started"):
+            await page.screencast.start(on_frame=lambda f: None)
+    finally:
+        await page.screencast.stop()
 
 
 async def test_show_overlays_and_overlay_apis_should_not_throw(page: Page) -> None:
     await page.screencast.start(on_frame=lambda f: None)
-    await page.screencast.show_overlay("<div>hello</div>", duration=100)
-    await page.screencast.show_chapter("ch", description="desc", duration=100)
-    await page.screencast.hide_overlays()
-    await page.screencast.show_overlays()
-    await page.screencast.show_actions(duration=100, position="top-right")
-    await page.screencast.hide_actions()
-    await page.screencast.stop()
+    try:
+        await page.screencast.show_overlay("<div>hello</div>", duration=100)
+        await page.screencast.show_chapter("ch", description="desc", duration=100)
+        await page.screencast.hide_overlays()
+        await page.screencast.show_overlays()
+        await page.screencast.show_actions(duration=100, position="top-right")
+        await page.screencast.hide_actions()
+    finally:
+        await page.screencast.stop()
 
 
 async def test_on_frame_receives_viewport_size(
     browser: Browser, server: Server
 ) -> None:
     context = await browser.new_context(viewport={"width": 1000, "height": 400})
-    page = await context.new_page()
-    received: list = []
+    async with context:
+        page = await context.new_page()
+        received: list = []
 
-    def on_frame(frame: ScreencastFrame) -> None:
-        received.append(frame)
+        def on_frame(frame: ScreencastFrame) -> None:
+            received.append(frame)
 
-    size: ScreencastSize = {"width": 500, "height": 400}
-    await page.screencast.start(on_frame=on_frame, size=size)
-    await page.goto(server.EMPTY_PAGE)
-    await page.evaluate("() => document.body.style.backgroundColor = 'red'")
-    for _ in range(100):
-        await page.evaluate(
-            "() => new Promise(f => requestAnimationFrame(() => requestAnimationFrame(f)))"
-        )
-    await page.screenshot()
-    await page.screencast.stop()
-    assert len(received) >= 1
-    assert any(frame["viewportWidth"] == 1000 for frame in received)
-    for frame in received:
-        assert frame["viewportHeight"] == 400
-        assert isinstance(frame["timestamp"], (int, float))
-    await context.close()
+        size: ScreencastSize = {"width": 500, "height": 400}
+        await page.screencast.start(on_frame=on_frame, size=size)
+        try:
+            await page.goto(server.EMPTY_PAGE)
+            await page.evaluate("() => document.body.style.backgroundColor = 'red'")
+            for _ in range(100):
+                await page.evaluate(
+                    "() => new Promise(f => requestAnimationFrame(() => requestAnimationFrame(f)))"
+                )
+            await page.screenshot()
+        finally:
+            await page.screencast.stop()
+        assert len(received) >= 1
+        assert any(frame["viewportWidth"] == 1000 for frame in received)
+        for frame in received:
+            assert frame["viewportHeight"] == 400
+            assert isinstance(frame["timestamp"], (int, float))
 
 
 async def test_show_actions_should_accept_cursor_param(page: Page) -> None:
     await page.screencast.start(on_frame=lambda f: None)
-    async with await page.screencast.show_actions(duration=100, cursor="pointer"):
-        pass
-    async with await page.screencast.show_actions(duration=100, cursor="none"):
-        pass
-    await page.screencast.stop()
+    try:
+        async with await page.screencast.show_actions(duration=100, cursor="pointer"):
+            pass
+        async with await page.screencast.show_actions(duration=100, cursor="none"):
+            pass
+    finally:
+        await page.screencast.stop()

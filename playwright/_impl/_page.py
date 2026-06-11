@@ -852,14 +852,19 @@ class Page(ChannelOwner):
 
     async def close(self, runBeforeUnload: bool = None, reason: str = None) -> None:
         self._close_reason = reason
-        self._close_was_called = True
+        if not runBeforeUnload:
+            self._close_was_called = True
         try:
-            await self._channel.send("close", None, locals_to_params(locals()))
             if self._owned_context:
                 await self._owned_context.close()
+            elif runBeforeUnload:
+                await self._channel.send("runBeforeUnload", None)
+            else:
+                await self._channel.send("close", None, {"reason": reason})
         except Exception as e:
-            if not is_target_closed_error(e) and not runBeforeUnload:
-                raise e
+            if is_target_closed_error(e) and not runBeforeUnload:
+                return
+            raise e
 
     def is_closed(self) -> bool:
         return self._is_closed
