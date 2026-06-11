@@ -37,6 +37,7 @@ from playwright._impl._api_structures import (
     FilePayload,
     FloatRect,
     FrameExpectOptions,
+    FrameExpectResult,
     Position,
 )
 from playwright._impl._element_handle import ElementHandle
@@ -770,7 +771,7 @@ class Locator:
         expression: str,
         options: FrameExpectOptions,
         title: str = None,
-    ) -> dict:
+    ) -> FrameExpectResult:
         return await self._frame._expect(self._selector, expression, options, title)
 
     async def highlight(self, style: str = None) -> None:

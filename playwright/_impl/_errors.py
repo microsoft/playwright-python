@@ -16,7 +16,7 @@
 # stable API.
 
 
-from typing import Optional
+from typing import Any, Optional
 
 
 def is_target_closed_error(error: Exception) -> bool:
@@ -28,6 +28,8 @@ class Error(Exception):
         self._message = message
         self._name: Optional[str] = None
         self._stack: Optional[str] = None
+        self._details: Optional[Any] = None
+        self._log: Optional[str] = None
         super().__init__(message)
 
     @property
@@ -57,4 +59,6 @@ def rewrite_error(error: Exception, message: str) -> Exception:
     if isinstance(rewritten_exc, Error) and isinstance(error, Error):
         rewritten_exc._name = error.name
         rewritten_exc._stack = error.stack
+        rewritten_exc._details = error._details
+        rewritten_exc._log = error._log
     return rewritten_exc

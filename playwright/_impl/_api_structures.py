@@ -234,11 +234,12 @@ class FrameExpectOptions(TypedDict, total=False):
     pseudo: Optional[str]
 
 
-class FrameExpectResult(TypedDict):
+class FrameExpectResult(TypedDict, total=False):
     matches: bool
     received: Any
-    log: List[str]
+    log: Optional[str]
     errorMessage: Optional[str]
+    timedOut: Optional[bool]
 
 
 AriaRole = Literal[
