@@ -24,6 +24,9 @@ import pytest
 from playwright.async_api import async_playwright
 from tests.server import Server
 
+_NETWORK_RESPONSE_RECEIVED_MARKER = "__pw__is_last_network_response_received_event"
+_NETWORK_RESPONSE_RECEIVED_MARKER_VALUE = object()
+
 
 @pytest.mark.asyncio
 async def test_memory_objects(server: Server, browser_name: str) -> None:
@@ -39,7 +42,9 @@ async def test_memory_objects(server: Server, browser_name: str) -> None:
         await page.route("**/*", lambda route, _: route.fulfill(body="OK"))
 
         def handle_network_response_received(event: Any) -> None:
-            event["__pw__is_last_network_response_received_event"] = True
+            event[_NETWORK_RESPONSE_RECEIVED_MARKER] = (
+                _NETWORK_RESPONSE_RECEIVED_MARKER_VALUE
+            )
 
         if browser_name == "chromium":
             # https://github.com/microsoft/playwright-python/issues/1602
@@ -64,7 +69,13 @@ async def test_memory_objects(server: Server, browser_name: str) -> None:
         assert isinstance(o, dict)
         name = o.get("_type")
         # https://github.com/microsoft/playwright-python/issues/1602
-        if o.get("__pw__is_last_network_response_received_event", False):
+        # Python 3.14 can expose CPython's interned-strings dict here, where
+        # a string can appear as both key and value. Check the sentinel by
+        # identity to avoid confusing that internal dict with a leaked event.
+        if (
+            o.get(_NETWORK_RESPONSE_RECEIVED_MARKER)
+            is _NETWORK_RESPONSE_RECEIVED_MARKER_VALUE
+        ):
             assert False
         if not name:
             continue

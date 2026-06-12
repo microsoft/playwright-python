@@ -1,7 +1,7 @@
 # Rolling Playwright-Python to the latest Playwright driver
 
 * checkout repo: `git clone https://github.com/microsoft/playwright-python`
-* make sure local python is 3.9
+* make sure local python is 3.10 or newer
     * create virtual environment, if don't have one: `python -m venv env`
 * activate venv: `source env/bin/activate`
 * install all deps:

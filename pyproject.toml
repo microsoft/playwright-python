@@ -11,7 +11,7 @@ authors = [
 readme = "README.md"
 license = "Apache-2.0"
 dynamic = ["version"]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 # Please when changing dependencies run the following commands to update requirements.txt:
 # - pip install uv==0.5.4
 # - uv pip compile pyproject.toml -o requirements.txt
@@ -24,11 +24,11 @@ classifiers = [
     "Topic :: Internet :: WWW/HTTP :: Browsers",
     "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Operating System :: OS Independent",
 ]
 
@@ -70,7 +70,7 @@ asyncio_default_test_loop_scope = "session"
 
 [tool.mypy]
 ignore_missing_imports = true
-python_version = "3.9"
+python_version = "3.10"
 warn_unused_ignores = false
 warn_redundant_casts = true
 warn_unused_configs = true
@@ -88,7 +88,7 @@ profile = "black"
 [tool.pyright]
 include = ["playwright", "tests", "scripts"]
 exclude = ["**/node_modules", "**/__pycache__", "**/.*", "./build"]
-pythonVersion = "3.9"
+pythonVersion = "3.10"
 reportMissingImports = false
 reportTypedDictNotRequiredAccess = false
 reportCallInDefaultInitializer = true

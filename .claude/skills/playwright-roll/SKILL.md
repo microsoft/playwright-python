@@ -48,7 +48,7 @@ There is sometimes no `vX.Y.0` tag for the latest release (the bots cut release 
 
 `CONTRIBUTING.md` covers this. Notes from past rolls:
 
-- The repo says Python 3.9 is required, but 3.9+ works. If `python3.9` isn't available, use `python3` (3.12 is fine).
+- The repo requires Python 3.10+. If `python3.10` isn't available, use `python3` (3.12 is fine).
 - If `python3-venv` is missing system-wide, use `uv venv env` instead, then `uv pip install --python env/bin/python --upgrade pip`. Don't try to `apt install` — sudo is denied in the harness.
 - Always activate the venv before any `pip`, `pytest`, `mypy`, or `pre-commit` invocation.
 
