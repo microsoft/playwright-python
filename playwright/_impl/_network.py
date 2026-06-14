@@ -209,10 +209,10 @@ class Request(ChannelOwner):
     def post_data(self) -> Optional[str]:
         data = self._fallback_overrides.post_data_buffer
         if data:
-            return data.decode()
+            return data.decode("utf-8", errors="replace")
         base64_post_data = self._initializer.get("postData")
         if base64_post_data is not None:
-            return base64.b64decode(base64_post_data).decode()
+            return base64.b64decode(base64_post_data).decode("utf-8", errors="replace")
         return None
 
     @property

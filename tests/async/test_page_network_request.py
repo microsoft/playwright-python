@@ -82,3 +82,25 @@ async def test_existing_response_should_return_none_before_response_arrives(
     assert captured
     # When the "request" event fires, the response has not been received yet.
     assert captured[0] is None
+
+
+async def test_post_data_non_utf8_bytes_does_not_raise(
+    page: Page, server: Server
+) -> None:
+    # Regression: non-UTF-8 bytes in POST body should not crash post_data
+    # post_data_buffer returns the raw bytes; post_data should return a
+    # best-effort decoded string
+    async with page.expect_request("**/upload") as request_info:
+        await page.evaluate(
+            "() => fetch('/upload', {"
+            "method: 'POST',"
+            "body: new Uint8Array([255, 254, 0, 1])"
+            "})"
+        )
+    request = await request_info.value
+    # post_data must not raise UnicodeDecodeError
+    post_data_str = request.post_data
+    assert isinstance(post_data_str, str)
+    # post_data_buffer returns the exact bytes
+    assert request.post_data_buffer == b'\xff\xfe\x00\x01'
+
