@@ -26,6 +26,7 @@ jobs:
         docker-image-variant:
           - jammy
           - noble
+          - resolute
         runs-on:
           - ubuntu-24.04
           - ubuntu-24.04-arm
