@@ -120,13 +120,12 @@ class AssertionsBase:
                 )
             error_message = result.get("errorMessage")
             error_message = f"\n{error_message}" if error_message else ""
-            log = result.get("log") or ""
             aria_snapshot_message = (
                 f"\nAria snapshot:\n{aria_snapshot}" if aria_snapshot else ""
             )
             _record_soft_or_raise(
                 AssertionError(
-                    f"{out_message}\nActual value: {actual}{error_message} {log}{aria_snapshot_message}"
+                    f"{out_message}\nActual value: {actual}{error_message} {format_call_log(result.get('log'))}{aria_snapshot_message}"
                 ),
                 self._is_soft,
             )

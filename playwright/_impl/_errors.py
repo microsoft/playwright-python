@@ -16,7 +16,7 @@
 # stable API.
 
 
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 
 def is_target_closed_error(error: Exception) -> bool:
@@ -29,7 +29,7 @@ class Error(Exception):
         self._name: Optional[str] = None
         self._stack: Optional[str] = None
         self._details: Optional[Any] = None
-        self._log: Optional[str] = None
+        self._log: Optional[List[str]] = None
         super().__init__(message)
 
     @property

@@ -38,28 +38,25 @@ class Waiter:
 
     def _wait_for_event_info_before(self, wait_id: str, event: str) -> None:
         self._channel.send_no_reply(
-            "waitForEventInfo",
+            "__waitInfo__",
             None,
             {
-                "info": {
-                    "waitId": wait_id,
-                    "phase": "before",
-                    "event": event,
-                }
+                "waitId": wait_id,
+                "phase": "before",
+                "event": event,
             },
+            title=f'Wait for event "{event}"',
         )
 
     def _wait_for_event_info_after(self, wait_id: str, error: Exception = None) -> None:
         self._channel._connection.wrap_api_call_sync(
             lambda: self._channel.send_no_reply(
-                "waitForEventInfo",
+                "__waitInfo__",
                 None,
                 {
-                    "info": {
-                        "waitId": wait_id,
-                        "phase": "after",
-                        **({"error": str(error)} if error else {}),
-                    },
+                    "waitId": wait_id,
+                    "phase": "after",
+                    **({"error": str(error)} if error else {}),
                 },
             ),
             True,
@@ -165,14 +162,12 @@ class Waiter:
         try:
             self._channel._connection.wrap_api_call_sync(
                 lambda: self._channel.send_no_reply(
-                    "waitForEventInfo",
+                    "__waitInfo__",
                     None,
                     {
-                        "info": {
-                            "waitId": self._wait_id,
-                            "phase": "log",
-                            "message": message,
-                        },
+                        "waitId": self._wait_id,
+                        "phase": "log",
+                        "message": message,
                     },
                 ),
                 True,

@@ -35,19 +35,17 @@ async def test_start_should_deliver_frames_via_callback(
         event.set()
 
     await page.screencast.start(on_frame=on_frame)
-    try:
-        await page.goto(server.EMPTY_PAGE)
-        await page.evaluate("() => document.body.style.backgroundColor = 'red'")
-        # Force a couple of paint cycles so engines that only emit on visual change
-        # still produce a frame. Mirrors upstream `ensureSomeFrames`.
-        for _ in range(3):
-            await page.evaluate(
-                "() => new Promise(f => requestAnimationFrame(() => requestAnimationFrame(f)))"
-            )
-        await page.screenshot()
-        await asyncio.wait_for(event.wait(), timeout=10)
-    finally:
-        await page.screencast.stop()
+    await page.goto(server.EMPTY_PAGE)
+    await page.evaluate("() => document.body.style.backgroundColor = 'red'")
+    # Force a couple of paint cycles so engines that only emit on visual change
+    # still produce a frame. Mirrors upstream `ensureSomeFrames`.
+    for _ in range(3):
+        await page.evaluate(
+            "() => new Promise(f => requestAnimationFrame(() => requestAnimationFrame(f)))"
+        )
+    await page.screenshot()
+    await asyncio.wait_for(event.wait(), timeout=10)
+    await page.screencast.stop()
     assert len(received) >= 1
     assert all(isinstance(d, bytes) and len(d) > 0 for d in received)
 
@@ -87,16 +85,14 @@ async def test_on_frame_receives_viewport_size(
 
         size: ScreencastSize = {"width": 500, "height": 400}
         await page.screencast.start(on_frame=on_frame, size=size)
-        try:
-            await page.goto(server.EMPTY_PAGE)
-            await page.evaluate("() => document.body.style.backgroundColor = 'red'")
-            for _ in range(100):
-                await page.evaluate(
-                    "() => new Promise(f => requestAnimationFrame(() => requestAnimationFrame(f)))"
-                )
-            await page.screenshot()
-        finally:
-            await page.screencast.stop()
+        await page.goto(server.EMPTY_PAGE)
+        await page.evaluate("() => document.body.style.backgroundColor = 'red'")
+        for _ in range(100):
+            await page.evaluate(
+                "() => new Promise(f => requestAnimationFrame(() => requestAnimationFrame(f)))"
+            )
+        await page.screenshot()
+        await page.screencast.stop()
         assert len(received) >= 1
         assert any(frame["viewportWidth"] == 1000 for frame in received)
         for frame in received:

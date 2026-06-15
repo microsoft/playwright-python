@@ -272,8 +272,10 @@ def test_should_work_with_playwright_context_managers(
             [
                 re.compile(r'Navigate to "/empty\.html"'),
                 re.compile(r"Set content"),
+                re.compile(r'Wait for event "page\.expect_event\(console\)"'),
                 re.compile(r"Evaluate"),
                 re.compile(r"Click"),
+                re.compile(r'Wait for event "page\.expect_event\(popup\)"'),
                 re.compile(r"Evaluate"),
             ]
         )
@@ -299,6 +301,8 @@ def test_should_display_wait_for_load_state_even_if_did_not_wait_for_it(
         expect(trace_viewer.action_titles).to_have_text(
             [
                 re.compile(r'Navigate to "/empty\.html"'),
+                re.compile(r'Wait for event "frame\.wait_for_load_state"'),
+                re.compile(r'Wait for event "frame\.wait_for_load_state"'),
             ]
         )
 

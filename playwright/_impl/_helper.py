@@ -85,7 +85,6 @@ class ErrorPayload(TypedDict, total=False):
     name: str
     stack: str
     value: Optional[Any]
-    details: Optional[Any]
 
 
 class HarRecordingMetadata(TypedDict, total=False):
@@ -135,6 +134,8 @@ class ParsedMessagePayload(TypedDict, total=False):
     params: ParsedMessageParams
     result: Any
     error: ErrorPayload
+    errorDetails: Any
+    log: List[str]
 
 
 class Document(TypedDict):
@@ -359,8 +360,6 @@ def parse_error(error: ErrorPayload, log: Optional[str] = None) -> Error:
     exc = base_error_class(patch_error_message(error["message"]) + log)
     exc._name = error["name"]
     exc._stack = error["stack"]
-    exc._details = error.get("details")
-    exc._log = log
     return exc
 
 

@@ -237,7 +237,7 @@ class FrameExpectOptions(TypedDict, total=False):
 class FrameExpectResult(TypedDict, total=False):
     matches: bool
     received: Any
-    log: Optional[str]
+    log: Optional[List[str]]
     errorMessage: Optional[str]
     timedOut: Optional[bool]
 
