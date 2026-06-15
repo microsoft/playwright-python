@@ -134,6 +134,8 @@ class ParsedMessagePayload(TypedDict, total=False):
     params: ParsedMessageParams
     result: Any
     error: ErrorPayload
+    errorDetails: Any
+    log: List[str]
 
 
 class Document(TypedDict):

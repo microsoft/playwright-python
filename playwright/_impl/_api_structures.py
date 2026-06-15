@@ -234,11 +234,12 @@ class FrameExpectOptions(TypedDict, total=False):
     pseudo: Optional[str]
 
 
-class FrameExpectResult(TypedDict):
+class FrameExpectResult(TypedDict, total=False):
     matches: bool
     received: Any
-    log: List[str]
+    log: Optional[List[str]]
     errorMessage: Optional[str]
+    timedOut: Optional[bool]
 
 
 AriaRole = Literal[
@@ -344,7 +345,21 @@ class DebuggerPausedDetails(TypedDict):
     title: str
 
 
+class ScreencastSize(TypedDict):
+    width: int
+    height: int
+
+
+class VirtualCredential(TypedDict):
+    id: str
+    rpId: str
+    userHandle: str
+    privateKey: str
+    publicKey: str
+
+
 class ScreencastFrame(TypedDict):
     data: bytes
+    timestamp: float
     viewportWidth: int
     viewportHeight: int

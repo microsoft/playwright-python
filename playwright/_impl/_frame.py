@@ -189,19 +189,41 @@ class Frame(ChannelOwner):
     ) -> FrameExpectResult:
         if "expectedValue" in options:
             options["expectedValue"] = serialize_argument(options["expectedValue"])
-        result = await self._channel.send_return_as_dict(
-            "expect",
-            self._timeout,
-            {
-                "selector": selector,
-                "expression": expression,
-                **options,
-            },
-            title=title,
-        )
-        if result.get("received"):
-            result["received"] = parse_value(result["received"])
-        return result
+        try:
+            await self._channel.send(
+                "expect",
+                self._timeout,
+                {
+                    "selector": selector,
+                    "expression": expression,
+                    **options,
+                },
+                title=title,
+            )
+            return {"matches": not options.get("isNot")}
+        except Error as e:
+            if not e._details:
+                raise e
+            details = cast(Dict[str, Any], e._details)
+            received = details.get("received")
+            if received:
+                received = {
+                    "value": (
+                        parse_value(received["value"]) if "value" in received else None
+                    ),
+                    "ariaSnapshot": received.get("ariaSnapshot"),
+                }
+            return {
+                "matches": bool(options.get("isNot")),
+                "received": received,
+                "timedOut": details.get("timedOut"),
+                "errorMessage": (
+                    "Error: " + details["customErrorMessage"]
+                    if details.get("customErrorMessage")
+                    else None
+                ),
+                "log": e._log,
+            }
 
     def expect_navigation(
         self,

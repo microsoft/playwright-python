@@ -94,7 +94,7 @@ class Channel(AsyncIOEventEmitter):
         is_internal: bool = False,
         title: str = None,
     ) -> None:
-        # No reply messages are used to e.g. waitForEventInfo(after).
+        # No reply messages are used to e.g. __waitInfo__(after).
         self._connection.wrap_api_call_sync(
             lambda: self._connection._send_message_to_server(
                 self._object,
@@ -413,7 +413,7 @@ class Connection(EventEmitter):
             callback = self._callbacks.pop(id)
             if callback.future.cancelled():
                 return
-            # No reply messages are used to e.g. waitForEventInfo(after) which returns exceptions on page close.
+            # No reply messages are used to e.g. __waitInfo__(after) which returns exceptions on page close.
             # To prevent 'Future exception was never retrieved' we just ignore such messages.
             if callback.no_reply:
                 return
@@ -421,6 +421,10 @@ class Connection(EventEmitter):
             if error and not msg.get("result"):
                 parsed_error = parse_error(
                     error["error"], format_call_log(msg.get("log"))  # type: ignore
+                )
+                parsed_error._log = msg.get("log")
+                parsed_error._details = self._replace_guids_with_channels(
+                    msg.get("errorDetails")
                 )
                 parsed_error._stack = "".join(callback.stack_trace.format())
                 callback.future.set_exception(parsed_error)

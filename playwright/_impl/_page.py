@@ -103,6 +103,7 @@ from playwright._impl._network import (
 from playwright._impl._screencast import Screencast
 from playwright._impl._video import Video
 from playwright._impl._waiter import Waiter
+from playwright._impl._web_storage import WebStorage
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser_context import BrowserContext
@@ -183,6 +184,8 @@ class Page(ChannelOwner):
             cast(Optional[Artifact], from_nullable_channel(initializer.get("video"))),
         )
         self._screencast: Screencast = Screencast(self)
+        self._local_storage = WebStorage(self, "local")
+        self._session_storage = WebStorage(self, "session")
         self._opener = cast("Page", from_nullable_channel(initializer.get("opener")))
         self._close_reason: Optional[str] = None
         self._close_was_called = False
@@ -849,14 +852,19 @@ class Page(ChannelOwner):
 
     async def close(self, runBeforeUnload: bool = None, reason: str = None) -> None:
         self._close_reason = reason
-        self._close_was_called = True
+        if not runBeforeUnload:
+            self._close_was_called = True
         try:
-            await self._channel.send("close", None, locals_to_params(locals()))
             if self._owned_context:
                 await self._owned_context.close()
+            elif runBeforeUnload:
+                await self._channel.send("runBeforeUnload", None)
+            else:
+                await self._channel.send("close", None, {"reason": reason})
         except Exception as e:
-            if not is_target_closed_error(e) and not runBeforeUnload:
-                raise e
+            if is_target_closed_error(e) and not runBeforeUnload:
+                return
+            raise e
 
     def is_closed(self) -> bool:
         return self._is_closed
@@ -1205,6 +1213,14 @@ class Page(ChannelOwner):
     @property
     def screencast(self) -> Screencast:
         return self._screencast
+
+    @property
+    def local_storage(self) -> WebStorage:
+        return self._local_storage
+
+    @property
+    def session_storage(self) -> WebStorage:
+        return self._session_storage
 
     def _close_error_with_reason(self) -> TargetClosedError:
         return TargetClosedError(

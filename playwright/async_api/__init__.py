@@ -82,10 +82,12 @@ Position = playwright._impl._api_structures.Position
 ProxySettings = playwright._impl._api_structures.ProxySettings
 ResourceTiming = playwright._impl._api_structures.ResourceTiming
 ScreencastFrame = playwright._impl._api_structures.ScreencastFrame
+ScreencastSize = playwright._impl._api_structures.ScreencastSize
 SourceLocation = playwright._impl._api_structures.SourceLocation
 StorageState = playwright._impl._api_structures.StorageState
 StorageStateCookie = playwright._impl._api_structures.StorageStateCookie
 ViewportSize = playwright._impl._api_structures.ViewportSize
+VirtualCredential = playwright._impl._api_structures.VirtualCredential
 
 Error = playwright._impl._errors.Error
 TimeoutError = playwright._impl._errors.TimeoutError
@@ -243,6 +245,7 @@ __all__ = [
     "Response",
     "Route",
     "ScreencastFrame",
+    "ScreencastSize",
     "Selectors",
     "SourceLocation",
     "StorageState",
@@ -251,6 +254,7 @@ __all__ = [
     "Touchscreen",
     "Video",
     "ViewportSize",
+    "VirtualCredential",
     "WebError",
     "WebSocket",
     "WebSocketRoute",

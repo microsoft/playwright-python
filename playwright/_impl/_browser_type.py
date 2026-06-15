@@ -197,6 +197,7 @@ class BrowserType(ChannelOwner):
         headers: Dict[str, str] = None,
         isLocal: bool = None,
         noDefaults: bool = None,
+        artifactsDir: Union[str, Path] = None,
     ) -> Browser:
         params = locals_to_params(locals())
         if params.get("headers"):

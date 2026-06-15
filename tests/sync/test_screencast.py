@@ -16,7 +16,7 @@ import time
 
 import pytest
 
-from playwright.sync_api import Page
+from playwright.sync_api import Browser, Page, ScreencastSize
 from tests.server import Server
 
 
@@ -49,5 +49,38 @@ def test_starting_twice_should_throw(page: Page) -> None:
     try:
         with pytest.raises(Exception, match="already started"):
             page.screencast.start(on_frame=lambda f: None)
+    finally:
+        page.screencast.stop()
+
+
+def test_on_frame_receives_viewport_size(browser: Browser, server: Server) -> None:
+    context = browser.new_context(viewport={"width": 1000, "height": 400})
+    with context:
+        page = context.new_page()
+        received: list = []
+        size: ScreencastSize = {"width": 500, "height": 400}
+        page.screencast.start(on_frame=lambda f: received.append(f), size=size)
+        page.goto(server.EMPTY_PAGE)
+        page.evaluate("() => document.body.style.backgroundColor = 'red'")
+        for _ in range(100):
+            page.evaluate(
+                "() => new Promise(f => requestAnimationFrame(() => requestAnimationFrame(f)))"
+            )
+        page.screenshot()
+        page.screencast.stop()
+        assert len(received) >= 1
+        assert any(frame["viewportWidth"] == 1000 for frame in received)
+        for frame in received:
+            assert frame["viewportHeight"] == 400
+            assert isinstance(frame["timestamp"], (int, float))
+
+
+def test_show_actions_should_accept_cursor_param(page: Page) -> None:
+    page.screencast.start(on_frame=lambda f: None)
+    try:
+        with page.screencast.show_actions(duration=100, cursor="pointer"):
+            pass
+        with page.screencast.show_actions(duration=100, cursor="none"):
+            pass
     finally:
         page.screencast.stop()

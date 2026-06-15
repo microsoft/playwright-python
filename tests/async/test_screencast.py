@@ -16,7 +16,7 @@ import asyncio
 
 import pytest
 
-from playwright.async_api import Page, ScreencastFrame
+from playwright.async_api import Browser, Page, ScreencastFrame, ScreencastSize
 from tests.server import Server
 
 
@@ -68,5 +68,44 @@ async def test_show_overlays_and_overlay_apis_should_not_throw(page: Page) -> No
         await page.screencast.show_overlays()
         await page.screencast.show_actions(duration=100, position="top-right")
         await page.screencast.hide_actions()
+    finally:
+        await page.screencast.stop()
+
+
+async def test_on_frame_receives_viewport_size(
+    browser: Browser, server: Server
+) -> None:
+    context = await browser.new_context(viewport={"width": 1000, "height": 400})
+    async with context:
+        page = await context.new_page()
+        received: list = []
+
+        def on_frame(frame: ScreencastFrame) -> None:
+            received.append(frame)
+
+        size: ScreencastSize = {"width": 500, "height": 400}
+        await page.screencast.start(on_frame=on_frame, size=size)
+        await page.goto(server.EMPTY_PAGE)
+        await page.evaluate("() => document.body.style.backgroundColor = 'red'")
+        for _ in range(100):
+            await page.evaluate(
+                "() => new Promise(f => requestAnimationFrame(() => requestAnimationFrame(f)))"
+            )
+        await page.screenshot()
+        await page.screencast.stop()
+        assert len(received) >= 1
+        assert any(frame["viewportWidth"] == 1000 for frame in received)
+        for frame in received:
+            assert frame["viewportHeight"] == 400
+            assert isinstance(frame["timestamp"], (int, float))
+
+
+async def test_show_actions_should_accept_cursor_param(page: Page) -> None:
+    await page.screencast.start(on_frame=lambda f: None)
+    try:
+        async with await page.screencast.show_actions(duration=100, cursor="pointer"):
+            pass
+        async with await page.screencast.show_actions(duration=100, cursor="none"):
+            pass
     finally:
         await page.screencast.stop()

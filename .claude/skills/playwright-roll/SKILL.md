@@ -27,21 +27,6 @@ The upstream documentation source of truth is `docs/src/api/*.md` in the playwri
 
 > **The mistake the 1.59 roll made twice over:** classifying things as "internal tooling, N/A for Python" based on the *name* of the API (Screencast, Debugger, pickLocator, clearConsoleMessages, artifactsDir, …). Almost all of those had empty `langs: {}` in `api.json` and were real Python APIs. Sounding tooling-y is not a `langs` filter. **The `langs` field on the member in `api.json` is the only authoritative signal.** When in doubt, dump it (see "Verifying classifications" below).
 
-## Pre-flight
-
-You will need two checkouts in the parent directory:
-- `~/code/playwright-python` — this repo.
-- `~/code/playwright` — the upstream playwright monorepo (used read-only for diffing).
-
-Bring upstream up to date and ensure release branches/tags are present:
-
-```sh
-git -C ~/code/playwright fetch --tags
-git -C ~/code/playwright fetch origin 'release-*:release-*'
-```
-
-There is sometimes no `vX.Y.0` tag for the latest release (the bots cut release branches first and tag later). Anchor on commits, not tags — see "Identify the commit range" below.
-
 ## Process
 
 ### 1. Set up the env
@@ -76,18 +61,29 @@ build + per-platform Node downloads).
 
 ### 3. Identify the commit range
 
+The build step (step 2) clones the upstream monorepo into `driver/playwright-src`.
+Bring it up to date and ensure release branches/tags are present before walking
+the range:
+
+```sh
+git -C driver/playwright-src fetch --tags
+git -C driver/playwright-src fetch origin 'release-*:release-*'
+```
+
+There is sometimes no `vX.Y.0` tag for the latest release (the bots cut release branches first and tag later). Anchor on commits, not tags.
+
 The diff range is "every commit on the new release branch since the previous release was cut". Anchor commits:
 
 - **Previous release end**: the `chore: bump version to vX.Y.0-next` commit on `main`. That commit is the first commit *after* the previous release (X.Y-1) was cut. Use its parent (`<sha>~1`) as the lower bound.
   ```sh
-  git -C ~/code/playwright log --all --grep="bump version to v" --oneline | head
+  git -C driver/playwright-src log --all --grep="bump version to v" --oneline | head
   ```
 - **New release end**: the tip of `release-<new>` (or the matching tag if it exists).
 
 Save the commit list, oldest first, scoped to `docs/src/api/`:
 
 ```sh
-git -C ~/code/playwright log <prev-anchor>~1..release-<new> --oneline --reverse -- docs/src/api > /tmp/roll-<new>-commits.md
+git -C driver/playwright-src log <prev-anchor>~1..release-<new> --oneline --reverse -- docs/src/api > /tmp/roll-<new>-commits.md
 ```
 
 A normal roll yields 50–100 commits. If you see 0 or thousands, the range is wrong.
@@ -99,7 +95,7 @@ Format the file as a markdown checklist and add the standard preamble (status le
 For each commit, in chronological order:
 
 ```sh
-git -C ~/code/playwright show <sha> -- docs/src/api/
+git -C driver/playwright-src show <sha> -- docs/src/api/
 ```
 
 Look for:
@@ -144,7 +140,7 @@ A few rules of thumb that catch most "actually a PORT" cases:
 
 #### PORT
 
-Implement the change in `playwright/_impl/<module>.py`. Use the upstream JS implementation as a reference: `~/code/playwright/packages/playwright-core/src/client/<module>.ts`. Translate idioms:
+Implement the change in `playwright/_impl/<module>.py`. Use the upstream JS implementation as a reference: `driver/playwright-src/packages/playwright-core/src/client/<module>.ts`. Translate idioms:
 
 | Upstream JS | Python |
 |---|---|
@@ -285,7 +281,7 @@ Class names use the upstream PascalCase (`BrowserContext`, `BrowserType`); metho
 - **A cluster of suppressions on the same class is a smell.** If you're about to add five `Method not implemented: Foo.*` lines, you're almost certainly looking at a class that needs to be implemented. Implement the whole thing once and the suppressions disappear.
 - **Watch for revert pairs in the same range.** 1.59 added and reverted `Browser.isRemote` (#39613 / #39620) inside the same release. Walking chronologically lets you skip the add when you see the revert later.
 - **Watch for rename-revert pairs.** 1.59 had `Locator.normalize` → `Locator.toCode` (#39648) → `Locator.normalize` (#39754). Final state wins; only port the last.
-- **Doc renames almost always include a wire-protocol rename.** Whenever you see `### param: X.y.oldName` → `### param: X.y.newName` in a doc commit, also `git -C ~/code/playwright show <sha> -- packages/protocol/src/protocol.yml` and the corresponding `*Dispatcher.ts` file. If the wire field changed too, the channel-send dict key in `_impl/` must change. Suppressing the doc-side mismatch is hiding a real bug — the previous Python code is silently sending an unknown field that the new server ignores.
+- **Doc renames almost always include a wire-protocol rename.** Whenever you see `### param: X.y.oldName` → `### param: X.y.newName` in a doc commit, also `git -C driver/playwright-src show <sha> -- packages/protocol/src/protocol.yml` and the corresponding `*Dispatcher.ts` file. If the wire field changed too, the channel-send dict key in `_impl/` must change. Suppressing the doc-side mismatch is hiding a real bug — the previous Python code is silently sending an unknown field that the new server ignores.
 - **TypedDicts beat `Dict[str, X]` for any structured return.** When the docs describe a return as `[Object]` with named fields (or even `[Object=Foo]`), define a `TypedDict` in `_api_structures.py`, re-export from both public `__init__.py` files, and use it. Zero runtime cost (it's still a `dict`), and the doc generator's type comparator matches by structure via `get_type_hints`.
 - **Positional renames are free.** A param with no default before any `*` separator is positional-or-keyword in Python, but realistic call sites pass it positionally. Renaming such a param doesn't break callers.
 - **The "Backport changes" GitHub issue can be misleading.** In the 1.59 roll its checkboxes were all marked `[x]` with annotations like "✅ IMPLEMENTED", but several of those features had not actually been merged into the Python port. Trust the `docs/src/api/` walk over the issue.
