@@ -24,7 +24,7 @@ RUN apt-get update && \
     # clean apt cache
     rm -rf /var/lib/apt/lists/* && \
     # Create the pwuser
-    adduser pwuser
+    useradd -m -s /bin/bash pwuser
 
 # === BAKE BROWSERS INTO IMAGE ===
 
