@@ -120,16 +120,31 @@ class Channel(AsyncIOEventEmitter):
         callback = self._connection._send_message_to_server(
             self._object, method, _augment_params(params, timeout_calculator)
         )
-        done, _ = await asyncio.wait(
-            {
-                self._connection._transport.on_error_future,
-                callback.future,
-            },
-            return_when=asyncio.FIRST_COMPLETED,
-        )
-        if not callback.future.done():
-            callback.future.cancel()
-        result = next(iter(done)).result()
+        # Wake up the pending send if the transport errors, but do not `await` the long-lived
+        # `on_error_future` directly. On Python 3.14 the asyncio await-graph keeps every waiting
+        # task in `on_error_future._asyncio_awaited_by` until that future resolves (i.e. the whole
+        # connection closes), leaking one task per protocol message. Forwarding the error via a
+        # done callback instead keeps each send's await graph local to its own short-lived future.
+        on_error_future = self._connection._transport.on_error_future
+
+        def _interrupt_on_transport_error(_: "asyncio.Future") -> None:
+            if not callback.future.done():
+                callback.future.cancel()
+
+        if on_error_future.done():
+            on_error_future.result()  # raises the transport error, if any
+        on_error_future.add_done_callback(_interrupt_on_transport_error)
+        try:
+            result = await callback.future
+        except asyncio.CancelledError:
+            # The send was interrupted. If the transport errored, surface that error to match the
+            # previous `asyncio.wait({on_error_future, callback.future})` behaviour; otherwise let
+            # the caller's cancellation propagate.
+            if on_error_future.done() and not on_error_future.cancelled():
+                raise cast(BaseException, on_error_future.exception())
+            raise
+        finally:
+            on_error_future.remove_done_callback(_interrupt_on_transport_error)
         # Protocol now has named return values, assume result is one level deeper unless
         # there is explicit ambiguity.
         if not result:

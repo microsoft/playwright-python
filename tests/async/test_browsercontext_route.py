@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+import gc
 import re
 from typing import Awaitable, Callable, List
 
@@ -514,3 +515,36 @@ async def test_should_fall_back_async(
 
     await page.goto(server.EMPTY_PAGE)
     assert intercepted == [3, 2, 1]
+
+
+async def test_route_should_not_leak_done_tasks(
+    browser: Browser, server: Server
+) -> None:
+    # Regression test: intercepting requests used to retain one completed asyncio Task per
+    # protocol message until the entire connection closed. This is observable on Python 3.14,
+    # which keeps strong references between tasks and the futures they await via the asyncio
+    # await-graph, so every send task lingered in the long-lived `on_error_future`.
+    def done_task_count() -> int:
+        gc.collect()
+        return sum(
+            1 for o in gc.get_objects() if isinstance(o, asyncio.Task) and o.done()
+        )
+
+    async def navigate_with_route() -> None:
+        context = await browser.new_context()
+
+        async def handler(route: Route) -> None:
+            await route.abort()
+
+        await context.route("**/*", handler)
+        page = await context.new_page()
+        await page.set_content(
+            "".join(f'<img src="{server.PREFIX}/missing-{i}.png">' for i in range(20))
+        )
+        await context.close()
+
+    baseline = done_task_count()
+    for _ in range(5):
+        await navigate_with_route()
+    leaked = done_task_count() - baseline
+    assert leaked < 50, f"intercepting requests leaked {leaked} done asyncio tasks"
