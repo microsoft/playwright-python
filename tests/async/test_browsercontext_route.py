@@ -317,8 +317,7 @@ async def test_should_override_post_body_with_empty_string(
 
     req = await asyncio.gather(
         server.wait_for_request("/empty.html"),
-        page.set_content(
-            """
+        page.set_content("""
             <script>
             (async () => {
                 await fetch('%s', {
@@ -327,9 +326,7 @@ async def test_should_override_post_body_with_empty_string(
                 });
             })()
             </script>
-            """
-            % server.EMPTY_PAGE
-        ),
+            """ % server.EMPTY_PAGE),
     )
 
     assert req[0].post_body == b""
@@ -520,15 +517,22 @@ async def test_should_fall_back_async(
 async def test_route_should_not_leak_done_tasks(
     browser: Browser, server: Server
 ) -> None:
-    # Regression test: intercepting requests used to retain one completed asyncio Task per
-    # protocol message until the entire connection closed. This is observable on Python 3.14,
+    # Regression test: intercepting requests used to retain a completed asyncio Task per
+    # intercepted request until the entire connection closed. This is observable on Python 3.14,
     # which keeps strong references between tasks and the futures they await via the asyncio
-    # await-graph, so every send task lingered in the long-lived `on_error_future`.
-    def done_task_count() -> int:
+    # await-graph. Two per-request tasks leaked into long-lived futures: the protocol send
+    # (`Channel.send`, awaiting the transport `on_error_future`) and the route-handler task
+    # (`BrowserContext._on_route`, awaiting the page close future in `_race_with_page_close`).
+    def retained_request_tasks() -> int:
         gc.collect()
-        return sum(
-            1 for o in gc.get_objects() if isinstance(o, asyncio.Task) and o.done()
-        )
+        count = 0
+        for obj in gc.get_objects():
+            if not (isinstance(obj, asyncio.Task) and obj.done()):
+                continue
+            qualname = getattr(obj.get_coro(), "__qualname__", "")
+            if qualname.endswith("Channel.send") or qualname.endswith("_on_route"):
+                count += 1
+        return count
 
     async def navigate_with_route() -> None:
         context = await browser.new_context()
@@ -543,8 +547,13 @@ async def test_route_should_not_leak_done_tasks(
         )
         await context.close()
 
-    baseline = done_task_count()
+    baseline = retained_request_tasks()
     for _ in range(5):
         await navigate_with_route()
-    leaked = done_task_count() - baseline
-    assert leaked < 50, f"intercepting requests leaked {leaked} done asyncio tasks"
+    leaked = retained_request_tasks() - baseline
+    # Each iteration intercepts 20 requests; before the fix this retained dozens of completed
+    # send/route tasks. A couple may still be in-flight at measurement time, so allow a small
+    # constant rather than the per-request growth that the leak produced.
+    assert (
+        leaked <= 2
+    ), f"intercepting requests retained {leaked} completed asyncio tasks"

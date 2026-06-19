@@ -555,10 +555,24 @@ class Route(ChannelOwner):
             getattr(asyncio.current_task(self._loop), "__pw_stack__", inspect.stack(0)),
         )
         target_closed_future = self.request._target_closed_future()
-        await asyncio.wait(
-            [fut, target_closed_future],
-            return_when=asyncio.FIRST_COMPLETED,
-        )
+        # Wait until either the action finishes or the page closes, but do not `await` the
+        # long-lived `target_closed_future` directly: on Python 3.14 its await graph would keep
+        # this route-handler task referenced until the page is collected. Bridge both into a
+        # short-lived local future via done callbacks instead.
+        if not (fut.done() or target_closed_future.done()):
+            waiter = self._loop.create_future()
+
+            def _wake(_: "asyncio.Future") -> None:
+                if not waiter.done():
+                    waiter.set_result(None)
+
+            fut.add_done_callback(_wake)
+            target_closed_future.add_done_callback(_wake)
+            try:
+                await waiter
+            finally:
+                fut.remove_done_callback(_wake)
+                target_closed_future.remove_done_callback(_wake)
         if fut.done() and fut.exception():
             raise cast(BaseException, fut.exception())
         if target_closed_future.done():
