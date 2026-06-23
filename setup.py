@@ -22,11 +22,13 @@ import zipfile
 from pathlib import Path
 from typing import Dict
 
-# The driver is built from microsoft/playwright at the commit pinned in the
-# DRIVER_SHA file (the single source of truth, also read by scripts/build_driver.sh
-# and CI). The SHA is baked into the staged bundle filenames, so it doubles as
-# the build cache key: a roll changes DRIVER_SHA, which changes the filenames.
-driver_sha = (Path(__file__).parent / "DRIVER_SHA").read_text().strip()
+# The driver is assembled by scripts/build_driver.py from published artifacts:
+# the playwright-core npm package (version pinned in DRIVER_VERSION) and the
+# official Node.js binaries (pinned in NODE_VERSION). DRIVER_VERSION is the
+# single source of truth (also read by CI) and is baked into the staged bundle
+# filenames, so it doubles as the build cache key: a roll changes DRIVER_VERSION,
+# which changes the filenames.
+driver_version = (Path(__file__).parent / "DRIVER_VERSION").read_text().strip()
 
 base_wheel_bundles = [
     {
@@ -103,16 +105,17 @@ def extractall(zip: zipfile.ZipFile, path: str) -> None:
 
 
 def ensure_driver_bundle(zip_name: str) -> None:
-    destination_path = f"driver/playwright-{driver_sha}-{zip_name}.zip"
+    destination_path = f"driver/playwright-{driver_version}-{zip_name}.zip"
     if os.path.exists(destination_path):
         return
-    # Build the driver bundles from source (microsoft/playwright @ DRIVER_SHA).
-    # One invocation produces every platform's bundle, so later calls early-return.
-    build_script = os.path.join(os.path.dirname(__file__), "scripts", "build_driver.sh")
-    subprocess.check_call(["bash", build_script])
+    # Assemble this platform's bundle by downloading the playwright-core npm
+    # package and the matching Node.js binary. Only the requested platform is
+    # built, so a wheel build downloads just the one Node.js binary it needs.
+    build_script = os.path.join(os.path.dirname(__file__), "scripts", "build_driver.py")
+    subprocess.check_call([sys.executable, build_script, zip_name])
     if not os.path.exists(destination_path):
         raise RuntimeError(
-            f"Driver bundle {destination_path} was not produced by the source build."
+            f"Driver bundle {destination_path} was not produced by scripts/build_driver.py."
         )
 
 
@@ -154,7 +157,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
         # Although the build produces every platform's bundle, only this wheel's
         # target platform driver is extracted and packed below, so the wheel
         # stays single-platform.
-        zip_file = f"driver/playwright-{driver_sha}-{wheel_bundle['zip_name']}.zip"
+        zip_file = f"driver/playwright-{driver_version}-{wheel_bundle['zip_name']}.zip"
         extract_dir = f"driver/{wheel_bundle['zip_name']}"
         if os.path.exists(extract_dir):
             shutil.rmtree(extract_dir)
@@ -202,7 +205,7 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
         assert len(zip_names_for_current_system) == 1
         zip_name = zip_names_for_current_system.pop()
         ensure_driver_bundle(zip_name)
-        zip_file = f"driver/playwright-{driver_sha}-{zip_name}.zip"
+        zip_file = f"driver/playwright-{driver_version}-{zip_name}.zip"
         if os.path.exists("playwright/driver"):
             shutil.rmtree("playwright/driver")
         with zipfile.ZipFile(zip_file, "r") as zip:

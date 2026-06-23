@@ -5,7 +5,7 @@ description: Roll Playwright Python to a new driver version. Walks the upstream 
 
 # Rolling Playwright Python
 
-The goal of a roll is to move the driver pin in `DRIVER_SHA` to a new release, port every public API change introduced upstream during that interval, and suppress the rest, so that `./scripts/update_api.sh` runs clean and the test suite still passes.
+The goal of a roll is to move the driver pin in `DRIVER_VERSION` to a new release, port every public API change introduced upstream during that interval, and suppress the rest, so that `./scripts/update_api.sh` runs clean and the test suite still passes.
 
 The previous human-facing summary lives in `../../../ROLLING.md`. This skill is the operational playbook — read it end to end before starting.
 
@@ -15,7 +15,7 @@ The Python port is hand-written code in `playwright/_impl/`, plus a generator (`
 
 1. introspects the Python `_impl` classes via `inspect`,
 2. emits typed wrapper classes into `playwright/{async,sync}_api/_generated.py`, and
-3. diffs the introspected surface against `playwright/driver/package/api.json` (built into the new driver from source).
+3. diffs the introspected surface against the Playwright `api.json` (generated from the upstream docs — see step 2).
 
 Anything in `api.json` that is missing or differently typed in `_impl/` causes generation to fail. Three resolutions:
 
@@ -37,37 +37,49 @@ The upstream documentation source of truth is `docs/src/api/*.md` in the playwri
 - If `python3-venv` is missing system-wide, use `uv venv env` instead, then `uv pip install --python env/bin/python --upgrade pip`. Don't try to `apt install` — sudo is denied in the harness.
 - Always activate the venv before any `pip`, `pytest`, `mypy`, or `pre-commit` invocation.
 
-### 2. Bump the driver and build it from source
+### 2. Bump the driver pin, download it, and generate api.json
+
+You need a nearby `microsoft/playwright` checkout for the docs walk and for
+`api.json` generation. Point `PW_SRC_DIR` at it and check out the new tag there:
 
 ```sh
-# Edit DRIVER_SHA (repo root): replace with the microsoft/playwright commit SHA
-# for the new release, e.g. the commit that v<new> points at.
-#   87bb9ddbd78f329df18c2b24847bc9409240cd07
-# Update the "# microsoft/playwright @ v<new>" comment in scripts/build_driver.sh too.
-
-source env/bin/activate
-python -m build --wheel       # clones microsoft/playwright @ DRIVER_SHA and builds the driver from source
-playwright install chromium   # NOT --with-deps; sudo is denied
+export PW_SRC_DIR=../playwright
+git -C "$PW_SRC_DIR" fetch --tags origin
+git -C "$PW_SRC_DIR" checkout v<new>      # e.g. v1.62.0
 ```
 
-The wheel build clones `microsoft/playwright` at the commit in `DRIVER_SHA`
-into `driver/playwright-src`, runs `npm ci && npm run build`, and runs upstream's
-`utils/build/build-playwright-driver.sh` to produce the per-platform driver
-bundles (`driver/playwright-<sha>-*.zip`), then unpacks the driver under
-`playwright/driver/package/`. From this point,
-`playwright/driver/package/api.json` reflects the new release. This requires
-**Node.js, npm, git and bash** on PATH; the first build is slow (full upstream
-build + per-platform Node downloads).
+Then bump the pins and assemble the driver:
+
+```sh
+# Edit DRIVER_VERSION (repo root): the playwright-core npm version for the new
+# release, no "v" prefix, e.g.  1.62.0
+python scripts/update_node_version.py     # refresh NODE_VERSION to the current LTS
+
+source env/bin/activate
+python -m build --wheel       # downloads playwright-core @ DRIVER_VERSION + Node.js, assembles the driver
+playwright install chromium   # NOT --with-deps; sudo is denied
+
+# api.json isn't in the bundle, and the walk below inspects `langs` from it.
+# Generate a copy to inspect (update_api.sh generates its own temp copy in step 6):
+API_JSON_MODE=1 node "$PW_SRC_DIR/utils/doclint/generateApiJson.js" > /tmp/api.json
+```
+
+The wheel build just downloads the `playwright-core` npm package at
+`DRIVER_VERSION` and the matching Node.js binary (no source build, no Node/npm/git
+toolchain), and unpacks the driver under `playwright/driver/`. `api.json` is the
+one piece not shipped in the bundle — it's generated from `$PW_SRC_DIR` on demand
+(here to `/tmp/api.json` for the walk, and into a temp file passed via
+`PW_API_JSON` by `./scripts/update_api.sh` during codegen).
 
 ### 3. Identify the commit range
 
-The build step (step 2) clones the upstream monorepo into `driver/playwright-src`.
+Use the nearby `microsoft/playwright` checkout at `$PW_SRC_DIR` (from step 2).
 Bring it up to date and ensure release branches/tags are present before walking
 the range:
 
 ```sh
-git -C driver/playwright-src fetch --tags
-git -C driver/playwright-src fetch origin 'release-*:release-*'
+git -C "$PW_SRC_DIR" fetch --tags
+git -C "$PW_SRC_DIR" fetch origin 'release-*:release-*'
 ```
 
 There is sometimes no `vX.Y.0` tag for the latest release (the bots cut release branches first and tag later). Anchor on commits, not tags.
@@ -76,14 +88,14 @@ The diff range is "every commit on the new release branch since the previous rel
 
 - **Previous release end**: the `chore: bump version to vX.Y.0-next` commit on `main`. That commit is the first commit *after* the previous release (X.Y-1) was cut. Use its parent (`<sha>~1`) as the lower bound.
   ```sh
-  git -C driver/playwright-src log --all --grep="bump version to v" --oneline | head
+  git -C "$PW_SRC_DIR" log --all --grep="bump version to v" --oneline | head
   ```
 - **New release end**: the tip of `release-<new>` (or the matching tag if it exists).
 
 Save the commit list, oldest first, scoped to `docs/src/api/`:
 
 ```sh
-git -C driver/playwright-src log <prev-anchor>~1..release-<new> --oneline --reverse -- docs/src/api > /tmp/roll-<new>-commits.md
+git -C "$PW_SRC_DIR" log <prev-anchor>~1..release-<new> --oneline --reverse -- docs/src/api > /tmp/roll-<new>-commits.md
 ```
 
 A normal roll yields 50–100 commits. If you see 0 or thousands, the range is wrong.
@@ -95,7 +107,7 @@ Format the file as a markdown checklist and add the standard preamble (status le
 For each commit, in chronological order:
 
 ```sh
-git -C driver/playwright-src show <sha> -- docs/src/api/
+git -C "$PW_SRC_DIR" show <sha> -- docs/src/api/
 ```
 
 Look for:
@@ -113,7 +125,7 @@ Before tagging anything as MISMATCH or N/A based on appearance, dump the actual 
 
 ```python
 import json
-data = json.load(open("playwright/driver/package/api.json"))
+data = json.load(open("/tmp/api.json"))
 classes = {c["name"]: c for c in data}
 for cls_name in ["Page", "BrowserContext", "Screencast", "Debugger"]:
     cls = classes.get(cls_name)
@@ -140,7 +152,7 @@ A few rules of thumb that catch most "actually a PORT" cases:
 
 #### PORT
 
-Implement the change in `playwright/_impl/<module>.py`. Use the upstream JS implementation as a reference: `driver/playwright-src/packages/playwright-core/src/client/<module>.ts`. Translate idioms:
+Implement the change in `playwright/_impl/<module>.py`. Use the upstream JS implementation as a reference: `$PW_SRC_DIR/packages/playwright-core/src/client/<module>.ts`. Translate idioms:
 
 | Upstream JS | Python |
 |---|---|
@@ -205,13 +217,18 @@ Tick the box in `/tmp/roll-<new>-commits.md` with one line: `[x] <sha> <subject>
 ### 5. Regenerate
 
 ```sh
-./scripts/update_api.sh
+PW_SRC_DIR=../playwright ./scripts/update_api.sh   # PW_SRC_DIR already exported in step 2
 ```
 
 The script does, in order:
-1. `git checkout HEAD -- playwright/{async,sync}_api/_generated.py` (resets to last committed),
-2. runs `scripts/generate_{sync,async}_api.py` which dumps to `.x` then renames into place,
-3. invokes `pre-commit run --files` on the generated files.
+1. generates `api.json` from `$PW_SRC_DIR` into a temp file and exports `PW_API_JSON`,
+2. `git checkout HEAD -- playwright/{async,sync}_api/_generated.py` (resets to last committed),
+3. runs `scripts/generate_{sync,async}_api.py` (they read `api.json` via `PW_API_JSON`), dumping to `.x` then renaming into place,
+4. invokes `pre-commit run --files` on the generated files.
+
+**CI no longer verifies that `_generated.py` is in sync** (the Lint job dropped the
+"Verify generated API is up to date" step so it needn't check out upstream). So
+regenerating here and committing the result is on you — don't skip it.
 
 Failure modes and fixes:
 
@@ -245,7 +262,7 @@ For each PORT, add one async test and a matching sync test. Conventions:
 
 ### 7. Update existing high-touch artifacts
 
-- `DRIVER_SHA` (and the version comment in `scripts/build_driver.sh`): already done in step 2.
+- `DRIVER_VERSION` and `NODE_VERSION`: already done in step 2.
 - `README.md`: gets the chromium/firefox/webkit version table updated automatically by `scripts/update_versions.py` (called from `update_api.sh`). Don't edit by hand.
 - The "Backport changes" tracking issue on GitHub (filed by `microsoft-playwright-automation`) is the *intent* tracker, but it's frequently out of sync with what's actually been ported. Treat it as a starting point, not the source of truth — the `docs/src/api/` commit walk is authoritative.
 
@@ -281,7 +298,7 @@ Class names use the upstream PascalCase (`BrowserContext`, `BrowserType`); metho
 - **A cluster of suppressions on the same class is a smell.** If you're about to add five `Method not implemented: Foo.*` lines, you're almost certainly looking at a class that needs to be implemented. Implement the whole thing once and the suppressions disappear.
 - **Watch for revert pairs in the same range.** 1.59 added and reverted `Browser.isRemote` (#39613 / #39620) inside the same release. Walking chronologically lets you skip the add when you see the revert later.
 - **Watch for rename-revert pairs.** 1.59 had `Locator.normalize` → `Locator.toCode` (#39648) → `Locator.normalize` (#39754). Final state wins; only port the last.
-- **Doc renames almost always include a wire-protocol rename.** Whenever you see `### param: X.y.oldName` → `### param: X.y.newName` in a doc commit, also `git -C driver/playwright-src show <sha> -- packages/protocol/src/protocol.yml` and the corresponding `*Dispatcher.ts` file. If the wire field changed too, the channel-send dict key in `_impl/` must change. Suppressing the doc-side mismatch is hiding a real bug — the previous Python code is silently sending an unknown field that the new server ignores.
+- **Doc renames almost always include a wire-protocol rename.** Whenever you see `### param: X.y.oldName` → `### param: X.y.newName` in a doc commit, also `git -C "$PW_SRC_DIR" show <sha> -- packages/protocol/src/protocol.yml` and the corresponding `*Dispatcher.ts` file. If the wire field changed too, the channel-send dict key in `_impl/` must change. Suppressing the doc-side mismatch is hiding a real bug — the previous Python code is silently sending an unknown field that the new server ignores.
 - **TypedDicts beat `Dict[str, X]` for any structured return.** When the docs describe a return as `[Object]` with named fields (or even `[Object=Foo]`), define a `TypedDict` in `_api_structures.py`, re-export from both public `__init__.py` files, and use it. Zero runtime cost (it's still a `dict`), and the doc generator's type comparator matches by structure via `get_type_hints`.
 - **Positional renames are free.** A param with no default before any `*` separator is positional-or-keyword in Python, but realistic call sites pass it positionally. Renaming such a param doesn't break callers.
 - **The "Backport changes" GitHub issue can be misleading.** In the 1.59 roll its checkboxes were all marked `[x]` with annotations like "✅ IMPLEMENTED", but several of those features had not actually been merged into the Python port. Trust the `docs/src/api/` walk over the issue.
