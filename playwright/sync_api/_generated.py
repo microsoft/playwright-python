@@ -7385,9 +7385,9 @@ class Credentials(SyncBase):
         `navigator.credentials.get()` in all current and future pages. Call this before the page first touches
         `navigator.credentials`.
 
-        Required: until `install()` is called, no interception is in place and the page sees the platform's native (or
-        absent) WebAuthn behaviour. Seeding credentials with `credentials.create()` without `install()` populates
-        the authenticator, but the page will never see those credentials.
+        Required: until `credentials.install()` is called, no interception is in place and the page sees the
+        platform's native (or absent) WebAuthn behaviour. Seeding credentials with `credentials.create()` without
+        installing populates the authenticator, but the page will never see those credentials.
         """
 
         return mapping.from_maybe_impl(self._sync(self._impl_obj.install()))
@@ -7407,8 +7407,8 @@ class Credentials(SyncBase):
 
         With only `rpId`, generates a fresh **ECDSA P-256** keypair, credential id and user handle. The seeded credential
         is discoverable (resident), so the page can resolve it from both username-then-passkey and usernameless passkey
-        flows. The returned object carries the `privateKey` and `publicKey`, so it can be persisted to disk and re-seeded
-        in a later test.
+        flows. The returned object carries the private and public keys, so it can be persisted to disk and re-seeded in a
+        later test.
 
         To **import a known credential**, supply all four of `id`, `userHandle`, `privateKey` and `publicKey` together.
 
@@ -7468,9 +7468,8 @@ class Credentials(SyncBase):
         both credentials seeded with `credentials.create()` and credentials the page registered itself by calling
         `navigator.credentials.create()`.
 
-        Each returned credential includes its `privateKey` and `publicKey`, so a passkey the app just registered can be
-        saved and re-seeded into a later test with `credentials.create()` — see the second example in the class
-        overview.
+        Each returned credential includes its private and public keys, so a passkey the app just registered can be saved
+        and re-seeded into a later test with `credentials.create()` — see the second example in the class overview.
 
         Parameters
         ----------
@@ -13730,7 +13729,7 @@ class WebStorage(SyncBase):
     def items(self) -> typing.List[NameValue]:
         """WebStorage.items
 
-        Returns all items in the storage as `name`/`value` pairs.
+        Returns all items in the storage as name/value pairs.
 
         Returns
         -------
@@ -13742,7 +13741,7 @@ class WebStorage(SyncBase):
     def get_item(self, name: str) -> typing.Optional[str]:
         """WebStorage.get_item
 
-        Returns the value for the given `name`, or `null` if the key is not present.
+        Returns the value for the given `name` if present.
 
         Parameters
         ----------
