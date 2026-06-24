@@ -15,7 +15,7 @@ jobs:
       contents: read    # This is required for actions/checkout to succeed
     environment: Docker
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@v7
     - name: Azure login
       uses: azure/login@v3
       with:
