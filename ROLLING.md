@@ -11,15 +11,14 @@ pip install -r local-requirements.txt
 pre-commit install
 pip install -e .
 ```
-* change the driver pin in `DRIVER_SHA` (the `microsoft/playwright` commit SHA to build from)
-* build the new driver from source: `python -m build --wheel` (clones `microsoft/playwright` at that commit and builds it; requires Node.js, npm, git and bash)
-* generate API: `./scripts/update_api.sh`
+* change the driver pin in `DRIVER_VERSION` (the `playwright-core` npm version, e.g. `1.61.0`) and refresh `NODE_VERSION`: `python scripts/update_node_version.py`
+* download the new driver: `python -m build --wheel` (fetches `playwright-core` from npm + the matching Node.js binary and assembles the bundle; no source build)
+* generate API (needs a nearby `microsoft/playwright` checkout at `v<new>`): `PW_SRC_DIR=../playwright ./scripts/update_api.sh`
 * commit changes & send PR
 * wait for bots to pass & merge the PR
 
 
 ## Fix typing issues with Playwright ToT
 
-1. `cd playwright`
-1. `API_JSON_MODE=1 node utils/doclint/generateApiJson.js > ../playwright-python/playwright/driver/package/api.json`
-1. `./scripts/update_api.sh`
+1. `API_JSON_MODE=1 node ../playwright/utils/doclint/generateApiJson.js > /tmp/api.json`
+1. `PW_API_JSON=/tmp/api.json ./scripts/update_api.sh`

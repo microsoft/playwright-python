@@ -21,11 +21,10 @@ pip install -r local-requirements.txt
 
 Build and install drivers:
 
-The driver is built from upstream `microsoft/playwright` source, so building a
-wheel requires **Node.js (with npm), git and bash** on your PATH. The commit to
-build from is pinned in the `DRIVER_SHA` file. The first
-`python -m build --wheel` clones that commit and runs its full
-build, which is slow.
+The driver is assembled from published artifacts — the `playwright-core` npm
+package (version pinned in `DRIVER_VERSION`) and the official Node.js binary
+(pinned in `NODE_VERSION`). Building a wheel just downloads them; no Node/npm/git
+toolchain is required.
 
 ```sh
 pip install -e .
@@ -62,8 +61,11 @@ open htmlcov/index.html
 
 ### Regenerating APIs
 
+`update_api.sh` generates `api.json` from a nearby `microsoft/playwright`
+checkout (at the tag matching `DRIVER_VERSION`); point `PW_SRC_DIR` at it.
+
 ```bash
-./scripts/update_api.sh
+PW_SRC_DIR=../playwright ./scripts/update_api.sh
 pre-commit run --all-files
 ```
 

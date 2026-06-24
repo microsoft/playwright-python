@@ -13,9 +13,9 @@
 # limitations under the License.
 
 import json
+import os
 import pathlib
 import re
-import subprocess
 from sys import stderr
 from typing import Any, Dict, List, Set, Union, get_args, get_origin, get_type_hints
 from urllib.parse import urljoin
@@ -32,12 +32,14 @@ class DocumentationProvider:
         self.api: Any = {}
         self.links: Dict[str, str] = {}
         self.printed_entries: List[str] = []
-        process_output = subprocess.run(
-            ["python", "-m", "playwright", "print-api-json"],
-            check=True,
-            capture_output=True,
-        )
-        self.api = json.loads(process_output.stdout)
+        api_json_path = os.environ.get("PW_API_JSON")
+        if not api_json_path:
+            raise RuntimeError(
+                "PW_API_JSON must point to a Playwright api.json file. Run codegen "
+                "via ./scripts/update_api.sh, which generates api.json from a "
+                "microsoft/playwright checkout (PW_SRC_DIR)."
+            )
+        self.api = json.loads(pathlib.Path(api_json_path).read_text(encoding="utf-8"))
         self.errors: Set[str] = set()
         self.class_aliases: Dict[str, str] = {
             "Disposable": "AsyncContextManager" if is_async else "SyncContextManager",
