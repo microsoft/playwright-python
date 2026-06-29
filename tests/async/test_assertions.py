@@ -1023,6 +1023,15 @@ async def test_should_be_able_to_set_custom_timeout(page: Page) -> None:
     assert 'Expect "to_be_visible" with timeout 111ms' in str(exc_info.value)
 
 
+async def test_negative_assertion_should_show_not_prefix_in_call_log(
+    page: Page,
+) -> None:
+    await page.set_content("<button>hello</button>")
+    with pytest.raises(AssertionError) as exc_info:
+        await expect(page.locator("button")).not_to_be_visible(timeout=111)
+    assert 'Expect "not_to_be_visible" with timeout 111ms' in str(exc_info.value)
+
+
 async def test_should_be_able_to_set_custom_global_timeout(page: Page) -> None:
     try:
         expect.set_options(timeout=111)
