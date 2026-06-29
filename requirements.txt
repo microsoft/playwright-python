@@ -4,5 +4,5 @@ greenlet==3.2.4
     # via playwright (pyproject.toml)
 pyee==13.0.1
     # via playwright (pyproject.toml)
-typing-extensions==4.14.1
+typing-extensions==4.15.0
     # via pyee
