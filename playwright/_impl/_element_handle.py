@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import base64
-import mimetypes
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
@@ -122,6 +121,7 @@ class ElementHandle(JSHandle):
         noWaitAfter: bool = None,
         force: bool = None,
         trial: bool = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         await self._channel.send(
             "hover", self._frame._timeout, locals_to_params(locals())
@@ -139,6 +139,7 @@ class ElementHandle(JSHandle):
         noWaitAfter: bool = None,
         trial: bool = None,
         steps: int = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         await self._channel.send(
             "click", self._frame._timeout, locals_to_params(locals())
@@ -155,6 +156,7 @@ class ElementHandle(JSHandle):
         noWaitAfter: bool = None,
         trial: bool = None,
         steps: int = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         await self._channel.send(
             "dblclick", self._frame._timeout, locals_to_params(locals())
@@ -187,6 +189,7 @@ class ElementHandle(JSHandle):
         force: bool = None,
         noWaitAfter: bool = None,
         trial: bool = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         await self._channel.send(
             "tap", self._frame._timeout, locals_to_params(locals())
@@ -267,6 +270,7 @@ class ElementHandle(JSHandle):
         force: bool = None,
         noWaitAfter: bool = None,
         trial: bool = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         if checked:
             await self.check(
@@ -274,6 +278,7 @@ class ElementHandle(JSHandle):
                 timeout=timeout,
                 force=force,
                 trial=trial,
+                scroll=scroll,
             )
         else:
             await self.uncheck(
@@ -281,6 +286,7 @@ class ElementHandle(JSHandle):
                 timeout=timeout,
                 force=force,
                 trial=trial,
+                scroll=scroll,
             )
 
     async def check(
@@ -290,6 +296,7 @@ class ElementHandle(JSHandle):
         force: bool = None,
         noWaitAfter: bool = None,
         trial: bool = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         await self._channel.send(
             "check", self._frame._timeout, locals_to_params(locals())
@@ -302,6 +309,7 @@ class ElementHandle(JSHandle):
         force: bool = None,
         noWaitAfter: bool = None,
         trial: bool = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         await self._channel.send(
             "uncheck", self._frame._timeout, locals_to_params(locals())
@@ -313,7 +321,7 @@ class ElementHandle(JSHandle):
     async def screenshot(
         self,
         timeout: float = None,
-        type: Literal["jpeg", "png"] = None,
+        type: Literal["jpeg", "png", "webp"] = None,
         path: Union[str, Path] = None,
         quality: int = None,
         omitBackground: bool = None,
@@ -457,10 +465,15 @@ def convert_select_option_values(
     return dict(options=options, elements=elements)
 
 
-def determine_screenshot_type(path: Union[str, Path]) -> Literal["jpeg", "png"]:
-    mime_type, _ = mimetypes.guess_type(path)
-    if mime_type == "image/png":
+def determine_screenshot_type(path: Union[str, Path]) -> Literal["jpeg", "png", "webp"]:
+    # Detect by file extension rather than mimetypes.guess_type, whose result is
+    # OS-dependent (e.g. Windows does not register image/webp), mirroring
+    # upstream's getMimeTypeForPath extension map.
+    suffix = Path(path).suffix.lower()
+    if suffix == ".png":
         return "png"
-    if mime_type == "image/jpeg":
+    if suffix in (".jpeg", ".jpg"):
         return "jpeg"
-    raise Error(f'Unsupported screenshot mime type for path "{path}": {mime_type}')
+    if suffix == ".webp":
+        return "webp"
+    raise Error(f'path: unsupported mime type "{suffix}"')

@@ -28,6 +28,7 @@ from typing import (
     List,
     Mapping,
     Optional,
+    Tuple,
     TypedDict,
     Union,
     cast,
@@ -95,12 +96,14 @@ class Channel(AsyncIOEventEmitter):
         title: str = None,
     ) -> None:
         # No reply messages are used to e.g. __waitInfo__(after).
+        augmented_params, timeout = _augment_params(params, timeout_calculator)
         self._connection.wrap_api_call_sync(
             lambda: self._connection._send_message_to_server(
                 self._object,
                 method,
-                _augment_params(params, timeout_calculator),
+                augmented_params,
                 True,
+                timeout,
             ),
             is_internal,
             title,
@@ -117,8 +120,9 @@ class Channel(AsyncIOEventEmitter):
             error = self._connection._error
             self._connection._error = None
             raise error
+        augmented_params, timeout = _augment_params(params, timeout_calculator)
         callback = self._connection._send_message_to_server(
-            self._object, method, _augment_params(params, timeout_calculator)
+            self._object, method, augmented_params, timeout=timeout
         )
         done, _ = await asyncio.wait(
             {
@@ -352,7 +356,12 @@ class Connection(EventEmitter):
             self._tracing_count -= 1
 
     def _send_message_to_server(
-        self, object: ChannelOwner, method: str, params: Dict, no_reply: bool = False
+        self,
+        object: ChannelOwner,
+        method: str,
+        params: Dict,
+        no_reply: bool = False,
+        timeout: Optional[float] = None,
     ) -> ProtocolCallback:
         if self._closed_error:
             raise self._closed_error
@@ -390,6 +399,8 @@ class Connection(EventEmitter):
         title = stack_trace_information["title"]
         if title:
             metadata["title"] = title
+        if timeout is not None:
+            metadata["timeout"] = timeout  # type: ignore
         message = {
             "id": id,
             "guid": object._guid,
@@ -652,12 +663,15 @@ def _extract_stack_trace_information_from_stack(
 def _augment_params(
     params: Optional[Dict],
     timeout_calculator: Optional[Callable[[Optional[float]], float]],
-) -> Dict:
+) -> Tuple[Dict, Optional[float]]:
     if params is None:
         params = {}
+    timeout: Optional[float] = None
     if timeout_calculator:
-        params["timeout"] = timeout_calculator(params.get("timeout"))
-    return _filter_none(params)
+        timeout = timeout_calculator(params.get("timeout"))
+    # The timeout is sent as a protocol-level metadata field, never in params.
+    params = {key: value for key, value in params.items() if key != "timeout"}
+    return _filter_none(params), timeout
 
 
 def _filter_none(d: Mapping) -> Dict:

@@ -77,3 +77,19 @@ async def test_should_screenshot_with_type_argument(page: Page, tmp_path: Path) 
     output_png_with_jpeg_extension = tmp_path / "bar_png.jpeg"
     await page.screenshot(path=output_png_with_jpeg_extension, type="png")
     assert_image_file_format(output_png_with_jpeg_extension, "PNG")
+
+
+async def test_should_screenshot_with_webp_type_argument(
+    page: Page, tmp_path: Path
+) -> None:
+    output_webp_with_png_extension = tmp_path / "foo_webp.png"
+    await page.screenshot(path=output_webp_with_png_extension, type="webp")
+    assert_image_file_format(output_webp_with_png_extension, "WEBP")
+
+
+async def test_should_infer_webp_screenshot_type_from_path(
+    page: Page, tmp_path: Path
+) -> None:
+    output_webp_file = tmp_path / "foo.webp"
+    await page.screenshot(path=output_webp_file)
+    assert_image_file_format(output_webp_file, "WEBP")

@@ -804,3 +804,70 @@ async def test_should_ignore_aborted_requests(
     )
     assert next(iter(done)).result() == "timeout"
     eval_task.cancel()
+
+
+async def test_should_fulfill_api_request_context_requests_from_har_when_intercepting(
+    browser: Browser, server: Server, tmp_path: Path
+) -> None:
+    # Ported from upstream browsercontext-har.spec.ts interceptAPIRequests.
+    def _live(req: TestServerRequest) -> None:
+        req.setHeader("content-type", "application/json")
+        req.write(json.dumps({"hello": "live"}).encode())
+        req.finish()
+
+    server.set_route("/api/data", _live)
+
+    har_path = tmp_path / "api.har"
+    context1 = await browser.new_context()
+    await context1.route_from_har(har_path, update=True)
+    page1 = await context1.new_page()
+    await page1.goto(server.EMPTY_PAGE)
+    recorded = await page1.request.get(server.PREFIX + "/api/data")
+    assert await recorded.json() == {"hello": "live"}
+    await context1.close()
+
+    # Now stop serving from the network - the request must come from the HAR.
+    def _not_from_har(req: TestServerRequest) -> None:
+        req.write(b"NOT_FROM_HAR")
+        req.finish()
+
+    server.set_route("/api/data", _not_from_har)
+    context2 = await browser.new_context()
+    await context2.route_from_har(har_path, intercept_api_requests=True)
+    page2 = await context2.new_page()
+    replayed = await page2.request.get(server.PREFIX + "/api/data")
+    assert await replayed.json() == {"hello": "live"}
+    await context2.close()
+
+
+async def test_should_not_intercept_api_request_context_requests_by_default(
+    browser: Browser, server: Server, tmp_path: Path
+) -> None:
+    def _live(req: TestServerRequest) -> None:
+        req.setHeader("content-type", "application/json")
+        req.write(json.dumps({"hello": "live"}).encode())
+        req.finish()
+
+    server.set_route("/api/data", _live)
+
+    har_path = tmp_path / "api.har"
+    context1 = await browser.new_context()
+    await context1.route_from_har(har_path, update=True)
+    page1 = await context1.new_page()
+    await page1.goto(server.EMPTY_PAGE)
+    await page1.request.get(server.PREFIX + "/api/data")
+    await context1.close()
+
+    # Without the option, the live network is hit.
+    def _fresh(req: TestServerRequest) -> None:
+        req.setHeader("content-type", "application/json")
+        req.write(json.dumps({"hello": "fresh"}).encode())
+        req.finish()
+
+    server.set_route("/api/data", _fresh)
+    context2 = await browser.new_context()
+    await context2.route_from_har(har_path, not_found="fallback")
+    page2 = await context2.new_page()
+    replayed = await page2.request.get(server.PREFIX + "/api/data")
+    assert await replayed.json() == {"hello": "fresh"}
+    await context2.close()

@@ -570,6 +570,7 @@ class Frame(ChannelOwner):
         noWaitAfter: bool = None,
         strict: bool = None,
         trial: bool = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         await self._click(**locals_to_params(locals()))
 
@@ -587,6 +588,7 @@ class Frame(ChannelOwner):
         strict: bool = None,
         trial: bool = None,
         steps: int = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         await self._channel.send("click", self._timeout, locals_to_params(locals()))
 
@@ -602,6 +604,7 @@ class Frame(ChannelOwner):
         noWaitAfter: bool = None,
         strict: bool = None,
         trial: bool = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         await self._channel.send(
             "dblclick", self._timeout, locals_to_params(locals()), title="Double click"
@@ -617,6 +620,7 @@ class Frame(ChannelOwner):
         noWaitAfter: bool = None,
         strict: bool = None,
         trial: bool = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         await self._channel.send("tap", self._timeout, locals_to_params(locals()))
 
@@ -688,6 +692,7 @@ class Frame(ChannelOwner):
         selected: bool = None,
         exact: bool = None,
         description: Union[str, Pattern[str]] = None,
+        busy: bool = None,
     ) -> "Locator":
         return self.locator(
             get_by_role_selector(
@@ -702,6 +707,7 @@ class Frame(ChannelOwner):
                 selected=selected,
                 exact=exact,
                 description=description,
+                busy=busy,
             )
         )
 
@@ -764,6 +770,7 @@ class Frame(ChannelOwner):
         force: bool = None,
         strict: bool = None,
         trial: bool = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         await self._channel.send("hover", self._timeout, locals_to_params(locals()))
 
@@ -779,6 +786,7 @@ class Frame(ChannelOwner):
         timeout: float = None,
         trial: bool = None,
         steps: int = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         await self._channel.send(
             "dragAndDrop", self._timeout, locals_to_params(locals())
@@ -897,6 +905,7 @@ class Frame(ChannelOwner):
         noWaitAfter: bool = None,
         strict: bool = None,
         trial: bool = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         await self._channel.send("check", self._timeout, locals_to_params(locals()))
 
@@ -909,6 +918,7 @@ class Frame(ChannelOwner):
         noWaitAfter: bool = None,
         strict: bool = None,
         trial: bool = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         await self._channel.send("uncheck", self._timeout, locals_to_params(locals()))
 
@@ -945,6 +955,7 @@ class Frame(ChannelOwner):
         noWaitAfter: bool = None,
         strict: bool = None,
         trial: bool = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         if checked:
             await self.check(
@@ -954,6 +965,7 @@ class Frame(ChannelOwner):
                 force=force,
                 strict=strict,
                 trial=trial,
+                scroll=scroll,
             )
         else:
             await self.uncheck(
@@ -963,6 +975,7 @@ class Frame(ChannelOwner):
                 force=force,
                 strict=strict,
                 trial=trial,
+                scroll=scroll,
             )
 
     async def _highlight(self, selector: str, style: str = None) -> None:

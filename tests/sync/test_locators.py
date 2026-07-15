@@ -1105,3 +1105,83 @@ def test_get_by_role_with_description_whitespace_normalization(page: Page) -> No
     assert page.get_by_role(
         "alert", description="  doc-2025.pdf \n was  uploaded "
     ).evaluate_all("els => els.map(e => e.textContent)") == ["Alert"]
+
+
+def test_get_by_role_with_busy(page: Page) -> None:
+    # Ported from upstream tests/page/selectors-role.spec.ts.
+    page.set_content(
+        """
+        <div role="cell">Hi</div>
+        <div role="cell" aria-busy="true">Hello</div>
+        <div role="cell" aria-busy="false">Bye</div>
+        <button>Click</button>
+        <button aria-busy="true">Loading</button>
+    """
+    )
+
+    def outer_htmls(locator: Locator) -> list:
+        return locator.evaluate_all("els => els.map(e => e.outerHTML)")
+
+    assert outer_htmls(page.get_by_role("cell", busy=True)) == [
+        '<div role="cell" aria-busy="true">Hello</div>'
+    ]
+    assert outer_htmls(page.get_by_role("cell", busy=False)) == [
+        '<div role="cell">Hi</div>',
+        '<div role="cell" aria-busy="false">Bye</div>',
+    ]
+    assert outer_htmls(page.get_by_role("button", busy=True)) == [
+        '<button aria-busy="true">Loading</button>'
+    ]
+    assert outer_htmls(page.get_by_role("button", busy=False)) == [
+        "<button>Click</button>"
+    ]
+
+
+def test_should_not_scroll_when_scroll_is_none(page: Page) -> None:
+    # Ported from upstream tests/page/page-click-scroll.spec.ts.
+    page.set_content(
+        """
+        <div style="height: 2000px;"></div>
+        <button onclick="window._clicked=true">click me</button>
+    """
+    )
+    with pytest.raises(Error) as exc_info:
+        page.locator("button").click(scroll="none", timeout=2000)
+    assert "element is outside of the viewport" in exc_info.value.message
+    assert not page.evaluate("window._clicked")
+    assert page.evaluate("() => window.scrollY") == 0
+
+
+def test_should_click_in_viewport_element_when_scroll_is_none(page: Page) -> None:
+    page.set_content(
+        """
+        <button onclick="window._clicked=true">click me</button>
+        <div style="height: 2000px;"></div>
+    """
+    )
+    page.locator("button").click(scroll="none", timeout=2000)
+    assert page.evaluate("window._clicked") is True
+    assert page.evaluate("() => window.scrollY") == 0
+
+
+def test_locator_wait_for_function(page: Page) -> None:
+    page.set_content("<div id=target>0</div>")
+    locator = page.locator("#target")
+    page.evaluate(
+        """() => {
+            setTimeout(() => {
+                document.querySelector('#target').textContent = '5';
+            }, 100);
+        }"""
+    )
+    locator.wait_for_function("(node) => node.textContent === '5'")
+    assert locator.text_content() == "5"
+
+
+def test_locator_wait_for_function_with_arg(page: Page) -> None:
+    page.set_content("<div id=target>hello</div>")
+    locator = page.locator("#target")
+    locator.wait_for_function(
+        "(node, arg) => node.textContent === arg",
+        arg="hello",
+    )

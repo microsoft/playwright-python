@@ -795,7 +795,7 @@ class Page(ChannelOwner):
     async def screenshot(
         self,
         timeout: float = None,
-        type: Literal["jpeg", "png"] = None,
+        type: Literal["jpeg", "png", "webp"] = None,
         path: Union[str, Path] = None,
         quality: int = None,
         omitBackground: bool = None,
@@ -882,6 +882,7 @@ class Page(ChannelOwner):
         noWaitAfter: bool = None,
         trial: bool = None,
         strict: bool = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         return await self._main_frame._click(**locals_to_params(locals()))
 
@@ -897,6 +898,7 @@ class Page(ChannelOwner):
         noWaitAfter: bool = None,
         strict: bool = None,
         trial: bool = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         return await self._main_frame.dblclick(**locals_to_params(locals()))
 
@@ -910,6 +912,7 @@ class Page(ChannelOwner):
         noWaitAfter: bool = None,
         strict: bool = None,
         trial: bool = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         return await self._main_frame.tap(**locals_to_params(locals()))
 
@@ -968,6 +971,7 @@ class Page(ChannelOwner):
         selected: bool = None,
         exact: bool = None,
         description: Union[str, Pattern[str]] = None,
+        busy: bool = None,
     ) -> "Locator":
         return self._main_frame.get_by_role(
             role,
@@ -981,6 +985,7 @@ class Page(ChannelOwner):
             selected=selected,
             exact=exact,
             description=description,
+            busy=busy,
         )
 
     def get_by_test_id(self, testId: Union[str, Pattern[str]]) -> "Locator":
@@ -1034,6 +1039,7 @@ class Page(ChannelOwner):
         force: bool = None,
         strict: bool = None,
         trial: bool = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         return await self._main_frame.hover(**locals_to_params(locals()))
 
@@ -1049,6 +1055,7 @@ class Page(ChannelOwner):
         strict: bool = None,
         trial: bool = None,
         steps: int = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         return await self._main_frame.drag_and_drop(**locals_to_params(locals()))
 
@@ -1116,6 +1123,7 @@ class Page(ChannelOwner):
         noWaitAfter: bool = None,
         strict: bool = None,
         trial: bool = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         return await self._main_frame.check(**locals_to_params(locals()))
 
@@ -1128,6 +1136,7 @@ class Page(ChannelOwner):
         noWaitAfter: bool = None,
         strict: bool = None,
         trial: bool = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         return await self._main_frame.uncheck(**locals_to_params(locals()))
 
@@ -1376,6 +1385,7 @@ class Page(ChannelOwner):
         noWaitAfter: bool = None,
         strict: bool = None,
         trial: bool = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         if checked:
             await self.check(
@@ -1385,6 +1395,7 @@ class Page(ChannelOwner):
                 force=force,
                 strict=strict,
                 trial=trial,
+                scroll=scroll,
             )
         else:
             await self.uncheck(
@@ -1394,6 +1405,7 @@ class Page(ChannelOwner):
                 force=force,
                 strict=strict,
                 trial=trial,
+                scroll=scroll,
             )
 
     async def add_locator_handler(

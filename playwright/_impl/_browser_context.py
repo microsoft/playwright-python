@@ -497,6 +497,7 @@ class BrowserContext(ChannelOwner):
         update: bool = None,
         updateContent: Literal["attach", "embed"] = None,
         updateMode: HarMode = None,
+        interceptAPIRequests: bool = None,
     ) -> None:
         if update:
             await self._tracing._record_into_har(
@@ -515,6 +516,8 @@ class BrowserContext(ChannelOwner):
         )
         self._har_routers.append(router)
         await router.add_context_route(self)
+        if interceptAPIRequests:
+            await router.add_api_request_route(self)
 
     async def _update_interception_patterns(self) -> None:
         patterns = RouteHandler.prepare_interception_patterns(self._routes)
@@ -586,10 +589,13 @@ class BrowserContext(ChannelOwner):
         await self._closed_future
 
     async def storage_state(
-        self, path: Union[str, Path] = None, indexedDB: bool = None
+        self,
+        path: Union[str, Path] = None,
+        indexedDB: bool = None,
+        credentials: bool = None,
     ) -> StorageState:
         result = await self._channel.send_return_as_dict(
-            "storageState", None, {"indexedDB": indexedDB}
+            "storageState", None, {"indexedDB": indexedDB, "credentials": credentials}
         )
         if path:
             await async_writefile(path, json.dumps(result))

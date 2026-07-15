@@ -226,12 +226,12 @@ class BrowserType(ChannelOwner):
         pipe_channel = (
             await local_utils._channel.send_return_as_dict(
                 "connect",
-                None,
+                lambda t: t if t is not None else 0,
                 {
                     "endpoint": endpoint,
                     "headers": headers,
                     "slowMo": slowMo,
-                    "timeout": timeout if timeout is not None else 0,
+                    "timeout": timeout,
                     "exposeNetwork": exposeNetwork,
                 },
             )
