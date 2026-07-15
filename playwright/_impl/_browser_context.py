@@ -66,6 +66,7 @@ from playwright._impl._helper import (
     WebSocketRouteHandlerCallback,
     async_readfile,
     async_writefile,
+    create_task_and_ignore_exception,
     locals_to_params,
     parse_error,
     to_impl,
@@ -260,10 +261,11 @@ class BrowserContext(ChannelOwner):
                 handled = await route_handler.handle(route)
             finally:
                 if len(self._routes) == 0:
-                    asyncio.create_task(
+                    create_task_and_ignore_exception(
+                        self._loop,
                         self._connection.wrap_api_call(
                             lambda: self._update_interception_patterns(), True
-                        )
+                        ),
                     )
             if handled:
                 return
@@ -691,9 +693,9 @@ class BrowserContext(ChannelOwner):
             # a) removing "dialog" listener subscription (client->server)
             # b) actual "dialog" event (server->client)
             if dialog.type == "beforeunload":
-                asyncio.create_task(dialog.accept())
+                create_task_and_ignore_exception(self._loop, dialog.accept())
             else:
-                asyncio.create_task(dialog.dismiss())
+                create_task_and_ignore_exception(self._loop, dialog.dismiss())
 
     def _on_page_error(
         self, error: Error, page: Optional[Page], location: WebErrorLocation

@@ -102,8 +102,8 @@ class Channel(AsyncIOEventEmitter):
                 self._object,
                 method,
                 augmented_params,
-                True,
                 timeout,
+                True,
             ),
             is_internal,
             title,
@@ -122,7 +122,7 @@ class Channel(AsyncIOEventEmitter):
             raise error
         augmented_params, timeout = _augment_params(params, timeout_calculator)
         callback = self._connection._send_message_to_server(
-            self._object, method, augmented_params, timeout=timeout
+            self._object, method, augmented_params, timeout
         )
         done, _ = await asyncio.wait(
             {
@@ -360,8 +360,8 @@ class Connection(EventEmitter):
         object: ChannelOwner,
         method: str,
         params: Dict,
+        timeout: float,
         no_reply: bool = False,
-        timeout: Optional[float] = None,
     ) -> ProtocolCallback:
         if self._closed_error:
             raise self._closed_error
@@ -393,14 +393,13 @@ class Connection(EventEmitter):
             "wallTime": int(datetime.datetime.now().timestamp() * 1000),
             "apiName": stack_trace_information["apiName"],
             "internal": not stack_trace_information["apiName"],
+            "timeout": timeout,
         }
         if location:
             metadata["location"] = location  # type: ignore
         title = stack_trace_information["title"]
         if title:
             metadata["title"] = title
-        if timeout is not None:
-            metadata["timeout"] = timeout  # type: ignore
         message = {
             "id": id,
             "guid": object._guid,
@@ -663,14 +662,13 @@ def _extract_stack_trace_information_from_stack(
 def _augment_params(
     params: Optional[Dict],
     timeout_calculator: Optional[Callable[[Optional[float]], float]],
-) -> Tuple[Dict, Optional[float]]:
+) -> Tuple[Dict, float]:
     if params is None:
         params = {}
-    timeout: Optional[float] = None
+    timeout_param = params.pop("timeout", None)
+    timeout: float = 0
     if timeout_calculator:
-        timeout = timeout_calculator(params.get("timeout"))
-    # The timeout is sent as a protocol-level metadata field, never in params.
-    params = {key: value for key, value in params.items() if key != "timeout"}
+        timeout = timeout_calculator(timeout_param)
     return _filter_none(params), timeout
 
 

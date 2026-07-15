@@ -468,7 +468,8 @@ def convert_select_option_values(
 def determine_screenshot_type(path: Union[str, Path]) -> Literal["jpeg", "png", "webp"]:
     # Detect by file extension rather than mimetypes.guess_type, whose result is
     # OS-dependent (e.g. Windows does not register image/webp), mirroring
-    # upstream's getMimeTypeForPath extension map.
+    # upstream's getMimeTypeForPath extension map:
+    # https://github.com/microsoft/playwright/blob/e0e814deed7b0a4c4d2bdf98481e6be7419cda16/packages/isomorphic/mimeType.ts#L28
     suffix = Path(path).suffix.lower()
     if suffix == ".png":
         return "png"

@@ -391,6 +391,18 @@ def monotonic_time() -> int:
     return math.floor(time.monotonic() * 1000)
 
 
+def create_task_and_ignore_exception(
+    loop: asyncio.AbstractEventLoop, coro: Awaitable[Any]
+) -> None:
+    async def _ignore_exception() -> None:
+        try:
+            await coro
+        except Exception:
+            pass
+
+    loop.create_task(_ignore_exception())
+
+
 class RouteHandlerInvocation:
     complete: "asyncio.Future"
     route: "Route"

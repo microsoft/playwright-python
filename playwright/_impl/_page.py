@@ -78,6 +78,7 @@ from playwright._impl._helper import (
     WebSocketRouteHandlerCallback,
     async_readfile,
     async_writefile,
+    create_task_and_ignore_exception,
     locals_to_params,
     make_dirs_for_file,
     parse_error,
@@ -1615,15 +1616,19 @@ class BindingCall(ChannelOwner):
                 result = func(source, *func_args)
             if inspect.iscoroutine(result):
                 result = await result
-            await self._channel.send(
-                "resolve", None, dict(result=serialize_argument(result))
+            create_task_and_ignore_exception(
+                self._loop,
+                self._channel.send(
+                    "resolve", None, dict(result=serialize_argument(result))
+                ),
             )
         except Exception as e:
             tb = sys.exc_info()[2]
-            asyncio.create_task(
+            create_task_and_ignore_exception(
+                self._loop,
                 self._channel.send(
                     "reject", None, dict(error=dict(error=serialize_error(e, tb)))
-                )
+                ),
             )
 
 

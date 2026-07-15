@@ -56,6 +56,7 @@ from playwright._impl._helper import (
     URLMatch,
     WebSocketRouteHandlerCallback,
     async_readfile,
+    create_task_and_ignore_exception,
     locals_to_params,
     url_matches,
 )
@@ -565,18 +566,6 @@ class Route(ChannelOwner):
             await asyncio.gather(fut, return_exceptions=True)
 
 
-def _create_task_and_ignore_exception(
-    loop: asyncio.AbstractEventLoop, coro: Coroutine
-) -> None:
-    async def _ignore_exception() -> None:
-        try:
-            await coro
-        except Exception:
-            pass
-
-    loop.create_task(_ignore_exception())
-
-
 class ServerWebSocketRoute:
     def __init__(self, ws: "WebSocketRoute"):
         self._ws = ws
@@ -601,7 +590,7 @@ class ServerWebSocketRoute:
         return list(self._ws._initializer.get("protocols", []))
 
     def close(self, code: int = None, reason: str = None) -> None:
-        _create_task_and_ignore_exception(
+        create_task_and_ignore_exception(
             self._ws._loop,
             self._ws._channel.send(
                 "closeServer",
@@ -616,14 +605,14 @@ class ServerWebSocketRoute:
 
     def send(self, message: Union[str, bytes]) -> None:
         if isinstance(message, str):
-            _create_task_and_ignore_exception(
+            create_task_and_ignore_exception(
                 self._ws._loop,
                 self._ws._channel.send(
                     "sendToServer", None, {"message": message, "isBase64": False}
                 ),
             )
         else:
-            _create_task_and_ignore_exception(
+            create_task_and_ignore_exception(
                 self._ws._loop,
                 self._ws._channel.send(
                     "sendToServer",
@@ -662,7 +651,7 @@ class WebSocketRoute(ChannelOwner):
                 else event["message"]
             )
         elif self._connected:
-            _create_task_and_ignore_exception(
+            create_task_and_ignore_exception(
                 self._loop, self._channel.send("sendToServer", None, event)
             )
 
@@ -674,7 +663,7 @@ class WebSocketRoute(ChannelOwner):
                 else event["message"]
             )
         else:
-            _create_task_and_ignore_exception(
+            create_task_and_ignore_exception(
                 self._loop, self._channel.send("sendToPage", None, event)
             )
 
@@ -682,7 +671,7 @@ class WebSocketRoute(ChannelOwner):
         if self._on_page_close:
             self._on_page_close(event["code"], event["reason"])
         else:
-            _create_task_and_ignore_exception(
+            create_task_and_ignore_exception(
                 self._loop, self._channel.send("closeServer", None, event)
             )
 
@@ -690,7 +679,7 @@ class WebSocketRoute(ChannelOwner):
         if self._on_server_close:
             self._on_server_close(event["code"], event["reason"])
         else:
-            _create_task_and_ignore_exception(
+            create_task_and_ignore_exception(
                 self._loop, self._channel.send("closePage", None, event)
             )
 
@@ -714,24 +703,25 @@ class WebSocketRoute(ChannelOwner):
         if self._connected:
             raise Error("Already connected to the server")
         self._connected = True
-        asyncio.create_task(
+        create_task_and_ignore_exception(
+            self._loop,
             self._channel.send(
                 "connect",
                 None,
-            )
+            ),
         )
         return cast("WebSocketRoute", self._server)
 
     def send(self, message: Union[str, bytes]) -> None:
         if isinstance(message, str):
-            _create_task_and_ignore_exception(
+            create_task_and_ignore_exception(
                 self._loop,
                 self._channel.send(
                     "sendToPage", None, {"message": message, "isBase64": False}
                 ),
             )
         else:
-            _create_task_and_ignore_exception(
+            create_task_and_ignore_exception(
                 self._loop,
                 self._channel.send(
                     "sendToPage",
