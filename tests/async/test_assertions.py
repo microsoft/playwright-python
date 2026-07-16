@@ -110,18 +110,19 @@ async def test_assertions_locator_to_contain_text_should_throw_if_arg_is_unsuppo
 
 async def test_assertions_locator_to_have_attribute(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
-    await page.set_content("<div id=foobar>kek</div>")
-    await expect(page.locator("div#foobar")).to_have_attribute("id", "foobar")
-    await expect(page.locator("div#foobar")).to_have_attribute(
-        "id", re.compile("foobar")
-    )
-    await expect(page.locator("div#foobar")).not_to_have_attribute(
-        "id", "kek", timeout=100
-    )
+    await page.set_content("<div id=foobar checked>kek</div>")
+    locator = page.locator("div#foobar")
+    await expect(locator).to_have_attribute("checked")
+    await expect(locator).not_to_have_attribute("open", timeout=100)
+    await expect(locator).to_have_attribute("id", "foobar")
+    await expect(locator).to_have_attribute("id", re.compile("foobar"))
+    await expect(locator).not_to_have_attribute("id", "kek", timeout=100)
     with pytest.raises(AssertionError):
-        await expect(page.locator("div#foobar")).to_have_attribute(
-            "id", "koko", timeout=100
-        )
+        await expect(locator).to_have_attribute("open", timeout=100)
+    with pytest.raises(AssertionError):
+        await expect(locator).not_to_have_attribute("checked", timeout=100)
+    with pytest.raises(AssertionError):
+        await expect(locator).to_have_attribute("id", "koko", timeout=100)
 
 
 async def test_assertions_locator_to_have_attribute_ignore_case(

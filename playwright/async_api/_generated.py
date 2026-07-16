@@ -21684,7 +21684,7 @@ class LocatorAssertions(AsyncBase):
     async def to_have_attribute(
         self,
         name: str,
-        value: typing.Union[str, typing.Pattern[str]],
+        value: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         *,
         ignore_case: typing.Optional[bool] = None,
         timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
@@ -21700,14 +21700,16 @@ class LocatorAssertions(AsyncBase):
 
         locator = page.locator(\"input\")
         await expect(locator).to_have_attribute(\"type\", \"text\")
+        await expect(locator).to_have_attribute(\"disabled\")
+        await expect(locator).not_to_have_attribute(\"readonly\")
         ```
 
         Parameters
         ----------
         name : str
             Attribute name.
-        value : Union[Pattern[str], str]
-            Expected attribute value.
+        value : Union[Pattern[str], str, None]
+            Expected attribute value. If not specified, the assertion verifies that the attribute is present.
         ignore_case : Union[bool, None]
             Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
             expression flag if specified.
@@ -21728,7 +21730,7 @@ class LocatorAssertions(AsyncBase):
     async def not_to_have_attribute(
         self,
         name: str,
-        value: typing.Union[str, typing.Pattern[str]],
+        value: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         *,
         ignore_case: typing.Optional[bool] = None,
         timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
@@ -21741,8 +21743,8 @@ class LocatorAssertions(AsyncBase):
         ----------
         name : str
             Attribute name.
-        value : Union[Pattern[str], str]
-            Expected attribute value.
+        value : Union[Pattern[str], str, None]
+            Expected attribute value. If not specified, the assertion verifies that the attribute is absent.
         ignore_case : Union[bool, None]
             Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
             expression flag if specified.
