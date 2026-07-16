@@ -21758,7 +21758,7 @@ class LocatorAssertions(SyncBase):
     def to_have_attribute(
         self,
         name: str,
-        value: typing.Union[str, typing.Pattern[str]],
+        value: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         *,
         ignore_case: typing.Optional[bool] = None,
         timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
@@ -21774,14 +21774,16 @@ class LocatorAssertions(SyncBase):
 
         locator = page.locator(\"input\")
         expect(locator).to_have_attribute(\"type\", \"text\")
+        expect(locator).to_have_attribute(\"disabled\")
+        expect(locator).not_to_have_attribute(\"readonly\")
         ```
 
         Parameters
         ----------
         name : str
             Attribute name.
-        value : Union[Pattern[str], str]
-            Expected attribute value.
+        value : Union[Pattern[str], str, None]
+            Expected attribute value. If not specified, the assertion verifies that the attribute is present.
         ignore_case : Union[bool, None]
             Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
             expression flag if specified.
@@ -21804,7 +21806,7 @@ class LocatorAssertions(SyncBase):
     def not_to_have_attribute(
         self,
         name: str,
-        value: typing.Union[str, typing.Pattern[str]],
+        value: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
         *,
         ignore_case: typing.Optional[bool] = None,
         timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
@@ -21817,8 +21819,8 @@ class LocatorAssertions(SyncBase):
         ----------
         name : str
             Attribute name.
-        value : Union[Pattern[str], str]
-            Expected attribute value.
+        value : Union[Pattern[str], str, None]
+            Expected attribute value. If not specified, the assertion verifies that the attribute is absent.
         ignore_case : Union[bool, None]
             Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
             expression flag if specified.

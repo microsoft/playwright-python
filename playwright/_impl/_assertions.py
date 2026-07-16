@@ -329,11 +329,20 @@ class LocatorAssertions(AssertionsBase):
     async def to_have_attribute(
         self,
         name: str,
-        value: Union[str, Pattern[str]],
+        value: Union[Pattern[str], str] = None,
         ignoreCase: bool = None,
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
+        if value is None:
+            await self._expect_impl(
+                "to.have.attribute",
+                FrameExpectOptions(expressionArg=name, timeout=timeout),
+                None,
+                "Locator expected to have attribute",
+                'Expect "to_have_attribute"',
+            )
+            return
         expected_text = to_expected_text_values([value], ignoreCase=ignoreCase)
         await self._expect_impl(
             "to.have.attribute.value",
@@ -348,7 +357,7 @@ class LocatorAssertions(AssertionsBase):
     async def not_to_have_attribute(
         self,
         name: str,
-        value: Union[str, Pattern[str]],
+        value: Union[Pattern[str], str] = None,
         ignoreCase: bool = None,
         timeout: float = None,
     ) -> None:
