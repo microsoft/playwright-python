@@ -692,7 +692,6 @@ class Frame(ChannelOwner):
         selected: bool = None,
         exact: bool = None,
         description: Union[str, Pattern[str]] = None,
-        busy: bool = None,
     ) -> "Locator":
         return self.locator(
             get_by_role_selector(
@@ -707,7 +706,6 @@ class Frame(ChannelOwner):
                 selected=selected,
                 exact=exact,
                 description=description,
-                busy=busy,
             )
         )
 

@@ -837,6 +837,17 @@ async def test_should_fulfill_api_request_context_requests_from_har_when_interce
     page2 = await context2.new_page()
     replayed = await page2.request.get(server.PREFIX + "/api/data")
     assert await replayed.json() == {"hello": "live"}
+    assert replayed.timing == {
+        "startTime": -1,
+        "domainLookupStart": -1,
+        "domainLookupEnd": -1,
+        "connectStart": -1,
+        "secureConnectionStart": -1,
+        "connectEnd": -1,
+        "requestStart": -1,
+        "responseStart": -1,
+        "responseEnd": -1,
+    }
     await context2.close()
 
 

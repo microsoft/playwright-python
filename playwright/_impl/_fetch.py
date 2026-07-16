@@ -29,6 +29,7 @@ from playwright._impl._api_structures import (
     HttpCredentials,
     ProxySettings,
     RemoteAddr,
+    ResourceTiming,
     SecurityDetails,
     ServerFilePayload,
     StorageState,
@@ -530,6 +531,24 @@ class APIResponse:
     @property
     def headers_array(self) -> network.HeadersArray:
         return self._headers.headers_array()
+
+    @property
+    def timing(self) -> ResourceTiming:
+        return cast(
+            ResourceTiming,
+            {
+                "startTime": -1,
+                "domainLookupStart": -1,
+                "domainLookupEnd": -1,
+                "connectStart": -1,
+                "secureConnectionStart": -1,
+                "connectEnd": -1,
+                "requestStart": -1,
+                "responseStart": -1,
+                **self._initializer.get("timing", {}),
+                "responseEnd": self._initializer.get("responseEndTiming", -1),
+            },
+        )
 
     async def body(self) -> bytes:
         try:

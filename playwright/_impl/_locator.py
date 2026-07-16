@@ -284,7 +284,6 @@ class Locator:
         selected: bool = None,
         exact: bool = None,
         description: Union[str, Pattern[str]] = None,
-        busy: bool = None,
     ) -> "Locator":
         return self.locator(
             get_by_role_selector(
@@ -299,7 +298,6 @@ class Locator:
                 selected=selected,
                 exact=exact,
                 description=description,
-                busy=busy,
             )
         )
 
@@ -875,7 +873,6 @@ class FrameLocator:
         selected: bool = None,
         exact: bool = None,
         description: Union[str, Pattern[str]] = None,
-        busy: bool = None,
     ) -> "Locator":
         return self.locator(
             get_by_role_selector(
@@ -890,7 +887,6 @@ class FrameLocator:
                 selected=selected,
                 exact=exact,
                 description=description,
-                busy=busy,
             )
         )
 
@@ -994,7 +990,6 @@ def get_by_role_selector(
     selected: bool = None,
     exact: bool = None,
     description: Union[str, Pattern[str]] = None,
-    busy: bool = None,
 ) -> str:
     props: List[Tuple[str, str]] = []
     if checked is not None:
@@ -1025,7 +1020,5 @@ def get_by_role_selector(
         )
     if pressed is not None:
         props.append(("pressed", bool_to_js_bool(pressed)))
-    if busy is not None:
-        props.append(("busy", bool_to_js_bool(busy)))
     props_str = "".join([f"[{t[0]}={t[1]}]" for t in props])
     return f"internal:role={role}{props_str}"

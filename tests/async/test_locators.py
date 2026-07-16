@@ -1360,37 +1360,6 @@ async def test_get_by_role_with_description_whitespace_normalization(
     ).evaluate_all("els => els.map(e => e.textContent)") == ["Alert"]
 
 
-async def test_get_by_role_with_busy(page: Page) -> None:
-    # Ported from upstream tests/page/selectors-role.spec.ts.
-    await page.set_content(
-        """
-        <div role="cell">Hi</div>
-        <div role="cell" aria-busy="true">Hello</div>
-        <div role="cell" aria-busy="false">Bye</div>
-        <button>Click</button>
-        <button aria-busy="true">Loading</button>
-    """
-    )
-
-    async def outer_htmls(locator: Locator) -> list:
-        return await locator.evaluate_all("els => els.map(e => e.outerHTML)")
-
-    assert await outer_htmls(page.get_by_role("cell", busy=True)) == [
-        '<div role="cell" aria-busy="true">Hello</div>'
-    ]
-    assert await outer_htmls(page.get_by_role("cell", busy=False)) == [
-        '<div role="cell">Hi</div>',
-        '<div role="cell" aria-busy="false">Bye</div>',
-    ]
-    # aria-busy is a global ARIA state and should work for any role.
-    assert await outer_htmls(page.get_by_role("button", busy=True)) == [
-        '<button aria-busy="true">Loading</button>'
-    ]
-    assert await outer_htmls(page.get_by_role("button", busy=False)) == [
-        "<button>Click</button>"
-    ]
-
-
 async def test_should_not_scroll_when_scroll_is_none(page: Page) -> None:
     # Ported from upstream tests/page/page-click-scroll.spec.ts.
     await page.set_content(

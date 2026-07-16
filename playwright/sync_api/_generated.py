@@ -5159,7 +5159,6 @@ class Frame(SyncBase):
         selected: typing.Optional[bool] = None,
         exact: typing.Optional[bool] = None,
         description: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
-        busy: typing.Optional[bool] = None,
     ) -> "Locator":
         """Frame.get_by_role
 
@@ -5249,10 +5248,6 @@ class Frame(SyncBase):
             default, matching is case-insensitive and searches for a substring, use `exact` to control this behavior.
 
             Learn more about [accessible description](https://w3c.github.io/accname/#dfn-accessible-description).
-        busy : Union[bool, None]
-            An attribute that is usually set by `aria-busy`.
-
-            Learn more about [`aria-busy`](https://www.w3.org/TR/wai-aria-1.2/#aria-busy).
 
         Returns
         -------
@@ -5272,7 +5267,6 @@ class Frame(SyncBase):
                 selected=selected,
                 exact=exact,
                 description=description,
-                busy=busy,
             )
         )
 
@@ -6730,7 +6724,6 @@ class FrameLocator(SyncBase):
         selected: typing.Optional[bool] = None,
         exact: typing.Optional[bool] = None,
         description: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
-        busy: typing.Optional[bool] = None,
     ) -> "Locator":
         """FrameLocator.get_by_role
 
@@ -6820,10 +6813,6 @@ class FrameLocator(SyncBase):
             default, matching is case-insensitive and searches for a substring, use `exact` to control this behavior.
 
             Learn more about [accessible description](https://w3c.github.io/accname/#dfn-accessible-description).
-        busy : Union[bool, None]
-            An attribute that is usually set by `aria-busy`.
-
-            Learn more about [`aria-busy`](https://www.w3.org/TR/wai-aria-1.2/#aria-busy).
 
         Returns
         -------
@@ -6843,7 +6832,6 @@ class FrameLocator(SyncBase):
                 selected=selected,
                 exact=exact,
                 description=description,
-                busy=busy,
             )
         )
 
@@ -11579,7 +11567,6 @@ class Page(SyncContextManager):
         selected: typing.Optional[bool] = None,
         exact: typing.Optional[bool] = None,
         description: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
-        busy: typing.Optional[bool] = None,
     ) -> "Locator":
         """Page.get_by_role
 
@@ -11669,10 +11656,6 @@ class Page(SyncContextManager):
             default, matching is case-insensitive and searches for a substring, use `exact` to control this behavior.
 
             Learn more about [accessible description](https://w3c.github.io/accname/#dfn-accessible-description).
-        busy : Union[bool, None]
-            An attribute that is usually set by `aria-busy`.
-
-            Learn more about [`aria-busy`](https://www.w3.org/TR/wai-aria-1.2/#aria-busy).
 
         Returns
         -------
@@ -11692,7 +11675,6 @@ class Page(SyncContextManager):
                 selected=selected,
                 exact=exact,
                 description=description,
-                busy=busy,
             )
         )
 
@@ -18584,7 +18566,6 @@ class Locator(SyncBase):
         selected: typing.Optional[bool] = None,
         exact: typing.Optional[bool] = None,
         description: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
-        busy: typing.Optional[bool] = None,
     ) -> "Locator":
         """Locator.get_by_role
 
@@ -18674,10 +18655,6 @@ class Locator(SyncBase):
             default, matching is case-insensitive and searches for a substring, use `exact` to control this behavior.
 
             Learn more about [accessible description](https://w3c.github.io/accname/#dfn-accessible-description).
-        busy : Union[bool, None]
-            An attribute that is usually set by `aria-busy`.
-
-            Learn more about [`aria-busy`](https://www.w3.org/TR/wai-aria-1.2/#aria-busy).
 
         Returns
         -------
@@ -18697,7 +18674,6 @@ class Locator(SyncBase):
                 selected=selected,
                 exact=exact,
                 description=description,
-                busy=busy,
             )
         )
 
@@ -20783,6 +20759,21 @@ class APIResponse(SyncBase):
         List[{name: str, value: str}]
         """
         return mapping.from_impl_list(self._impl_obj.headers_array)
+
+    @property
+    def timing(self) -> ResourceTiming:
+        """APIResponse.timing
+
+        Returns resource timing information for given response. For redirected requests, returns the information for the
+        last request in the redirect chain. When the response is served [from the HAR file](https://playwright.dev/python/docs/mock#replaying-from-har),
+        timing information is not available and all the values are -1. Find more information at
+        [Resource Timing API](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceResourceTiming).
+
+        Returns
+        -------
+        {startTime: float, domainLookupStart: float, domainLookupEnd: float, connectStart: float, secureConnectionStart: float, connectEnd: float, requestStart: float, responseStart: float, responseEnd: float}
+        """
+        return mapping.from_impl(self._impl_obj.timing)
 
     def body(self) -> bytes:
         """APIResponse.body

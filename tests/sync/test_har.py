@@ -667,6 +667,17 @@ def test_should_fulfill_api_request_context_requests_from_har_when_intercepting(
     page2 = context2.new_page()
     replayed = page2.request.get(server.PREFIX + "/api/data")
     assert replayed.json() == {"hello": "live"}
+    assert replayed.timing == {
+        "startTime": -1,
+        "domainLookupStart": -1,
+        "domainLookupEnd": -1,
+        "connectStart": -1,
+        "secureConnectionStart": -1,
+        "connectEnd": -1,
+        "requestStart": -1,
+        "responseStart": -1,
+        "responseEnd": -1,
+    }
     context2.close()
 
 

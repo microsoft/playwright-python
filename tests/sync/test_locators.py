@@ -1107,36 +1107,6 @@ def test_get_by_role_with_description_whitespace_normalization(page: Page) -> No
     ).evaluate_all("els => els.map(e => e.textContent)") == ["Alert"]
 
 
-def test_get_by_role_with_busy(page: Page) -> None:
-    # Ported from upstream tests/page/selectors-role.spec.ts.
-    page.set_content(
-        """
-        <div role="cell">Hi</div>
-        <div role="cell" aria-busy="true">Hello</div>
-        <div role="cell" aria-busy="false">Bye</div>
-        <button>Click</button>
-        <button aria-busy="true">Loading</button>
-    """
-    )
-
-    def outer_htmls(locator: Locator) -> list:
-        return locator.evaluate_all("els => els.map(e => e.outerHTML)")
-
-    assert outer_htmls(page.get_by_role("cell", busy=True)) == [
-        '<div role="cell" aria-busy="true">Hello</div>'
-    ]
-    assert outer_htmls(page.get_by_role("cell", busy=False)) == [
-        '<div role="cell">Hi</div>',
-        '<div role="cell" aria-busy="false">Bye</div>',
-    ]
-    assert outer_htmls(page.get_by_role("button", busy=True)) == [
-        '<button aria-busy="true">Loading</button>'
-    ]
-    assert outer_htmls(page.get_by_role("button", busy=False)) == [
-        "<button>Click</button>"
-    ]
-
-
 def test_should_not_scroll_when_scroll_is_none(page: Page) -> None:
     # Ported from upstream tests/page/page-click-scroll.spec.ts.
     page.set_content(
