@@ -17,7 +17,7 @@ import inspect
 import math
 import uuid
 from asyncio.tasks import Task
-from typing import Any, Callable, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 from pyee import EventEmitter
 
@@ -37,9 +37,7 @@ class Waiter:
         self._wait_for_event_info_before(self._wait_id, event)
 
     def _wait_for_event_info_before(self, wait_id: str, event: str) -> None:
-        self._channel.send_no_reply(
-            "__waitInfo__",
-            None,
+        self._send_wait_for_event_info(
             {
                 "waitId": wait_id,
                 "phase": "before",
@@ -49,18 +47,29 @@ class Waiter:
         )
 
     def _wait_for_event_info_after(self, wait_id: str, error: Exception = None) -> None:
-        self._channel._connection.wrap_api_call_sync(
-            lambda: self._channel.send_no_reply(
+        self._send_wait_for_event_info(
+            {
+                "waitId": wait_id,
+                "phase": "after",
+                **({"error": str(error)} if error else {}),
+            },
+            is_internal=True,
+        )
+
+    def _send_wait_for_event_info(
+        self, params: Dict[str, Any], is_internal: bool = False, title: str = None
+    ) -> None:
+        # Wait info is fire-and-forget telemetry and must not affect the waiter.
+        try:
+            self._channel.send_no_reply(
                 "__waitInfo__",
                 None,
-                {
-                    "waitId": wait_id,
-                    "phase": "after",
-                    **({"error": str(error)} if error else {}),
-                },
-            ),
-            True,
-        )
+                params,
+                is_internal=is_internal,
+                title=title,
+            )
+        except Error:
+            pass
 
     def reject_on_event(
         self,
@@ -159,21 +168,14 @@ class Waiter:
 
     def log(self, message: str) -> None:
         self._logs.append(message)
-        try:
-            self._channel._connection.wrap_api_call_sync(
-                lambda: self._channel.send_no_reply(
-                    "__waitInfo__",
-                    None,
-                    {
-                        "waitId": self._wait_id,
-                        "phase": "log",
-                        "message": message,
-                    },
-                ),
-                True,
-            )
-        except Exception:
-            pass
+        self._send_wait_for_event_info(
+            {
+                "waitId": self._wait_id,
+                "phase": "log",
+                "message": message,
+            },
+            is_internal=True,
+        )
 
 
 def throw_on_timeout(timeout: float, exception: Exception) -> asyncio.Task:
