@@ -1,6 +1,6 @@
 asyncio-atexit==1.0.1
 autobahn==23.1.2
-black==25.11.0
+black==26.5.1
 build==1.4.4
 flake8==7.3.0
 mypy==2.1.0
