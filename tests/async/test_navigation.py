@@ -989,6 +989,9 @@ async def test_frame_goto_should_reject_when_frame_detaches(
         assert "frame was detached" in exc_info.value.message.lower()
 
 
+@pytest.mark.skip_browser(
+    "firefox"
+)  # script.js is requested before navigationCommitted arrives
 async def test_frame_goto_should_continue_after_client_redirect(
     page: Page, server: Server
 ) -> None:
