@@ -180,6 +180,56 @@ async def test_browser_type_connect_should_reject_navigation_when_browser_closes
     assert "has been closed" in exc_info.value.message
 
 
+async def test_browser_type_connect_should_reject_wait_for_event_before_browser_close_finishes(
+    browser_type: BrowserType, launch_server: Callable[[], RemoteServer]
+) -> None:
+    remote_server = launch_server()
+    browser = await browser_type.connect(remote_server.ws_endpoint)
+    page = await browser.new_page()
+    rejected = asyncio.Event()
+
+    async def wait_for_download() -> None:
+        with pytest.raises(Error):
+            await page.wait_for_event("download")
+        rejected.set()
+
+    wait_task = asyncio.create_task(wait_for_download())
+    await asyncio.sleep(0)
+    await browser.close()
+
+    assert rejected.is_set()
+    await wait_task
+
+
+async def test_browser_type_connect_should_reject_wait_for_event_before_disconnected(
+    browser_type: BrowserType, launch_server: Callable[[], RemoteServer]
+) -> None:
+    remote_server = launch_server()
+    browser = await browser_type.connect(remote_server.ws_endpoint)
+    page = await browser.new_page()
+    log = []
+    disconnected = asyncio.Event()
+
+    async def wait_for_download() -> None:
+        with pytest.raises(Error):
+            await page.wait_for_event("download")
+        log.append("rejected")
+
+    def on_disconnected(_: object) -> None:
+        log.append("disconnected")
+        disconnected.set()
+
+    wait_task = asyncio.create_task(wait_for_download())
+    await asyncio.sleep(0)
+    browser.on("disconnected", on_disconnected)
+
+    remote_server.kill()
+    await wait_task
+    await asyncio.wait_for(disconnected.wait(), timeout=5)
+
+    assert log == ["rejected", "disconnected"]
+
+
 async def test_should_not_allow_getting_the_path(
     browser_type: BrowserType, launch_server: Callable[[], RemoteServer], server: Server
 ) -> None:
