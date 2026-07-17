@@ -27,7 +27,8 @@ from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
 
 
 async def test_should_cancel_underlying_protocol_calls(
-    browser_name: str, launch_arguments: Dict
+    browser_name: str,
+    launch_arguments: Dict,
 ) -> None:
     handler_exception = None
 
@@ -40,12 +41,23 @@ async def test_should_cancel_underlying_protocol_calls(
     async with async_playwright() as p:
         browser = await p[browser_name].launch(**launch_arguments)
         page = await browser.new_page()
-        task = asyncio.create_task(page.wait_for_selector("will-never-find"))
-        # make sure that the wait_for_selector message was sent to the server (driver)
-        await asyncio.sleep(0.1)
+        await page.set_content(
+            """
+            <button disabled onclick="window.clicked = true">click me</button>
+            <script>window.clicked = false</script>
+            """
+        )
+        task = asyncio.create_task(page.locator("button").click(timeout=0))
+        await page.wait_for_timeout(100)
+        assert not task.done()
+
         task.cancel()
         with pytest.raises(asyncio.CancelledError):
             await task
+
+        await page.locator("button").evaluate("button => button.disabled = false")
+        await page.wait_for_timeout(700)
+        assert not await page.evaluate("window.clicked")
         await browser.close()
 
     # The actual 'Future exception was never retrieved' is logged inside the Future destructor (__del__).
