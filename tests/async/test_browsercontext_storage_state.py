@@ -219,3 +219,24 @@ async def test_should_serialise_indexed_db(page: Page, server: Server) -> None:
             }
         ],
     }
+
+
+async def test_should_round_trip_webauthn_credentials_with_storage_state(
+    browser: Browser,
+) -> None:
+    # Ported from upstream browsercontext-storage-state.spec.ts.
+    context = await browser.new_context()
+    credential = await context.credentials.create(rp_id="localhost")
+
+    # Credentials are opt-in, omitted by default.
+    assert await context.storage_state() == {"cookies": [], "origins": []}
+
+    state = await context.storage_state(credentials=True)
+    assert state == {"cookies": [], "origins": [], "credentials": [credential]}
+
+    # A fresh context seeded from the storage state holds the same credential.
+    context2 = await browser.new_context(storage_state=state)
+    assert await context2.credentials.get() == [credential]
+    assert await context2.storage_state(credentials=True) == state
+    await context.close()
+    await context2.close()

@@ -28,6 +28,7 @@ from typing import (
     List,
     Mapping,
     Optional,
+    Tuple,
     TypedDict,
     Union,
     cast,
@@ -40,7 +41,12 @@ import playwright
 import playwright._impl._impl_to_api_mapping
 from playwright._impl._errors import TargetClosedError, rewrite_error
 from playwright._impl._greenlets import EventGreenlet
-from playwright._impl._helper import Error, ParsedMessagePayload, parse_error
+from playwright._impl._helper import (
+    Error,
+    ParsedMessagePayload,
+    create_task_and_ignore_exception,
+    parse_error,
+)
 from playwright._impl._transport import Transport
 
 if TYPE_CHECKING:
@@ -72,6 +78,19 @@ class Channel(AsyncIOEventEmitter):
             title,
         )
 
+    def send_may_fail(
+        self,
+        method: str,
+        timeout_calculator: TimeoutCalculator,
+        params: Dict = None,
+        is_internal: bool = False,
+        title: str = None,
+    ) -> None:
+        create_task_and_ignore_exception(
+            self._connection._loop,
+            self.send(method, timeout_calculator, params, is_internal, title),
+        )
+
     async def send_return_as_dict(
         self,
         method: str,
@@ -95,11 +114,13 @@ class Channel(AsyncIOEventEmitter):
         title: str = None,
     ) -> None:
         # No reply messages are used to e.g. __waitInfo__(after).
+        augmented_params, timeout = _augment_params(params, timeout_calculator)
         self._connection.wrap_api_call_sync(
             lambda: self._connection._send_message_to_server(
                 self._object,
                 method,
-                _augment_params(params, timeout_calculator),
+                augmented_params,
+                timeout,
                 True,
             ),
             is_internal,
@@ -117,8 +138,9 @@ class Channel(AsyncIOEventEmitter):
             error = self._connection._error
             self._connection._error = None
             raise error
+        augmented_params, timeout = _augment_params(params, timeout_calculator)
         callback = self._connection._send_message_to_server(
-            self._object, method, _augment_params(params, timeout_calculator)
+            self._object, method, augmented_params, timeout
         )
         done, _ = await asyncio.wait(
             {
@@ -352,7 +374,12 @@ class Connection(EventEmitter):
             self._tracing_count -= 1
 
     def _send_message_to_server(
-        self, object: ChannelOwner, method: str, params: Dict, no_reply: bool = False
+        self,
+        object: ChannelOwner,
+        method: str,
+        params: Dict,
+        timeout: float,
+        no_reply: bool = False,
     ) -> ProtocolCallback:
         if self._closed_error:
             raise self._closed_error
@@ -384,6 +411,7 @@ class Connection(EventEmitter):
             "wallTime": int(datetime.datetime.now().timestamp() * 1000),
             "apiName": stack_trace_information["apiName"],
             "internal": not stack_trace_information["apiName"],
+            "timeout": timeout,
         }
         if location:
             metadata["location"] = location  # type: ignore
@@ -652,12 +680,14 @@ def _extract_stack_trace_information_from_stack(
 def _augment_params(
     params: Optional[Dict],
     timeout_calculator: Optional[Callable[[Optional[float]], float]],
-) -> Dict:
+) -> Tuple[Dict, float]:
     if params is None:
         params = {}
+    timeout_param = params.pop("timeout", None)
+    timeout: float = 0
     if timeout_calculator:
-        params["timeout"] = timeout_calculator(params.get("timeout"))
-    return _filter_none(params)
+        timeout = timeout_calculator(timeout_param)
+    return _filter_none(params), timeout
 
 
 def _filter_none(d: Mapping) -> Dict:

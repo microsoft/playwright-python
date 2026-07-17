@@ -13,13 +13,15 @@
 # limitations under the License.
 import asyncio
 import base64
-from typing import TYPE_CHECKING, Optional, cast
+import re
+from typing import TYPE_CHECKING, List, Optional, Tuple, cast
 
 from playwright._impl._api_structures import HeadersArray
 from playwright._impl._helper import (
     HarLookupResult,
     RouteFromHarNotFoundPolicy,
     URLMatch,
+    escape_regex_flags,
 )
 from playwright._impl._local_utils import LocalUtils
 
@@ -41,6 +43,7 @@ class HarRouter:
         self._har_id: str = har_id
         self._not_found_action: RouteFromHarNotFoundPolicy = not_found_action
         self._options_url_match: Optional[URLMatch] = url_matcher
+        self._api_request_registrations: List[Tuple["BrowserContext", str]] = []
 
     @staticmethod
     async def create(
@@ -116,7 +119,30 @@ class HarRouter:
             handler=lambda route, _: asyncio.create_task(self._handle(route)),
         )
 
+    async def add_api_request_route(self, context: "BrowserContext") -> None:
+        url_match = self._options_url_match
+        params: dict = {
+            "harId": self._har_id,
+            "notFound": self._not_found_action,
+        }
+        if isinstance(url_match, str):
+            params["urlGlob"] = url_match
+        elif isinstance(url_match, re.Pattern):
+            params["urlRegexSource"] = url_match.pattern
+            params["urlRegexFlags"] = escape_regex_flags(url_match)
+        result = await context._channel.send_return_as_dict(
+            "routeAPIRequestsFromHar", None, params
+        )
+        self._api_request_registrations.append((context, result["registrationId"]))
+
     def dispose(self) -> None:
-        asyncio.create_task(
-            self._local_utils._channel.send("harClose", None, {"harId": self._har_id})
+        for context, registration_id in self._api_request_registrations:
+            context._channel.send_may_fail(
+                "unrouteAPIRequestsFromHar",
+                None,
+                {"registrationId": registration_id},
+            )
+        self._api_request_registrations = []
+        self._local_utils._channel.send_may_fail(
+            "harClose", None, {"harId": self._har_id}
         )

@@ -565,18 +565,6 @@ class Route(ChannelOwner):
             await asyncio.gather(fut, return_exceptions=True)
 
 
-def _create_task_and_ignore_exception(
-    loop: asyncio.AbstractEventLoop, coro: Coroutine
-) -> None:
-    async def _ignore_exception() -> None:
-        try:
-            await coro
-        except Exception:
-            pass
-
-    loop.create_task(_ignore_exception())
-
-
 class ServerWebSocketRoute:
     def __init__(self, ws: "WebSocketRoute"):
         self._ws = ws
@@ -601,35 +589,26 @@ class ServerWebSocketRoute:
         return list(self._ws._initializer.get("protocols", []))
 
     def close(self, code: int = None, reason: str = None) -> None:
-        _create_task_and_ignore_exception(
-            self._ws._loop,
-            self._ws._channel.send(
-                "closeServer",
-                None,
-                {
-                    "code": code,
-                    "reason": reason,
-                    "wasClean": True,
-                },
-            ),
+        self._ws._channel.send_may_fail(
+            "closeServer",
+            None,
+            {
+                "code": code,
+                "reason": reason,
+                "wasClean": True,
+            },
         )
 
     def send(self, message: Union[str, bytes]) -> None:
         if isinstance(message, str):
-            _create_task_and_ignore_exception(
-                self._ws._loop,
-                self._ws._channel.send(
-                    "sendToServer", None, {"message": message, "isBase64": False}
-                ),
+            self._ws._channel.send_may_fail(
+                "sendToServer", None, {"message": message, "isBase64": False}
             )
         else:
-            _create_task_and_ignore_exception(
-                self._ws._loop,
-                self._ws._channel.send(
-                    "sendToServer",
-                    None,
-                    {"message": base64.b64encode(message).decode(), "isBase64": True},
-                ),
+            self._ws._channel.send_may_fail(
+                "sendToServer",
+                None,
+                {"message": base64.b64encode(message).decode(), "isBase64": True},
             )
 
 
@@ -662,9 +641,7 @@ class WebSocketRoute(ChannelOwner):
                 else event["message"]
             )
         elif self._connected:
-            _create_task_and_ignore_exception(
-                self._loop, self._channel.send("sendToServer", None, event)
-            )
+            self._channel.send_may_fail("sendToServer", None, event)
 
     def _channel_message_from_server(self, event: Dict) -> None:
         if self._on_server_message:
@@ -674,25 +651,19 @@ class WebSocketRoute(ChannelOwner):
                 else event["message"]
             )
         else:
-            _create_task_and_ignore_exception(
-                self._loop, self._channel.send("sendToPage", None, event)
-            )
+            self._channel.send_may_fail("sendToPage", None, event)
 
     def _channel_close_page(self, event: Dict) -> None:
         if self._on_page_close:
             self._on_page_close(event["code"], event["reason"])
         else:
-            _create_task_and_ignore_exception(
-                self._loop, self._channel.send("closeServer", None, event)
-            )
+            self._channel.send_may_fail("closeServer", None, event)
 
     def _channel_close_server(self, event: Dict) -> None:
         if self._on_server_close:
             self._on_server_close(event["code"], event["reason"])
         else:
-            _create_task_and_ignore_exception(
-                self._loop, self._channel.send("closePage", None, event)
-            )
+            self._channel.send_may_fail("closePage", None, event)
 
     @property
     def url(self) -> str:
@@ -714,33 +685,22 @@ class WebSocketRoute(ChannelOwner):
         if self._connected:
             raise Error("Already connected to the server")
         self._connected = True
-        asyncio.create_task(
-            self._channel.send(
-                "connect",
-                None,
-            )
-        )
+        self._channel.send_may_fail("connect", None)
         return cast("WebSocketRoute", self._server)
 
     def send(self, message: Union[str, bytes]) -> None:
         if isinstance(message, str):
-            _create_task_and_ignore_exception(
-                self._loop,
-                self._channel.send(
-                    "sendToPage", None, {"message": message, "isBase64": False}
-                ),
+            self._channel.send_may_fail(
+                "sendToPage", None, {"message": message, "isBase64": False}
             )
         else:
-            _create_task_and_ignore_exception(
-                self._loop,
-                self._channel.send(
-                    "sendToPage",
-                    None,
-                    {
-                        "message": base64.b64encode(message).decode(),
-                        "isBase64": True,
-                    },
-                ),
+            self._channel.send_may_fail(
+                "sendToPage",
+                None,
+                {
+                    "message": base64.b64encode(message).decode(),
+                    "isBase64": True,
+                },
             )
 
     def on_message(self, handler: Callable[[Union[str, bytes]], Any]) -> None:

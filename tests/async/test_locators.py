@@ -1358,3 +1358,55 @@ async def test_get_by_role_with_description_whitespace_normalization(
     assert await page.get_by_role(
         "alert", description="  doc-2025.pdf \n was  uploaded "
     ).evaluate_all("els => els.map(e => e.textContent)") == ["Alert"]
+
+
+async def test_should_not_scroll_when_scroll_is_none(page: Page) -> None:
+    # Ported from upstream tests/page/page-click-scroll.spec.ts.
+    await page.set_content(
+        """
+        <div style="height: 2000px;"></div>
+        <button onclick="window._clicked=true">click me</button>
+    """
+    )
+    with pytest.raises(Error) as exc_info:
+        await page.locator("button").click(scroll="none", timeout=2000)
+    assert "element is outside of the viewport" in exc_info.value.message
+    assert not await page.evaluate("window._clicked")
+    assert await page.evaluate("() => window.scrollY") == 0
+
+
+async def test_should_click_in_viewport_element_when_scroll_is_none(page: Page) -> None:
+    await page.set_content(
+        """
+        <button onclick="window._clicked=true">click me</button>
+        <div style="height: 2000px;"></div>
+    """
+    )
+    await page.locator("button").click(scroll="none", timeout=2000)
+    assert await page.evaluate("window._clicked") is True
+    assert await page.evaluate("() => window.scrollY") == 0
+
+
+async def test_locator_wait_for_function(page: Page) -> None:
+    await page.set_content("<div id=target>0</div>")
+    locator = page.locator("#target")
+    await page.evaluate(
+        """() => {
+            setTimeout(() => {
+                document.querySelector('#target').textContent = '5';
+            }, 100);
+        }"""
+    )
+    await locator.wait_for_function(
+        "(node) => node.textContent === '5'",
+    )
+    assert await locator.text_content() == "5"
+
+
+async def test_locator_wait_for_function_with_arg(page: Page) -> None:
+    await page.set_content("<div id=target>hello</div>")
+    locator = page.locator("#target")
+    await locator.wait_for_function(
+        "(node, arg) => node.textContent === arg",
+        arg="hello",
+    )

@@ -66,6 +66,7 @@ from playwright._impl._helper import (
     WebSocketRouteHandlerCallback,
     async_readfile,
     async_writefile,
+    create_task_and_ignore_exception,
     locals_to_params,
     parse_error,
     to_impl,
@@ -260,10 +261,11 @@ class BrowserContext(ChannelOwner):
                 handled = await route_handler.handle(route)
             finally:
                 if len(self._routes) == 0:
-                    asyncio.create_task(
+                    create_task_and_ignore_exception(
+                        self._loop,
                         self._connection.wrap_api_call(
                             lambda: self._update_interception_patterns(), True
-                        )
+                        ),
                     )
             if handled:
                 return
@@ -497,6 +499,7 @@ class BrowserContext(ChannelOwner):
         update: bool = None,
         updateContent: Literal["attach", "embed"] = None,
         updateMode: HarMode = None,
+        interceptAPIRequests: bool = None,
     ) -> None:
         if update:
             await self._tracing._record_into_har(
@@ -515,6 +518,8 @@ class BrowserContext(ChannelOwner):
         )
         self._har_routers.append(router)
         await router.add_context_route(self)
+        if interceptAPIRequests:
+            await router.add_api_request_route(self)
 
     async def _update_interception_patterns(self) -> None:
         patterns = RouteHandler.prepare_interception_patterns(self._routes)
@@ -586,10 +591,13 @@ class BrowserContext(ChannelOwner):
         await self._closed_future
 
     async def storage_state(
-        self, path: Union[str, Path] = None, indexedDB: bool = None
+        self,
+        path: Union[str, Path] = None,
+        indexedDB: bool = None,
+        credentials: bool = None,
     ) -> StorageState:
         result = await self._channel.send_return_as_dict(
-            "storageState", None, {"indexedDB": indexedDB}
+            "storageState", None, {"indexedDB": indexedDB, "credentials": credentials}
         )
         if path:
             await async_writefile(path, json.dumps(result))
@@ -685,9 +693,9 @@ class BrowserContext(ChannelOwner):
             # a) removing "dialog" listener subscription (client->server)
             # b) actual "dialog" event (server->client)
             if dialog.type == "beforeunload":
-                asyncio.create_task(dialog.accept())
+                create_task_and_ignore_exception(self._loop, dialog.accept())
             else:
-                asyncio.create_task(dialog.dismiss())
+                create_task_and_ignore_exception(self._loop, dialog.dismiss())
 
     def _on_page_error(
         self, error: Error, page: Optional[Page], location: WebErrorLocation

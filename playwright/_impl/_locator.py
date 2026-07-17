@@ -49,7 +49,7 @@ from playwright._impl._helper import (
     monotonic_time,
     to_impl,
 )
-from playwright._impl._js_handle import Serializable
+from playwright._impl._js_handle import Serializable, serialize_argument
 from playwright._impl._str_utils import (
     escape_for_attribute_selector,
     escape_for_text_selector,
@@ -142,6 +142,7 @@ class Locator:
         force: bool = None,
         noWaitAfter: bool = None,
         trial: bool = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         params = locals_to_params(locals())
         return await self._frame.check(self._selector, strict=True, **params)
@@ -158,6 +159,7 @@ class Locator:
         noWaitAfter: bool = None,
         trial: bool = None,
         steps: int = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         params = locals_to_params(locals())
         return await self._frame._click(self._selector, strict=True, **params)
@@ -173,6 +175,7 @@ class Locator:
         noWaitAfter: bool = None,
         trial: bool = None,
         steps: int = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         params = locals_to_params(locals())
         return await self._frame.dblclick(self._selector, strict=True, **params)
@@ -435,6 +438,7 @@ class Locator:
         sourcePosition: Position = None,
         targetPosition: Position = None,
         steps: int = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         params = locals_to_params(locals())
         del params["target"]
@@ -472,6 +476,7 @@ class Locator:
         noWaitAfter: bool = None,
         force: bool = None,
         trial: bool = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         params = locals_to_params(locals())
         return await self._frame.hover(
@@ -563,7 +568,7 @@ class Locator:
     async def screenshot(
         self,
         timeout: float = None,
-        type: Literal["jpeg", "png"] = None,
+        type: Literal["jpeg", "png", "webp"] = None,
         path: Union[str, pathlib.Path] = None,
         quality: int = None,
         omitBackground: bool = None,
@@ -665,6 +670,7 @@ class Locator:
         force: bool = None,
         noWaitAfter: bool = None,
         trial: bool = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         params = locals_to_params(locals())
         return await self._frame.tap(
@@ -711,6 +717,7 @@ class Locator:
         force: bool = None,
         noWaitAfter: bool = None,
         trial: bool = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         params = locals_to_params(locals())
         return await self._frame.uncheck(
@@ -742,6 +749,24 @@ class Locator:
             self._selector, strict=True, timeout=timeout, state=state
         )
 
+    async def wait_for_function(
+        self,
+        expression: str,
+        arg: Serializable = None,
+        timeout: float = None,
+    ) -> None:
+        await self._frame._channel.send(
+            "waitForFunction",
+            self._frame._timeout,
+            {
+                "selector": self._selector,
+                "strict": True,
+                "expression": expression,
+                "arg": serialize_argument(arg),
+                "timeout": timeout,
+            },
+        )
+
     async def set_checked(
         self,
         checked: bool,
@@ -750,6 +775,7 @@ class Locator:
         force: bool = None,
         noWaitAfter: bool = None,
         trial: bool = None,
+        scroll: Literal["auto", "none"] = None,
     ) -> None:
         if checked:
             await self.check(
@@ -757,6 +783,7 @@ class Locator:
                 timeout=timeout,
                 force=force,
                 trial=trial,
+                scroll=scroll,
             )
         else:
             await self.uncheck(
@@ -764,6 +791,7 @@ class Locator:
                 timeout=timeout,
                 force=force,
                 trial=trial,
+                scroll=scroll,
             )
 
     async def _expect(

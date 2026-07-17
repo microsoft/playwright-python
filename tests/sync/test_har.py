@@ -22,7 +22,7 @@ from typing import Any, cast
 import pytest
 
 from playwright.sync_api import Browser, BrowserContext, Error, Page, Route, expect
-from tests.server import Server
+from tests.server import Server, TestServerRequest
 
 
 def test_should_work(browser: Browser, server: Server, tmp_path: Path) -> None:
@@ -634,3 +634,81 @@ def test_should_update_extracted_har_zip_for_page(
     assert "hello, world!" in page_2.content()
     expect(page_2.locator("body")).to_have_css("background-color", "rgb(255, 192, 203)")
     context_2.close()
+
+
+def test_should_fulfill_api_request_context_requests_from_har_when_intercepting(
+    browser: Browser, server: Server, tmp_path: Path
+) -> None:
+    # Ported from upstream browsercontext-har.spec.ts interceptAPIRequests.
+    def _live(req: TestServerRequest) -> None:
+        req.setHeader("content-type", "application/json")
+        req.write(json.dumps({"hello": "live"}).encode())
+        req.finish()
+
+    server.set_route("/api/data", _live)
+
+    har_path = tmp_path / "api.har"
+    context1 = browser.new_context()
+    context1.route_from_har(har_path, update=True)
+    page1 = context1.new_page()
+    page1.goto(server.EMPTY_PAGE)
+    recorded = page1.request.get(server.PREFIX + "/api/data")
+    assert recorded.json() == {"hello": "live"}
+    context1.close()
+
+    # Now stop serving from the network - the request must come from the HAR.
+    def _not_from_har(req: TestServerRequest) -> None:
+        req.write(b"NOT_FROM_HAR")
+        req.finish()
+
+    server.set_route("/api/data", _not_from_har)
+    context2 = browser.new_context()
+    context2.route_from_har(har_path, intercept_api_requests=True)
+    page2 = context2.new_page()
+    replayed = page2.request.get(server.PREFIX + "/api/data")
+    assert replayed.json() == {"hello": "live"}
+    assert replayed.timing == {
+        "startTime": -1,
+        "domainLookupStart": -1,
+        "domainLookupEnd": -1,
+        "connectStart": -1,
+        "secureConnectionStart": -1,
+        "connectEnd": -1,
+        "requestStart": -1,
+        "responseStart": -1,
+        "responseEnd": -1,
+    }
+    context2.close()
+
+
+def test_should_not_intercept_api_request_context_requests_by_default(
+    browser: Browser, server: Server, tmp_path: Path
+) -> None:
+    def _live(req: TestServerRequest) -> None:
+        req.setHeader("content-type", "application/json")
+        req.write(json.dumps({"hello": "live"}).encode())
+        req.finish()
+
+    server.set_route("/api/data", _live)
+
+    har_path = tmp_path / "api.har"
+    context1 = browser.new_context()
+    context1.route_from_har(har_path, update=True)
+    page1 = context1.new_page()
+    page1.goto(server.EMPTY_PAGE)
+    page1.request.get(server.PREFIX + "/api/data")
+    context1.close()
+
+    # Without the option, the live network is hit.
+    def _fresh(req: TestServerRequest) -> None:
+        req.setHeader("content-type", "application/json")
+        req.write(json.dumps({"hello": "fresh"}).encode())
+        req.finish()
+
+    server.set_route("/api/data", _fresh)
+    context2 = browser.new_context()
+    context2.route_from_har(har_path, not_found="fallback")
+    page2 = context2.new_page()
+    replayed = page2.request.get(server.PREFIX + "/api/data")
+    assert replayed.json() == {"hello": "fresh"}
+    context2.close()

@@ -15,6 +15,7 @@
 import asyncio
 import base64
 import json
+import time
 from pathlib import Path
 from typing import Any, Callable, cast
 from urllib.parse import parse_qs
@@ -29,7 +30,7 @@ from playwright.async_api import (
     FormData,
     Page,
 )
-from tests.server import Server, TestServerRequest
+from tests.server import HTTPServer, Server, TestServerRequest
 from tests.utils import must
 
 
@@ -59,6 +60,26 @@ async def test_fetch_should_work(context: BrowserContext, server: Server) -> Non
         "value": "application/json",
     } in response.headers_array
     assert await response.text() == '{"foo": "bar"}\n'
+
+
+async def test_should_return_timing(context: BrowserContext) -> None:
+    fresh_server = HTTPServer()
+    fresh_server.start()
+    try:
+        response = await context.request.get(fresh_server.EMPTY_PAGE)
+        timing = response.timing
+        assert abs(timing["startTime"] - time.time() * 1000) < 10000
+        assert timing["domainLookupStart"] == 0
+        assert timing["domainLookupEnd"] >= timing["domainLookupStart"]
+        assert timing["connectStart"] == timing["domainLookupEnd"]
+        assert timing["secureConnectionStart"] == -1
+        assert timing["connectEnd"] >= timing["connectStart"]
+        assert timing["requestStart"] == timing["connectEnd"]
+        assert timing["responseStart"] >= timing["requestStart"]
+        assert timing["responseEnd"] >= timing["responseStart"]
+        assert timing["responseEnd"] < 60000
+    finally:
+        fresh_server.stop()
 
 
 async def test_should_throw_on_network_error(

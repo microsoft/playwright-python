@@ -220,18 +220,20 @@ class BrowserType(ChannelOwner):
     ) -> Browser:
         if slowMo is None:
             slowMo = 0
+        if timeout is None:
+            timeout = 0
 
         headers = {**(headers if headers else {}), "x-playwright-browser": self.name}
         local_utils = self._connection.local_utils
         pipe_channel = (
             await local_utils._channel.send_return_as_dict(
                 "connect",
-                None,
+                lambda t: t or 0,
                 {
                     "endpoint": endpoint,
                     "headers": headers,
                     "slowMo": slowMo,
-                    "timeout": timeout if timeout is not None else 0,
+                    "timeout": timeout,
                     "exposeNetwork": exposeNetwork,
                 },
             )
@@ -272,7 +274,7 @@ class BrowserType(ChannelOwner):
         playwright_future = connection.playwright_future
 
         timeout_future = throw_on_timeout(
-            timeout if timeout is not None else PLAYWRIGHT_MAX_DEADLINE,
+            timeout if timeout else PLAYWRIGHT_MAX_DEADLINE,
             Error("Connection timed out"),
         )
         done, pending = await asyncio.wait(

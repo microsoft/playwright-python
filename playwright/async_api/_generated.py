@@ -2221,6 +2221,7 @@ class ElementHandle(JSHandle):
         no_wait_after: typing.Optional[bool] = None,
         force: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """ElementHandle.hover
 
@@ -2254,6 +2255,11 @@ class ElementHandle(JSHandle):
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -2264,6 +2270,7 @@ class ElementHandle(JSHandle):
                 noWaitAfter=no_wait_after,
                 force=force,
                 trial=trial,
+                scroll=scroll,
             )
         )
 
@@ -2282,6 +2289,7 @@ class ElementHandle(JSHandle):
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
         steps: typing.Optional[int] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """ElementHandle.click
 
@@ -2327,6 +2335,11 @@ class ElementHandle(JSHandle):
         steps : Union[int, None]
             Defaults to 1. Sends `n` interpolated `mousemove` events to represent travel between Playwright's current cursor
             position and the provided destination. When set to 1, emits a single `mousemove` event at the destination location.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -2341,6 +2354,7 @@ class ElementHandle(JSHandle):
                 noWaitAfter=no_wait_after,
                 trial=trial,
                 steps=steps,
+                scroll=scroll,
             )
         )
 
@@ -2358,6 +2372,7 @@ class ElementHandle(JSHandle):
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
         steps: typing.Optional[int] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """ElementHandle.dblclick
 
@@ -2400,6 +2415,11 @@ class ElementHandle(JSHandle):
         steps : Union[int, None]
             Defaults to 1. Sends `n` interpolated `mousemove` events to represent travel between Playwright's current cursor
             position and the provided destination. When set to 1, emits a single `mousemove` event at the destination location.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -2413,6 +2433,7 @@ class ElementHandle(JSHandle):
                 noWaitAfter=no_wait_after,
                 trial=trial,
                 steps=steps,
+                scroll=scroll,
             )
         )
 
@@ -2503,6 +2524,7 @@ class ElementHandle(JSHandle):
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """ElementHandle.tap
 
@@ -2538,6 +2560,11 @@ class ElementHandle(JSHandle):
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -2548,6 +2575,7 @@ class ElementHandle(JSHandle):
                 force=force,
                 noWaitAfter=no_wait_after,
                 trial=trial,
+                scroll=scroll,
             )
         )
 
@@ -2640,8 +2668,7 @@ class ElementHandle(JSHandle):
         Parameters
         ----------
         timeout : Union[float, None]
-            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
-            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+            Deprecated: This option is ignored. The value is returned immediately.
 
         Returns
         -------
@@ -2809,6 +2836,7 @@ class ElementHandle(JSHandle):
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """ElementHandle.set_checked
 
@@ -2842,6 +2870,11 @@ class ElementHandle(JSHandle):
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -2852,6 +2885,7 @@ class ElementHandle(JSHandle):
                 force=force,
                 noWaitAfter=no_wait_after,
                 trial=trial,
+                scroll=scroll,
             )
         )
 
@@ -2863,6 +2897,7 @@ class ElementHandle(JSHandle):
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """ElementHandle.check
 
@@ -2895,6 +2930,11 @@ class ElementHandle(JSHandle):
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -2904,6 +2944,7 @@ class ElementHandle(JSHandle):
                 force=force,
                 noWaitAfter=no_wait_after,
                 trial=trial,
+                scroll=scroll,
             )
         )
 
@@ -2915,6 +2956,7 @@ class ElementHandle(JSHandle):
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """ElementHandle.uncheck
 
@@ -2947,6 +2989,11 @@ class ElementHandle(JSHandle):
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -2956,6 +3003,7 @@ class ElementHandle(JSHandle):
                 force=force,
                 noWaitAfter=no_wait_after,
                 trial=trial,
+                scroll=scroll,
             )
         )
 
@@ -2993,7 +3041,7 @@ class ElementHandle(JSHandle):
         self,
         *,
         timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
-        type: typing.Optional[Literal["jpeg", "png"]] = None,
+        type: typing.Optional[Literal["jpeg", "png", "webp"]] = None,
         path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         quality: typing.Optional[int] = None,
         omit_background: typing.Optional[bool] = None,
@@ -3020,14 +3068,15 @@ class ElementHandle(JSHandle):
         timeout : Union[float, None]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        type : Union["jpeg", "png", None]
+        type : Union["jpeg", "png", "webp", None]
             Specify screenshot type, defaults to `png`.
         path : Union[pathlib.Path, str, None]
             The file path to save the image to. The screenshot type will be inferred from file extension. If `path` is a
             relative path, then it is resolved relative to the current working directory. If no path is provided, the image
             won't be saved to the disk.
         quality : Union[int, None]
-            The quality of the image, between 0-100. Not applicable to `png` images.
+            The quality of the image, between 0-100. Not applicable to `png` images. For `jpeg` the default is `80`. For
+            `webp`, a quality of `100` (the default) produces a lossless image, while lower values use lossy compression.
         omit_background : Union[bool, None]
             Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images.
             Defaults to `false`.
@@ -4460,6 +4509,7 @@ class Frame(AsyncBase):
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """Frame.click
 
@@ -4510,6 +4560,11 @@ class Frame(AsyncBase):
             to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
             `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
             are pressed.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -4525,6 +4580,7 @@ class Frame(AsyncBase):
                 noWaitAfter=no_wait_after,
                 strict=strict,
                 trial=trial,
+                scroll=scroll,
             )
         )
 
@@ -4543,6 +4599,7 @@ class Frame(AsyncBase):
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """Frame.dblclick
 
@@ -4591,6 +4648,11 @@ class Frame(AsyncBase):
             to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
             `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
             are pressed.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -4605,6 +4667,7 @@ class Frame(AsyncBase):
                 noWaitAfter=no_wait_after,
                 strict=strict,
                 trial=trial,
+                scroll=scroll,
             )
         )
 
@@ -4621,6 +4684,7 @@ class Frame(AsyncBase):
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """Frame.tap
 
@@ -4664,6 +4728,11 @@ class Frame(AsyncBase):
             to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
             `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
             are pressed.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -4676,6 +4745,7 @@ class Frame(AsyncBase):
                 noWaitAfter=no_wait_after,
                 strict=strict,
                 trial=trial,
+                scroll=scroll,
             )
         )
 
@@ -5476,6 +5546,7 @@ class Frame(AsyncBase):
         force: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """Frame.hover
 
@@ -5517,6 +5588,11 @@ class Frame(AsyncBase):
             to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
             `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
             are pressed.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -5529,6 +5605,7 @@ class Frame(AsyncBase):
                 force=force,
                 strict=strict,
                 trial=trial,
+                scroll=scroll,
             )
         )
 
@@ -5545,6 +5622,7 @@ class Frame(AsyncBase):
         timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
         trial: typing.Optional[bool] = None,
         steps: typing.Optional[int] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """Frame.drag_and_drop
 
@@ -5579,6 +5657,11 @@ class Frame(AsyncBase):
         steps : Union[int, None]
             Defaults to 1. Sends `n` interpolated `mousemove` events to represent travel between the `mousedown` and `mouseup`
             of the drag. When set to 1, emits a single `mousemove` event at the destination location.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -5593,6 +5676,7 @@ class Frame(AsyncBase):
                 timeout=to_milliseconds(timeout),
                 trial=trial,
                 steps=steps,
+                scroll=scroll,
             )
         )
 
@@ -5896,6 +5980,7 @@ class Frame(AsyncBase):
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """Frame.check
 
@@ -5934,6 +6019,11 @@ class Frame(AsyncBase):
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -5945,6 +6035,7 @@ class Frame(AsyncBase):
                 noWaitAfter=no_wait_after,
                 strict=strict,
                 trial=trial,
+                scroll=scroll,
             )
         )
 
@@ -5958,6 +6049,7 @@ class Frame(AsyncBase):
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """Frame.uncheck
 
@@ -5996,6 +6088,11 @@ class Frame(AsyncBase):
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -6007,6 +6104,7 @@ class Frame(AsyncBase):
                 noWaitAfter=no_wait_after,
                 strict=strict,
                 trial=trial,
+                scroll=scroll,
             )
         )
 
@@ -6124,6 +6222,7 @@ class Frame(AsyncBase):
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """Frame.set_checked
 
@@ -6164,6 +6263,11 @@ class Frame(AsyncBase):
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -6176,6 +6280,7 @@ class Frame(AsyncBase):
                 noWaitAfter=no_wait_after,
                 strict=strict,
                 trial=trial,
+                scroll=scroll,
             )
         )
 
@@ -10648,7 +10753,7 @@ class Page(AsyncContextManager):
         self,
         *,
         timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
-        type: typing.Optional[Literal["jpeg", "png"]] = None,
+        type: typing.Optional[Literal["jpeg", "png", "webp"]] = None,
         path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         quality: typing.Optional[int] = None,
         omit_background: typing.Optional[bool] = None,
@@ -10670,14 +10775,15 @@ class Page(AsyncContextManager):
         timeout : Union[float, None]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        type : Union["jpeg", "png", None]
+        type : Union["jpeg", "png", "webp", None]
             Specify screenshot type, defaults to `png`.
         path : Union[pathlib.Path, str, None]
             The file path to save the image to. The screenshot type will be inferred from file extension. If `path` is a
             relative path, then it is resolved relative to the current working directory. If no path is provided, the image
             won't be saved to the disk.
         quality : Union[int, None]
-            The quality of the image, between 0-100. Not applicable to `png` images.
+            The quality of the image, between 0-100. Not applicable to `png` images. For `jpeg` the default is `80`. For
+            `webp`, a quality of `100` (the default) produces a lossless image, while lower values use lossy compression.
         omit_background : Union[bool, None]
             Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images.
             Defaults to `false`.
@@ -10846,6 +10952,7 @@ class Page(AsyncContextManager):
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """Page.click
 
@@ -10896,6 +11003,11 @@ class Page(AsyncContextManager):
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
             element, the call throws an exception.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -10911,6 +11023,7 @@ class Page(AsyncContextManager):
                 noWaitAfter=no_wait_after,
                 trial=trial,
                 strict=strict,
+                scroll=scroll,
             )
         )
 
@@ -10929,6 +11042,7 @@ class Page(AsyncContextManager):
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """Page.dblclick
 
@@ -10976,6 +11090,11 @@ class Page(AsyncContextManager):
             to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
             `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
             are pressed.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -10990,6 +11109,7 @@ class Page(AsyncContextManager):
                 noWaitAfter=no_wait_after,
                 strict=strict,
                 trial=trial,
+                scroll=scroll,
             )
         )
 
@@ -11006,6 +11126,7 @@ class Page(AsyncContextManager):
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """Page.tap
 
@@ -11049,6 +11170,11 @@ class Page(AsyncContextManager):
             to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
             `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
             are pressed.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -11061,6 +11187,7 @@ class Page(AsyncContextManager):
                 noWaitAfter=no_wait_after,
                 strict=strict,
                 trial=trial,
+                scroll=scroll,
             )
         )
 
@@ -11859,6 +11986,7 @@ class Page(AsyncContextManager):
         force: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """Page.hover
 
@@ -11900,6 +12028,11 @@ class Page(AsyncContextManager):
             to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
             `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
             are pressed.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -11912,6 +12045,7 @@ class Page(AsyncContextManager):
                 force=force,
                 strict=strict,
                 trial=trial,
+                scroll=scroll,
             )
         )
 
@@ -11928,6 +12062,7 @@ class Page(AsyncContextManager):
         strict: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
         steps: typing.Optional[int] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """Page.drag_and_drop
 
@@ -11978,6 +12113,11 @@ class Page(AsyncContextManager):
         steps : Union[int, None]
             Defaults to 1. Sends `n` interpolated `mousemove` events to represent travel between the `mousedown` and `mouseup`
             of the drag. When set to 1, emits a single `mousemove` event at the destination location.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -11992,6 +12132,7 @@ class Page(AsyncContextManager):
                 strict=strict,
                 trial=trial,
                 steps=steps,
+                scroll=scroll,
             )
         )
 
@@ -12313,6 +12454,7 @@ class Page(AsyncContextManager):
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """Page.check
 
@@ -12351,6 +12493,11 @@ class Page(AsyncContextManager):
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -12362,6 +12509,7 @@ class Page(AsyncContextManager):
                 noWaitAfter=no_wait_after,
                 strict=strict,
                 trial=trial,
+                scroll=scroll,
             )
         )
 
@@ -12375,6 +12523,7 @@ class Page(AsyncContextManager):
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """Page.uncheck
 
@@ -12413,6 +12562,11 @@ class Page(AsyncContextManager):
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -12424,6 +12578,7 @@ class Page(AsyncContextManager):
                 noWaitAfter=no_wait_after,
                 strict=strict,
                 trial=trial,
+                scroll=scroll,
             )
         )
 
@@ -13299,6 +13454,7 @@ class Page(AsyncContextManager):
         no_wait_after: typing.Optional[bool] = None,
         strict: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """Page.set_checked
 
@@ -13339,6 +13495,11 @@ class Page(AsyncContextManager):
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -13351,6 +13512,7 @@ class Page(AsyncContextManager):
                 noWaitAfter=no_wait_after,
                 strict=strict,
                 trial=trial,
+                scroll=scroll,
             )
         )
 
@@ -14930,6 +15092,7 @@ class BrowserContext(AsyncContextManager):
         update: typing.Optional[bool] = None,
         update_content: typing.Optional[Literal["attach", "embed"]] = None,
         update_mode: typing.Optional[Literal["full", "minimal"]] = None,
+        intercept_api_requests: typing.Optional[bool] = None,
     ) -> None:
         """BrowserContext.route_from_har
 
@@ -14963,6 +15126,10 @@ class BrowserContext(AsyncContextManager):
             When set to `minimal`, only record information necessary for routing from HAR. This omits sizes, timing, page,
             cookies, security and other types of HAR information that are not used when replaying from HAR. Defaults to
             `minimal`.
+        intercept_api_requests : Union[bool, None]
+            If set to `true`, requests made via `APIRequestContext` (such as `browser_context.request` or
+            `page.request`) are also served from the HAR file. By default these requests are sent to the network,
+            matching the behavior prior to v1.62. Defaults to `false` for backward compatibility.
         """
 
         return mapping.from_maybe_impl(
@@ -14973,6 +15140,7 @@ class BrowserContext(AsyncContextManager):
                 update=update,
                 updateContent=update_content,
                 updateMode=update_mode,
+                interceptAPIRequests=intercept_api_requests,
             )
         )
 
@@ -15213,11 +15381,12 @@ class BrowserContext(AsyncContextManager):
         *,
         path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         indexed_db: typing.Optional[bool] = None,
+        credentials: typing.Optional[bool] = None,
     ) -> StorageState:
         """BrowserContext.storage_state
 
-        Returns storage state for this browser context, contains current cookies, local storage snapshot and IndexedDB
-        snapshot.
+        Returns storage state for this browser context, contains current cookies, local storage snapshot, IndexedDB
+        snapshot and virtual WebAuthn credentials.
 
         Parameters
         ----------
@@ -15228,6 +15397,12 @@ class BrowserContext(AsyncContextManager):
             Set to `true` to include [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) in the storage
             state snapshot. If your application uses IndexedDB to store authentication tokens, like Firebase Authentication,
             enable this.
+        credentials : Union[bool, None]
+            Set to `true` to include the context's virtual WebAuthn `browser_context.credentials` (passkeys) in the
+            storage state snapshot. The captured credentials carry their private keys, so they can be re-seeded into a later
+            context via the `storageState` option or `browser_context.set_storage_state()`. Note that restoring the
+            storage state that contains credentials will automatically install the virtual WebAuthn authenticator (see
+            `credentials.install()`), and prevent all real authenticators from working in this context.
 
         Returns
         -------
@@ -15235,7 +15410,9 @@ class BrowserContext(AsyncContextManager):
         """
 
         return mapping.from_impl(
-            await self._impl_obj.storage_state(path=path, indexedDB=indexed_db)
+            await self._impl_obj.storage_state(
+                path=path, indexedDB=indexed_db, credentials=credentials
+            )
         )
 
     async def set_storage_state(
@@ -15243,7 +15420,9 @@ class BrowserContext(AsyncContextManager):
     ) -> None:
         """BrowserContext.set_storage_state
 
-        Clears the existing cookies, local storage and IndexedDB entries for all origins and sets the new storage state.
+        Clears the existing cookies, local storage, IndexedDB entries and virtual WebAuthn credentials, and sets the new
+        storage state. When the storage state contains credentials, the virtual WebAuthn authenticator is installed
+        (equivalent to `credentials.install()`), preventing all real authenticators from working in this context.
 
         **Usage**
 
@@ -16920,6 +17099,10 @@ class BrowserType(AsyncBase):
         `browser_type.connect()`. If you are experiencing issues or attempting to use advanced functionality, you
         probably want to use `browser_type.connect()`.
 
+        **NOTE** Playwright maintains a curated list of arguments for launching the browser. If you launch the browser
+        without Playwright and do not pass the exact same arguments, some of Playwright functionality may be broken upon
+        connecting to the browser.
+
         **Usage**
 
         ```py
@@ -17550,6 +17733,7 @@ class Locator(AsyncBase):
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """Locator.check
 
@@ -17592,6 +17776,11 @@ class Locator(AsyncBase):
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -17601,6 +17790,7 @@ class Locator(AsyncBase):
                 force=force,
                 noWaitAfter=no_wait_after,
                 trial=trial,
+                scroll=scroll,
             )
         )
 
@@ -17619,6 +17809,7 @@ class Locator(AsyncBase):
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
         steps: typing.Optional[int] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """Locator.click
 
@@ -17686,6 +17877,11 @@ class Locator(AsyncBase):
         steps : Union[int, None]
             Defaults to 1. Sends `n` interpolated `mousemove` events to represent travel between Playwright's current cursor
             position and the provided destination. When set to 1, emits a single `mousemove` event at the destination location.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -17700,6 +17896,7 @@ class Locator(AsyncBase):
                 noWaitAfter=no_wait_after,
                 trial=trial,
                 steps=steps,
+                scroll=scroll,
             )
         )
 
@@ -17717,6 +17914,7 @@ class Locator(AsyncBase):
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
         steps: typing.Optional[int] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """Locator.dblclick
 
@@ -17765,6 +17963,11 @@ class Locator(AsyncBase):
         steps : Union[int, None]
             Defaults to 1. Sends `n` interpolated `mousemove` events to represent travel between Playwright's current cursor
             position and the provided destination. When set to 1, emits a single `mousemove` event at the destination location.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -17778,6 +17981,7 @@ class Locator(AsyncBase):
                 noWaitAfter=no_wait_after,
                 trial=trial,
                 steps=steps,
+                scroll=scroll,
             )
         )
 
@@ -18954,6 +19158,7 @@ class Locator(AsyncBase):
         source_position: typing.Optional[Position] = None,
         target_position: typing.Optional[Position] = None,
         steps: typing.Optional[int] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """Locator.drag_to
 
@@ -19003,6 +19208,11 @@ class Locator(AsyncBase):
         steps : Union[int, None]
             Defaults to 1. Sends `n` interpolated `mousemove` events to represent travel between the `mousedown` and `mouseup`
             of the drag. When set to 1, emits a single `mousemove` event at the destination location.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -19015,6 +19225,7 @@ class Locator(AsyncBase):
                 sourcePosition=source_position,
                 targetPosition=target_position,
                 steps=steps,
+                scroll=scroll,
             )
         )
 
@@ -19106,6 +19317,7 @@ class Locator(AsyncBase):
         no_wait_after: typing.Optional[bool] = None,
         force: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """Locator.hover
 
@@ -19151,6 +19363,11 @@ class Locator(AsyncBase):
             to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
             `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
             are pressed.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -19161,6 +19378,7 @@ class Locator(AsyncBase):
                 noWaitAfter=no_wait_after,
                 force=force,
                 trial=trial,
+                scroll=scroll,
             )
         )
 
@@ -19524,7 +19742,7 @@ class Locator(AsyncBase):
         self,
         *,
         timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
-        type: typing.Optional[Literal["jpeg", "png"]] = None,
+        type: typing.Optional[Literal["jpeg", "png", "webp"]] = None,
         path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         quality: typing.Optional[int] = None,
         omit_background: typing.Optional[bool] = None,
@@ -19567,14 +19785,15 @@ class Locator(AsyncBase):
         timeout : Union[float, None]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
-        type : Union["jpeg", "png", None]
+        type : Union["jpeg", "png", "webp", None]
             Specify screenshot type, defaults to `png`.
         path : Union[pathlib.Path, str, None]
             The file path to save the image to. The screenshot type will be inferred from file extension. If `path` is a
             relative path, then it is resolved relative to the current working directory. If no path is provided, the image
             won't be saved to the disk.
         quality : Union[int, None]
-            The quality of the image, between 0-100. Not applicable to `png` images.
+            The quality of the image, between 0-100. Not applicable to `png` images. For `jpeg` the default is `80`. For
+            `webp`, a quality of `100` (the default) produces a lossless image, while lower values use lossy compression.
         omit_background : Union[bool, None]
             Hides default white background and allows capturing screenshots with transparency. Not applicable to `jpeg` images.
             Defaults to `false`.
@@ -19945,6 +20164,7 @@ class Locator(AsyncBase):
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """Locator.tap
 
@@ -19987,6 +20207,11 @@ class Locator(AsyncBase):
             to `false`. Useful to wait until the element is ready for the action without performing it. Note that keyboard
             `modifiers` will be pressed regardless of `trial` to allow testing elements which are only visible when those keys
             are pressed.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -19997,6 +20222,7 @@ class Locator(AsyncBase):
                 force=force,
                 noWaitAfter=no_wait_after,
                 trial=trial,
+                scroll=scroll,
             )
         )
 
@@ -20131,6 +20357,7 @@ class Locator(AsyncBase):
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """Locator.uncheck
 
@@ -20173,6 +20400,11 @@ class Locator(AsyncBase):
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -20182,6 +20414,7 @@ class Locator(AsyncBase):
                 force=force,
                 noWaitAfter=no_wait_after,
                 trial=trial,
+                scroll=scroll,
             )
         )
 
@@ -20268,6 +20501,52 @@ class Locator(AsyncBase):
             await self._impl_obj.wait_for(timeout=to_milliseconds(timeout), state=state)
         )
 
+    async def wait_for_function(
+        self,
+        expression: str,
+        *,
+        arg: typing.Optional[typing.Any] = None,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
+    ) -> None:
+        """Locator.wait_for_function
+
+        Returns when `expression` returns a truthy value, called with the matching element as a first argument, and `arg`
+        as a second argument.
+
+        This is a generic way to wait for an element to reach a custom condition without asserting it. The locator is
+        re-resolved on each retry, so it tolerates the element being re-rendered while waiting.
+
+        If `expression` returns a [Promise], this method will wait for the promise to resolve before checking its value.
+
+        If `expression` throws or rejects, this method throws.
+
+        **Usage**
+
+        Wait for an attribute to appear:
+
+        Passing argument to `expression`:
+
+        Parameters
+        ----------
+        expression : str
+            JavaScript expression to be evaluated in the browser context. If the expression evaluates to a function, the
+            function is automatically invoked.
+        arg : Union[Any, None]
+            Optional argument to pass to `expression`.
+        timeout : Union[float, None]
+            Maximum time to wait for in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The
+            default value can be changed by using the `browser_context.set_default_timeout()` or
+            `page.set_default_timeout()` methods.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.wait_for_function(
+                expression=expression,
+                arg=mapping.to_impl(arg),
+                timeout=to_milliseconds(timeout),
+            )
+        )
+
     async def set_checked(
         self,
         checked: bool,
@@ -20277,6 +20556,7 @@ class Locator(AsyncBase):
         force: typing.Optional[bool] = None,
         no_wait_after: typing.Optional[bool] = None,
         trial: typing.Optional[bool] = None,
+        scroll: typing.Optional[Literal["auto", "none"]] = None,
     ) -> None:
         """Locator.set_checked
 
@@ -20320,6 +20600,11 @@ class Locator(AsyncBase):
         trial : Union[bool, None]
             When set, this method only performs the [actionability](../actionability.md) checks and skips the action. Defaults
             to `false`. Useful to wait until the element is ready for the action without performing it.
+        scroll : Union["auto", "none", None]
+            Controls whether Playwright scrolls the element into view before performing the action. Defaults to `"auto"`, which
+            scrolls the element into view when necessary, including scrolling nested scrollable containers. When set to
+            `"none"`, Playwright does not scroll the element and the action fails if the element is not already in the
+            viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
         return mapping.from_maybe_impl(
@@ -20330,6 +20615,7 @@ class Locator(AsyncBase):
                 force=force,
                 noWaitAfter=no_wait_after,
                 trial=trial,
+                scroll=scroll,
             )
         )
 
@@ -20433,6 +20719,21 @@ class APIResponse(AsyncBase):
         List[{name: str, value: str}]
         """
         return mapping.from_impl_list(self._impl_obj.headers_array)
+
+    @property
+    def timing(self) -> ResourceTiming:
+        """APIResponse.timing
+
+        Returns resource timing information for given response. For redirected requests, returns the information for the
+        last request in the redirect chain. When the response is served [from the HAR file](https://playwright.dev/python/docs/mock#replaying-from-har),
+        timing information is not available and all the values are -1. Find more information at
+        [Resource Timing API](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceResourceTiming).
+
+        Returns
+        -------
+        {startTime: float, domainLookupStart: float, domainLookupEnd: float, connectStart: float, secureConnectionStart: float, connectEnd: float, requestStart: float, responseStart: float, responseEnd: float}
+        """
+        return mapping.from_impl(self._impl_obj.timing)
 
     async def body(self) -> bytes:
         """APIResponse.body
