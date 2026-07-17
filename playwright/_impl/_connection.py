@@ -41,7 +41,12 @@ import playwright
 import playwright._impl._impl_to_api_mapping
 from playwright._impl._errors import TargetClosedError, rewrite_error
 from playwright._impl._greenlets import EventGreenlet
-from playwright._impl._helper import Error, ParsedMessagePayload, parse_error
+from playwright._impl._helper import (
+    Error,
+    ParsedMessagePayload,
+    create_task_and_ignore_exception,
+    parse_error,
+)
 from playwright._impl._transport import Transport
 
 if TYPE_CHECKING:
@@ -71,6 +76,19 @@ class Channel(AsyncIOEventEmitter):
             lambda: self._inner_send(method, timeout_calculator, params, False),
             is_internal,
             title,
+        )
+
+    def send_may_fail(
+        self,
+        method: str,
+        timeout_calculator: TimeoutCalculator,
+        params: Dict = None,
+        is_internal: bool = False,
+        title: str = None,
+    ) -> None:
+        create_task_and_ignore_exception(
+            self._connection._loop,
+            self.send(method, timeout_calculator, params, is_internal, title),
         )
 
     async def send_return_as_dict(

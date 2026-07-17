@@ -21,7 +21,6 @@ from playwright._impl._helper import (
     HarLookupResult,
     RouteFromHarNotFoundPolicy,
     URLMatch,
-    create_task_and_ignore_exception,
     escape_regex_flags,
 )
 from playwright._impl._local_utils import LocalUtils
@@ -138,16 +137,12 @@ class HarRouter:
 
     def dispose(self) -> None:
         for context, registration_id in self._api_request_registrations:
-            create_task_and_ignore_exception(
-                context._loop,
-                context._channel.send(
-                    "unrouteAPIRequestsFromHar",
-                    None,
-                    {"registrationId": registration_id},
-                ),
+            context._channel.send_may_fail(
+                "unrouteAPIRequestsFromHar",
+                None,
+                {"registrationId": registration_id},
             )
         self._api_request_registrations = []
-        create_task_and_ignore_exception(
-            self._local_utils._loop,
-            self._local_utils._channel.send("harClose", None, {"harId": self._har_id}),
+        self._local_utils._channel.send_may_fail(
+            "harClose", None, {"harId": self._har_id}
         )
