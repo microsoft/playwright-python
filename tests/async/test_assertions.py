@@ -1023,7 +1023,7 @@ async def test_should_be_able_to_set_custom_timeout(page: Page) -> None:
     assert 'Expect "to_be_visible" with timeout 111ms' in str(exc_info.value)
 
 
-async def test_negative_assertion_should_show_not_prefix_in_call_log(
+async def test_negative_assertion_shows_not_prefix_in_call_log(
     page: Page,
 ) -> None:
     await page.set_content("<button>hello</button>")
