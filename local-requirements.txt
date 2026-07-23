@@ -16,7 +16,7 @@ pytest-repeat==0.9.4
 pytest-rerunfailures==16.4
 pytest-timeout==2.4.0
 pytest-xdist==3.8.0
-requests==2.33.0
+requests==2.34.2
 service_identity==24.2.0
 twisted==25.5.0
 types-pyOpenSSL==24.1.0.20240722
