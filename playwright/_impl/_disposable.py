@@ -13,13 +13,12 @@
 # limitations under the License.
 
 import asyncio
-import inspect
 import traceback
 from typing import Awaitable, Callable, Dict
 
 import greenlet
 
-from playwright._impl._connection import ChannelOwner
+from playwright._impl._connection import ChannelOwner, _capture_stack_trace
 from playwright._impl._errors import Error, is_target_closed_error
 
 
@@ -78,7 +77,11 @@ class DisposableStub:
             raise Error("Event loop is closed! Is Playwright already stopped?")
         g_self = greenlet.getcurrent()
         task = self._loop.create_task(coro)  # type: ignore
-        setattr(task, "__pw_stack__", inspect.stack(0))
+        setattr(
+            task,
+            "__pw_stack__",
+            _capture_stack_trace(),
+        )
         setattr(task, "__pw_stack_trace__", traceback.extract_stack(limit=10))
         task.add_done_callback(lambda _: g_self.switch())
         while not task.done():

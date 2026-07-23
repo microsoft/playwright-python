@@ -54,6 +54,7 @@ if TYPE_CHECKING:
     from playwright._impl._playwright import Playwright
 
 TimeoutCalculator = Optional[Callable[[Optional[float]], float]]
+_PLAYWRIGHT_MODULE_PATH = str(Path(playwright.__file__).parents[0])
 
 
 class Channel(AsyncIOEventEmitter):
@@ -404,7 +405,8 @@ class Connection(EventEmitter):
         task = asyncio.current_task(self._loop)
         callback.stack_trace = cast(
             traceback.StackSummary,
-            getattr(task, "__pw_stack_trace__", traceback.extract_stack(limit=10)),
+            getattr(task, "__pw_stack_trace__", None)
+            or traceback.extract_stack(limit=10),
         )
         callback.no_reply = no_reply
         stack_trace_information = cast(ParsedStackTrace, self._api_zone.get())
@@ -618,11 +620,11 @@ class Connection(EventEmitter):
         if self._api_zone.get():
             return await cb()
         task = asyncio.current_task(self._loop)
-        st: List[inspect.FrameInfo] = getattr(
-            task, "__pw_stack__", None
-        ) or inspect.stack(0)
-
-        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
         self._api_zone.set(parsed_st)
         try:
             return await cb()
@@ -637,10 +639,11 @@ class Connection(EventEmitter):
         if self._api_zone.get():
             return cb()
         task = asyncio.current_task(self._loop)
-        st: List[inspect.FrameInfo] = getattr(
-            task, "__pw_stack__", None
-        ) or inspect.stack(0)
-        parsed_st = _extract_stack_trace_information_from_stack(st, is_internal, title)
+        parsed_st = _attach_api_call_information(
+            getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
+            is_internal,
+            title,
+        )
         self._api_zone.set(parsed_st)
         try:
             return cb()
@@ -671,32 +674,35 @@ class ParsedStackTrace(TypedDict):
     title: Optional[str]
 
 
-def _extract_stack_trace_information_from_stack(
-    st: List[inspect.FrameInfo], is_internal: bool, title: str = None
-) -> ParsedStackTrace:
-    playwright_module_path = str(Path(playwright.__file__).parents[0])
+def _capture_stack_trace() -> ParsedStackTrace:
+    frame = inspect.currentframe()
+    # Skip this helper and the caller that only captures the stack.
+    frame = frame.f_back.f_back if frame and frame.f_back else None
     last_internal_api_name = ""
     api_name = ""
     parsed_frames: List[StackFrame] = []
-    for frame in st:
+    while frame:
+        code = frame.f_code
+        filename = code.co_filename
         # Sync and Async implementations can have event handlers. When these are sync, they
         # get evaluated in the context of the event loop, so they contain the stack trace of when
         # the message was received. _impl_to_api_mapping is glue between the user-code and internal
         # code to translate impl classes to api classes. We want to ignore these frames.
-        if playwright._impl._impl_to_api_mapping.__file__ == frame.filename:
+        if playwright._impl._impl_to_api_mapping.__file__ == filename:
+            frame = frame.f_back
             continue
-        is_playwright_internal = frame.filename.startswith(playwright_module_path)
+        is_playwright_internal = filename.startswith(_PLAYWRIGHT_MODULE_PATH)
 
         method_name = ""
-        if "self" in frame[0].f_locals:
-            method_name = frame[0].f_locals["self"].__class__.__name__ + "."
-        method_name += frame[0].f_code.co_name
+        if "self" in frame.f_locals:
+            method_name = frame.f_locals["self"].__class__.__name__ + "."
+        method_name += code.co_name
 
         if not is_playwright_internal:
             parsed_frames.append(
                 {
-                    "file": frame.filename,
-                    "line": frame.lineno,
+                    "file": filename,
+                    "line": frame.f_lineno,
                     "column": 0,
                     "function": method_name,
                 }
@@ -706,14 +712,26 @@ def _extract_stack_trace_information_from_stack(
         elif last_internal_api_name:
             api_name = last_internal_api_name
             last_internal_api_name = ""
+        frame = frame.f_back
     if not api_name:
         api_name = last_internal_api_name
 
     return {
         "frames": parsed_frames,
-        "apiName": "" if is_internal else api_name,
-        "title": title,
+        "apiName": api_name,
+        "title": None,
     }
+
+
+def _attach_api_call_information(
+    stack_trace_information: ParsedStackTrace,
+    is_internal: bool,
+    title: Optional[str],
+) -> ParsedStackTrace:
+    if is_internal:
+        stack_trace_information["apiName"] = ""
+    stack_trace_information["title"] = title
+    return stack_trace_information
 
 
 def _augment_params(

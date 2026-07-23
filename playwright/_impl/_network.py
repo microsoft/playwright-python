@@ -14,7 +14,6 @@
 
 import asyncio
 import base64
-import inspect
 import json
 import json as json_utils
 import mimetypes
@@ -47,6 +46,7 @@ from playwright._impl._api_structures import (
 )
 from playwright._impl._connection import (
     ChannelOwner,
+    _capture_stack_trace,
     from_channel,
     from_nullable_channel,
 )
@@ -552,7 +552,8 @@ class Route(ChannelOwner):
         setattr(
             fut,
             "__pw_stack__",
-            getattr(asyncio.current_task(self._loop), "__pw_stack__", inspect.stack(0)),
+            getattr(asyncio.current_task(self._loop), "__pw_stack__", None)
+            or _capture_stack_trace(),
         )
         target_closed_future = self.request._target_closed_future()
         await asyncio.wait(
