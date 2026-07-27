@@ -52,3 +52,4 @@ More comfortable in another programming language? [Playwright](https://playwrigh
 - [Node.js (JavaScript / TypeScript)](https://playwright.dev/docs/intro),
 - [.NET](https://playwright.dev/dotnet/docs/intro),
 - [Java](https://playwright.dev/java/docs/intro).
+# Updated documentation 
