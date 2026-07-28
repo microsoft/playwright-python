@@ -108,7 +108,12 @@ class SyncBase(ImplWrapper):
         setattr(task, "__pw_stack__", _capture_stack_trace())
         setattr(task, "__pw_stack_trace__", traceback.extract_stack(limit=10))
 
-        task.add_done_callback(lambda _: g_self.switch())
+        def _on_done(_: Any) -> None:
+            if hasattr(task, "__pw_stack__"):
+                delattr(task, "__pw_stack__")
+            g_self.switch()
+
+        task.add_done_callback(_on_done)
         while not task.done():
             self._dispatcher_fiber.switch()
         asyncio._set_running_loop(self._loop)
