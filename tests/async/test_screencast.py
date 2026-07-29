@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+import time
 
 import pytest
 
@@ -48,6 +49,53 @@ async def test_start_should_deliver_frames_via_callback(
     await page.screencast.stop()
     assert len(received) >= 1
     assert all(isinstance(d, bytes) and len(d) > 0 for d in received)
+
+
+async def test_start_should_apply_backpressure_while_async_callback_is_pending(
+    page: Page, server: Server
+) -> None:
+    release_callback = asyncio.Event()
+    first_frame_received = asyncio.Event()
+    next_frame_received = asyncio.Event()
+    frame_count = 0
+    frames_while_blocked = None
+    last_frame_time = 0.0
+
+    async def on_frame(frame: ScreencastFrame) -> None:
+        nonlocal frame_count, last_frame_time
+        frame_count += 1
+        last_frame_time = time.monotonic()
+        first_frame_received.set()
+        if frames_while_blocked is not None and frame_count > frames_while_blocked:
+            next_frame_received.set()
+        await release_callback.wait()
+
+    await page.screencast.start(on_frame=on_frame)
+    try:
+        await page.goto(server.EMPTY_PAGE)
+        await page.evaluate(
+            """() => {
+                const animate = () => {
+                    document.body.style.backgroundColor = document.body.style.backgroundColor === 'red' ? 'blue' : 'red';
+                    requestAnimationFrame(animate);
+                };
+                requestAnimationFrame(animate);
+            }"""
+        )
+        await asyncio.wait_for(first_frame_received.wait(), timeout=10)
+        while time.monotonic() - last_frame_time <= 1:
+            await asyncio.sleep(0.1)
+        frames_while_blocked = frame_count
+        await page.evaluate(
+            "() => document.body.style.backgroundColor = document.body.style.backgroundColor === 'red' ? 'blue' : 'red'"
+        )
+        await asyncio.sleep(1)
+        assert frame_count == frames_while_blocked
+        release_callback.set()
+        await asyncio.wait_for(next_frame_received.wait(), timeout=10)
+    finally:
+        release_callback.set()
+        await page.screencast.stop()
 
 
 async def test_starting_twice_should_throw(page: Page) -> None:

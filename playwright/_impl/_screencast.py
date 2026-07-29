@@ -14,7 +14,7 @@
 
 import base64
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, Awaitable, Callable, Literal, Optional, Union
 
 from playwright._impl._api_structures import ScreencastFrame, ScreencastSize
 from playwright._impl._artifact import Artifact
@@ -54,21 +54,39 @@ class Screencast:
         page._channel.on("screencastFrame", lambda params: self._dispatch_frame(params))
 
     def _dispatch_frame(self, params: dict) -> None:
-        if not self._on_frame:
-            return
-        data = params["data"]
-        if isinstance(data, str):
-            data = base64.b64decode(data)
-        result = self._on_frame(
-            {
-                "data": data,
-                "timestamp": params.get("timestamp", 0),
-                "viewportWidth": params["viewportWidth"],
-                "viewportHeight": params["viewportHeight"],
-            }
+        frame_id = params["frameId"]
+        result = None
+        try:
+            if self._on_frame:
+                data = params["data"]
+                if isinstance(data, str):
+                    data = base64.b64decode(data)
+                result = self._on_frame(
+                    {
+                        "data": data,
+                        "timestamp": params.get("timestamp", 0),
+                        "viewportWidth": params["viewportWidth"],
+                        "viewportHeight": params["viewportHeight"],
+                    }
+                )
+        finally:
+            if result is not None and hasattr(result, "__await__"):
+                self._page._loop.create_task(
+                    self._ack_frame_when_done(result, frame_id)
+                )
+            else:
+                self._ack_frame(frame_id)
+
+    async def _ack_frame_when_done(self, result: Awaitable, frame_id: int) -> None:
+        try:
+            await result
+        finally:
+            self._ack_frame(frame_id)
+
+    def _ack_frame(self, frame_id: int) -> None:
+        self._page._channel.send_may_fail(
+            "screencastFrameAck", None, {"frameId": frame_id}, is_internal=True
         )
-        if hasattr(result, "__await__"):
-            self._page._loop.create_task(result)
 
     async def start(
         self,

@@ -499,7 +499,6 @@ class BrowserContext(ChannelOwner):
         update: bool = None,
         updateContent: Literal["attach", "embed"] = None,
         updateMode: HarMode = None,
-        interceptAPIRequests: bool = None,
     ) -> None:
         if update:
             await self._tracing._record_into_har(
@@ -518,8 +517,6 @@ class BrowserContext(ChannelOwner):
         )
         self._har_routers.append(router)
         await router.add_context_route(self)
-        if interceptAPIRequests:
-            await router.add_api_request_route(self)
 
     async def _update_interception_patterns(self) -> None:
         patterns = RouteHandler.prepare_interception_patterns(self._routes)
