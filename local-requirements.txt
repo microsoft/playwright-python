@@ -1,7 +1,7 @@
 asyncio-atexit==1.0.1
 autobahn==23.1.2
 black==26.5.1
-build==1.4.4
+build==1.5.0
 flake8==7.3.0
 mypy==2.1.0
 objgraph==3.6.2
