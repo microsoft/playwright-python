@@ -208,7 +208,7 @@ class Request(ChannelOwner):
     @property
     def post_data(self) -> Optional[str]:
         data = self._fallback_overrides.post_data_buffer
-        if data:
+        if data is not None:
             return data.decode()
         base64_post_data = self._initializer.get("postData")
         if base64_post_data is not None:

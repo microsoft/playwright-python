@@ -189,7 +189,7 @@ async def test_workers_should_report_network_activity_on_worker_creation(
 
 
 async def test_workers_should_format_number_using_context_locale(
-    browser: Browser, server: Server, browser_name: str
+    browser: Browser, server: Server
 ) -> None:
     context = await browser.new_context(locale="ru-RU")
     page = await context.new_page()
@@ -199,9 +199,7 @@ async def test_workers_should_format_number_using_context_locale(
             "() => new Worker(URL.createObjectURL(new Blob(['console.log(1)'], {type: 'application/javascript'})))"
         )
     worker = await worker_info.value
-    # https://github.com/microsoft/playwright/issues/38919
-    expected = "10,000.2" if browser_name == "firefox" else "10\u00a0000,2"
-    assert await worker.evaluate("() => (10000.20).toLocaleString()") == expected
+    assert await worker.evaluate("() => (10000.20).toLocaleString()") == "10\u00a0000,2"
     await context.close()
 
 
