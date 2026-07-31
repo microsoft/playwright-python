@@ -51,24 +51,47 @@ class Screencast:
         self._save_path: Optional[Union[str, Path]] = None
         self._on_frame: Optional[ScreencastFrameCallback] = None
         self._artifact: Optional[Artifact] = None
-        page._channel.on("screencastFrame", lambda params: self._dispatch_frame(params))
+        page._channel.on("screencastFrame", self._dispatch_frame)
 
-    def _dispatch_frame(self, params: dict) -> None:
-        if not self._on_frame:
-            return
-        data = params["data"]
-        if isinstance(data, str):
-            data = base64.b64decode(data)
-        result = self._on_frame(
-            {
-                "data": data,
-                "timestamp": params.get("timestamp", 0),
-                "viewportWidth": params["viewportWidth"],
-                "viewportHeight": params["viewportHeight"],
-            }
-        )
-        if hasattr(result, "__await__"):
-            self._page._loop.create_task(result)
+    def _ack_frame(self, frame_id: int) -> None:
+        try:
+            self._page._channel.send_no_reply(
+                "screencastFrameAck", None, {"frameId": frame_id}
+            )
+        except (Error, OSError):
+            pass
+
+    async def _await_callback_and_ack(self, result: Any, frame_id: int) -> None:
+        try:
+            await result
+        finally:
+            self._ack_frame(frame_id)
+
+    def _dispatch_frame(self, params: dict) -> Any:
+        result = None
+        task = None
+        try:
+            if not self._on_frame:
+                return
+            data = params["data"]
+            if isinstance(data, str):
+                data = base64.b64decode(data)
+            result = self._on_frame(
+                {
+                    "data": data,
+                    "timestamp": params.get("timestamp", 0),
+                    "viewportWidth": params["viewportWidth"],
+                    "viewportHeight": params["viewportHeight"],
+                }
+            )
+        finally:
+            if hasattr(result, "__await__"):
+                task = self._loop.create_task(
+                    self._await_callback_and_ack(result, params["frameId"])
+                )
+            else:
+                self._ack_frame(params["frameId"])
+        return task
 
     async def start(
         self,

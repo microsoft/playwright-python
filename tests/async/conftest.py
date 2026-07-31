@@ -128,10 +128,8 @@ async def context(
 
 
 @pytest.fixture
-async def page(context: BrowserContext) -> AsyncGenerator[Page, None]:
-    page = await context.new_page()
-    yield page
-    await page.close()
+async def page(context: BrowserContext) -> Page:
+    return await context.new_page()
 
 
 @pytest.fixture(scope="session")
