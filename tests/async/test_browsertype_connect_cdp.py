@@ -13,10 +13,11 @@
 # limitations under the License.
 
 import asyncio
+import json
+import urllib.request
 from typing import Dict
 
 import pytest
-import requests
 
 from playwright.async_api import BrowserType, Error
 from tests.server import Server, WebSocketProtocol, find_free_port
@@ -64,9 +65,9 @@ async def test_connect_to_an_existing_cdp_session_twice(
 
 
 def _ws_endpoint_from_url(url: str) -> str:
-    response = requests.get(url)
-    assert response.ok
-    response_body = response.json()
+    with urllib.request.urlopen(url) as response:
+        assert response.status == 200
+        response_body: Dict[str, str] = json.load(response)
     return response_body["webSocketDebuggerUrl"]
 
 
