@@ -52,3 +52,18 @@ def test_should_intercept_with_url_override(server: Server, page: Page) -> None:
     assert response
     assert response.status == 200
     assert "one-style.css" in response.body().decode("utf-8")
+
+
+def test_post_data_should_return_empty_string_when_overriding_body_with_empty_string(
+    server: Server, page: Page
+) -> None:
+    page.goto(server.EMPTY_PAGE)
+    page.route("**/*", lambda route: route.continue_(post_data=""))
+
+    with page.expect_request("**/empty.html") as request_info:
+        page.evaluate(
+            "url => fetch(url, { method: 'POST', body: 'original' })",
+            server.EMPTY_PAGE,
+        )
+
+    assert request_info.value.post_data == ""

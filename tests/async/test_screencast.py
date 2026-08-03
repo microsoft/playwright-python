@@ -20,6 +20,14 @@ from playwright.async_api import Browser, Page, ScreencastFrame, ScreencastSize
 from tests.server import Server
 
 
+async def ensure_some_frames(page: Page) -> None:
+    for _ in range(100):
+        await page.evaluate(
+            "() => new Promise(f => requestAnimationFrame(() => requestAnimationFrame(f)))"
+        )
+    await page.screenshot()
+
+
 async def test_should_expose_screencast_property(page: Page) -> None:
     assert page.screencast is page.screencast
 
@@ -48,6 +56,100 @@ async def test_start_should_deliver_frames_via_callback(
     await page.screencast.stop()
     assert len(received) >= 1
     assert all(isinstance(d, bytes) and len(d) > 0 for d in received)
+
+
+async def test_should_acknowledge_frames_after_async_callback(
+    page: Page, server: Server
+) -> None:
+    first_frame = asyncio.Event()
+    release_callback = asyncio.Event()
+    frame_count = 0
+    last_frame_timestamp = 0.0
+
+    async def on_frame(_: ScreencastFrame) -> None:
+        nonlocal frame_count, last_frame_timestamp
+        frame_count += 1
+        last_frame_timestamp = asyncio.get_running_loop().time()
+        first_frame.set()
+        await release_callback.wait()
+
+    await page.screencast.start(on_frame=on_frame)
+    try:
+        await page.goto(server.EMPTY_PAGE)
+        await page.evaluate(
+            """() => {
+                const animate = () => {
+                    document.body.style.backgroundColor =
+                        document.body.style.backgroundColor === "red" ? "blue" : "red";
+                    requestAnimationFrame(animate);
+                };
+                requestAnimationFrame(animate);
+            }"""
+        )
+        await asyncio.wait_for(first_frame.wait(), timeout=10)
+        while asyncio.get_running_loop().time() - last_frame_timestamp <= 1:
+            await page.wait_for_timeout(100)
+
+        frames_while_blocked = frame_count
+        await ensure_some_frames(page)
+        assert frame_count == frames_while_blocked
+        release_callback.set()
+        for _ in range(10):
+            await page.evaluate(
+                """() => {
+                    document.body.style.backgroundColor =
+                        document.body.style.backgroundColor === "red" ? "blue" : "red";
+                }"""
+            )
+            await ensure_some_frames(page)
+            if frame_count > frames_while_blocked:
+                break
+        assert frame_count > frames_while_blocked
+    finally:
+        release_callback.set()
+        await page.screencast.stop()
+
+
+async def test_should_report_callback_errors_and_continue_delivering_frames(
+    page: Page, server: Server
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+    await page.evaluate(
+        """() => {
+            const animate = () => {
+                document.body.style.backgroundColor =
+                    document.body.style.backgroundColor === "red" ? "blue" : "red";
+                requestAnimationFrame(animate);
+            };
+            requestAnimationFrame(animate);
+        }"""
+    )
+    callback_count = 0
+
+    async def on_frame(_: ScreencastFrame) -> None:
+        nonlocal callback_count
+        callback_count += 1
+        raise RuntimeError("screencast callback failed")
+
+    await page.screencast.start(on_frame=on_frame)
+    try:
+        callback_error = None
+        for _ in range(100):
+            try:
+                await page.wait_for_timeout(100)
+            except RuntimeError as error:
+                callback_error = error
+            if callback_error and callback_count > 1:
+                break
+        assert callback_error
+        assert "screencast callback failed" in str(callback_error)
+        assert callback_count > 1
+    finally:
+        try:
+            await page.screencast.stop()
+        except RuntimeError as error:
+            assert "screencast callback failed" in str(error)
+            await page.screencast.stop()
 
 
 async def test_starting_twice_should_throw(page: Page) -> None:

@@ -7240,7 +7240,7 @@ class Clock(AsyncBase):
         Parameters
         ----------
         time : Union[datetime.datetime, float, str, None]
-            Time to initialize with, current system time by default.
+            Time to initialize with, current system time by default. Numeric values are Unix time in seconds.
         """
 
         return mapping.from_maybe_impl(await self._impl_obj.install(time=time))
@@ -7299,7 +7299,7 @@ class Clock(AsyncBase):
         Parameters
         ----------
         time : Union[datetime.datetime, float, str]
-            Time to pause at.
+            Time to pause at. Numeric values are Unix time in seconds.
         """
 
         return mapping.from_maybe_impl(await self._impl_obj.pause_at(time=time))
@@ -7354,7 +7354,7 @@ class Clock(AsyncBase):
         Parameters
         ----------
         time : Union[datetime.datetime, float, str]
-            Time to be set.
+            Time to be set. Numeric values are Unix time in seconds.
         """
 
         return mapping.from_maybe_impl(await self._impl_obj.set_fixed_time(time=time))
@@ -7378,7 +7378,7 @@ class Clock(AsyncBase):
         Parameters
         ----------
         time : Union[datetime.datetime, float, str]
-            Time to be set.
+            Time to be set. Numeric values are Unix time in seconds.
         """
 
         return mapping.from_maybe_impl(await self._impl_obj.set_system_time(time=time))
@@ -10254,6 +10254,12 @@ class Page(AsyncContextManager):
 
         Navigate to the previous page in history.
 
+        **NOTE** **Testing Back/Forward Cache (BFCache) is not supported.**  By default, Playwright disables the
+        Back/Forward Cache across all browsers. Even if explicitly enabled, Playwright's internal state relies on
+        network-level navigation events. Because BFCache restores unfreeze the DOM without firing these events, using
+        `page.goBack()` or `page.goForward()` to trigger a BFCache restore will result in timeouts and a desynchronized
+        `Page` state.
+
         Parameters
         ----------
         timeout : Union[float, None]
@@ -10295,6 +10301,12 @@ class Page(AsyncContextManager):
         the last redirect. If cannot go forward, returns `null`.
 
         Navigate to the next page in history.
+
+        **NOTE** **Testing Back/Forward Cache (BFCache) is not supported.**  By default, Playwright disables the
+        Back/Forward Cache across all browsers. Even if explicitly enabled, Playwright's internal state relies on
+        network-level navigation events. Because BFCache restores unfreeze the DOM without firing these events, using
+        `page.goBack()` or `page.goForward()` to trigger a BFCache restore will result in timeouts and a desynchronized
+        `Page` state.
 
         Parameters
         ----------
@@ -15092,7 +15104,6 @@ class BrowserContext(AsyncContextManager):
         update: typing.Optional[bool] = None,
         update_content: typing.Optional[Literal["attach", "embed"]] = None,
         update_mode: typing.Optional[Literal["full", "minimal"]] = None,
-        intercept_api_requests: typing.Optional[bool] = None,
     ) -> None:
         """BrowserContext.route_from_har
 
@@ -15126,10 +15137,6 @@ class BrowserContext(AsyncContextManager):
             When set to `minimal`, only record information necessary for routing from HAR. This omits sizes, timing, page,
             cookies, security and other types of HAR information that are not used when replaying from HAR. Defaults to
             `minimal`.
-        intercept_api_requests : Union[bool, None]
-            If set to `true`, requests made via `APIRequestContext` (such as `browser_context.request` or
-            `page.request`) are also served from the HAR file. By default these requests are sent to the network,
-            matching the behavior prior to v1.62. Defaults to `false` for backward compatibility.
         """
 
         return mapping.from_maybe_impl(
@@ -15140,7 +15147,6 @@ class BrowserContext(AsyncContextManager):
                 update=update,
                 updateContent=update_content,
                 updateMode=update_mode,
-                interceptAPIRequests=intercept_api_requests,
             )
         )
 

@@ -20,6 +20,14 @@ from playwright.sync_api import Browser, Page, ScreencastSize
 from tests.server import Server
 
 
+def ensure_some_frames(page: Page) -> None:
+    for _ in range(100):
+        page.evaluate(
+            "() => new Promise(f => requestAnimationFrame(() => requestAnimationFrame(f)))"
+        )
+    page.screenshot()
+
+
 def test_should_expose_screencast_property(page: Page) -> None:
     assert page.screencast is page.screencast
 
@@ -42,6 +50,69 @@ def test_start_should_deliver_frames_via_callback(page: Page, server: Server) ->
     page.screencast.stop()
     assert len(received) >= 1
     assert all(isinstance(d, bytes) and len(d) > 0 for d in received)
+
+
+def test_should_acknowledge_frames_after_callback(page: Page, server: Server) -> None:
+    frame_count = 0
+
+    def on_frame(_: object) -> None:
+        nonlocal frame_count
+        frame_count += 1
+        assert page.title() == ""
+
+    page.screencast.start(on_frame=on_frame)
+    try:
+        page.goto(server.EMPTY_PAGE)
+        page.evaluate("() => document.body.style.backgroundColor = 'red'")
+        ensure_some_frames(page)
+        frames_before_repaint = frame_count
+        page.evaluate("() => document.body.style.backgroundColor = 'blue'")
+        ensure_some_frames(page)
+        assert frame_count > frames_before_repaint
+    finally:
+        page.screencast.stop()
+
+
+def test_should_report_callback_errors_and_continue_delivering_frames(
+    page: Page, server: Server
+) -> None:
+    page.goto(server.EMPTY_PAGE)
+    page.evaluate(
+        """() => {
+            const animate = () => {
+                document.body.style.backgroundColor =
+                    document.body.style.backgroundColor === "red" ? "blue" : "red";
+                requestAnimationFrame(animate);
+            };
+            requestAnimationFrame(animate);
+        }"""
+    )
+    callback_count = 0
+
+    def on_frame(_: object) -> None:
+        nonlocal callback_count
+        callback_count += 1
+        raise RuntimeError("screencast callback failed")
+
+    page.screencast.start(on_frame=on_frame)
+    try:
+        callback_error = None
+        for _ in range(100):
+            try:
+                page.wait_for_timeout(100)
+            except RuntimeError as error:
+                callback_error = error
+            if callback_error and callback_count > 1:
+                break
+        assert callback_error
+        assert "screencast callback failed" in str(callback_error)
+        assert callback_count > 1
+    finally:
+        try:
+            page.screencast.stop()
+        except RuntimeError as error:
+            assert "screencast callback failed" in str(error)
+            page.screencast.stop()
 
 
 def test_starting_twice_should_throw(page: Page) -> None:

@@ -85,6 +85,21 @@ async def test_should_intercept_with_post_data_override(
     assert request.post_body.decode("utf-8") == '{"foo": "bar"}'
 
 
+async def test_post_data_should_return_empty_string_when_overriding_body_with_empty_string(
+    server: Server, page: Page
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+    await page.route("**/*", lambda route: route.continue_(post_data=""))
+
+    async with page.expect_request("**/empty.html") as request_info:
+        await page.evaluate(
+            "url => fetch(url, { method: 'POST', body: 'original' })",
+            server.EMPTY_PAGE,
+        )
+
+    assert (await request_info.value).post_data == ""
+
+
 async def test_should_fulfill_popup_main_request_using_alias(
     page: Page, server: Server
 ) -> None:

@@ -366,6 +366,17 @@ class TestWhileRunning:
         now = page.evaluate("Date.now()")
         assert 1000 <= now <= 2000
 
+    def test_should_reject_an_invalid_target_time_with_an_active_animation_frame_loop(
+        self, page: Page
+    ) -> None:
+        page.clock.install()
+        page.set_content(
+            "<script>function tick() { requestAnimationFrame(tick); } requestAnimationFrame(tick);</script>"
+        )
+        invalid_time = page.evaluate("Date.now()") * 1000
+        with pytest.raises(Error, match=f"Invalid date: {int(invalid_time * 1000)}"):
+            page.clock.pause_at(invalid_time)
+
     def test_should_run_for(self, page: Page) -> None:
         page.clock.install(time=0)
         page.goto("data:text/html,")

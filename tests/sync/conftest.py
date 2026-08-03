@@ -82,10 +82,8 @@ def context(browser: Browser) -> Generator[BrowserContext, None, None]:
 
 
 @pytest.fixture
-def page(context: BrowserContext) -> Generator[Page, None, None]:
-    page = context.new_page()
-    yield page
-    page.close()
+def page(context: BrowserContext) -> Page:
+    return context.new_page()
 
 
 @pytest.fixture(scope="session")

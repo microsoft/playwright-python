@@ -35,6 +35,9 @@ Usage::
     scripts/build_driver.py            # assemble every platform bundle
     scripts/build_driver.py <suffix>   # assemble a single bundle, e.g. mac-arm64
 
+Set ``npm_config_registry`` to download ``playwright-core`` from an
+alternative npm registry.
+
 ``setup.py`` invokes the single-suffix form so a wheel build only downloads the
 one Node.js binary it needs.
 """
@@ -53,7 +56,9 @@ from typing import Iterable, List, NamedTuple, Set
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DRIVER_DIR = REPO_ROOT / "driver"
 
-NPM_REGISTRY = "https://registry.npmjs.org"
+NPM_REGISTRY = os.environ.get(
+    "npm_config_registry", "https://registry.npmjs.org"
+).rstrip("/")
 NODEJS_DIST = "https://nodejs.org/dist"
 
 
