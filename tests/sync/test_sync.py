@@ -14,7 +14,11 @@
 
 import multiprocessing
 import os
+import subprocess
+import sys
+import textwrap
 from datetime import timedelta
+from pathlib import Path
 from typing import Any, Callable, Dict
 
 import pytest
@@ -364,3 +368,36 @@ def test_should_return_proper_api_name_on_error(page: Page) -> None:
 def test_click_should_accept_timedelta_for_timeout(page: Page) -> None:
     with pytest.raises(TimeoutError, match="Timeout 1ms exceeded"):
         page.click("does-not-exist", timeout=timedelta(milliseconds=1))
+
+
+def test_no_orphaned_future_on_serialization_error(
+    browser_name: str, launch_arguments: Dict[str, Any], tmp_path: Path
+) -> None:
+    # When transport.send fails (e.g. non-JSON-serializable params), the protocol
+    # callback must not be left for cleanup() to reject — that yields
+    # "Future exception was never retrieved". See issue #3165.
+    script = tmp_path / "repro.py"
+    script.write_text(
+        textwrap.dedent(
+            f"""
+            from playwright.sync_api import sync_playwright
+
+            with sync_playwright() as p:
+                browser = p["{browser_name}"].launch(**{launch_arguments!r})
+                page = browser.new_page()
+                try:
+                    page.locator("asdf").highlight(style=object())
+                except TypeError:
+                    pass
+                browser.close()
+            """
+        )
+    )
+    result = subprocess.run(
+        [sys.executable, str(script)],
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "Future exception was never retrieved" not in result.stderr

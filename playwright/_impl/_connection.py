@@ -143,14 +143,10 @@ class Channel(AsyncIOEventEmitter):
         callback = self._connection._send_message_to_server(
             self._object, method, augmented_params, timeout
         )
+        # Transport errors reject pending callbacks via Connection.cleanup(); no need
+        # to also race transport.on_error_future here.
         try:
-            done, _ = await asyncio.wait(
-                {
-                    self._connection._transport.on_error_future,
-                    callback.future,
-                },
-                return_when=asyncio.FIRST_COMPLETED,
-            )
+            result = await callback.future
         except asyncio.CancelledError as exc:
             await self._connection._abort(
                 self._object,
@@ -158,9 +154,6 @@ class Channel(AsyncIOEventEmitter):
                 str(exc) or "Task was cancelled",
             )
             raise
-        if not callback.future.done():
-            callback.future.cancel()
-        result = next(iter(done)).result()
         # Protocol now has named return values, assume result is one level deeper unless
         # there is explicit ambiguity.
         if not result:
@@ -305,6 +298,7 @@ class Connection(EventEmitter):
         self._dispatcher_fiber = dispatcher_fiber
         self._transport = transport
         self._transport.on_message = lambda msg: self.dispatch(msg)
+        self._transport.on_error = self._on_transport_error
         self._waiting_for_object: Dict[str, Callable[[ChannelOwner], None]] = {}
         self._last_id = 0
         self._objects: Dict[str, ChannelOwner] = {}
@@ -358,21 +352,34 @@ class Connection(EventEmitter):
         await self._transport.wait_until_stopped()
         self.cleanup()
 
+    def _on_transport_error(self, error: Exception) -> None:
+        # Unexpected pipe death: fail every in-flight send so waiters do not hang
+        # and do not need to race transport.on_error_future themselves.
+        self.cleanup(str(error) or None)
+
     def cleanup(self, cause: str = None) -> None:
-        self._closed_error = TargetClosedError(cause) if cause else TargetClosedError()
-        if self._init_task and not self._init_task.done():
-            self._init_task.cancel()
-        for ws_connection in self._child_ws_connections:
-            ws_connection._transport.dispose()
-        for callback in self._callbacks.values():
-            # To prevent 'Future exception was never retrieved' we ignore all callbacks that are no_reply.
-            if callback.no_reply:
-                continue
-            if callback.future.cancelled():
-                continue
-            callback.future.set_exception(self._closed_error)
-        self._callbacks.clear()
-        self.emit("close")
+        if not self._closed_error:
+            self._closed_error = (
+                TargetClosedError(cause) if cause else TargetClosedError()
+            )
+            if self._init_task and not self._init_task.done():
+                self._init_task.cancel()
+            for ws_connection in self._child_ws_connections:
+                ws_connection._transport.dispose()
+            for callback in self._callbacks.values():
+                # To prevent 'Future exception was never retrieved' we ignore all callbacks that are no_reply.
+                if callback.no_reply:
+                    continue
+                if callback.future.cancelled():
+                    continue
+                callback.future.set_exception(self._closed_error)
+            self._callbacks.clear()
+            self.emit("close")
+        # Startup / connect waiters race this future; if nobody awaited it (e.g. the
+        # pipe died after init), mark the exception retrieved so GC stays quiet.
+        on_error_future = self._transport.on_error_future
+        if on_error_future.done() and not on_error_future.cancelled():
+            on_error_future.exception()
 
     def call_on_object_with_known_name(
         self, guid: str, callback: Callable[[ChannelOwner], None]
@@ -441,9 +448,8 @@ class Connection(EventEmitter):
         if self._tracing_count > 0 and frames and object._guid != "localUtils":
             self.local_utils.add_stack_to_tracing_no_reply(id, frames)
 
-        self._callbacks[id] = callback
         self._transport.send(message)
-
+        self._callbacks[id] = callback
         return callback
 
     async def _abort(
@@ -459,20 +465,15 @@ class Connection(EventEmitter):
             )
         except (Error, OSError):
             pass
+        # Wait for the server abort ack or connection teardown (cleanup rejects us).
+        if callback.future.done():
+            if not callback.future.cancelled():
+                callback.future.exception()
+            return
         try:
-            done, _ = await asyncio.wait(
-                {
-                    self._transport.on_error_future,
-                    callback.future,
-                },
-                return_when=asyncio.FIRST_COMPLETED,
-            )
-        finally:
-            if not callback.future.done():
-                callback.future.cancel()
-        for future in done:
-            if not future.cancelled():
-                future.exception()
+            await callback.future
+        except (Exception, asyncio.CancelledError):
+            pass
 
     def dispatch(self, msg: ParsedMessagePayload) -> None:
         if self._closed_error:

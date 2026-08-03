@@ -54,10 +54,13 @@ class JsonPipeTransport(AsyncIOEventEmitter, Transport):
             self.on_message(cast(ParsedMessagePayload, message))
 
         def handle_closed(reason: Optional[str]) -> None:
-            self.emit("close", reason)
-            if reason:
+            # Set the error future before notifying listeners so Connection.cleanup()
+            # can mark the exception retrieved if nobody else awaits it.
+            if reason and not self.on_error_future.done():
                 self.on_error_future.set_exception(TargetClosedError(reason))
-            self._stopped_future.set_result(None)
+            self.emit("close", reason)
+            if not self._stopped_future.done():
+                self._stopped_future.set_result(None)
 
         self._pipe_channel.on(
             "message",

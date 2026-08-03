@@ -13,6 +13,7 @@
 # limitations under the License.
 import asyncio
 import gc
+import os
 import subprocess
 import sys
 import textwrap
@@ -154,3 +155,94 @@ async def test_should_return_proper_api_name_on_error(page: Page) -> None:
     except Exception as error:
         # Each browser returns slightly different error messages, but they should all start with "Page.evaluate:", because that was the Playwright method where the error originated
         assert str(error).startswith("Page.evaluate:")
+
+
+async def test_no_orphaned_future_on_serialization_error(
+    browser_name: str,
+    launch_arguments: Dict,
+) -> None:
+    # When transport.send fails (e.g. non-JSON-serializable params), the protocol
+    # callback must not be left for cleanup() to reject — that yields
+    # "Future exception was never retrieved". See issue #3165.
+    handler_exception = None
+
+    def exception_handler(loop: asyncio.AbstractEventLoop, context: Dict) -> None:
+        nonlocal handler_exception
+        handler_exception = context.get("exception")
+
+    asyncio.get_running_loop().set_exception_handler(exception_handler)
+    try:
+        async with async_playwright() as p:
+            browser = await p[browser_name].launch(**launch_arguments)
+            page = await browser.new_page()
+            with pytest.raises(TypeError, match="JSON serializable"):
+                await page.locator("asdf").highlight(style=object())  # type: ignore[arg-type]
+            await browser.close()
+        gc.collect()
+        assert handler_exception is None
+    finally:
+        asyncio.get_running_loop().set_exception_handler(None)
+
+
+async def test_no_orphaned_future_on_send_may_fail_teardown(
+    browser_name: str,
+    launch_arguments: Dict,
+    tmp_path: Path,
+) -> None:
+    # Mirrors pytest-playwright session teardown: background send_may_fail work,
+    # then browser.close() + playwright.stop(). Also covers unexpected driver death
+    # before stop (transport EOF → connection.cleanup). See issue #3165.
+    script = tmp_path / "repro_may_fail.py"
+    script.write_text(
+        textwrap.dedent(
+            f"""
+            import asyncio
+            import gc
+            import os
+            import signal
+
+            from playwright.async_api import async_playwright
+
+            async def session(kill_driver: bool) -> None:
+                p = await async_playwright().start()
+                browser = await p["{browser_name}"].launch(**{launch_arguments!r})
+                page = await browser.new_page()
+                channel = page._impl_obj._channel
+                for _ in range(20):
+                    channel.send_may_fail("bringToFront", None, {{}})
+                await asyncio.sleep(0)
+                if kill_driver:
+                    os.kill(
+                        page._impl_obj._connection._transport._proc.pid,
+                        signal.SIGKILL,
+                    )
+                    await asyncio.sleep(0.01)
+                else:
+                    await browser.close()
+                try:
+                    await p.stop()
+                except Exception:
+                    pass
+
+            async def main() -> None:
+                for i in range(40):
+                    await session(kill_driver=(i % 2 == 0))
+                    gc.collect()
+                await asyncio.sleep(0.1)
+                gc.collect()
+
+            asyncio.run(main())
+            """
+        )
+    )
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(Path(__file__).resolve().parents[2])
+    result = subprocess.run(
+        [sys.executable, str(script)],
+        capture_output=True,
+        text=True,
+        timeout=180,
+        env=env,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "Future exception was never retrieved" not in result.stderr

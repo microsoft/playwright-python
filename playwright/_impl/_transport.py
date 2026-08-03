@@ -50,6 +50,9 @@ class Transport(ABC):
         self._loop = loop
         self.on_message: Callable[[ParsedMessagePayload], None] = lambda _: None
         self.on_error_future: asyncio.Future = loop.create_future()
+        # Called on unexpected transport failure so the connection can reject
+        # in-flight protocol callbacks (see Connection._on_transport_error).
+        self.on_error: Callable[[Exception], None] = lambda _: None
 
     @abstractmethod
     def request_stop(self) -> None:
@@ -129,10 +132,15 @@ class PipeTransport(Transport):
                 startupinfo=startupinfo,
             )
         except Exception as exc:
-            self.on_error_future.set_exception(exc)
+            self._handle_error(exc)
             raise exc
 
         self._output = self._proc.stdin
+
+    def _handle_error(self, error: Exception) -> None:
+        if not self.on_error_future.done():
+            self.on_error_future.set_exception(error)
+        self.on_error(error)
 
     async def run(self) -> None:
         assert self._proc.stdout
@@ -162,8 +170,10 @@ class PipeTransport(Transport):
                     self.on_message(obj)
                 except asyncio.IncompleteReadError:
                     if not self._stopped:
-                        self.on_error_future.set_exception(
-                            Exception("Connection closed while reading from the driver")
+                        self._handle_error(
+                            Exception(
+                                "Connection closed while reading from the driver"
+                            )
                         )
                     break
                 await asyncio.sleep(0)
