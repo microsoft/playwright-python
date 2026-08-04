@@ -32,11 +32,11 @@ async def test_should_cancel_underlying_protocol_calls(
 ) -> None:
     handler_exception = None
 
-    def exception_handlerdler(loop: asyncio.AbstractEventLoop, context: Dict) -> None:
+    def exception_handler(loop: asyncio.AbstractEventLoop, context: Dict) -> None:
         nonlocal handler_exception
         handler_exception = context["exception"]
 
-    asyncio.get_running_loop().set_exception_handler(exception_handlerdler)
+    asyncio.get_running_loop().set_exception_handler(exception_handler)
 
     async with async_playwright() as p:
         browser = await p[browser_name].launch(**launch_arguments)
@@ -66,6 +66,24 @@ async def test_should_cancel_underlying_protocol_calls(
     assert handler_exception is None
 
     asyncio.get_running_loop().set_exception_handler(None)
+
+
+async def test_should_not_orphan_callback_on_non_serializable_params(
+    browser_name: str,
+    launch_arguments: Dict,
+) -> None:
+    # Regression test for https://github.com/microsoft/playwright-python/issues/3165.
+    # A failed transport.send must not leave a ProtocolCallback in connection._callbacks
+    # (cleanup would later set_exception on it → "Future exception was never retrieved").
+    async with async_playwright() as p:
+        browser = await p[browser_name].launch(**launch_arguments)
+        page = await browser.new_page()
+        connection = page._impl_obj._connection
+        before = set(connection._callbacks)
+        with pytest.raises(TypeError, match="JSON serializable"):
+            await page.locator("asdf").highlight(style=object())  # type: ignore
+        assert set(connection._callbacks) == before
+        await browser.close()
 
 
 async def test_async_playwright_stop_multiple_times() -> None:
