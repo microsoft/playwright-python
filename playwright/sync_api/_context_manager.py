@@ -70,7 +70,9 @@ Please use the Async API instead."""
         dispatcher_fiber.switch()
 
         try:
-            self._playwright = SyncPlaywright(self._connection.playwright_future.result())
+            self._playwright = SyncPlaywright(
+                self._connection.playwright_future.result()
+            )
         except BaseException:
             self.__exit__()
             raise
