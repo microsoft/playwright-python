@@ -341,10 +341,15 @@ class Connection(EventEmitter):
 
         async def init() -> None:
             try:
-                self.playwright_future.set_result(await self._root_object.initialize())
-            except BaseException as exc:
-                self.playwright_future.set_exception(exc)
-                raise
+                result = await self._root_object.initialize()
+                if not self.playwright_future.done():
+                    self.playwright_future.set_result(result)
+            except Exception as exc:
+                # No re-raise: callers observe playwright_future; a task
+                # exception would log "never retrieved". Skip set_* if async
+                # __aenter__ already cancelled the future after a transport error.
+                if not self.playwright_future.done():
+                    self.playwright_future.set_exception(exc)
 
         await self._transport.connect()
         self._init_task = self._loop.create_task(init())
