@@ -441,8 +441,8 @@ class Connection(EventEmitter):
         if self._tracing_count > 0 and frames and object._guid != "localUtils":
             self.local_utils.add_stack_to_tracing_no_reply(id, frames)
 
-        self._callbacks[id] = callback
         self._transport.send(message)
+        self._callbacks[id] = callback
 
         return callback
 

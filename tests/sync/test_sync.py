@@ -14,7 +14,11 @@
 
 import multiprocessing
 import os
+import subprocess
+import sys
+import textwrap
 from datetime import timedelta
+from pathlib import Path
 from typing import Any, Callable, Dict
 
 import pytest
@@ -359,6 +363,40 @@ def test_should_return_proper_api_name_on_error(page: Page) -> None:
     except Exception as error:
         # Each browser returns slightly different error messages, but they should all start with "Page.evaluate:", because that was the Playwright method where the error originated
         assert str(error).startswith("Page.evaluate:")
+
+
+def test_should_not_orphan_callback_on_non_serializable_params(
+    browser_name: str,
+    launch_arguments: Dict[str, Any],
+    tmp_path: Path,
+) -> None:
+    # Regression test for https://github.com/microsoft/playwright-python/issues/3165.
+    # Run in a subprocess so "Future exception was never retrieved" on exit is visible on stderr.
+    script = tmp_path / "orphan_callback.py"
+    script.write_text(
+        textwrap.dedent(
+            f"""
+            from playwright.sync_api import sync_playwright
+
+            with sync_playwright() as p:
+                browser = p[{browser_name!r}].launch(**{launch_arguments!r})
+                page = browser.new_page()
+                try:
+                    page.locator("asdf").highlight(style=object())
+                except TypeError:
+                    pass
+                browser.close()
+            """
+        )
+    )
+    result = subprocess.run(
+        [sys.executable, str(script)],
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "Future exception was never retrieved" not in result.stderr
 
 
 def test_click_should_accept_timedelta_for_timeout(page: Page) -> None:

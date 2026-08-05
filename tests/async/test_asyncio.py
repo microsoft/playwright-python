@@ -32,11 +32,11 @@ async def test_should_cancel_underlying_protocol_calls(
 ) -> None:
     handler_exception = None
 
-    def exception_handlerdler(loop: asyncio.AbstractEventLoop, context: Dict) -> None:
+    def exception_handler(loop: asyncio.AbstractEventLoop, context: Dict) -> None:
         nonlocal handler_exception
         handler_exception = context["exception"]
 
-    asyncio.get_running_loop().set_exception_handler(exception_handlerdler)
+    asyncio.get_running_loop().set_exception_handler(exception_handler)
 
     async with async_playwright() as p:
         browser = await p[browser_name].launch(**launch_arguments)
