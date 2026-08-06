@@ -144,13 +144,7 @@ class Channel(AsyncIOEventEmitter):
             self._object, method, augmented_params, timeout
         )
         try:
-            done, _ = await asyncio.wait(
-                {
-                    self._connection._transport.on_error_future,
-                    callback.future,
-                },
-                return_when=asyncio.FIRST_COMPLETED,
-            )
+            result = await callback.future
         except asyncio.CancelledError as exc:
             await self._connection._abort(
                 self._object,
@@ -158,9 +152,6 @@ class Channel(AsyncIOEventEmitter):
                 str(exc) or "Task was cancelled",
             )
             raise
-        if not callback.future.done():
-            callback.future.cancel()
-        result = next(iter(done)).result()
         # Protocol now has named return values, assume result is one level deeper unless
         # there is explicit ambiguity.
         if not result:
@@ -351,9 +342,20 @@ class Connection(EventEmitter):
                 if not self.playwright_future.done():
                     self.playwright_future.set_exception(exc)
 
-        await self._transport.connect()
-        self._init_task = self._loop.create_task(init())
-        await self._transport.run()
+        try:
+            await self._transport.connect()
+            self._init_task = self._loop.create_task(init())
+            await self._transport.run()
+        finally:
+            cause = None
+            if (
+                self._transport.on_error_future.done()
+                and not self._transport.on_error_future.cancelled()
+            ):
+                transport_exc = self._transport.on_error_future.exception()
+                if transport_exc is not None:
+                    cause = str(transport_exc)
+            self.cleanup(cause)
 
     def stop_sync(self) -> None:
         self._transport.request_stop()
@@ -367,6 +369,8 @@ class Connection(EventEmitter):
         self.cleanup()
 
     def cleanup(self, cause: str = None) -> None:
+        if self._closed_error:
+            return
         self._closed_error = TargetClosedError(cause) if cause else TargetClosedError()
         if self._init_task and not self._init_task.done():
             self._init_task.cancel()
@@ -463,19 +467,12 @@ class Connection(EventEmitter):
         except (Error, OSError):
             pass
         try:
-            done, _ = await asyncio.wait(
-                {
-                    self._transport.on_error_future,
-                    callback.future,
-                },
-                return_when=asyncio.FIRST_COMPLETED,
-            )
+            await callback.future
+        except (Exception, asyncio.CancelledError):
+            pass
         finally:
             if not callback.future.done():
                 callback.future.cancel()
-        for future in done:
-            if not future.cancelled():
-                future.exception()
 
     def dispatch(self, msg: ParsedMessagePayload) -> None:
         if self._closed_error:
