@@ -305,7 +305,6 @@ class Connection(EventEmitter):
         self._dispatcher_fiber = dispatcher_fiber
         self._transport = transport
         self._transport.on_message = lambda msg: self.dispatch(msg)
-        self._waiting_for_object: Dict[str, Callable[[ChannelOwner], None]] = {}
         self._last_id = 0
         self._objects: Dict[str, ChannelOwner] = {}
         self._callbacks: Dict[int, ProtocolCallback] = {}
@@ -341,7 +340,16 @@ class Connection(EventEmitter):
         self._root_object = RootChannelOwner(self)
 
         async def init() -> None:
-            self.playwright_future.set_result(await self._root_object.initialize())
+            try:
+                result = await self._root_object.initialize()
+                if not self.playwright_future.done():
+                    self.playwright_future.set_result(result)
+            except Exception as exc:
+                # No re-raise: callers observe playwright_future; a task
+                # exception would log "never retrieved". Skip set_* if async
+                # __aenter__ already cancelled the future after a transport error.
+                if not self.playwright_future.done():
+                    self.playwright_future.set_exception(exc)
 
         await self._transport.connect()
         self._init_task = self._loop.create_task(init())
@@ -373,11 +381,6 @@ class Connection(EventEmitter):
             callback.future.set_exception(self._closed_error)
         self._callbacks.clear()
         self.emit("close")
-
-    def call_on_object_with_known_name(
-        self, guid: str, callback: Callable[[ChannelOwner], None]
-    ) -> None:
-        self._waiting_for_object[guid] = callback
 
     def set_is_tracing(self, is_tracing: bool) -> None:
         if is_tracing:
@@ -574,10 +577,7 @@ class Connection(EventEmitter):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> ChannelOwner:
         initializer = self._replace_guids_with_channels(initializer)
-        result = self._object_factory(parent, type, guid, initializer)
-        if guid in self._waiting_for_object:
-            self._waiting_for_object.pop(guid)(result)
-        return result
+        return self._object_factory(parent, type, guid, initializer)
 
     def _replace_channels_with_guids(
         self,

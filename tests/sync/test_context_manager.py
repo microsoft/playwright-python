@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import subprocess
+import sys
+import textwrap
+from pathlib import Path
 from typing import Dict
 
 import pytest
@@ -34,3 +38,29 @@ def test_context_managers_not_hang(context: BrowserContext) -> None:
     with pytest.raises(Exception, match="Oops!"):
         with context.new_page():
             raise Exception("Oops!")
+
+
+def test_empty_sync_playwright_does_not_warn(tmp_path: Path) -> None:
+    # Regression test for https://github.com/microsoft/playwright-python/issues/3165.
+    # __enter__ must wait for initialize to finish; otherwise teardown races the
+    # in-flight init callback and prints asyncio warnings on an empty with-block.
+    script = tmp_path / "empty_sync_playwright.py"
+    script.write_text(
+        textwrap.dedent(
+            """
+            from playwright.sync_api import sync_playwright
+
+            with sync_playwright() as pw:
+                pass
+            """
+        )
+    )
+    result = subprocess.run(
+        [sys.executable, str(script)],
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "Future exception was never retrieved" not in result.stderr
+    assert "Task was destroyed but it is pending" not in result.stderr

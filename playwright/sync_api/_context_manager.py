@@ -13,15 +13,14 @@
 # limitations under the License.
 
 import asyncio
-from typing import TYPE_CHECKING, Any, Optional, cast
+from typing import TYPE_CHECKING, Any, Optional
 
 from greenlet import greenlet
 
-from playwright._impl._connection import ChannelOwner, Connection
+from playwright._impl._connection import Connection
 from playwright._impl._errors import Error
 from playwright._impl._greenlets import MainGreenlet
 from playwright._impl._object_factory import create_remote_object
-from playwright._impl._playwright import Playwright
 from playwright._impl._transport import PipeTransport
 from playwright.sync_api._generated import Playwright as SyncPlaywright
 
@@ -66,19 +65,19 @@ Please use the Async API instead."""
 
         g_self = greenlet.getcurrent()
 
-        def callback_wrapper(channel_owner: ChannelOwner) -> None:
-            playwright_impl = cast(Playwright, channel_owner)
-            self._playwright = SyncPlaywright(playwright_impl)
-            g_self.switch()
-
-        # Switch control to the dispatcher, it'll fire an event and pass control to
-        # the calling greenlet.
-        self._connection.call_on_object_with_known_name("Playwright", callback_wrapper)
+        # Wait until initialize completes (not just Playwright __create__), matching async.
+        self._connection.playwright_future.add_done_callback(lambda _: g_self.switch())
         dispatcher_fiber.switch()
 
-        playwright = self._playwright
-        playwright.stop = self.__exit__  # type: ignore
-        return playwright
+        try:
+            self._playwright = SyncPlaywright(
+                self._connection.playwright_future.result()
+            )
+        except BaseException:
+            self.__exit__()
+            raise
+        self._playwright.stop = self.__exit__  # type: ignore
+        return self._playwright
 
     def start(self) -> SyncPlaywright:
         return self.__enter__()
