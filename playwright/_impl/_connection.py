@@ -353,7 +353,16 @@ class Connection(EventEmitter):
 
         await self._transport.connect()
         self._init_task = self._loop.create_task(init())
-        await self._transport.run()
+        try:
+            await self._transport.run()
+        except asyncio.CancelledError:
+            # This task is cancelled by asyncio.run() at loop shutdown. Release
+            # any tasks waiting on protocol replies that will never arrive,
+            # otherwise their cancellation is absorbed by Channel._abort()
+            # waiting for the reply and the loop never finishes closing.
+            if not self._closed_error:
+                self.cleanup()
+            raise
 
     def stop_sync(self) -> None:
         self._transport.request_stop()
@@ -463,7 +472,7 @@ class Connection(EventEmitter):
         except (Error, OSError):
             pass
         try:
-            done, _ = await asyncio.wait(
+            await asyncio.wait(
                 {
                     self._transport.on_error_future,
                     callback.future,
@@ -471,11 +480,17 @@ class Connection(EventEmitter):
                 return_when=asyncio.FIRST_COMPLETED,
             )
         finally:
+            # Retrieve exceptions in a finally so that this happens even if the
+            # wait above is interrupted by another cancellation (e.g. when the
+            # loop is being shut down), avoiding 'Future exception was never
+            # retrieved' errors.
             if not callback.future.done():
                 callback.future.cancel()
-        for future in done:
-            if not future.cancelled():
-                future.exception()
+            elif not callback.future.cancelled():
+                callback.future.exception()
+            error_future = self._transport.on_error_future
+            if error_future.done() and not error_future.cancelled():
+                error_future.exception()
 
     def dispatch(self, msg: ParsedMessagePayload) -> None:
         if self._closed_error:

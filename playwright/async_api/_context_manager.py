@@ -37,10 +37,18 @@ class PlaywrightContextManager:
         loop.create_task(self._connection.run())
         playwright_future = self._connection.playwright_future
 
-        done, _ = await asyncio.wait(
-            {self._connection._transport.on_error_future, playwright_future},
-            return_when=asyncio.FIRST_COMPLETED,
-        )
+        try:
+            done, _ = await asyncio.wait(
+                {self._connection._transport.on_error_future, playwright_future},
+                return_when=asyncio.FIRST_COMPLETED,
+            )
+        except asyncio.CancelledError:
+            # Cancelled while connecting - stop the driver process and the
+            # background tasks, otherwise they keep running with no owner.
+            if not playwright_future.done():
+                playwright_future.cancel()
+            await self._connection.stop_async()
+            raise
         if not playwright_future.done():
             playwright_future.cancel()
         playwright = AsyncPlaywright(next(iter(done)).result())
