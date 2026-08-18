@@ -50,6 +50,7 @@ class Transport(ABC):
         self._loop = loop
         self.on_message: Callable[[ParsedMessagePayload], None] = lambda _: None
         self.on_error_future: asyncio.Future = loop.create_future()
+        self._stopped_future: asyncio.Future = loop.create_future()
 
     @abstractmethod
     def request_stop(self) -> None:
@@ -58,9 +59,8 @@ class Transport(ABC):
     def dispose(self) -> None:
         pass
 
-    @abstractmethod
     async def wait_until_stopped(self) -> None:
-        pass
+        await self._stopped_future
 
     @abstractmethod
     async def connect(self) -> None:
@@ -93,7 +93,6 @@ class PipeTransport(Transport):
         super().__init__(loop)
         self._stopped = False
         self._output: Optional[asyncio.StreamWriter] = None
-        self._stopped_future: asyncio.Future = loop.create_future()
 
     def request_stop(self) -> None:
         self._stopped = True
@@ -101,9 +100,6 @@ class PipeTransport(Transport):
         # driver; connect() will close the pipe once it is available.
         if self._output:
             self._output.close()
-
-    async def wait_until_stopped(self) -> None:
-        await self._stopped_future
 
     async def connect(self) -> None:
         try:
@@ -131,14 +127,13 @@ class PipeTransport(Transport):
                 startupinfo=startupinfo,
             )
         except Exception as exc:
-            if not self._stopped_future.done():
-                self._stopped_future.set_result(None)
+            self._stopped_future.set_result(None)
             self.on_error_future.set_exception(exc)
             raise exc
 
         self._output = self._proc.stdin
-        if self._stopped and self._output:
-            self._output.close()
+        if self._stopped:
+            self.request_stop()
 
     async def run(self) -> None:
         assert self._proc.stdout

@@ -461,16 +461,17 @@ class Connection(EventEmitter):
     async def _abort(
         self, object: ChannelOwner, callback: ProtocolCallback, reason: str
     ) -> None:
-        try:
-            self._transport.send(
-                {
-                    "guid": object._guid,
-                    "method": "__abort__",
-                    "params": {"id": callback.id, "reason": reason},
-                }
-            )
-        except (Error, OSError):
-            pass
+        if not self._closed_error:
+            try:
+                self._transport.send(
+                    {
+                        "guid": object._guid,
+                        "method": "__abort__",
+                        "params": {"id": callback.id, "reason": reason},
+                    }
+                )
+            except (Error, OSError):
+                pass
         try:
             await asyncio.wait(
                 {
@@ -486,11 +487,9 @@ class Connection(EventEmitter):
             # retrieved' errors.
             if not callback.future.done():
                 callback.future.cancel()
-            elif not callback.future.cancelled():
-                callback.future.exception()
-            error_future = self._transport.on_error_future
-            if error_future.done() and not error_future.cancelled():
-                error_future.exception()
+            for future in (callback.future, self._transport.on_error_future):
+                if future.done() and not future.cancelled():
+                    future.exception()
 
     def dispatch(self, msg: ParsedMessagePayload) -> None:
         if self._closed_error:

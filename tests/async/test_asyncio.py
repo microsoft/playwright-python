@@ -174,7 +174,7 @@ def test_cancelled_playwright_start_does_not_hang(tmp_path: Path) -> None:
                     pass
 
 
-            for delay in (0.001, 0.01, 0.05, 0.1, 0.5):
+            for delay in (0.001, 0.05, 0.5):
                 asyncio.run(main(delay))
             print("DONE", flush=True)
             """

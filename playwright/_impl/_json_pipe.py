@@ -42,12 +42,7 @@ class JsonPipeTransport(AsyncIOEventEmitter, Transport):
         self.on_error_future.cancel()
         self._stopped_future.cancel()
 
-    async def wait_until_stopped(self) -> None:
-        await self._stopped_future
-
     async def connect(self) -> None:
-        self._stopped_future: asyncio.Future = asyncio.Future()
-
         def handle_message(message: Dict) -> None:
             if self._stop_requested:
                 return
