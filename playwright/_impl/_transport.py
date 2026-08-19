@@ -92,18 +92,19 @@ class PipeTransport(Transport):
     def __init__(self, loop: asyncio.AbstractEventLoop) -> None:
         super().__init__(loop)
         self._stopped = False
+        self._output: Optional[asyncio.StreamWriter] = None
+        self._stopped_future: asyncio.Future = loop.create_future()
 
     def request_stop(self) -> None:
-        assert self._output
         self._stopped = True
-        self._output.close()
+        # May be called before connect() has spawned the driver.
+        if self._output:
+            self._output.close()
 
     async def wait_until_stopped(self) -> None:
         await self._stopped_future
 
     async def connect(self) -> None:
-        self._stopped_future: asyncio.Future = asyncio.Future()
-
         try:
             # For pyinstaller and Nuitka
             env = get_driver_env()
@@ -129,10 +130,13 @@ class PipeTransport(Transport):
                 startupinfo=startupinfo,
             )
         except Exception as exc:
+            self._stopped_future.set_result(None)
             self.on_error_future.set_exception(exc)
             raise exc
 
         self._output = self._proc.stdin
+        if self._stopped:
+            self.request_stop()
 
     async def run(self) -> None:
         assert self._proc.stdout

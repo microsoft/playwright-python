@@ -142,3 +142,50 @@ async def test_should_return_proper_api_name_on_error(page: Page) -> None:
     except Exception as error:
         # Each browser returns slightly different error messages, but they should all start with "Page.evaluate:", because that was the Playwright method where the error originated
         assert str(error).startswith("Page.evaluate:")
+
+
+def test_cancelled_playwright_start_does_not_hang(tmp_path: Path) -> None:
+    # Regression test for https://github.com/microsoft/playwright/issues/42296.
+    # Cancelling __aenter__ left the driver and the transport tasks running,
+    # and asyncio.run() hung at loop shutdown.
+    script = tmp_path / "cancel_start.py"
+    script.write_text(
+        textwrap.dedent(
+            """
+            import asyncio
+
+            from playwright.async_api import async_playwright
+
+
+            async def run_playwright():
+                async with async_playwright():
+                    pass
+
+
+            async def main(delay):
+                task = asyncio.create_task(run_playwright())
+                await asyncio.sleep(delay)
+                task.cancel()
+                try:
+                    await task
+                except asyncio.CancelledError:
+                    pass
+
+
+            for delay in (0.001, 0.05, 0.5):
+                asyncio.run(main(delay))
+            print("DONE", flush=True)
+            """
+        )
+    )
+    result = subprocess.run(
+        [sys.executable, str(script)],
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "DONE" in result.stdout
+    # Nothing is orphaned: no unretrieved futures, and the driver exits cleanly
+    # instead of dying with EPIPE mid-write.
+    assert result.stderr == ""

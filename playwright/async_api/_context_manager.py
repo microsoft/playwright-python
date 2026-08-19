@@ -37,13 +37,18 @@ class PlaywrightContextManager:
         loop.create_task(self._connection.run())
         playwright_future = self._connection.playwright_future
 
-        done, _ = await asyncio.wait(
-            {self._connection._transport.on_error_future, playwright_future},
-            return_when=asyncio.FIRST_COMPLETED,
-        )
-        if not playwright_future.done():
+        try:
+            done, _ = await asyncio.wait(
+                {self._connection._transport.on_error_future, playwright_future},
+                return_when=asyncio.FIRST_COMPLETED,
+            )
+            if not playwright_future.done():
+                playwright_future.cancel()
+            playwright = AsyncPlaywright(next(iter(done)).result())
+        except BaseException:
             playwright_future.cancel()
-        playwright = AsyncPlaywright(next(iter(done)).result())
+            await self.__aexit__()
+            raise
         playwright.stop = self.__aexit__  # type: ignore
         return playwright
 
