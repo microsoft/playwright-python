@@ -96,8 +96,7 @@ class PipeTransport(Transport):
 
     def request_stop(self) -> None:
         self._stopped = True
-        # The stop can be requested while connect() is still spawning the
-        # driver; connect() will close the pipe once it is available.
+        # May be called before connect() has spawned the driver.
         if self._output:
             self._output.close()
 

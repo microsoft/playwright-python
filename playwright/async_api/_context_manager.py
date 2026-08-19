@@ -46,8 +46,6 @@ class PlaywrightContextManager:
                 playwright_future.cancel()
             playwright = AsyncPlaywright(next(iter(done)).result())
         except BaseException:
-            # Startup failed or was cancelled - stop the driver process and the
-            # background tasks, otherwise they keep running with no owner.
             playwright_future.cancel()
             await self.__aexit__()
             raise

@@ -146,10 +146,8 @@ def test_stop_does_not_deadlock_with_asyncio_atexit(tmp_path: Path) -> None:
 
 def test_cancelled_playwright_start_does_not_hang(tmp_path: Path) -> None:
     # Regression test for https://github.com/microsoft/playwright/issues/42296.
-    # Cancelling __aenter__ used to leave the driver process and the transport
-    # tasks running; at loop shutdown the init task absorbed its cancellation
-    # in Channel._abort() waiting for a reply that could never arrive, so
-    # asyncio.run() never returned.
+    # Cancelling __aenter__ left the driver and the transport tasks running,
+    # and asyncio.run() hung at loop shutdown.
     script = tmp_path / "cancel_start.py"
     script.write_text(
         textwrap.dedent(
