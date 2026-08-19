@@ -143,21 +143,13 @@ class Channel(AsyncIOEventEmitter):
         callback = self._connection._send_message_to_server(
             self._object, method, augmented_params, timeout
         )
-        try:
-            done, _ = await asyncio.wait(
-                {
-                    self._connection._transport.on_error_future,
-                    callback.future,
-                },
-                return_when=asyncio.FIRST_COMPLETED,
-            )
-        except asyncio.CancelledError as exc:
-            await self._connection._abort(
-                self._object,
-                callback,
-                str(exc) or "Task was cancelled",
-            )
-            raise
+        done, _ = await asyncio.wait(
+            {
+                self._connection._transport.on_error_future,
+                callback.future,
+            },
+            return_when=asyncio.FIRST_COMPLETED,
+        )
         if not callback.future.done():
             callback.future.cancel()
         result = next(iter(done)).result()
@@ -249,10 +241,7 @@ class ChannelOwner(AsyncIOEventEmitter):
 
 
 class ProtocolCallback:
-    def __init__(
-        self, loop: asyncio.AbstractEventLoop, id: int, no_reply: bool = False
-    ) -> None:
-        self.id = id
+    def __init__(self, loop: asyncio.AbstractEventLoop, no_reply: bool = False) -> None:
         self.stack_trace: traceback.StackSummary
         self.no_reply = no_reply
         self.future = loop.create_future()
@@ -404,7 +393,7 @@ class Connection(EventEmitter):
             )
         self._last_id += 1
         id = self._last_id
-        callback = ProtocolCallback(self._loop, id, no_reply=no_reply)
+        callback = ProtocolCallback(self._loop, no_reply=no_reply)
         task = asyncio.current_task(self._loop)
         callback.stack_trace = cast(
             traceback.StackSummary,
@@ -448,34 +437,6 @@ class Connection(EventEmitter):
         self._callbacks[id] = callback
 
         return callback
-
-    async def _abort(
-        self, object: ChannelOwner, callback: ProtocolCallback, reason: str
-    ) -> None:
-        try:
-            self._transport.send(
-                {
-                    "guid": object._guid,
-                    "method": "__abort__",
-                    "params": {"id": callback.id, "reason": reason},
-                }
-            )
-        except (Error, OSError):
-            pass
-        try:
-            done, _ = await asyncio.wait(
-                {
-                    self._transport.on_error_future,
-                    callback.future,
-                },
-                return_when=asyncio.FIRST_COMPLETED,
-            )
-        finally:
-            if not callback.future.done():
-                callback.future.cancel()
-        for future in done:
-            if not future.cancelled():
-                future.exception()
 
     def dispatch(self, msg: ParsedMessagePayload) -> None:
         if self._closed_error:
