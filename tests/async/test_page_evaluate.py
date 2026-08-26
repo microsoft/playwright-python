@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import math
+import re
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 from urllib.parse import ParseResult, urlparse
@@ -353,3 +354,34 @@ async def test_evaluate_jsonvalue_url(page: Page) -> None:
     url = urlparse("https://example.com/")
     result = await page.evaluate('() => ({ someKey: new URL("https://example.com/") })')
     assert result == {"someKey": url}
+
+
+async def test_should_evaluate_regex(page: Page) -> None:
+    out = await page.evaluate("() => ({ someKey: /foo.bar/im })")
+    assert out["someKey"] == re.compile("foo.bar", re.IGNORECASE | re.MULTILINE)
+
+
+async def test_should_roundtrip_regex(page: Page) -> None:
+    regex = re.compile("hello", re.IGNORECASE | re.MULTILINE)
+    result = await page.evaluate("regex => regex", regex)
+    assert result == regex
+
+
+async def test_should_pass_regex_as_a_working_regexp(page: Page) -> None:
+    assert await page.evaluate("re => re instanceof RegExp", re.compile("foo"))
+    assert await page.evaluate("re => re.test('a123')", re.compile(r"a\d+"))
+    assert await page.evaluate("re => re.source", re.compile(r"a\d+")) == "a\\d+"
+    assert await page.evaluate("re => re.flags", re.compile("foo", re.DOTALL)) == "s"
+
+
+async def test_should_evaluate_regex_in_nested_structures(page: Page) -> None:
+    out = await page.evaluate("() => ({ list: [/foo/s], nested: { re: /bar/ } })")
+    assert out == {
+        "list": [re.compile("foo", re.DOTALL)],
+        "nested": {"re": re.compile("bar")},
+    }
+
+
+async def test_evaluate_jsonvalue_regex(page: Page) -> None:
+    handle = await page.evaluate_handle("() => ({ someKey: /foo/i })")
+    assert await handle.json_value() == {"someKey": re.compile("foo", re.IGNORECASE)}
