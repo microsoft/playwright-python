@@ -38,9 +38,6 @@ Usage::
     scripts/build_driver.py            # assemble every platform bundle
     scripts/build_driver.py <suffix>   # assemble a single bundle, e.g. mac-arm64
 
-Set ``npm_config_registry`` (or configure npm any other way) to download
-``playwright-core`` from an alternative npm registry.
-
 ``setup.py`` invokes the single-suffix form so a wheel build only downloads the
 one Node.js binary it needs.
 """
