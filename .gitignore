@@ -21,3 +21,6 @@ utils/docker/dist/
 Pipfile
 Pipfile.lock
 .venv/
+
+# Written by the release pipeline (npmAuthenticate@0); holds feed credentials.
+.npmrc

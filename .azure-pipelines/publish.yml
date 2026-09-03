@@ -36,25 +36,51 @@ extends:
             path: $(Build.ArtifactStagingDirectory)/esrp-build
             artifact: esrp-build
         steps:
+        - bash: |
+            if [[ ! "$CURRENT_BRANCH" =~ ^v1\..* ]]; then
+              echo "Can only publish from a release tag (v1.*)."
+              echo "Unexpected ref name: $CURRENT_BRANCH"
+              exit 1
+            fi
+          env:
+            CURRENT_BRANCH: ${{ variables['Build.SourceBranchName'] }}
+          displayName: 'Check the ref is a release tag'
+          # Allow manual runs on any branch to exercise the build without publishing.
+          condition: ne(variables['Build.Reason'], 'Manual')
         - task: UsePythonVersion@0
           inputs:
             versionSpec: '3.10'
           displayName: 'Use Python'
-        - task: NodeTool@0
+        # Resolve every pip install (including the isolated build environments
+        # that `python -m build` and `pip install -e .` create) through the
+        # DevDiv_PublicPackages Azure Artifacts feed instead of pypi.org, as
+        # required by SFI-ES4.2.4. The task exports an authenticated PIP_INDEX_URL.
+        - task: PipAuthenticate@1
           inputs:
-            versionSpec: '24.x'
-          displayName: 'Use Node.js'
+            artifactFeeds: DevDiv/DevDiv_PublicPackages
+          displayName: 'Authenticate pip to DevDiv_PublicPackages feed'
+        # scripts/build_driver.py downloads playwright-core from the npm registry
+        # configured in .npmrc, using the credentials npmAuthenticate@0 adds to it.
+        - script: echo "registry=https://devdiv.pkgs.visualstudio.com/DevDiv/_packaging/DevDiv_PublicPackages/npm/registry/" >> .npmrc
+          displayName: 'Point npm registry at DevDiv_PublicPackages feed'
+        - task: npmAuthenticate@0
+          inputs:
+            workingFile: .npmrc
+          displayName: 'Authenticate npm to DevDiv_PublicPackages feed'
         - script: |
-            python -m pip install --upgrade pip
-            pip install -r local-requirements.txt
-            pip install -r requirements.txt
-            pip install -e .
+            python -m pip install --upgrade pip --disable-pip-version-check
+            pip install -r local-requirements.txt --disable-pip-version-check
+            pip install -r requirements.txt --disable-pip-version-check
+            pip install -e . --disable-pip-version-check
             for wheel in $(python setup.py --list-wheels); do
               PLAYWRIGHT_TARGET_WHEEL=$wheel python -m build --wheel --outdir $(Build.ArtifactStagingDirectory)/esrp-build
             done
           displayName: 'Install & Build'
       - job: Publish
         dependsOn: Build
+        # Only publish from release tags; manual runs on a branch stop after Build,
+        # which lets the build be exercised without publishing.
+        condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/v1.'))
         templateContext:
           type: releaseJob
           isProduction: true
