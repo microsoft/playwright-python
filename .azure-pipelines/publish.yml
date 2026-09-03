@@ -59,8 +59,12 @@ extends:
           inputs:
             artifactFeeds: DevDiv/DevDiv_PublicPackages
           displayName: 'Authenticate pip to DevDiv_PublicPackages feed'
-        # scripts/build_driver.py downloads playwright-core from the npm registry
-        # configured in .npmrc, using the credentials npmAuthenticate@0 adds to it.
+        - task: UseNode@1
+          inputs:
+            version: '24.x'
+          displayName: 'Install Node.js'
+        # scripts/build_driver.py fetches playwright-core with `npm pack`, which
+        # picks up the registry and credentials from this .npmrc.
         - script: echo "registry=https://devdiv.pkgs.visualstudio.com/DevDiv/_packaging/DevDiv_PublicPackages/npm/registry/" >> .npmrc
           displayName: 'Point npm registry at DevDiv_PublicPackages feed'
         - task: npmAuthenticate@0

@@ -27,43 +27,39 @@ building a wheel::
     LICENSE           - the Node.js license
     package/**        - the playwright-core npm package
 
-Unlike the old source build this needs no Node.js, npm, git or bash — only the
-Python standard library.
+``playwright-core`` is fetched with ``npm pack`` (run from the repository root, so
+a root-level ``.npmrc`` -- e.g. the one the release pipeline writes to point at
+the internal Azure Artifacts feed -- and its credentials are honoured). The
+Node.js binaries are downloaded directly from nodejs.org. Apart from Node.js/npm
+this needs only the Python standard library.
 
 Usage::
 
     scripts/build_driver.py            # assemble every platform bundle
     scripts/build_driver.py <suffix>   # assemble a single bundle, e.g. mac-arm64
 
-``playwright-core`` is downloaded from the npm registry configured the way npm
-itself would resolve it: the ``npm_config_registry`` environment variable, else
-``registry=`` in the repository-root ``.npmrc``, else ``~/.npmrc``, else the
-public registry. Credentials for that registry (``_authToken``, or
-``username``/``_password``) are read from the same ``.npmrc`` files, so the
-release pipeline can point the build at an authenticated Azure Artifacts feed
-with ``npmAuthenticate@0`` without needing npm installed.
+Set ``npm_config_registry`` (or configure npm any other way) to download
+``playwright-core`` from an alternative npm registry.
 
 ``setup.py`` invokes the single-suffix form so a wheel build only downloads the
 one Node.js binary it needs.
 """
 
-import base64
 import os
 import shutil
+import subprocess
 import sys
 import tarfile
 import tempfile
 import time
-import urllib.parse
 import urllib.request
 import zipfile
 from pathlib import Path
-from typing import Dict, Iterable, List, NamedTuple, Optional, Set
+from typing import Iterable, List, NamedTuple, Set
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DRIVER_DIR = REPO_ROOT / "driver"
 
-DEFAULT_NPM_REGISTRY = "https://registry.npmjs.org"
 NODEJS_DIST = "https://nodejs.org/dist"
 
 
@@ -91,80 +87,12 @@ def read_pin(name: str) -> str:
     return value
 
 
-def _read_npmrc(path: Path) -> Dict[str, str]:
-    """Parse the ``key=value`` lines of an npmrc file (comments start with ; or #)."""
-    config: Dict[str, str] = {}
-    if not path.is_file():
-        return config
-    for raw_line in path.read_text().splitlines():
-        line = raw_line.strip()
-        if not line or line[0] in ";#":
-            continue
-        key, sep, value = line.partition("=")
-        if sep:
-            config[key.strip()] = value.strip()
-    return config
-
-
-def npm_config() -> Dict[str, str]:
-    """Merge npmrc files with npm's precedence: project ``.npmrc`` over ``~/.npmrc``."""
-    config = _read_npmrc(Path.home() / ".npmrc")
-    config.update(_read_npmrc(REPO_ROOT / ".npmrc"))
-    return config
-
-
-def npm_registry(config: Dict[str, str]) -> str:
-    registry = (
-        os.environ.get("npm_config_registry")
-        or os.environ.get("NPM_CONFIG_REGISTRY")
-        or config.get("registry")
-        or DEFAULT_NPM_REGISTRY
-    )
-    return registry.rstrip("/")
-
-
-def npm_auth_header(registry: str, config: Dict[str, str]) -> Optional[str]:
-    """Build the Authorization header npm would send to ``registry``, if any.
-
-    npm scopes credentials to a "nerf dart" -- the registry URL without its
-    scheme, e.g. ``//host/org/_packaging/feed/npm/registry/`` -- and looks for
-    ``<nerf dart>:_authToken=`` (bearer token) or ``<nerf dart>:username=`` plus
-    ``<nerf dart>:_password=`` (base64-encoded) entries, checking each parent
-    path in turn. This is the format ``npmAuthenticate@0`` and ``npm login``
-    write.
-    """
-    parts = urllib.parse.urlsplit(registry + "/")
-    path = parts.path
-    while True:
-        nerf_dart = f"//{parts.netloc}{path}"
-        token = config.get(f"{nerf_dart}:_authToken")
-        if token:
-            return f"Bearer {token}"
-        username = config.get(f"{nerf_dart}:username")
-        password = config.get(f"{nerf_dart}:_password")
-        if username and password:
-            decoded = base64.b64decode(password).decode()
-            credentials = base64.b64encode(f"{username}:{decoded}".encode()).decode()
-            return f"Basic {credentials}"
-        basic = config.get(f"{nerf_dart}:_auth")
-        if basic:
-            return f"Basic {basic}"
-        if path == "/":
-            return None
-        path = path[: path.rstrip("/").rfind("/") + 1]
-
-
-def download(url: str, destination: Path, auth_header: Optional[str] = None) -> None:
-    request = urllib.request.Request(url)
-    if auth_header:
-        # Unredirected so the credential is not replayed to a different host
-        # if the registry redirects the tarball download to blob storage.
-        request.add_unredirected_header("Authorization", auth_header)
+def download(url: str, destination: Path) -> None:
     last_error: Exception = RuntimeError("no attempt made")
     for attempt in range(1, 6):
         try:
             print(f"Downloading {url}")
-            with urllib.request.urlopen(request) as response:  # noqa: S310
+            with urllib.request.urlopen(url) as response:  # noqa: S310
                 with open(destination, "wb") as out:
                     shutil.copyfileobj(response, out)
             return
@@ -209,11 +137,25 @@ def _extract_zip_file(archive: zipfile.ZipFile, name: str, destination: Path) ->
 
 def fetch_playwright_core(version: str, work_dir: Path) -> Path:
     """Download playwright-core@<version> and extract its package/ tree once."""
-    config = npm_config()
-    registry = npm_registry(config)
-    url = f"{registry}/playwright-core/-/playwright-core-{version}.tgz"
+    npm = "npm.cmd" if sys.platform == "win32" else "npm"
+    spec = f"playwright-core@{version}"
+    # npm is run from the repository root so that a root-level .npmrc (registry
+    # and credentials) is honoured. `npm pack` writes <name>-<version>.tgz.
+    print(f"Downloading {spec} with npm pack", flush=True)
+    try:
+        subprocess.check_call(
+            [npm, "pack", spec, "--pack-destination", str(work_dir)],
+            cwd=REPO_ROOT,
+        )
+    except FileNotFoundError:
+        raise SystemExit(
+            "npm was not found on PATH; Node.js/npm are required to assemble the driver."
+        )
+    except subprocess.CalledProcessError as error:
+        raise SystemExit(f"npm pack {spec} failed with exit code {error.returncode}")
     tgz = work_dir / f"playwright-core-{version}.tgz"
-    download(url, tgz, npm_auth_header(registry, config))
+    if not tgz.is_file():
+        raise SystemExit(f"npm pack did not produce {tgz}")
     with tarfile.open(tgz, "r:gz") as tar:
         # npm tarballs nest every file under a top-level "package/" directory,
         # which is exactly the bundle layout we want.
@@ -223,7 +165,7 @@ def fetch_playwright_core(version: str, work_dir: Path) -> Path:
             if m.name == "package" or m.name.startswith("package/")
         ]
         if not members:
-            raise SystemExit(f"No package/ entries found in {url}")
+            raise SystemExit(f"No package/ entries found in {tgz.name}")
         _extract_members(tar, work_dir, members)
     tgz.unlink()
     return work_dir / "package"

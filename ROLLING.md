@@ -12,7 +12,7 @@ pre-commit install
 pip install -e .
 ```
 * change the driver pin in `DRIVER_VERSION` (the `playwright-core` npm version, e.g. `1.61.0`) and refresh `NODE_VERSION`: `python scripts/update_node_version.py`
-* download the new driver: `python -m build --wheel` (fetches `playwright-core` from npm + the matching Node.js binary and assembles the bundle; no source build). Set `npm_config_registry` to use a different npm registry.
+* download the new driver: `python -m build --wheel` (fetches `playwright-core` via `npm pack` + the matching Node.js binary and assembles the bundle; no source build). Configure npm (e.g. `npm_config_registry`) to use a different npm registry.
 * generate API (needs a nearby `microsoft/playwright` checkout at `v<new>`): `PW_SRC_DIR=../playwright ./scripts/update_api.sh`
 * commit changes & send PR
 * wait for bots to pass & merge the PR
