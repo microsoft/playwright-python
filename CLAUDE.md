@@ -15,13 +15,13 @@ Python bindings for [Playwright](https://playwright.dev). The Python client talk
 - `tests/async/`, `tests/sync/` — pytest suites. Most new tests are added to the async file with a sync mirror.
 - `DRIVER_VERSION` — the single source of truth for which Playwright release the driver is assembled from (one line, the `playwright-core` npm version, e.g. `1.61.0`, no `v` prefix). Read by `setup.py`, `scripts/build_driver.py`, and CI. The wheel build downloads `playwright-core` at this version from npm plus the matching Node.js binary and assembles the per-platform bundles — no source build. The version is baked into the staged bundle filenames (`driver/playwright-<version>-<suffix>.zip`), so it doubles as the build cache key.
 - `NODE_VERSION` — the Node.js version bundled with the driver (one line, e.g. `24.16.0`). Maintained at roll time by `scripts/update_node_version.py` (latest LTS, mirroring upstream's `utils/build/update-playwright-node.mjs`).
-- `scripts/build_driver.py` — assembles the per-platform driver bundles into `driver/` by downloading the `playwright-core` npm package (`DRIVER_VERSION`) and the official Node.js binaries (`NODE_VERSION`). Pure Python stdlib (no Node/npm/git); invoked from `setup.py`'s `bdist_wheel` with the target platform's suffix (no arg builds all six).
+- `scripts/build_driver.py` — assembles the per-platform driver bundles into `driver/` by downloading the `playwright-core` npm package (`DRIVER_VERSION`) and the official Node.js binaries (`NODE_VERSION`). Fetches `playwright-core` with `npm pack` (needs Node.js/npm on PATH; honours a root `.npmrc`) and the Node.js binaries over plain HTTP; invoked from `setup.py`'s `bdist_wheel` with the target platform's suffix (no arg builds all six).
 - `api.json` is **not** shipped in the bundle and is never written into the driver — `scripts/update_api.sh` generates it from a nearby `microsoft/playwright` checkout (`$PW_SRC_DIR`) into a temp file and passes it to codegen via `PW_API_JSON` (read by `scripts/documentation_provider.py`). Needed only when regenerating the API, never at runtime.
 - `ROLLING.md`, `CONTRIBUTING.md` — human-facing setup and roll docs.
 
 ## Setup
 
-`CONTRIBUTING.md` has the full sequence. The short version (needs Node.js, npm, git and bash for the driver build):
+`CONTRIBUTING.md` has the full sequence. The short version (needs Node.js and npm for the driver build):
 
 ```sh
 python3 -m venv env && source env/bin/activate

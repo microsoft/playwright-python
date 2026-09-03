@@ -23,8 +23,8 @@ Build and install drivers:
 
 The driver is assembled from published artifacts — the `playwright-core` npm
 package (version pinned in `DRIVER_VERSION`) and the official Node.js binary
-(pinned in `NODE_VERSION`). Building a wheel just downloads them; no Node/npm/git
-toolchain is required.
+(pinned in `NODE_VERSION`). Building a wheel downloads them with `npm pack` and
+plain HTTP, so Node.js/npm must be installed; no git or source build is needed.
 
 ```sh
 pip install -e .

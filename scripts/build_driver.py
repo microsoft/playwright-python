@@ -27,16 +27,16 @@ building a wheel::
     LICENSE           - the Node.js license
     package/**        - the playwright-core npm package
 
-Unlike the old source build this needs no Node.js, npm, git or bash — only the
-Python standard library.
+``playwright-core`` is fetched with ``npm pack`` (run from the repository root, so
+a root-level ``.npmrc`` -- e.g. the one the release pipeline writes to point at
+the internal Azure Artifacts feed -- and its credentials are honoured). The
+Node.js binaries are downloaded directly from nodejs.org. Apart from Node.js/npm
+this needs only the Python standard library.
 
 Usage::
 
     scripts/build_driver.py            # assemble every platform bundle
     scripts/build_driver.py <suffix>   # assemble a single bundle, e.g. mac-arm64
-
-Set ``npm_config_registry`` to download ``playwright-core`` from an
-alternative npm registry.
 
 ``setup.py`` invokes the single-suffix form so a wheel build only downloads the
 one Node.js binary it needs.
@@ -44,6 +44,7 @@ one Node.js binary it needs.
 
 import os
 import shutil
+import subprocess
 import sys
 import tarfile
 import tempfile
@@ -56,9 +57,6 @@ from typing import Iterable, List, NamedTuple, Set
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DRIVER_DIR = REPO_ROOT / "driver"
 
-NPM_REGISTRY = os.environ.get(
-    "npm_config_registry", "https://registry.npmjs.org"
-).rstrip("/")
 NODEJS_DIST = "https://nodejs.org/dist"
 
 
@@ -136,9 +134,25 @@ def _extract_zip_file(archive: zipfile.ZipFile, name: str, destination: Path) ->
 
 def fetch_playwright_core(version: str, work_dir: Path) -> Path:
     """Download playwright-core@<version> and extract its package/ tree once."""
-    url = f"{NPM_REGISTRY}/playwright-core/-/playwright-core-{version}.tgz"
+    npm = "npm.cmd" if sys.platform == "win32" else "npm"
+    spec = f"playwright-core@{version}"
+    # npm is run from the repository root so that a root-level .npmrc (registry
+    # and credentials) is honoured. `npm pack` writes <name>-<version>.tgz.
+    print(f"Downloading {spec} with npm pack", flush=True)
+    try:
+        subprocess.check_call(
+            [npm, "pack", spec, "--pack-destination", str(work_dir)],
+            cwd=REPO_ROOT,
+        )
+    except FileNotFoundError:
+        raise SystemExit(
+            "npm was not found on PATH; Node.js/npm are required to assemble the driver."
+        )
+    except subprocess.CalledProcessError as error:
+        raise SystemExit(f"npm pack {spec} failed with exit code {error.returncode}")
     tgz = work_dir / f"playwright-core-{version}.tgz"
-    download(url, tgz)
+    if not tgz.is_file():
+        raise SystemExit(f"npm pack did not produce {tgz}")
     with tarfile.open(tgz, "r:gz") as tar:
         # npm tarballs nest every file under a top-level "package/" directory,
         # which is exactly the bundle layout we want.
@@ -148,7 +162,7 @@ def fetch_playwright_core(version: str, work_dir: Path) -> Path:
             if m.name == "package" or m.name.startswith("package/")
         ]
         if not members:
-            raise SystemExit(f"No package/ entries found in {url}")
+            raise SystemExit(f"No package/ entries found in {tgz.name}")
         _extract_members(tar, work_dir, members)
     tgz.unlink()
     return work_dir / "package"
