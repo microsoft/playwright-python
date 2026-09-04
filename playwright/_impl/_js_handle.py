@@ -145,7 +145,7 @@ def serialize_value(
             return dict(v="Infinity")
         if value == float("-inf"):
             return dict(v="-Infinity")
-        if value == float("-0"):
+        if value == 0 and math.copysign(1, value) == -1:
             return dict(v="-0")
         if math.isnan(value):
             return dict(v="NaN")
