@@ -11,11 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import base64
 import collections.abc
 import datetime
 import math
+import re
 import struct
 import traceback
 from pathlib import Path
@@ -145,7 +145,7 @@ def serialize_value(
             return dict(v="Infinity")
         if value == float("-inf"):
             return dict(v="-Infinity")
-        if value == float("-0"):
+        if value == 0.0 and math.copysign(1, value) == -1:
             return dict(v="-0")
         if math.isnan(value):
             return dict(v="NaN")
@@ -180,6 +180,15 @@ def serialize_value(
         return {"n": value}
     if isinstance(value, str):
         return {"s": value}
+    if isinstance(value, re.Pattern):
+        flags = ""
+        if value.flags & re.IGNORECASE:
+            flags += "i"
+        if value.flags & re.MULTILINE:
+            flags += "m"
+        if value.flags & re.DOTALL:
+            flags += "s"
+        return {"r": {"p": value.pattern, "f": flags}}
     if isinstance(value, ParseResult):
         return {"u": urlunparse(value)}
 
@@ -246,6 +255,17 @@ def parse_value(value: Any, refs: Optional[Dict[int, Any]] = None) -> Any:
             error._name = value["e"]["n"]
             error._stack = value["e"]["s"]
             return error
+
+        if "r" in value:
+            flags = 0
+            f = value["r"]["f"]
+            if "i" in f:
+                flags |= re.IGNORECASE
+            if "m" in f:
+                flags |= re.MULTILINE
+            if "s" in f:
+                flags |= re.DOTALL
+            return re.compile(value["r"]["p"], flags)
 
         if "a" in value:
             a: List = []
