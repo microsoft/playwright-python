@@ -40,7 +40,7 @@ class Video:
             )
         if not self._artifact:
             raise Error("Video recording has not been started.")
-        return self._artifact.absolute_path
+        return pathlib.Path(self._artifact.absolute_path)
 
     async def save_as(self, path: Union[str, pathlib.Path]) -> None:
         if self._page._connection._is_sync and not self._page._is_closed:
