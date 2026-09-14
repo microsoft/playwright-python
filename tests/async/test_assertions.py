@@ -162,7 +162,9 @@ async def test_assertions_locator_to_contain_class(page: Page, server: Server) -
 
     assert excinfo.match("Locator expected to contain class 'does-not-exist'")
     assert excinfo.match("Actual value: foo bar baz")
-    assert excinfo.match('Expect "to_contain_class" with timeout 100ms')
+    assert excinfo.match(
+        'Expect "to_contain_class" locator\\("div"\\) with timeout 100ms'
+    )
 
     await page.set_content(
         '<div class="foo"></div><div class="hello bar"></div><div class="baz"></div>'
@@ -575,7 +577,8 @@ async def test_assertions_boolean_checked_with_intermediate_true_and_checked(
 async def test_assertions_boolean_fail_with_indeterminate_true(page: Page) -> None:
     await page.set_content("<input type=checkbox></input>")
     with pytest.raises(
-        AssertionError, match='Expect "to_be_checked" with timeout 1000ms'
+        AssertionError,
+        match='Expect "to_be_checked" locator\\("input"\\) with timeout 1000ms',
     ):
         await expect(page.locator("input")).to_be_checked(
             indeterminate=True, timeout=1000
@@ -1021,7 +1024,9 @@ async def test_should_be_attached_over_navigation(page: Page, server: Server) ->
 async def test_should_be_able_to_set_custom_timeout(page: Page) -> None:
     with pytest.raises(AssertionError) as exc_info:
         await expect(page.locator("#a1")).to_be_visible(timeout=111)
-    assert 'Expect "to_be_visible" with timeout 111ms' in str(exc_info.value)
+    assert 'Expect "to_be_visible" locator("#a1") with timeout 111ms' in str(
+        exc_info.value
+    )
 
 
 async def test_negative_assertion_shows_not_prefix_in_call_log(
@@ -1030,7 +1035,9 @@ async def test_negative_assertion_shows_not_prefix_in_call_log(
     await page.set_content("<button>hello</button>")
     with pytest.raises(AssertionError) as exc_info:
         await expect(page.locator("button")).not_to_be_visible(timeout=111)
-    assert 'Expect "not_to_be_visible" with timeout 111ms' in str(exc_info.value)
+    assert 'Expect "not_to_be_visible" locator("button") with timeout 111ms' in str(
+        exc_info.value
+    )
 
 
 async def test_should_be_able_to_set_custom_global_timeout(page: Page) -> None:
@@ -1038,7 +1045,9 @@ async def test_should_be_able_to_set_custom_global_timeout(page: Page) -> None:
         expect.set_options(timeout=111)
         with pytest.raises(AssertionError) as exc_info:
             await expect(page.locator("#a1")).to_be_visible()
-        assert 'Expect "to_be_visible" with timeout 111ms' in str(exc_info.value)
+        assert 'Expect "to_be_visible" locator("#a1") with timeout 111ms' in str(
+            exc_info.value
+        )
     finally:
         expect.set_options(timeout=None)
 

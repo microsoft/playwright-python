@@ -109,6 +109,7 @@ class Browser(ChannelOwner):
 
     def _setup_browser_context(self, context: BrowserContext) -> None:
         context._tracing._traces_dir = self._traces_dir
+        context._request._tracing._traces_dir = self._traces_dir
         assert self._browser_type is not None
         self._browser_type._playwright.selectors._contexts_for_selectors.add(context)
 
@@ -143,7 +144,7 @@ class Browser(ChannelOwner):
         permissions: Sequence[str] = None,
         extraHTTPHeaders: Dict[str, str] = None,
         offline: bool = None,
-        httpCredentials: HttpCredentials = None,
+        httpCredentials: Union[HttpCredentials, Sequence[HttpCredentials]] = None,
         deviceScaleFactor: float = None,
         isMobile: bool = None,
         hasTouch: bool = None,
@@ -197,7 +198,7 @@ class Browser(ChannelOwner):
         permissions: Sequence[str] = None,
         extraHTTPHeaders: Dict[str, str] = None,
         offline: bool = None,
-        httpCredentials: HttpCredentials = None,
+        httpCredentials: Union[HttpCredentials, Sequence[HttpCredentials]] = None,
         deviceScaleFactor: float = None,
         isMobile: bool = None,
         hasTouch: bool = None,

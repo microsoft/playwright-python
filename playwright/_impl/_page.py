@@ -137,6 +137,7 @@ class Page(ChannelOwner):
         Crash="crash",
         Console="console",
         Dialog="dialog",
+        DialogClosed="dialogclosed",
         Download="download",
         FileChooser="filechooser",
         DOMContentLoaded="domcontentloaded",
@@ -268,6 +269,7 @@ class Page(ChannelOwner):
             {
                 Page.Events.Console: "console",
                 Page.Events.Dialog: "dialog",
+                Page.Events.DialogClosed: "dialogClosed",
                 Page.Events.Request: "request",
                 Page.Events.Response: "response",
                 Page.Events.RequestFinished: "requestFinished",
@@ -999,7 +1001,7 @@ class Page(ChannelOwner):
     ) -> "Locator":
         return self._main_frame.get_by_title(text, exact=exact)
 
-    def frame_locator(self, selector: str) -> "FrameLocator":
+    def frame_locator(self, selector: str = None) -> "FrameLocator":
         return self.main_frame.frame_locator(selector)
 
     async def focus(

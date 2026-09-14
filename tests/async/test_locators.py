@@ -1410,3 +1410,63 @@ async def test_locator_wait_for_function_with_arg(page: Page) -> None:
         "(node, arg) => node.textContent === arg",
         arg="hello",
     )
+
+
+async def test_should_support_visible(page: Page) -> None:
+    await page.set_content(
+        """<div>
+    <div class="item" style="display: none">Hidden data0</div>
+    <div class="item">visible data1</div>
+    <div class="item" style="display: none">Hidden data1</div>
+    <div class="item">visible data2</div>
+    <div class="item" style="display: none">Hidden data2</div>
+    <div class="item">visible data3</div>
+    </div>
+    """
+    )
+    locator = page.locator(".item").visible.nth(1)
+    await expect(locator).to_have_text("visible data2")
+    await expect(page.locator(".item").visible.get_by_text("data3")).to_have_text(
+        "visible data3"
+    )
+    await expect(page.locator(".item").visible).to_have_count(3)
+
+
+async def test_frame_locator_without_selector_should_search_any_frame(
+    page: Page,
+) -> None:
+    await page.set_content(
+        """<div>main</div><iframe srcdoc="<button>Click me</button>"></iframe>"""
+    )
+    await expect(page.frame_locator().get_by_role("button")).to_have_text("Click me")
+    await expect(page.main_frame.frame_locator().locator("button")).to_have_count(1)
+
+    await page.set_content(
+        """<button>Main</button><iframe srcdoc="<div>No buttons here</div>"></iframe>"""
+    )
+    await expect(page.frame_locator().locator("button")).to_have_text("Main")
+
+
+async def test_frame_locator_without_selector_should_throw_on_multiple_frames(
+    page: Page,
+) -> None:
+    await page.set_content(
+        """<iframe srcdoc="<span>one</span>"></iframe><iframe srcdoc="<span>two</span>"></iframe>"""
+    )
+    await expect(
+        page.locator("iframe").nth(1).content_frame.locator("span")
+    ).to_be_attached()
+    await expect(
+        page.locator("iframe").first.content_frame.locator("span")
+    ).to_be_attached()
+    with pytest.raises(Error, match="matched elements in multiple frames"):
+        await page.frame_locator().locator("span").count()
+
+
+async def test_frame_locator_without_selector_should_not_allow_nth(page: Page) -> None:
+    with pytest.raises(Error, match="Selecting the nth frame is not allowed"):
+        page.frame_locator().first
+    with pytest.raises(Error, match="Selecting the nth frame is not allowed"):
+        page.frame_locator().last
+    with pytest.raises(Error, match="Selecting the nth frame is not allowed"):
+        page.frame_locator().nth(1)

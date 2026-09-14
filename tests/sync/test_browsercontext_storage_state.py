@@ -15,6 +15,8 @@
 import json
 from pathlib import Path
 
+import pytest
+
 from playwright.sync_api import Browser, BrowserContext, Page, StorageState
 from tests.server import Server
 
@@ -192,4 +194,48 @@ def test_should_round_trip_webauthn_credentials_with_storage_state(
     assert context2.credentials.get() == [credential]
     assert context2.storage_state(credentials=True) == state
     context.close()
+    context2.close()
+
+
+@pytest.mark.skip_browser("webkit")  # OPFS is unavailable in ephemeral WebKit contexts
+def test_should_round_trip_opfs(browser: Browser, page: Page, server: Server) -> None:
+    page.goto(server.EMPTY_PAGE)
+    page.evaluate(
+        """async () => {
+            const root = await navigator.storage.getDirectory();
+            const nested = await root.getDirectoryHandle('nested', { create: true });
+            const file = await nested.getFileHandle('data.bin', { create: true });
+            const writable = await file.createWritable();
+            await writable.write(new Uint8Array([0, 1, 2, 255]));
+            await writable.close();
+        }"""
+    )
+    assert page.context.storage_state() == {"cookies": [], "origins": []}
+    state = page.context.storage_state(opfs=True)
+    assert state["origins"] == [
+        {
+            "origin": f"http://localhost:{server.PORT}",
+            "localStorage": [],
+            "opfs": [
+                {"path": "nested", "type": "directory"},
+                {"path": "nested/data.bin", "type": "file", "base64": "AAEC/w=="},
+            ],
+        }
+    ]
+    assert page.context.request.storage_state(opfs=True) == state
+
+    context2 = browser.new_context(storage_state=state)
+    page2 = context2.new_page()
+    page2.goto(server.EMPTY_PAGE)
+    assert (
+        page2.evaluate(
+            """async () => {
+            const root = await navigator.storage.getDirectory();
+            const nested = await root.getDirectoryHandle('nested');
+            const data = await (await nested.getFileHandle('data.bin')).getFile();
+            return [...new Uint8Array(await data.arrayBuffer())];
+        }"""
+        )
+        == [0, 1, 2, 255]
+    )
     context2.close()

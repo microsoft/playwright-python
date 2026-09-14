@@ -44,7 +44,11 @@ from playwright._impl._helper import (
     locals_to_params,
 )
 from playwright._impl._json_pipe import JsonPipeTransport
-from playwright._impl._network import serialize_headers, to_client_certificates_protocol
+from playwright._impl._network import (
+    serialize_headers,
+    to_client_certificates_protocol,
+    to_http_credentials_protocol,
+)
 from playwright._impl._waiter import throw_on_timeout
 
 if TYPE_CHECKING:
@@ -133,7 +137,7 @@ class BrowserType(ChannelOwner):
         permissions: Sequence[str] = None,
         extraHTTPHeaders: Dict[str, str] = None,
         offline: bool = None,
-        httpCredentials: HttpCredentials = None,
+        httpCredentials: Union[HttpCredentials, Sequence[HttpCredentials]] = None,
         deviceScaleFactor: float = None,
         isMobile: bool = None,
         hasTouch: bool = None,
@@ -332,6 +336,10 @@ class BrowserType(ChannelOwner):
         if "clientCertificates" in params:
             params["clientCertificates"] = await to_client_certificates_protocol(
                 params["clientCertificates"]
+            )
+        if "httpCredentials" in params:
+            params["httpCredentials"] = to_http_credentials_protocol(
+                params["httpCredentials"]
             )
         params["selectorEngines"] = self._playwright.selectors._selector_engines
         params["testIdAttributeName"] = (

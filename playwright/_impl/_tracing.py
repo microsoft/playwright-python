@@ -44,6 +44,8 @@ class Tracing(ChannelOwner):
         name: str = None,
         title: str = None,
         snapshots: bool = None,
+        ariaSnapshots: bool = None,
+        screenSnapshots: bool = None,
         screenshots: bool = None,
         sources: bool = None,
         live: bool = None,
@@ -57,8 +59,10 @@ class Tracing(ChannelOwner):
             None,
             {
                 "name": name,
-                "snapshots": snapshots,
-                "screenshots": screenshots,
+                "snapshotDom": snapshots,
+                "snapshotAria": ariaSnapshots,
+                "snapshotScreen": screenSnapshots,
+                "screencast": screenshots,
                 "live": live,
             },
         )

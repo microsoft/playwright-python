@@ -67,6 +67,7 @@ from playwright._impl._js_handle import (
     serialize_argument,
 )
 from playwright._impl._locator import (
+    ANY_FRAME_SELECTOR,
     FrameLocator,
     Locator,
     get_by_alt_text_selector,
@@ -722,8 +723,8 @@ class Frame(ChannelOwner):
     ) -> "Locator":
         return self.locator(get_by_title_selector(text, exact=exact))
 
-    def frame_locator(self, selector: str) -> FrameLocator:
-        return FrameLocator(self, selector)
+    def frame_locator(self, selector: str = None) -> FrameLocator:
+        return FrameLocator(self, ANY_FRAME_SELECTOR if selector is None else selector)
 
     async def focus(
         self, selector: str, strict: bool = None, timeout: float = None

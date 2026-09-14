@@ -18,7 +18,7 @@ import mimetypes
 import pathlib
 import typing
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union, cast
+from typing import Any, Dict, List, Optional, Sequence, Union, cast
 
 import playwright._impl._network as network
 from playwright._impl._api_structures import (
@@ -49,7 +49,11 @@ from playwright._impl._helper import (
     object_to_array,
     to_impl,
 )
-from playwright._impl._network import serialize_headers, to_client_certificates_protocol
+from playwright._impl._network import (
+    serialize_headers,
+    to_client_certificates_protocol,
+    to_http_credentials_protocol,
+)
 from playwright._impl._tracing import Tracing
 
 if typing.TYPE_CHECKING:
@@ -72,7 +76,7 @@ class APIRequest:
         self,
         baseURL: str = None,
         extraHTTPHeaders: Dict[str, str] = None,
-        httpCredentials: HttpCredentials = None,
+        httpCredentials: Union[HttpCredentials, Sequence[HttpCredentials]] = None,
         ignoreHTTPSErrors: bool = None,
         proxy: ProxySettings = None,
         userAgent: str = None,
@@ -94,6 +98,10 @@ class APIRequest:
         params["clientCertificates"] = await to_client_certificates_protocol(
             params.get("clientCertificates")
         )
+        if "httpCredentials" in params:
+            params["httpCredentials"] = to_http_credentials_protocol(
+                params["httpCredentials"]
+            )
         context = cast(
             APIRequestContext,
             from_channel(
@@ -458,9 +466,10 @@ class APIRequestContext(ChannelOwner):
         self,
         path: Union[pathlib.Path, str] = None,
         indexedDB: bool = None,
+        opfs: bool = None,
     ) -> StorageState:
         result = await self._channel.send_return_as_dict(
-            "storageState", None, {"indexedDB": indexedDB}
+            "storageState", None, {"indexedDB": indexedDB, "opfs": opfs}
         )
         if path:
             await async_writefile(path, json.dumps(result))

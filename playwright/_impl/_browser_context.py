@@ -96,6 +96,7 @@ class BrowserContext(ChannelOwner):
         Close="close",
         Console="console",
         Dialog="dialog",
+        DialogClosed="dialogclosed",
         Download="download",
         FrameAttached="frameattached",
         FrameDetached="framedetached",
@@ -174,6 +175,10 @@ class BrowserContext(ChannelOwner):
             "dialog", lambda params: self._on_dialog(from_channel(params["dialog"]))
         )
         self._channel.on(
+            "dialogClosed",
+            lambda params: self._on_dialog_closed(from_channel(params["dialog"])),
+        )
+        self._channel.on(
             "pageError",
             lambda params: self._on_page_error(
                 parse_error(params["error"]["error"]),
@@ -226,6 +231,7 @@ class BrowserContext(ChannelOwner):
             {
                 BrowserContext.Events.Console: "console",
                 BrowserContext.Events.Dialog: "dialog",
+                BrowserContext.Events.DialogClosed: "dialogClosed",
                 BrowserContext.Events.Request: "request",
                 BrowserContext.Events.Response: "response",
                 BrowserContext.Events.RequestFinished: "requestFinished",
@@ -567,6 +573,7 @@ class BrowserContext(ChannelOwner):
 
         self._dispose_har_routers()
         self._tracing._reset_stack_counter()
+        self._request._tracing._reset_stack_counter()
         self.emit(BrowserContext.Events.Close, self)
 
     def is_closed(self) -> bool:
@@ -591,10 +598,13 @@ class BrowserContext(ChannelOwner):
         self,
         path: Union[str, Path] = None,
         indexedDB: bool = None,
+        opfs: bool = None,
         credentials: bool = None,
     ) -> StorageState:
         result = await self._channel.send_return_as_dict(
-            "storageState", None, {"indexedDB": indexedDB, "credentials": credentials}
+            "storageState",
+            None,
+            {"indexedDB": indexedDB, "opfs": opfs, "credentials": credentials},
         )
         if path:
             await async_writefile(path, json.dumps(result))
@@ -693,6 +703,12 @@ class BrowserContext(ChannelOwner):
                 create_task_and_ignore_exception(self._loop, dialog.accept())
             else:
                 create_task_and_ignore_exception(self._loop, dialog.dismiss())
+
+    def _on_dialog_closed(self, dialog: Dialog) -> None:
+        self.emit(BrowserContext.Events.DialogClosed, dialog)
+        page = dialog.page
+        if page:
+            page.emit(Page.Events.DialogClosed, dialog)
 
     def _on_page_error(
         self, error: Error, page: Optional[Page], location: WebErrorLocation

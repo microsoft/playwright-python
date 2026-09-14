@@ -29,6 +29,7 @@ from typing import (
     Dict,
     List,
     Optional,
+    Sequence,
     TypedDict,
     Union,
     cast,
@@ -39,6 +40,7 @@ from playwright._impl._api_structures import (
     ClientCertificate,
     Headers,
     HeadersArray,
+    HttpCredentials,
     RemoteAddr,
     RequestSizes,
     ResourceTiming,
@@ -124,6 +126,20 @@ async def to_client_certificates_protocol(
             ).decode()
         out.append(out_record)
     return out
+
+
+def to_http_credentials_protocol(
+    httpCredentials: Optional[Union[HttpCredentials, Sequence[HttpCredentials]]],
+) -> Optional[List[HttpCredentials]]:
+    if not httpCredentials:
+        return None
+    credentials_list = (
+        [httpCredentials] if isinstance(httpCredentials, dict) else httpCredentials
+    )
+    return [
+        cast(HttpCredentials, {k: v for k, v in c.items() if v is not None})
+        for c in credentials_list
+    ] or None
 
 
 class Request(ChannelOwner):

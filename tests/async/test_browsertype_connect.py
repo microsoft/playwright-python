@@ -397,7 +397,7 @@ async def test_should_record_trace_with_source(
     async with show_trace_viewer(path) as trace_viewer:
         await expect(trace_viewer.action_titles).to_have_text(
             [
-                re.compile(r'Navigate to "/empty\.html"'),
+                re.compile(r"Navigate.*/empty\.html"),
                 re.compile(r"Set content"),
                 re.compile(r"Click"),
             ]

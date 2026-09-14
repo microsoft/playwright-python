@@ -240,3 +240,49 @@ async def test_should_round_trip_webauthn_credentials_with_storage_state(
     assert await context2.storage_state(credentials=True) == state
     await context.close()
     await context2.close()
+
+
+@pytest.mark.skip_browser("webkit")  # OPFS is unavailable in ephemeral WebKit contexts
+async def test_should_round_trip_opfs(
+    browser: Browser, page: Page, server: Server
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+    await page.evaluate(
+        """async () => {
+            const root = await navigator.storage.getDirectory();
+            const nested = await root.getDirectoryHandle('nested', { create: true });
+            const file = await nested.getFileHandle('data.bin', { create: true });
+            const writable = await file.createWritable();
+            await writable.write(new Uint8Array([0, 1, 2, 255]));
+            await writable.close();
+        }"""
+    )
+    assert await page.context.storage_state() == {"cookies": [], "origins": []}
+    state = await page.context.storage_state(opfs=True)
+    assert state["origins"] == [
+        {
+            "origin": f"http://localhost:{server.PORT}",
+            "localStorage": [],
+            "opfs": [
+                {"path": "nested", "type": "directory"},
+                {"path": "nested/data.bin", "type": "file", "base64": "AAEC/w=="},
+            ],
+        }
+    ]
+    assert await page.context.request.storage_state(opfs=True) == state
+
+    context2 = await browser.new_context(storage_state=state)
+    page2 = await context2.new_page()
+    await page2.goto(server.EMPTY_PAGE)
+    assert (
+        await page2.evaluate(
+            """async () => {
+            const root = await navigator.storage.getDirectory();
+            const nested = await root.getDirectoryHandle('nested');
+            const data = await (await nested.getFileHandle('data.bin')).getFile();
+            return [...new Uint8Array(await data.arrayBuffer())];
+        }"""
+        )
+        == [0, 1, 2, 255]
+    )
+    await context2.close()
