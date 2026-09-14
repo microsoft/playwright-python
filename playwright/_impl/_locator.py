@@ -384,6 +384,10 @@ class Locator:
             visible=visible,
         )
 
+    @property
+    def visible(self) -> "Locator":
+        return Locator(self._frame, self._selector, visible=True)
+
     def or_(self, locator: "Locator") -> "Locator":
         if locator._frame != self._frame:
             raise Error("Locators must belong to the same frame.")
@@ -809,12 +813,25 @@ class Locator:
         await self._frame._hide_highlight(self._selector)
 
 
+ANY_FRAME_SELECTOR = "internal:control=any-frame"
+
+
 class FrameLocator:
     def __init__(self, frame: "Frame", frame_selector: str) -> None:
         self._frame = frame
         self._loop = frame._loop
         self._dispatcher_fiber = frame._connection._dispatcher_fiber
         self._frame_selector = frame_selector
+
+    def _child_selector(self, selector: str) -> str:
+        if self._frame_selector == ANY_FRAME_SELECTOR:
+            return f"{self._frame_selector} >> {selector}"
+        return f"{self._frame_selector} >> internal:control=enter-frame >> {selector}"
+
+    def _nth_selector(self, nth: str) -> str:
+        if self._frame_selector == ANY_FRAME_SELECTOR:
+            raise Error("Selecting the nth frame is not allowed on frame_locator().")
+        return f"{self._frame_selector} >> nth={nth}"
 
     def locator(
         self,
@@ -827,7 +844,7 @@ class FrameLocator:
         if isinstance(selectorOrLocator, str):
             return Locator(
                 self._frame,
-                f"{self._frame_selector} >> internal:control=enter-frame >> {selectorOrLocator}",
+                self._child_selector(selectorOrLocator),
                 has_text=hasText,
                 has_not_text=hasNotText,
                 has=has,
@@ -838,7 +855,7 @@ class FrameLocator:
             raise ValueError("Locators must belong to the same frame.")
         return Locator(
             self._frame,
-            f"{self._frame_selector} >> internal:control=enter-frame >> {selectorOrLocator._selector}",
+            self._child_selector(selectorOrLocator._selector),
             has_text=hasText,
             has_not_text=hasNotText,
             has=has,
@@ -904,25 +921,22 @@ class FrameLocator:
         return self.locator(get_by_title_selector(text, exact=exact))
 
     def frame_locator(self, selector: str) -> "FrameLocator":
-        return FrameLocator(
-            self._frame,
-            f"{self._frame_selector} >> internal:control=enter-frame >> {selector}",
-        )
+        return FrameLocator(self._frame, self._child_selector(selector))
 
     @property
     def first(self) -> "FrameLocator":
-        return FrameLocator(self._frame, f"{self._frame_selector} >> nth=0")
+        return FrameLocator(self._frame, self._nth_selector("0"))
 
     @property
     def last(self) -> "FrameLocator":
-        return FrameLocator(self._frame, f"{self._frame_selector} >> nth=-1")
+        return FrameLocator(self._frame, self._nth_selector("-1"))
 
     @property
     def owner(self) -> "Locator":
         return Locator(self._frame, self._frame_selector)
 
     def nth(self, index: int) -> "FrameLocator":
-        return FrameLocator(self._frame, f"{self._frame_selector} >> nth={index}")
+        return FrameLocator(self._frame, self._nth_selector(str(index)))
 
     def __repr__(self) -> str:
         return f"<FrameLocator frame={self._frame!r} selector={self._frame_selector!r}>"

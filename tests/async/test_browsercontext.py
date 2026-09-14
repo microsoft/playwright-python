@@ -822,3 +822,49 @@ async def test_should_support_forced_colors(browser: Browser) -> None:
     page = await context.new_page()
     assert await page.evaluate("matchMedia('(forced-colors: active)').matches")
     assert not await page.evaluate("matchMedia('(forced-colors: none)').matches")
+
+
+async def test_should_work_with_multiple_credentials_for_different_origins(
+    browser: Browser, server: Server
+) -> None:
+    server.set_auth("/empty.html", "user1", "pass1")
+    context = await browser.new_context(
+        http_credentials=[
+            {"username": "user1", "password": "pass1", "origin": server.PREFIX},
+            {
+                "username": "user2",
+                "password": "pass2",
+                "origin": server.CROSS_PROCESS_PREFIX,
+            },
+        ]
+    )
+    page = await context.new_page()
+    response1 = await page.goto(server.EMPTY_PAGE)
+    assert response1
+    assert response1.status == 200
+    # Wrong credentials are picked for the other origin.
+    response2 = await page.goto(server.CROSS_PROCESS_PREFIX + "/empty.html")
+    assert response2
+    assert response2.status == 401
+    await context.close()
+
+
+async def test_should_fall_back_to_credentials_without_origin(
+    browser: Browser, server: Server
+) -> None:
+    server.set_auth("/empty.html", "user", "pass")
+    context = await browser.new_context(
+        http_credentials=[
+            {
+                "username": "user2",
+                "password": "pass2",
+                "origin": server.CROSS_PROCESS_PREFIX,
+            },
+            {"username": "user", "password": "pass"},
+        ]
+    )
+    page = await context.new_page()
+    response = await page.goto(server.EMPTY_PAGE)
+    assert response
+    assert response.status == 200
+    await context.close()

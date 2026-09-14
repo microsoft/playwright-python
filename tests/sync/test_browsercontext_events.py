@@ -316,3 +316,20 @@ def test_download_event_should_work(
     download = info.value
     assert download.suggested_filename == "file.txt"
     assert download.page == page
+
+
+def test_dialogclosed_event_should_work(page: Page) -> None:
+    page.on("dialog", lambda dialog: dialog.accept("hello"))
+    with page.context.expect_event("dialogclosed") as context_closed_info:
+        with page.expect_event("dialogclosed") as page_closed_info:
+            assert page.evaluate("() => prompt('hey?')") == "hello"
+    dialog = page_closed_info.value
+    assert context_closed_info.value == dialog
+    assert dialog.message == "hey?"
+    assert dialog.page == page
+
+
+def test_dialogclosed_event_should_fire_for_auto_dismissed_dialogs(page: Page) -> None:
+    with page.expect_event("dialogclosed") as closed_info:
+        page.evaluate("() => alert('yo')")
+    assert closed_info.value.message == "yo"

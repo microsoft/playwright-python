@@ -104,6 +104,7 @@ positional_exceptions = [
     r"expect_.*\.predicate",
     r"evaluate_handle\.arg",
     r"frame.*\.name",
+    r"frame_locator\.selector",
     r"not_to_have_attribute\.value",
     r"register\.script",
     r"select_option\.value",

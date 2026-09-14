@@ -17,7 +17,7 @@ import json
 import re
 import zipfile
 from pathlib import Path
-from typing import AsyncContextManager, Callable
+from typing import Any, AsyncContextManager, Callable, Dict, List
 
 from playwright.async_api import (
     Browser,
@@ -101,7 +101,7 @@ async def test_should_collect_sources(
     async with show_trace_viewer(path) as trace_viewer:
         await expect(trace_viewer.action_titles).to_have_text(
             [
-                re.compile(r'Navigate to "/empty\.html"'),
+                re.compile(r"Navigate.*/empty\.html"),
                 re.compile(r"Set content"),
                 re.compile(r"Click"),
             ]
@@ -152,16 +152,15 @@ async def test_should_collect_trace_with_resources_but_no_js(
     async with show_trace_viewer(trace_file_path) as trace_viewer:
         await expect(trace_viewer.action_titles).to_have_text(
             [
-                re.compile(r'Navigate to "/frames/frame\.html"'),
+                re.compile(r"Navigate.*/frames/frame\.html"),
                 re.compile(r"Set content"),
                 re.compile(r"Click"),
                 re.compile(r"Mouse move"),
                 re.compile(r"Double click"),
-                re.compile(r"GET \"/empty\.html\""),
                 re.compile(r'Insert "abc"'),
                 re.compile(r"Wait for timeout"),
-                re.compile(r'Navigate to "/empty\.html"'),
-                re.compile(r'Navigate to "/one-style\.html"'),
+                re.compile(r"Navigate.*/empty\.html"),
+                re.compile(r"Navigate.*/one-style\.html"),
                 re.compile(r"Close"),
             ]
         )
@@ -200,7 +199,7 @@ async def test_should_correctly_determine_sync_apiname(
     async with show_trace_viewer(trace_file_path) as trace_viewer:
         await expect(trace_viewer.action_titles).to_have_text(
             [
-                re.compile(r'Navigate to "/grid\.html"'),
+                re.compile(r"Navigate.*/grid\.html"),
                 re.compile(r"Close"),
             ]
         )
@@ -229,7 +228,7 @@ async def test_should_collect_two_traces(
     async with show_trace_viewer(tracing1_path) as trace_viewer:
         await expect(trace_viewer.action_titles).to_have_text(
             [
-                re.compile(r'Navigate to "/empty\.html"'),
+                re.compile(r"Navigate.*/empty\.html"),
                 re.compile(r"Set content"),
                 re.compile(r"Click"),
             ]
@@ -267,7 +266,7 @@ async def test_should_work_with_playwright_context_managers(
     async with show_trace_viewer(trace_file_path) as trace_viewer:
         await expect(trace_viewer.action_titles).to_have_text(
             [
-                re.compile(r'Navigate to "/empty\.html"'),
+                re.compile(r"Navigate.*/empty\.html"),
                 re.compile(r"Set content"),
                 re.compile(r'Wait for event "page\.expect_event\(console\)"'),
                 re.compile(r"Evaluate"),
@@ -297,7 +296,7 @@ async def test_should_display_wait_for_load_state_even_if_did_not_wait_for_it(
     async with show_trace_viewer(trace_file_path) as trace_viewer:
         await expect(trace_viewer.action_titles).to_have_text(
             [
-                re.compile(r'Navigate to "/empty\.html"'),
+                re.compile(r"Navigate.*/empty\.html"),
                 re.compile(r'Wait for event "frame\.wait_for_load_state"'),
                 re.compile(r'Wait for event "frame\.wait_for_load_state"'),
             ]
@@ -333,12 +332,10 @@ async def test_should_respect_traces_dir_and_name(
     async with show_trace_viewer(tmp_path / "trace1.zip") as trace_viewer:
         await expect(trace_viewer.action_titles).to_have_text(
             [
-                re.compile('Navigate to "/one-style\\.html"'),
+                re.compile(r"Navigate.*/one-style\.html"),
             ]
         )
-        frame = await trace_viewer.snapshot_frame(
-            'Navigate to "/one-style.html"', 0, False
-        )
+        frame = await trace_viewer.snapshot_frame("Navigate", 0, False)
         await expect(frame.locator("body")).to_have_css(
             "background-color", "rgb(255, 192, 203)"
         )
@@ -347,10 +344,10 @@ async def test_should_respect_traces_dir_and_name(
     async with show_trace_viewer(tmp_path / "trace2.zip") as trace_viewer:
         await expect(trace_viewer.action_titles).to_have_text(
             [
-                re.compile(r'Navigate to "/har\.html"'),
+                re.compile(r"Navigate.*/har\.html"),
             ]
         )
-        frame = await trace_viewer.snapshot_frame('Navigate to "/har.html"', 0, False)
+        frame = await trace_viewer.snapshot_frame("Navigate", 0, False)
         await expect(frame.locator("body")).to_have_css(
             "background-color", "rgb(255, 192, 203)"
         )
@@ -384,7 +381,7 @@ async def test_should_show_tracing_group_in_action_list(
             [
                 re.compile(r"Create page"),
                 re.compile(r"outer group"),
-                re.compile(r"Navigate to \"data:\""),
+                re.compile(r"Navigate.*data:"),
                 re.compile(r"inner group 1"),
                 re.compile(r"Click"),
                 re.compile(r"inner group 2"),
@@ -443,3 +440,50 @@ async def test_should_record_a_zipped_har_for_apirequestcontext(
     assert any(
         e["request"]["url"] == server.PREFIX + "/simple.json" for e in log["entries"]
     )
+
+
+def _parse_trace_events(path: Path) -> List[Dict[str, Any]]:
+    events = []
+    with zipfile.ZipFile(path) as z:
+        for name in z.namelist():
+            if name.endswith(".trace"):
+                for line in z.read(name).decode().splitlines():
+                    if line:
+                        events.append(json.loads(line))
+    return events
+
+
+async def test_should_not_collect_aria_and_screen_snapshots_by_default(
+    context: BrowserContext, page: Page, server: Server, tmp_path: Path
+) -> None:
+    await context.tracing.start(snapshots=True)
+    await page.goto(server.PREFIX + "/input/button.html")
+    await page.click("button")
+    await context.tracing.stop(path=tmp_path / "trace.zip")
+
+    events = _parse_trace_events(tmp_path / "trace.zip")
+    assert not any(e["type"] == "screenshot" for e in events)
+    assert not any(e["type"] == "aria-snapshot" for e in events)
+
+
+async def test_should_collect_aria_and_screen_snapshots(
+    context: BrowserContext, page: Page, server: Server, tmp_path: Path
+) -> None:
+    await context.tracing.start(aria_snapshots=True, screen_snapshots=True)
+    await page.goto(server.PREFIX + "/input/button.html")
+    await page.click("button")
+    await context.tracing.stop(path=tmp_path / "trace.zip")
+
+    events = _parse_trace_events(tmp_path / "trace.zip")
+    click_call_id = next(
+        e["callId"]
+        for e in events
+        if e["type"] == "before" and e.get("method") == "click"
+    )
+    for event_type in ["screenshot", "aria-snapshot"]:
+        phases = [
+            e["phase"]
+            for e in events
+            if e["type"] == event_type and e.get("callId") == click_call_id
+        ]
+        assert phases == ["before", "action", "after"]

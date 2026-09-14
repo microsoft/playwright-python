@@ -388,3 +388,25 @@ def test_should_follow_max_redirects(playwright: Playwright, server: Server) -> 
         request.fetch(server.EMPTY_PAGE)
     assert redirect_count == 2
     request.dispose()
+
+
+def test_should_support_multiple_http_credentials(
+    playwright: Playwright, server: Server
+) -> None:
+    server.set_auth("/empty.html", "user1", "pass1")
+    request = playwright.request.new_context(
+        http_credentials=[
+            {"username": "user1", "password": "pass1", "origin": server.PREFIX},
+            {
+                "username": "user2",
+                "password": "pass2",
+                "origin": server.CROSS_PROCESS_PREFIX,
+            },
+        ]
+    )
+    response1 = request.get(server.EMPTY_PAGE)
+    assert response1.status == 200
+    # Wrong credentials are picked for the other origin.
+    response2 = request.get(server.CROSS_PROCESS_PREFIX + "/empty.html")
+    assert response2.status == 401
+    request.dispose()

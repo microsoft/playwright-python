@@ -5411,11 +5411,15 @@ class Frame(SyncBase):
 
         return mapping.from_impl(self._impl_obj.get_by_title(text=text, exact=exact))
 
-    def frame_locator(self, selector: str) -> "FrameLocator":
+    def frame_locator(self, selector: typing.Optional[str] = None) -> "FrameLocator":
         """Frame.frame_locator
 
         When working with iframes, you can create a frame locator that will enter the iframe and allow selecting elements
         in that iframe.
+
+        When called without `selector`, the search starts in this frame or in any of the iframes inside it, so that you
+        don't need to locate each iframe first. Note that the rest of the locator is resolved inside a single frame, just
+        like any other locator. If it matches elements inside multiple frames, an error is thrown.
 
         **Usage**
 
@@ -5427,10 +5431,18 @@ class Frame(SyncBase):
         locator.click()
         ```
 
+        Following snippet locates a button, either in the frame or in one of the iframes inside it:
+
+        ```py
+        locator = frame.frame_locator().get_by_role(\"button\")
+        locator.click()
+        ```
+
         Parameters
         ----------
-        selector : str
-            A selector to use when resolving DOM element.
+        selector : Union[str, None]
+            A selector that matches the frame element. When not specified, locator is matched in this frame or in any of the
+            iframes inside it.
 
         Returns
         -------
@@ -8274,6 +8286,14 @@ class Page(SyncContextManager):
 
     @typing.overload
     def on(
+        self, event: Literal["dialogclosed"], f: typing.Callable[["Dialog"], "None"]
+    ) -> None:
+        """
+        Emitted when a JavaScript dialog has been closed, either by `dialog.accept()`, by
+        `dialog.dismiss()`, or manually by the user in the headed browser."""
+
+    @typing.overload
+    def on(
         self, event: Literal["domcontentloaded"], f: typing.Callable[["Page"], "None"]
     ) -> None:
         """
@@ -8489,6 +8509,14 @@ class Page(SyncContextManager):
 
         **NOTE** When no `page.on('dialog')` or `browser_context.on('dialog')` listeners are present, all dialogs are
         automatically dismissed."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["dialogclosed"], f: typing.Callable[["Dialog"], "None"]
+    ) -> None:
+        """
+        Emitted when a JavaScript dialog has been closed, either by `dialog.accept()`, by
+        `dialog.dismiss()`, or manually by the user in the headed browser."""
 
     @typing.overload
     def once(
@@ -10074,6 +10102,15 @@ class Page(SyncContextManager):
     @typing.overload
     def wait_for_event(
         self,
+        event: typing.Literal["dialogclosed"],
+        predicate: typing.Optional[typing.Callable[["Dialog"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Dialog": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
         event: typing.Literal["domcontentloaded"],
         predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
         *,
@@ -10270,7 +10307,7 @@ class Page(SyncContextManager):
 
         Navigate to the previous page in history.
 
-        **NOTE** **Testing Back/Forward Cache (BFCache) is not supported.**  By default, Playwright disables the
+        **NOTE** **Testing Back/Forward Cache (BFCache) is not supported.** By default, Playwright disables the
         Back/Forward Cache across all browsers. Even if explicitly enabled, Playwright's internal state relies on
         network-level navigation events. Because BFCache restores unfreeze the DOM without firing these events, using
         `page.goBack()` or `page.goForward()` to trigger a BFCache restore will result in timeouts and a desynchronized
@@ -10320,7 +10357,7 @@ class Page(SyncContextManager):
 
         Navigate to the next page in history.
 
-        **NOTE** **Testing Back/Forward Cache (BFCache) is not supported.**  By default, Playwright disables the
+        **NOTE** **Testing Back/Forward Cache (BFCache) is not supported.** By default, Playwright disables the
         Back/Forward Cache across all browsers. Even if explicitly enabled, Playwright's internal state relies on
         network-level navigation events. Because BFCache restores unfreeze the DOM without firing these events, using
         `page.goBack()` or `page.goForward()` to trigger a BFCache restore will result in timeouts and a desynchronized
@@ -11831,11 +11868,15 @@ class Page(SyncContextManager):
 
         return mapping.from_impl(self._impl_obj.get_by_title(text=text, exact=exact))
 
-    def frame_locator(self, selector: str) -> "FrameLocator":
+    def frame_locator(self, selector: typing.Optional[str] = None) -> "FrameLocator":
         """Page.frame_locator
 
         When working with iframes, you can create a frame locator that will enter the iframe and allow selecting elements
         in that iframe.
+
+        When called without `selector`, the search starts in any frame on the page - the main frame or any of the iframes -
+        so that you don't need to locate each iframe first. Note that the rest of the locator is resolved inside a single
+        frame, just like any other locator. If it matches elements inside multiple frames, an error is thrown.
 
         **Usage**
 
@@ -11847,10 +11888,17 @@ class Page(SyncContextManager):
         locator.click()
         ```
 
+        Following snippet locates a button, either in the main frame or in one of the iframes:
+
+        ```py
+        locator = page.frame_locator().get_by_role(\"button\")
+        locator.click()
+        ```
+
         Parameters
         ----------
-        selector : str
-            A selector to use when resolving DOM element.
+        selector : Union[str, None]
+            A selector that matches the frame element. When not specified, locator is matched in any frame on the page.
 
         Returns
         -------
@@ -12957,6 +13005,15 @@ class Page(SyncContextManager):
     @typing.overload
     def expect_event(
         self,
+        event: typing.Literal["dialogclosed"],
+        predicate: typing.Optional[typing.Callable[["Dialog"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Dialog"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
         event: typing.Literal["domcontentloaded"],
         predicate: typing.Optional[typing.Callable[["Page"], bool]] = None,
         *,
@@ -14033,6 +14090,15 @@ class BrowserContext(SyncContextManager):
 
     @typing.overload
     def on(
+        self, event: Literal["dialogclosed"], f: typing.Callable[["Dialog"], "None"]
+    ) -> None:
+        """
+        Emitted when a JavaScript dialog in any page belonging to this context has been closed, either by
+        `dialog.accept()`, by `dialog.dismiss()`, or manually by the user in the headed browser.
+        """
+
+    @typing.overload
+    def on(
         self, event: Literal["download"], f: typing.Callable[["Download"], "None"]
     ) -> None:
         """
@@ -14221,6 +14287,15 @@ class BrowserContext(SyncContextManager):
 
         **NOTE** When no `page.on('dialog')` or `browser_context.on('dialog')` listeners are present, all dialogs are
         automatically dismissed."""
+
+    @typing.overload
+    def once(
+        self, event: Literal["dialogclosed"], f: typing.Callable[["Dialog"], "None"]
+    ) -> None:
+        """
+        Emitted when a JavaScript dialog in any page belonging to this context has been closed, either by
+        `dialog.accept()`, by `dialog.dismiss()`, or manually by the user in the headed browser.
+        """
 
     @typing.overload
     def once(
@@ -15192,6 +15267,15 @@ class BrowserContext(SyncContextManager):
     @typing.overload
     def expect_event(
         self,
+        event: typing.Literal["dialogclosed"],
+        predicate: typing.Optional[typing.Callable[["Dialog"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> EventContextManager["Dialog"]: ...
+
+    @typing.overload
+    def expect_event(
+        self,
         event: typing.Literal["download"],
         predicate: typing.Optional[typing.Callable[["Download"], bool]] = None,
         *,
@@ -15390,12 +15474,13 @@ class BrowserContext(SyncContextManager):
         *,
         path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         indexed_db: typing.Optional[bool] = None,
+        opfs: typing.Optional[bool] = None,
         credentials: typing.Optional[bool] = None,
     ) -> StorageState:
         """BrowserContext.storage_state
 
         Returns storage state for this browser context, contains current cookies, local storage snapshot, IndexedDB
-        snapshot and virtual WebAuthn credentials.
+        snapshot, origin private file system snapshot and virtual WebAuthn credentials.
 
         Parameters
         ----------
@@ -15406,6 +15491,13 @@ class BrowserContext(SyncContextManager):
             Set to `true` to include [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) in the storage
             state snapshot. If your application uses IndexedDB to store authentication tokens, like Firebase Authentication,
             enable this.
+        opfs : Union[bool, None]
+            Set to `true` to include the
+            [origin private file system](https://developer.mozilla.org/en-US/docs/Web/API/File_System_API/Origin_private_file_system)
+            in the storage state snapshot.
+
+            **NOTE** OPFS is currently not supported in ephemeral WebKit contexts.
+
         credentials : Union[bool, None]
             Set to `true` to include the context's virtual WebAuthn `browser_context.credentials` (passkeys) in the
             storage state snapshot. The captured credentials carry their private keys, so they can be re-seeded into a later
@@ -15421,7 +15513,7 @@ class BrowserContext(SyncContextManager):
         return mapping.from_impl(
             self._sync(
                 self._impl_obj.storage_state(
-                    path=path, indexedDB=indexed_db, credentials=credentials
+                    path=path, indexedDB=indexed_db, opfs=opfs, credentials=credentials
                 )
             )
         )
@@ -15431,9 +15523,10 @@ class BrowserContext(SyncContextManager):
     ) -> None:
         """BrowserContext.set_storage_state
 
-        Clears the existing cookies, local storage, IndexedDB entries and virtual WebAuthn credentials, and sets the new
-        storage state. When the storage state contains credentials, the virtual WebAuthn authenticator is installed
-        (equivalent to `credentials.install()`), preventing all real authenticators from working in this context.
+        Clears the existing cookies, local storage, IndexedDB entries, origin private file system entries and virtual
+        WebAuthn credentials, and sets the new storage state. When the storage state contains credentials, the virtual
+        WebAuthn authenticator is installed (equivalent to `credentials.install()`), preventing all real
+        authenticators from working in this context.
 
         **Usage**
 
@@ -15486,6 +15579,15 @@ class BrowserContext(SyncContextManager):
     def wait_for_event(
         self,
         event: typing.Literal["dialog"],
+        predicate: typing.Optional[typing.Callable[["Dialog"], bool]] = None,
+        *,
+        timeout: typing.Optional[float] = None,
+    ) -> "Dialog": ...
+
+    @typing.overload
+    def wait_for_event(
+        self,
+        event: typing.Literal["dialogclosed"],
         predicate: typing.Optional[typing.Callable[["Dialog"], bool]] = None,
         *,
         timeout: typing.Optional[float] = None,
@@ -15927,7 +16029,9 @@ class Browser(SyncContextManager):
         permissions: typing.Optional[typing.Sequence[str]] = None,
         extra_http_headers: typing.Optional[typing.Dict[str, str]] = None,
         offline: typing.Optional[bool] = None,
-        http_credentials: typing.Optional[HttpCredentials] = None,
+        http_credentials: typing.Optional[
+            typing.Union[HttpCredentials, typing.Sequence[HttpCredentials]]
+        ] = None,
         device_scale_factor: typing.Optional[float] = None,
         is_mobile: typing.Optional[bool] = None,
         has_touch: typing.Optional[bool] = None,
@@ -16019,9 +16123,12 @@ class Browser(SyncContextManager):
         offline : Union[bool, None]
             Whether to emulate network being offline. Defaults to `false`. Learn more about
             [network emulation](../emulation.md#offline).
-        http_credentials : Union[{username: str, password: str, origin: Union[str, None], send: Union["always", "unauthorized", None]}, None]
+        http_credentials : Union[Sequence[{username: str, password: str, origin: Union[str, None], send: Union["always", "unauthorized", None]}], {username: str, password: str, origin: Union[str, None], send: Union["always", "unauthorized", None]}, None]
             Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication). If no
             origin is specified, the username and password are sent to any servers upon unauthorized responses.
+
+            Pass an array to use different credentials for different origins. The first entry that matches the request origin
+            is used, and entries with no origin match any request.
         device_scale_factor : Union[float, None]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`. Learn more about
             [emulating devices with device scale factor](../emulation.md#devices).
@@ -16137,7 +16244,7 @@ class Browser(SyncContextManager):
                     permissions=mapping.to_impl(permissions),
                     extraHTTPHeaders=mapping.to_impl(extra_http_headers),
                     offline=offline,
-                    httpCredentials=http_credentials,
+                    httpCredentials=mapping.to_impl(http_credentials),
                     deviceScaleFactor=device_scale_factor,
                     isMobile=is_mobile,
                     hasTouch=has_touch,
@@ -16180,7 +16287,9 @@ class Browser(SyncContextManager):
         permissions: typing.Optional[typing.Sequence[str]] = None,
         extra_http_headers: typing.Optional[typing.Dict[str, str]] = None,
         offline: typing.Optional[bool] = None,
-        http_credentials: typing.Optional[HttpCredentials] = None,
+        http_credentials: typing.Optional[
+            typing.Union[HttpCredentials, typing.Sequence[HttpCredentials]]
+        ] = None,
         device_scale_factor: typing.Optional[float] = None,
         is_mobile: typing.Optional[bool] = None,
         has_touch: typing.Optional[bool] = None,
@@ -16256,9 +16365,12 @@ class Browser(SyncContextManager):
         offline : Union[bool, None]
             Whether to emulate network being offline. Defaults to `false`. Learn more about
             [network emulation](../emulation.md#offline).
-        http_credentials : Union[{username: str, password: str, origin: Union[str, None], send: Union["always", "unauthorized", None]}, None]
+        http_credentials : Union[Sequence[{username: str, password: str, origin: Union[str, None], send: Union["always", "unauthorized", None]}], {username: str, password: str, origin: Union[str, None], send: Union["always", "unauthorized", None]}, None]
             Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication). If no
             origin is specified, the username and password are sent to any servers upon unauthorized responses.
+
+            Pass an array to use different credentials for different origins. The first entry that matches the request origin
+            is used, and entries with no origin match any request.
         device_scale_factor : Union[float, None]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`. Learn more about
             [emulating devices with device scale factor](../emulation.md#devices).
@@ -16374,7 +16486,7 @@ class Browser(SyncContextManager):
                     permissions=mapping.to_impl(permissions),
                     extraHTTPHeaders=mapping.to_impl(extra_http_headers),
                     offline=offline,
-                    httpCredentials=http_credentials,
+                    httpCredentials=mapping.to_impl(http_credentials),
                     deviceScaleFactor=device_scale_factor,
                     isMobile=is_mobile,
                     hasTouch=has_touch,
@@ -16754,7 +16866,9 @@ class BrowserType(SyncBase):
         permissions: typing.Optional[typing.Sequence[str]] = None,
         extra_http_headers: typing.Optional[typing.Dict[str, str]] = None,
         offline: typing.Optional[bool] = None,
-        http_credentials: typing.Optional[HttpCredentials] = None,
+        http_credentials: typing.Optional[
+            typing.Union[HttpCredentials, typing.Sequence[HttpCredentials]]
+        ] = None,
         device_scale_factor: typing.Optional[float] = None,
         is_mobile: typing.Optional[bool] = None,
         has_touch: typing.Optional[bool] = None,
@@ -16890,9 +17004,12 @@ class BrowserType(SyncBase):
         offline : Union[bool, None]
             Whether to emulate network being offline. Defaults to `false`. Learn more about
             [network emulation](../emulation.md#offline).
-        http_credentials : Union[{username: str, password: str, origin: Union[str, None], send: Union["always", "unauthorized", None]}, None]
+        http_credentials : Union[Sequence[{username: str, password: str, origin: Union[str, None], send: Union["always", "unauthorized", None]}], {username: str, password: str, origin: Union[str, None], send: Union["always", "unauthorized", None]}, None]
             Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication). If no
             origin is specified, the username and password are sent to any servers upon unauthorized responses.
+
+            Pass an array to use different credentials for different origins. The first entry that matches the request origin
+            is used, and entries with no origin match any request.
         device_scale_factor : Union[float, None]
             Specify device scale factor (can be thought of as dpr). Defaults to `1`. Learn more about
             [emulating devices with device scale factor](../emulation.md#devices).
@@ -17029,7 +17146,7 @@ class BrowserType(SyncBase):
                     permissions=mapping.to_impl(permissions),
                     extraHTTPHeaders=mapping.to_impl(extra_http_headers),
                     offline=offline,
-                    httpCredentials=http_credentials,
+                    httpCredentials=mapping.to_impl(http_credentials),
                     deviceScaleFactor=device_scale_factor,
                     isMobile=is_mobile,
                     hasTouch=has_touch,
@@ -17330,6 +17447,8 @@ class Tracing(SyncBase):
         name: typing.Optional[str] = None,
         title: typing.Optional[str] = None,
         snapshots: typing.Optional[bool] = None,
+        aria_snapshots: typing.Optional[bool] = None,
+        screen_snapshots: typing.Optional[bool] = None,
         screenshots: typing.Optional[bool] = None,
         sources: typing.Optional[bool] = None,
         live: typing.Optional[bool] = None,
@@ -17365,9 +17484,11 @@ class Tracing(SyncBase):
         title : Union[str, None]
             Trace name to be shown in the Trace Viewer.
         snapshots : Union[bool, None]
-            If this option is true tracing will
-            - capture DOM snapshot on every action
-            - record network activity
+            Whether to capture DOM snapshot and record network activity on every action.
+        aria_snapshots : Union[bool, None]
+            Whether to capture aria snapshot of the page on every action.
+        screen_snapshots : Union[bool, None]
+            Whether to capture a screenshot of the page on every action.
         screenshots : Union[bool, None]
             Whether to capture screenshots during tracing. Screenshots are used to build a timeline preview.
         sources : Union[bool, None]
@@ -17384,6 +17505,8 @@ class Tracing(SyncBase):
                     name=name,
                     title=title,
                     snapshots=snapshots,
+                    ariaSnapshots=aria_snapshots,
+                    screenSnapshots=screen_snapshots,
                     screenshots=screenshots,
                     sources=sources,
                     live=live,
@@ -17521,7 +17644,7 @@ class Tracing(SyncBase):
         Start recording a HAR (HTTP Archive) of network activity in this context. The HAR file is written to disk when
         `tracing.stop_har()` is called, or when the returned `Disposable` is disposed.
 
-        Only one HAR recording can be active at a time per `BrowserContext`.
+        Only one HAR recording can be active at a time per `Tracing` instance.
 
         **Usage**
 
@@ -17665,6 +17788,39 @@ class Locator(SyncBase):
         Union[str, None]
         """
         return mapping.from_maybe_impl(self._impl_obj.description)
+
+    @property
+    def visible(self) -> "Locator":
+        """Locator.visible
+
+        Returns a locator that matches only [visible](https://playwright.dev/python/docs/actionability#visible) elements, ignoring the invisible ones.
+        This is the recommended way to distinguish elements by visibility, as opposed to the `:visible` CSS pseudo-class.
+
+        Note that visibility is checked every time the locator is used, and not at the moment of the
+        `locator.visible()` call.
+
+        **Usage**
+
+        Consider a page with two buttons, the first invisible and the second visible.
+
+        ```html
+        <button style='display: none'>Invisible</button>
+        <button>Visible</button>
+        ```
+
+        This will only find the second button, because it is visible, and then click it.
+
+        ```py
+        page.locator(\"button\").visible.click()
+        ```
+
+        To match invisible elements instead, use `locator.filter()` with the `visible` option set to `false`.
+
+        Returns
+        -------
+        Locator
+        """
+        return mapping.from_impl(self._impl_obj.visible)
 
     def bounding_box(
         self,
@@ -18982,7 +19138,8 @@ class Locator(SyncBase):
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
         visible : Union[bool, None]
-            Only matches visible or invisible elements.
+            Only matches visible or invisible elements. Prefer the `locator.visible()` shortcut when matching only
+            visible elements.
 
         Returns
         -------
@@ -20863,6 +21020,8 @@ class APIRequestContext(SyncBase):
     def tracing(self) -> "Tracing":
         """APIRequestContext.tracing
 
+        Tracing recorder for requests made through this API request context.
+
         Returns
         -------
         Tracing
@@ -21587,6 +21746,7 @@ class APIRequestContext(SyncBase):
         *,
         path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         indexed_db: typing.Optional[bool] = None,
+        opfs: typing.Optional[bool] = None,
     ) -> StorageState:
         """APIRequestContext.storage_state
 
@@ -21600,6 +21760,8 @@ class APIRequestContext(SyncBase):
             working directory. If no path is provided, storage state is still returned, but won't be saved to the disk.
         indexed_db : Union[bool, None]
             Set to `true` to include IndexedDB in the storage state snapshot.
+        opfs : Union[bool, None]
+            Set to `true` to include the origin private file system in the storage state snapshot.
 
         Returns
         -------
@@ -21607,7 +21769,9 @@ class APIRequestContext(SyncBase):
         """
 
         return mapping.from_impl(
-            self._sync(self._impl_obj.storage_state(path=path, indexedDB=indexed_db))
+            self._sync(
+                self._impl_obj.storage_state(path=path, indexedDB=indexed_db, opfs=opfs)
+            )
         )
 
 
@@ -21621,7 +21785,9 @@ class APIRequest(SyncBase):
         *,
         base_url: typing.Optional[str] = None,
         extra_http_headers: typing.Optional[typing.Dict[str, str]] = None,
-        http_credentials: typing.Optional[HttpCredentials] = None,
+        http_credentials: typing.Optional[
+            typing.Union[HttpCredentials, typing.Sequence[HttpCredentials]]
+        ] = None,
         ignore_https_errors: typing.Optional[bool] = None,
         proxy: typing.Optional[ProxySettings] = None,
         user_agent: typing.Optional[str] = None,
@@ -21650,9 +21816,12 @@ class APIRequest(SyncBase):
               `http://localhost:3000/bar.html`
         extra_http_headers : Union[Dict[str, str], None]
             An object containing additional HTTP headers to be sent with every request. Defaults to none.
-        http_credentials : Union[{username: str, password: str, origin: Union[str, None], send: Union["always", "unauthorized", None]}, None]
+        http_credentials : Union[Sequence[{username: str, password: str, origin: Union[str, None], send: Union["always", "unauthorized", None]}], {username: str, password: str, origin: Union[str, None], send: Union["always", "unauthorized", None]}, None]
             Credentials for [HTTP authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication). If no
             origin is specified, the username and password are sent to any servers upon unauthorized responses.
+
+            Pass an array to use different credentials for different origins. The first entry that matches the request origin
+            is used, and entries with no origin match any request.
         ignore_https_errors : Union[bool, None]
             Whether to ignore HTTPS errors when sending network requests. Defaults to `false`.
         proxy : Union[{server: str, bypass: Union[str, None], username: Union[str, None], password: Union[str, None]}, None]
@@ -21702,7 +21871,7 @@ class APIRequest(SyncBase):
                 self._impl_obj.new_context(
                     baseURL=base_url,
                     extraHTTPHeaders=mapping.to_impl(extra_http_headers),
-                    httpCredentials=http_credentials,
+                    httpCredentials=mapping.to_impl(http_credentials),
                     ignoreHTTPSErrors=ignore_https_errors,
                     proxy=proxy,
                     userAgent=user_agent,

@@ -17,7 +17,7 @@ from typing import Optional
 
 import pytest
 
-from playwright.async_api import BrowserContext, Page
+from playwright.async_api import BrowserContext, Dialog, Page
 from tests.utils import must
 
 from ..server import Server, TestServerRequest
@@ -318,3 +318,26 @@ async def test_download_event_should_work(
     download = await info.value
     assert download.suggested_filename == "file.txt"
     assert download.page == page
+
+
+async def test_dialogclosed_event_should_work(page: Page) -> None:
+    async def handle_dialog(dialog: Dialog) -> None:
+        await dialog.accept("hello")
+
+    page.on("dialog", handle_dialog)
+    async with page.context.expect_event("dialogclosed") as context_closed_info:
+        async with page.expect_event("dialogclosed") as page_closed_info:
+            assert await page.evaluate("() => prompt('hey?')") == "hello"
+    dialog = await page_closed_info.value
+    assert await context_closed_info.value == dialog
+    assert dialog.message == "hey?"
+    assert dialog.page == page
+
+
+async def test_dialogclosed_event_should_fire_for_auto_dismissed_dialogs(
+    page: Page,
+) -> None:
+    async with page.expect_event("dialogclosed") as closed_info:
+        await page.evaluate("() => alert('yo')")
+    dialog = await closed_info.value
+    assert dialog.message == "yo"

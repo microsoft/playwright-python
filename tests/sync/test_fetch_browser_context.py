@@ -21,6 +21,7 @@ from urllib.parse import parse_qs
 import pytest
 
 from playwright.sync_api import (
+    Browser,
     BrowserContext,
     Error,
     FilePayload,
@@ -359,3 +360,25 @@ def test_should_add_default_headers(
     assert server_req.value.getHeader("User-Agent") == page.evaluate(
         "() => navigator.userAgent"
     )
+
+
+def test_should_support_multiple_http_credentials(
+    browser: Browser, server: Server
+) -> None:
+    server.set_auth("/empty.html", "user1", "pass1")
+    context = browser.new_context(
+        http_credentials=[
+            {"username": "user1", "password": "pass1", "origin": server.PREFIX},
+            {
+                "username": "user2",
+                "password": "pass2",
+                "origin": server.CROSS_PROCESS_PREFIX,
+            },
+        ]
+    )
+    response1 = context.request.get(server.EMPTY_PAGE)
+    assert response1.status == 200
+    # Wrong credentials are picked for the other origin.
+    response2 = context.request.get(server.CROSS_PROCESS_PREFIX + "/empty.html")
+    assert response2.status == 401
+    context.close()
