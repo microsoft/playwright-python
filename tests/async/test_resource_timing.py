@@ -48,7 +48,11 @@ async def test_should_work_for_subresource(
     assert timing["responseEnd"] < 10000
 
 
-async def test_should_work_for_ssl(browser: Browser, https_server: Server) -> None:
+async def test_should_work_for_ssl(
+    browser: Browser, https_server: Server, is_mac: bool, is_webkit: bool
+) -> None:
+    if is_webkit and is_mac:
+        pytest.skip()
     page = await browser.new_page(ignore_https_errors=True)
     async with page.expect_event("requestfinished") as request_info:
         await page.goto(https_server.EMPTY_PAGE)
