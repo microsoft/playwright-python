@@ -31,6 +31,12 @@ pip install -e .
 python -m build --wheel
 ```
 
+Install the browsers to test against:
+
+```sh
+playwright install chromium
+```
+
 Run tests:
 
 ```sh
