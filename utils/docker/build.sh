@@ -17,6 +17,7 @@ fi
 
 function cleanup() {
   rm -rf "dist/"
+  rm -f "${PIP_CONF:-}"
 }
 
 trap "cleanup; cd $(pwd -P)" EXIT
@@ -40,4 +41,20 @@ else
   exit 1
 fi
 
-docker build --platform "${PLATFORM}" -t "$3" -f "Dockerfile.$2" .
+# Let pip inside the image use the same package index as the host. Passed as a
+# BuildKit secret, so the (possibly authenticated) URL never lands in an image layer.
+SECRET_ARGS=()
+if [[ -n "${PIP_INDEX_URL:-}" ]]; then
+  PIP_CONF="$(mktemp)"
+  printf '[global]\nindex-url = %s\n' "${PIP_INDEX_URL}" > "${PIP_CONF}"
+  SECRET_ARGS+=(--secret "id=pipconf,src=${PIP_CONF}")
+fi
+
+# Keep each arch image a plain single-platform manifest without the unknown/unknown platform entry.
+export BUILDX_NO_DEFAULT_ATTESTATIONS=1
+
+docker build --platform "${PLATFORM}" \
+  --build-arg ACR_CACHE_PREFIX="${ACR_CACHE_PREFIX}" \
+  --build-arg UBUNTU_MIRROR_PREFIX="${UBUNTU_MIRROR_PREFIX}" \
+  "${SECRET_ARGS[@]}" \
+  -t "$3" -f "Dockerfile.$2" .

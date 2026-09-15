@@ -1,15 +1,20 @@
-FROM ubuntu:jammy
+ARG ACR_CACHE_PREFIX
+FROM ${ACR_CACHE_PREFIX}ubuntu:jammy
 
 ARG DEBIAN_FRONTEND=noninteractive
 ARG TZ=America/Los_Angeles
 ARG DOCKER_IMAGE_NAME_TEMPLATE="mcr.microsoft.com/playwright/python:v%version%-jammy"
+ARG UBUNTU_MIRROR_PREFIX
 
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 
 # === INSTALL Python ===
 
-RUN apt-get update && \
+RUN --mount=type=secret,id=pipconf,target=/etc/pip.conf,required=false \
+    find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) \
+      -exec sed -i "s|http://archive.ubuntu.com|http://${UBUNTU_MIRROR_PREFIX}archive.ubuntu.com|g; s|http://ports.ubuntu.com|http://${UBUNTU_MIRROR_PREFIX}ports.ubuntu.com|g" {} + && \
+    apt-get update && \
     # Install Python
     apt-get install -y python3 python3-distutils curl && \
     update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
@@ -35,7 +40,8 @@ COPY ./dist/*-manylinux*.whl /tmp/
 #    Browsers will be downloaded in `/ms-playwright`.
 #    Note: make sure to set 777 to the registry so that any user can access
 #    registry.
-RUN mkdir /ms-playwright && \
+RUN --mount=type=secret,id=pipconf,target=/etc/pip.conf,required=false \
+    mkdir /ms-playwright && \
     mkdir /ms-playwright-agent && \
     cd /ms-playwright-agent && \
     pip install virtualenv && \
