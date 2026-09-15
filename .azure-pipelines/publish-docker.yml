@@ -1,0 +1,128 @@
+# Trigger: any `v*` release tag (e.g. v1.40.0).
+# Can also be queued manually from the ADO UI.
+trigger:
+  tags:
+    include:
+      - v*
+
+pr: none
+
+parameters:
+- name: releaseChannel
+  displayName: "IMPORTANT: set this to 'canary' when triggering manually"
+  type: string
+  default: stable
+  values:
+  - stable
+  - canary
+
+resources:
+  repositories:
+  - repository: 1esPipelines
+    type: git
+    name: 1ESPipelineTemplates/1ESPipelineTemplates
+    ref: refs/tags/release
+
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1esPipelines
+  parameters:
+    pool:
+      name: DevDivPlaywrightAzurePipelinesUbuntu2204
+      os: linux
+    sdl:
+      sourceAnalysisPool:
+        name: DevDivPlaywrightAzurePipelinesWindows2022
+        # The image must be windows-based due to restrictions of the SDL tools. See: https://aka.ms/AAo6v8e
+        os: windows
+      suppression:
+        suppressionFile: $(Build.SourcesDirectory)\.azure-pipelines\guardian\SDL\.gdnsuppress
+    stages:
+    - stage: Publish
+      jobs:
+      - job: PublishDocker
+        displayName: "Publish Docker images to ACR"
+        # arm64 images are cross-built under QEMU emulation, which is slow.
+        timeoutInMinutes: 360
+        steps:
+        # Full history and tags: setuptools-scm derives the package version
+        # (and thus the image tags) from the release tag.
+        - checkout: self
+          fetchDepth: 0
+          fetchTags: true
+          displayName: "Checkout code"
+
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '3.10'
+          displayName: "Use Python"
+
+        # Resolve pip installs through the DevDiv_PublicPackages feed. The task exports
+        # an authenticated PIP_INDEX_URL, which build.sh also forwards to the image builds.
+        - task: PipAuthenticate@1
+          inputs:
+            artifactFeeds: DevDiv/DevDiv_PublicPackages
+          displayName: "Authenticate pip to DevDiv_PublicPackages feed"
+
+        - task: UseNode@1
+          inputs:
+            version: '24.x'
+          displayName: "Install Node.js"
+
+        # Relocate the Docker data-root to the large /mnt volume: this job builds
+        # 6 images (jammy/noble/resolute x amd64/arm64) and `docker system prune`s
+        # between them, so the default disk fills up.
+        - task: Bash@3
+          displayName: "Setup docker"
+          inputs:
+            targetType: "inline"
+            script: |
+              set -x
+              sudo service docker stop
+              sudo mkdir -p /etc/docker
+              echo '{ "data-root": "/mnt/docker" }' | sudo tee /etc/docker/daemon.json
+              sudo service docker start
+
+        # scripts/build_driver.py fetches playwright-core with `npm pack`, which
+        # picks up the registry and credentials from this .npmrc.
+        - task: Bash@3
+          displayName: "setup .npmrc"
+          inputs:
+            targetType: "inline"
+            script: echo "registry=https://devdiv.pkgs.visualstudio.com/DevDiv/_packaging/DevDiv_PublicPackages/npm/registry/" >> .npmrc
+
+        - task: npmAuthenticate@0
+          displayName: "authenticate the private npm registry"
+          inputs:
+            workingFile: .npmrc
+
+        - script: |
+            python -m pip install --upgrade pip --disable-pip-version-check
+            pip install -r local-requirements.txt --disable-pip-version-check
+            pip install -r requirements.txt --disable-pip-version-check
+            pip install -e . --disable-pip-version-check
+          displayName: "Install dependencies"
+
+        - task: AzureCLI@2
+          displayName: "Login to ACR via OIDC"
+          inputs:
+            azureSubscription: "Playwright-CDN"
+            scriptType: "bash"
+            scriptLocation: "inlineScript"
+            inlineScript: "az acr login --name playwright"
+
+        - task: Bash@3
+          displayName: "Register QEMU (binfmt) for arm64 cross-build"
+          inputs:
+            targetType: "inline"
+            script: "docker run --rm --privileged ${ACR_CACHE_PREFIX}tonistiigi/binfmt --install arm64"
+          env:
+            ACR_CACHE_PREFIX: "playwright.azurecr.io/cached/"
+
+        - task: Bash@3
+          displayName: "Build & publish Docker images"
+          inputs:
+            targetType: "inline"
+            script: "./utils/docker/publish_docker.sh ${{ parameters.releaseChannel }}"
+          env:
+            ACR_CACHE_PREFIX: "playwright.azurecr.io/cached/"
+            UBUNTU_MIRROR_PREFIX: "azure."
