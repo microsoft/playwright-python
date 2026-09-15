@@ -85,9 +85,22 @@ class LocalStorageEntry(TypedDict):
     value: str
 
 
-class OriginState(TypedDict):
+class _RequiredOriginState(TypedDict):
     origin: str
     localStorage: List[LocalStorageEntry]
+
+
+class _RequiredOPFSEntry(TypedDict):
+    path: str
+    type: Literal["directory", "file"]
+
+
+class OPFSEntry(_RequiredOPFSEntry, total=False):
+    base64: str
+
+
+class OriginState(_RequiredOriginState, total=False):
+    opfs: List[OPFSEntry]
 
 
 class PdfMargins(TypedDict, total=False):
@@ -112,6 +125,7 @@ class ProxySettings(TypedDict, total=False):
 class StorageState(TypedDict, total=False):
     cookies: List[StorageStateCookie]
     origins: List[OriginState]
+    credentials: List["VirtualCredential"]
 
 
 class ClientCertificate(TypedDict, total=False):
