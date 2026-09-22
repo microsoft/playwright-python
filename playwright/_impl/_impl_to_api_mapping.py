@@ -17,6 +17,7 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Union
 
 from playwright._impl._errors import Error
 from playwright._impl._map import Map
+from playwright._impl._signature import signature
 
 API_ATTR = "_pw_api_instance_"
 IMPL_ATTR = "_pw_impl_instance_"
@@ -119,7 +120,7 @@ class ImplToApiMapping:
 
     def wrap_handler(self, handler: Callable[..., Any]) -> Callable[..., None]:
         def wrapper_func(*args: Any) -> Any:
-            parameters = inspect.signature(handler).parameters
+            parameters = signature(handler).parameters
             has_varargs = any(
                 parameter.kind == inspect.Parameter.VAR_POSITIONAL
                 for parameter in parameters.values()

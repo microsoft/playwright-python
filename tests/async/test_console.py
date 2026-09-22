@@ -12,12 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List
+import sys
+from typing import TYPE_CHECKING, List
 
 import pytest
 
 from playwright.async_api import ConsoleMessage, Page
 from tests.server import Server
+
+if TYPE_CHECKING:
+
+    class Unresolvable:
+        """Annotation-only type, deliberately undefined at runtime."""
 
 
 async def test_console_should_work(page: Page, browser_name: str) -> None:
@@ -153,3 +159,22 @@ async def test_console_should_not_throw_when_there_are_console_messages_in_detac
     popup = await page_info.value
     # 4. Connect to the popup and make sure it doesn't throw.
     assert await popup.evaluate("1 + 1") == 2
+
+
+@pytest.mark.skipif(
+    sys.version_info < (3, 14),
+    reason="PEP 649 lazy annotations require Python 3.14+",
+)
+async def test_console_should_support_annotations_with_runtime_unresolved_types(
+    page: Page,
+) -> None:
+    # Since PEP 649, annotations are lazily evaluated; the signature
+    # inspection done for event listeners must not resolve them eagerly.
+    messages: List[str] = []
+
+    def on_console(message: Unresolvable) -> None:
+        messages.append(message.text)
+
+    page.on("console", on_console)
+    await page.evaluate('() => console.log("hello")')
+    assert messages == ["hello"]
