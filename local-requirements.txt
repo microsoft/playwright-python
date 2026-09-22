@@ -12,5 +12,5 @@ pytest-asyncio==1.4.0
 pytest-rerunfailures==16.4
 pytest-timeout==2.4.0
 service_identity==24.2.0
-twisted==25.5.0
+twisted==26.4.0rc2
 types-pyOpenSSL==24.1.0.20240722
