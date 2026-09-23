@@ -101,6 +101,7 @@ from playwright._impl._network import (
     serialize_headers,
 )
 from playwright._impl._screencast import Screencast
+from playwright._impl._signature import signature
 from playwright._impl._video import Video
 from playwright._impl._waiter import Waiter
 from playwright._impl._web_storage import WebStorage
@@ -125,7 +126,7 @@ class LocatorHandler:
         self.times = times
 
     def __call__(self) -> Any:
-        arg_count = len(inspect.signature(self._handler).parameters)
+        arg_count = len(signature(self._handler).parameters)
         if arg_count == 0:
             return self._handler()
         return self._handler(self.locator)

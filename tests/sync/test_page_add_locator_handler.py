@@ -12,12 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
+from typing import TYPE_CHECKING
 
 import pytest
 
 from playwright.sync_api import Error, Locator, Page, expect
 from tests.server import Server
 from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
+
+if TYPE_CHECKING:
+    # Real type for static checkers, undefined at runtime (PEP 649 case).
+    from playwright.sync_api import Locator as TypeCheckingOnlyLocator
 
 
 def test_should_work(page: Page, server: Server) -> None:
@@ -433,3 +439,31 @@ def test_should_removeLocatorHandler(page: Page, server: Server) -> None:
     assert page.evaluate("window.clicked") == 0
     expect(page.locator("#interstitial")).to_be_visible()
     assert "Timeout 3000ms exceeded" in error.value.message
+
+
+@pytest.mark.skipif(
+    sys.version_info < (3, 14),
+    reason="PEP 649 lazy annotations require Python 3.14+",
+)
+def test_should_support_annotations_with_runtime_unresolved_types(
+    page: Page, server: Server
+) -> None:
+    # Since PEP 649, annotations are lazily evaluated; the signature
+    # inspection done for locator handlers must not resolve them eagerly.
+    page.goto(server.PREFIX + "/input/handle-locator.html")
+
+    original_locator = page.get_by_text("This interstitial covers the button")
+    called = 0
+
+    def handler(locator: TypeCheckingOnlyLocator) -> None:
+        nonlocal called
+        called += 1
+        assert locator == original_locator
+        page.locator("#close").click()
+
+    page.add_locator_handler(original_locator, handler)
+    page.locator("#aside").hover()
+    page.evaluate('() => window.setupAnnoyingInterstitial("mouseover", 1)')
+    page.locator("#target").click()
+    assert called == 1
+    assert page.evaluate("window.clicked") == 1
