@@ -1,5 +1,5 @@
 asyncio-atexit==1.0.1
-autobahn==23.1.2
+autobahn==24.4.2
 build==1.5.0
 mypy==2.3.0
 objgraph==3.6.2
