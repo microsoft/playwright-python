@@ -27,6 +27,7 @@ async def test_should_expose_video_path(
     await page.goto(server.PREFIX + "/grid.html")
     assert page.video
     path = await page.video.path()
+    assert isinstance(path, Path)
     assert str(tmp_path) in str(path)
     await page.context.close()
 

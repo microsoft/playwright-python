@@ -32,6 +32,7 @@ def test_should_expose_video_path(
     video = page.video
     assert video
     path = video.path()
+    assert isinstance(path, Path)
     assert repr(page.video) == f"<Video page={page}>"
     assert str(tmp_path) in str(path)
     page.wait_for_timeout(1000)
