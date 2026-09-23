@@ -42,7 +42,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.10', '3.14']
+        python-version: ['3.14']
         browser: [chromium, firefox, webkit]
         exclude:
         # WebKit on standard macOS-latest (currently macos-15-arm64) is unstable;
@@ -50,9 +50,15 @@ jobs:
         - os: macos-latest
           browser: webkit
         include:
-        - os: macos-15-xlarge
+        - os: windows-latest
           python-version: '3.10'
-          browser: webkit
+          browser: chromium
+        - os: macos-latest
+          python-version: '3.10'
+          browser: chromium
+        - os: ubuntu-latest
+          python-version: '3.10'
+          browser: chromium
         - os: macos-15-xlarge
           python-version: '3.14'
           browser: webkit
