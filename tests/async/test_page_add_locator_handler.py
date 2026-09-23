@@ -23,9 +23,8 @@ from tests.server import Server
 from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
 
 if TYPE_CHECKING:
-
-    class Unresolvable:
-        """Annotation-only type, deliberately undefined at runtime."""
+    # Real type for static checkers, undefined at runtime (PEP 649 case).
+    from playwright.async_api import Locator as TypeCheckingOnlyLocator
 
 
 async def test_should_work(page: Page, server: Server) -> None:
@@ -460,7 +459,7 @@ async def test_should_support_annotations_with_runtime_unresolved_types(
     original_locator = page.get_by_text("This interstitial covers the button")
     called = 0
 
-    async def handler(locator: Unresolvable) -> None:
+    async def handler(locator: TypeCheckingOnlyLocator) -> None:
         nonlocal called
         called += 1
         assert locator == original_locator
