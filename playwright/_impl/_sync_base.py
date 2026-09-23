@@ -32,6 +32,7 @@ from typing import (
 import greenlet
 
 from playwright._impl._connection import _capture_stack_trace
+from playwright._impl._errors import TargetClosedError
 from playwright._impl._helper import Error
 from playwright._impl._impl_to_api_mapping import ImplToApiMapping, ImplWrapper
 
@@ -110,6 +111,17 @@ class SyncBase(ImplWrapper):
 
         task.add_done_callback(lambda _: g_self.switch())
         while not task.done():
+            if self._dispatcher_fiber.dead:
+                # The dispatcher fiber runs the connection's event loop; when the
+                # transport ends without going through Connection.cleanup() (e.g.
+                # the driver process dies or a remote connection drops), the fiber
+                # finishes with this task still pending. Switching to a dead
+                # greenlet returns immediately to its parent - this very loop -
+                # so without this check the thread spins at 100% CPU forever.
+                task.cancel()
+                raise TargetClosedError(
+                    "Playwright connection closed while this call was pending"
+                )
             self._dispatcher_fiber.switch()
         asyncio._set_running_loop(self._loop)
         return task.result()

@@ -399,6 +399,47 @@ def test_should_not_orphan_callback_on_non_serializable_params(
     assert "Future exception was never retrieved" not in result.stderr
 
 
+@pytest.mark.only_browser("chromium")  # browser-agnostic; run once
+def test_sync_call_fails_fast_when_dispatcher_dies_mid_call(tmp_path: Path) -> None:
+    # When the driver process dies without the transport reporting an error
+    # (its stdout hits EOF on the not-self-initiated stop path), the dispatcher
+    # fiber finishes silently and Connection.cleanup() never runs, so a pending
+    # sync call's task can never complete. Switching to the dead fiber returns
+    # immediately, degenerating the _sync() waiting loop into a 100% CPU spin
+    # that raises nothing and logs nothing. The loop must detect the dead
+    # dispatcher and raise instead. Run in a subprocess: without the fix the
+    # doomed call spins forever and this test would hang, not fail.
+    script = tmp_path / "dead_dispatcher.py"
+    script.write_text(
+        textwrap.dedent(
+            """
+            import sys
+
+            from playwright.sync_api import Error, sync_playwright
+
+            p = sync_playwright().start()
+            transport = p._impl_obj._connection._transport
+            # Emulate an abrupt driver death that reports no transport error:
+            # the same shape a wedged remote connection produces in the wild.
+            transport._stopped = True
+            transport._proc.kill()
+            try:
+                p.chromium.launch()
+                sys.exit(2)  # returned normally: the driver is gone, impossible
+            except Error:
+                sys.exit(0)  # failed fast instead of spinning
+            """
+        )
+    )
+    result = subprocess.run(
+        [sys.executable, str(script)],
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    assert result.returncode == 0, (result.stdout, result.stderr)
+
+
 def test_click_should_accept_timedelta_for_timeout(page: Page) -> None:
     with pytest.raises(TimeoutError, match="Timeout 1ms exceeded"):
         page.click("does-not-exist", timeout=timedelta(milliseconds=1))
