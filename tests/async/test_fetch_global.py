@@ -377,6 +377,22 @@ async def test_should_not_double_stringify_body_when_content_type_is_application
     await request.dispose()
 
 
+async def test_should_json_stringify_string_body_when_content_type_is_application_json(
+    playwright: Playwright, server: Server
+) -> None:
+    request = await playwright.request.new_context()
+    [req, _] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        request.post(
+            server.EMPTY_PAGE,
+            headers={"content-type": "application/json"},
+            data="foo",
+        ),
+    )
+    assert req.post_body == b'"foo"'
+    await request.dispose()
+
+
 async def test_should_accept_already_serialized_data_as_bytes_when_content_type_is_application_json(
     playwright: Playwright, server: Server
 ) -> None:
