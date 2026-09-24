@@ -620,7 +620,7 @@ def is_json_content_type(headers: network.HeadersArray = None) -> bool:
     if not headers:
         return False
     for header in headers:
-        if header["name"] == "Content-Type":
+        if header["name"].lower() == "content-type":
             return header["value"].startswith("application/json")
     return False
 
