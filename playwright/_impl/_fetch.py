@@ -394,7 +394,7 @@ class APIRequestContext(ChannelOwner):
                     post_data_buffer = data.encode()
             elif isinstance(data, bytes):
                 post_data_buffer = data
-            elif isinstance(data, (dict, list, int, bool)):
+            elif isinstance(data, (dict, list, int, float, bool)):
                 json_data = json.dumps(data)
             else:
                 raise Error(f"Unsupported 'data' type: {type(data)}")
