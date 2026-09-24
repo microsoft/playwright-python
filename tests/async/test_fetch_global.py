@@ -467,6 +467,7 @@ async def test_should_serialize_request_data(
         ([], "[]"),
         ({}, "{}"),
         ("", ""),
+        (1.5, "1.5"),
     ]:
         response = await request.post(server.PREFIX + "/echo", data=data)
         assert response.status == 200
