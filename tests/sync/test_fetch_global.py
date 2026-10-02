@@ -344,6 +344,22 @@ def test_should_reject_non_finite_floats_in_request_data(
     request.dispose()
 
 
+def test_should_reject_empty_data_with_form(
+    playwright: Playwright, server: Server
+) -> None:
+    request = playwright.request.new_context()
+    with pytest.raises(
+        AssertionError,
+        match="Only one of 'data', 'form' or 'multipart' can be specified",
+    ):
+        request.post(
+            server.EMPTY_PAGE,
+            data="",
+            form={"name": "value"},
+        )
+    request.dispose()
+
+
 def test_should_throw_when_fail_on_status_code_is_true(
     playwright: Playwright, server: Server
 ) -> None:
