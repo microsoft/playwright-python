@@ -14,6 +14,7 @@
 
 import json
 from pathlib import Path
+from typing import Any
 from urllib.parse import urlparse
 
 import pytest
@@ -332,6 +333,61 @@ def test_should_serialize_null_values_in_json(
     assert response.status == 200
     assert response.text() == '{"foo": null}'
     request.dispose()
+
+
+@pytest.mark.parametrize(
+    "data",
+    ["", b"", 0, [], {}, False],
+)
+def test_should_disallow_falsy_data_together_with_form_or_multipart(
+    playwright: Playwright, server: Server, data: Any
+) -> None:
+    server.set_route("/echo", lambda req: (req.write(req.post_body), req.finish()))
+    request = playwright.request.new_context()
+    try:
+        for body_option in ["form", "multipart"]:
+            with pytest.raises(AssertionError) as exc_info:
+                if body_option == "form":
+                    request.post(
+                        server.PREFIX + "/echo", data=data, form={"name": "value"}
+                    )
+                else:
+                    request.post(
+                        server.PREFIX + "/echo",
+                        data=data,
+                        multipart={"name": "value"},
+                    )
+            assert "Only one of 'data', 'form' or 'multipart' can be specified" in str(
+                exc_info
+            )
+    finally:
+        request.dispose()
+
+
+def test_should_count_empty_form_and_multipart_as_specified(
+    playwright: Playwright, server: Server
+) -> None:
+    # Mirrors Node.js semantics: an option counts as specified when it is
+    # not None, even if it is empty, so it still conflicts with data.
+    server.set_route("/echo", lambda req: (req.write(req.post_body), req.finish()))
+    request = playwright.request.new_context()
+    try:
+        with pytest.raises(AssertionError) as exc_info:
+            request.post(server.PREFIX + "/echo", data="payload", form={})
+        assert "Only one of 'data', 'form' or 'multipart' can be specified" in str(
+            exc_info
+        )
+        with pytest.raises(AssertionError) as exc_info:
+            request.post(server.PREFIX + "/echo", data="payload", multipart={})
+        assert "Only one of 'data', 'form' or 'multipart' can be specified" in str(
+            exc_info
+        )
+        # Empty form/multipart on their own are allowed and send no fields.
+        response = request.post(server.PREFIX + "/echo", form={})
+        assert response.status == 200
+        assert response.text() == ""
+    finally:
+        request.dispose()
 
 
 def test_should_throw_when_fail_on_status_code_is_true(
