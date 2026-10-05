@@ -1218,3 +1218,13 @@ async def test_assertions_should_include_aria_snapshot_in_separate_section(
     actual_line = message.split("\n")[1]
     assert 'heading "Page Heading"' not in actual_line
     assert message.index('heading "Page Heading"') > message.index("Aria snapshot:")
+
+
+@pytest.mark.parametrize("timeout", [float("inf"), float("-inf"), float("nan")])
+async def test_assertions_should_reject_non_finite_timeout(
+    page: Page, timeout: float
+) -> None:
+    with pytest.raises(Error, match="Out of range float values are not JSON"):
+        await expect(page.locator("div")).to_be_visible(timeout=timeout)
+    # The driver connection must survive the rejected call.
+    assert await page.evaluate("1 + 1") == 2
