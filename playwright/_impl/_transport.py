@@ -22,6 +22,7 @@ from abc import ABC, abstractmethod
 from typing import Callable, Dict, Optional, Union
 
 from playwright._impl._driver import compute_driver_executable, get_driver_env
+from playwright._impl._errors import Error
 from playwright._impl._helper import ParsedMessagePayload
 
 
@@ -75,7 +76,11 @@ class Transport(ABC):
         pass
 
     def serialize_message(self, message: Dict) -> bytes:
-        msg = json.dumps(message)
+        try:
+            # NaN and Infinity are not valid JSON and would crash the driver.
+            msg = json.dumps(message, allow_nan=False)
+        except ValueError as e:
+            raise Error(str(e)) from None
         if "DEBUGP" in os.environ:  # pragma: no cover
             print("\x1b[32mSEND>\x1b[0m", json.dumps(message, indent=2))
         return msg.encode()
