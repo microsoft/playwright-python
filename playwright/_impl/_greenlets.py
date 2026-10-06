@@ -11,10 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import asyncio
 import os
 from typing import Tuple
 
 import greenlet
+
+from playwright._impl._errors import TargetClosedError
 
 
 def _greenlet_trace_callback(
@@ -47,3 +50,26 @@ class LocatorHandlerGreenlet(greenlet.greenlet):
 class EventGreenlet(greenlet.greenlet):
     def __str__(self) -> str:
         return "<EventGreenlet>"
+
+
+def connection_closed_error() -> TargetClosedError:
+    return TargetClosedError("Playwright connection closed")
+
+
+def wait_for_future(
+    loop: asyncio.AbstractEventLoop,
+    dispatcher_fiber: greenlet.greenlet,
+    future: "asyncio.Future",
+) -> None:
+    __tracebackhide__ = True
+    while not future.done():
+        # The dispatcher fiber exits once the connection to the driver ends, e.g.
+        # when the driver process dies. Nothing can settle the future after that,
+        # and switching to a dead greenlet returns right away, so we would spin.
+        if dispatcher_fiber.dead:
+            future.cancel()
+            raise connection_closed_error()
+        dispatcher_fiber.switch()
+    # The loop is only running for as long as the dispatcher fiber is alive.
+    if not dispatcher_fiber.dead:
+        asyncio._set_running_loop(loop)
