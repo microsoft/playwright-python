@@ -13,9 +13,12 @@
 # limitations under the License.
 
 import math
+import re
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 from urllib.parse import ParseResult, urlparse
+
+import pytest
 
 from playwright.async_api import Error, Page
 
@@ -358,3 +361,43 @@ async def test_evaluate_jsonvalue_url(page: Page) -> None:
     url = urlparse("https://example.com/")
     result = await page.evaluate('() => ({ someKey: new URL("https://example.com/") })')
     assert result == {"someKey": url}
+
+
+async def test_evaluate_transfer_regex(page: Page) -> None:
+    regex = re.compile("foo.bar", re.IGNORECASE | re.MULTILINE)
+    assert await page.evaluate("a => a", regex) == regex
+
+
+async def test_evaluate_pass_regex_as_regexp(page: Page) -> None:
+    result = await page.evaluate(
+        "r => [r instanceof RegExp, r.source, r.flags, r.test('A12')]",
+        re.compile(r"a\d+", re.IGNORECASE | re.DOTALL | re.MULTILINE),
+    )
+    assert result == [True, "a\\d+", "ims", True]
+
+
+async def test_evaluate_return_regex(page: Page) -> None:
+    result = await page.evaluate(
+        "() => ({ list: [/foo/s], nested: { re: /a\\d+/gi } })"
+    )
+    assert result == {
+        "list": [re.compile("foo", re.DOTALL)],
+        "nested": {"re": re.compile(r"a\d+", re.IGNORECASE)},
+    }
+
+
+async def test_evaluate_jsonvalue_regex(page: Page) -> None:
+    handle = await page.evaluate_handle("() => ({ someKey: /foo/i })")
+    assert await handle.json_value() == {"someKey": re.compile("foo", re.IGNORECASE)}
+
+
+async def test_evaluate_return_regex_unsupported_by_python(page: Page) -> None:
+    result = await page.evaluate("() => ({ a: 1, re: /(?<year>\\d{4})/ })")
+    assert result == {"a": 1, "re": {"r": {"p": "(?<year>\\d{4})", "f": ""}}}
+
+
+async def test_evaluate_throw_for_unsupported_regex(page: Page) -> None:
+    with pytest.raises(AssertionError, match="Unexpected re.Pattern flag"):
+        await page.evaluate("a => a", re.compile("foo", re.VERBOSE))
+    with pytest.raises(AssertionError, match="Only str patterns are supported"):
+        await page.evaluate("a => a", re.compile(b"foo"))
