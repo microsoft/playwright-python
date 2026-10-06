@@ -396,7 +396,7 @@ class APIRequestContext(ChannelOwner):
                     post_data_buffer = data.encode()
             elif isinstance(data, bytes):
                 post_data_buffer = data
-            elif isinstance(data, (dict, list, int, bool)):
+            elif isinstance(data, (dict, list, int, float, bool)):
                 try:
                     # NaN and Infinity are not valid JSON.
                     json_data = json.dumps(data, allow_nan=False)
