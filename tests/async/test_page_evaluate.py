@@ -40,6 +40,11 @@ async def test_evaluate_transfer_neg_zero(page: Page) -> None:
     assert result == float("-0")
 
 
+async def test_evaluate_transfer_positive_zero_stays_positive(page: Page) -> None:
+    result = await page.evaluate("a => Object.is(a, -0)", 0.0)
+    assert result is False
+
+
 async def test_evaluate_transfer_infinity(page: Page) -> None:
     result = await page.evaluate("a => a", float("Infinity"))
     assert result == float("Infinity")
