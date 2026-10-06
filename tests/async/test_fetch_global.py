@@ -500,6 +500,22 @@ async def test_should_reject_non_finite_floats_in_request_data(
     await request.dispose()
 
 
+async def test_should_reject_empty_data_with_form(
+    playwright: Playwright, server: Server
+) -> None:
+    request = await playwright.request.new_context()
+    with pytest.raises(
+        AssertionError,
+        match="Only one of 'data', 'form' or 'multipart' can be specified",
+    ):
+        await request.post(
+            server.EMPTY_PAGE,
+            data="",
+            form={"name": "value"},
+        )
+    await request.dispose()
+
+
 async def test_should_retry_ECONNRESET(playwright: Playwright, server: Server) -> None:
     request_count = 0
 
