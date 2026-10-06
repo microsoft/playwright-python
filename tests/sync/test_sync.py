@@ -399,6 +399,55 @@ def test_should_not_orphan_callback_on_non_serializable_params(
     assert "Future exception was never retrieved" not in result.stderr
 
 
+def test_sync_calls_should_raise_after_driver_exit(
+    browser_name: str,
+    launch_arguments: Dict[str, Any],
+    tmp_path: Path,
+) -> None:
+    # Regression test for https://github.com/microsoft/playwright-python/pull/3187.
+    # Run in a subprocess with a timeout, the calls used to spin forever instead of raising.
+    script = tmp_path / "driver_exit.py"
+    script.write_text(
+        textwrap.dedent(
+            f"""
+            from playwright.sync_api import sync_playwright
+
+
+            def error_of(callback):
+                try:
+                    callback()
+                except Exception as e:
+                    return str(e)
+                return ""
+
+
+            with sync_playwright() as p:
+                browser = p[{browser_name!r}].launch(**{launch_arguments!r})
+                page = browser.new_page()
+                route = page.route("**/*", lambda route: route.continue_())
+
+                def expect_event():
+                    with page.expect_event("console", timeout=0):
+                        p._impl_obj._connection._transport._proc.kill()
+
+                def dispose_route():
+                    with route:
+                        pass
+
+                for callback in [expect_event, page.title, dispose_route, browser.close]:
+                    assert "Playwright connection closed" in error_of(callback), callback
+            """
+        )
+    )
+    result = subprocess.run(
+        [sys.executable, str(script)],
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    assert result.returncode == 0, result.stderr
+
+
 def test_click_should_accept_timedelta_for_timeout(page: Page) -> None:
     with pytest.raises(TimeoutError, match="Timeout 1ms exceeded"):
         page.click("does-not-exist", timeout=timedelta(milliseconds=1))
