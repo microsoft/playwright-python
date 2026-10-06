@@ -395,7 +395,11 @@ class APIRequestContext(ChannelOwner):
             elif isinstance(data, bytes):
                 post_data_buffer = data
             elif isinstance(data, (dict, list, int, bool)):
-                json_data = json.dumps(data)
+                try:
+                    # NaN and Infinity are not valid JSON.
+                    json_data = json.dumps(data, allow_nan=False)
+                except ValueError as e:
+                    raise Error(str(e)) from None
             else:
                 raise Error(f"Unsupported 'data' type: {type(data)}")
         elif form:
