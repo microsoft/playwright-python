@@ -474,6 +474,16 @@ async def test_should_serialize_request_data(
     await request.dispose()
 
 
+@pytest.mark.parametrize("value", [float("inf"), float("-inf"), float("nan")])
+async def test_should_reject_non_finite_floats_in_request_data(
+    playwright: Playwright, server: Server, value: float
+) -> None:
+    request = await playwright.request.new_context()
+    with pytest.raises(Error, match="Out of range float values are not JSON"):
+        await request.post(server.EMPTY_PAGE, data={"value": value})
+    await request.dispose()
+
+
 async def test_should_retry_ECONNRESET(playwright: Playwright, server: Server) -> None:
     request_count = 0
 

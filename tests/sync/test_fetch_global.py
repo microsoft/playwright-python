@@ -334,6 +334,16 @@ def test_should_serialize_null_values_in_json(
     request.dispose()
 
 
+@pytest.mark.parametrize("value", [float("inf"), float("-inf"), float("nan")])
+def test_should_reject_non_finite_floats_in_request_data(
+    playwright: Playwright, server: Server, value: float
+) -> None:
+    request = playwright.request.new_context()
+    with pytest.raises(Error, match="Out of range float values are not JSON"):
+        request.post(server.EMPTY_PAGE, data={"value": value})
+    request.dispose()
+
+
 def test_should_throw_when_fail_on_status_code_is_true(
     playwright: Playwright, server: Server
 ) -> None:
