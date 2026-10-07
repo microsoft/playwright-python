@@ -423,18 +423,10 @@ class APIRequestContext(ChannelOwner):
                         await _form_data_field_to_form_field(fd_name, fd_value)
                     )
             else:
-                # Convert file-like values to ServerFilePayload structs.
                 for name, value in multipart.items():
-                    if is_file_payload(value):
-                        payload = cast(FilePayload, value)
-                        assert isinstance(
-                            payload["buffer"], bytes
-                        ), f"Unexpected buffer type of 'data.{name}'"
-                        multipart_data.append(
-                            FormField(name=name, file=file_payload_to_json(payload))
-                        )
-                    elif isinstance(value, str):
-                        multipart_data.append(FormField(name=name, value=value))
+                    multipart_data.append(
+                        await _form_data_field_to_form_field(name, value)
+                    )
         if (
             post_data_buffer is None
             and json_data is None
