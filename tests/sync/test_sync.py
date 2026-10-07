@@ -19,9 +19,10 @@ import sys
 import textwrap
 from datetime import timedelta
 from pathlib import Path
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, List
 
 import pytest
+from greenlet import greenlet
 
 from playwright.sync_api import (
     Browser,
@@ -297,6 +298,28 @@ def test_expect_response_should_not_hang_when_predicate_throws(page: Page) -> No
     with pytest.raises(Exception, match="Oops!"):
         with page.expect_response("**/*"):
             raise Exception("Oops!")
+
+
+def test_expect_response_should_not_switch_to_stale_greenlet_when_cancelled(
+    page: Page, server: Server
+) -> None:
+    # Mimics frameworks like pytest-twisted that run the test body in a separate
+    # greenlet which stays alive (suspended) after handing control back.
+    main = greenlet.getcurrent()
+    resumed: List[bool] = []
+
+    def body() -> None:
+        with pytest.raises(Exception, match="Oops!"):
+            with page.expect_response("**/*"):
+                raise Exception("Oops!")
+        main.switch()
+        resumed.append(True)
+        main.switch()
+
+    greenlet(body).switch()
+    # Pumps the dispatcher, which runs the cancelled future's done callbacks.
+    page.goto(server.EMPTY_PAGE)
+    assert resumed == []
 
 
 def test_expect_response_should_use_context_timeout(
