@@ -345,6 +345,9 @@ async def test_should_support_multipart_form_data(
             multipart={
                 "firstName": "John",
                 "lastName": "Doe",
+                "age": 30,
+                "score": 42.5,
+                "active": True,
                 "file": file,
             },
         ),
@@ -358,6 +361,9 @@ async def test_should_support_multipart_form_data(
     )
     assert request.args[b"firstName"] == [b"John"]
     assert request.args[b"lastName"] == [b"Doe"]
+    assert request.args[b"age"] == [b"30"]
+    assert request.args[b"score"] == [b"42.5"]
+    assert request.args[b"active"] == [b"True"]
     assert request.args[b"file"][0] == file["buffer"]
 
 
