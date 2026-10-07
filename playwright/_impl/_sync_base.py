@@ -47,11 +47,15 @@ class EventInfo(Generic[T]):
     def __init__(self, sync_base: "SyncBase", future: "asyncio.Future[T]") -> None:
         self._sync_base = sync_base
         self._future = future
-        g_self = greenlet.getcurrent()
-        self._future.add_done_callback(lambda _: g_self.switch())
 
     @property
     def value(self) -> T:
+        # Only wake the greenlet that is actually waiting. Registering this on
+        # construction would also fire on cancellation and resume the creating
+        # greenlet wherever it happens to be suspended.
+        if not self._future.done():
+            g_self = greenlet.getcurrent()
+            self._future.add_done_callback(lambda _: g_self.switch())
         wait_for_future(
             self._sync_base._loop, self._sync_base._dispatcher_fiber, self._future
         )
