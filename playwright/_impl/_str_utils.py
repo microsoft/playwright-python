@@ -35,6 +35,18 @@ def escape_regex_flags(pattern: Pattern) -> str:
     return flags
 
 
+def parse_regex_flags(flags: str) -> int:
+    result = 0
+    if "i" in flags:
+        result |= re.IGNORECASE
+    if "s" in flags:
+        result |= re.DOTALL
+    if "m" in flags:
+        result |= re.MULTILINE
+    # The remaining JavaScript flags (d, g, u, v, y) have no re equivalent.
+    return result
+
+
 def escape_for_regex(text: str) -> str:
     return re.sub(r"[.*+?^>${}()|[\]\\]", "\\$&", text)
 
