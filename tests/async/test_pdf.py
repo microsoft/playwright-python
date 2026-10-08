@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import re
 from pathlib import Path
 
 import pytest
@@ -45,3 +46,17 @@ async def test_should_be_able_to_generate_outline(
     assert os.path.getsize(output_file_outline) > os.path.getsize(
         output_file_no_outline
     )
+
+
+async def test_should_accept_numeric_width_height_and_margin(page: Page) -> None:
+    await page.set_content("<h1>hello</h1>")
+    with_numbers = await page.pdf(
+        width=500, height=400, margin={"top": 10, "right": 10, "bottom": 10, "left": 10}
+    )
+    with_px = await page.pdf(
+        width="500px",
+        height="400px",
+        margin={"top": "10px", "right": "10px", "bottom": "10px", "left": "10px"},
+    )
+    media_box = re.compile(rb"/MediaBox\s*\[[^\]]*\]")
+    assert media_box.findall(with_numbers) == media_box.findall(with_px)
