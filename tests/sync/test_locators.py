@@ -394,6 +394,13 @@ def test_locators_should_screenshot(
     )
 
 
+def test_locators_screenshot_should_respect_timeout(page: Page) -> None:
+    page.set_default_timeout(5_000)
+    page.set_content("<div>hello</div>")
+    with pytest.raises(Error, match="Locator.screenshot: Timeout 500ms exceeded."):
+        page.locator("#missing").screenshot(timeout=500)
+
+
 def test_locators_should_return_bounding_box(page: Page, server: Server) -> None:
     page.set_viewport_size(
         {
