@@ -462,7 +462,8 @@ class Route(ChannelOwner):
         headers = {k.lower(): str(v) for k, v in params.get("headers", {}).items()}
         if params.get("contentType"):
             headers["content-type"] = params["contentType"]
-        elif json:
+        elif json or isinstance(json, (list, tuple, dict)):
+            # Like the JS client, which checks truthiness: [] and {} are truthy in JS.
             headers["content-type"] = "application/json"
         elif path:
             headers["content-type"] = (

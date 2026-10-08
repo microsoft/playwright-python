@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Any
+
+import pytest
+
 from playwright.async_api import Page, Route
 from tests.server import Server
 
@@ -41,6 +45,21 @@ async def test_should_fulfill_json(page: Page, server: Server) -> None:
     assert response.status == 201
     assert response.headers["content-type"] == "application/json"
     assert await response.json() == {"bar": "baz"}
+
+
+@pytest.mark.parametrize("value", [[], {}])
+async def test_should_fulfill_empty_json_with_json_content_type(
+    page: Page, server: Server, value: Any
+) -> None:
+    async def handle(route: Route) -> None:
+        await route.fulfill(json=value)
+
+    await page.route("**/*", handle)
+
+    response = await page.goto(server.EMPTY_PAGE)
+    assert response
+    assert response.headers["content-type"] == "application/json"
+    assert await response.json() == value
 
 
 async def test_should_fulfill_json_overriding_existing_response(
