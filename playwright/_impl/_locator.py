@@ -588,6 +588,7 @@ class Locator:
             lambda h, timeout: h.screenshot(
                 **{**params, "timeout": timeout},
             ),
+            timeout,
         )
 
     async def aria_snapshot(
