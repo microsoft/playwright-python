@@ -15,8 +15,6 @@
 import traceback
 from typing import Any, Awaitable, Callable, Coroutine, Dict
 
-import greenlet
-
 from playwright._impl._connection import ChannelOwner, _capture_stack_trace
 from playwright._impl._errors import Error, is_target_closed_error
 from playwright._impl._greenlets import connection_closed_error, wait_for_future
@@ -78,7 +76,6 @@ class DisposableStub:
         if self._dispatcher_fiber.dead:
             coro.close()
             raise connection_closed_error()
-        g_self = greenlet.getcurrent()
         task = self._loop.create_task(coro)
         setattr(
             task,
@@ -86,7 +83,6 @@ class DisposableStub:
             _capture_stack_trace(),
         )
         setattr(task, "__pw_stack_trace__", traceback.extract_stack(limit=10))
-        task.add_done_callback(lambda _: g_self.switch())
         wait_for_future(self._loop, self._dispatcher_fiber, task)
         return task.result()
 
