@@ -12,14 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import contextlib
 import multiprocessing
 import os
+import signal
 import subprocess
 import sys
 import textwrap
+import time
 from datetime import timedelta
 from pathlib import Path
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict, Generator, List
 
 import pytest
 from greenlet import greenlet
@@ -27,6 +30,7 @@ from greenlet import greenlet
 from playwright.sync_api import (
     Browser,
     BrowserContext,
+    ConsoleMessage,
     Dialog,
     Error,
     Page,
@@ -469,6 +473,77 @@ def test_sync_calls_should_raise_after_driver_exit(
         timeout=60,
     )
     assert result.returncode == 0, result.stderr
+
+
+class Interrupted(BaseException):
+    """Raised from a signal handler, like pytest-timeout's Failed."""
+
+
+@contextlib.contextmanager
+def interrupt_after(seconds: float) -> Generator[None, None, None]:
+    # Python runs the handler in whatever code executes when the alarm fires.
+    # During a blocking sync call that is the dispatcher's event loop, not the
+    # test. The previous handler and timer belong to pytest-timeout.
+    def handler(signum: int, frame: Any) -> None:
+        raise Interrupted()
+
+    previous_handler = signal.signal(signal.SIGALRM, handler)
+    previous_timer = signal.setitimer(signal.ITIMER_REAL, seconds)
+    try:
+        yield
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, *previous_timer)
+        signal.signal(signal.SIGALRM, previous_handler)
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="SIGALRM is not available")
+def test_sync_should_survive_exception_raised_by_signal_handler(page: Page) -> None:
+    with interrupt_after(0.2):
+        with pytest.raises(Interrupted):
+            page.wait_for_timeout(10_000)
+    # The connection is still usable, and the next call does not wait for the
+    # abandoned one to finish.
+    start = time.monotonic()
+    assert page.evaluate("1 + 1") == 2
+    assert time.monotonic() - start < 5
+    assert page.title() == ""
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="SIGALRM is not available")
+def test_sync_expect_event_should_survive_exception_raised_by_signal_handler(
+    page: Page,
+) -> None:
+    with interrupt_after(0.2):
+        with pytest.raises(Interrupted):
+            with page.expect_event("console"):
+                pass
+    with page.expect_console_message() as console_info:
+        page.evaluate("console.log('hello')")
+    assert console_info.value.text == "hello"
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="SIGALRM is not available")
+def test_sync_should_survive_exception_raised_by_signal_handler_while_event_handler_blocks(
+    page: Page,
+) -> None:
+    handled: List[str] = []
+
+    def handler(message: ConsoleMessage) -> None:
+        page.wait_for_timeout(500)
+        handled.append(message.text)
+
+    page.on("console", handler)
+    with interrupt_after(0.2):
+        with pytest.raises(Interrupted):
+            page.evaluate("console.log('hello')")
+            page.wait_for_timeout(10_000)
+    assert page.evaluate("1 + 1") == 2
+    # The handler was suspended in its own sync call. It finishes once the
+    # dispatcher runs the event loop again.
+    deadline = time.monotonic() + 10
+    while not handled and time.monotonic() < deadline:
+        page.wait_for_timeout(100)
+    assert handled == ["hello"]
 
 
 def test_click_should_accept_timedelta_for_timeout(page: Page) -> None:

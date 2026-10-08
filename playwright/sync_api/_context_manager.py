@@ -15,7 +15,7 @@
 import asyncio
 from typing import TYPE_CHECKING, Any, Optional
 
-from greenlet import greenlet
+from greenlet import GreenletExit, greenlet
 
 from playwright._impl._connection import Connection
 from playwright._impl._errors import Error
@@ -48,11 +48,33 @@ class PlaywrightContextManager:
 Please use the Async API instead."""
             )
 
+        g_self = greenlet.getcurrent()
+
         # Create a new fiber for the protocol dispatcher. It will be pumping events
         # until the end of times. We will pass control to that fiber every time we
         # block while waiting for a response.
         def greenlet_main() -> None:
-            self._loop.run_until_complete(self._connection.run_as_sync())
+            task = self._loop.create_task(self._connection.run_as_sync())
+            while not task.done():
+                try:
+                    self._loop.run_until_complete(task)
+                except GreenletExit:
+                    raise
+                except BaseException as exc:
+                    if task.done():
+                        raise
+                    # asyncio contains exceptions raised in tasks and callbacks.
+                    # An exception that escapes the loop while the connection
+                    # still runs comes from a signal handler, e.g. pytest-timeout
+                    # or Ctrl+C, that fired while the loop waited for the driver.
+                    # The user code is suspended in a sync call in the greenlet
+                    # that created us: raise it there, and stay alive. The loop
+                    # and its tasks are intact, so the next sync call resumes
+                    # them.
+                    g_self.throw(exc)
+                    # Between sync calls the user code marks the loop as running,
+                    # see wait_for_future. run_forever() refuses to start then.
+                    asyncio._set_running_loop(None)
 
         dispatcher_fiber = MainGreenlet(greenlet_main)
 
@@ -62,8 +84,6 @@ Please use the Async API instead."""
             PipeTransport(self._loop),
             self._loop,
         )
-
-        g_self = greenlet.getcurrent()
 
         # Wait until initialize completes (not just Playwright __create__), matching async.
         self._connection.playwright_future.add_done_callback(lambda _: g_self.switch())

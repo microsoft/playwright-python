@@ -29,8 +29,6 @@ from typing import (
     cast,
 )
 
-import greenlet
-
 from playwright._impl._connection import _capture_stack_trace
 from playwright._impl._greenlets import connection_closed_error, wait_for_future
 from playwright._impl._helper import Error
@@ -50,12 +48,6 @@ class EventInfo(Generic[T]):
 
     @property
     def value(self) -> T:
-        # Only wake the greenlet that is actually waiting. Registering this on
-        # construction would also fire on cancellation and resume the creating
-        # greenlet wherever it happens to be suspended.
-        if not self._future.done():
-            g_self = greenlet.getcurrent()
-            self._future.add_done_callback(lambda _: g_self.switch())
         wait_for_future(
             self._sync_base._loop, self._sync_base._dispatcher_fiber, self._future
         )
@@ -111,12 +103,10 @@ class SyncBase(ImplWrapper):
             coro.close()
             raise connection_closed_error()
 
-        g_self = greenlet.getcurrent()
         task: asyncio.tasks.Task[Any] = self._loop.create_task(coro)
         setattr(task, "__pw_stack__", _capture_stack_trace())
         setattr(task, "__pw_stack_trace__", traceback.extract_stack(limit=10))
 
-        task.add_done_callback(lambda _: g_self.switch())
         wait_for_future(self._loop, self._dispatcher_fiber, task)
         return task.result()
 

@@ -62,14 +62,33 @@ def wait_for_future(
     future: "asyncio.Future",
 ) -> None:
     __tracebackhide__ = True
-    while not future.done():
-        # The dispatcher fiber exits once the connection to the driver ends, e.g.
-        # when the driver process dies. Nothing can settle the future after that,
-        # and switching to a dead greenlet returns right away, so we would spin.
-        if dispatcher_fiber.dead:
-            future.cancel()
-            raise connection_closed_error()
-        dispatcher_fiber.switch()
-    # The loop is only running for as long as the dispatcher fiber is alive.
-    if not dispatcher_fiber.dead:
-        asyncio._set_running_loop(loop)
+    g_self = greenlet.getcurrent()
+
+    def resume(_: "asyncio.Future") -> None:
+        g_self.switch()
+
+    # The wait owns the callback that resumes this greenlet, so that it can
+    # remove it again when the wait is abandoned. A callback left behind would
+    # resume this greenlet at an arbitrary later point.
+    future.add_done_callback(resume)
+    try:
+        while not future.done():
+            # The dispatcher fiber exits once the connection to the driver ends,
+            # e.g. when the driver process dies. Nothing can settle the future
+            # after that, and switching to a dead greenlet returns right away,
+            # so we would spin.
+            if dispatcher_fiber.dead:
+                raise connection_closed_error()
+            # Raises when a signal handler interrupted the event loop while it
+            # waited for the driver, see greenlet_main in _context_manager.py.
+            dispatcher_fiber.switch()
+    except BaseException:
+        future.remove_done_callback(resume)
+        future.cancel()
+        raise
+    finally:
+        # The loop is only running for as long as the dispatcher fiber is alive.
+        # Also after a signal handler interrupted it: run_forever() cleared this
+        # on its way out, but the dispatcher is going to run the loop again.
+        if not dispatcher_fiber.dead:
+            asyncio._set_running_loop(loop)
