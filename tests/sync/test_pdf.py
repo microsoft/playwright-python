@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import re
 from pathlib import Path
 
 import pytest
@@ -31,3 +32,18 @@ def test_should_be_able_to_save_pdf_file(page: Page, tmp_path: Path) -> None:
 def test_should_be_able_capture_pdf_without_path(page: Page) -> None:
     buffer = page.pdf()
     assert buffer
+
+
+@pytest.mark.only_browser("chromium")
+def test_should_accept_numeric_width_height_and_margin(page: Page) -> None:
+    page.set_content("<h1>hello</h1>")
+    with_numbers = page.pdf(
+        width=500, height=400, margin={"top": 10, "right": 10, "bottom": 10, "left": 10}
+    )
+    with_px = page.pdf(
+        width="500px",
+        height="400px",
+        margin={"top": "10px", "right": "10px", "bottom": "10px", "left": "10px"},
+    )
+    media_box = re.compile(rb"/MediaBox\s*\[[^\]]*\]")
+    assert media_box.findall(with_numbers) == media_box.findall(with_px)

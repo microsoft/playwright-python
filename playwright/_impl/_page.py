@@ -1205,6 +1205,12 @@ class Page(ChannelOwner):
         params = locals_to_params(locals())
         if "path" in params:
             del params["path"]
+        for key in ["width", "height"]:
+            if key in params:
+                params[key] = to_pdf_size(params[key])
+        for key in ["top", "right", "bottom", "left"]:
+            if key in params.get("margin", {}):
+                params["margin"][key] = to_pdf_size(params["margin"][key])
         encoded_binary = await self._channel.send("pdf", None, params)
         decoded_binary = base64.b64decode(encoded_binary)
         if path:
@@ -1638,3 +1644,10 @@ def trim_end(s: str) -> str:
     if len(s) > 50:
         return s[:50] + "\u2026"
     return s
+
+
+def to_pdf_size(value: Any) -> Any:
+    # Unlabeled numbers are pixels, as in the JS client. bool is not a number here.
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        return f"{value}px"
+    return value
