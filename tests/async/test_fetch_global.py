@@ -15,9 +15,10 @@
 import asyncio
 import base64
 import json
+import re
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, List
 from urllib.parse import urlparse
 
 import pytest
@@ -617,4 +618,141 @@ async def test_should_support_multiple_http_credentials(
     # Wrong credentials are picked for the other origin.
     response2 = await request.get(server.CROSS_PROCESS_PREFIX + "/empty.html")
     assert response2.status == 401
+    await request.dispose()
+
+
+async def test_add_cookies_should_add_cookies_to_the_cookie_jar(
+    playwright: Playwright, server: Server
+) -> None:
+    request = await playwright.request.new_context()
+    await request.add_cookies(
+        [
+            {"name": "a", "value": "b", "url": server.EMPTY_PAGE},
+            {
+                "name": "c",
+                "value": "d",
+                "domain": "localhost",
+                "path": "/input",
+                "httpOnly": True,
+                "sameSite": "Strict",
+            },
+            {"name": "e", "value": "f", "domain": "other.com", "path": "/"},
+        ]
+    )
+    server_request, _ = await asyncio.gather(
+        server.wait_for_request("/input/button.html"),
+        request.get(server.PREFIX + "/input/button.html"),
+    )
+    assert server_request.getHeader("cookie") == "a=b; c=d"
+    state = await request.storage_state()
+    assert state["cookies"] == [
+        {
+            "name": "a",
+            "value": "b",
+            "domain": "localhost",
+            "path": "/",
+            "expires": -1,
+            "httpOnly": False,
+            "secure": False,
+            "sameSite": "Lax",
+        },
+        {
+            "name": "c",
+            "value": "d",
+            "domain": "localhost",
+            "path": "/input",
+            "expires": -1,
+            "httpOnly": True,
+            "secure": False,
+            "sameSite": "Strict",
+        },
+        {
+            "name": "e",
+            "value": "f",
+            "domain": "other.com",
+            "path": "/",
+            "expires": -1,
+            "httpOnly": False,
+            "secure": False,
+            "sameSite": "Lax",
+        },
+    ]
+    with pytest.raises(Error, match="Cookie should have a url or a domain/path pair"):
+        await request.add_cookies([{"name": "a", "value": "b"}])
+    await request.dispose()
+
+
+async def test_cookies_should_return_cookies_filtered_by_urls(
+    playwright: Playwright, server: Server
+) -> None:
+    request = await playwright.request.new_context()
+    await request.add_cookies(
+        [
+            {"name": "a", "value": "b", "domain": "localhost", "path": "/"},
+            {"name": "c", "value": "d", "domain": "localhost", "path": "/input"},
+            {"name": "e", "value": "f", "domain": "one.com", "path": "/"},
+            {
+                "name": "g",
+                "value": "h",
+                "domain": "two.com",
+                "path": "/",
+                "secure": True,
+            },
+        ]
+    )
+    assert [c["name"] for c in await request.cookies()] == ["a", "c", "e", "g"]
+    assert [c["name"] for c in await request.cookies(server.EMPTY_PAGE)] == ["a"]
+    assert [
+        c["name"] for c in await request.cookies(server.PREFIX + "/input/button.html")
+    ] == ["a", "c"]
+    assert [
+        c["name"]
+        for c in await request.cookies(["http://sub.one.com/", "https://two.com/"])
+    ] == ["e", "g"]
+    assert await request.cookies("http://other.com/") == []
+    await request.dispose()
+
+
+async def test_clear_cookies_should_remove_all_cookies(
+    playwright: Playwright, server: Server
+) -> None:
+    request = await playwright.request.new_context()
+    await request.add_cookies(
+        [
+            {"name": "a", "value": "b", "url": server.EMPTY_PAGE},
+            {"name": "c", "value": "d", "domain": "one.com", "path": "/"},
+        ]
+    )
+    await request.clear_cookies()
+    assert await request.cookies() == []
+    server_request, _ = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        request.get(server.EMPTY_PAGE),
+    )
+    assert server_request.getHeader("cookie") is None
+    await request.dispose()
+
+
+async def test_clear_cookies_should_filter_by_name_domain_and_path(
+    playwright: Playwright,
+) -> None:
+    request = await playwright.request.new_context()
+    await request.add_cookies(
+        [
+            {"name": "session", "value": "1", "domain": "one.com", "path": "/"},
+            {"name": "session", "value": "2", "domain": "two.com", "path": "/"},
+            {"name": "session", "value": "3", "domain": "two.com", "path": "/api"},
+            {"name": "other", "value": "4", "domain": "one.com", "path": "/"},
+        ]
+    )
+
+    async def values() -> List[str]:
+        return sorted(c["value"] for c in await request.cookies())
+
+    await request.clear_cookies(name="session", domain="two.com", path="/api")
+    assert await values() == ["1", "2", "4"]
+    await request.clear_cookies(domain=re.compile(r"one\.com$"))
+    assert await values() == ["2"]
+    await request.clear_cookies(name=re.compile(r"^sess"))
+    assert await values() == []
     await request.dispose()

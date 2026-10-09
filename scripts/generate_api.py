@@ -57,6 +57,7 @@ from playwright._impl._tracing import Tracing
 from playwright._impl._video import Video
 from playwright._impl._web_error import WebError
 from playwright._impl._web_storage import WebStorage
+from playwright._impl._webmcp import WebMCP
 
 SYNC_API = False
 
@@ -98,6 +99,7 @@ positional_exceptions = [
     r"abort\.errorCode",
     r"accept\.promptText",
     r"add_init_script\.script",
+    r"call_tool\.input",
     r"cookies\.urls",
     r"dispatch_event\.eventInit",
     r"eval.*\.arg",
@@ -251,7 +253,7 @@ import datetime
 from typing import Literal
 
 
-from playwright._impl._api_structures import Cookie, SetCookieParam, FloatRect, FilePayload, Geolocation, HttpCredentials, PdfMargins, Position, ProxySettings, ResourceTiming, SourceLocation, StorageState, ClientCertificate, ViewportSize, RemoteAddr, SecurityDetails, RequestSizes, NameValue, TracingGroupLocation, DebuggerLocation, DebuggerPausedDetails, ScreencastFrame, ScreencastSize, BrowserBindResult, WebErrorLocation, DropPayload, VirtualCredential
+from playwright._impl._api_structures import Cookie, SetCookieParam, FloatRect, FilePayload, Geolocation, HttpCredentials, PdfMargins, Position, ProxySettings, ResourceTiming, SourceLocation, StorageState, ClientCertificate, ViewportSize, RemoteAddr, SecurityDetails, RequestSizes, NameValue, TracingGroupLocation, DebuggerLocation, DebuggerPausedDetails, ScreencastActionStyle, ScreencastFrame, ScreencastSize, BrowserBindResult, WebErrorLocation, DropPayload, VirtualCredential, WebMCPTool
 from playwright._impl._browser import Browser as BrowserImpl
 from playwright._impl._browser_context import BrowserContext as BrowserContextImpl
 from playwright._impl._browser_type import BrowserType as BrowserTypeImpl
@@ -276,6 +278,7 @@ from playwright._impl._selectors import Selectors as SelectorsImpl
 from playwright._impl._screencast import Screencast as ScreencastImpl
 from playwright._impl._video import Video as VideoImpl
 from playwright._impl._web_storage import WebStorage as WebStorageImpl
+from playwright._impl._webmcp import WebMCP as WebMCPImpl
 from playwright._impl._tracing import Tracing as TracingImpl
 from playwright._impl._locator import Locator as LocatorImpl, FrameLocator as FrameLocatorImpl
 from playwright._impl._errors import Error
@@ -310,6 +313,7 @@ generated_types = [
     Download,
     Screencast,
     Video,
+    WebMCP,
     Page,
     WebError,
     WebStorage,

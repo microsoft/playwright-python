@@ -350,12 +350,32 @@ class ScreencastSize(TypedDict):
     height: int
 
 
+class ScreencastActionStyle(TypedDict, total=False):
+    point: Optional[str]
+    highlight: Optional[str]
+    title: Optional[str]
+
+
 class VirtualCredential(TypedDict):
     id: str
     rpId: str
     userHandle: str
     privateKey: str
     publicKey: str
+    signCount: int
+
+
+class WebMCPToolAnnotations(TypedDict, total=False):
+    readOnly: Optional[bool]
+    untrustedContent: Optional[bool]
+    consequential: Optional[bool]
+
+
+class WebMCPTool(TypedDict, total=False):
+    name: str
+    description: str
+    inputSchema: Optional[Any]
+    annotations: Optional[WebMCPToolAnnotations]
 
 
 class ScreencastFrame(TypedDict):

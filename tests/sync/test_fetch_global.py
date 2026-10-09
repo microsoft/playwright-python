@@ -13,7 +13,9 @@
 # limitations under the License.
 
 import json
+import re
 from pathlib import Path
+from typing import List
 from urllib.parse import urlparse
 
 import pytest
@@ -435,4 +437,111 @@ def test_should_support_multiple_http_credentials(
     # Wrong credentials are picked for the other origin.
     response2 = request.get(server.CROSS_PROCESS_PREFIX + "/empty.html")
     assert response2.status == 401
+    request.dispose()
+
+
+def test_add_cookies_should_add_cookies_to_the_cookie_jar(
+    playwright: Playwright, server: Server
+) -> None:
+    request = playwright.request.new_context()
+    request.add_cookies(
+        [
+            {"name": "a", "value": "b", "url": server.EMPTY_PAGE},
+            {
+                "name": "c",
+                "value": "d",
+                "domain": "localhost",
+                "path": "/input",
+                "httpOnly": True,
+                "sameSite": "Strict",
+            },
+            {"name": "e", "value": "f", "domain": "other.com", "path": "/"},
+        ]
+    )
+    with server.expect_request("/input/button.html") as server_req:
+        request.get(server.PREFIX + "/input/button.html")
+    assert server_req.value.getHeader("cookie") == "a=b; c=d"
+    assert [
+        (c["name"], c["domain"], c["path"], c["httpOnly"], c["sameSite"])
+        for c in request.storage_state()["cookies"]
+    ] == [
+        ("a", "localhost", "/", False, "Lax"),
+        ("c", "localhost", "/input", True, "Strict"),
+        ("e", "other.com", "/", False, "Lax"),
+    ]
+    with pytest.raises(Error, match="Cookie should have a url or a domain/path pair"):
+        request.add_cookies([{"name": "a", "value": "b"}])
+    request.dispose()
+
+
+def test_cookies_should_return_cookies_filtered_by_urls(
+    playwright: Playwright, server: Server
+) -> None:
+    request = playwright.request.new_context()
+    request.add_cookies(
+        [
+            {"name": "a", "value": "b", "domain": "localhost", "path": "/"},
+            {"name": "c", "value": "d", "domain": "localhost", "path": "/input"},
+            {"name": "e", "value": "f", "domain": "one.com", "path": "/"},
+            {
+                "name": "g",
+                "value": "h",
+                "domain": "two.com",
+                "path": "/",
+                "secure": True,
+            },
+        ]
+    )
+    assert [c["name"] for c in request.cookies()] == ["a", "c", "e", "g"]
+    assert [c["name"] for c in request.cookies(server.EMPTY_PAGE)] == ["a"]
+    assert [
+        c["name"] for c in request.cookies(server.PREFIX + "/input/button.html")
+    ] == ["a", "c"]
+    assert [
+        c["name"] for c in request.cookies(["http://sub.one.com/", "https://two.com/"])
+    ] == ["e", "g"]
+    assert request.cookies("http://other.com/") == []
+    request.dispose()
+
+
+def test_clear_cookies_should_remove_all_cookies(
+    playwright: Playwright, server: Server
+) -> None:
+    request = playwright.request.new_context()
+    request.add_cookies(
+        [
+            {"name": "a", "value": "b", "url": server.EMPTY_PAGE},
+            {"name": "c", "value": "d", "domain": "one.com", "path": "/"},
+        ]
+    )
+    request.clear_cookies()
+    assert request.cookies() == []
+    with server.expect_request("/empty.html") as server_req:
+        request.get(server.EMPTY_PAGE)
+    assert server_req.value.getHeader("cookie") is None
+    request.dispose()
+
+
+def test_clear_cookies_should_filter_by_name_domain_and_path(
+    playwright: Playwright,
+) -> None:
+    request = playwright.request.new_context()
+    request.add_cookies(
+        [
+            {"name": "session", "value": "1", "domain": "one.com", "path": "/"},
+            {"name": "session", "value": "2", "domain": "two.com", "path": "/"},
+            {"name": "session", "value": "3", "domain": "two.com", "path": "/api"},
+            {"name": "other", "value": "4", "domain": "one.com", "path": "/"},
+        ]
+    )
+
+    def values() -> List[str]:
+        return sorted(c["value"] for c in request.cookies())
+
+    request.clear_cookies(name="session", domain="two.com", path="/api")
+    assert values() == ["1", "2", "4"]
+    request.clear_cookies(domain=re.compile(r"one\.com$"))
+    assert values() == ["2"]
+    request.clear_cookies(name=re.compile(r"^sess"))
+    assert values() == []
     request.dispose()

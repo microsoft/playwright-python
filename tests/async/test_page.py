@@ -1591,3 +1591,20 @@ async def test_page_should_ignore_deprecated_is_hidden_and_visible_timeout(
     await page.set_content("<div>foo</div>")
     assert await page.is_hidden("div", timeout=10) is False
     assert await page.is_visible("div", timeout=10) is True
+
+
+async def test_content_should_include_shadow_roots(page: Page) -> None:
+    html = '<!DOCTYPE html><html lang="en"><head></head><body><div id="host"><template shadowrootmode="open"><div id="nested"><template shadowrootmode="open"><span>nested</span></template><slot></slot></div></template><span>light</span></div><div id="closed"></div></body></html>'
+    # Closed shadow roots are not accessible from script and are never serialized.
+    await page.set_content(
+        html.replace(
+            '<div id="closed">',
+            '<div id="closed"><template shadowrootmode="closed"><span>closed</span></template>',
+        )
+    )
+    assert (
+        await page.content()
+        == '<!DOCTYPE html><html lang="en"><head></head><body><div id="host"><span>light</span></div><div id="closed"></div></body></html>'
+    )
+    assert await page.content(include_shadow=True) == html
+    assert await page.main_frame.content(include_shadow=True) == html

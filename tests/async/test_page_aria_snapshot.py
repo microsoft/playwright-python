@@ -275,3 +275,22 @@ async def test_to_match_aria_snapshot_should_match_page_with_not(page: Page) -> 
         - heading "wrong"
         """
     )
+
+
+async def test_get_by_ref_should_locate_elements_by_aria_ref(page: Page) -> None:
+    await page.set_content("<button>One</button><button>Two</button>")
+    snapshot = await page.aria_snapshot(mode="ai")
+    assert 'button "One" [ref=e2]' in snapshot
+    assert 'button "Two" [ref=e3]' in snapshot
+    await expect(page.get_by_ref("e2")).to_have_text("One")
+    await expect(page.get_by_ref("e3")).to_have_text("Two")
+
+
+async def test_normalize_should_return_python_locator_code(page: Page) -> None:
+    await page.set_content('<button id="submit">Submit</button>')
+    assert 'button "Submit" [ref=e2]' in await page.aria_snapshot(mode="ai")
+    normalized = await page.get_by_ref("e2").normalize()
+    assert str(normalized) == 'get_by_role("button", name="Submit")'
+    await expect(normalized).to_have_text("Submit")
+    # Locators that were not normalized keep the default representation.
+    assert str(page.get_by_ref("e2")) == repr(page.get_by_ref("e2"))

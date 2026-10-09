@@ -81,6 +81,7 @@ PdfMargins = playwright._impl._api_structures.PdfMargins
 Position = playwright._impl._api_structures.Position
 ProxySettings = playwright._impl._api_structures.ProxySettings
 ResourceTiming = playwright._impl._api_structures.ResourceTiming
+ScreencastActionStyle = playwright._impl._api_structures.ScreencastActionStyle
 ScreencastFrame = playwright._impl._api_structures.ScreencastFrame
 ScreencastSize = playwright._impl._api_structures.ScreencastSize
 SourceLocation = playwright._impl._api_structures.SourceLocation
@@ -88,6 +89,8 @@ StorageState = playwright._impl._api_structures.StorageState
 StorageStateCookie = playwright._impl._api_structures.StorageStateCookie
 ViewportSize = playwright._impl._api_structures.ViewportSize
 VirtualCredential = playwright._impl._api_structures.VirtualCredential
+WebMCPTool = playwright._impl._api_structures.WebMCPTool
+WebMCPToolAnnotations = playwright._impl._api_structures.WebMCPToolAnnotations
 
 Error = playwright._impl._errors.Error
 TimeoutError = playwright._impl._errors.TimeoutError
@@ -243,6 +246,7 @@ __all__ = [
     "ResourceTiming",
     "Response",
     "Route",
+    "ScreencastActionStyle",
     "ScreencastFrame",
     "ScreencastSize",
     "Selectors",
@@ -256,6 +260,8 @@ __all__ = [
     "ViewportSize",
     "VirtualCredential",
     "WebError",
+    "WebMCPTool",
+    "WebMCPToolAnnotations",
     "WebSocket",
     "WebSocketRoute",
     "Worker",

@@ -19,10 +19,13 @@ import zipfile
 from pathlib import Path
 from typing import Any, AsyncContextManager, Callable, Dict, List
 
+import pytest
+
 from playwright.async_api import (
     Browser,
     BrowserContext,
     BrowserType,
+    Error,
     Page,
     Playwright,
     Response,
@@ -54,6 +57,26 @@ async def test_start_stop(browser: Browser) -> None:
 async def test_browser_context_should_not_throw_when_stopping_without_start_but_not_exporting(
     context: BrowserContext,
 ) -> None:
+    await context.tracing.stop()
+
+
+async def test_start_should_return_a_disposable_that_discards_the_trace(
+    context: BrowserContext, page: Page, server: Server, tmp_path: Path
+) -> None:
+    async with await context.tracing.start():
+        await page.goto(server.EMPTY_PAGE)
+    with pytest.raises(Error, match="Must start tracing before stopping"):
+        await context.tracing.stop(path=tmp_path / "trace.zip")
+
+
+async def test_start_chunk_should_return_a_disposable_that_discards_the_chunk(
+    context: BrowserContext, page: Page, server: Server, tmp_path: Path
+) -> None:
+    await context.tracing.start()
+    async with await context.tracing.start_chunk():
+        await page.goto(server.EMPTY_PAGE)
+    with pytest.raises(Error, match="Must start tracing before stopping"):
+        await context.tracing.stop_chunk(path=tmp_path / "trace.zip")
     await context.tracing.stop()
 
 

@@ -78,9 +78,9 @@ from playwright._impl._network import (
     WebSocketRoute,
     WebSocketRouteHandler,
     serialize_headers,
+    to_clear_cookies_params,
 )
 from playwright._impl._page import BindingCall, Page, Worker
-from playwright._impl._str_utils import escape_regex_flags
 from playwright._impl._tracing import Tracing
 from playwright._impl._waiter import Waiter
 from playwright._impl._web_error import WebError
@@ -369,27 +369,7 @@ class BrowserContext(ChannelOwner):
         path: Union[str, Pattern[str]] = None,
     ) -> None:
         await self._channel.send(
-            "clearCookies",
-            None,
-            {
-                "name": name if isinstance(name, str) else None,
-                "nameRegexSource": name.pattern if isinstance(name, Pattern) else None,
-                "nameRegexFlags": (
-                    escape_regex_flags(name) if isinstance(name, Pattern) else None
-                ),
-                "domain": domain if isinstance(domain, str) else None,
-                "domainRegexSource": (
-                    domain.pattern if isinstance(domain, Pattern) else None
-                ),
-                "domainRegexFlags": (
-                    escape_regex_flags(domain) if isinstance(domain, Pattern) else None
-                ),
-                "path": path if isinstance(path, str) else None,
-                "pathRegexSource": path.pattern if isinstance(path, Pattern) else None,
-                "pathRegexFlags": (
-                    escape_regex_flags(path) if isinstance(path, Pattern) else None
-                ),
-            },
+            "clearCookies", None, to_clear_cookies_params(name, domain, path)
         )
 
     async def grant_permissions(

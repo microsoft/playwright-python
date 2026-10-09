@@ -37,6 +37,7 @@ class Credentials:
         userHandle: str = None,
         privateKey: str = None,
         publicKey: str = None,
+        signCount: int = None,
     ) -> VirtualCredential:
         result = await self._browser_context._channel.send_return_as_dict(
             "credentialsCreate", None, locals_to_params(locals())

@@ -1207,6 +1207,29 @@ async def test_normalize_should_resolve_to_a_locator(page: Page) -> None:
     assert await normalized.text_content() == "Click me"
 
 
+async def test_should_support_locator_within(page: Page) -> None:
+    await page.set_content(
+        """
+        <table>
+          <tr><td>a1</td><td>a2</td><td>a3</td></tr>
+          <tr><td>b1</td><td>b2</td><td>b3</td></tr>
+          <tr><td>c1</td><td>c2</td><td>c3</td></tr>
+        </table>
+        <span>outside</span>
+    """
+    )
+    cells = page.get_by_role("cell")
+    rows = page.get_by_role("row")
+    await expect(cells.within(rows)).to_have_text(
+        ["a1", "a2", "a3", "b1", "b2", "b3", "c1", "c2", "c3"]
+    )
+    await expect(cells.nth(1).within(rows)).to_have_text(["a2", "b2", "c2"])
+    await expect(cells.last.within(rows)).to_have_text(["a3", "b3", "c3"])
+    await expect(cells.nth(1).within(rows.nth(2))).to_have_text(["c2"])
+    await expect(page.locator("span").within(rows)).to_have_count(0)
+    await expect(cells.nth(1).within(rows).nth(1)).to_have_text("b2")
+
+
 _DROPZONE_HTML = """
     <style>#dropzone { width: 300px; height: 200px; border: 2px dashed #888; }</style>
     <div id="dropzone"></div>

@@ -114,3 +114,33 @@ def test_should_error_if_page_not_closed_before_save_as(
 
     video.save_as(out_path)
     assert os.path.exists(out_path)
+
+
+def test_should_record_video_with_fps(
+    browser: Browser, tmp_path: Path, server: Server
+) -> None:
+    context = browser.new_context(record_video_dir=tmp_path, record_video_fps=60)
+    page = context.new_page()
+    page.goto(server.PREFIX + "/grid.html")
+    page.wait_for_timeout(500)
+    context.close()
+    assert page.video
+    assert os.path.exists(page.video.path())
+
+
+def test_should_throw_on_invalid_record_video_fps(
+    browser: Browser, browser_type: BrowserType, tmp_path: Path, launch_arguments: Dict
+) -> None:
+    with pytest.raises(
+        Error, match='"recordVideo.fps" must be a positive number, got 0'
+    ):
+        browser.new_context(record_video_dir=tmp_path, record_video_fps=0)
+    with pytest.raises(
+        Error, match='"recordVideo.fps" must be a positive number, got 0'
+    ):
+        browser_type.launch_persistent_context(
+            tmp_path / "user-data-dir",
+            **launch_arguments,
+            record_video_dir=tmp_path,
+            record_video_fps=0,
+        )

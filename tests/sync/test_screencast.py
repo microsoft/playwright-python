@@ -13,10 +13,11 @@
 # limitations under the License.
 
 import time
+from pathlib import Path
 
 import pytest
 
-from playwright.sync_api import Browser, Page, ScreencastSize
+from playwright.sync_api import Browser, Error, Page, ScreencastSize
 from tests.server import Server
 
 
@@ -155,3 +156,30 @@ def test_show_actions_should_accept_cursor_param(page: Page) -> None:
             pass
     finally:
         page.screencast.stop()
+
+
+def test_start_should_record_video_with_fps(page: Page, tmp_path: Path) -> None:
+    path = tmp_path / "video.webm"
+    page.screencast.start(path=path, fps=60)
+    ensure_some_frames(page)
+    page.screencast.stop()
+    assert path.exists()
+
+
+def test_start_should_throw_on_invalid_fps(page: Page, tmp_path: Path) -> None:
+    with pytest.raises(Error, match='"fps" must be a positive number, got -1'):
+        page.screencast.start(path=tmp_path / "video.webm", fps=-1)
+
+
+def test_show_actions_should_accept_style(page: Page, server: Server) -> None:
+    page.goto(server.PREFIX + "/input/button.html")
+    with page.screencast.show_actions(
+        duration=100,
+        style={
+            "point": "width: 20px; height: 20px; border-radius: 50%; background: red",
+            "highlight": "outline: 2px solid #333",
+            "title": "font-size: 16px",
+        },
+    ):
+        page.click("button")
+    assert page.evaluate("result") == "Clicked"

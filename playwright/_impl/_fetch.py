@@ -18,11 +18,12 @@ import mimetypes
 import pathlib
 import typing
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Sequence, Union, cast
+from typing import Any, Dict, List, Optional, Pattern, Sequence, Union, cast
 
 import playwright._impl._network as network
 from playwright._impl._api_structures import (
     ClientCertificate,
+    Cookie,
     FilePayload,
     FormField,
     Headers,
@@ -32,6 +33,7 @@ from playwright._impl._api_structures import (
     ResourceTiming,
     SecurityDetails,
     ServerFilePayload,
+    SetCookieParam,
     StorageState,
 )
 from playwright._impl._connection import ChannelOwner, from_channel
@@ -51,6 +53,7 @@ from playwright._impl._helper import (
 )
 from playwright._impl._network import (
     serialize_headers,
+    to_clear_cookies_params,
     to_client_certificates_protocol,
     to_http_credentials_protocol,
 )
@@ -135,6 +138,26 @@ class APIRequestContext(ChannelOwner):
     @property
     def tracing(self) -> Tracing:
         return self._tracing
+
+    async def cookies(self, urls: Union[str, Sequence[str]] = None) -> List[Cookie]:
+        if urls is None:
+            urls = []
+        if isinstance(urls, str):
+            urls = [urls]
+        return await self._channel.send("cookies", None, dict(urls=urls))
+
+    async def add_cookies(self, cookies: Sequence[SetCookieParam]) -> None:
+        await self._channel.send("addCookies", None, dict(cookies=cookies))
+
+    async def clear_cookies(
+        self,
+        name: Union[str, Pattern[str]] = None,
+        domain: Union[str, Pattern[str]] = None,
+        path: Union[str, Pattern[str]] = None,
+    ) -> None:
+        await self._channel.send(
+            "clearCookies", None, to_clear_cookies_params(name, domain, path)
+        )
 
     async def delete(
         self,

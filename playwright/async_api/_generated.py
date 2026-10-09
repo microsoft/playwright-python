@@ -36,6 +36,7 @@ from playwright._impl._api_structures import (
     RemoteAddr,
     RequestSizes,
     ResourceTiming,
+    ScreencastActionStyle,
     ScreencastFrame,
     ScreencastSize,
     SecurityDetails,
@@ -46,6 +47,7 @@ from playwright._impl._api_structures import (
     ViewportSize,
     VirtualCredential,
     WebErrorLocation,
+    WebMCPTool,
 )
 from playwright._impl._assertions import (
     APIResponseAssertions as APIResponseAssertionsImpl,
@@ -98,6 +100,7 @@ from playwright._impl._tracing import Tracing as TracingImpl
 from playwright._impl._video import Video as VideoImpl
 from playwright._impl._web_error import WebError as WebErrorImpl
 from playwright._impl._web_storage import WebStorage as WebStorageImpl
+from playwright._impl._webmcp import WebMCP as WebMCPImpl
 
 
 class Request(AsyncBase):
@@ -120,7 +123,7 @@ class Request(AsyncBase):
 
         Contains the request's resource type as it was perceived by the rendering engine. ResourceType will be one of the
         following: `document`, `stylesheet`, `image`, `media`, `font`, `script`, `texttrack`, `xhr`, `fetch`,
-        `eventsource`, `websocket`, `manifest`, `other`.
+        `eventsource`, `websocket`, `manifest`, `beacon`, `ping`, `cspreport`, `other`.
 
         Returns
         -------
@@ -550,9 +553,10 @@ class Response(AsyncBase):
     async def headers_array(self) -> typing.List[NameValue]:
         """Response.headers_array
 
-        An array with all the request HTTP headers associated with this response. Unlike `response.all_headers()`,
+        An array with all the response HTTP headers associated with this response. Unlike `response.all_headers()`,
         header names are NOT lower-cased. Headers with multiple entries, such as `Set-Cookie`, appear in the array multiple
-        times.
+        times. Some browser network stacks combine multiple field values before reporting them, so separate entries are not
+        always available.
 
         Returns
         -------
@@ -3491,6 +3495,18 @@ class Frame(AsyncBase):
         return mapping.from_maybe_impl(self._impl_obj.url)
 
     @property
+    def webmcp(self) -> "WebMCP":
+        """Frame.webmcp
+
+        Tools that the frame registers through the experimental `WebMCP` browser API. See `WebMCP` for details.
+
+        Returns
+        -------
+        WebMCP
+        """
+        return mapping.from_impl(self._impl_obj.webmcp)
+
+    @property
     def parent_frame(self) -> typing.Optional["Frame"]:
         """Frame.parent_frame
 
@@ -4359,17 +4375,27 @@ class Frame(AsyncBase):
             )
         )
 
-    async def content(self) -> str:
+    async def content(self, *, include_shadow: typing.Optional[bool] = None) -> str:
         """Frame.content
 
         Gets the full HTML contents of the frame, including the doctype.
+
+        Parameters
+        ----------
+        include_shadow : Union[bool, None]
+            When true, contents of open shadow roots are included as
+            [declarative shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM#declaratively_with_html),
+            i.e. `<template shadowrootmode="open">` elements nested inside their host elements. Closed shadow roots are never
+            included. Defaults to `false`.
 
         Returns
         -------
         str
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.content())
+        return mapping.from_maybe_impl(
+            await self._impl_obj.content(includeShadow=include_shadow)
+        )
 
     async def set_content(
         self,
@@ -4807,8 +4833,8 @@ class Frame(AsyncBase):
         self,
         selector: str,
         *,
-        has_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
-        has_not_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        has_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        has_not_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
         has: typing.Optional["Locator"] = None,
         has_not: typing.Optional["Locator"] = None,
     ) -> "Locator":
@@ -5075,11 +5101,11 @@ class Frame(AsyncBase):
         expanded: typing.Optional[bool] = None,
         include_hidden: typing.Optional[bool] = None,
         level: typing.Optional[int] = None,
-        name: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        name: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
         pressed: typing.Optional[bool] = None,
         selected: typing.Optional[bool] = None,
         exact: typing.Optional[bool] = None,
-        description: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        description: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
     ) -> "Locator":
         """Frame.get_by_role
 
@@ -6356,8 +6382,8 @@ class FrameLocator(AsyncBase):
         self,
         selector_or_locator: typing.Union["Locator", str],
         *,
-        has_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
-        has_not_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        has_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        has_not_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
         has: typing.Optional["Locator"] = None,
         has_not: typing.Optional["Locator"] = None,
     ) -> "Locator":
@@ -6621,11 +6647,11 @@ class FrameLocator(AsyncBase):
         expanded: typing.Optional[bool] = None,
         include_hidden: typing.Optional[bool] = None,
         level: typing.Optional[int] = None,
-        name: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        name: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
         pressed: typing.Optional[bool] = None,
         selected: typing.Optional[bool] = None,
         exact: typing.Optional[bool] = None,
-        description: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        description: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
     ) -> "Locator":
         """FrameLocator.get_by_role
 
@@ -7235,6 +7261,7 @@ class Clock(AsyncBase):
 
         Install fake implementations for the following time-related functions:
         - `Date`
+        - `Temporal.Now`
         - `setTimeout`
         - `clearTimeout`
         - `setInterval`
@@ -7423,6 +7450,7 @@ class Credentials(AsyncBase):
         user_handle: typing.Optional[str] = None,
         private_key: typing.Optional[str] = None,
         public_key: typing.Optional[str] = None,
+        sign_count: typing.Optional[int] = None,
     ) -> VirtualCredential:
         """Credentials.create
 
@@ -7434,6 +7462,7 @@ class Credentials(AsyncBase):
         later test.
 
         To **import a known credential**, supply all four of `id`, `userHandle`, `privateKey` and `publicKey` together.
+        Pass `signCount` as well to continue from the signature counter the relying party has already seen.
 
         Call `credentials.install()` before navigating to a page that uses WebAuthn.
 
@@ -7449,10 +7478,14 @@ class Credentials(AsyncBase):
             Base64url-encoded PKCS#8 (DER) private key. Auto-generated if omitted.
         public_key : Union[str, None]
             Base64url-encoded SPKI (DER) public key. Auto-generated if omitted.
+        sign_count : Union[int, None]
+            Initial value of the [signature counter](https://www.w3.org/TR/webauthn-2/#signature-counter). The counter is
+            incremented by one on every successful `navigator.credentials.get()` assertion, so the first assertion reports
+            `signCount + 1`. Defaults to `0`.
 
         Returns
         -------
-        {id: str, rpId: str, userHandle: str, privateKey: str, publicKey: str}
+        {id: str, rpId: str, userHandle: str, privateKey: str, publicKey: str, signCount: int}
         """
 
         return mapping.from_impl(
@@ -7462,6 +7495,7 @@ class Credentials(AsyncBase):
                 userHandle=user_handle,
                 privateKey=private_key,
                 publicKey=public_key,
+                signCount=sign_count,
             )
         )
 
@@ -7489,8 +7523,9 @@ class Credentials(AsyncBase):
         both credentials seeded with `credentials.create()` and credentials the page registered itself by calling
         `navigator.credentials.create()`.
 
-        Each returned credential includes its private and public keys, so a passkey the app just registered can be saved
-        and re-seeded into a later test with `credentials.create()` — see the second example in the class overview.
+        Each returned credential includes its private and public keys and the current signature counter, so a passkey the
+        app just registered can be saved and re-seeded into a later test with `credentials.create()` — see the
+        second example in the class overview.
 
         Parameters
         ----------
@@ -7501,7 +7536,7 @@ class Credentials(AsyncBase):
 
         Returns
         -------
-        List[{id: str, rpId: str, userHandle: str, privateKey: str, publicKey: str}]
+        List[{id: str, rpId: str, userHandle: str, privateKey: str, publicKey: str, signCount: int}]
         """
 
         return mapping.from_impl_list(await self._impl_obj.get(rpId=rp_id, id=id))
@@ -7926,6 +7961,7 @@ class Screencast(AsyncBase):
         path: typing.Optional[typing.Union[pathlib.Path, str]] = None,
         quality: typing.Optional[int] = None,
         size: typing.Optional[ScreencastSize] = None,
+        fps: typing.Optional[int] = None,
     ) -> "AsyncContextManager":
         """Screencast.start
 
@@ -7947,6 +7983,12 @@ class Screencast(AsyncBase):
             may be smaller than these bounds. If a screencast is already active (e.g. started by tracing or video recording),
             the existing configuration takes precedence and the frame size may exceed these bounds or this option may be
             ignored. If not specified the size will be equal to page viewport scaled down to fit into 800×800.
+        fps : Union[int, None]
+            Frame rate of the video recording in frames per second. Only used together with `path`. Defaults to `25`.
+
+            Higher frame rates make animations and scrolling smoother at the cost of more CPU spent on encoding. Combine with
+            `size` to record high resolution videos. The video can only contain as many distinct frames as the browser
+            produces; Firefox and WebKit currently capture up to 25 frames per second.
 
         Returns
         -------
@@ -7959,6 +8001,7 @@ class Screencast(AsyncBase):
                 path=path,
                 quality=quality,
                 size=size,
+                fps=fps,
             )
         )
 
@@ -7982,6 +8025,7 @@ class Screencast(AsyncBase):
         ] = None,
         font_size: typing.Optional[int] = None,
         cursor: typing.Optional[Literal["none", "pointer"]] = None,
+        style: typing.Optional[ScreencastActionStyle] = None,
     ) -> "AsyncContextManager":
         """Screencast.show_actions
 
@@ -7995,9 +8039,25 @@ class Screencast(AsyncBase):
             Position of the action title overlay. Defaults to `"top-right"`.
         font_size : Union[int, None]
             Font size of the action title in pixels. Defaults to `24`.
+            Deprecated: Use `title` in `style` instead, for example `style: { title: 'font-size: 32px' }`.
         cursor : Union["none", "pointer", None]
             Cursor decoration shown for pointer actions. `"pointer"` (the default) renders a mouse pointer that animates from
             the previous action point to the next one. `"none"` disables the cursor decoration.
+        style : Union[{point: Union[str, None], highlight: Union[str, None], title: Union[str, None]}, None]
+            Styles of the action decorations. All decorations fade out over `duration`.
+
+            **Usage**
+
+            ```js
+            await page.screencast.showActions({
+              style: {
+                point: 'width: 20px; height: 20px; border-radius: 50%; background: red',
+                highlight: 'outline: 2px solid #333; background: rgba(0, 128, 255, .15)',
+                title: 'font-size: 16px',
+              },
+            });
+            ```
+
 
         Returns
         -------
@@ -8006,7 +8066,11 @@ class Screencast(AsyncBase):
 
         return mapping.from_impl(
             await self._impl_obj.show_actions(
-                duration=duration, position=position, fontSize=font_size, cursor=cursor
+                duration=duration,
+                position=position,
+                fontSize=font_size,
+                cursor=cursor,
+                style=style,
             )
         )
 
@@ -8130,6 +8194,76 @@ class Video(AsyncBase):
 
 
 mapping.register(VideoImpl, Video)
+
+
+class WebMCP(AsyncBase):
+
+    async def tools(
+        self,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
+    ) -> typing.List[WebMCPTool]:
+        """WebMCP.tools
+
+        Returns the tools currently registered by the frame. Throws if the browser was launched without WebMCP support, see
+        the note above for the launch options that enable it.
+
+        `page.webmcp` covers the main frame only, child frames list their tools through their own
+        `frame.webmcp`.
+
+        Parameters
+        ----------
+        timeout : Union[float, None]
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        List[{name: str, description: str, inputSchema: Union[Any, None], annotations: Union[{readOnly: Union[bool, None], untrustedContent: Union[bool, None], consequential: Union[bool, None]}, None]}]
+        """
+
+        return mapping.from_impl_list(
+            await self._impl_obj.tools(timeout=to_milliseconds(timeout))
+        )
+
+    async def call_tool(
+        self,
+        name: str,
+        input: typing.Optional[typing.Any] = None,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
+    ) -> typing.Any:
+        """WebMCP.call_tool
+
+        Calls a tool registered by the frame and returns its result. The result is whatever the tool's `execute` function
+        resolved to, typically an object with a `content` array. A result with `isError: true` is returned as is. The
+        method throws when the tool is not registered or its `execute` function throws.
+
+        Parameters
+        ----------
+        name : str
+            Name of the tool, as reported by `web_mcp.tools()`.
+        input : Union[Any, None]
+            Input for the tool, matching its `inputSchema`. Defaults to an empty object.
+        timeout : Union[float, None]
+            Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
+            be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
+
+        Returns
+        -------
+        Any
+        """
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.call_tool(
+                name=name,
+                input=mapping.to_impl(input),
+                timeout=to_milliseconds(timeout),
+            )
+        )
+
+
+mapping.register(WebMCPImpl, WebMCP)
 
 
 class Page(AsyncContextManager):
@@ -8847,6 +8981,21 @@ class Page(AsyncContextManager):
         Screencast
         """
         return mapping.from_impl(self._impl_obj.screencast)
+
+    @property
+    def webmcp(self) -> "WebMCP":
+        """Page.webmcp
+
+        Tools that the main frame registers through the experimental `WebMCP` browser API. Shortcut for
+        `frame.webmcp` of `page.main_frame()`, see `WebMCP` for details.
+
+        **Usage**
+
+        Returns
+        -------
+        WebMCP
+        """
+        return mapping.from_impl(self._impl_obj.webmcp)
 
     @property
     def local_storage(self) -> "WebStorage":
@@ -9786,17 +9935,27 @@ class Page(AsyncContextManager):
             )
         )
 
-    async def content(self) -> str:
+    async def content(self, *, include_shadow: typing.Optional[bool] = None) -> str:
         """Page.content
 
         Gets the full HTML contents of the page, including the doctype.
+
+        Parameters
+        ----------
+        include_shadow : Union[bool, None]
+            When true, contents of open shadow roots are included as
+            [declarative shadow DOM](https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM#declaratively_with_html),
+            i.e. `<template shadowrootmode="open">` elements nested inside their host elements. Closed shadow roots are never
+            included. Defaults to `false`.
 
         Returns
         -------
         str
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.content())
+        return mapping.from_maybe_impl(
+            await self._impl_obj.content(includeShadow=include_shadow)
+        )
 
     async def set_content(
         self,
@@ -10751,7 +10910,7 @@ class Page(AsyncContextManager):
         self,
         har: typing.Union[pathlib.Path, str],
         *,
-        url: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        url: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
         not_found: typing.Optional[Literal["abort", "fallback"]] = None,
         update: typing.Optional[bool] = None,
         update_content: typing.Optional[Literal["attach", "embed"]] = None,
@@ -11302,8 +11461,8 @@ class Page(AsyncContextManager):
         self,
         selector: str,
         *,
-        has_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
-        has_not_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        has_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        has_not_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
         has: typing.Optional["Locator"] = None,
         has_not: typing.Optional["Locator"] = None,
     ) -> "Locator":
@@ -11476,6 +11635,34 @@ class Page(AsyncContextManager):
             self._impl_obj.get_by_placeholder(text=text, exact=exact)
         )
 
+    def get_by_ref(self, ref: str) -> "Locator":
+        """Page.get_by_ref
+
+        Locate element by its aria ref. Refs like `[ref=e2]` are reported by `page.aria_snapshot()` when called with
+        the `\"ai\"` mode, and resolve against the latest snapshot taken in the element's frame.
+
+        **Usage**
+
+        Consider the following aria snapshot.
+
+        You can locate the button by its ref:
+
+        ```py
+        await page.get_by_ref(\"e2\").click()
+        ```
+
+        Parameters
+        ----------
+        ref : str
+            Aria ref of the element, for example `e2` or `f1e3`.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.get_by_ref(ref=ref))
+
     def get_by_role(
         self,
         role: Literal[
@@ -11568,11 +11755,11 @@ class Page(AsyncContextManager):
         expanded: typing.Optional[bool] = None,
         include_hidden: typing.Optional[bool] = None,
         level: typing.Optional[int] = None,
-        name: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        name: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
         pressed: typing.Optional[bool] = None,
         selected: typing.Optional[bool] = None,
         exact: typing.Optional[bool] = None,
-        description: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        description: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
     ) -> "Locator":
         """Page.get_by_role
 
@@ -14665,9 +14852,9 @@ class BrowserContext(AsyncContextManager):
     async def clear_cookies(
         self,
         *,
-        name: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
-        domain: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
-        path: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        name: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        domain: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        path: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
     ) -> None:
         """BrowserContext.clear_cookies
 
@@ -14813,6 +15000,12 @@ class BrowserContext(AsyncContextManager):
         ----------
         offline : bool
             Whether to emulate network being offline for the browser context.
+
+            **NOTE** Offline emulation only affects requests that go through the browser's regular network stack, such as page
+            navigations, `fetch()`, `XMLHttpRequest` and WebSockets. It does not affect WebRTC traffic: established
+            `RTCPeerConnection`s keep sending and receiving media over UDP. To test WebRTC connection loss, interrupt the
+            connection outside the browser, for example by stopping the TURN server or using an OS-level firewall.
+
         """
 
         return mapping.from_maybe_impl(
@@ -15182,7 +15375,7 @@ class BrowserContext(AsyncContextManager):
         self,
         har: typing.Union[pathlib.Path, str],
         *,
-        url: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        url: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
         not_found: typing.Optional[Literal["abort", "fallback"]] = None,
         update: typing.Optional[bool] = None,
         update_content: typing.Optional[Literal["attach", "embed"]] = None,
@@ -15505,10 +15698,11 @@ class BrowserContext(AsyncContextManager):
 
         credentials : Union[bool, None]
             Set to `true` to include the context's virtual WebAuthn `browser_context.credentials` (passkeys) in the
-            storage state snapshot. The captured credentials carry their private keys, so they can be re-seeded into a later
-            context via the `storageState` option or `browser_context.set_storage_state()`. Note that restoring the
-            storage state that contains credentials will automatically install the virtual WebAuthn authenticator (see
-            `credentials.install()`), and prevent all real authenticators from working in this context.
+            storage state snapshot. The captured credentials carry their private keys and signature counters, so they can be
+            re-seeded into a later context via the `storageState` option or `browser_context.set_storage_state()`. Note
+            that restoring the storage state that contains credentials will automatically install the virtual WebAuthn
+            authenticator (see `credentials.install()`), and prevent all real authenticators from working in this
+            context.
 
         Returns
         -------
@@ -16102,11 +16296,12 @@ class Browser(AsyncContextManager):
         strict_selectors: typing.Optional[bool] = None,
         service_workers: typing.Optional[Literal["allow", "block"]] = None,
         record_har_url_filter: typing.Optional[
-            typing.Union[typing.Pattern[str], str]
+            typing.Union[str, typing.Pattern[str]]
         ] = None,
         record_har_mode: typing.Optional[Literal["full", "minimal"]] = None,
         record_har_content: typing.Optional[Literal["attach", "embed", "omit"]] = None,
         client_certificates: typing.Optional[typing.List[ClientCertificate]] = None,
+        record_video_fps: typing.Optional[int] = None,
     ) -> "BrowserContext":
         """Browser.new_context
 
@@ -16179,8 +16374,8 @@ class Browser(AsyncContextManager):
             [emulating devices with device scale factor](../emulation.md#devices).
         is_mobile : Union[bool, None]
             Whether the `meta viewport` tag is taken into account and touch events are enabled. isMobile is a part of device,
-            so you don't actually need to set it manually. Defaults to `false` and is not supported in Firefox. Learn more
-            about [mobile emulation](../emulation.md#ismobile).
+            so you don't actually need to set it manually. Defaults to `false`. Learn more about
+            [mobile emulation](../emulation.md#ismobile).
         has_touch : Union[bool, None]
             Specifies if viewport supports touch events. Defaults to false. Learn more about
             [mobile emulation](../emulation.md#devices).
@@ -16267,6 +16462,9 @@ class Browser(AsyncContextManager):
             **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
             work by replacing `localhost` with `local.playwright`.
 
+        record_video_fps : Union[int, None]
+            Frame rate of the recorded videos in frames per second. Defaults to `25`. Firefox and WebKit currently capture up
+            to 25 frames per second.
 
         Returns
         -------
@@ -16311,6 +16509,7 @@ class Browser(AsyncContextManager):
                 recordHarMode=record_har_mode,
                 recordHarContent=record_har_content,
                 clientCertificates=client_certificates,
+                recordVideoFps=record_video_fps,
             )
         )
 
@@ -16358,11 +16557,12 @@ class Browser(AsyncContextManager):
         strict_selectors: typing.Optional[bool] = None,
         service_workers: typing.Optional[Literal["allow", "block"]] = None,
         record_har_url_filter: typing.Optional[
-            typing.Union[typing.Pattern[str], str]
+            typing.Union[str, typing.Pattern[str]]
         ] = None,
         record_har_mode: typing.Optional[Literal["full", "minimal"]] = None,
         record_har_content: typing.Optional[Literal["attach", "embed", "omit"]] = None,
         client_certificates: typing.Optional[typing.List[ClientCertificate]] = None,
+        record_video_fps: typing.Optional[int] = None,
     ) -> "Page":
         """Browser.new_page
 
@@ -16419,8 +16619,8 @@ class Browser(AsyncContextManager):
             [emulating devices with device scale factor](../emulation.md#devices).
         is_mobile : Union[bool, None]
             Whether the `meta viewport` tag is taken into account and touch events are enabled. isMobile is a part of device,
-            so you don't actually need to set it manually. Defaults to `false` and is not supported in Firefox. Learn more
-            about [mobile emulation](../emulation.md#ismobile).
+            so you don't actually need to set it manually. Defaults to `false`. Learn more about
+            [mobile emulation](../emulation.md#ismobile).
         has_touch : Union[bool, None]
             Specifies if viewport supports touch events. Defaults to false. Learn more about
             [mobile emulation](../emulation.md#devices).
@@ -16507,6 +16707,9 @@ class Browser(AsyncContextManager):
             **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
             work by replacing `localhost` with `local.playwright`.
 
+        record_video_fps : Union[int, None]
+            Frame rate of the recorded videos in frames per second. Defaults to `25`. Firefox and WebKit currently capture up
+            to 25 frames per second.
 
         Returns
         -------
@@ -16551,6 +16754,7 @@ class Browser(AsyncContextManager):
                 recordHarMode=record_har_mode,
                 recordHarContent=record_har_content,
                 clientCertificates=client_certificates,
+                recordVideoFps=record_video_fps,
             )
         )
 
@@ -16810,7 +17014,7 @@ class BrowserType(AsyncBase):
         handle_sighup : Union[bool, None]
             Close the browser process on SIGHUP. Defaults to `true`.
         timeout : Union[float, None]
-            Maximum time in milliseconds to wait for the browser instance to start. Defaults to `30000` (30 seconds). Pass `0`
+            Maximum time in milliseconds to wait for the browser instance to start. Defaults to `180000` (3 minutes). Pass `0`
             to disable timeout.
         env : Union[Dict[str, Union[bool, float, str]], None]
             Specify environment variables that will be visible to the browser. Defaults to `process.env`.
@@ -16930,11 +17134,12 @@ class BrowserType(AsyncBase):
         strict_selectors: typing.Optional[bool] = None,
         service_workers: typing.Optional[Literal["allow", "block"]] = None,
         record_har_url_filter: typing.Optional[
-            typing.Union[typing.Pattern[str], str]
+            typing.Union[str, typing.Pattern[str]]
         ] = None,
         record_har_mode: typing.Optional[Literal["full", "minimal"]] = None,
         record_har_content: typing.Optional[Literal["attach", "embed", "omit"]] = None,
         client_certificates: typing.Optional[typing.List[ClientCertificate]] = None,
+        record_video_fps: typing.Optional[int] = None,
     ) -> "BrowserContext":
         """BrowserType.launch_persistent_context
 
@@ -16988,7 +17193,7 @@ class BrowserType(AsyncBase):
         handle_sighup : Union[bool, None]
             Close the browser process on SIGHUP. Defaults to `true`.
         timeout : Union[float, None]
-            Maximum time in milliseconds to wait for the browser instance to start. Defaults to `30000` (30 seconds). Pass `0`
+            Maximum time in milliseconds to wait for the browser instance to start. Defaults to `180000` (3 minutes). Pass `0`
             to disable timeout.
         env : Union[Dict[str, Union[bool, float, str]], None]
             Specify environment variables that will be visible to the browser. Defaults to `process.env`.
@@ -17050,8 +17255,8 @@ class BrowserType(AsyncBase):
             [emulating devices with device scale factor](../emulation.md#devices).
         is_mobile : Union[bool, None]
             Whether the `meta viewport` tag is taken into account and touch events are enabled. isMobile is a part of device,
-            so you don't actually need to set it manually. Defaults to `false` and is not supported in Firefox. Learn more
-            about [mobile emulation](../emulation.md#ismobile).
+            so you don't actually need to set it manually. Defaults to `false`. Learn more about
+            [mobile emulation](../emulation.md#ismobile).
         has_touch : Union[bool, None]
             Specifies if viewport supports touch events. Defaults to false. Learn more about
             [mobile emulation](../emulation.md#devices).
@@ -17145,6 +17350,9 @@ class BrowserType(AsyncBase):
             **NOTE** When using WebKit on macOS, accessing `localhost` will not pick up client certificates. You can make it
             work by replacing `localhost` with `local.playwright`.
 
+        record_video_fps : Union[int, None]
+            Frame rate of the recorded videos in frames per second. Defaults to `25`. Firefox and WebKit currently capture up
+            to 25 frames per second.
 
         Returns
         -------
@@ -17204,6 +17412,7 @@ class BrowserType(AsyncBase):
                 recordHarMode=record_har_mode,
                 recordHarContent=record_har_content,
                 clientCertificates=client_certificates,
+                recordVideoFps=record_video_fps,
             )
         )
 
@@ -17484,10 +17693,11 @@ class Tracing(AsyncBase):
         screenshots: typing.Optional[bool] = None,
         sources: typing.Optional[bool] = None,
         live: typing.Optional[bool] = None,
-    ) -> None:
+    ) -> "AsyncContextManager":
         """Tracing.start
 
-        Start tracing.
+        Start tracing. Disposing the returned `Disposable` stops tracing without saving the trace, similarly to calling
+        `tracing.stop()` without a path.
 
         **NOTE** You probably want to
         [enable tracing in your config file](https://playwright.dev/docs/api/class-testoptions#test-options-trace) instead
@@ -17529,9 +17739,13 @@ class Tracing(AsyncBase):
             When enabled, the trace is written to an unarchived file that is updated in real time as actions occur, instead of
             caching changes and archiving them into a zip file at the end. This is useful for live trace viewing during test
             execution.
+
+        Returns
+        -------
+        AsyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             await self._impl_obj.start(
                 name=name,
                 title=title,
@@ -17546,12 +17760,13 @@ class Tracing(AsyncBase):
 
     async def start_chunk(
         self, *, title: typing.Optional[str] = None, name: typing.Optional[str] = None
-    ) -> None:
+    ) -> "AsyncContextManager":
         """Tracing.start_chunk
 
-        Start a new trace chunk. If you'd like to record multiple traces on the same `BrowserContext`, use
-        `tracing.start()` once, and then create multiple trace chunks with `tracing.start_chunk()` and
-        `tracing.stop_chunk()`.
+        Start a new trace chunk. Disposing the returned `Disposable` stops the chunk without saving it, similarly to
+        calling `tracing.stop_chunk()` without a path. If you'd like to record multiple traces on the same
+        `BrowserContext`, use `tracing.start()` once, and then create multiple trace chunks with
+        `tracing.start_chunk()` and `tracing.stop_chunk()`.
 
         **Usage**
 
@@ -17579,9 +17794,13 @@ class Tracing(AsyncBase):
             If specified, intermediate trace files are going to be saved into the files with the given name prefix inside the
             `tracesDir` directory specified in `browser_type.launch()`. To specify the final trace zip file name, you
             need to pass `path` option to `tracing.stop_chunk()` instead.
+
+        Returns
+        -------
+        AsyncContextManager
         """
 
-        return mapping.from_maybe_impl(
+        return mapping.from_impl(
             await self._impl_obj.start_chunk(title=title, name=name)
         )
 
@@ -17667,7 +17886,7 @@ class Tracing(AsyncBase):
         *,
         content: typing.Optional[Literal["attach", "embed", "omit"]] = None,
         mode: typing.Optional[Literal["full", "minimal"]] = None,
-        url_filter: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        url_filter: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
     ) -> "AsyncContextManager":
         """Tracing.start_har
 
@@ -18466,8 +18685,8 @@ class Locator(AsyncBase):
         self,
         selector_or_locator: typing.Union[str, "Locator"],
         *,
-        has_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
-        has_not_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        has_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        has_not_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
         has: typing.Optional["Locator"] = None,
         has_not: typing.Optional["Locator"] = None,
     ) -> "Locator":
@@ -18731,11 +18950,11 @@ class Locator(AsyncBase):
         expanded: typing.Optional[bool] = None,
         include_hidden: typing.Optional[bool] = None,
         level: typing.Optional[int] = None,
-        name: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        name: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
         pressed: typing.Optional[bool] = None,
         selected: typing.Optional[bool] = None,
         exact: typing.Optional[bool] = None,
-        description: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        description: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
     ) -> "Locator":
         """Locator.get_by_role
 
@@ -19100,8 +19319,8 @@ class Locator(AsyncBase):
     def filter(
         self,
         *,
-        has_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
-        has_not_text: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        has_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        has_not_text: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
         has: typing.Optional["Locator"] = None,
         has_not: typing.Optional["Locator"] = None,
         visible: typing.Optional[bool] = None,
@@ -19227,6 +19446,34 @@ class Locator(AsyncBase):
         """
 
         return mapping.from_impl(self._impl_obj.and_(locator=locator._impl_obj))
+
+    def within(self, locator: "Locator") -> "Locator":
+        """Locator.within
+
+        Returns a locator that matches this locator's elements inside each element matched by `locator`.
+
+        Note that relative locators, such as `locator.nth()` or `locator.first()`, are resolved separately
+        inside each matched parent. In the example below, `page.getByRole('cell').nth(2)` picks the third cell of every
+        row, not the third cell in the whole table.
+
+        **Usage**
+
+        ```py
+        third_column = page.get_by_role(\"cell\").nth(2).within(page.get_by_role(\"row\"))
+        await expect(third_column).to_have_text([\"Apple\", \"Banana\", \"Cherry\"])
+        ```
+
+        Parameters
+        ----------
+        locator : Locator
+            Locator matching the parent elements to search within.
+
+        Returns
+        -------
+        Locator
+        """
+
+        return mapping.from_impl(self._impl_obj.within(locator=locator._impl_obj))
 
     async def focus(
         self,
@@ -20102,6 +20349,22 @@ class Locator(AsyncBase):
         Returns a new locator that uses best practices for referencing the matched element, prioritizing test ids, aria
         roles, and other user-facing attributes over CSS selectors. This is useful for converting implementation-detail
         selectors into more resilient, human-readable locators.
+
+        **Usage**
+
+        An agent can pick an element by its ref from an `page.aria_snapshot()` taken in the `\"ai\"` mode. Refs only
+        work for the latest snapshot. Normalize the ref locator and convert it to a string to get resilient locator code in
+        your language, the same way `codegen` does.
+
+        Consider the following aria snapshot.
+
+        You can turn the ref into locator code:
+
+        ```py
+        normalized = await page.get_by_ref(\"e2\").normalize()
+        print(str(normalized))
+        # get_by_role(\"button\", name=\"Submit\")
+        ```
 
         Returns
         -------
@@ -21010,6 +21273,88 @@ class APIRequestContext(AsyncBase):
         """
 
         return mapping.from_maybe_impl(await self._impl_obj.dispose(reason=reason))
+
+    async def cookies(
+        self, urls: typing.Optional[typing.Union[str, typing.Sequence[str]]] = None
+    ) -> typing.List[Cookie]:
+        """APIRequestContext.cookies
+
+        If no URLs are specified, this method returns all cookies. If URLs are specified, only cookies that affect those
+        URLs are returned. For `browser_context.request` and `page.request`, this is equivalent to
+        calling `browser_context.cookies()` on the corresponding browser context.
+
+        Parameters
+        ----------
+        urls : Union[Sequence[str], str, None]
+            Optional list of URLs.
+
+        Returns
+        -------
+        List[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"], partitionKey: Union[str, None]}]
+        """
+
+        return mapping.from_impl_list(
+            await self._impl_obj.cookies(urls=mapping.to_impl(urls))
+        )
+
+    async def add_cookies(self, cookies: typing.Sequence[SetCookieParam]) -> None:
+        """APIRequestContext.add_cookies
+
+        Adds cookies into this request context. They will be sent with matching subsequent requests. For
+        `browser_context.request` and `page.request`, this is equivalent to calling
+        `browser_context.add_cookies()` on the corresponding browser context.
+
+        **Usage**
+
+        ```py
+        await request.add_cookies([cookie_object1, cookie_object2])
+        ```
+
+        Parameters
+        ----------
+        cookies : Sequence[{name: str, value: str, url: Union[str, None], domain: Union[str, None], path: Union[str, None], expires: Union[float, None], httpOnly: Union[bool, None], secure: Union[bool, None], sameSite: Union["Lax", "None", "Strict", None], partitionKey: Union[str, None]}]
+        """
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.add_cookies(cookies=mapping.to_impl(cookies))
+        )
+
+    async def clear_cookies(
+        self,
+        *,
+        name: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        domain: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+        path: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
+    ) -> None:
+        """APIRequestContext.clear_cookies
+
+        Removes cookies from this request context. Accepts optional filter. For `browser_context.request` and
+        `page.request`, this is equivalent to calling `browser_context.clear_cookies()` on the
+        corresponding browser context.
+
+        **Usage**
+
+        ```py
+        await request.clear_cookies()
+        await request.clear_cookies(name=\"session-id\")
+        await request.clear_cookies(domain=\"my-origin.com\")
+        await request.clear_cookies(path=\"/api/v1\")
+        await request.clear_cookies(name=\"session-id\", domain=\"my-origin.com\")
+        ```
+
+        Parameters
+        ----------
+        name : Union[Pattern[str], str, None]
+            Only removes cookies with the given name.
+        domain : Union[Pattern[str], str, None]
+            Only removes cookies with the given domain.
+        path : Union[Pattern[str], str, None]
+            Only removes cookies with the given path.
+        """
+
+        return mapping.from_maybe_impl(
+            await self._impl_obj.clear_cookies(name=name, domain=domain, path=path)
+        )
 
     async def delete(
         self,
@@ -22168,7 +22513,7 @@ class LocatorAssertions(AsyncBase):
     async def to_have_attribute(
         self,
         name: str,
-        value: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        value: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
         *,
         ignore_case: typing.Optional[bool] = None,
         timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
@@ -22214,7 +22559,7 @@ class LocatorAssertions(AsyncBase):
     async def not_to_have_attribute(
         self,
         name: str,
-        value: typing.Optional[typing.Union[typing.Pattern[str], str]] = None,
+        value: typing.Optional[typing.Union[str, typing.Pattern[str]]] = None,
         *,
         ignore_case: typing.Optional[bool] = None,
         timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,

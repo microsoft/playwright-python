@@ -386,3 +386,55 @@ def test_should_support_multiple_http_credentials(
     response2 = context.request.get(server.CROSS_PROCESS_PREFIX + "/empty.html")
     assert response2.status == 401
     context.close()
+
+
+def test_page_request_add_cookies_should_add_cookies_to_the_browser_context(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    page.request.add_cookies(
+        [
+            {"name": "a", "value": "b", "url": server.EMPTY_PAGE},
+            {
+                "name": "c",
+                "value": "d",
+                "domain": "localhost",
+                "path": "/",
+                "expires": time.time() + 3600,
+            },
+        ]
+    )
+    assert sorted(c["name"] for c in context.cookies()) == ["a", "c"]
+    with server.expect_request("/empty.html") as server_req:
+        context.request.get(server.EMPTY_PAGE)
+    cookie_header = server_req.value.getHeader("cookie")
+    assert cookie_header
+    assert sorted(s.strip() for s in cookie_header.split(";")) == ["a=b", "c=d"]
+
+
+def test_page_request_cookies_should_return_browser_context_cookies(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    context.add_cookies(
+        [
+            {"name": "a", "value": "b", "url": server.EMPTY_PAGE},
+            {"name": "c", "value": "d", "domain": "example.com", "path": "/"},
+        ]
+    )
+    assert sorted(c["name"] for c in page.request.cookies()) == ["a", "c"]
+    assert [c["name"] for c in page.request.cookies(server.EMPTY_PAGE)] == ["a"]
+    assert page.request.cookies(server.EMPTY_PAGE) == context.cookies(server.EMPTY_PAGE)
+
+
+def test_page_request_clear_cookies_should_clear_browser_context_cookies(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    context.add_cookies(
+        [
+            {"name": "a", "value": "b", "url": server.EMPTY_PAGE},
+            {"name": "c", "value": "d", "url": server.EMPTY_PAGE},
+        ]
+    )
+    page.request.clear_cookies(name="a")
+    assert [c["name"] for c in context.cookies()] == ["c"]
+    page.request.clear_cookies()
+    assert context.cookies() == []

@@ -17,6 +17,8 @@ import collections.abc
 import contextvars
 import datetime
 import inspect
+import random
+import string
 import sys
 import traceback
 from pathlib import Path
@@ -250,7 +252,7 @@ class ChannelOwner(AsyncIOEventEmitter):
 
 class ProtocolCallback:
     def __init__(
-        self, loop: asyncio.AbstractEventLoop, id: int, no_reply: bool = False
+        self, loop: asyncio.AbstractEventLoop, id: str, no_reply: bool = False
     ) -> None:
         self.id = id
         self.stack_trace: traceback.StackSummary
@@ -305,9 +307,11 @@ class Connection(EventEmitter):
         self._dispatcher_fiber = dispatcher_fiber
         self._transport = transport
         self._transport.on_message = lambda msg: self.dispatch(msg)
+        # Call ids double as trace call ids, so they must be unique across connections.
+        self._call_id_prefix = "".join(random.choices(string.ascii_lowercase, k=4))
         self._last_id = 0
         self._objects: Dict[str, ChannelOwner] = {}
-        self._callbacks: Dict[int, ProtocolCallback] = {}
+        self._callbacks: Dict[str, ProtocolCallback] = {}
         self._object_factory = object_factory
         self._is_sync = False
         self._child_ws_connections: List["Connection"] = []
@@ -403,7 +407,7 @@ class Connection(EventEmitter):
                 "The object has been collected to prevent unbounded heap growth."
             )
         self._last_id += 1
-        id = self._last_id
+        id = f"{self._call_id_prefix}@{self._last_id}"
         callback = ProtocolCallback(self._loop, id, no_reply=no_reply)
         task = asyncio.current_task(self._loop)
         callback.stack_trace = cast(
