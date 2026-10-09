@@ -1216,3 +1216,26 @@ def test_frame_locator_without_selector_should_not_allow_nth(page: Page) -> None
         page.frame_locator().last
     with pytest.raises(Error, match="Selecting the nth frame is not allowed"):
         page.frame_locator().nth(1)
+
+
+def test_should_support_locator_within(page: Page) -> None:
+    page.set_content(
+        """
+        <table>
+          <tr><td>a1</td><td>a2</td><td>a3</td></tr>
+          <tr><td>b1</td><td>b2</td><td>b3</td></tr>
+          <tr><td>c1</td><td>c2</td><td>c3</td></tr>
+        </table>
+        <span>outside</span>
+    """
+    )
+    cells = page.get_by_role("cell")
+    rows = page.get_by_role("row")
+    expect(cells.within(rows)).to_have_text(
+        ["a1", "a2", "a3", "b1", "b2", "b3", "c1", "c2", "c3"]
+    )
+    expect(cells.nth(1).within(rows)).to_have_text(["a2", "b2", "c2"])
+    expect(cells.last.within(rows)).to_have_text(["a3", "b3", "c3"])
+    expect(cells.nth(1).within(rows.nth(2))).to_have_text(["c2"])
+    expect(page.locator("span").within(rows)).to_have_count(0)
+    expect(cells.nth(1).within(rows).nth(1)).to_have_text("b2")

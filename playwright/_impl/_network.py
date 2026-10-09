@@ -29,6 +29,7 @@ from typing import (
     Dict,
     List,
     Optional,
+    Pattern,
     Sequence,
     TypedDict,
     Union,
@@ -140,6 +141,30 @@ def to_http_credentials_protocol(
         cast(HttpCredentials, {k: v for k, v in c.items() if v is not None})
         for c in credentials_list
     ] or None
+
+
+def to_clear_cookies_params(
+    name: Optional[Union[str, Pattern[str]]],
+    domain: Optional[Union[str, Pattern[str]]],
+    path: Optional[Union[str, Pattern[str]]],
+) -> Dict[str, Optional[str]]:
+    return {
+        "name": name if isinstance(name, str) else None,
+        "nameRegexSource": name.pattern if isinstance(name, Pattern) else None,
+        "nameRegexFlags": (
+            escape_regex_flags(name) if isinstance(name, Pattern) else None
+        ),
+        "domain": domain if isinstance(domain, str) else None,
+        "domainRegexSource": (domain.pattern if isinstance(domain, Pattern) else None),
+        "domainRegexFlags": (
+            escape_regex_flags(domain) if isinstance(domain, Pattern) else None
+        ),
+        "path": path if isinstance(path, str) else None,
+        "pathRegexSource": path.pattern if isinstance(path, Pattern) else None,
+        "pathRegexFlags": (
+            escape_regex_flags(path) if isinstance(path, Pattern) else None
+        ),
+    }
 
 
 class Request(ChannelOwner):

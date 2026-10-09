@@ -49,7 +49,7 @@ class Tracing(ChannelOwner):
         screenshots: bool = None,
         sources: bool = None,
         live: bool = None,
-    ) -> None:
+    ) -> DisposableStub:
         params = locals_to_params(locals())
         self._include_sources = bool(sources)
         self._is_live = bool(live)
@@ -70,11 +70,13 @@ class Tracing(ChannelOwner):
             "tracingStartChunk", None, {"title": title, "name": name}
         )
         await self._start_collecting_stacks(trace_name)
+        return DisposableStub(lambda: self.stop(), self)
 
-    async def start_chunk(self, title: str = None, name: str = None) -> None:
+    async def start_chunk(self, title: str = None, name: str = None) -> DisposableStub:
         params = locals_to_params(locals())
         trace_name = await self._channel.send("tracingStartChunk", None, params)
         await self._start_collecting_stacks(trace_name)
+        return DisposableStub(lambda: self.stop_chunk(), self)
 
     async def _start_collecting_stacks(self, trace_name: str) -> None:
         if not self._is_tracing:

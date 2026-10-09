@@ -128,7 +128,7 @@ class ParsedMessageParams(TypedDict):
 
 
 class ParsedMessagePayload(TypedDict, total=False):
-    id: int
+    id: str
     guid: str
     method: str
     params: ParsedMessageParams

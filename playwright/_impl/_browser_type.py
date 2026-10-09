@@ -161,6 +161,7 @@ class BrowserType(ChannelOwner):
         recordHarMode: HarMode = None,
         recordHarContent: HarContentPolicy = None,
         clientCertificates: List[ClientCertificate] = None,
+        recordVideoFps: int = None,
     ) -> BrowserContext:
         userDataDir = self._user_data_dir(userDataDir)
         params = locals_to_params(locals())
@@ -313,7 +314,10 @@ class BrowserType(ChannelOwner):
             if "recordVideoSize" in params:
                 params["recordVideo"]["size"] = params["recordVideoSize"]
                 del params["recordVideoSize"]
+            if "recordVideoFps" in params:
+                params["recordVideo"]["fps"] = params["recordVideoFps"]
             del params["recordVideoDir"]
+        params.pop("recordVideoFps", None)
         if "storageState" in params:
             storageState = params["storageState"]
             if not isinstance(storageState, dict):

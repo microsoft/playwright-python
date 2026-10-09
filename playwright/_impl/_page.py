@@ -105,6 +105,7 @@ from playwright._impl._signature import signature
 from playwright._impl._video import Video
 from playwright._impl._waiter import Waiter
 from playwright._impl._web_storage import WebStorage
+from playwright._impl._webmcp import WebMCP
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser_context import BrowserContext
@@ -542,8 +543,8 @@ class Page(ChannelOwner):
     def url(self) -> str:
         return self._main_frame.url
 
-    async def content(self) -> str:
-        return await self._main_frame.content()
+    async def content(self, includeShadow: bool = None) -> str:
+        return await self._main_frame.content(includeShadow=includeShadow)
 
     async def set_content(
         self,
@@ -961,6 +962,9 @@ class Page(ChannelOwner):
     ) -> "Locator":
         return self._main_frame.get_by_placeholder(text, exact=exact)
 
+    def get_by_ref(self, ref: str) -> "Locator":
+        return self.locator(f"aria-ref={ref}")
+
     def get_by_role(
         self,
         role: AriaRole,
@@ -1229,6 +1233,10 @@ class Page(ChannelOwner):
     @property
     def screencast(self) -> Screencast:
         return self._screencast
+
+    @property
+    def webmcp(self) -> WebMCP:
+        return self._main_frame.webmcp
 
     @property
     def local_storage(self) -> WebStorage:

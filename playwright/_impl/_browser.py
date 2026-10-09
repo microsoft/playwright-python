@@ -167,6 +167,7 @@ class Browser(ChannelOwner):
         recordHarMode: HarMode = None,
         recordHarContent: HarContentPolicy = None,
         clientCertificates: List[ClientCertificate] = None,
+        recordVideoFps: int = None,
     ) -> BrowserContext:
         params = locals_to_params(locals())
         assert self._browser_type is not None
@@ -221,6 +222,7 @@ class Browser(ChannelOwner):
         recordHarMode: HarMode = None,
         recordHarContent: HarContentPolicy = None,
         clientCertificates: List[ClientCertificate] = None,
+        recordVideoFps: int = None,
     ) -> Page:
         params = locals_to_params(locals())
 

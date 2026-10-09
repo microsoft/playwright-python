@@ -13,10 +13,17 @@
 # limitations under the License.
 
 import asyncio
+from pathlib import Path
 
 import pytest
 
-from playwright.async_api import Browser, Page, ScreencastFrame, ScreencastSize
+from playwright.async_api import (
+    Browser,
+    Error,
+    Page,
+    ScreencastFrame,
+    ScreencastSize,
+)
 from tests.server import Server
 
 
@@ -211,3 +218,30 @@ async def test_show_actions_should_accept_cursor_param(page: Page) -> None:
             pass
     finally:
         await page.screencast.stop()
+
+
+async def test_start_should_record_video_with_fps(page: Page, tmp_path: Path) -> None:
+    path = tmp_path / "video.webm"
+    await page.screencast.start(path=path, fps=60)
+    await ensure_some_frames(page)
+    await page.screencast.stop()
+    assert path.exists()
+
+
+async def test_start_should_throw_on_invalid_fps(page: Page, tmp_path: Path) -> None:
+    with pytest.raises(Error, match='"fps" must be a positive number, got -1'):
+        await page.screencast.start(path=tmp_path / "video.webm", fps=-1)
+
+
+async def test_show_actions_should_accept_style(page: Page, server: Server) -> None:
+    await page.goto(server.PREFIX + "/input/button.html")
+    async with await page.screencast.show_actions(
+        duration=100,
+        style={
+            "point": "width: 20px; height: 20px; border-radius: 50%; background: red",
+            "highlight": "outline: 2px solid #333",
+            "title": "font-size: 16px",
+        },
+    ):
+        await page.click("button")
+    assert await page.evaluate("result") == "Clicked"

@@ -496,3 +496,59 @@ async def test_should_retry_ECONNRESET(context: BrowserContext, server: Server) 
     assert response.status == 200
     assert await response.text() == "Hello!"
     assert request_count == 4
+
+
+async def test_page_request_add_cookies_should_add_cookies_to_the_browser_context(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    await page.request.add_cookies(
+        [
+            {"name": "a", "value": "b", "url": server.EMPTY_PAGE},
+            {
+                "name": "c",
+                "value": "d",
+                "domain": "localhost",
+                "path": "/",
+                "expires": time.time() + 3600,
+            },
+        ]
+    )
+    assert sorted(c["name"] for c in await context.cookies()) == ["a", "c"]
+    server_request, _ = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        context.request.get(server.EMPTY_PAGE),
+    )
+    cookie_header = server_request.getHeader("cookie")
+    assert cookie_header
+    assert sorted(s.strip() for s in cookie_header.split(";")) == ["a=b", "c=d"]
+
+
+async def test_page_request_cookies_should_return_browser_context_cookies(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    await context.add_cookies(
+        [
+            {"name": "a", "value": "b", "url": server.EMPTY_PAGE},
+            {"name": "c", "value": "d", "domain": "example.com", "path": "/"},
+        ]
+    )
+    assert sorted(c["name"] for c in await page.request.cookies()) == ["a", "c"]
+    assert [c["name"] for c in await page.request.cookies(server.EMPTY_PAGE)] == ["a"]
+    assert await page.request.cookies(server.EMPTY_PAGE) == await context.cookies(
+        server.EMPTY_PAGE
+    )
+
+
+async def test_page_request_clear_cookies_should_clear_browser_context_cookies(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    await context.add_cookies(
+        [
+            {"name": "a", "value": "b", "url": server.EMPTY_PAGE},
+            {"name": "c", "value": "d", "url": server.EMPTY_PAGE},
+        ]
+    )
+    await page.request.clear_cookies(name="a")
+    assert [c["name"] for c in await context.cookies()] == ["c"]
+    await page.request.clear_cookies()
+    assert await context.cookies() == []
