@@ -391,11 +391,12 @@ class APIRequestContext(ChannelOwner):
     ) -> "APIResponse":
         if self._close_reason:
             raise TargetClosedError(self._close_reason)
-        assert (
+        if (
             (1 if data is not None else 0)
             + (1 if form is not None else 0)
             + (1 if multipart is not None else 0)
-        ) <= 1, "Only one of 'data', 'form' or 'multipart' can be specified"
+        ) > 1:
+            raise Error("Only one of 'data', 'form' or 'multipart' can be specified")
         assert (
             maxRedirects is None or maxRedirects >= 0
         ), "'max_redirects' must be greater than or equal to '0'"

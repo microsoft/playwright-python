@@ -14,6 +14,8 @@
 
 import json
 import re
+import subprocess
+import sys
 from pathlib import Path
 from typing import List
 from urllib.parse import urlparse
@@ -351,7 +353,7 @@ def test_should_reject_empty_data_with_form(
 ) -> None:
     request = playwright.request.new_context()
     with pytest.raises(
-        AssertionError,
+        Error,
         match="Only one of 'data', 'form' or 'multipart' can be specified",
     ):
         request.post(
@@ -360,6 +362,40 @@ def test_should_reject_empty_data_with_form(
             form={"name": "value"},
         )
     request.dispose()
+
+
+def test_should_reject_multiple_body_options_under_python_optimization(
+    server: Server,
+) -> None:
+    script = f"""
+from playwright.sync_api import sync_playwright, Error
+
+with sync_playwright() as p:
+    request = p.request.new_context()
+    try:
+        request.post(
+            "{server.EMPTY_PAGE}",
+            data="",
+            form={{"name": "value"}},
+        )
+    except Error as e:
+        expected = "Only one of 'data', 'form' or 'multipart' can be specified"
+        if expected not in str(e):
+            raise
+    else:
+        raise RuntimeError("Conflicting body options were accepted")
+    finally:
+        request.dispose()
+"""
+
+    result = subprocess.run(
+        [sys.executable, "-O", "-c", script],
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
 
 
 def test_should_throw_when_fail_on_status_code_is_true(
