@@ -18,7 +18,6 @@ import json
 import json as json_utils
 import mimetypes
 import re
-from collections import defaultdict
 from pathlib import Path
 from types import SimpleNamespace
 from typing import (
@@ -1031,9 +1030,10 @@ class WebSocket(ChannelOwner):
 class RawHeaders:
     def __init__(self, headers: HeadersArray) -> None:
         self._headers_array = headers
-        self._headers_map: Dict[str, Dict[str, bool]] = defaultdict(dict)
+        self._headers_map: Dict[str, Dict[str, bool]] = {}
         for header in headers:
-            self._headers_map[header["name"].lower()][header["value"]] = True
+            values = self._headers_map.setdefault(header["name"].lower(), {})
+            values[header["value"]] = True
 
     @staticmethod
     def _from_headers_dict_lossy(headers: Dict[str, str]) -> "RawHeaders":
@@ -1047,7 +1047,7 @@ class RawHeaders:
         return separator.join(values)
 
     def get_all(self, name: str) -> List[str]:
-        return list(self._headers_map[name.lower()].keys())
+        return list(self._headers_map.get(name.lower(), {}).keys())
 
     def headers(self) -> Dict[str, str]:
         result = {}
