@@ -1,27 +1,27 @@
 ---
 name: playwright-roll
-description: Roll Playwright Python to a new driver version. Walks the upstream `docs/src/api/` commit range, ports each public-API change, suppresses the rest in `expected_api_mismatch.txt`, regenerates the typed surface, and adds tests.
+description: Roll Playwright Python to a new driver version. Walks the upstream `docs/src/api/` commit range, regenerates the public API from the docs, ports each change into `_impl/`, records justified differences in `scripts/codegen/python_rules.js`, and adds tests.
 ---
 
 # Rolling Playwright Python
 
-The goal of a roll is to move the driver pin in `DRIVER_VERSION` to a new release, port every public API change introduced upstream during that interval, and suppress the rest, so that `./scripts/update_api.sh` runs clean and the test suite still passes.
+The goal of a roll is to move the driver pin in `DRIVER_VERSION` to a new release, port every public API change introduced upstream during that interval, and suppress the rest, so that `./scripts/update_api.sh` and `mypy playwright` run clean and the test suite still passes.
 
 The previous human-facing summary lives in `../../../ROLLING.md`. This skill is the operational playbook — read it end to end before starting.
 
 ## Mental model
 
-The Python port is hand-written code in `playwright/_impl/`, plus a generator (`scripts/generate_*.py`, `scripts/documentation_provider.py`) that:
+The Python port is hand-written code in `playwright/_impl/`, plus a generator (`scripts/codegen/generate_api.js`) that:
 
-1. introspects the Python `_impl` classes via `inspect`,
-2. emits typed wrapper classes into `playwright/{async,sync}_api/_generated.py`, and
-3. diffs the introspected surface against the Playwright `api.json` (generated from the upstream docs — see step 2).
+1. parses the upstream docs (`$PW_SRC_DIR/docs/src/api`) with the upstream parser and filters them for Python,
+2. applies the Python facts that the docs do not contain, from `scripts/codegen/python_rules.js`, and
+3. emits the whole public API into `playwright/{async,sync}_api/_generated.py`: signatures, types, docstrings, event overloads, and the call into `_impl/` for every member.
 
-Anything in `api.json` that is missing or differently typed in `_impl/` causes generation to fail. Three resolutions:
+The generator never reads `_impl/`. A new member or option in the docs therefore shows up in `_generated.py` right away, as a call into `_impl/` that does not exist yet. Each generated class types its `_impl_obj`, so **`mypy playwright` lists every such gap** as an error in `_generated.py`. (Temporary: while `scripts/codegen/legacy_order.json` exists, `_impl_obj` is not typed and mypy reports nothing. Find the gaps in the docs diff and with the tests instead.) Three resolutions:
 
-- **PORT** — the new API is intended for Python (no `langs.only` filter, or `langs.only` includes `"python"`). Implement it in `_impl/`.
-- **MISMATCH** — the API genuinely exists for Python but is shaped differently (a callback signature uses unions, a kwarg uses a legacy name, etc.) and there's a justified reason to keep the divergence. Add a precise line to `scripts/expected_api_mismatch.txt` with a comment explaining *why*.
-- **N/A** — the commit only touches docs, has `* langs: js` (or any other filter that excludes Python), is server-side, Electron-only, or was reverted later in the same release. No action.
+- **PORT** — the new API is intended for Python (no `langs.only` filter, or `langs.only` includes `"python"`). Implement it in `_impl/` until mypy is clean.
+- **MISMATCH** — the shipped Python API differs from the docs (a callback signature uses unions, a kwarg uses a legacy name, etc.). The shipped implementation wins. Add an entry to `scripts/codegen/python_rules.js` with a comment explaining *why*, and propose the upstream docs change that would make the entry unnecessary.
+- **N/A** — the commit only touches docs, has `* langs: js` (or any other filter that excludes Python), is server-side, Electron-only, or was reverted later in the same release. No action; the generator already leaves it out.
 
 The upstream documentation source of truth is `docs/src/api/*.md` in the playwright repo. Every `## method:` / `## property:` / `## event:` / `### option:` / `### param:` block has an optional `* langs: js` (or `js, python`, etc.) filter. The Python doclint resolves these into `langs` fields on each member of `api.json`. **An empty `langs: {}` means "all languages including Python" — *implement it*, don't suppress it.**
 
@@ -40,12 +40,13 @@ The upstream documentation source of truth is `docs/src/api/*.md` in the playwri
 ### 2. Bump the driver pin, download it, and generate api.json
 
 You need a nearby `microsoft/playwright` checkout for the docs walk and for
-`api.json` generation. Point `PW_SRC_DIR` at it and check out the new tag there:
+codegen. Point `PW_SRC_DIR` at it and check out the release branch for the new
+version there (the branch has the release's docs plus any cherry-picks):
 
 ```sh
 export PW_SRC_DIR=../playwright
-git -C "$PW_SRC_DIR" fetch --tags origin
-git -C "$PW_SRC_DIR" checkout v<new>      # e.g. v1.62.0
+git -C "$PW_SRC_DIR" fetch origin 'release-*:release-*'
+git -C "$PW_SRC_DIR" checkout release-<new>      # e.g. release-1.62
 ```
 
 Then bump the pins and assemble the driver:
@@ -59,17 +60,16 @@ source env/bin/activate
 python -m build --wheel       # downloads playwright-core @ DRIVER_VERSION + Node.js, assembles the driver
 playwright install chromium   # NOT --with-deps; sudo is denied
 
-# api.json isn't in the bundle, and the walk below inspects `langs` from it.
-# Generate a copy to inspect (update_api.sh generates its own temp copy in step 6):
-API_JSON_MODE=1 node "$PW_SRC_DIR/utils/doclint/generateApiJson.js" > /tmp/api.json
+# The walk below inspects `langs` from api.json. Codegen does not need it.
+node "$PW_SRC_DIR/utils/doclint/generateApiJson.js" > /tmp/api.json
 ```
 
 The wheel build just downloads the `playwright-core` npm package at
 `DRIVER_VERSION` and the matching Node.js binary (no source build, no Node/npm/git
-toolchain), and unpacks the driver under `playwright/driver/`. `api.json` is the
-one piece not shipped in the bundle — it's generated from `$PW_SRC_DIR` on demand
-(here to `/tmp/api.json` for the walk, and into a temp file passed via
-`PW_API_JSON` by `./scripts/update_api.sh` during codegen).
+toolchain), and unpacks the driver under `playwright/driver/`. The docs are the
+one piece not shipped in the bundle — `./scripts/update_api.sh` reads them from
+`$PW_SRC_DIR`. `/tmp/api.json` is only a convenient dump of the same docs for
+the walk.
 
 ### 3. Identify the commit range
 
@@ -157,50 +157,53 @@ Implement the change in `playwright/_impl/<module>.py`. Use the upstream JS impl
 | Upstream JS | Python |
 |---|---|
 | `async foo(): Promise<X>` | `async def foo(self) -> X:` |
-| `foo(): X` (sync getter, no args, no body) | `@property def foo(self) -> X:` (the doc generator treats argument-less sync getters as properties — see `documentation_provider.py:133`. If you make it a method instead, you'll get a "Method vs property mismatch" error.) |
+| `foo(): X` (sync getter, no args, no body) | `@property def foo(self) -> X:` (the generator makes argument-less sync members properties — see `isPythonProperty` in `scripts/codegen/generate_api.js` — and reads `self._impl_obj.foo` without calling it. mypy does not catch a plain method here; the test does.) |
 | `await this._channel.foo({ a, b })` | `await self._channel.send("foo", None, locals_to_params(locals()))` |
 | `(await this._channel.foo()).value` | `await self._channel.send("foo", None)` (Python's `send()` auto-unwraps single-key responses; only call `send_return_as_dict` when the protocol returns multiple keys.) |
 | `(await this._channel.foo()).artifact` (multi-key, may be empty) | `result = await self._channel.send_return_as_dict("foo", None); (result or {}).get("artifact")` — `send_return_as_dict` returns **`None`** (not `{}`) when the protocol response carries no fields. |
 | `try { ... } catch (e) { if (isTargetClosedError(e)) return; throw e; }` | `try: ...; except Exception as e: if is_target_closed_error(e): return; raise` (import from `playwright._impl._errors`) |
-| Inline `[Object]` return like `{endpoint: string}` | A `TypedDict` in `playwright/_impl/_api_structures.py` — *not* `Dict[str, str]`. The doc generator serializes TypedDicts as `{field: type, ...}` via `get_type_hints` and that matches the inline-object form exactly. See `RemoteAddr`, `BrowserBindResult`, `DebuggerPausedDetails`. |
+| Inline `[Object]` return like `{endpoint: string}` | A `TypedDict` in `playwright/_impl/_api_structures.py`. The generator names the struct from its docs `* alias:` (or a `structRenames` / `structNamesByPlace` entry in `python_rules.js`) and imports that name from `_api_structures.py`. See `RemoteAddr`, `BrowserBindResult`, `DebuggerPausedDetails`. |
 | `binary` event/return field | The Python channel layer hands you a base64 string. Decode with `base64.b64decode(value)` before exposing as `bytes`. See `Screencast._dispatch_frame`. |
 
 When implementing a new ChannelOwner subclass (one constructed by the protocol with `(parent, type, guid, initializer)`):
 1. Register it in `playwright/_impl/_object_factory.py:create_remote_object` — otherwise the guid resolves to `DummyObject` and downstream code breaks mysteriously.
-2. Import it and add it to `generated_types` in `scripts/generate_api.py`, plus add a `XxxImpl` import in the `header` string.
+2. Nothing to do in codegen: the generator emits every Python class in the docs. If the class does not live in `_impl/_<snake_case name>.py`, add it to `implModules` in `scripts/codegen/python_rules.js`.
 
 When implementing a non-ChannelOwner wrapper class (a plain class that holds a Page/Context reference, like `Screencast`, `Clock`):
 - Set `self._loop = parent._loop` and `self._dispatcher_fiber = parent._dispatcher_fiber` in `__init__`. The generated `AsyncBase`/`SyncBase` wrappers read these; missing them gives `AttributeError: 'X' object has no attribute '_loop'` at first use.
 
 When adding a new TypedDict in `_api_structures.py`:
-- Add it to the `from playwright._impl._api_structures import …` line in `scripts/generate_api.py` so the generator can resolve it as a forward reference in type hints.
+- Its name must match what the generator emits: the struct's `* alias:` in the docs, or a `structRenames` / `structNamesByPlace` entry in `python_rules.js`. The generator fails with "No Python name for the struct at …" until one exists.
 - Re-export it from both `playwright/async_api/__init__.py` and `playwright/sync_api/__init__.py`: assignment line plus an entry in `__all__`. Same pattern as `ViewportSize`, `RemoteAddr`.
 
-If the new API was previously suppressed in `expected_api_mismatch.txt`, **remove that line** when implementing it.
+If the new API was previously recorded in `python_rules.js` (for example in `skipArgs`), **remove that entry** when implementing it. The generator fails on entries that no longer match anything, so stale entries cannot pile up.
 
-If a doc rename involves a *positional* parameter (no default, before any `*`), users almost certainly call it positionally — you can rename freely. The 1.59 `BrowserType.connect.wsEndpoint` → `endpoint` is the canonical example. Don't suppress this kind of rename; just rename in `_impl/`. **Important corollary:** when docs rename a param, the wire-protocol field usually also changed in `packages/protocol/src/protocol.yml` and the server-side dispatcher in `packages/playwright-core/src/server/dispatchers/*Dispatcher.ts`. If so, you must also update the channel-send dict key (e.g. `{"wsEndpoint": …}` → `{"endpoint": …}`). A "Parameter not documented" suppression for a renamed param is a code smell hiding a wire-protocol bug.
+If a doc rename involves a *positional* parameter (no default, before any `*`), users almost certainly call it positionally — you can rename freely. The 1.59 `BrowserType.connect.wsEndpoint` → `endpoint` is the canonical example. Don't suppress this kind of rename; just rename in `_impl/`. **Important corollary:** when docs rename a param, the wire-protocol field usually also changed in `packages/protocol/spec/*.yml` and the server-side dispatcher in `packages/playwright-core/src/server/dispatchers/*Dispatcher.ts`. If so, you must also update the channel-send dict key (e.g. `{"wsEndpoint": …}` → `{"endpoint": …}`). An `argNames` entry for a renamed param is a code smell hiding a wire-protocol bug.
 
 #### MISMATCH
 
-A MISMATCH is a *justified, durable* divergence between the docs and the Python surface. Use it sparingly — most apparent mismatches turn out to be PORTs you skipped. Legitimate examples in the current `expected_api_mismatch.txt`:
+A MISMATCH is a divergence between the docs and the shipped Python surface. The shipped implementation wins, but each entry is a debt: the real fix is an upstream docs change (a `* langs: python` declaration, an `alias-python:`, a Python type override), after which the entry goes away. Use it sparingly — most apparent mismatches turn out to be PORTs you skipped. Legitimate examples in the current `python_rules.js`:
 
-- Hidden internal kwargs (`Browser.new_context(default_browser_type=)`).
-- Callback signatures where Python explicitly unions one-arg and two-arg variants but the docs document only the canonical form (`Page.route(handler=)`, `WebSocketRoute.on_close(handler=)`).
+- Hidden internal kwargs (`extraOptions`: `Browser.new_context(default_browser_type=)`).
+- Callback signatures where Python explicitly unions one-arg and two-arg variants but the docs document only the canonical form (`typeOverrides`: `Page.route.handler`, `WebSocketRoute.onClose.handler`).
+- Positional parameters that the docs declare as options (`positional`: `select_option(value, ...)`).
 
-Add a precise line to `scripts/expected_api_mismatch.txt` with a `# comment` group header explaining *why* the divergence is intentional. The exact wording comes from the generator's error message. Examples:
+Add an entry to the right table in `scripts/codegen/python_rules.js`, with a one-line `//` comment above it explaining *why*. Keys use docs names (`Class.member.arg`, camelCase). Example:
 
+```js
+  typeOverrides: {
+    // One vs two arguments in the callback, Python explicitly unions.
+    'Page.route.handler': '[function]([Route])|[function]([Route], [Request])',
+  },
 ```
-# One vs two arguments in the callback, Python explicitly unions.
-Parameter type mismatch in Page.route(handler=): documented as Callable[[Route, Request], Union[Any, Any]], code has Union[Callable[[Route, Request], Any], Callable[[Route], Any]]
-```
 
-The generator removes lines from `expected_api_mismatch.txt` that no longer match an error. If you see "No longer there: …" in the script's stderr, delete that line.
+The generator fails with "the entry … no longer matches anything; remove it" when an upstream change makes an entry unnecessary. Delete that entry.
 
 **Do not suppress** these — they're PORTs in disguise:
 
 - "Internal tooling" classes/methods whose `langs` field is empty (`Screencast.*`, `Debugger.*`, `Page.pick_locator`, `BrowserContext.debugger`, `Browser.bind/unbind`, `Page.{clear,console}_*`). The 1.59 roll suppressed all of these initially, then had to walk every one back. Verify `langs` first.
-- A renamed positional parameter (`Parameter not documented: X.y(old_name=)` + `Parameter not implemented: X.y(new_name=)`). Just rename in `_impl/` and update the channel-send dict key.
-- A `Parameter type mismatch in X.y(return=): documented as {field: T}, code has Dict[str, T]`. Use a TypedDict.
+- A renamed positional parameter (mypy: unexpected keyword argument `newName` for the impl method). Just rename in `_impl/` and update the channel-send dict key.
+- A struct return the generator cannot name ("No Python name for the struct at …"). Add a TypedDict and name it — don't type it `Dict`.
 
 #### N/A
 
@@ -220,11 +223,18 @@ Tick the box in `/tmp/roll-<new>-commits.md` with one line: `[x] <sha> <subject>
 PW_SRC_DIR=../playwright ./scripts/update_api.sh   # PW_SRC_DIR already exported in step 2
 ```
 
-The script does, in order:
-1. generates `api.json` from `$PW_SRC_DIR` into a temp file and exports `PW_API_JSON`,
-2. `git checkout HEAD -- playwright/{async,sync}_api/_generated.py` (resets to last committed),
-3. runs `scripts/generate_{sync,async}_api.py` (they read `api.json` via `PW_API_JSON`), dumping to `.x` then renaming into place,
-4. invokes `pre-commit run --files` on the generated files.
+The script, for `sync` and then `async`:
+1. runs `node scripts/codegen/generate_api.js --flavor <flavor>` (reads the docs from `$PW_SRC_DIR`) straight into `playwright/<flavor>_api/_generated.py`,
+2. invokes `pre-commit run --files` on the generated file.
+
+Then run `mypy playwright` and work through the errors in `_generated.py` — each one is a call into `_impl/` that the implementation does not support yet.
+
+To see exactly what a regeneration changed in the public API, compare against the committed file:
+
+```sh
+git show HEAD:playwright/async_api/_generated.py > /tmp/old.py
+python scripts/codegen/compare_api.py /tmp/old.py playwright/async_api/_generated.py --show all
+```
 
 **CI no longer verifies that `_generated.py` is in sync** (the Lint job dropped the
 "Verify generated API is up to date" step so it needn't check out upstream). So
@@ -234,16 +244,17 @@ Failure modes and fixes:
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| `Method not implemented: X.y` | `api.json` documents `X.y`, no Python impl exists. | PORT it, or add a MISMATCH line. |
-| `Parameter not implemented: X.y(z=)` | New parameter on existing method. | Add the kwarg in `_impl/`, or MISMATCH. |
-| `Method vs property mismatch: X.y` | You implemented as a method but the doc treats it as a property (sync, no args, has return type). | Add `@property` in `_impl/`. |
-| `Method not documented: X.y` | Python has it but `api.json` doesn't. | The upstream removed the API; remove from `_impl/` and from `_generated.py` callers. |
-| `Parameter type mismatch in X.y(z=): documented as ..., code has ...` | Type signature doesn't line up. | Match the type in `_impl/`, or MISMATCH it for known historical divergences. |
-| `pyright … reportInconsistentOverload` (single-event class) | A class gained its first event in `api.json`, so the generator emits one `Literal[…]` overload + impl, which pyright wants ≥2 of. | The generator already handles this — `documentation_provider.print_events` emits a second `@typing.overload` with `event: str` plus a generic impl. If you regress this, see how 1.59 handled `CDPSession` getting a `close` event. |
+| mypy: `"XImpl" has no attribute "y"` in `_generated.py` | The docs have a new member `X.y`; `_impl/` does not. | PORT it. |
+| mypy: `Unexpected keyword argument "z" for "y" of "XImpl"` | New parameter or option on an existing method. | Add the kwarg (docs camelCase name) in `_impl/`. If Python must not have it, `skipArgs`. |
+| mypy: incompatible argument type in `_generated.py` | The docs type changed, or `_impl/` declares a narrower type. | Match the type in `_impl/`, or record a `typeOverrides` entry for a justified divergence. |
+| generator: `No Python name for the struct at X.y.z` | A new inline `[Object]` with no `* alias:` in the docs. | Add the TypedDict and name it: `alias-python` upstream, or `structNamesByPlace` / `structRenames`. |
+| generator: `Unknown docs type "T" at X.y` | A docs type the type table in `generate_api.js` (`toPy`) does not know. | Add it to `toPy`. |
+| generator: `required parameter z follows an optional one` | The docs order params so that Python would need a default before a non-default. | Add a `positional` entry with the Python order. |
+| generator: `the entry "…" no longer matches anything; remove it` | An upstream change made a rules entry unnecessary (or renamed what it points at). | Delete it, or re-key it to the new docs name. |
+| generator: `legacy_order.json: … has no …; remove it` | A member or parameter in the temporary legacy order was removed or renamed upstream. | Delete that name from `scripts/codegen/legacy_order.json`. New members need no entry; they go last. |
+| `pyright … reportInconsistentOverload` (single-event class) | A class gained its first event, so there is one `Literal[…]` overload + impl, which pyright wants ≥2 of. | The generator already handles this — `emitEvents` adds a second `@typing.overload` with `event: str` when a class has exactly one event. |
 | `pre-commit` keeps reformatting `_generated.py` on each run | First run after regen always reformats once; rerun until idle. | `pre-commit run --all-files` to settle. |
-| `Parameter not documented: X.y(z=)` | Python has a kwarg the docs don't mention (e.g. legacy name from a doc rename). | If the param is positional with no default, just rename it in `_impl/`. Check `protocol.yml` and the server dispatcher — if the wire field renamed too, also update the channel-send dict key. Only MISMATCH for genuinely hidden internal kwargs (`default_browser_type`). |
-| `KeyError: 'templates'` deep in `inner_serialize_doc_type` | A `Promise<X>\|X` union upstream collapsed to a bare `Promise` with no templates in `api.json`. | `documentation_provider.inner_serialize_doc_type` should treat that as `Any` (`if "templates" not in type: return "Any"`). |
-| `"void" is not defined (reportUndefinedVariable)` in generated event handlers | `api.json` has a `void`-typed event payload that the serializer left as the literal string `"void"`. | `documentation_provider.inner_serialize_doc_type` should map `"void"` to `"None"` alongside `"null"`. |
+| A kwarg in `_impl/` that the docs don't mention (e.g. legacy name from a doc rename) | Nothing fails: the generator simply never passes it. | If the param is positional with no default, just rename it in `_impl/`. Check `packages/protocol/spec/*.yml` and the server dispatcher — if the wire field renamed too, also update the channel-send dict key. Only use `extraOptions` for genuinely hidden internal kwargs (`default_browser_type`). |
 | `AttributeError: 'X' object has no attribute '_loop'` (or `_dispatcher_fiber`) at first use of a new wrapper class | The non-ChannelOwner wrapper isn't initializing the fields the generated `AsyncBase`/`SyncBase` reads. | In the wrapper's `__init__`, set `self._loop = parent._loop` and `self._dispatcher_fiber = parent._dispatcher_fiber`. |
 | `'NoneType' object has no attribute 'get'` after `send_return_as_dict` | Method's protocol response carries no fields and `send_return_as_dict` returned `None`. | `(result or {}).get(...)`. |
 | Frame/buffer payload arrives as a `str` instead of `bytes` | Protocol `binary` fields cross the wire as base64. | `base64.b64decode(value)` in the impl before exposing. |
@@ -276,32 +287,35 @@ pytest --browser chromium tests/async/<files-you-touched> tests/sync/<files-you-
 
 Then a smoke regression on a few neighboring suites (`tests/async/test_browser*.py`, `test_cdp_session.py`, `test_tracing.py`, `test_dialog.py`, `test_page_*.py`) to make sure nothing inherent to the port shifted.
 
-## Reference: `expected_api_mismatch.txt` line forms
+## Reference: `python_rules.js` tables
 
-Exact strings the generator emits (and that this file must contain to suppress):
+All keys use docs names: `Class.member` or `Class.member.arg`, with the upstream PascalCase class and camelCase member/arg names. `*` matches one name segment.
 
-```
-Method not implemented: <Class>.<snake_method>
-Parameter not implemented: <Class>.<snake_method>(<snake_param>=)
-Parameter not documented: <Class>.<snake_method>(<snake_param>=)
-Method vs property mismatch: <Class>.<snake_method>
-Method not documented: <Class>.<snake_method>
-Parameter type mismatch in <Class>.<snake_method>(<arg>=): documented as <T1>, code has <T2>
-```
-
-Class names use the upstream PascalCase (`BrowserContext`, `BrowserType`); method/param names are converted to `snake_case` matching the Python surface.
+| Table | Use |
+|---|---|
+| `extraClasses` | A class the docs mark for other languages only, but Python has (`Disposable`). |
+| `handWrittenClasses` | Classes in the Python docs that are written by hand (`Error`, `TimeoutError`, `FormData`). |
+| `contextManagerClasses`, `tracebackHideClasses` | Base-class and `__tracebackhide__` choices. |
+| `extraMembers`, `extraOptions` | Python-only members and hidden options; generated without docstrings. |
+| `skipArgs` | Docs arguments Python does not have. |
+| `argNames` | Docs arguments whose Python name differs. |
+| `typeOverrides` | Python types that differ from the docs (docs type syntax; a function type with a return type must be last in a union). A member place overrides the return type. |
+| `positional` | Methods whose positional parameters differ from "params positional, options keyword-only". |
+| `positionalOptions` | Option names that are positional everywhere (`predicate`). |
+| `structRenames`, `structNamesByPlace` | TypedDict names. |
+| `implModules` | `_impl/` module of classes not in `_<snake_case name>.py`. |
 
 ## Tips & gotchas
 
 - **`langs.only` is your filter — and the only filter.** Don't classify by name (`Screencast`, `Debugger`, `pickLocator`) or by intuition ("looks like internal tooling"). Always check `langs` in `api.json`. The 1.59 roll cost two extra audit passes by trusting names over `langs`.
-- **Audit your own classifications a second time.** After the first walk through the commit range, before opening the PR, re-read every line in `expected_api_mismatch.txt` you added during this roll and ask "is this divergence justified, or did I skip a port?" Run the `langs`-dump snippet on each suspicious entry. The 1.59 roll's first PR had ~20 wrong suppressions; the second pass cut them to 0.
-- **A cluster of suppressions on the same class is a smell.** If you're about to add five `Method not implemented: Foo.*` lines, you're almost certainly looking at a class that needs to be implemented. Implement the whole thing once and the suppressions disappear.
+- **Audit your own classifications a second time.** After the first walk through the commit range, before opening the PR, re-read every entry in `python_rules.js` you added during this roll and ask "is this divergence justified, or did I skip a port?" Run the `langs`-dump snippet on each suspicious entry. The 1.59 roll's first PR had ~20 wrong suppressions; the second pass cut them to 0.
+- **A cluster of rules on the same class is a smell.** If you're about to add five entries for `Foo.*`, you're almost certainly looking at a class that needs to be implemented. Implement the whole thing once and the entries disappear.
 - **Watch for revert pairs in the same range.** 1.59 added and reverted `Browser.isRemote` (#39613 / #39620) inside the same release. Walking chronologically lets you skip the add when you see the revert later.
 - **Watch for rename-revert pairs.** 1.59 had `Locator.normalize` → `Locator.toCode` (#39648) → `Locator.normalize` (#39754). Final state wins; only port the last.
-- **Doc renames almost always include a wire-protocol rename.** Whenever you see `### param: X.y.oldName` → `### param: X.y.newName` in a doc commit, also `git -C "$PW_SRC_DIR" show <sha> -- packages/protocol/src/protocol.yml` and the corresponding `*Dispatcher.ts` file. If the wire field changed too, the channel-send dict key in `_impl/` must change. Suppressing the doc-side mismatch is hiding a real bug — the previous Python code is silently sending an unknown field that the new server ignores.
-- **TypedDicts beat `Dict[str, X]` for any structured return.** When the docs describe a return as `[Object]` with named fields (or even `[Object=Foo]`), define a `TypedDict` in `_api_structures.py`, re-export from both public `__init__.py` files, and use it. Zero runtime cost (it's still a `dict`), and the doc generator's type comparator matches by structure via `get_type_hints`.
+- **Doc renames almost always include a wire-protocol rename.** Whenever you see `### param: X.y.oldName` → `### param: X.y.newName` in a doc commit, also `git -C "$PW_SRC_DIR" show <sha> -- packages/protocol/spec/` and the corresponding `*Dispatcher.ts` file. If the wire field changed too, the channel-send dict key in `_impl/` must change. Suppressing the doc-side mismatch is hiding a real bug — the previous Python code is silently sending an unknown field that the new server ignores.
+- **TypedDicts beat `Dict[str, X]` for any structured return.** When the docs describe a return as `[Object]` with named fields, define a `TypedDict` in `_api_structures.py`, name it for the generator, and re-export it from both public `__init__.py` files. Zero runtime cost (it's still a `dict`), and the docstrings expand its fields from the docs.
 - **Positional renames are free.** A param with no default before any `*` separator is positional-or-keyword in Python, but realistic call sites pass it positionally. Renaming such a param doesn't break callers.
 - **The "Backport changes" GitHub issue can be misleading.** In the 1.59 roll its checkboxes were all marked `[x]` with annotations like "✅ IMPLEMENTED", but several of those features had not actually been merged into the Python port. Trust the `docs/src/api/` walk over the issue.
-- **`api.json` may carry doclint quirks.** 1.59 hit two: `Promise<X>|X` collapsed to a bare `Promise` with no `templates`, and `void`-typed events serialized as the literal string `"void"`. Both are upstream artifacts; patch `inner_serialize_doc_type` to handle them rather than fighting the api.json side.
-- **Don't edit `_generated.py` to fix lint or typing.** Fix `_impl/`, `documentation_provider.py`, or `expected_api_mismatch.txt` instead. Hand-editing the generated file is reverted on the next regen.
+- **The docs parser has quirks.** In a type expression, everything after a function's `:` is its return type, so `[function]([A]):[any]|[B]` is one function returning `any|B`. Put a function with a return type last in a union. The parser also drops the second argument of a function type when the first is a union (see the `WebSocketRoute.onClose.handler` override, which builds the type by hand). And when a `### param:` header name differs from the backticked name on its type line, the header name is the docs name and the type-line name becomes the alias (see `argNames`).
+- **Don't edit `_generated.py` to fix lint or typing.** Fix `_impl/`, `scripts/codegen/generate_api.js`, or `python_rules.js` instead. Hand-editing the generated file is reverted on the next regen.
 - **`/tmp/roll-<new>-commits.md` is a working artifact, not a deliverable.** Don't commit it. The commit message and PR description are where the audit summary belongs.

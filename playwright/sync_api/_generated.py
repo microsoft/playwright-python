@@ -141,7 +141,7 @@ class Request(SyncBase):
 
         This method is Chromium only. It's safe to call when using other browsers, but it will always be `null`.
 
-        Requests originated in a Service Worker do not have a `request.frame()` available.
+        Requests originated in a Service Worker do not have a `request.frame` available.
 
         Returns
         -------
@@ -282,7 +282,7 @@ class Request(SyncBase):
 
         **Usage**
 
-        This method is the opposite of `request.redirected_from()`:
+        This method is the opposite of `request.redirected_from`:
 
         ```py
         assert request.redirected_from.redirected_to == request
@@ -381,7 +381,7 @@ class Request(SyncBase):
         Whether this request is driving frame's navigation.
 
         Some navigation requests are issued before the corresponding frame is created, and therefore do not have
-        `request.frame()` available.
+        `request.frame` available.
 
         Returns
         -------
@@ -1001,7 +1001,7 @@ class Route(SyncBase):
         **Details**
 
         The `headers` option applies to both the routed request and any redirects it initiates. However, `url`, `method`,
-        and `postData` only apply to the original request and are not carried over to redirected requests.
+        and `post_data` only apply to the original request and are not carried over to redirected requests.
 
         `route.continue_()` will immediately send the request to the network, other matching handlers won't be
         invoked. Use `route.fallback()` If you want next matching handler in the chain to be invoked.
@@ -1798,7 +1798,7 @@ class Touchscreen(SyncBase):
 
         Dispatches a `touchstart` and `touchend` event with a single touch at the position (`x`,`y`).
 
-        **NOTE** `touchscreen.tap()` will throw if the `hasTouch` option of the browser context is false.
+        **NOTE** `touchscreen.tap()` will throw if the `has_touch` option of the browser context is false.
 
         Parameters
         ----------
@@ -1974,18 +1974,6 @@ mapping.register(JSHandleImpl, JSHandle)
 
 class ElementHandle(JSHandle):
 
-    def as_element(self) -> typing.Optional["ElementHandle"]:
-        """ElementHandle.as_element
-
-        Returns either `null` or the object handle itself, if the object handle is an instance of `ElementHandle`.
-
-        Returns
-        -------
-        Union[ElementHandle, None]
-        """
-
-        return mapping.from_impl_nullable(self._impl_obj.as_element())
-
     def owner_frame(self) -> typing.Optional["Frame"]:
         """ElementHandle.owner_frame
 
@@ -2152,10 +2140,10 @@ class ElementHandle(JSHandle):
         element_handle.dispatch_event(\"click\")
         ```
 
-        Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit`
+        Under the hood, it creates an instance of an event based on the given `type`, initializes it with `event_init`
         properties and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
 
-        Since `eventInit` is event-specific, please refer to the events documentation for the lists of initial properties:
+        Since `event_init` is event-specific, please refer to the events documentation for the lists of initial properties:
         - [DeviceMotionEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent/DeviceMotionEvent)
         - [DeviceOrientationEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent/DeviceOrientationEvent)
         - [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent)
@@ -2311,7 +2299,7 @@ class ElementHandle(JSHandle):
         1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element, or the specified `position`.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+        1. Wait for initiated navigations to either succeed or fail, unless `no_wait_after` option is set.
 
         If the element is detached from the DOM at any moment during the action, this method throws.
 
@@ -3136,7 +3124,7 @@ class ElementHandle(JSHandle):
             Defaults to `"device"`.
         mask : Union[Sequence[Locator], None]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
-            box `#FF00FF` (customized by `maskColor`) that completely covers its bounding box. The mask is also applied to
+            box `#FF00FF` (customized by `mask_color`) that completely covers its bounding box. The mask is also applied to
             invisible elements, see [Matching only visible elements](../locators.md#matching-only-visible-elements) to disable
             that.
         mask_color : Union[str, None]
@@ -3598,7 +3586,7 @@ class Frame(SyncBase):
 
         The method will not throw an error when any valid HTTP status code is returned by the remote server, including 404
         \"Not Found\" and 500 \"Internal Server Error\".  The status code for such responses can be retrieved by calling
-        `response.status()`.
+        `response.status`.
 
         **NOTE** The method either throws an error or returns a main resource response. The only exceptions are navigation
         to `about:blank` or navigation to the same URL with a different hash, which would succeed and return `null`.
@@ -4291,10 +4279,10 @@ class Frame(SyncBase):
         frame.dispatch_event(\"button#submit\", \"click\")
         ```
 
-        Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit`
+        Under the hood, it creates an instance of an event based on the given `type`, initializes it with `event_init`
         properties and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
 
-        Since `eventInit` is event-specific, please refer to the events documentation for the lists of initial properties:
+        Since `event_init` is event-specific, please refer to the events documentation for the lists of initial properties:
         - [DeviceMotionEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent/DeviceMotionEvent)
         - [DeviceOrientationEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent/DeviceOrientationEvent)
         - [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent)
@@ -4616,7 +4604,7 @@ class Frame(SyncBase):
            the element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element, or the specified `position`.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+        1. Wait for initiated navigations to either succeed or fail, unless `no_wait_after` option is set.
 
         When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
         Passing zero timeout disables this.
@@ -6471,7 +6459,7 @@ class FrameLocator(SyncBase):
         Useful when you have a `FrameLocator` object obtained somewhere, and later on would like to interact with the
         `iframe` element.
 
-        For a reverse operation, use `locator.content_frame()`.
+        For a reverse operation, use `locator.content_frame`.
 
         **Usage**
 
@@ -6538,7 +6526,7 @@ class FrameLocator(SyncBase):
 
         return mapping.from_impl(
             self._impl_obj.locator(
-                selectorOrLocator=selector_or_locator,
+                selectorOrLocator=mapping.to_impl(selector_or_locator),
                 hasText=has_text,
                 hasNotText=has_not_text,
                 has=has._impl_obj if has else None,
@@ -7550,13 +7538,13 @@ class Credentials(SyncBase):
 
         Seeds a virtual WebAuthn credential and returns it.
 
-        With only `rpId`, generates a fresh **ECDSA P-256** keypair, credential id and user handle. The seeded credential
+        With only `rp_id`, generates a fresh **ECDSA P-256** keypair, credential id and user handle. The seeded credential
         is discoverable (resident), so the page can resolve it from both username-then-passkey and usernameless passkey
         flows. The returned object carries the private and public keys, so it can be persisted to disk and re-seeded in a
         later test.
 
-        To **import a known credential**, supply all four of `id`, `userHandle`, `privateKey` and `publicKey` together.
-        Pass `signCount` as well to continue from the signature counter the relying party has already seen.
+        To **import a known credential**, supply all four of `id`, `user_handle`, `private_key` and `public_key` together.
+        Pass `sign_count` as well to continue from the signature counter the relying party has already seen.
 
         Call `credentials.install()` before navigating to a page that uses WebAuthn.
 
@@ -7615,7 +7603,7 @@ class Credentials(SyncBase):
     ) -> typing.List[VirtualCredential]:
         """Credentials.get
 
-        Returns every credential currently held by the authenticator, optionally filtered by `rpId` or `id`. This includes
+        Returns every credential currently held by the authenticator, optionally filtered by `rp_id` or `id`. This includes
         both credentials seeded with `credentials.create()` and credentials the page registered itself by calling
         `navigator.credentials.create()`.
 
@@ -7646,26 +7634,26 @@ class ConsoleMessage(SyncBase):
     @property
     def type(
         self,
-    ) -> typing.Union[
-        Literal["assert"],
-        Literal["clear"],
-        Literal["count"],
-        Literal["debug"],
-        Literal["dir"],
-        Literal["dirxml"],
-        Literal["endGroup"],
-        Literal["error"],
-        Literal["info"],
-        Literal["log"],
-        Literal["profile"],
-        Literal["profileEnd"],
-        Literal["startGroup"],
-        Literal["startGroupCollapsed"],
-        Literal["table"],
-        Literal["time"],
-        Literal["timeEnd"],
-        Literal["trace"],
-        Literal["warning"],
+    ) -> Literal[
+        "assert",
+        "clear",
+        "count",
+        "debug",
+        "dir",
+        "dirxml",
+        "endGroup",
+        "error",
+        "info",
+        "log",
+        "profile",
+        "profileEnd",
+        "startGroup",
+        "startGroupCollapsed",
+        "table",
+        "time",
+        "timeEnd",
+        "trace",
+        "warning",
     ]:
         """ConsoleMessage.type
 
@@ -7738,7 +7726,7 @@ class ConsoleMessage(SyncBase):
         """ConsoleMessage.worker
 
         The web worker or service worker that produced this console message, if any. Note that console messages from web
-        workers also have non-null `console_message.page()`.
+        workers also have non-null `console_message.page`.
 
         Returns
         -------
@@ -7985,7 +7973,7 @@ class Download(SyncBase):
         Returns path to the downloaded file for a successful download, or throws for a failed/canceled download. The method
         will wait for the download to finish if necessary. The method throws when connected remotely.
 
-        Note that the download's file name is a random GUID, use `download.suggested_filename()` to get suggested
+        Note that the download's file name is a random GUID, use `download.suggested_filename` to get suggested
         file name.
 
         Returns
@@ -8043,7 +8031,7 @@ class Screencast(SyncBase):
     ) -> "SyncContextManager":
         """Screencast.start
 
-        Starts the screencast. When `path` is provided, it saves video recording to the specified file. When `onFrame` is
+        Starts the screencast. When `path` is provided, it saves video recording to the specified file. When `on_frame` is
         provided, delivers JPEG-encoded frames to the callback. Both can be used together.
 
         **Usage**
@@ -8127,17 +8115,6 @@ class Screencast(SyncBase):
             Styles of the action decorations. All decorations fade out over `duration`.
 
             **Usage**
-
-            ```js
-            await page.screencast.showActions({
-              style: {
-                point: 'width: 20px; height: 20px; border-radius: 50%; background: red',
-                highlight: 'outline: 2px solid #333; background: rgba(0, 128, 255, .15)',
-                title: 'font-size: 16px',
-              },
-            });
-            ```
-
 
         Returns
         -------
@@ -8538,7 +8515,7 @@ class Page(SyncContextManager):
         ```
 
         **NOTE** HTTP Error responses, such as 404 or 503, are still successful responses from HTTP standpoint, so request
-        will complete with `page.on('request_finished')` event and not with `page.on('request_failed')`. A request will
+        will complete with `page.on('requestfinished')` event and not with `page.on('requestfailed')`. A request will
         only be considered failed when the client cannot get an HTTP response from the server, e.g. due to network error
         net::ERR_FAILED."""
 
@@ -8768,7 +8745,7 @@ class Page(SyncContextManager):
         ```
 
         **NOTE** HTTP Error responses, such as 404 or 503, are still successful responses from HTTP standpoint, so request
-        will complete with `page.on('request_finished')` event and not with `page.on('request_failed')`. A request will
+        will complete with `page.on('requestfinished')` event and not with `page.on('requestfailed')`. A request will
         only be considered failed when the client cannot get an HTTP response from the server, e.g. due to network error
         net::ERR_FAILED."""
 
@@ -8965,7 +8942,7 @@ class Page(SyncContextManager):
         """Page.webmcp
 
         Tools that the main frame registers through the experimental `WebMCP` browser API. Shortcut for
-        `frame.webmcp` of `page.main_frame()`, see `WebMCP` for details.
+        `frame.webmcp` of `page.main_frame`, see `WebMCP` for details.
 
         **Usage**
 
@@ -9024,6 +9001,10 @@ class Page(SyncContextManager):
         Returns frame matching the specified criteria. Either `name` or `url` must be specified.
 
         **Usage**
+
+        ```py
+        frame = page.frame(name=\"frame-name\")
+        ```
 
         ```py
         frame = page.frame(url=r\".*domain.*\")
@@ -9453,10 +9434,10 @@ class Page(SyncContextManager):
         page.dispatch_event(\"button#submit\", \"click\")
         ```
 
-        Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit`
+        Under the hood, it creates an instance of an event based on the given `type`, initializes it with `event_init`
         properties and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
 
-        Since `eventInit` is event-specific, please refer to the events documentation for the lists of initial properties:
+        Since `event_init` is event-specific, please refer to the events documentation for the lists of initial properties:
         - [DeviceMotionEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent/DeviceMotionEvent)
         - [DeviceOrientationEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent/DeviceOrientationEvent)
         - [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent)
@@ -10021,7 +10002,7 @@ class Page(SyncContextManager):
 
         The method will not throw an error when any valid HTTP status code is returned by the remote server, including 404
         \"Not Found\" and 500 \"Internal Server Error\".  The status code for such responses can be retrieved by calling
-        `response.status()`.
+        `response.status`.
 
         **NOTE** The method either throws an error or returns a main resource response. The only exceptions are navigation
         to `about:blank` or navigation to the same URL with a different hash, which would succeed and return `null`.
@@ -10032,7 +10013,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         url : str
-            URL to navigate page to. The url should include scheme, e.g. `https://`. When a `baseURL` via the context options
+            URL to navigate page to. The url should include scheme, e.g. `https://`. When a `base_url` via the context options
             was provided and the passed URL is a path, it gets merged via the
             [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
         timeout : Union[float, None]
@@ -10757,7 +10738,7 @@ class Page(SyncContextManager):
 
         **NOTE** `page.route()` will not intercept requests intercepted by Service Worker. See
         [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when
-        using request interception by setting `serviceWorkers` to `'block'`.
+        using request interception by setting `service_workers` to `'block'`.
 
         **NOTE** `page.route()` will not intercept the first request of a popup page. Use
         `browser_context.route()` instead.
@@ -10806,7 +10787,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         url : Union[Callable[[str], bool], Pattern[str], str]
-            A glob pattern, regex pattern, or predicate that receives a [URL] to match during routing. If `baseURL` is set in
+            A glob pattern, regex pattern, or predicate that receives a [URL] to match during routing. If `base_url` is set in
             the context options and the provided URL is a string that does not start with `*`, it is resolved using the
             [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
         handler : Union[Callable[[Route, Request], Any], Callable[[Route], Any]]
@@ -10892,7 +10873,7 @@ class Page(SyncContextManager):
         ----------
         url : Union[Callable[[str], bool], Pattern[str], str]
             Only WebSockets with the url matching this pattern will be routed. A string pattern can be relative to the
-            `baseURL` context option.
+            `base_url` context option.
         handler : Callable[[WebSocketRoute], Any]
             Handler function to route the WebSocket.
         """
@@ -10946,7 +10927,7 @@ class Page(SyncContextManager):
 
         Playwright will not serve requests intercepted by Service Worker from the HAR file. See
         [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when
-        using request interception by setting `serviceWorkers` to `'block'`.
+        using request interception by setting `service_workers` to `'block'`.
 
         Parameters
         ----------
@@ -11047,7 +11028,7 @@ class Page(SyncContextManager):
             Defaults to `"device"`.
         mask : Union[Sequence[Locator], None]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
-            box `#FF00FF` (customized by `maskColor`) that completely covers its bounding box. The mask is also applied to
+            box `#FF00FF` (customized by `mask_color`) that completely covers its bounding box. The mask is also applied to
             invisible elements, see [Matching only visible elements](../locators.md#matching-only-visible-elements) to disable
             that.
         mask_color : Union[str, None]
@@ -11147,12 +11128,12 @@ class Page(SyncContextManager):
     ) -> None:
         """Page.close
 
-        If `runBeforeUnload` is `false`, does not run any unload handlers and waits for the page to be closed. If
-        `runBeforeUnload` is `true` the method will run unload handlers, but will **not** wait for the page to close.
+        If `run_before_unload` is `false`, does not run any unload handlers and waits for the page to be closed. If
+        `run_before_unload` is `true` the method will run unload handlers, but will **not** wait for the page to close.
 
         By default, `page.close()` **does not** run `beforeunload` handlers.
 
-        **NOTE** if `runBeforeUnload` is passed as true, a `beforeunload` dialog might be summoned and should be handled
+        **NOTE** if `run_before_unload` is passed as true, a `beforeunload` dialog might be summoned and should be handled
         manually via `page.on('dialog')` event.
 
         Parameters
@@ -11208,7 +11189,7 @@ class Page(SyncContextManager):
            the element is detached during the checks, the whole action is retried.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element, or the specified `position`.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+        1. Wait for initiated navigations to either succeed or fail, unless `no_wait_after` option is set.
 
         When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
         Passing zero timeout disables this.
@@ -11390,7 +11371,7 @@ class Page(SyncContextManager):
         When all steps combined have not finished during the specified `timeout`, this method throws a `TimeoutError`.
         Passing zero timeout disables this.
 
-        **NOTE** `page.tap()` will throw if the `hasTouch` option of the browser context is false.
+        **NOTE** `page.tap()` will throw if the `has_touch` option of the browser context is false.
 
         Parameters
         ----------
@@ -13081,7 +13062,7 @@ class Page(SyncContextManager):
         - `A5`: 5.83in x 8.27in
         - `A6`: 4.13in x 5.83in
 
-        **NOTE** `headerTemplate` and `footerTemplate` markup have the following limitations: > 1. Script tags inside
+        **NOTE** `header_template` and `footer_template` markup have the following limitations: > 1. Script tags inside
         templates are not evaluated. > 2. Page styles are not visible inside templates.
 
         Parameters
@@ -13099,7 +13080,7 @@ class Page(SyncContextManager):
             - `'pageNumber'` current page number
             - `'totalPages'` total pages in the document
         footer_template : Union[str, None]
-            HTML template for the print footer. Should use the same format as the `headerTemplate`.
+            HTML template for the print footer. Should use the same format as the `header_template`.
         print_background : Union[bool, None]
             Print background graphics. Defaults to `false`.
         landscape : Union[bool, None]
@@ -13607,7 +13588,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         url_or_predicate : Union[Callable[[Request], bool], Pattern[str], str]
-            Request URL string, regex or predicate receiving `Request` object. When a `baseURL` via the context options was
+            Request URL string, regex or predicate receiving `Request` object. When a `base_url` via the context options was
             provided and the passed URL is a path, it gets merged via the
             [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
         timeout : Union[float, None]
@@ -13636,7 +13617,7 @@ class Page(SyncContextManager):
 
         Performs action and waits for a `Request` to finish loading. If predicate is provided, it passes `Request` value
         into the `predicate` function and waits for `predicate(request)` to return a truthy value. Will throw an error if
-        the page is closed before the `page.on('request_finished')` event is fired.
+        the page is closed before the `page.on('requestfinished')` event is fired.
 
         Parameters
         ----------
@@ -13689,7 +13670,7 @@ class Page(SyncContextManager):
         Parameters
         ----------
         url_or_predicate : Union[Callable[[Response], bool], Pattern[str], str]
-            Request URL string, regex or predicate receiving `Response` object. When a `baseURL` via the context options was
+            Request URL string, regex or predicate receiving `Response` object. When a `base_url` via the context options was
             provided and the passed URL is a path, it gets merged via the
             [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
         timeout : Union[float, None]
@@ -13875,7 +13856,7 @@ class Page(SyncContextManager):
           handler is only called when you perform an action/assertion - if the overlay becomes visible but you don't
           perform any actions, the handler will not be triggered.
         - After executing the handler, Playwright will ensure that overlay that triggered the handler is not visible
-          anymore. You can opt-out of this behavior with `noWaitAfter`.
+          anymore. You can opt-out of this behavior with `no_wait_after`.
         - The execution time of the handler counts towards the timeout of the action/assertion that executed the handler.
           If your handler takes too long, it might cause timeouts.
         - You can register multiple handlers. However, only a single handler will be running at a time. Make sure the
@@ -13900,50 +13881,50 @@ class Page(SyncContextManager):
 
         ```py
         # Setup the handler.
-        async def handler():
-          await page.get_by_role(\"button\", name=\"No thanks\").click()
-        await page.add_locator_handler(page.get_by_text(\"Sign up to the newsletter\"), handler)
+        def handler():
+          page.get_by_role(\"button\", name=\"No thanks\").click()
+        page.add_locator_handler(page.get_by_text(\"Sign up to the newsletter\"), handler)
 
         # Write the test as usual.
-        await page.goto(\"https://example.com\")
-        await page.get_by_role(\"button\", name=\"Start here\").click()
+        page.goto(\"https://example.com\")
+        page.get_by_role(\"button\", name=\"Start here\").click()
         ```
 
         An example that skips the \"Confirm your security details\" page when it is shown:
 
         ```py
         # Setup the handler.
-        async def handler():
-          await page.get_by_role(\"button\", name=\"Remind me later\").click()
-        await page.add_locator_handler(page.get_by_text(\"Confirm your security details\"), handler)
+        def handler():
+          page.get_by_role(\"button\", name=\"Remind me later\").click()
+        page.add_locator_handler(page.get_by_text(\"Confirm your security details\"), handler)
 
         # Write the test as usual.
-        await page.goto(\"https://example.com\")
-        await page.get_by_role(\"button\", name=\"Start here\").click()
+        page.goto(\"https://example.com\")
+        page.get_by_role(\"button\", name=\"Start here\").click()
         ```
 
         An example with a custom callback on every actionability check. It uses a `<body>` locator that is always visible,
-        so the handler is called before every actionability check. It is important to specify `noWaitAfter`, because the
+        so the handler is called before every actionability check. It is important to specify `no_wait_after`, because the
         handler does not hide the `<body>` element.
 
         ```py
         # Setup the handler.
-        async def handler():
-          await page.evaluate(\"window.removeObstructionsForTestIfNeeded()\")
-        await page.add_locator_handler(page.locator(\"body\"), handler, no_wait_after=True)
+        def handler():
+          page.evaluate(\"window.removeObstructionsForTestIfNeeded()\")
+        page.add_locator_handler(page.locator(\"body\"), handler, no_wait_after=True)
 
         # Write the test as usual.
-        await page.goto(\"https://example.com\")
-        await page.get_by_role(\"button\", name=\"Start here\").click()
+        page.goto(\"https://example.com\")
+        page.get_by_role(\"button\", name=\"Start here\").click()
         ```
 
         Handler takes the original locator as an argument. You can also automatically remove the handler after a number of
         invocations by setting `times`:
 
         ```py
-        async def handler(locator):
-          await locator.click()
-        await page.add_locator_handler(page.get_by_label(\"Close\"), handler, times=1)
+        def handler(locator):
+          locator.click()
+        page.add_locator_handler(page.get_by_label(\"Close\"), handler, times=1)
         ```
 
         Parameters
@@ -14032,7 +14013,7 @@ class Page(SyncContextManager):
     ) -> typing.List["Error"]:
         """Page.page_errors
 
-        Returns up to (currently) 200 last page errors from this page. See `page.on('page_error')` for more details.
+        Returns up to (currently) 200 last page errors from this page. See `page.on('pageerror')` for more details.
 
         Parameters
         ----------
@@ -14297,7 +14278,7 @@ class BrowserContext(SyncContextManager):
         self, event: Literal["frameattached"], f: typing.Callable[["Frame"], "None"]
     ) -> None:
         """
-        Emitted when a frame is attached in any page belonging to this context. See also `page.on('frame_attached')` to
+        Emitted when a frame is attached in any page belonging to this context. See also `page.on('frameattached')` to
         receive events about a specific page."""
 
     @typing.overload
@@ -14305,7 +14286,7 @@ class BrowserContext(SyncContextManager):
         self, event: Literal["framedetached"], f: typing.Callable[["Frame"], "None"]
     ) -> None:
         """
-        Emitted when a frame is detached in any page belonging to this context. See also `page.on('frame_detached')` to
+        Emitted when a frame is detached in any page belonging to this context. See also `page.on('framedetached')` to
         receive events about a specific page."""
 
     @typing.overload
@@ -14314,7 +14295,7 @@ class BrowserContext(SyncContextManager):
     ) -> None:
         """
         Emitted when a frame is navigated to a new url in any page belonging to this context. See also
-        `page.on('frame_navigated')` to receive events about navigations in a specific page.
+        `page.on('framenavigated')` to receive events about navigations in a specific page.
         """
 
     @typing.overload
@@ -14363,7 +14344,7 @@ class BrowserContext(SyncContextManager):
     ) -> None:
         """
         Emitted when exception is unhandled in any of the pages in this context. To listen for errors from a particular
-        page, use `page.on('page_error')` instead."""
+        page, use `page.on('pageerror')` instead."""
 
     @typing.overload
     def on(
@@ -14382,11 +14363,11 @@ class BrowserContext(SyncContextManager):
     ) -> None:
         """
         Emitted when a request fails, for example by timing out. To only listen for failed requests from a particular page,
-        use `page.on('request_failed')`.
+        use `page.on('requestfailed')`.
 
         **NOTE** HTTP Error responses, such as 404 or 503, are still successful responses from HTTP standpoint, so request
-        will complete with `browser_context.on('request_finished')` event and not with
-        `browser_context.on('request_failed')`."""
+        will complete with `browser_context.on('requestfinished')` event and not with
+        `browser_context.on('requestfailed')`."""
 
     @typing.overload
     def on(
@@ -14395,7 +14376,7 @@ class BrowserContext(SyncContextManager):
         """
         Emitted when a request finishes successfully after downloading the response body. For a successful response, the
         sequence of events is `request`, `response` and `requestfinished`. To listen for successful requests from a
-        particular page, use `page.on('request_finished')`."""
+        particular page, use `page.on('requestfinished')`."""
 
     @typing.overload
     def on(
@@ -14497,7 +14478,7 @@ class BrowserContext(SyncContextManager):
         self, event: Literal["frameattached"], f: typing.Callable[["Frame"], "None"]
     ) -> None:
         """
-        Emitted when a frame is attached in any page belonging to this context. See also `page.on('frame_attached')` to
+        Emitted when a frame is attached in any page belonging to this context. See also `page.on('frameattached')` to
         receive events about a specific page."""
 
     @typing.overload
@@ -14505,7 +14486,7 @@ class BrowserContext(SyncContextManager):
         self, event: Literal["framedetached"], f: typing.Callable[["Frame"], "None"]
     ) -> None:
         """
-        Emitted when a frame is detached in any page belonging to this context. See also `page.on('frame_detached')` to
+        Emitted when a frame is detached in any page belonging to this context. See also `page.on('framedetached')` to
         receive events about a specific page."""
 
     @typing.overload
@@ -14514,7 +14495,7 @@ class BrowserContext(SyncContextManager):
     ) -> None:
         """
         Emitted when a frame is navigated to a new url in any page belonging to this context. See also
-        `page.on('frame_navigated')` to receive events about navigations in a specific page.
+        `page.on('framenavigated')` to receive events about navigations in a specific page.
         """
 
     @typing.overload
@@ -14565,7 +14546,7 @@ class BrowserContext(SyncContextManager):
     ) -> None:
         """
         Emitted when exception is unhandled in any of the pages in this context. To listen for errors from a particular
-        page, use `page.on('page_error')` instead."""
+        page, use `page.on('pageerror')` instead."""
 
     @typing.overload
     def once(
@@ -14584,11 +14565,11 @@ class BrowserContext(SyncContextManager):
     ) -> None:
         """
         Emitted when a request fails, for example by timing out. To only listen for failed requests from a particular page,
-        use `page.on('request_failed')`.
+        use `page.on('requestfailed')`.
 
         **NOTE** HTTP Error responses, such as 404 or 503, are still successful responses from HTTP standpoint, so request
-        will complete with `browser_context.on('request_finished')` event and not with
-        `browser_context.on('request_failed')`."""
+        will complete with `browser_context.on('requestfinished')` event and not with
+        `browser_context.on('requestfailed')`."""
 
     @typing.overload
     def once(
@@ -14597,7 +14578,7 @@ class BrowserContext(SyncContextManager):
         """
         Emitted when a request finishes successfully after downloading the response body. For a successful response, the
         sequence of events is `request`, `response` and `requestfinished`. To listen for successful requests from a
-        particular page, use `page.on('request_finished')`."""
+        particular page, use `page.on('requestfinished')`."""
 
     @typing.overload
     def once(
@@ -15189,7 +15170,7 @@ class BrowserContext(SyncContextManager):
 
         **NOTE** `browser_context.route()` will not intercept requests intercepted by Service Worker. See
         [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when
-        using request interception by setting `serviceWorkers` to `'block'`.
+        using request interception by setting `service_workers` to `'block'`.
 
         **Usage**
 
@@ -15237,7 +15218,7 @@ class BrowserContext(SyncContextManager):
         Parameters
         ----------
         url : Union[Callable[[str], bool], Pattern[str], str]
-            A glob pattern, regex pattern, or predicate that receives a [URL] to match during routing. If `baseURL` is set in
+            A glob pattern, regex pattern, or predicate that receives a [URL] to match during routing. If `base_url` is set in
             the context options and the provided URL is a string that does not start with `*`, it is resolved using the
             [`new URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor.
         handler : Union[Callable[[Route, Request], Any], Callable[[Route], Any]]
@@ -15326,7 +15307,7 @@ class BrowserContext(SyncContextManager):
         ----------
         url : Union[Callable[[str], bool], Pattern[str], str]
             Only WebSockets with the url matching this pattern will be routed. A string pattern can be relative to the
-            `baseURL` context option.
+            `base_url` context option.
         handler : Callable[[WebSocketRoute], Any]
             Handler function to route the WebSocket.
         """
@@ -15380,7 +15361,7 @@ class BrowserContext(SyncContextManager):
 
         Playwright will not serve requests intercepted by Service Worker from the HAR file. See
         [this](https://github.com/microsoft/playwright/issues/1090) issue. We recommend disabling Service Workers when
-        using request interception by setting `serviceWorkers` to `'block'`.
+        using request interception by setting `service_workers` to `'block'`.
 
         Parameters
         ----------
@@ -15693,7 +15674,7 @@ class BrowserContext(SyncContextManager):
         credentials : Union[bool, None]
             Set to `true` to include the context's virtual WebAuthn `browser_context.credentials` (passkeys) in the
             storage state snapshot. The captured credentials carry their private keys and signature counters, so they can be
-            re-seeded into a later context via the `storageState` option or `browser_context.set_storage_state()`. Note
+            re-seeded into a later context via the `storage_state` option or `browser_context.set_storage_state()`. Note
             that restoring the storage state that contains credentials will automatically install the virtual WebAuthn
             authenticator (see `credentials.install()`), and prevent all real authenticators from working in this
             context.
@@ -16035,7 +16016,9 @@ class BrowserContext(SyncContextManager):
         CDPSession
         """
 
-        return mapping.from_impl(self._sync(self._impl_obj.new_cdp_session(page=page)))
+        return mapping.from_impl(
+            self._sync(self._impl_obj.new_cdp_session(page=mapping.to_impl(page)))
+        )
 
 
 mapping.register(BrowserContextImpl, BrowserContext)
@@ -16254,7 +16237,7 @@ class Browser(SyncContextManager):
         ] = None,
         record_har_mode: typing.Optional[Literal["full", "minimal"]] = None,
         record_har_content: typing.Optional[Literal["attach", "embed", "omit"]] = None,
-        client_certificates: typing.Optional[typing.List[ClientCertificate]] = None,
+        client_certificates: typing.Optional[typing.Sequence[ClientCertificate]] = None,
         record_video_fps: typing.Optional[int] = None,
     ) -> "BrowserContext":
         """Browser.new_context
@@ -16463,7 +16446,7 @@ class Browser(SyncContextManager):
                     recordHarUrlFilter=record_har_url_filter,
                     recordHarMode=record_har_mode,
                     recordHarContent=record_har_content,
-                    clientCertificates=client_certificates,
+                    clientCertificates=mapping.to_impl(client_certificates),
                     recordVideoFps=record_video_fps,
                 )
             )
@@ -16517,7 +16500,7 @@ class Browser(SyncContextManager):
         ] = None,
         record_har_mode: typing.Optional[Literal["full", "minimal"]] = None,
         record_har_content: typing.Optional[Literal["attach", "embed", "omit"]] = None,
-        client_certificates: typing.Optional[typing.List[ClientCertificate]] = None,
+        client_certificates: typing.Optional[typing.Sequence[ClientCertificate]] = None,
         record_video_fps: typing.Optional[int] = None,
     ) -> "Page":
         """Browser.new_page
@@ -16710,7 +16693,7 @@ class Browser(SyncContextManager):
                     recordHarUrlFilter=record_har_url_filter,
                     recordHarMode=record_har_mode,
                     recordHarContent=record_har_content,
-                    clientCertificates=client_certificates,
+                    clientCertificates=mapping.to_impl(client_certificates),
                     recordVideoFps=record_video_fps,
                 )
             )
@@ -16925,7 +16908,7 @@ class BrowserType(SyncBase):
 
         **Usage**
 
-        You can use `ignoreDefaultArgs` to filter out `--mute-audio` from default arguments:
+        You can use `ignore_default_args` to filter out `--mute-audio` from default arguments:
 
         ```py
         browser = playwright.chromium.launch( # or \"firefox\" or \"webkit\".
@@ -16935,7 +16918,7 @@ class BrowserType(SyncBase):
 
         > **Chromium-only** Playwright can also be used to control the Google Chrome or Microsoft Edge browsers, but it
         works best with the version of Chromium it is bundled with. There is no guarantee it will work with any other
-        version. Use `executablePath` option with extreme caution.
+        version. Use `executable_path` option with extreme caution.
         >
         > If Google Chrome (rather than Chromium) is preferred, a
         [Chrome Canary](https://www.google.com/chrome/browser/canary.html) or
@@ -16951,7 +16934,7 @@ class BrowserType(SyncBase):
         Parameters
         ----------
         executable_path : Union[pathlib.Path, str, None]
-            Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is
+            Path to a browser executable to run instead of the bundled one. If `executable_path` is a relative path, then it is
             resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium,
             Firefox or WebKit, use at your own risk.
         channel : Union[str, None]
@@ -17102,14 +17085,14 @@ class BrowserType(SyncBase):
         ] = None,
         record_har_mode: typing.Optional[Literal["full", "minimal"]] = None,
         record_har_content: typing.Optional[Literal["attach", "embed", "omit"]] = None,
-        client_certificates: typing.Optional[typing.List[ClientCertificate]] = None,
+        client_certificates: typing.Optional[typing.Sequence[ClientCertificate]] = None,
         record_video_fps: typing.Optional[int] = None,
     ) -> "BrowserContext":
         """BrowserType.launch_persistent_context
 
         Returns the persistent browser context instance.
 
-        Launches browser that uses persistent storage located at `userDataDir` and returns the only context. Closing this
+        Launches browser that uses persistent storage located at `user_data_dir` and returns the only context. Closing this
         context will automatically close the browser.
 
         Parameters
@@ -17139,7 +17122,7 @@ class BrowserType(SyncBase):
             Use "chrome", "chrome-beta", "chrome-dev", "chrome-canary", "msedge", "msedge-beta", "msedge-dev", or
             "msedge-canary" to use branded [Google Chrome and Microsoft Edge](../browsers.md#google-chrome--microsoft-edge).
         executable_path : Union[pathlib.Path, str, None]
-            Path to a browser executable to run instead of the bundled one. If `executablePath` is a relative path, then it is
+            Path to a browser executable to run instead of the bundled one. If `executable_path` is a relative path, then it is
             resolved relative to the current working directory. Note that Playwright only works with the bundled Chromium,
             Firefox or WebKit, use at your own risk.
         args : Union[Sequence[str], None]
@@ -17376,7 +17359,7 @@ class BrowserType(SyncBase):
                     recordHarUrlFilter=record_har_url_filter,
                     recordHarMode=record_har_mode,
                     recordHarContent=record_har_content,
-                    clientCertificates=client_certificates,
+                    clientCertificates=mapping.to_impl(client_certificates),
                     recordVideoFps=record_video_fps,
                 )
             )
@@ -17397,7 +17380,7 @@ class BrowserType(SyncBase):
 
         This method attaches Playwright to an existing browser instance using the Chrome DevTools Protocol.
 
-        The default browser context is accessible via `browser.contexts()`.
+        The default browser context is accessible via `browser.contexts`.
 
         **NOTE** Connecting over the Chrome DevTools Protocol is only supported for Chromium-based browsers.
 
@@ -17435,9 +17418,9 @@ class BrowserType(SyncBase):
             upon the file system being the same between Playwright and the Browser.
         no_defaults : Union[bool, None]
             When true, Playwright will not apply its default overrides to the existing default browser context. Specifically,
-            `acceptDownloads` is left at the browser's setting, focus emulation is not enabled, and media emulation options
-            (such as `colorScheme`, `reducedMotion`, `forcedColors`, and `contrast`) are not applied. Useful when attaching to
-            a user's daily-driver browser where these overrides would interfere with existing browser state. New contexts
+            `accept_downloads` is left at the browser's setting, focus emulation is not enabled, and media emulation options
+            (such as `color_scheme`, `reduced_motion`, `forced_colors`, and `contrast`) are not applied. Useful when attaching
+            to a user's daily-driver browser where these overrides would interfere with existing browser state. New contexts
             created via `browser.new_context()` are not affected. Defaults to `false`.
         artifacts_dir : Union[pathlib.Path, str, None]
             If specified, browser artifacts (such as traces and downloads) are saved into this directory.
@@ -17618,7 +17601,7 @@ class Playwright(SyncBase):
 
     def __getitem__(self, value: str) -> "BrowserType":
 
-        return mapping.from_impl(self._impl_obj.__getitem__(value=value))
+        return mapping.from_impl(self._impl_obj.__getitem__(value))
 
     def stop(self) -> None:
         """Playwright.stop
@@ -17688,7 +17671,7 @@ class Tracing(SyncBase):
         ----------
         name : Union[str, None]
             If specified, intermediate trace files are going to be saved into the files with the given name prefix inside the
-            `tracesDir` directory specified in `browser_type.launch()`. To specify the final trace zip file name, you
+            `traces_dir` directory specified in `browser_type.launch()`. To specify the final trace zip file name, you
             need to pass `path` option to `tracing.stop()` instead.
         title : Union[str, None]
             Trace name to be shown in the Trace Viewer.
@@ -17761,7 +17744,7 @@ class Tracing(SyncBase):
             Trace name to be shown in the Trace Viewer.
         name : Union[str, None]
             If specified, intermediate trace files are going to be saved into the files with the given name prefix inside the
-            `tracesDir` directory specified in `browser_type.launch()`. To specify the final trace zip file name, you
+            `traces_dir` directory specified in `browser_type.launch()`. To specify the final trace zip file name, you
             need to pass `path` option to `tracing.stop_chunk()` instead.
 
         Returns
@@ -17818,10 +17801,10 @@ class Tracing(SyncBase):
         ```py
         # All actions between group and group_end
         # will be shown in the trace viewer as a group.
-        await page.context.tracing.group(\"Open Playwright.dev > API\")
-        await page.goto(\"https://playwright.dev/\")
-        await page.get_by_role(\"link\", name=\"API\").click()
-        await page.context.tracing.group_end()
+        page.context.tracing.group(\"Open Playwright.dev > API\")
+        page.goto(\"https://playwright.dev/\")
+        page.get_by_role(\"link\", name=\"API\").click()
+        page.context.tracing.group_end()
         ```
 
         Parameters
@@ -17967,7 +17950,7 @@ class Locator(SyncBase):
         Useful when you have a `Locator` object obtained somewhere, and later on would like to interact with the content
         inside the frame.
 
-        For a reverse operation, use `frame_locator.owner()`.
+        For a reverse operation, use `frame_locator.owner`.
 
         **Usage**
 
@@ -18015,7 +17998,7 @@ class Locator(SyncBase):
         This is the recommended way to distinguish elements by visibility, as opposed to the `:visible` CSS pseudo-class.
 
         Note that visibility is checked every time the locator is used, and not at the moment of the
-        `locator.visible()` call.
+        `locator.visible` call.
 
         **Usage**
 
@@ -18183,7 +18166,7 @@ class Locator(SyncBase):
         1. Wait for [actionability](https://playwright.dev/python/docs/actionability) checks on the element, unless `force` option is set.
         1. Scroll the element into view if needed.
         1. Use `page.mouse` to click in the center of the element, or the specified `position`.
-        1. Wait for initiated navigations to either succeed or fail, unless `noWaitAfter` option is set.
+        1. Wait for initiated navigations to either succeed or fail, unless `no_wait_after` option is set.
 
         If the element is detached from the DOM at any moment during the action, this method throws.
 
@@ -18374,10 +18357,10 @@ class Locator(SyncBase):
         `click` is dispatched. This is equivalent to calling
         [element.click()](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/click).
 
-        Under the hood, it creates an instance of an event based on the given `type`, initializes it with `eventInit`
+        Under the hood, it creates an instance of an event based on the given `type`, initializes it with `event_init`
         properties and dispatches it on the element. Events are `composed`, `cancelable` and bubble by default.
 
-        Since `eventInit` is event-specific, please refer to the events documentation for the lists of initial properties:
+        Since `event_init` is event-specific, please refer to the events documentation for the lists of initial properties:
         - [DeviceMotionEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceMotionEvent/DeviceMotionEvent)
         - [DeviceOrientationEvent](https://developer.mozilla.org/en-US/docs/Web/API/DeviceOrientationEvent/DeviceOrientationEvent)
         - [DragEvent](https://developer.mozilla.org/en-US/docs/Web/API/DragEvent/DragEvent)
@@ -18722,7 +18705,7 @@ class Locator(SyncBase):
 
         return mapping.from_impl(
             self._impl_obj.locator(
-                selectorOrLocator=selector_or_locator,
+                selectorOrLocator=mapping.to_impl(selector_or_locator),
                 hasText=has_text,
                 hasNotText=has_not_text,
                 has=has._impl_obj if has else None,
@@ -19356,7 +19339,7 @@ class Locator(SyncBase):
 
             Note that outer and inner locators must belong to the same frame. Inner locator must not contain `FrameLocator`s.
         visible : Union[bool, None]
-            Only matches visible or invisible elements. Prefer the `locator.visible()` shortcut when matching only
+            Only matches visible or invisible elements. Prefer the `locator.visible` shortcut when matching only
             visible elements.
 
         Returns
@@ -19389,7 +19372,7 @@ class Locator(SyncBase):
 
         **NOTE** If both \"New email\" button and security dialog appear on screen, the \"or\" locator will match both of them,
         possibly throwing the [\"strict mode violation\" error](https://playwright.dev/python/docs/locators#strictness). In this case, you can use
-        `locator.first()` to only match one of them.
+        `locator.first` to only match one of them.
 
         ```py
         new_email = page.get_by_role(\"button\", name=\"New\")
@@ -19442,7 +19425,7 @@ class Locator(SyncBase):
 
         Returns a locator that matches this locator's elements inside each element matched by `locator`.
 
-        Note that relative locators, such as `locator.nth()` or `locator.first()`, are resolved separately
+        Note that relative locators, such as `locator.nth()` or `locator.first`, are resolved separately
         inside each matched parent. In the example below, `page.getByRole('cell').nth(2)` picks the third cell of every
         row, not the third cell in the whole table.
 
@@ -19832,7 +19815,7 @@ class Locator(SyncBase):
         Returns the [`element.innerText`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/innerText).
 
         **NOTE** If you need to assert text on the page, prefer `locator_assertions.to_have_text()` with
-        `useInnerText` option to avoid flakiness. See [assertions guide](https://playwright.dev/python/docs/test-assertions) for more details.
+        `use_inner_text` option to avoid flakiness. See [assertions guide](https://playwright.dev/python/docs/test-assertions) for more details.
 
         Parameters
         ----------
@@ -20233,7 +20216,7 @@ class Locator(SyncBase):
             Defaults to `"device"`.
         mask : Union[Sequence[Locator], None]
             Specify locators that should be masked when the screenshot is taken. Masked elements will be overlaid with a pink
-            box `#FF00FF` (customized by `maskColor`) that completely covers its bounding box. The mask is also applied to
+            box `#FF00FF` (customized by `mask_color`) that completely covers its bounding box. The mask is also applied to
             invisible elements, see [Matching only visible elements](../locators.md#matching-only-visible-elements) to disable
             that.
         mask_color : Union[str, None]
@@ -20881,7 +20864,7 @@ class Locator(SyncBase):
         Returns an array of `node.innerText` values for all matching nodes.
 
         **NOTE** If you need to assert text on the page, prefer `locator_assertions.to_have_text()` with
-        `useInnerText` option to avoid flakiness. See [assertions guide](https://playwright.dev/python/docs/test-assertions) for more details.
+        `use_inner_text` option to avoid flakiness. See [assertions guide](https://playwright.dev/python/docs/test-assertions) for more details.
 
         **Usage**
 
@@ -21293,8 +21276,8 @@ class APIRequestContext(SyncBase):
     def dispose(self, *, reason: typing.Optional[str] = None) -> None:
         """APIRequestContext.dispose
 
-        All responses returned by `a_pi_request_context.get()` and similar methods are stored in the memory, so that
-        you can later call `a_pi_response.body()`.This method discards all its resources, calling any method on
+        All responses returned by `api_request_context.get()` and similar methods are stored in the memory, so that
+        you can later call `api_response.body()`.This method discards all its resources, calling any method on
         disposed `APIRequestContext` will throw an exception.
 
         Parameters
@@ -21887,6 +21870,14 @@ class APIRequestContext(SyncBase):
 
         JSON objects can be passed directly to the request:
 
+        ```python
+        data = {
+            \"title\": \"Book Title\",
+            \"body\": \"John Doe\",
+        }
+        api_request_context.post(\"https://example.com/api/createBook\", data=data)
+        ```
+
         To send form data to the server use `form` option. Its value will be encoded into the request body with
         `application/x-www-form-urlencoded` encoding (see below how to use `multipart/form-data` form encoding to send
         files):
@@ -22008,6 +21999,14 @@ class APIRequestContext(SyncBase):
 
         JSON objects can be passed directly to the request:
 
+        ```python
+        data = {
+            \"title\": \"Book Title\",
+            \"body\": \"John Doe\",
+        }
+        api_request_context.fetch(\"https://example.com/api/createBook\", method=\"post\", data=data)
+        ```
+
         The common way to send file(s) in the body of a request is to upload them as form fields with `multipart/form-data`
         encoding, by specifiying the `multipart` parameter:
 
@@ -22071,7 +22070,7 @@ class APIRequestContext(SyncBase):
         return mapping.from_impl(
             self._sync(
                 self._impl_obj.fetch(
-                    urlOrRequest=url_or_request,
+                    urlOrRequest=mapping.to_impl(url_or_request),
                     params=mapping.to_impl(params),
                     method=method,
                     headers=mapping.to_impl(headers),
@@ -22141,7 +22140,7 @@ class APIRequest(SyncBase):
         storage_state: typing.Optional[
             typing.Union[StorageState, str, pathlib.Path]
         ] = None,
-        client_certificates: typing.Optional[typing.List[ClientCertificate]] = None,
+        client_certificates: typing.Optional[typing.Sequence[ClientCertificate]] = None,
         fail_on_status_code: typing.Optional[bool] = None,
         max_redirects: typing.Optional[int] = None,
     ) -> "APIRequestContext":
@@ -22152,7 +22151,7 @@ class APIRequest(SyncBase):
         Parameters
         ----------
         base_url : Union[str, None]
-            Methods like `a_pi_request_context.get()` take the base URL into consideration by using the
+            Methods like `api_request_context.get()` take the base URL into consideration by using the
             [`URL()`](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL) constructor for building the corresponding URL.
             Examples:
             - baseURL: `http://localhost:3000` and sending request to `/bar.html` results in `http://localhost:3000/bar.html`
@@ -22179,9 +22178,9 @@ class APIRequest(SyncBase):
             timeout.
         storage_state : Union[pathlib.Path, str, {cookies: Sequence[{name: str, value: str, domain: str, path: str, expires: float, httpOnly: bool, secure: bool, sameSite: Union["Lax", "None", "Strict"]}], origins: Sequence[{origin: str, localStorage: Sequence[{name: str, value: str}]}]}, None]
             Populates context with given storage state. This option can be used to initialize context with logged-in
-            information obtained via `browser_context.storage_state()` or `a_pi_request_context.storage_state()`.
+            information obtained via `browser_context.storage_state()` or `api_request_context.storage_state()`.
             Either a path to the file with saved storage, or the value returned by one of
-            `browser_context.storage_state()` or `a_pi_request_context.storage_state()` methods.
+            `browser_context.storage_state()` or `api_request_context.storage_state()` methods.
         client_certificates : Union[Sequence[{origin: str, certPath: Union[pathlib.Path, str, None], cert: Union[bytes, None], keyPath: Union[pathlib.Path, str, None], key: Union[bytes, None], pfxPath: Union[pathlib.Path, str, None], pfx: Union[bytes, None], passphrase: Union[str, None]}], None]
             TLS Client Authentication allows the server to request a client certificate and verify it.
 
@@ -22223,7 +22222,7 @@ class APIRequest(SyncBase):
                     userAgent=user_agent,
                     timeout=to_milliseconds(timeout),
                     storageState=storage_state,
-                    clientCertificates=client_certificates,
+                    clientCertificates=mapping.to_impl(client_certificates),
                     failOnStatusCode=fail_on_status_code,
                     maxRedirects=max_redirects,
                 )
@@ -22328,7 +22327,7 @@ class PageAssertions(SyncBase):
         timeout : Union[float, None]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         ignore_case : Union[bool, None]
-            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            Whether to perform case-insensitive match. `ignore_case` option takes precedence over the corresponding regular
             expression parameter if specified. A provided predicate ignores this flag.
         """
         __tracebackhide__ = True
@@ -22361,7 +22360,7 @@ class PageAssertions(SyncBase):
         timeout : Union[float, None]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         ignore_case : Union[bool, None]
-            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            Whether to perform case-insensitive match. `ignore_case` option takes precedence over the corresponding regular
             expression flag if specified.
         """
         __tracebackhide__ = True
@@ -22522,7 +22521,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, None]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         ignore_case : Union[bool, None]
-            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            Whether to perform case-insensitive match. `ignore_case` option takes precedence over the corresponding regular
             expression flag if specified.
         """
         __tracebackhide__ = True
@@ -22565,7 +22564,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, None]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         ignore_case : Union[bool, None]
-            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            Whether to perform case-insensitive match. `ignore_case` option takes precedence over the corresponding regular
             expression flag if specified.
         """
         __tracebackhide__ = True
@@ -22611,7 +22610,7 @@ class LocatorAssertions(SyncBase):
         value : Union[Pattern[str], str, None]
             Expected attribute value. If not specified, the assertion verifies that the attribute is present.
         ignore_case : Union[bool, None]
-            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            Whether to perform case-insensitive match. `ignore_case` option takes precedence over the corresponding regular
             expression flag if specified.
         timeout : Union[float, None]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
@@ -22648,7 +22647,7 @@ class LocatorAssertions(SyncBase):
         value : Union[Pattern[str], str, None]
             Expected attribute value. If not specified, the assertion verifies that the attribute is absent.
         ignore_case : Union[bool, None]
-            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            Whether to perform case-insensitive match. `ignore_case` option takes precedence over the corresponding regular
             expression flag if specified.
         timeout : Union[float, None]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
@@ -23345,7 +23344,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, None]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         ignore_case : Union[bool, None]
-            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            Whether to perform case-insensitive match. `ignore_case` option takes precedence over the corresponding regular
             expression flag if specified.
         """
         __tracebackhide__ = True
@@ -23388,7 +23387,7 @@ class LocatorAssertions(SyncBase):
         timeout : Union[float, None]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         ignore_case : Union[bool, None]
-            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            Whether to perform case-insensitive match. `ignore_case` option takes precedence over the corresponding regular
             expression flag if specified.
         """
         __tracebackhide__ = True
@@ -23816,7 +23815,7 @@ class LocatorAssertions(SyncBase):
 
         Ensures that `Locator` points to an attached and [visible](https://playwright.dev/python/docs/actionability#visible) DOM node.
 
-        To check that at least one element from the list is visible, use `locator.first()`.
+        To check that at least one element from the list is visible, use `locator.first`.
 
         **Usage**
 
@@ -24021,7 +24020,7 @@ class LocatorAssertions(SyncBase):
         description : Union[Pattern[str], str]
             Expected accessible description.
         ignore_case : Union[bool, None]
-            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            Whether to perform case-insensitive match. `ignore_case` option takes precedence over the corresponding regular
             expression flag if specified.
         timeout : Union[float, None]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
@@ -24054,7 +24053,7 @@ class LocatorAssertions(SyncBase):
         name : Union[Pattern[str], str]
             Expected accessible description.
         ignore_case : Union[bool, None]
-            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            Whether to perform case-insensitive match. `ignore_case` option takes precedence over the corresponding regular
             expression flag if specified.
         timeout : Union[float, None]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
@@ -24093,7 +24092,7 @@ class LocatorAssertions(SyncBase):
         name : Union[Pattern[str], str]
             Expected accessible name.
         ignore_case : Union[bool, None]
-            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            Whether to perform case-insensitive match. `ignore_case` option takes precedence over the corresponding regular
             expression flag if specified.
         timeout : Union[float, None]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
@@ -24124,7 +24123,7 @@ class LocatorAssertions(SyncBase):
         name : Union[Pattern[str], str]
             Expected accessible name.
         ignore_case : Union[bool, None]
-            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            Whether to perform case-insensitive match. `ignore_case` option takes precedence over the corresponding regular
             expression flag if specified.
         timeout : Union[float, None]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
@@ -24281,7 +24280,7 @@ class LocatorAssertions(SyncBase):
         error_message : Union[Pattern[str], str]
             Expected accessible error message.
         ignore_case : Union[bool, None]
-            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            Whether to perform case-insensitive match. `ignore_case` option takes precedence over the corresponding regular
             expression flag if specified.
         timeout : Union[float, None]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
@@ -24314,7 +24313,7 @@ class LocatorAssertions(SyncBase):
         error_message : Union[Pattern[str], str]
             Expected accessible error message.
         ignore_case : Union[bool, None]
-            Whether to perform case-insensitive match. `ignoreCase` option takes precedence over the corresponding regular
+            Whether to perform case-insensitive match. `ignore_case` option takes precedence over the corresponding regular
             expression flag if specified.
         timeout : Union[float, None]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
@@ -24531,7 +24530,7 @@ class APIResponseAssertions(SyncBase):
     def not_to_be_ok(self) -> None:
         """APIResponseAssertions.not_to_be_ok
 
-        The opposite of `a_pi_response_assertions.to_be_ok()`.
+        The opposite of `api_response_assertions.to_be_ok()`.
         """
         __tracebackhide__ = True
 

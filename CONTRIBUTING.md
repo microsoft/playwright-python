@@ -75,8 +75,11 @@ For more details look at the [CI configuration](./.github/workflows/ci.yml).
 
 ### Regenerating APIs
 
-`update_api.sh` generates `api.json` from a nearby `microsoft/playwright`
-checkout (at the tag matching `DRIVER_VERSION`); point `PW_SRC_DIR` at it.
+`update_api.sh` generates `playwright/{async,sync}_api/_generated.py` from the
+API docs in a nearby `microsoft/playwright` checkout (at the release branch
+matching `DRIVER_VERSION`); point `PW_SRC_DIR` at it. The generator is
+`scripts/codegen/generate_api.js`; Python facts that the docs do not contain
+live in `scripts/codegen/python_rules.js`.
 
 ```bash
 PW_SRC_DIR=../playwright ./scripts/update_api.sh
