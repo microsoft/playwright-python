@@ -110,9 +110,7 @@ class SyncBase(ImplWrapper):
         wait_for_future(self._loop, self._dispatcher_fiber, task)
         return task.result()
 
-    def _wrap_handler(
-        self, handler: Union[Callable[..., Any], Any]
-    ) -> Callable[..., None]:
+    def _wrap_handler(self, handler: Union[Callable[..., Any], Any]) -> Any:
         if callable(handler):
             return mapping.wrap_handler(handler)
         return handler

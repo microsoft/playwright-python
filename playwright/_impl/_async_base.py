@@ -68,9 +68,7 @@ class AsyncBase(ImplWrapper):
     def __str__(self) -> str:
         return self._impl_obj.__str__()
 
-    def _wrap_handler(
-        self, handler: Union[Callable[..., Any], Any]
-    ) -> Callable[..., None]:
+    def _wrap_handler(self, handler: Union[Callable[..., Any], Any]) -> Any:
         if callable(handler):
             return mapping.wrap_handler(handler)
         return handler

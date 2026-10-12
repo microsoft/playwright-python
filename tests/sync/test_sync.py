@@ -79,7 +79,7 @@ def test_browser_repr(browser: Browser) -> None:
 
 
 def test_browser_type_repr(browser: Browser) -> None:
-    browser_type = browser._impl_obj._browser_type
+    browser_type = browser.browser_type
     assert (
         repr(browser_type)
         == f"<BrowserType name={browser_type.name} executable_path={browser_type.executable_path}>"
