@@ -33,9 +33,6 @@
 const fs = require('fs');
 const path = require('path');
 const rules = require('./python_rules');
-// TEMPORARY: see "TEMPORARY: the legacy order" below. Replace the require()
-// with null to see the output without it.
-const legacyOrder = require('./legacy_order.json');
 
 /**
  * @typedef {{
@@ -140,6 +137,17 @@ const structUses = new Map();
 // ---------------------------------------------------------------------------
 // Names.
 
+/**
+ * Compares by name, in code point order (as Python's sorted()). The generated
+ * files list classes, members, keyword-only parameters, events and
+ * TypedDicts in this order.
+ * @param {string} a
+ * @param {string} b
+ */
+function byName(a, b) {
+  return a < b ? -1 : a > b ? 1 : 0;
+}
+
 /** @param {string} name */
 function toSnakeCase(name) {
   // Same as playwright._impl._helper.to_snake_case.
@@ -227,10 +235,8 @@ documentation.setLinkRenderer(({ clazz, member, param, option }) => {
     return '`' + toSnakeCase(param.alias) + '`';
   if (option)
     return '`' + option.alias.split('.').map(toSnakeCase).join('.') + '`';
-  // TEMPORARY: the legacy order renders member links after wrapping, in
-  // renderLegacyMemberLinks().
   if (member)
-    return legacyOrder ? undefined : memberLink(member);
+    return memberLink(member);
   if (clazz)
     return '`' + clazz.name + '`';
   return undefined;
@@ -276,8 +282,7 @@ function renderSpec(spec) {
     if (node.type === 'code' && node.codeLang)
       node.codeLang = parseCodeLang(node.codeLang).highlighter;
   });
-  // TEMPORARY: renderLegacyMemberLinks() is the legacy order.
-  return renderLegacyMemberLinks(md.render(nodes, { maxColumns: 120 - 5, omitLastCR: true, flattenText: true, noteMode: 'compact' }));
+  return md.render(nodes, { maxColumns: 120 - 5, omitLastCR: true, flattenText: true, noteMode: 'compact' });
 }
 
 /** @param {string} text */
@@ -724,8 +729,7 @@ function buildMember(clazz, member) {
       type,
       optional: isOption || !arg.required || nullable,
       comment: renderSpec(arg.spec),
-      // TEMPORARY: renderLegacyMemberLinks() is the legacy order.
-      deprecated: arg.deprecated && renderLegacyMemberLinks(arg.deprecated),
+      deprecated: arg.deprecated,
       documented: true,
     });
   };
@@ -758,6 +762,7 @@ function buildMember(clazz, member) {
       documented: false,
     });
   }
+  keywordOnly.sort((a, b) => byName(a.name, b.name));
   let sawOptional = false;
   for (const param of positional) {
     if (sawOptional && !param.optional)
@@ -824,12 +829,14 @@ function buildClass(clazz) {
   }
   for (const extra of lookupRule('extraMembers', clazz.name) || [])
     members.push(buildExtraMember(clazz.name, extra));
-  return { name: clazz.name, base, events: clazz.eventsArray, members };
+  members.sort((a, b) => byName(a.name, b.name));
+  const events = [...clazz.eventsArray].sort((a, b) => byName(a.name.toLowerCase(), b.name.toLowerCase()));
+  return { name: clazz.name, base, events, members };
 }
 
-/** Classes in docs order, with base classes first. */
+/** Classes in alphabetical order, with base classes first. */
 function orderedClasses() {
-  const classes = documentation.classesArray.filter(c => generatedClassNames.has(c.name));
+  const classes = documentation.classesArray.filter(c => generatedClassNames.has(c.name)).sort((a, b) => byName(a.name, b.name));
   const result = [];
   const done = new Set();
   const visit = clazz => {
@@ -842,152 +849,6 @@ function orderedClasses() {
   };
   classes.forEach(visit);
   return result;
-}
-
-// ---------------------------------------------------------------------------
-// TEMPORARY: the legacy order.
-//
-// legacy_order.json holds the order of classes, members and keyword-only
-// parameters in the _generated.py files that the old generator wrote. That
-// generator read playwright/_impl, so its order followed the implementation.
-// The file lists only the places where that order differs from the docs order.
-// It also holds the class order of the hand-written _api_structures.py.
-// It keeps the diff of the switch to this generator small enough to review.
-//
-// The section also reproduces two more habits of the old generator:
-// - the order of the members of a union, from legacyOrder.unions;
-// - docstring lines wrapped before the member links were replaced with their
-//   Python form, so that the wrapped lines can be too long or too short.
-//
-// To remove it: delete legacy_order.json, this section, the calls to its
-// functions, and the `legacyOrder ? ... : ...` choice. Every place is marked
-// TEMPORARY.
-
-/**
- * Sorts items by the position of their name in `order`. Items that are not in
- * `order` go last, in their current order.
- * @template T
- * @param {T[]} items
- * @param {string[] | undefined} order
- * @param {(item: T) => string} nameOf
- * @param {string} where
- * @returns {T[]}
- */
-function sortByLegacyOrder(items, order, nameOf, where) {
-  if (!order)
-    return items;
-  const names = new Set(items.map(nameOf));
-  for (const name of order) {
-    if (!names.has(name))
-      errors.push(`legacy_order.json: ${where} has no ${name}; remove it`);
-  }
-  /** @param {T} item */
-  const position = item => {
-    const index = order.indexOf(nameOf(item));
-    return index === -1 ? order.length : index;
-  };
-  return items.map((item, index) => ({ item, index }))
-      .sort((a, b) => position(a.item) - position(b.item) || a.index - b.index)
-      .map(entry => entry.item);
-}
-
-/** @type {Map<string, any>} */
-const membersByLink = new Map();
-for (const clazz of documentation.classesArray) {
-  for (const member of clazz.membersArray)
-    membersByLink.set(`${member.kind}: ${clazz.name}.${member.name}`, member);
-}
-
-/**
- * Replaces the member links that the link renderer left in the text.
- * @param {string} text
- */
-function renderLegacyMemberLinks(text) {
-  return text.replace(/\[`(event|method|property): ([^\]]+)`\](?:\(([^)]*?)\))?/g, (match, kind, name) => {
-    const member = membersByLink.get(`${kind}: ${name}`);
-    if (!member)
-      throw new Error(`Unknown member link ${match}`);
-    return memberLink(member);
-  });
-}
-
-/** @type {Set<string>} */
-const usedLegacyUnions = new Set();
-
-/**
- * Sorts the members of every union in `type` in the order of
- * legacyOrder.unions[key].
- * @param {PyType} type
- * @param {string} key `Class.member.param`, in Python names.
- * @returns {PyType}
- */
-function applyLegacyUnionOrder(type, key) {
-  const order = legacyOrder?.unions[key];
-  if (!order)
-    return type;
-  usedLegacyUnions.add(key);
-  /** @param {string} text */
-  const normalize = text => text.replace(/["'\s]/g, '');
-  const normalizedOrder = order.map(normalize);
-  /** @param {PyType} t */
-  const position = t => {
-    const index = normalizedOrder.indexOf(normalize(annotation(t)));
-    return index === -1 ? normalizedOrder.length : index;
-  };
-  /**
-   * @param {PyType} t
-   * @returns {PyType}
-   */
-  const sort = t => {
-    if (t.kind === 'union') {
-      const members = (t.members || []).map(sort).map((member, index) => ({ member, index }));
-      members.sort((a, b) => position(a.member) - position(b.member) || a.index - b.index);
-      return { ...t, members: members.map(entry => entry.member) };
-    }
-    if (t.kind === 'list')
-      return { ...t, item: sort(/** @type {PyType} */ (t.item)) };
-    if (t.kind === 'dict' && t.value)
-      return { ...t, value: sort(t.value) };
-    return t;
-  };
-  return sort(type);
-}
-
-/**
- * @param {PyClass[]} classes
- * @returns {PyClass[]}
- */
-function applyLegacyOrder(classes) {
-  if (!legacyOrder)
-    return classes;
-  const result = sortByLegacyOrder(classes, legacyOrder.classes, clazz => clazz.name, 'the API');
-  const memberKeys = new Set();
-  for (const clazz of result) {
-    clazz.members = sortByLegacyOrder(clazz.members, legacyOrder.members[clazz.name], member => member.name, clazz.name);
-    for (const member of clazz.members) {
-      const key = `${clazz.name}.${member.name}`;
-      memberKeys.add(key);
-      member.keywordOnly = sortByLegacyOrder(member.keywordOnly, legacyOrder.keywordOnly[key], param => param.name, key);
-    }
-  }
-  for (const name of Object.keys(legacyOrder.members)) {
-    if (!classes.some(clazz => clazz.name === name))
-      errors.push(`legacy_order.json: the API has no class ${name}; remove it`);
-  }
-  for (const key of Object.keys(legacyOrder.keywordOnly)) {
-    if (!memberKeys.has(key))
-      errors.push(`legacy_order.json: the API has no member ${key}; remove it`);
-  }
-  return result;
-}
-
-function checkLegacyUnions() {
-  if (!legacyOrder)
-    return;
-  for (const key of Object.keys(legacyOrder.unions)) {
-    if (!usedLegacyUnions.has(key))
-      errors.push(`legacy_order.json: the API has no parameter ${key}; remove it`);
-  }
 }
 
 // ---------------------------------------------------------------------------
@@ -1022,28 +883,26 @@ function eventPayload(clazz, event) {
 }
 
 /**
+ * on() or once(), with one typed overload per event.
  * @param {PyClass} clazz
+ * @param {'on' | 'once'} method
  * @param {string[]} out
  */
-function emitEvents(clazz, out) {
+function emitEventMethod(clazz, method, out) {
   const events = clazz.events;
-  if (!events.length)
-    return;
   const handlerReturn = isAsync ? 'typing.Union[typing.Awaitable[None], None]' : 'None';
-  for (const method of ['on', 'once']) {
-    for (const event of events) {
-      out.push('    @typing.overload');
-      out.push(`    def ${method}(self, event: Literal['${event.name.toLowerCase()}'], f: typing.Callable[['${eventPayload(clazz, event)}'], '${handlerReturn}']) -> None:`);
-      out.push(`        """${formatComment(renderSpec(event.spec), ' '.repeat(8))}"""`);
-    }
-    if (events.length === 1) {
-      out.push('    @typing.overload');
-      out.push(`    def ${method}(self, event: str, f: typing.Callable[...,${handlerReturn}]) -> None: ...`);
-      out.push('');
-    }
-    out.push(`    def ${method}(self, event: str, f: typing.Callable[...,${handlerReturn}]) -> None:`);
-    out.push(`        return super().${method}(event=event,f=f)`);
+  for (const event of events) {
+    out.push('    @typing.overload');
+    out.push(`    def ${method}(self, event: Literal['${event.name.toLowerCase()}'], f: typing.Callable[['${eventPayload(clazz, event)}'], '${handlerReturn}']) -> None:`);
+    out.push(`        """${formatComment(renderSpec(event.spec), ' '.repeat(8))}"""`);
   }
+  if (events.length === 1) {
+    out.push('    @typing.overload');
+    out.push(`    def ${method}(self, event: str, f: typing.Callable[...,${handlerReturn}]) -> None: ...`);
+    out.push('');
+  }
+  out.push(`    def ${method}(self, event: str, f: typing.Callable[...,${handlerReturn}]) -> None:`);
+  out.push(`        return super().${method}(event=event,f=f)`);
 }
 
 /**
@@ -1082,13 +941,9 @@ function emitEventOverloads(clazz, methodName, out) {
   out.push('');
 }
 
-/**
- * @param {PyParam} param
- * @param {string} key `Class.member.param`, in Python names.
- */
-function paramAnnotation(param, key) {
-  // TEMPORARY: applyLegacyUnionOrder() is the legacy order.
-  let type = applyLegacyUnionOrder(param.type, key);
+/** @param {PyParam} param */
+function paramAnnotation(param) {
+  let type = param.type;
   if (param.implName === 'timeout' && type.kind === 'name' && type.name === 'float')
     type = makeUnion([NAME('float'), NAME('datetime.timedelta')]);
   if (param.optional && !(type.kind === 'union' && type.members?.some(isNone)))
@@ -1145,11 +1000,9 @@ function emitMember(clazz, member, out) {
     return;
   }
 
-  /** @param {PyParam} p */
-  const declaration = p => `${p.name}: ${paramAnnotation(p, `${clazz.name}.${member.name}.${p.name}`)}`;
-  const params = ['self', ...member.positional.map(declaration)];
+  const params = ['self', ...member.positional.map(p => `${p.name}: ${paramAnnotation(p)}`)];
   if (member.keywordOnly.length)
-    params.push('*', ...member.keywordOnly.map(declaration));
+    params.push('*', ...member.keywordOnly.map(p => `${p.name}: ${paramAnnotation(p)}`));
   out.push(`    ${member.isAsync && isAsync ? 'async ' : ''}def ${member.name}(${params.join(', ')}) -> ${returnAnnotation}:`);
   if (member.documented)
     emitDocstring(clazz, member, out);
@@ -1189,12 +1042,23 @@ function emitClass(clazz, out) {
   // Typed, so that mypy checks every call below against the implementation.
   out.push(`    _impl_obj: ${clazz.name}Impl`);
   out.push('');
-  emitEvents(clazz, out);
-  for (const member of clazz.members) {
+  /** @type {{ name: string, emit: () => void }[]} */
+  const items = clazz.members.map(member => ({
+    name: member.name,
+    emit: () => {
+      if (member.name === 'expect_event' || member.name === 'wait_for_event')
+        emitEventOverloads(clazz, member.name, out);
+      emitMember(clazz, member, out);
+    },
+  }));
+  if (clazz.events.length) {
+    for (const method of /** @type {const} */ (['on', 'once']))
+      items.push({ name: method, emit: () => emitEventMethod(clazz, method, out) });
+  }
+  items.sort((a, b) => byName(a.name, b.name));
+  for (const item of items) {
     out.push('');
-    if (member.name === 'expect_event' || member.name === 'wait_for_event')
-      emitEventOverloads(clazz, member.name, out);
-    emitMember(clazz, member, out);
+    item.emit();
   }
   out.push('');
   out.push(`mapping.register(${clazz.name}Impl, ${clazz.name})`);
@@ -1257,21 +1121,20 @@ function orderedStructNames(structs) {
       return;
     done.add(name);
     const text = /** @type {any} */ (structs.get(name)).fields.map(f => f.text).join(' ');
-    for (const other of [...structs.keys()].sort()) {
+    for (const other of [...structs.keys()].sort(byName)) {
       if (other !== name && new RegExp(`\\b${other}\\b`).test(text))
         visit(other);
     }
     result.push(name);
   };
-  [...structs.keys()].sort().forEach(visit);
+  [...structs.keys()].sort(byName).forEach(visit);
   return result;
 }
 
 function emitStructs() {
   const structs = buildStructs();
   const body = [];
-  // TEMPORARY: sortByLegacyOrder() is the legacy order.
-  for (const name of sortByLegacyOrder(orderedStructNames(structs), legacyOrder?.structs, name => name, '_api_structures.py')) {
+  for (const name of orderedStructNames(structs)) {
     const { fields } = /** @type {any} */ (structs.get(name));
     const totalRule = lookupRule('structTotal', name);
     const total = totalRule !== undefined ? totalRule : !fields.some(f => f.optional);
@@ -1304,8 +1167,7 @@ function checkRules() {
 }
 
 function main() {
-  // TEMPORARY: applyLegacyOrder() is the legacy order.
-  const classes = applyLegacyOrder(orderedClasses().map(buildClass));
+  const classes = orderedClasses().map(buildClass);
   const body = [];
   for (const clazz of classes)
     emitClass(clazz, body);
@@ -1328,7 +1190,6 @@ function main() {
   const text = options.flavor === 'structs' ? structsText : [...header, ...body, ''].join('\n');
 
   checkRules();
-  checkLegacyUnions();  // TEMPORARY: the legacy order.
   if (errors.length) {
     for (const error of errors)
       console.error(error);
