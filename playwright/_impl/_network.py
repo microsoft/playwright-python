@@ -1047,7 +1047,7 @@ class RawHeaders:
         return separator.join(values)
 
     def get_all(self, name: str) -> List[str]:
-        return list(self._headers_map[name.lower()].keys())
+        return list(self._headers_map.get(name.lower(), {}).keys())
 
     def headers(self) -> Dict[str, str]:
         result = {}

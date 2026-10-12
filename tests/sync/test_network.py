@@ -114,3 +114,25 @@ def test_should_report_service_worker_request(page: Page, server: Server) -> Non
     ) as request_info:
         page.evaluate("() => fetch('/example.txt')")
     assert request_info.value.service_worker == worker_info.value
+
+
+def test_header_value_of_missing_header_should_not_add_it_to_all_headers(
+    page: Page, server: Server
+) -> None:
+    server.set_route("/empty.html", lambda r: (r.setHeader("foo", "bar"), r.finish()))
+
+    response = page.goto(server.EMPTY_PAGE)
+    assert response
+    assert response.header_value("x-missing") is None
+    assert response.header_values("x-other") == []
+    headers = response.all_headers()
+    assert "x-missing" not in headers
+    assert "x-other" not in headers
+    assert headers["foo"] == "bar"
+
+    request = response.request
+    assert request.header_value("x-missing") is None
+    assert request.header_value("x-other") is None
+    request_headers = request.all_headers()
+    assert "x-missing" not in request_headers
+    assert "x-other" not in request_headers

@@ -371,6 +371,28 @@ async def test_response_headers_should_work(page: Page, server: Server) -> None:
     assert (await response.all_headers())["foo"] == "bar"
 
 
+async def test_header_value_of_missing_header_should_not_add_it_to_all_headers(
+    page: Page, server: Server
+) -> None:
+    server.set_route("/empty.html", lambda r: (r.setHeader("foo", "bar"), r.finish()))
+
+    response = await page.goto(server.EMPTY_PAGE)
+    assert response
+    assert await response.header_value("x-missing") is None
+    assert await response.header_values("x-other") == []
+    headers = await response.all_headers()
+    assert "x-missing" not in headers
+    assert "x-other" not in headers
+    assert headers["foo"] == "bar"
+
+    request = response.request
+    assert await request.header_value("x-missing") is None
+    assert await request.header_value("x-other") is None
+    request_headers = await request.all_headers()
+    assert "x-missing" not in request_headers
+    assert "x-other" not in request_headers
+
+
 async def test_request_post_data_should_work(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
     server.set_route("/post", lambda r: r.finish())
