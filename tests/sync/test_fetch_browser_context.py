@@ -288,6 +288,28 @@ def test_should_support_multipart_form_data(
     assert server_req.value.args[b"file"][0] == file["buffer"]
 
 
+def test_should_send_empty_form(context: BrowserContext, server: Server) -> None:
+    with server.expect_request("/empty.html") as server_req:
+        context.request.post(server.EMPTY_PAGE, form={})
+    assert (
+        server_req.value.getHeader("Content-Type")
+        == "application/x-www-form-urlencoded"
+    )
+    assert server_req.value.getHeader("Content-Length") == "0"
+
+
+def test_should_send_empty_multipart(context: BrowserContext, server: Server) -> None:
+    # The test server rejects an empty multipart body in POST requests before handling them.
+    with server.expect_request("/empty.html") as server_req:
+        context.request.put(server.EMPTY_PAGE, multipart={})
+    content_type = server_req.value.getHeader("Content-Type")
+    assert content_type
+    assert content_type.startswith("multipart/form-data; ")
+    assert server_req.value.getHeader("Content-Length") == str(
+        len(must(server_req.value.post_body))
+    )
+
+
 def test_should_support_form_data_with_repeated_keys(
     context: BrowserContext, server: Server
 ) -> None:
