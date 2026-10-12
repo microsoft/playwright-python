@@ -104,6 +104,7 @@ from playwright._impl._webmcp import WebMCP as WebMCPImpl
 
 
 class Request(AsyncBase):
+    _impl_obj: RequestImpl
 
     @property
     def url(self) -> str:
@@ -438,6 +439,7 @@ mapping.register(RequestImpl, Request)
 
 
 class Response(AsyncBase):
+    _impl_obj: ResponseImpl
 
     @property
     def url(self) -> str:
@@ -643,7 +645,7 @@ class Response(AsyncBase):
         Waits for this response to finish, returns always `null`.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.finished())
+        await self._impl_obj.finished()
 
     async def body(self) -> bytes:
         """Response.body
@@ -688,6 +690,7 @@ mapping.register(ResponseImpl, Response)
 
 
 class Route(AsyncBase):
+    _impl_obj: RouteImpl
 
     @property
     def request(self) -> "Request":
@@ -728,7 +731,7 @@ class Route(AsyncBase):
             - `'failed'` - A generic failure occurred.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.abort(errorCode=error_code))
+        await self._impl_obj.abort(errorCode=error_code)
 
     async def fulfill(
         self,
@@ -782,16 +785,14 @@ class Route(AsyncBase):
             overridden using fulfill options.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.fulfill(
-                status=status,
-                headers=mapping.to_impl(headers),
-                body=body,
-                json=mapping.to_impl(json),
-                path=path,
-                contentType=content_type,
-                response=response._impl_obj if response else None,
-            )
+        await self._impl_obj.fulfill(
+            status=status,
+            headers=mapping.to_impl(headers),
+            body=body,
+            json=mapping.to_impl(json),
+            path=path,
+            contentType=content_type,
+            response=response._impl_obj if response else None,
         )
 
     async def fetch(
@@ -948,13 +949,11 @@ class Route(AsyncBase):
             If set changes the post data of request.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.fallback(
-                url=url,
-                method=method,
-                headers=mapping.to_impl(headers),
-                postData=mapping.to_impl(post_data),
-            )
+        await self._impl_obj.fallback(
+            url=url,
+            method=method,
+            headers=mapping.to_impl(headers),
+            postData=mapping.to_impl(post_data),
         )
 
     async def continue_(
@@ -1011,13 +1010,11 @@ class Route(AsyncBase):
             If set changes the post data of request.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.continue_(
-                url=url,
-                method=method,
-                headers=mapping.to_impl(headers),
-                postData=mapping.to_impl(post_data),
-            )
+        await self._impl_obj.continue_(
+            url=url,
+            method=method,
+            headers=mapping.to_impl(headers),
+            postData=mapping.to_impl(post_data),
         )
 
 
@@ -1025,6 +1022,7 @@ mapping.register(RouteImpl, Route)
 
 
 class WebSocket(AsyncBase):
+    _impl_obj: WebSocketImpl
 
     @typing.overload
     def on(
@@ -1320,6 +1318,7 @@ mapping.register(WebSocketImpl, WebSocket)
 
 
 class WebSocketRoute(AsyncBase):
+    _impl_obj: WebSocketRouteImpl
 
     @property
     def url(self) -> str:
@@ -1376,9 +1375,7 @@ class WebSocketRoute(AsyncBase):
             Optional [close reason](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/close#reason).
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.close(code=code, reason=reason)
-        )
+        await self._impl_obj.close(code=code, reason=reason)
 
     def connect_to_server(self) -> "WebSocketRoute":
         """WebSocketRoute.connect_to_server
@@ -1416,7 +1413,7 @@ class WebSocketRoute(AsyncBase):
             Message to send.
         """
 
-        return mapping.from_maybe_impl(self._impl_obj.send(message=message))
+        self._impl_obj.send(message=message)
 
     def on_message(
         self, handler: typing.Callable[[typing.Union[str, bytes]], typing.Any]
@@ -1440,9 +1437,7 @@ class WebSocketRoute(AsyncBase):
             Function that will handle messages.
         """
 
-        return mapping.from_maybe_impl(
-            self._impl_obj.on_message(handler=self._wrap_handler(handler))
-        )
+        self._impl_obj.on_message(handler=self._wrap_handler(handler))
 
     def on_close(
         self,
@@ -1466,15 +1461,14 @@ class WebSocketRoute(AsyncBase):
             [close reason](https://developer.mozilla.org/en-US/docs/Web/API/WebSocket/close#reason).
         """
 
-        return mapping.from_maybe_impl(
-            self._impl_obj.on_close(handler=self._wrap_handler(handler))
-        )
+        self._impl_obj.on_close(handler=self._wrap_handler(handler))
 
 
 mapping.register(WebSocketRouteImpl, WebSocketRoute)
 
 
 class Keyboard(AsyncBase):
+    _impl_obj: KeyboardImpl
 
     async def down(self, key: str) -> None:
         """Keyboard.down
@@ -1513,7 +1507,7 @@ class Keyboard(AsyncBase):
             Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.down(key=key))
+        await self._impl_obj.down(key=key)
 
     async def up(self, key: str) -> None:
         """Keyboard.up
@@ -1526,7 +1520,7 @@ class Keyboard(AsyncBase):
             Name of the key to press or a character to generate, such as `ArrowLeft` or `a`.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.up(key=key))
+        await self._impl_obj.up(key=key)
 
     async def insert_text(self, text: str) -> None:
         """Keyboard.insert_text
@@ -1548,7 +1542,7 @@ class Keyboard(AsyncBase):
             Sets input to the specified text value.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.insert_text(text=text))
+        await self._impl_obj.insert_text(text=text)
 
     async def type(self, text: str, *, delay: typing.Optional[float] = None) -> None:
         """Keyboard.type
@@ -1579,9 +1573,7 @@ class Keyboard(AsyncBase):
             Time to wait between key presses in milliseconds. Defaults to 0.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.type(text=text, delay=delay)
-        )
+        await self._impl_obj.type(text=text, delay=delay)
 
     async def press(self, key: str, *, delay: typing.Optional[float] = None) -> None:
         """Keyboard.press
@@ -1632,13 +1624,14 @@ class Keyboard(AsyncBase):
             Time to wait between `keydown` and `keyup` in milliseconds. Defaults to 0.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.press(key=key, delay=delay))
+        await self._impl_obj.press(key=key, delay=delay)
 
 
 mapping.register(KeyboardImpl, Keyboard)
 
 
 class Mouse(AsyncBase):
+    _impl_obj: MouseImpl
 
     async def move(
         self, x: float, y: float, *, steps: typing.Optional[int] = None
@@ -1658,7 +1651,7 @@ class Mouse(AsyncBase):
             position and the provided destination. When set to 1, emits a single `mousemove` event at the destination location.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.move(x=x, y=y, steps=steps))
+        await self._impl_obj.move(x=x, y=y, steps=steps)
 
     async def down(
         self,
@@ -1678,9 +1671,7 @@ class Mouse(AsyncBase):
             defaults to 1. See [UIEvent.detail].
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.down(button=button, clickCount=click_count)
-        )
+        await self._impl_obj.down(button=button, clickCount=click_count)
 
     async def up(
         self,
@@ -1700,9 +1691,7 @@ class Mouse(AsyncBase):
             defaults to 1. See [UIEvent.detail].
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.up(button=button, clickCount=click_count)
-        )
+        await self._impl_obj.up(button=button, clickCount=click_count)
 
     async def click(
         self,
@@ -1731,10 +1720,8 @@ class Mouse(AsyncBase):
             defaults to 1. See [UIEvent.detail].
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.click(
-                x=x, y=y, delay=delay, button=button, clickCount=click_count
-            )
+        await self._impl_obj.click(
+            x=x, y=y, delay=delay, button=button, clickCount=click_count
         )
 
     async def dblclick(
@@ -1762,9 +1749,7 @@ class Mouse(AsyncBase):
             Defaults to `left`.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.dblclick(x=x, y=y, delay=delay, button=button)
-        )
+        await self._impl_obj.dblclick(x=x, y=y, delay=delay, button=button)
 
     async def wheel(self, delta_x: float, delta_y: float) -> None:
         """Mouse.wheel
@@ -1783,15 +1768,14 @@ class Mouse(AsyncBase):
             Pixels to scroll vertically.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.wheel(deltaX=delta_x, deltaY=delta_y)
-        )
+        await self._impl_obj.wheel(deltaX=delta_x, deltaY=delta_y)
 
 
 mapping.register(MouseImpl, Mouse)
 
 
 class Touchscreen(AsyncBase):
+    _impl_obj: TouchscreenImpl
 
     async def tap(self, x: float, y: float) -> None:
         """Touchscreen.tap
@@ -1808,13 +1792,14 @@ class Touchscreen(AsyncBase):
             Y coordinate relative to the main frame's viewport in CSS pixels.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.tap(x=x, y=y))
+        await self._impl_obj.tap(x=x, y=y)
 
 
 mapping.register(TouchscreenImpl, Touchscreen)
 
 
 class JSHandle(AsyncBase):
+    _impl_obj: JSHandleImpl
 
     async def evaluate(
         self, expression: str, arg: typing.Optional[typing.Any] = None
@@ -1949,7 +1934,7 @@ class JSHandle(AsyncBase):
         The `jsHandle.dispose` method stops referencing the element handle.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.dispose())
+        await self._impl_obj.dispose()
 
     async def json_value(self) -> typing.Any:
         """JSHandle.json_value
@@ -1971,6 +1956,7 @@ mapping.register(JSHandleImpl, JSHandle)
 
 
 class ElementHandle(JSHandle):
+    _impl_obj: ElementHandleImpl
 
     async def owner_frame(self) -> typing.Optional["Frame"]:
         """ElementHandle.owner_frame
@@ -2167,10 +2153,8 @@ class ElementHandle(JSHandle):
             Optional event-specific initialization properties.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.dispatch_event(
-                type=type, eventInit=mapping.to_impl(event_init)
-            )
+        await self._impl_obj.dispatch_event(
+            type=type, eventInit=mapping.to_impl(event_init)
         )
 
     async def scroll_into_view_if_needed(
@@ -2196,10 +2180,8 @@ class ElementHandle(JSHandle):
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.scroll_into_view_if_needed(
-                timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.scroll_into_view_if_needed(
+            timeout=to_milliseconds(timeout)
         )
 
     async def hover(
@@ -2254,16 +2236,14 @@ class ElementHandle(JSHandle):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.hover(
-                modifiers=mapping.to_impl(modifiers),
-                position=position,
-                timeout=to_milliseconds(timeout),
-                noWaitAfter=no_wait_after,
-                force=force,
-                trial=trial,
-                scroll=scroll,
-            )
+        await self._impl_obj.hover(
+            modifiers=mapping.to_impl(modifiers),
+            position=position,
+            timeout=to_milliseconds(timeout),
+            noWaitAfter=no_wait_after,
+            force=force,
+            trial=trial,
+            scroll=scroll,
         )
 
     async def click(
@@ -2334,20 +2314,18 @@ class ElementHandle(JSHandle):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.click(
-                modifiers=mapping.to_impl(modifiers),
-                position=position,
-                delay=delay,
-                button=button,
-                clickCount=click_count,
-                timeout=to_milliseconds(timeout),
-                force=force,
-                noWaitAfter=no_wait_after,
-                trial=trial,
-                steps=steps,
-                scroll=scroll,
-            )
+        await self._impl_obj.click(
+            modifiers=mapping.to_impl(modifiers),
+            position=position,
+            delay=delay,
+            button=button,
+            clickCount=click_count,
+            timeout=to_milliseconds(timeout),
+            force=force,
+            noWaitAfter=no_wait_after,
+            trial=trial,
+            steps=steps,
+            scroll=scroll,
         )
 
     async def dblclick(
@@ -2414,19 +2392,17 @@ class ElementHandle(JSHandle):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.dblclick(
-                modifiers=mapping.to_impl(modifiers),
-                position=position,
-                delay=delay,
-                button=button,
-                timeout=to_milliseconds(timeout),
-                force=force,
-                noWaitAfter=no_wait_after,
-                trial=trial,
-                steps=steps,
-                scroll=scroll,
-            )
+        await self._impl_obj.dblclick(
+            modifiers=mapping.to_impl(modifiers),
+            position=position,
+            delay=delay,
+            button=button,
+            timeout=to_milliseconds(timeout),
+            force=force,
+            noWaitAfter=no_wait_after,
+            trial=trial,
+            steps=steps,
+            scroll=scroll,
         )
 
     async def select_option(
@@ -2559,16 +2535,14 @@ class ElementHandle(JSHandle):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.tap(
-                modifiers=mapping.to_impl(modifiers),
-                position=position,
-                timeout=to_milliseconds(timeout),
-                force=force,
-                noWaitAfter=no_wait_after,
-                trial=trial,
-                scroll=scroll,
-            )
+        await self._impl_obj.tap(
+            modifiers=mapping.to_impl(modifiers),
+            position=position,
+            timeout=to_milliseconds(timeout),
+            force=force,
+            noWaitAfter=no_wait_after,
+            trial=trial,
+            scroll=scroll,
         )
 
     async def fill(
@@ -2605,13 +2579,11 @@ class ElementHandle(JSHandle):
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.fill(
-                value=value,
-                timeout=to_milliseconds(timeout),
-                noWaitAfter=no_wait_after,
-                force=force,
-            )
+        await self._impl_obj.fill(
+            value=value,
+            timeout=to_milliseconds(timeout),
+            noWaitAfter=no_wait_after,
+            force=force,
         )
 
     async def select_text(
@@ -2638,11 +2610,7 @@ class ElementHandle(JSHandle):
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.select_text(
-                force=force, timeout=to_milliseconds(timeout)
-            )
-        )
+        await self._impl_obj.select_text(force=force, timeout=to_milliseconds(timeout))
 
     async def input_value(
         self,
@@ -2706,12 +2674,10 @@ class ElementHandle(JSHandle):
             Deprecated: This option has no effect.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.set_input_files(
-                files=mapping.to_impl(files),
-                timeout=to_milliseconds(timeout),
-                noWaitAfter=no_wait_after,
-            )
+        await self._impl_obj.set_input_files(
+            files=mapping.to_impl(files),
+            timeout=to_milliseconds(timeout),
+            noWaitAfter=no_wait_after,
         )
 
     async def focus(self) -> None:
@@ -2720,7 +2686,7 @@ class ElementHandle(JSHandle):
         Calls [focus](https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/focus) on the element.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.focus())
+        await self._impl_obj.focus()
 
     async def type(
         self,
@@ -2753,13 +2719,11 @@ class ElementHandle(JSHandle):
             Deprecated: This option has no effect.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.type(
-                text=text,
-                delay=delay,
-                timeout=to_milliseconds(timeout),
-                noWaitAfter=no_wait_after,
-            )
+        await self._impl_obj.type(
+            text=text,
+            delay=delay,
+            timeout=to_milliseconds(timeout),
+            noWaitAfter=no_wait_after,
         )
 
     async def press(
@@ -2810,13 +2774,11 @@ class ElementHandle(JSHandle):
             Deprecated: This option will default to `true` in the future.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.press(
-                key=key,
-                delay=delay,
-                timeout=to_milliseconds(timeout),
-                noWaitAfter=no_wait_after,
-            )
+        await self._impl_obj.press(
+            key=key,
+            delay=delay,
+            timeout=to_milliseconds(timeout),
+            noWaitAfter=no_wait_after,
         )
 
     async def set_checked(
@@ -2869,16 +2831,14 @@ class ElementHandle(JSHandle):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.set_checked(
-                checked=checked,
-                position=position,
-                timeout=to_milliseconds(timeout),
-                force=force,
-                noWaitAfter=no_wait_after,
-                trial=trial,
-                scroll=scroll,
-            )
+        await self._impl_obj.set_checked(
+            checked=checked,
+            position=position,
+            timeout=to_milliseconds(timeout),
+            force=force,
+            noWaitAfter=no_wait_after,
+            trial=trial,
+            scroll=scroll,
         )
 
     async def check(
@@ -2929,15 +2889,13 @@ class ElementHandle(JSHandle):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.check(
-                position=position,
-                timeout=to_milliseconds(timeout),
-                force=force,
-                noWaitAfter=no_wait_after,
-                trial=trial,
-                scroll=scroll,
-            )
+        await self._impl_obj.check(
+            position=position,
+            timeout=to_milliseconds(timeout),
+            force=force,
+            noWaitAfter=no_wait_after,
+            trial=trial,
+            scroll=scroll,
         )
 
     async def uncheck(
@@ -2988,15 +2946,13 @@ class ElementHandle(JSHandle):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.uncheck(
-                position=position,
-                timeout=to_milliseconds(timeout),
-                force=force,
-                noWaitAfter=no_wait_after,
-                trial=trial,
-                scroll=scroll,
-            )
+        await self._impl_obj.uncheck(
+            position=position,
+            timeout=to_milliseconds(timeout),
+            force=force,
+            noWaitAfter=no_wait_after,
+            trial=trial,
+            scroll=scroll,
         )
 
     async def bounding_box(self) -> typing.Optional[FloatRect]:
@@ -3286,10 +3242,8 @@ class ElementHandle(JSHandle):
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.wait_for_element_state(
-                state=state, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.wait_for_element_state(
+            state=state, timeout=to_milliseconds(timeout)
         )
 
     async def wait_for_selector(
@@ -3361,6 +3315,7 @@ mapping.register(ElementHandleImpl, ElementHandle)
 
 
 class FileChooser(AsyncBase):
+    _impl_obj: FileChooserImpl
 
     @property
     def page(self) -> "Page":
@@ -3427,12 +3382,10 @@ class FileChooser(AsyncBase):
             Deprecated: This option has no effect.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.set_files(
-                files=mapping.to_impl(files),
-                timeout=to_milliseconds(timeout),
-                noWaitAfter=no_wait_after,
-            )
+        await self._impl_obj.set_files(
+            files=mapping.to_impl(files),
+            timeout=to_milliseconds(timeout),
+            noWaitAfter=no_wait_after,
         )
 
 
@@ -3440,6 +3393,7 @@ mapping.register(FileChooserImpl, FileChooser)
 
 
 class Frame(AsyncBase):
+    _impl_obj: FrameImpl
 
     @property
     def page(self) -> "Page":
@@ -3688,12 +3642,10 @@ class Frame(AsyncBase):
             `page.set_default_timeout()` methods.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.wait_for_url(
-                url=self._wrap_handler(url),
-                waitUntil=wait_until,
-                timeout=to_milliseconds(timeout),
-            )
+        await self._impl_obj.wait_for_url(
+            url=self._wrap_handler(url),
+            waitUntil=wait_until,
+            timeout=to_milliseconds(timeout),
         )
 
     async def wait_for_load_state(
@@ -3738,10 +3690,8 @@ class Frame(AsyncBase):
             `page.set_default_timeout()` methods.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.wait_for_load_state(
-                state=state, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.wait_for_load_state(
+            state=state, timeout=to_milliseconds(timeout)
         )
 
     async def frame_element(self) -> "ElementHandle":
@@ -4260,14 +4210,12 @@ class Frame(AsyncBase):
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.dispatch_event(
-                selector=selector,
-                type=type,
-                eventInit=mapping.to_impl(event_init),
-                strict=strict,
-                timeout=to_milliseconds(timeout),
-            )
+        await self._impl_obj.dispatch_event(
+            selector=selector,
+            type=type,
+            eventInit=mapping.to_impl(event_init),
+            strict=strict,
+            timeout=to_milliseconds(timeout),
         )
 
     async def eval_on_selector(
@@ -4418,10 +4366,8 @@ class Frame(AsyncBase):
               loading.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.set_content(
-                html=html, timeout=to_milliseconds(timeout), waitUntil=wait_until
-            )
+        await self._impl_obj.set_content(
+            html=html, timeout=to_milliseconds(timeout), waitUntil=wait_until
         )
 
     def is_detached(self) -> bool:
@@ -4581,21 +4527,19 @@ class Frame(AsyncBase):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.click(
-                selector=selector,
-                modifiers=mapping.to_impl(modifiers),
-                position=position,
-                delay=delay,
-                button=button,
-                clickCount=click_count,
-                timeout=to_milliseconds(timeout),
-                force=force,
-                noWaitAfter=no_wait_after,
-                strict=strict,
-                trial=trial,
-                scroll=scroll,
-            )
+        await self._impl_obj.click(
+            selector=selector,
+            modifiers=mapping.to_impl(modifiers),
+            position=position,
+            delay=delay,
+            button=button,
+            clickCount=click_count,
+            timeout=to_milliseconds(timeout),
+            force=force,
+            noWaitAfter=no_wait_after,
+            strict=strict,
+            trial=trial,
+            scroll=scroll,
         )
 
     async def dblclick(
@@ -4669,20 +4613,18 @@ class Frame(AsyncBase):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.dblclick(
-                selector=selector,
-                modifiers=mapping.to_impl(modifiers),
-                position=position,
-                delay=delay,
-                button=button,
-                timeout=to_milliseconds(timeout),
-                force=force,
-                noWaitAfter=no_wait_after,
-                strict=strict,
-                trial=trial,
-                scroll=scroll,
-            )
+        await self._impl_obj.dblclick(
+            selector=selector,
+            modifiers=mapping.to_impl(modifiers),
+            position=position,
+            delay=delay,
+            button=button,
+            timeout=to_milliseconds(timeout),
+            force=force,
+            noWaitAfter=no_wait_after,
+            strict=strict,
+            trial=trial,
+            scroll=scroll,
         )
 
     async def tap(
@@ -4749,18 +4691,16 @@ class Frame(AsyncBase):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.tap(
-                selector=selector,
-                modifiers=mapping.to_impl(modifiers),
-                position=position,
-                timeout=to_milliseconds(timeout),
-                force=force,
-                noWaitAfter=no_wait_after,
-                strict=strict,
-                trial=trial,
-                scroll=scroll,
-            )
+        await self._impl_obj.tap(
+            selector=selector,
+            modifiers=mapping.to_impl(modifiers),
+            position=position,
+            timeout=to_milliseconds(timeout),
+            force=force,
+            noWaitAfter=no_wait_after,
+            strict=strict,
+            trial=trial,
+            scroll=scroll,
         )
 
     async def fill(
@@ -4806,15 +4746,13 @@ class Frame(AsyncBase):
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.fill(
-                selector=selector,
-                value=value,
-                timeout=to_milliseconds(timeout),
-                noWaitAfter=no_wait_after,
-                strict=strict,
-                force=force,
-            )
+        await self._impl_obj.fill(
+            selector=selector,
+            value=value,
+            timeout=to_milliseconds(timeout),
+            noWaitAfter=no_wait_after,
+            strict=strict,
+            force=force,
         )
 
     def locator(
@@ -5411,10 +5349,8 @@ class Frame(AsyncBase):
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.focus(
-                selector=selector, strict=strict, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.focus(
+            selector=selector, strict=strict, timeout=to_milliseconds(timeout)
         )
 
     async def text_content(
@@ -5621,18 +5557,16 @@ class Frame(AsyncBase):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.hover(
-                selector=selector,
-                modifiers=mapping.to_impl(modifiers),
-                position=position,
-                timeout=to_milliseconds(timeout),
-                noWaitAfter=no_wait_after,
-                force=force,
-                strict=strict,
-                trial=trial,
-                scroll=scroll,
-            )
+        await self._impl_obj.hover(
+            selector=selector,
+            modifiers=mapping.to_impl(modifiers),
+            position=position,
+            timeout=to_milliseconds(timeout),
+            noWaitAfter=no_wait_after,
+            force=force,
+            strict=strict,
+            trial=trial,
+            scroll=scroll,
         )
 
     async def drag_and_drop(
@@ -5690,20 +5624,18 @@ class Frame(AsyncBase):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.drag_and_drop(
-                source=source,
-                target=target,
-                sourcePosition=source_position,
-                targetPosition=target_position,
-                force=force,
-                noWaitAfter=no_wait_after,
-                strict=strict,
-                timeout=to_milliseconds(timeout),
-                trial=trial,
-                steps=steps,
-                scroll=scroll,
-            )
+        await self._impl_obj.drag_and_drop(
+            source=source,
+            target=target,
+            sourcePosition=source_position,
+            targetPosition=target_position,
+            force=force,
+            noWaitAfter=no_wait_after,
+            strict=strict,
+            timeout=to_milliseconds(timeout),
+            trial=trial,
+            steps=steps,
+            scroll=scroll,
         )
 
     async def select_option(
@@ -5871,14 +5803,12 @@ class Frame(AsyncBase):
             Deprecated: This option has no effect.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.set_input_files(
-                selector=selector,
-                files=mapping.to_impl(files),
-                strict=strict,
-                timeout=to_milliseconds(timeout),
-                noWaitAfter=no_wait_after,
-            )
+        await self._impl_obj.set_input_files(
+            selector=selector,
+            files=mapping.to_impl(files),
+            strict=strict,
+            timeout=to_milliseconds(timeout),
+            noWaitAfter=no_wait_after,
         )
 
     async def type(
@@ -5920,15 +5850,13 @@ class Frame(AsyncBase):
             Deprecated: This option has no effect.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.type(
-                selector=selector,
-                text=text,
-                delay=delay,
-                strict=strict,
-                timeout=to_milliseconds(timeout),
-                noWaitAfter=no_wait_after,
-            )
+        await self._impl_obj.type(
+            selector=selector,
+            text=text,
+            delay=delay,
+            strict=strict,
+            timeout=to_milliseconds(timeout),
+            noWaitAfter=no_wait_after,
         )
 
     async def press(
@@ -5985,15 +5913,13 @@ class Frame(AsyncBase):
             Deprecated: This option will default to `true` in the future.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.press(
-                selector=selector,
-                key=key,
-                delay=delay,
-                strict=strict,
-                timeout=to_milliseconds(timeout),
-                noWaitAfter=no_wait_after,
-            )
+        await self._impl_obj.press(
+            selector=selector,
+            key=key,
+            delay=delay,
+            strict=strict,
+            timeout=to_milliseconds(timeout),
+            noWaitAfter=no_wait_after,
         )
 
     async def check(
@@ -6052,17 +5978,15 @@ class Frame(AsyncBase):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.check(
-                selector=selector,
-                position=position,
-                timeout=to_milliseconds(timeout),
-                force=force,
-                noWaitAfter=no_wait_after,
-                strict=strict,
-                trial=trial,
-                scroll=scroll,
-            )
+        await self._impl_obj.check(
+            selector=selector,
+            position=position,
+            timeout=to_milliseconds(timeout),
+            force=force,
+            noWaitAfter=no_wait_after,
+            strict=strict,
+            trial=trial,
+            scroll=scroll,
         )
 
     async def uncheck(
@@ -6121,17 +6045,15 @@ class Frame(AsyncBase):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.uncheck(
-                selector=selector,
-                position=position,
-                timeout=to_milliseconds(timeout),
-                force=force,
-                noWaitAfter=no_wait_after,
-                strict=strict,
-                trial=trial,
-                scroll=scroll,
-            )
+        await self._impl_obj.uncheck(
+            selector=selector,
+            position=position,
+            timeout=to_milliseconds(timeout),
+            force=force,
+            noWaitAfter=no_wait_after,
+            strict=strict,
+            trial=trial,
+            scroll=scroll,
         )
 
     async def wait_for_timeout(
@@ -6150,9 +6072,7 @@ class Frame(AsyncBase):
             A timeout to wait for
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.wait_for_timeout(timeout=to_milliseconds(timeout))
-        )
+        await self._impl_obj.wait_for_timeout(timeout=to_milliseconds(timeout))
 
     async def wait_for_function(
         self,
@@ -6296,18 +6216,16 @@ class Frame(AsyncBase):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.set_checked(
-                selector=selector,
-                checked=checked,
-                position=position,
-                timeout=to_milliseconds(timeout),
-                force=force,
-                noWaitAfter=no_wait_after,
-                strict=strict,
-                trial=trial,
-                scroll=scroll,
-            )
+        await self._impl_obj.set_checked(
+            selector=selector,
+            checked=checked,
+            position=position,
+            timeout=to_milliseconds(timeout),
+            force=force,
+            noWaitAfter=no_wait_after,
+            strict=strict,
+            trial=trial,
+            scroll=scroll,
         )
 
 
@@ -6315,6 +6233,7 @@ mapping.register(FrameImpl, Frame)
 
 
 class FrameLocator(AsyncBase):
+    _impl_obj: FrameLocatorImpl
 
     @property
     def first(self) -> "FrameLocator":
@@ -6931,6 +6850,7 @@ mapping.register(FrameLocatorImpl, FrameLocator)
 
 
 class Worker(AsyncBase):
+    _impl_obj: WorkerImpl
 
     @typing.overload
     def on(
@@ -7140,6 +7060,7 @@ mapping.register(WorkerImpl, Worker)
 
 
 class Selectors(AsyncBase):
+    _impl_obj: SelectorsImpl
 
     async def register(
         self,
@@ -7212,10 +7133,8 @@ class Selectors(AsyncBase):
             script is not guaranteed when this engine is used together with other registered engines.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.register(
-                name=name, script=script, path=path, contentScript=content_script
-            )
+        await self._impl_obj.register(
+            name=name, script=script, path=path, contentScript=content_script
         )
 
     def set_test_id_attribute(self, attribute_name: str) -> None:
@@ -7230,15 +7149,14 @@ class Selectors(AsyncBase):
             `"data-pw,data-ti"`.
         """
 
-        return mapping.from_maybe_impl(
-            self._impl_obj.set_test_id_attribute(attributeName=attribute_name)
-        )
+        self._impl_obj.set_test_id_attribute(attributeName=attribute_name)
 
 
 mapping.register(SelectorsImpl, Selectors)
 
 
 class Clock(AsyncBase):
+    _impl_obj: ClockImpl
 
     async def install(
         self,
@@ -7270,7 +7188,7 @@ class Clock(AsyncBase):
             Time to initialize with, current system time by default. Numeric values are Unix time in seconds.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.install(time=time))
+        await self._impl_obj.install(time=time)
 
     async def fast_forward(self, ticks: typing.Union[int, str]) -> None:
         """Clock.fast_forward
@@ -7292,7 +7210,7 @@ class Clock(AsyncBase):
             "08" for eight seconds, "01:00" for one minute and "02:34:10" for two hours, 34 minutes and ten seconds.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.fast_forward(ticks=ticks))
+        await self._impl_obj.fast_forward(ticks=ticks)
 
     async def pause_at(self, time: typing.Union[float, str, datetime.datetime]) -> None:
         """Clock.pause_at
@@ -7329,7 +7247,7 @@ class Clock(AsyncBase):
             Time to pause at. Numeric values are Unix time in seconds.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.pause_at(time=time))
+        await self._impl_obj.pause_at(time=time)
 
     async def resume(self) -> None:
         """Clock.resume
@@ -7337,7 +7255,7 @@ class Clock(AsyncBase):
         Resumes timers. Once this method is called, time resumes flowing, timers are fired as usual.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.resume())
+        await self._impl_obj.resume()
 
     async def run_for(self, ticks: typing.Union[int, str]) -> None:
         """Clock.run_for
@@ -7358,7 +7276,7 @@ class Clock(AsyncBase):
             "08" for eight seconds, "01:00" for one minute and "02:34:10" for two hours, 34 minutes and ten seconds.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.run_for(ticks=ticks))
+        await self._impl_obj.run_for(ticks=ticks)
 
     async def set_fixed_time(
         self, time: typing.Union[float, str, datetime.datetime]
@@ -7384,7 +7302,7 @@ class Clock(AsyncBase):
             Time to be set. Numeric values are Unix time in seconds.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.set_fixed_time(time=time))
+        await self._impl_obj.set_fixed_time(time=time)
 
     async def set_system_time(
         self, time: typing.Union[float, str, datetime.datetime]
@@ -7408,13 +7326,14 @@ class Clock(AsyncBase):
             Time to be set. Numeric values are Unix time in seconds.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.set_system_time(time=time))
+        await self._impl_obj.set_system_time(time=time)
 
 
 mapping.register(ClockImpl, Clock)
 
 
 class Credentials(AsyncBase):
+    _impl_obj: CredentialsImpl
 
     async def install(self) -> None:
         """Credentials.install
@@ -7428,7 +7347,7 @@ class Credentials(AsyncBase):
         installing populates the authenticator, but the page will never see those credentials.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.install())
+        await self._impl_obj.install()
 
     async def create(
         self,
@@ -7500,7 +7419,7 @@ class Credentials(AsyncBase):
             Base64url-encoded credential id.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.delete(id=id))
+        await self._impl_obj.delete(id=id)
 
     async def get(
         self, *, rp_id: typing.Optional[str] = None, id: typing.Optional[str] = None
@@ -7534,6 +7453,7 @@ mapping.register(CredentialsImpl, Credentials)
 
 
 class ConsoleMessage(AsyncBase):
+    _impl_obj: ConsoleMessageImpl
 
     @property
     def type(
@@ -7643,6 +7563,7 @@ mapping.register(ConsoleMessageImpl, ConsoleMessage)
 
 
 class Debugger(AsyncBase):
+    _impl_obj: DebuggerImpl
 
     @typing.overload
     def on(
@@ -7715,7 +7636,7 @@ class Debugger(AsyncBase):
         configures the debugger to pause before the next action is executed.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.request_pause())
+        await self._impl_obj.request_pause()
 
     async def resume(self) -> None:
         """Debugger.resume
@@ -7723,7 +7644,7 @@ class Debugger(AsyncBase):
         Resumes script execution. Throws if the debugger is not paused.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.resume())
+        await self._impl_obj.resume()
 
     async def next(self) -> None:
         """Debugger.next
@@ -7731,7 +7652,7 @@ class Debugger(AsyncBase):
         Resumes script execution and pauses again before the next action. Throws if the debugger is not paused.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.next())
+        await self._impl_obj.next()
 
     async def run_to(self, location: DebuggerLocation) -> None:
         """Debugger.run_to
@@ -7745,13 +7666,14 @@ class Debugger(AsyncBase):
             The source location to pause at.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.run_to(location=location))
+        await self._impl_obj.run_to(location=location)
 
 
 mapping.register(DebuggerImpl, Debugger)
 
 
 class Dialog(AsyncBase):
+    _impl_obj: DialogImpl
 
     @property
     def type(self) -> str:
@@ -7812,9 +7734,7 @@ class Dialog(AsyncBase):
             A text to enter in prompt. Does not cause any effects if the dialog's `type` is not prompt. Optional.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.accept(promptText=prompt_text)
-        )
+        await self._impl_obj.accept(promptText=prompt_text)
 
     async def dismiss(self) -> None:
         """Dialog.dismiss
@@ -7822,13 +7742,14 @@ class Dialog(AsyncBase):
         Returns when the dialog has been dismissed.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.dismiss())
+        await self._impl_obj.dismiss()
 
 
 mapping.register(DialogImpl, Dialog)
 
 
 class Download(AsyncBase):
+    _impl_obj: DownloadImpl
 
     @property
     def page(self) -> "Page":
@@ -7875,7 +7796,7 @@ class Download(AsyncBase):
         Deletes the downloaded file. Will wait for the download to finish if necessary.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.delete())
+        await self._impl_obj.delete()
 
     async def failure(self) -> typing.Optional[str]:
         """Download.failure
@@ -7923,7 +7844,7 @@ class Download(AsyncBase):
             Path where the download should be copied.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.save_as(path=path))
+        await self._impl_obj.save_as(path=path)
 
     async def cancel(self) -> None:
         """Download.cancel
@@ -7932,13 +7853,14 @@ class Download(AsyncBase):
         `download.failure()` would resolve to `'canceled'`.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.cancel())
+        await self._impl_obj.cancel()
 
 
 mapping.register(DownloadImpl, Download)
 
 
 class Screencast(AsyncBase):
+    _impl_obj: ScreencastImpl
 
     async def start(
         self,
@@ -8000,7 +7922,7 @@ class Screencast(AsyncBase):
         in `screencast.start()`.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.stop())
+        await self._impl_obj.stop()
 
     async def show_actions(
         self,
@@ -8057,7 +7979,7 @@ class Screencast(AsyncBase):
         Removes action decorations.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.hide_actions())
+        await self._impl_obj.hide_actions()
 
     async def show_overlay(
         self, html: str, *, duration: typing.Optional[float] = None
@@ -8106,10 +8028,8 @@ class Screencast(AsyncBase):
             Duration in milliseconds after which the overlay is automatically removed. Defaults to `2000`.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.show_chapter(
-                title=title, description=description, duration=duration
-            )
+        await self._impl_obj.show_chapter(
+            title=title, description=description, duration=duration
         )
 
     async def show_overlays(self) -> None:
@@ -8118,7 +8038,7 @@ class Screencast(AsyncBase):
         Shows overlays.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.show_overlays())
+        await self._impl_obj.show_overlays()
 
     async def hide_overlays(self) -> None:
         """Screencast.hide_overlays
@@ -8126,13 +8046,14 @@ class Screencast(AsyncBase):
         Hides overlays without removing them.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.hide_overlays())
+        await self._impl_obj.hide_overlays()
 
 
 mapping.register(ScreencastImpl, Screencast)
 
 
 class Video(AsyncBase):
+    _impl_obj: VideoImpl
 
     async def path(self) -> pathlib.Path:
         """Video.path
@@ -8159,7 +8080,7 @@ class Video(AsyncBase):
             Path where the video should be saved.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.save_as(path=path))
+        await self._impl_obj.save_as(path=path)
 
     async def delete(self) -> None:
         """Video.delete
@@ -8167,13 +8088,14 @@ class Video(AsyncBase):
         Deletes the video file. Will wait for the video to finish if necessary.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.delete())
+        await self._impl_obj.delete()
 
 
 mapping.register(VideoImpl, Video)
 
 
 class WebMCP(AsyncBase):
+    _impl_obj: WebMCPImpl
 
     async def tools(
         self,
@@ -8244,6 +8166,7 @@ mapping.register(WebMCPImpl, WebMCP)
 
 
 class Page(AsyncContextManager):
+    _impl_obj: PageImpl
 
     @typing.overload
     def on(
@@ -9071,11 +8994,7 @@ class Page(AsyncContextManager):
             Maximum navigation time in milliseconds
         """
 
-        return mapping.from_maybe_impl(
-            self._impl_obj.set_default_navigation_timeout(
-                timeout=to_milliseconds(timeout)
-            )
-        )
+        self._impl_obj.set_default_navigation_timeout(timeout=to_milliseconds(timeout))
 
     def set_default_timeout(
         self, timeout: typing.Union[float, datetime.timedelta]
@@ -9092,9 +9011,7 @@ class Page(AsyncContextManager):
             Maximum time in milliseconds. Pass `0` to disable timeout.
         """
 
-        return mapping.from_maybe_impl(
-            self._impl_obj.set_default_timeout(timeout=to_milliseconds(timeout))
-        )
+        self._impl_obj.set_default_timeout(timeout=to_milliseconds(timeout))
 
     async def query_selector(
         self, selector: str, *, strict: typing.Optional[bool] = None
@@ -9485,14 +9402,12 @@ class Page(AsyncContextManager):
             element, the call throws an exception.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.dispatch_event(
-                selector=selector,
-                type=type,
-                eventInit=mapping.to_impl(event_init),
-                timeout=to_milliseconds(timeout),
-                strict=strict,
-            )
+        await self._impl_obj.dispatch_event(
+            selector=selector,
+            type=type,
+            eventInit=mapping.to_impl(event_init),
+            timeout=to_milliseconds(timeout),
+            strict=strict,
         )
 
     async def evaluate(
@@ -9910,11 +9825,7 @@ class Page(AsyncContextManager):
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.set_extra_http_headers(
-                headers=mapping.to_impl(headers)
-            )
-        )
+        await self._impl_obj.set_extra_http_headers(headers=mapping.to_impl(headers))
 
     async def content(self, *, include_shadow: typing.Optional[bool] = None) -> str:
         """Page.content
@@ -9971,10 +9882,8 @@ class Page(AsyncContextManager):
               loading.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.set_content(
-                html=html, timeout=to_milliseconds(timeout), waitUntil=wait_until
-            )
+        await self._impl_obj.set_content(
+            html=html, timeout=to_milliseconds(timeout), waitUntil=wait_until
         )
 
     async def goto(
@@ -10138,10 +10047,8 @@ class Page(AsyncContextManager):
             `page.set_default_timeout()` methods.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.wait_for_load_state(
-                state=state, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.wait_for_load_state(
+            state=state, timeout=to_milliseconds(timeout)
         )
 
     async def wait_for_url(
@@ -10185,12 +10092,10 @@ class Page(AsyncContextManager):
             `page.set_default_timeout()` methods.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.wait_for_url(
-                url=self._wrap_handler(url),
-                waitUntil=wait_until,
-                timeout=to_milliseconds(timeout),
-            )
+        await self._impl_obj.wait_for_url(
+            url=self._wrap_handler(url),
+            waitUntil=wait_until,
+            timeout=to_milliseconds(timeout),
         )
 
     @typing.overload
@@ -10536,7 +10441,7 @@ class Page(AsyncContextManager):
         ```
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.request_gc())
+        await self._impl_obj.request_gc()
 
     async def emulate_media(
         self,
@@ -10601,14 +10506,12 @@ class Page(AsyncContextManager):
         contrast : Union["more", "no-preference", "null", None]
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.emulate_media(
-                media=media,
-                colorScheme=color_scheme,
-                reducedMotion=reduced_motion,
-                forcedColors=forced_colors,
-                contrast=contrast,
-            )
+        await self._impl_obj.emulate_media(
+            media=media,
+            colorScheme=color_scheme,
+            reducedMotion=reduced_motion,
+            forcedColors=forced_colors,
+            contrast=contrast,
         )
 
     async def set_viewport_size(self, viewport_size: ViewportSize) -> None:
@@ -10635,9 +10538,7 @@ class Page(AsyncContextManager):
         viewport_size : {width: int, height: int}
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.set_viewport_size(viewportSize=viewport_size)
-        )
+        await self._impl_obj.set_viewport_size(viewportSize=viewport_size)
 
     async def bring_to_front(self) -> None:
         """Page.bring_to_front
@@ -10645,7 +10546,7 @@ class Page(AsyncContextManager):
         Brings page to front (activates tab).
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.bring_to_front())
+        await self._impl_obj.bring_to_front()
 
     async def hide_highlight(self) -> None:
         """Page.hide_highlight
@@ -10653,7 +10554,7 @@ class Page(AsyncContextManager):
         Hide all locator highlight overlays previously added by `locator.highlight()` on this page.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.hide_highlight())
+        await self._impl_obj.hide_highlight()
 
     async def add_init_script(
         self,
@@ -10814,10 +10715,8 @@ class Page(AsyncContextManager):
             Optional handler function to route the request.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.unroute(
-                url=self._wrap_handler(url), handler=self._wrap_handler(handler)
-            )
+        await self._impl_obj.unroute(
+            url=self._wrap_handler(url), handler=self._wrap_handler(handler)
         )
 
     async def route_web_socket(
@@ -10857,10 +10756,8 @@ class Page(AsyncContextManager):
             Handler function to route the WebSocket.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.route_web_socket(
-                url=self._wrap_handler(url), handler=self._wrap_handler(handler)
-            )
+        await self._impl_obj.route_web_socket(
+            url=self._wrap_handler(url), handler=self._wrap_handler(handler)
         )
 
     async def unroute_all(
@@ -10883,9 +10780,7 @@ class Page(AsyncContextManager):
               after unrouting are silently caught
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.unroute_all(behavior=behavior)
-        )
+        await self._impl_obj.unroute_all(behavior=behavior)
 
     async def route_from_har(
         self,
@@ -10931,15 +10826,13 @@ class Page(AsyncContextManager):
             `minimal`.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.route_from_har(
-                har=har,
-                url=url,
-                notFound=not_found,
-                update=update,
-                updateContent=update_content,
-                updateMode=update_mode,
-            )
+        await self._impl_obj.route_from_har(
+            har=har,
+            url=url,
+            notFound=not_found,
+            update=update,
+            updateContent=update_content,
+            updateMode=update_mode,
         )
 
     async def screenshot(
@@ -11113,9 +11006,7 @@ class Page(AsyncContextManager):
             The reason to be reported to the operations interrupted by the page closure.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.close(runBeforeUnload=run_before_unload, reason=reason)
-        )
+        await self._impl_obj.close(runBeforeUnload=run_before_unload, reason=reason)
 
     def is_closed(self) -> bool:
         """Page.is_closed
@@ -11203,21 +11094,19 @@ class Page(AsyncContextManager):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.click(
-                selector=selector,
-                modifiers=mapping.to_impl(modifiers),
-                position=position,
-                delay=delay,
-                button=button,
-                clickCount=click_count,
-                timeout=to_milliseconds(timeout),
-                force=force,
-                noWaitAfter=no_wait_after,
-                trial=trial,
-                strict=strict,
-                scroll=scroll,
-            )
+        await self._impl_obj.click(
+            selector=selector,
+            modifiers=mapping.to_impl(modifiers),
+            position=position,
+            delay=delay,
+            button=button,
+            clickCount=click_count,
+            timeout=to_milliseconds(timeout),
+            force=force,
+            noWaitAfter=no_wait_after,
+            trial=trial,
+            strict=strict,
+            scroll=scroll,
         )
 
     async def dblclick(
@@ -11290,20 +11179,18 @@ class Page(AsyncContextManager):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.dblclick(
-                selector=selector,
-                modifiers=mapping.to_impl(modifiers),
-                position=position,
-                delay=delay,
-                button=button,
-                timeout=to_milliseconds(timeout),
-                force=force,
-                noWaitAfter=no_wait_after,
-                strict=strict,
-                trial=trial,
-                scroll=scroll,
-            )
+        await self._impl_obj.dblclick(
+            selector=selector,
+            modifiers=mapping.to_impl(modifiers),
+            position=position,
+            delay=delay,
+            button=button,
+            timeout=to_milliseconds(timeout),
+            force=force,
+            noWaitAfter=no_wait_after,
+            strict=strict,
+            trial=trial,
+            scroll=scroll,
         )
 
     async def tap(
@@ -11370,18 +11257,16 @@ class Page(AsyncContextManager):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.tap(
-                selector=selector,
-                modifiers=mapping.to_impl(modifiers),
-                position=position,
-                timeout=to_milliseconds(timeout),
-                force=force,
-                noWaitAfter=no_wait_after,
-                strict=strict,
-                trial=trial,
-                scroll=scroll,
-            )
+        await self._impl_obj.tap(
+            selector=selector,
+            modifiers=mapping.to_impl(modifiers),
+            position=position,
+            timeout=to_milliseconds(timeout),
+            force=force,
+            noWaitAfter=no_wait_after,
+            strict=strict,
+            trial=trial,
+            scroll=scroll,
         )
 
     async def fill(
@@ -11427,15 +11312,13 @@ class Page(AsyncContextManager):
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.fill(
-                selector=selector,
-                value=value,
-                timeout=to_milliseconds(timeout),
-                noWaitAfter=no_wait_after,
-                strict=strict,
-                force=force,
-            )
+        await self._impl_obj.fill(
+            selector=selector,
+            value=value,
+            timeout=to_milliseconds(timeout),
+            noWaitAfter=no_wait_after,
+            strict=strict,
+            force=force,
         )
 
     def locator(
@@ -12057,10 +11940,8 @@ class Page(AsyncContextManager):
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.focus(
-                selector=selector, strict=strict, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.focus(
+            selector=selector, strict=strict, timeout=to_milliseconds(timeout)
         )
 
     async def text_content(
@@ -12267,18 +12148,16 @@ class Page(AsyncContextManager):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.hover(
-                selector=selector,
-                modifiers=mapping.to_impl(modifiers),
-                position=position,
-                timeout=to_milliseconds(timeout),
-                noWaitAfter=no_wait_after,
-                force=force,
-                strict=strict,
-                trial=trial,
-                scroll=scroll,
-            )
+        await self._impl_obj.hover(
+            selector=selector,
+            modifiers=mapping.to_impl(modifiers),
+            position=position,
+            timeout=to_milliseconds(timeout),
+            noWaitAfter=no_wait_after,
+            force=force,
+            strict=strict,
+            trial=trial,
+            scroll=scroll,
         )
 
     async def drag_and_drop(
@@ -12352,20 +12231,18 @@ class Page(AsyncContextManager):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.drag_and_drop(
-                source=source,
-                target=target,
-                sourcePosition=source_position,
-                targetPosition=target_position,
-                force=force,
-                noWaitAfter=no_wait_after,
-                timeout=to_milliseconds(timeout),
-                strict=strict,
-                trial=trial,
-                steps=steps,
-                scroll=scroll,
-            )
+        await self._impl_obj.drag_and_drop(
+            source=source,
+            target=target,
+            sourcePosition=source_position,
+            targetPosition=target_position,
+            force=force,
+            noWaitAfter=no_wait_after,
+            timeout=to_milliseconds(timeout),
+            strict=strict,
+            trial=trial,
+            steps=steps,
+            scroll=scroll,
         )
 
     async def select_option(
@@ -12535,14 +12412,12 @@ class Page(AsyncContextManager):
             Deprecated: This option has no effect.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.set_input_files(
-                selector=selector,
-                files=mapping.to_impl(files),
-                timeout=to_milliseconds(timeout),
-                strict=strict,
-                noWaitAfter=no_wait_after,
-            )
+        await self._impl_obj.set_input_files(
+            selector=selector,
+            files=mapping.to_impl(files),
+            timeout=to_milliseconds(timeout),
+            strict=strict,
+            noWaitAfter=no_wait_after,
         )
 
     async def type(
@@ -12584,15 +12459,13 @@ class Page(AsyncContextManager):
             element, the call throws an exception.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.type(
-                selector=selector,
-                text=text,
-                delay=delay,
-                timeout=to_milliseconds(timeout),
-                noWaitAfter=no_wait_after,
-                strict=strict,
-            )
+        await self._impl_obj.type(
+            selector=selector,
+            text=text,
+            delay=delay,
+            timeout=to_milliseconds(timeout),
+            noWaitAfter=no_wait_after,
+            strict=strict,
         )
 
     async def press(
@@ -12665,15 +12538,13 @@ class Page(AsyncContextManager):
             element, the call throws an exception.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.press(
-                selector=selector,
-                key=key,
-                delay=delay,
-                timeout=to_milliseconds(timeout),
-                noWaitAfter=no_wait_after,
-                strict=strict,
-            )
+        await self._impl_obj.press(
+            selector=selector,
+            key=key,
+            delay=delay,
+            timeout=to_milliseconds(timeout),
+            noWaitAfter=no_wait_after,
+            strict=strict,
         )
 
     async def check(
@@ -12732,17 +12603,15 @@ class Page(AsyncContextManager):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.check(
-                selector=selector,
-                position=position,
-                timeout=to_milliseconds(timeout),
-                force=force,
-                noWaitAfter=no_wait_after,
-                strict=strict,
-                trial=trial,
-                scroll=scroll,
-            )
+        await self._impl_obj.check(
+            selector=selector,
+            position=position,
+            timeout=to_milliseconds(timeout),
+            force=force,
+            noWaitAfter=no_wait_after,
+            strict=strict,
+            trial=trial,
+            scroll=scroll,
         )
 
     async def uncheck(
@@ -12801,17 +12670,15 @@ class Page(AsyncContextManager):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.uncheck(
-                selector=selector,
-                position=position,
-                timeout=to_milliseconds(timeout),
-                force=force,
-                noWaitAfter=no_wait_after,
-                strict=strict,
-                trial=trial,
-                scroll=scroll,
-            )
+        await self._impl_obj.uncheck(
+            selector=selector,
+            position=position,
+            timeout=to_milliseconds(timeout),
+            force=force,
+            noWaitAfter=no_wait_after,
+            strict=strict,
+            trial=trial,
+            scroll=scroll,
         )
 
     async def wait_for_timeout(
@@ -12837,9 +12704,7 @@ class Page(AsyncContextManager):
             A timeout to wait for
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.wait_for_timeout(timeout=to_milliseconds(timeout))
-        )
+        await self._impl_obj.wait_for_timeout(timeout=to_milliseconds(timeout))
 
     async def wait_for_function(
         self,
@@ -12924,7 +12789,7 @@ class Page(AsyncContextManager):
         **NOTE** This method requires Playwright to be started in a headed mode, with a falsy `headless` option.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.pause())
+        await self._impl_obj.pause()
 
     async def pdf(
         self,
@@ -13743,18 +13608,16 @@ class Page(AsyncContextManager):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.set_checked(
-                selector=selector,
-                checked=checked,
-                position=position,
-                timeout=to_milliseconds(timeout),
-                force=force,
-                noWaitAfter=no_wait_after,
-                strict=strict,
-                trial=trial,
-                scroll=scroll,
-            )
+        await self._impl_obj.set_checked(
+            selector=selector,
+            checked=checked,
+            position=position,
+            timeout=to_milliseconds(timeout),
+            force=force,
+            noWaitAfter=no_wait_after,
+            strict=strict,
+            trial=trial,
+            scroll=scroll,
         )
 
     async def add_locator_handler(
@@ -13871,13 +13734,11 @@ class Page(AsyncContextManager):
             Specifies the maximum number of times this handler should be called. Unlimited by default.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.add_locator_handler(
-                locator=locator._impl_obj,
-                handler=self._wrap_handler(handler),
-                noWaitAfter=no_wait_after,
-                times=times,
-            )
+        await self._impl_obj.add_locator_handler(
+            locator=locator._impl_obj,
+            handler=self._wrap_handler(handler),
+            noWaitAfter=no_wait_after,
+            times=times,
         )
 
     async def remove_locator_handler(self, locator: "Locator") -> None:
@@ -13891,9 +13752,7 @@ class Page(AsyncContextManager):
             Locator passed to `page.add_locator_handler()`.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.remove_locator_handler(locator=locator._impl_obj)
-        )
+        await self._impl_obj.remove_locator_handler(locator=locator._impl_obj)
 
     async def requests(self) -> typing.List["Request"]:
         """Page.requests
@@ -13961,7 +13820,7 @@ class Page(AsyncContextManager):
         return messages logged after the clear.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.clear_console_messages())
+        await self._impl_obj.clear_console_messages()
 
     async def clear_page_errors(self) -> None:
         """Page.clear_page_errors
@@ -13970,7 +13829,7 @@ class Page(AsyncContextManager):
         errors thrown after the clear.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.clear_page_errors())
+        await self._impl_obj.clear_page_errors()
 
     async def pick_locator(self) -> "Locator":
         """Page.pick_locator
@@ -13999,13 +13858,14 @@ class Page(AsyncContextManager):
         active, this method is a no-op.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.cancel_pick_locator())
+        await self._impl_obj.cancel_pick_locator()
 
 
 mapping.register(PageImpl, Page)
 
 
 class WebError(AsyncBase):
+    _impl_obj: WebErrorImpl
 
     @property
     def page(self) -> typing.Optional["Page"]:
@@ -14046,6 +13906,7 @@ mapping.register(WebErrorImpl, WebError)
 
 
 class WebStorage(AsyncBase):
+    _impl_obj: WebStorageImpl
 
     async def items(self) -> typing.List[NameValue]:
         """WebStorage.items
@@ -14089,9 +13950,7 @@ class WebStorage(AsyncBase):
             New value for the item.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.set_item(name=name, value=value)
-        )
+        await self._impl_obj.set_item(name=name, value=value)
 
     async def remove_item(self, name: str) -> None:
         """WebStorage.remove_item
@@ -14104,7 +13963,7 @@ class WebStorage(AsyncBase):
             Name of the item to remove.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.remove_item(name=name))
+        await self._impl_obj.remove_item(name=name)
 
     async def clear(self) -> None:
         """WebStorage.clear
@@ -14112,13 +13971,14 @@ class WebStorage(AsyncBase):
         Removes all items from the storage.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.clear())
+        await self._impl_obj.clear()
 
 
 mapping.register(WebStorageImpl, WebStorage)
 
 
 class BrowserContext(AsyncContextManager):
+    _impl_obj: BrowserContextImpl
 
     @typing.overload
     def on(
@@ -14748,11 +14608,7 @@ class BrowserContext(AsyncContextManager):
             Maximum navigation time in milliseconds
         """
 
-        return mapping.from_maybe_impl(
-            self._impl_obj.set_default_navigation_timeout(
-                timeout=to_milliseconds(timeout)
-            )
-        )
+        self._impl_obj.set_default_navigation_timeout(timeout=to_milliseconds(timeout))
 
     def set_default_timeout(
         self, timeout: typing.Union[float, datetime.timedelta]
@@ -14771,9 +14627,7 @@ class BrowserContext(AsyncContextManager):
             Maximum time in milliseconds. Pass `0` to disable timeout.
         """
 
-        return mapping.from_maybe_impl(
-            self._impl_obj.set_default_timeout(timeout=to_milliseconds(timeout))
-        )
+        self._impl_obj.set_default_timeout(timeout=to_milliseconds(timeout))
 
     async def new_page(self) -> "Page":
         """BrowserContext.new_page
@@ -14826,9 +14680,7 @@ class BrowserContext(AsyncContextManager):
         cookies : Sequence[{name: str, value: str, url: Union[str, None], domain: Union[str, None], path: Union[str, None], expires: Union[float, None], httpOnly: Union[bool, None], secure: Union[bool, None], sameSite: Union["Lax", "None", "Strict", None], partitionKey: Union[str, None]}]
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.add_cookies(cookies=mapping.to_impl(cookies))
-        )
+        await self._impl_obj.add_cookies(cookies=mapping.to_impl(cookies))
 
     async def clear_cookies(
         self,
@@ -14861,9 +14713,7 @@ class BrowserContext(AsyncContextManager):
             Only removes cookies with the given path.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.clear_cookies(name=name, domain=domain, path=path)
-        )
+        await self._impl_obj.clear_cookies(name=name, domain=domain, path=path)
 
     async def grant_permissions(
         self, permissions: typing.Sequence[str], *, origin: typing.Optional[str] = None
@@ -14904,10 +14754,8 @@ class BrowserContext(AsyncContextManager):
             The [origin] to grant permissions to, e.g. "https://example.com".
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.grant_permissions(
-                permissions=mapping.to_impl(permissions), origin=origin
-            )
+        await self._impl_obj.grant_permissions(
+            permissions=mapping.to_impl(permissions), origin=origin
         )
 
     async def clear_permissions(self) -> None:
@@ -14925,7 +14773,7 @@ class BrowserContext(AsyncContextManager):
         ```
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.clear_permissions())
+        await self._impl_obj.clear_permissions()
 
     async def set_geolocation(
         self, geolocation: typing.Optional[Geolocation] = None
@@ -14948,9 +14796,7 @@ class BrowserContext(AsyncContextManager):
         geolocation : Union[{latitude: float, longitude: float, accuracy: Union[float, None]}, None]
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.set_geolocation(geolocation=geolocation)
-        )
+        await self._impl_obj.set_geolocation(geolocation=geolocation)
 
     async def set_extra_http_headers(self, headers: typing.Dict[str, str]) -> None:
         """BrowserContext.set_extra_http_headers
@@ -14968,11 +14814,7 @@ class BrowserContext(AsyncContextManager):
             An object containing additional HTTP headers to be sent with every request. All header values must be strings.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.set_extra_http_headers(
-                headers=mapping.to_impl(headers)
-            )
-        )
+        await self._impl_obj.set_extra_http_headers(headers=mapping.to_impl(headers))
 
     async def set_offline(self, offline: bool) -> None:
         """BrowserContext.set_offline
@@ -14989,9 +14831,7 @@ class BrowserContext(AsyncContextManager):
 
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.set_offline(offline=offline)
-        )
+        await self._impl_obj.set_offline(offline=offline)
 
     async def add_init_script(
         self,
@@ -15277,10 +15117,8 @@ class BrowserContext(AsyncContextManager):
             Optional handler function used to register a routing with `browser_context.route()`.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.unroute(
-                url=self._wrap_handler(url), handler=self._wrap_handler(handler)
-            )
+        await self._impl_obj.unroute(
+            url=self._wrap_handler(url), handler=self._wrap_handler(handler)
         )
 
     async def route_web_socket(
@@ -15322,10 +15160,8 @@ class BrowserContext(AsyncContextManager):
             Handler function to route the WebSocket.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.route_web_socket(
-                url=self._wrap_handler(url), handler=self._wrap_handler(handler)
-            )
+        await self._impl_obj.route_web_socket(
+            url=self._wrap_handler(url), handler=self._wrap_handler(handler)
         )
 
     async def unroute_all(
@@ -15348,9 +15184,7 @@ class BrowserContext(AsyncContextManager):
               after unrouting are silently caught
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.unroute_all(behavior=behavior)
-        )
+        await self._impl_obj.unroute_all(behavior=behavior)
 
     async def route_from_har(
         self,
@@ -15396,15 +15230,13 @@ class BrowserContext(AsyncContextManager):
             `minimal`.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.route_from_har(
-                har=har,
-                url=url,
-                notFound=not_found,
-                update=update,
-                updateContent=update_content,
-                updateMode=update_mode,
-            )
+        await self._impl_obj.route_from_har(
+            har=har,
+            url=url,
+            notFound=not_found,
+            update=update,
+            updateContent=update_content,
+            updateMode=update_mode,
         )
 
     @typing.overload
@@ -15646,7 +15478,7 @@ class BrowserContext(AsyncContextManager):
             The reason to be reported to the operations interrupted by the context closure.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.close(reason=reason))
+        await self._impl_obj.close(reason=reason)
 
     async def storage_state(
         self,
@@ -15722,9 +15554,7 @@ class BrowserContext(AsyncContextManager):
             information obtained via `browser_context.storage_state()`.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.set_storage_state(storageState=storage_state)
-        )
+        await self._impl_obj.set_storage_state(storageState=storage_state)
 
     @typing.overload
     async def wait_for_event(
@@ -16029,6 +15859,7 @@ mapping.register(BrowserContextImpl, BrowserContext)
 
 
 class CDPSession(AsyncBase):
+    _impl_obj: CDPSessionImpl
 
     @typing.overload
     def on(
@@ -16110,13 +15941,14 @@ class CDPSession(AsyncBase):
         used to send messages.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.detach())
+        await self._impl_obj.detach()
 
 
 mapping.register(CDPSessionImpl, CDPSession)
 
 
 class Browser(AsyncContextManager):
+    _impl_obj: BrowserImpl
 
     @typing.overload
     def on(
@@ -16762,7 +16594,7 @@ class Browser(AsyncContextManager):
             The reason to be reported to the operations interrupted by the browser closure.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.close(reason=reason))
+        await self._impl_obj.close(reason=reason)
 
     async def new_browser_cdp_session(self) -> "CDPSession":
         """Browser.new_browser_cdp_session
@@ -16819,7 +16651,7 @@ class Browser(AsyncContextManager):
         Unbinds the browser server previously bound with `browser.bind()`.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.unbind())
+        await self._impl_obj.unbind()
 
     async def start_tracing(
         self,
@@ -16859,13 +16691,11 @@ class Browser(AsyncContextManager):
             specify custom categories to use instead of default.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.start_tracing(
-                page=page._impl_obj if page else None,
-                path=path,
-                screenshots=screenshots,
-                categories=mapping.to_impl(categories),
-            )
+        await self._impl_obj.start_tracing(
+            page=page._impl_obj if page else None,
+            path=path,
+            screenshots=screenshots,
+            categories=mapping.to_impl(categories),
         )
 
     async def stop_tracing(self) -> bytes:
@@ -16890,6 +16720,7 @@ mapping.register(BrowserImpl, Browser)
 
 
 class BrowserType(AsyncBase):
+    _impl_obj: BrowserTypeImpl
 
     @property
     def name(self) -> str:
@@ -17538,6 +17369,7 @@ mapping.register(BrowserTypeImpl, BrowserType)
 
 
 class Playwright(AsyncBase):
+    _impl_obj: PlaywrightImpl
 
     @property
     def devices(self) -> typing.Dict:
@@ -17657,13 +17489,14 @@ class Playwright(AsyncBase):
         ```
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.stop())
+        await self._impl_obj.stop()
 
 
 mapping.register(PlaywrightImpl, Playwright)
 
 
 class Tracing(AsyncBase):
+    _impl_obj: TracingImpl
 
     async def start(
         self,
@@ -17800,7 +17633,7 @@ class Tracing(AsyncBase):
             Export trace collected since the last `tracing.start_chunk()` call into the file with the given path.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.stop_chunk(path=path))
+        await self._impl_obj.stop_chunk(path=path)
 
     async def stop(
         self, *, path: typing.Optional[typing.Union[pathlib.Path, str]] = None
@@ -17815,7 +17648,7 @@ class Tracing(AsyncBase):
             Export trace into the file with the given path.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.stop(path=path))
+        await self._impl_obj.stop(path=path)
 
     async def group(
         self, name: str, *, location: typing.Optional[TracingGroupLocation] = None
@@ -17861,7 +17694,7 @@ class Tracing(AsyncBase):
         Closes the last group created by `tracing.group()`.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.group_end())
+        await self._impl_obj.group_end()
 
     async def start_har(
         self,
@@ -17920,13 +17753,14 @@ class Tracing(AsyncBase):
         Stop HAR recording and save the HAR file to the path given to `tracing.start_har()`.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.stop_har())
+        await self._impl_obj.stop_har()
 
 
 mapping.register(TracingImpl, Tracing)
 
 
 class Locator(AsyncBase):
+    _impl_obj: LocatorImpl
 
     @property
     def page(self) -> "Page":
@@ -18155,15 +17989,13 @@ class Locator(AsyncBase):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.check(
-                position=position,
-                timeout=to_milliseconds(timeout),
-                force=force,
-                noWaitAfter=no_wait_after,
-                trial=trial,
-                scroll=scroll,
-            )
+        await self._impl_obj.check(
+            position=position,
+            timeout=to_milliseconds(timeout),
+            force=force,
+            noWaitAfter=no_wait_after,
+            trial=trial,
+            scroll=scroll,
         )
 
     async def click(
@@ -18256,20 +18088,18 @@ class Locator(AsyncBase):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.click(
-                modifiers=mapping.to_impl(modifiers),
-                position=position,
-                delay=delay,
-                button=button,
-                clickCount=click_count,
-                timeout=to_milliseconds(timeout),
-                force=force,
-                noWaitAfter=no_wait_after,
-                trial=trial,
-                steps=steps,
-                scroll=scroll,
-            )
+        await self._impl_obj.click(
+            modifiers=mapping.to_impl(modifiers),
+            position=position,
+            delay=delay,
+            button=button,
+            clickCount=click_count,
+            timeout=to_milliseconds(timeout),
+            force=force,
+            noWaitAfter=no_wait_after,
+            trial=trial,
+            steps=steps,
+            scroll=scroll,
         )
 
     async def dblclick(
@@ -18342,19 +18172,17 @@ class Locator(AsyncBase):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.dblclick(
-                modifiers=mapping.to_impl(modifiers),
-                position=position,
-                delay=delay,
-                button=button,
-                timeout=to_milliseconds(timeout),
-                force=force,
-                noWaitAfter=no_wait_after,
-                trial=trial,
-                steps=steps,
-                scroll=scroll,
-            )
+        await self._impl_obj.dblclick(
+            modifiers=mapping.to_impl(modifiers),
+            position=position,
+            delay=delay,
+            button=button,
+            timeout=to_milliseconds(timeout),
+            force=force,
+            noWaitAfter=no_wait_after,
+            trial=trial,
+            steps=steps,
+            scroll=scroll,
         )
 
     async def dispatch_event(
@@ -18413,12 +18241,10 @@ class Locator(AsyncBase):
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.dispatch_event(
-                type=type,
-                eventInit=mapping.to_impl(event_init),
-                timeout=to_milliseconds(timeout),
-            )
+        await self._impl_obj.dispatch_event(
+            type=type,
+            eventInit=mapping.to_impl(event_init),
+            timeout=to_milliseconds(timeout),
         )
 
     async def evaluate(
@@ -18610,13 +18436,11 @@ class Locator(AsyncBase):
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.fill(
-                value=value,
-                timeout=to_milliseconds(timeout),
-                noWaitAfter=no_wait_after,
-                force=force,
-            )
+        await self._impl_obj.fill(
+            value=value,
+            timeout=to_milliseconds(timeout),
+            noWaitAfter=no_wait_after,
+            force=force,
         )
 
     async def clear(
@@ -18658,10 +18482,8 @@ class Locator(AsyncBase):
             Whether to bypass the [actionability](../actionability.md) checks. Defaults to `false`.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.clear(
-                timeout=to_milliseconds(timeout), noWaitAfter=no_wait_after, force=force
-            )
+        await self._impl_obj.clear(
+            timeout=to_milliseconds(timeout), noWaitAfter=no_wait_after, force=force
         )
 
     def locator(
@@ -19474,9 +19296,7 @@ class Locator(AsyncBase):
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.focus(timeout=to_milliseconds(timeout))
-        )
+        await self._impl_obj.focus(timeout=to_milliseconds(timeout))
 
     async def blur(
         self,
@@ -19494,9 +19314,7 @@ class Locator(AsyncBase):
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.blur(timeout=to_milliseconds(timeout))
-        )
+        await self._impl_obj.blur(timeout=to_milliseconds(timeout))
 
     async def all(self) -> typing.List["Locator"]:
         """Locator.all
@@ -19616,18 +19434,16 @@ class Locator(AsyncBase):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.drag_to(
-                target=target._impl_obj,
-                force=force,
-                noWaitAfter=no_wait_after,
-                timeout=to_milliseconds(timeout),
-                trial=trial,
-                sourcePosition=source_position,
-                targetPosition=target_position,
-                steps=steps,
-                scroll=scroll,
-            )
+        await self._impl_obj.drag_to(
+            target=target._impl_obj,
+            force=force,
+            noWaitAfter=no_wait_after,
+            timeout=to_milliseconds(timeout),
+            trial=trial,
+            sourcePosition=source_position,
+            targetPosition=target_position,
+            steps=steps,
+            scroll=scroll,
         )
 
     async def drop(
@@ -19669,10 +19485,8 @@ class Locator(AsyncBase):
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.drop(
-                payload=payload, position=position, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.drop(
+            payload=payload, position=position, timeout=to_milliseconds(timeout)
         )
 
     async def get_attribute(
@@ -19771,16 +19585,14 @@ class Locator(AsyncBase):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.hover(
-                modifiers=mapping.to_impl(modifiers),
-                position=position,
-                timeout=to_milliseconds(timeout),
-                noWaitAfter=no_wait_after,
-                force=force,
-                trial=trial,
-                scroll=scroll,
-            )
+        await self._impl_obj.hover(
+            modifiers=mapping.to_impl(modifiers),
+            position=position,
+            timeout=to_milliseconds(timeout),
+            noWaitAfter=no_wait_after,
+            force=force,
+            trial=trial,
+            scroll=scroll,
         )
 
     async def inner_html(
@@ -20130,13 +19942,11 @@ class Locator(AsyncBase):
             Deprecated: This option will default to `true` in the future.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.press(
-                key=key,
-                delay=delay,
-                timeout=to_milliseconds(timeout),
-                noWaitAfter=no_wait_after,
-            )
+        await self._impl_obj.press(
+            key=key,
+            delay=delay,
+            timeout=to_milliseconds(timeout),
+            noWaitAfter=no_wait_after,
         )
 
     async def screenshot(
@@ -20376,10 +20186,8 @@ class Locator(AsyncBase):
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.scroll_into_view_if_needed(
-                timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.scroll_into_view_if_needed(
+            timeout=to_milliseconds(timeout)
         )
 
     async def select_option(
@@ -20494,11 +20302,7 @@ class Locator(AsyncBase):
             be changed by using the `browser_context.set_default_timeout()` or `page.set_default_timeout()` methods.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.select_text(
-                force=force, timeout=to_milliseconds(timeout)
-            )
-        )
+        await self._impl_obj.select_text(force=force, timeout=to_milliseconds(timeout))
 
     async def set_input_files(
         self,
@@ -20562,12 +20366,10 @@ class Locator(AsyncBase):
             Deprecated: This option has no effect.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.set_input_files(
-                files=mapping.to_impl(files),
-                timeout=to_milliseconds(timeout),
-                noWaitAfter=no_wait_after,
-            )
+        await self._impl_obj.set_input_files(
+            files=mapping.to_impl(files),
+            timeout=to_milliseconds(timeout),
+            noWaitAfter=no_wait_after,
         )
 
     async def tap(
@@ -20631,16 +20433,14 @@ class Locator(AsyncBase):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.tap(
-                modifiers=mapping.to_impl(modifiers),
-                position=position,
-                timeout=to_milliseconds(timeout),
-                force=force,
-                noWaitAfter=no_wait_after,
-                trial=trial,
-                scroll=scroll,
-            )
+        await self._impl_obj.tap(
+            modifiers=mapping.to_impl(modifiers),
+            position=position,
+            timeout=to_milliseconds(timeout),
+            force=force,
+            noWaitAfter=no_wait_after,
+            trial=trial,
+            scroll=scroll,
         )
 
     async def text_content(
@@ -20701,13 +20501,11 @@ class Locator(AsyncBase):
             Deprecated: This option has no effect.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.type(
-                text=text,
-                delay=delay,
-                timeout=to_milliseconds(timeout),
-                noWaitAfter=no_wait_after,
-            )
+        await self._impl_obj.type(
+            text=text,
+            delay=delay,
+            timeout=to_milliseconds(timeout),
+            noWaitAfter=no_wait_after,
         )
 
     async def press_sequentially(
@@ -20757,13 +20555,11 @@ class Locator(AsyncBase):
             Deprecated: This option has no effect.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.press_sequentially(
-                text=text,
-                delay=delay,
-                timeout=to_milliseconds(timeout),
-                noWaitAfter=no_wait_after,
-            )
+        await self._impl_obj.press_sequentially(
+            text=text,
+            delay=delay,
+            timeout=to_milliseconds(timeout),
+            noWaitAfter=no_wait_after,
         )
 
     async def uncheck(
@@ -20824,15 +20620,13 @@ class Locator(AsyncBase):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.uncheck(
-                position=position,
-                timeout=to_milliseconds(timeout),
-                force=force,
-                noWaitAfter=no_wait_after,
-                trial=trial,
-                scroll=scroll,
-            )
+        await self._impl_obj.uncheck(
+            position=position,
+            timeout=to_milliseconds(timeout),
+            force=force,
+            noWaitAfter=no_wait_after,
+            trial=trial,
+            scroll=scroll,
         )
 
     async def all_inner_texts(self) -> typing.List[str]:
@@ -20914,9 +20708,7 @@ class Locator(AsyncBase):
               `visibility:hidden`. This is opposite to the `'visible'` option.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.wait_for(timeout=to_milliseconds(timeout), state=state)
-        )
+        await self._impl_obj.wait_for(timeout=to_milliseconds(timeout), state=state)
 
     async def wait_for_function(
         self,
@@ -20956,12 +20748,10 @@ class Locator(AsyncBase):
             `page.set_default_timeout()` methods.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.wait_for_function(
-                expression=expression,
-                arg=mapping.to_impl(arg),
-                timeout=to_milliseconds(timeout),
-            )
+        await self._impl_obj.wait_for_function(
+            expression=expression,
+            arg=mapping.to_impl(arg),
+            timeout=to_milliseconds(timeout),
         )
 
     async def set_checked(
@@ -21024,16 +20814,14 @@ class Locator(AsyncBase):
             viewport. This is useful to assert that an element is reachable by the user without additional scrolling.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.set_checked(
-                checked=checked,
-                position=position,
-                timeout=to_milliseconds(timeout),
-                force=force,
-                noWaitAfter=no_wait_after,
-                trial=trial,
-                scroll=scroll,
-            )
+        await self._impl_obj.set_checked(
+            checked=checked,
+            position=position,
+            timeout=to_milliseconds(timeout),
+            force=force,
+            noWaitAfter=no_wait_after,
+            trial=trial,
+            scroll=scroll,
         )
 
     async def highlight(self, *, style: typing.Optional[str] = None) -> None:
@@ -21048,7 +20836,7 @@ class Locator(AsyncBase):
             Additional inline CSS applied to the highlight overlay, e.g. `"outline: 2px dashed red"`.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.highlight(style=style))
+        await self._impl_obj.highlight(style=style)
 
     async def hide_highlight(self) -> None:
         """Locator.hide_highlight
@@ -21056,13 +20844,14 @@ class Locator(AsyncBase):
         Hides the element highlight previously added by `locator.highlight()`.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.hide_highlight())
+        await self._impl_obj.hide_highlight()
 
 
 mapping.register(LocatorImpl, Locator)
 
 
 class APIResponse(AsyncBase):
+    _impl_obj: APIResponseImpl
 
     @property
     def ok(self) -> bool:
@@ -21222,13 +21011,14 @@ class APIResponse(AsyncBase):
         Disposes the body of this response. If not called then the body will stay in memory until the context closes.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.dispose())
+        await self._impl_obj.dispose()
 
 
 mapping.register(APIResponseImpl, APIResponse)
 
 
 class APIRequestContext(AsyncBase):
+    _impl_obj: APIRequestContextImpl
 
     @property
     def tracing(self) -> "Tracing":
@@ -21255,7 +21045,7 @@ class APIRequestContext(AsyncBase):
             The reason to be reported to the operations interrupted by the context disposal.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.dispose(reason=reason))
+        await self._impl_obj.dispose(reason=reason)
 
     async def cookies(
         self, urls: typing.Optional[typing.Union[str, typing.Sequence[str]]] = None
@@ -21298,9 +21088,7 @@ class APIRequestContext(AsyncBase):
         cookies : Sequence[{name: str, value: str, url: Union[str, None], domain: Union[str, None], path: Union[str, None], expires: Union[float, None], httpOnly: Union[bool, None], secure: Union[bool, None], sameSite: Union["Lax", "None", "Strict", None], partitionKey: Union[str, None]}]
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.add_cookies(cookies=mapping.to_impl(cookies))
-        )
+        await self._impl_obj.add_cookies(cookies=mapping.to_impl(cookies))
 
     async def clear_cookies(
         self,
@@ -21335,9 +21123,7 @@ class APIRequestContext(AsyncBase):
             Only removes cookies with the given path.
         """
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.clear_cookies(name=name, domain=domain, path=path)
-        )
+        await self._impl_obj.clear_cookies(name=name, domain=domain, path=path)
 
     async def delete(
         self,
@@ -22075,6 +21861,7 @@ mapping.register(APIRequestContextImpl, APIRequestContext)
 
 
 class APIRequest(AsyncBase):
+    _impl_obj: APIRequestImpl
 
     async def new_context(
         self,
@@ -22183,6 +21970,7 @@ mapping.register(APIRequestImpl, APIRequest)
 
 
 class PageAssertions(AsyncBase):
+    _impl_obj: PageAssertionsImpl
 
     async def to_have_title(
         self,
@@ -22213,10 +22001,8 @@ class PageAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_have_title(
-                titleOrRegExp=title_or_reg_exp, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.to_have_title(
+            titleOrRegExp=title_or_reg_exp, timeout=to_milliseconds(timeout)
         )
 
     async def not_to_have_title(
@@ -22238,10 +22024,8 @@ class PageAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_have_title(
-                titleOrRegExp=title_or_reg_exp, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.not_to_have_title(
+            titleOrRegExp=title_or_reg_exp, timeout=to_milliseconds(timeout)
         )
 
     async def to_have_url(
@@ -22277,12 +22061,10 @@ class PageAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_have_url(
-                urlOrRegExp=url_or_reg_exp,
-                timeout=to_milliseconds(timeout),
-                ignoreCase=ignore_case,
-            )
+        await self._impl_obj.to_have_url(
+            urlOrRegExp=url_or_reg_exp,
+            timeout=to_milliseconds(timeout),
+            ignoreCase=ignore_case,
         )
 
     async def not_to_have_url(
@@ -22308,12 +22090,10 @@ class PageAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_have_url(
-                urlOrRegExp=url_or_reg_exp,
-                timeout=to_milliseconds(timeout),
-                ignoreCase=ignore_case,
-            )
+        await self._impl_obj.not_to_have_url(
+            urlOrRegExp=url_or_reg_exp,
+            timeout=to_milliseconds(timeout),
+            ignoreCase=ignore_case,
         )
 
     async def to_match_aria_snapshot(
@@ -22344,10 +22124,8 @@ class PageAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_match_aria_snapshot(
-                expected=expected, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.to_match_aria_snapshot(
+            expected=expected, timeout=to_milliseconds(timeout)
         )
 
     async def not_to_match_aria_snapshot(
@@ -22368,10 +22146,8 @@ class PageAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_match_aria_snapshot(
-                expected=expected, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.not_to_match_aria_snapshot(
+            expected=expected, timeout=to_milliseconds(timeout)
         )
 
 
@@ -22379,6 +22155,7 @@ mapping.register(PageAssertionsImpl, PageAssertions)
 
 
 class LocatorAssertions(AsyncBase):
+    _impl_obj: LocatorAssertionsImpl
 
     async def to_contain_text(
         self,
@@ -22463,13 +22240,11 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_contain_text(
-                expected=mapping.to_impl(expected),
-                useInnerText=use_inner_text,
-                timeout=to_milliseconds(timeout),
-                ignoreCase=ignore_case,
-            )
+        await self._impl_obj.to_contain_text(
+            expected=mapping.to_impl(expected),
+            useInnerText=use_inner_text,
+            timeout=to_milliseconds(timeout),
+            ignoreCase=ignore_case,
         )
 
     async def not_to_contain_text(
@@ -22504,13 +22279,11 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_contain_text(
-                expected=mapping.to_impl(expected),
-                useInnerText=use_inner_text,
-                timeout=to_milliseconds(timeout),
-                ignoreCase=ignore_case,
-            )
+        await self._impl_obj.not_to_contain_text(
+            expected=mapping.to_impl(expected),
+            useInnerText=use_inner_text,
+            timeout=to_milliseconds(timeout),
+            ignoreCase=ignore_case,
         )
 
     async def to_have_attribute(
@@ -22550,13 +22323,11 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_have_attribute(
-                name=name,
-                value=value,
-                ignoreCase=ignore_case,
-                timeout=to_milliseconds(timeout),
-            )
+        await self._impl_obj.to_have_attribute(
+            name=name,
+            value=value,
+            ignoreCase=ignore_case,
+            timeout=to_milliseconds(timeout),
         )
 
     async def not_to_have_attribute(
@@ -22585,13 +22356,11 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_have_attribute(
-                name=name,
-                value=value,
-                ignoreCase=ignore_case,
-                timeout=to_milliseconds(timeout),
-            )
+        await self._impl_obj.not_to_have_attribute(
+            name=name,
+            value=value,
+            ignoreCase=ignore_case,
+            timeout=to_milliseconds(timeout),
         )
 
     async def to_have_class(
@@ -22645,10 +22414,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_have_class(
-                expected=mapping.to_impl(expected), timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.to_have_class(
+            expected=mapping.to_impl(expected), timeout=to_milliseconds(timeout)
         )
 
     async def not_to_have_class(
@@ -22676,10 +22443,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_have_class(
-                expected=mapping.to_impl(expected), timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.not_to_have_class(
+            expected=mapping.to_impl(expected), timeout=to_milliseconds(timeout)
         )
 
     async def to_contain_class(
@@ -22737,10 +22502,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_contain_class(
-                expected=mapping.to_impl(expected), timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.to_contain_class(
+            expected=mapping.to_impl(expected), timeout=to_milliseconds(timeout)
         )
 
     async def not_to_contain_class(
@@ -22762,10 +22525,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_contain_class(
-                expected=mapping.to_impl(expected), timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.not_to_contain_class(
+            expected=mapping.to_impl(expected), timeout=to_milliseconds(timeout)
         )
 
     async def to_have_count(
@@ -22796,10 +22557,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_have_count(
-                count=count, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.to_have_count(
+            count=count, timeout=to_milliseconds(timeout)
         )
 
     async def not_to_have_count(
@@ -22821,10 +22580,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_have_count(
-                count=count, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.not_to_have_count(
+            count=count, timeout=to_milliseconds(timeout)
         )
 
     async def to_have_css(
@@ -22861,10 +22618,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_have_css(
-                name=name, value=value, timeout=to_milliseconds(timeout), pseudo=pseudo
-            )
+        await self._impl_obj.to_have_css(
+            name=name, value=value, timeout=to_milliseconds(timeout), pseudo=pseudo
         )
 
     async def not_to_have_css(
@@ -22889,10 +22644,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_have_css(
-                name=name, value=value, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.not_to_have_css(
+            name=name, value=value, timeout=to_milliseconds(timeout)
         )
 
     async def to_have_id(
@@ -22923,9 +22676,7 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_have_id(id=id, timeout=to_milliseconds(timeout))
-        )
+        await self._impl_obj.to_have_id(id=id, timeout=to_milliseconds(timeout))
 
     async def not_to_have_id(
         self,
@@ -22946,9 +22697,7 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_have_id(id=id, timeout=to_milliseconds(timeout))
-        )
+        await self._impl_obj.not_to_have_id(id=id, timeout=to_milliseconds(timeout))
 
     async def to_have_js_property(
         self,
@@ -22982,12 +22731,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_have_js_property(
-                name=name,
-                value=mapping.to_impl(value),
-                timeout=to_milliseconds(timeout),
-            )
+        await self._impl_obj.to_have_js_property(
+            name=name, value=mapping.to_impl(value), timeout=to_milliseconds(timeout)
         )
 
     async def not_to_have_js_property(
@@ -23012,12 +22757,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_have_js_property(
-                name=name,
-                value=mapping.to_impl(value),
-                timeout=to_milliseconds(timeout),
-            )
+        await self._impl_obj.not_to_have_js_property(
+            name=name, value=mapping.to_impl(value), timeout=to_milliseconds(timeout)
         )
 
     async def to_have_value(
@@ -23050,10 +22791,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_have_value(
-                value=value, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.to_have_value(
+            value=value, timeout=to_milliseconds(timeout)
         )
 
     async def not_to_have_value(
@@ -23075,10 +22814,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_have_value(
-                value=value, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.not_to_have_value(
+            value=value, timeout=to_milliseconds(timeout)
         )
 
     async def to_have_values(
@@ -23126,10 +22863,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_have_values(
-                values=mapping.to_impl(values), timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.to_have_values(
+            values=mapping.to_impl(values), timeout=to_milliseconds(timeout)
         )
 
     async def not_to_have_values(
@@ -23155,10 +22890,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_have_values(
-                values=mapping.to_impl(values), timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.not_to_have_values(
+            values=mapping.to_impl(values), timeout=to_milliseconds(timeout)
         )
 
     async def to_have_text(
@@ -23243,13 +22976,11 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_have_text(
-                expected=mapping.to_impl(expected),
-                useInnerText=use_inner_text,
-                timeout=to_milliseconds(timeout),
-                ignoreCase=ignore_case,
-            )
+        await self._impl_obj.to_have_text(
+            expected=mapping.to_impl(expected),
+            useInnerText=use_inner_text,
+            timeout=to_milliseconds(timeout),
+            ignoreCase=ignore_case,
         )
 
     async def not_to_have_text(
@@ -23284,13 +23015,11 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_have_text(
-                expected=mapping.to_impl(expected),
-                useInnerText=use_inner_text,
-                timeout=to_milliseconds(timeout),
-                ignoreCase=ignore_case,
-            )
+        await self._impl_obj.not_to_have_text(
+            expected=mapping.to_impl(expected),
+            useInnerText=use_inner_text,
+            timeout=to_milliseconds(timeout),
+            ignoreCase=ignore_case,
         )
 
     async def to_be_attached(
@@ -23318,10 +23047,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_be_attached(
-                attached=attached, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.to_be_attached(
+            attached=attached, timeout=to_milliseconds(timeout)
         )
 
     async def to_be_checked(
@@ -23357,12 +23084,10 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_be_checked(
-                timeout=to_milliseconds(timeout),
-                checked=checked,
-                indeterminate=indeterminate,
-            )
+        await self._impl_obj.to_be_checked(
+            timeout=to_milliseconds(timeout),
+            checked=checked,
+            indeterminate=indeterminate,
         )
 
     async def not_to_be_attached(
@@ -23383,10 +23108,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_be_attached(
-                attached=attached, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.not_to_be_attached(
+            attached=attached, timeout=to_milliseconds(timeout)
         )
 
     async def not_to_be_checked(
@@ -23405,9 +23128,7 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_be_checked(timeout=to_milliseconds(timeout))
-        )
+        await self._impl_obj.not_to_be_checked(timeout=to_milliseconds(timeout))
 
     async def to_be_disabled(
         self,
@@ -23438,9 +23159,7 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_be_disabled(timeout=to_milliseconds(timeout))
-        )
+        await self._impl_obj.to_be_disabled(timeout=to_milliseconds(timeout))
 
     async def not_to_be_disabled(
         self,
@@ -23458,9 +23177,7 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_be_disabled(timeout=to_milliseconds(timeout))
-        )
+        await self._impl_obj.not_to_be_disabled(timeout=to_milliseconds(timeout))
 
     async def to_be_editable(
         self,
@@ -23489,10 +23206,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_be_editable(
-                editable=editable, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.to_be_editable(
+            editable=editable, timeout=to_milliseconds(timeout)
         )
 
     async def not_to_be_editable(
@@ -23513,10 +23228,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_be_editable(
-                editable=editable, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.not_to_be_editable(
+            editable=editable, timeout=to_milliseconds(timeout)
         )
 
     async def to_be_empty(
@@ -23544,9 +23257,7 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_be_empty(timeout=to_milliseconds(timeout))
-        )
+        await self._impl_obj.to_be_empty(timeout=to_milliseconds(timeout))
 
     async def not_to_be_empty(
         self,
@@ -23564,9 +23275,7 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_be_empty(timeout=to_milliseconds(timeout))
-        )
+        await self._impl_obj.not_to_be_empty(timeout=to_milliseconds(timeout))
 
     async def to_be_enabled(
         self,
@@ -23595,10 +23304,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_be_enabled(
-                enabled=enabled, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.to_be_enabled(
+            enabled=enabled, timeout=to_milliseconds(timeout)
         )
 
     async def not_to_be_enabled(
@@ -23619,10 +23326,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_be_enabled(
-                enabled=enabled, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.not_to_be_enabled(
+            enabled=enabled, timeout=to_milliseconds(timeout)
         )
 
     async def to_be_hidden(
@@ -23651,9 +23356,7 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_be_hidden(timeout=to_milliseconds(timeout))
-        )
+        await self._impl_obj.to_be_hidden(timeout=to_milliseconds(timeout))
 
     async def not_to_be_hidden(
         self,
@@ -23671,9 +23374,7 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_be_hidden(timeout=to_milliseconds(timeout))
-        )
+        await self._impl_obj.not_to_be_hidden(timeout=to_milliseconds(timeout))
 
     async def to_be_visible(
         self,
@@ -23712,10 +23413,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_be_visible(
-                visible=visible, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.to_be_visible(
+            visible=visible, timeout=to_milliseconds(timeout)
         )
 
     async def not_to_be_visible(
@@ -23736,10 +23435,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_be_visible(
-                visible=visible, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.not_to_be_visible(
+            visible=visible, timeout=to_milliseconds(timeout)
         )
 
     async def to_be_focused(
@@ -23767,9 +23464,7 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_be_focused(timeout=to_milliseconds(timeout))
-        )
+        await self._impl_obj.to_be_focused(timeout=to_milliseconds(timeout))
 
     async def not_to_be_focused(
         self,
@@ -23787,9 +23482,7 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_be_focused(timeout=to_milliseconds(timeout))
-        )
+        await self._impl_obj.not_to_be_focused(timeout=to_milliseconds(timeout))
 
     async def to_be_in_viewport(
         self,
@@ -23826,10 +23519,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_be_in_viewport(
-                ratio=ratio, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.to_be_in_viewport(
+            ratio=ratio, timeout=to_milliseconds(timeout)
         )
 
     async def not_to_be_in_viewport(
@@ -23850,10 +23541,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_be_in_viewport(
-                ratio=ratio, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.not_to_be_in_viewport(
+            ratio=ratio, timeout=to_milliseconds(timeout)
         )
 
     async def to_have_accessible_description(
@@ -23887,12 +23576,10 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_have_accessible_description(
-                description=description,
-                ignoreCase=ignore_case,
-                timeout=to_milliseconds(timeout),
-            )
+        await self._impl_obj.to_have_accessible_description(
+            description=description,
+            ignoreCase=ignore_case,
+            timeout=to_milliseconds(timeout),
         )
 
     async def not_to_have_accessible_description(
@@ -23918,10 +23605,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_have_accessible_description(
-                name=name, ignoreCase=ignore_case, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.not_to_have_accessible_description(
+            name=name, ignoreCase=ignore_case, timeout=to_milliseconds(timeout)
         )
 
     async def to_have_accessible_name(
@@ -23955,10 +23640,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_have_accessible_name(
-                name=name, ignoreCase=ignore_case, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.to_have_accessible_name(
+            name=name, ignoreCase=ignore_case, timeout=to_milliseconds(timeout)
         )
 
     async def not_to_have_accessible_name(
@@ -23984,10 +23667,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_have_accessible_name(
-                name=name, ignoreCase=ignore_case, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.not_to_have_accessible_name(
+            name=name, ignoreCase=ignore_case, timeout=to_milliseconds(timeout)
         )
 
     async def to_have_role(
@@ -24102,11 +23783,7 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_have_role(
-                role=role, timeout=to_milliseconds(timeout)
-            )
-        )
+        await self._impl_obj.to_have_role(role=role, timeout=to_milliseconds(timeout))
 
     async def to_have_accessible_error_message(
         self,
@@ -24139,12 +23816,10 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_have_accessible_error_message(
-                errorMessage=error_message,
-                ignoreCase=ignore_case,
-                timeout=to_milliseconds(timeout),
-            )
+        await self._impl_obj.to_have_accessible_error_message(
+            errorMessage=error_message,
+            ignoreCase=ignore_case,
+            timeout=to_milliseconds(timeout),
         )
 
     async def not_to_have_accessible_error_message(
@@ -24170,12 +23845,10 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_have_accessible_error_message(
-                errorMessage=error_message,
-                ignoreCase=ignore_case,
-                timeout=to_milliseconds(timeout),
-            )
+        await self._impl_obj.not_to_have_accessible_error_message(
+            errorMessage=error_message,
+            ignoreCase=ignore_case,
+            timeout=to_milliseconds(timeout),
         )
 
     async def not_to_have_role(
@@ -24280,10 +23953,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_have_role(
-                role=role, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.not_to_have_role(
+            role=role, timeout=to_milliseconds(timeout)
         )
 
     async def to_match_aria_snapshot(
@@ -24314,10 +23985,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.to_match_aria_snapshot(
-                expected=expected, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.to_match_aria_snapshot(
+            expected=expected, timeout=to_milliseconds(timeout)
         )
 
     async def not_to_match_aria_snapshot(
@@ -24338,10 +24007,8 @@ class LocatorAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(
-            await self._impl_obj.not_to_match_aria_snapshot(
-                expected=expected, timeout=to_milliseconds(timeout)
-            )
+        await self._impl_obj.not_to_match_aria_snapshot(
+            expected=expected, timeout=to_milliseconds(timeout)
         )
 
 
@@ -24349,6 +24016,7 @@ mapping.register(LocatorAssertionsImpl, LocatorAssertions)
 
 
 class APIResponseAssertions(AsyncBase):
+    _impl_obj: APIResponseAssertionsImpl
 
     async def to_be_ok(self) -> None:
         """APIResponseAssertions.to_be_ok
@@ -24366,7 +24034,7 @@ class APIResponseAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(await self._impl_obj.to_be_ok())
+        await self._impl_obj.to_be_ok()
 
     async def not_to_be_ok(self) -> None:
         """APIResponseAssertions.not_to_be_ok
@@ -24375,13 +24043,14 @@ class APIResponseAssertions(AsyncBase):
         """
         __tracebackhide__ = True
 
-        return mapping.from_maybe_impl(await self._impl_obj.not_to_be_ok())
+        await self._impl_obj.not_to_be_ok()
 
 
 mapping.register(APIResponseAssertionsImpl, APIResponseAssertions)
 
 
 class Disposable(AsyncContextManager):
+    _impl_obj: DisposableImpl
 
     async def dispose(self) -> None:
         """Disposable.dispose
@@ -24390,11 +24059,11 @@ class Disposable(AsyncContextManager):
         or `browser_context.add_init_script()`.
         """
 
-        return mapping.from_maybe_impl(await self._impl_obj.dispose())
+        await self._impl_obj.dispose()
 
     async def close(self) -> None:
 
-        return mapping.from_maybe_impl(await self._impl_obj.close())
+        await self._impl_obj.close()
 
 
 mapping.register(DisposableImpl, Disposable)

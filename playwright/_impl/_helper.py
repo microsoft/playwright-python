@@ -36,6 +36,7 @@ from typing import (
     TypeVar,
     Union,
     cast,
+    overload,
 )
 from urllib.parse import ParseResult, urljoin, urlparse, urlunparse
 
@@ -589,6 +590,20 @@ TEXTUAL_MIME_TYPE = re.compile(
 
 def is_textual_mime_type(mime_type: str) -> bool:
     return bool(TEXTUAL_MIME_TYPE.match(mime_type))
+
+
+@overload
+def to_milliseconds(value: Union[float, datetime.timedelta]) -> float: ...
+
+
+@overload
+def to_milliseconds(value: None) -> None: ...
+
+
+@overload
+def to_milliseconds(
+    value: Union[float, datetime.timedelta, None],
+) -> Optional[float]: ...
 
 
 def to_milliseconds(

@@ -17,7 +17,7 @@ The Python port is hand-written code in `playwright/_impl/`, plus a generator (`
 2. applies the Python facts that the docs do not contain, from `scripts/codegen/python_rules.js`, and
 3. emits the whole public API into `playwright/{async,sync}_api/_generated.py`: signatures, types, docstrings, event overloads, and the call into `_impl/` for every member.
 
-The generator never reads `_impl/`. A new member or option in the docs therefore shows up in `_generated.py` right away, as a call into `_impl/` that does not exist yet. Each generated class types its `_impl_obj`, so **`mypy playwright` lists every such gap** as an error in `_generated.py`. (Temporary: while `scripts/codegen/legacy_order.json` exists, `_impl_obj` is not typed and mypy reports nothing. Find the gaps in the docs diff and with the tests instead.) Three resolutions:
+The generator never reads `_impl/`. A new member or option in the docs therefore shows up in `_generated.py` right away, as a call into `_impl/` that does not exist yet. Each generated class types its `_impl_obj`, so **`mypy playwright` lists every such gap** as an error in `_generated.py`. Three resolutions:
 
 - **PORT** — the new API is intended for Python (no `langs.only` filter, or `langs.only` includes `"python"`). Implement it in `_impl/` until mypy is clean.
 - **MISMATCH** — the shipped Python API differs from the docs (a callback signature uses unions, a kwarg uses a legacy name, etc.). The shipped implementation wins. Add an entry to `scripts/codegen/python_rules.js` with a comment explaining *why*, and propose the upstream docs change that would make the entry unnecessary.

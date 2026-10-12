@@ -846,17 +846,13 @@ function orderedClasses() {
 // The file lists only the places where that order differs from the docs order.
 // It keeps the diff of the switch to this generator small enough to review.
 //
-// The section also reproduces more habits of the old generator:
+// The section also reproduces two more habits of the old generator:
 // - the order of the members of a union, from legacyOrder.unions;
 // - docstring lines wrapped before the member links were replaced with their
-//   Python form, so that the wrapped lines can be too long or too short;
-// - `return mapping.from_maybe_impl(...)` around calls that return nothing;
-// - no type on `_impl_obj`. So mypy does not check the generated calls
-//   against playwright/_impl yet. The type needs two annotation fixes in
-//   _impl/ (`_wrap_handler`, `to_milliseconds`); they land with its removal.
+//   Python form, so that the wrapped lines can be too long or too short.
 //
 // To remove it: delete legacy_order.json, this section, the calls to its
-// functions, and the `legacyOrder ? ... : ...` choices. Every place is marked
+// functions, and the `legacyOrder ? ... : ...` choice. Every place is marked
 // TEMPORARY.
 
 /**
@@ -1171,8 +1167,6 @@ function emitMember(clazz, member, out) {
     expression = isAsync ? `await ${call}` : `self._sync(${call})`;
   if (member.returnType)
     out.push(`        return ${wrapper}(${expression})`);
-  else if (legacyOrder)  // TEMPORARY: the legacy order.
-    out.push(`        return mapping.from_maybe_impl(${expression})`);
   else
     out.push(`        ${expression}`);
 }
@@ -1185,8 +1179,7 @@ function emitClass(clazz, out) {
   out.push('');
   out.push(`class ${clazz.name}(${clazz.base}):`);
   // Typed, so that mypy checks every call below against the implementation.
-  if (!legacyOrder)  // TEMPORARY: the legacy order.
-    out.push(`    _impl_obj: ${clazz.name}Impl`);
+  out.push(`    _impl_obj: ${clazz.name}Impl`);
   out.push('');
   emitEvents(clazz, out);
   for (const member of clazz.members) {
