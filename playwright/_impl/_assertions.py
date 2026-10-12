@@ -1103,7 +1103,8 @@ def to_expected_text_values(
     ignoreCase: Optional[bool] = None,
 ) -> Sequence[ExpectedTextValue]:
     out: List[ExpectedTextValue] = []
-    assert isinstance(items, (list, tuple))
+    if not isinstance(items, (list, tuple)):
+        raise Error("Expected a list or tuple of strings or patterns")
     for item in items:
         if isinstance(item, str):
             o = ExpectedTextValue(

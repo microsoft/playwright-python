@@ -318,7 +318,7 @@ def test_should_throw_an_error_when_max_redirects_is_less_than_0(
 ) -> None:
     request = playwright.request.new_context()
     for method in ["GET", "PUT", "POST", "OPTIONS", "HEAD", "PATCH"]:
-        with pytest.raises(AssertionError) as exc_info:
+        with pytest.raises(Error) as exc_info:
             request.fetch(
                 server.PREFIX + "/a/redirect1", method=method, max_redirects=-1
             )
@@ -351,7 +351,7 @@ def test_should_reject_empty_data_with_form(
 ) -> None:
     request = playwright.request.new_context()
     with pytest.raises(
-        AssertionError,
+        Error,
         match="Only one of 'data', 'form' or 'multipart' can be specified",
     ):
         request.post(
