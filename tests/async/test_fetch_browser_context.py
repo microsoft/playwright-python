@@ -365,6 +365,31 @@ async def test_should_support_multipart_form_data(
     assert request.args[b"file"][0] == file["buffer"]
 
 
+async def test_should_send_empty_form(context: BrowserContext, server: Server) -> None:
+    [request, _] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        context.request.post(server.EMPTY_PAGE, form={}),
+    )
+    assert request.getHeader("Content-Type") == "application/x-www-form-urlencoded"
+    assert request.getHeader("Content-Length") == "0"
+
+
+async def test_should_send_empty_multipart(
+    context: BrowserContext, server: Server
+) -> None:
+    # The test server rejects an empty multipart body in POST requests before handling them.
+    [request, _] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        context.request.put(server.EMPTY_PAGE, multipart={}),
+    )
+    assert cast(str, request.getHeader("Content-Type")).startswith(
+        "multipart/form-data; "
+    )
+    assert must(request.getHeader("Content-Length")) == str(
+        len(must(request.post_body))
+    )
+
+
 async def test_should_support_form_data_with_repeated_keys(
     context: BrowserContext, server: Server
 ) -> None:

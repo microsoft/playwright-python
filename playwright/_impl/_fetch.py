@@ -427,7 +427,7 @@ class APIRequestContext(ChannelOwner):
                     raise Error(str(e)) from None
             else:
                 raise Error(f"Unsupported 'data' type: {type(data)}")
-        elif form:
+        elif form is not None:
             if isinstance(form, FormData):
                 form_data = []
                 for fd_name, fd_value in form._fields:
@@ -437,8 +437,8 @@ class APIRequestContext(ChannelOwner):
                         )
                     form_data.append(NameValue(name=fd_name, value=str(fd_value)))
             else:
-                form_data = object_to_array(form)
-        elif multipart:
+                form_data = object_to_array(form) or []
+        elif multipart is not None:
             multipart_data = []
             if isinstance(multipart, FormData):
                 for fd_name, fd_value in multipart._fields:
