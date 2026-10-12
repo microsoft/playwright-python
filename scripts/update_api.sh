@@ -1,40 +1,24 @@
 #!/bin/bash
 
-# Codegen needs Playwright's api.json (the documented API surface), which the
-# assembled driver bundle does not ship — it is generated from the upstream docs
-# and is only needed here, when regenerating the API. Generate it into a temp file
-# and hand it to the generators via PW_API_JSON (documentation_provider.py reads it
-# from there); nothing is written into the driver. If PW_API_JSON is already set,
-# use that pre-generated api.json as-is; otherwise generate it from a nearby
-# microsoft/playwright checkout pointed to by PW_SRC_DIR (at the tag in
-# DRIVER_VERSION).
+# Generates the public API (playwright/{async,sync}_api/_generated.py) from the
+# Playwright API docs (docs/src/api) in a microsoft/playwright checkout, pointed
+# to by PW_SRC_DIR. Use the release branch for the version in DRIVER_VERSION
+# (for example release-1.64). The generator is scripts/codegen/generate_api.js;
+# Python facts that the docs do not contain are in scripts/codegen/python_rules.js.
 driver_version="$(cat DRIVER_VERSION)"
-if [[ -z "$PW_API_JSON" ]]; then
-    if [[ -z "$PW_SRC_DIR" ]]; then
-        echo "Set PW_SRC_DIR to a microsoft/playwright checkout at v${driver_version}" >&2
-        echo "(or PW_API_JSON to a pre-generated api.json), e.g.:" >&2
-        echo "    PW_SRC_DIR=../playwright ./scripts/update_api.sh" >&2
-        exit 1
-    fi
-    PW_API_JSON="$(mktemp "${TMPDIR:-/tmp}/playwright-api-json.XXXXXX")"
-    trap 'rm -f "$PW_API_JSON"' EXIT
-    echo "Generating api.json from $PW_SRC_DIR"
-    if ! API_JSON_MODE=1 node "$PW_SRC_DIR/utils/doclint/generateApiJson.js" > "$PW_API_JSON"; then
-        echo "Failed to generate api.json from $PW_SRC_DIR (a microsoft/playwright checkout at v${driver_version}?)" >&2
-        exit 1
-    fi
+if [[ -z "$PW_SRC_DIR" ]]; then
+    echo "Set PW_SRC_DIR to a microsoft/playwright checkout at the release branch for v${driver_version}, e.g.:" >&2
+    echo "    PW_SRC_DIR=../playwright ./scripts/update_api.sh" >&2
+    exit 1
 fi
-export PW_API_JSON
+export PW_SRC_DIR
 
 function update_api {
-    echo "Generating $1"
-    file_name="$1"
-    generate_script="$2"
-    git checkout HEAD -- "$file_name"
-
-    if PYTHONIOENCODING=utf-8 python "$generate_script" > .x; then
-        mv .x "$file_name"
-        pre-commit run --files $file_name
+    flavor="$1"
+    file_name="playwright/${flavor}_api/_generated.py"
+    echo "Generating $file_name"
+    if node scripts/codegen/generate_api.js --flavor "$flavor" --out "$file_name"; then
+        pre-commit run --files "$file_name"
         echo "Regenerated APIs"
     else
         echo "Exited due to errors"
@@ -42,8 +26,8 @@ function update_api {
     fi
 }
 
-update_api "playwright/sync_api/_generated.py" "scripts/generate_sync_api.py"
-update_api "playwright/async_api/_generated.py" "scripts/generate_async_api.py"
+update_api sync
+update_api async
 
 playwright install
 

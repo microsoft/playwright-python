@@ -4,19 +4,21 @@ Guidance for Claude when working in this repository.
 
 ## What this is
 
-Python bindings for [Playwright](https://playwright.dev). The Python client talks JSON over a pipe to the Node-based driver bundled in `playwright/driver/`. The pipe protocol is defined upstream in `packages/protocol/src/protocol.yml`.
+Python bindings for [Playwright](https://playwright.dev). The Python client talks JSON over a pipe to the Node-based driver bundled in `playwright/driver/`. The pipe protocol is defined upstream in `packages/protocol/spec/*.yml`.
 
 ## Layout
 
 - `playwright/_impl/` — hand-written client implementation (one module per object: `_browser.py`, `_page.py`, `_locator.py`, `_network.py`, etc.). Edit these to add or change behavior.
-- `playwright/async_api/_generated.py`, `playwright/sync_api/_generated.py` — **auto-generated**. Never edit by hand; rerun `./scripts/update_api.sh` after changing `_impl/` or the driver.
-- `scripts/generate_api.py`, `scripts/generate_async_api.py`, `scripts/generate_sync_api.py`, `scripts/documentation_provider.py` — codegen and validation. They diff the Python implementation against Playwright's `api.json` (provided via the `PW_API_JSON` env var; see `scripts/update_api.sh`) and abort if either side is out of sync.
-- `scripts/expected_api_mismatch.txt` — explicit allowlist of "documented in JS, not in Python" or "named differently in Python" gaps. Lines that no longer apply must be removed.
+- `playwright/async_api/_generated.py`, `playwright/sync_api/_generated.py` — **auto-generated** from the upstream API docs. Never edit by hand; rerun `./scripts/update_api.sh` after a roll or after changing `scripts/codegen/`.
+- `scripts/codegen/generate_api.js` — the generator. A Node.js script that loads the upstream doc parser (`utils/doclint/api_parser.js`) from `$PW_SRC_DIR`, filters the docs for Python, and writes the whole public API: signatures, types, docstrings, event overloads, and the calls into `_impl/`. It does not read `_impl/`.
+- `scripts/codegen/python_rules.js` — the Python facts that the docs do not contain (positional parameters, struct names, type overrides, hidden members). Policy: the shipped Python API wins; each entry is a candidate for an upstream docs fix, and the generator fails on entries that no longer match anything. Every entry needs a one-line rationale comment above it.
+- `scripts/codegen/legacy_order.json` — **temporary**. The old generator's order of classes, members, keyword-only parameters and union members. The generator applies it, and more old habits marked `TEMPORARY` in the generator, so that the switch to the docs generator has a small diff. New members go last. If the generator reports an entry that no longer matches, remove the entry. While the file exists, `_impl_obj` is not typed, so the mypy check described below is not active yet: a docs member that `_impl/` lacks fails only at run time. A follow-up change deletes the file and the `TEMPORARY` code.
+- `scripts/codegen/compare_api.py` — compares two generated files (signatures, annotations, call bodies, docstrings) and lists every difference. Use it to check that a generator change does not change the API.
 - `tests/async/`, `tests/sync/` — pytest suites. Most new tests are added to the async file with a sync mirror.
 - `DRIVER_VERSION` — the single source of truth for which Playwright release the driver is assembled from (one line, the `playwright-core` npm version, e.g. `1.61.0`, no `v` prefix). Read by `setup.py`, `scripts/build_driver.py`, and CI. The wheel build downloads `playwright-core` at this version from npm plus the matching Node.js binary and assembles the per-platform bundles — no source build. The version is baked into the staged bundle filenames (`driver/playwright-<version>-<suffix>.zip`), so it doubles as the build cache key.
 - `NODE_VERSION` — the Node.js version bundled with the driver (one line, e.g. `24.16.0`). Maintained at roll time by `scripts/update_node_version.py` (latest LTS, mirroring upstream's `utils/build/update-playwright-node.mjs`).
 - `scripts/build_driver.py` — assembles the per-platform driver bundles into `driver/` by downloading the `playwright-core` npm package (`DRIVER_VERSION`) and the official Node.js binaries (`NODE_VERSION`). Fetches `playwright-core` with `npm pack` (needs Node.js/npm on PATH; honours a root `.npmrc`) and the Node.js binaries over plain HTTP; invoked from `setup.py`'s `bdist_wheel` with the target platform's suffix (no arg builds all six).
-- `api.json` is **not** shipped in the bundle and is never written into the driver — `scripts/update_api.sh` generates it from a nearby `microsoft/playwright` checkout (`$PW_SRC_DIR`) into a temp file and passes it to codegen via `PW_API_JSON` (read by `scripts/documentation_provider.py`). Needed only when regenerating the API, never at runtime.
+- The API docs are **not** shipped in the bundle. `scripts/update_api.sh` reads them from a nearby `microsoft/playwright` checkout (`$PW_SRC_DIR`, at the release branch for `DRIVER_VERSION`). Needed only when regenerating the API, never at runtime.
 - `ROLLING.md`, `CONTRIBUTING.md` — human-facing setup and roll docs.
 
 ## Setup
@@ -41,7 +43,7 @@ If the system lacks `python3-venv`, `uv venv env` is an acceptable substitute (t
 - Type-check: `mypy playwright`.
 - Run tests: `pytest --browser chromium [-k name]`. Browsers are installed via `playwright install chromium` (do **not** use `--with-deps`, which requires sudo).
 
-When changing public API, edit `_impl/`, then run `./scripts/update_api.sh`. The script regenerates `_generated.py` and validates against Playwright's `api.json` (which it generates from `$PW_SRC_DIR`). If validation fails, fix the mismatch in `_impl/`, in `expected_api_mismatch.txt`, or in `documentation_provider.py` — not by hand-editing `_generated.py`.
+The public API comes from the upstream docs. After `./scripts/update_api.sh`, run `mypy playwright`: the generated classes type their `_impl_obj`, so every new member or option that `_impl/` does not implement yet is a mypy error in `_generated.py`. Fix it in `_impl/`, or record a justified difference in `scripts/codegen/python_rules.js` — not by hand-editing `_generated.py`.
 
 ## Rolling Playwright to a new version
 
@@ -60,7 +62,7 @@ It documents the full process: the upstream commit-range diff over `docs/src/api
 - Don't hand-edit generated files.
 - Don't add `# type: ignore` or modify `_generated.py` to silence pyright; fix the source of the mismatch.
 - New public methods on impl classes need a sync test mirror under `tests/sync/`.
-- Keep `expected_api_mismatch.txt` minimal — every entry needs a one-line rationale comment above it.
+- Keep `scripts/codegen/python_rules.js` minimal — every entry needs a one-line rationale comment above it. Prefer fixing the upstream docs.
 - Prefer `locals_to_params(locals())` for forwarding optional kwargs to channel sends, matching the rest of the codebase.
 
 ## Commit Convention
