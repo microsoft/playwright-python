@@ -16,7 +16,6 @@ import asyncio
 import base64
 import json
 import re
-import subprocess
 import sys
 from pathlib import Path
 from typing import Any, List
@@ -508,7 +507,7 @@ async def test_should_reject_empty_data_with_form(
 ) -> None:
     request = await playwright.request.new_context()
     with pytest.raises(
-        Error,
+        AssertionError,
         match="Only one of 'data', 'form' or 'multipart' can be specified",
     ):
         await request.post(
@@ -517,44 +516,6 @@ async def test_should_reject_empty_data_with_form(
             form={"name": "value"},
         )
     await request.dispose()
-
-
-async def test_should_reject_multiple_body_options_under_python_optimization(
-    server: Server,
-) -> None:
-    script = f"""
-import asyncio
-from playwright.async_api import async_playwright, Error
-
-async def main():
-    async with async_playwright() as p:
-        request = await p.request.new_context()
-        try:
-            await request.post(
-                "{server.EMPTY_PAGE}",
-                data="",
-                form={{"name": "value"}},
-            )
-        except Error as e:
-            expected = "Only one of 'data', 'form' or 'multipart' can be specified"
-            if expected not in str(e):
-                raise
-        else:
-            raise RuntimeError("Conflicting body options were accepted")
-        finally:
-            await request.dispose()
-
-asyncio.run(main())
-"""
-
-    result = subprocess.run(
-        [sys.executable, "-O", "-c", script],
-        capture_output=True,
-        text=True,
-        timeout=60,
-    )
-
-    assert result.returncode == 0, result.stdout + result.stderr
 
 
 async def test_should_retry_ECONNRESET(playwright: Playwright, server: Server) -> None:

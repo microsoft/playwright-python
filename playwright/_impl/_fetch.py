@@ -396,7 +396,9 @@ class APIRequestContext(ChannelOwner):
             + (1 if form is not None else 0)
             + (1 if multipart is not None else 0)
         ) > 1:
-            raise Error("Only one of 'data', 'form' or 'multipart' can be specified")
+            raise AssertionError(
+                "Only one of 'data', 'form' or 'multipart' can be specified"
+            )
         assert (
             maxRedirects is None or maxRedirects >= 0
         ), "'max_redirects' must be greater than or equal to '0'"
