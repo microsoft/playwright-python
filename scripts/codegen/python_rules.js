@@ -191,6 +191,18 @@ module.exports = {
     // No docs alias.
     '*.*.storageState': 'StorageState',
     // No docs alias.
+    '*.storageState.cookies': 'StorageStateCookie',
+    // No docs alias.
+    '*.*.storageState.cookies': 'StorageStateCookie',
+    // No docs alias.
+    '*.storageState.origins': 'OriginState',
+    // No docs alias.
+    '*.*.storageState.origins': 'OriginState',
+    // The docs alias is `WebStorageItem`, which maps to NameValue elsewhere.
+    '*.storageState.origins.localStorage': 'LocalStorageEntry',
+    // The docs alias is `WebStorageItem`, which maps to NameValue elsewhere.
+    '*.*.storageState.origins.localStorage': 'LocalStorageEntry',
+    // No docs alias.
     '*.addCookies.cookies': 'SetCookieParam',
     // No docs alias.
     '*.timing': 'ResourceTiming',
@@ -216,6 +228,21 @@ module.exports = {
     'Page.pdf.margin': 'PdfMargins',
     // The docs alias is `Location`, which maps to DebuggerLocation elsewhere.
     'Tracing.group.location': 'TracingGroupLocation',
+  },
+
+  // `total=` of a TypedDict, where it differs from the rule "total=False if
+  // any field is optional". Keyed by struct name.
+  structTotal: {
+    // Shipped as total=True, although `line` and `column` are optional.
+    DebuggerLocation: true,
+    // Shipped as total=True, although every field is optional.
+    SecurityDetails: true,
+    // Shipped as total=False, although every field is required.
+    StorageState: false,
+    // Shipped as total=False, although every field is required.
+    StorageStateCookie: false,
+    // Shipped as total=True, although `line` and `column` are optional.
+    TracingGroupLocation: true,
   },
 
   // Old implementation: the module in playwright/_impl/ that holds each class.

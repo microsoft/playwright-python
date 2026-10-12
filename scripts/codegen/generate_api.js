@@ -18,10 +18,11 @@
 // @ts-check
 
 // Generates the public Python API (playwright/{async,sync}_api/_generated.py)
-// from the upstream Playwright docs (docs/src/api in microsoft/playwright).
+// and its TypedDicts (playwright/_impl/_api_structures.py) from the upstream
+// Playwright docs (docs/src/api in microsoft/playwright).
 //
 // Usage:
-//   PW_SRC_DIR=<microsoft/playwright checkout> node scripts/codegen/generate_api.js --flavor async|sync [--out <file>]
+//   PW_SRC_DIR=<microsoft/playwright checkout> node scripts/codegen/generate_api.js --flavor async|sync|structs [--out <file>]
 //
 // The docs are parsed with the upstream parser (utils/doclint/api_parser.js) and
 // filtered for Python. Facts that the docs do not contain come from
@@ -102,8 +103,8 @@ function parseArgs(argv) {
     else
       fail(`Unknown argument: ${argv[i]}`);
   }
-  if (!['async', 'sync'].includes(result.flavor))
-    fail(`--flavor must be "async" or "sync", got "${result.flavor}"`);
+  if (!['async', 'sync', 'structs'].includes(result.flavor))
+    fail(`--flavor must be "async", "sync" or "structs", got "${result.flavor}"`);
   return result;
 }
 
@@ -133,6 +134,8 @@ const errors = [];
 const usedRules = new Set();
 /** @type {Set<string>} */
 const usedStructs = new Set();
+/** @type {Map<string, PyType[]>} every use of each struct name */
+const structUses = new Map();
 
 // ---------------------------------------------------------------------------
 // Names.
@@ -477,6 +480,10 @@ function structName(t) {
     return 'typing.Dict';
   }
   usedStructs.add(name);
+  const uses = structUses.get(name) || [];
+  if (!uses.some(use => use.place === t.place && use.dir === t.dir))
+    uses.push(t);
+  structUses.set(name, uses);
   return name;
 }
 
@@ -844,6 +851,7 @@ function orderedClasses() {
 // parameters in the _generated.py files that the old generator wrote. That
 // generator read playwright/_impl, so its order followed the implementation.
 // The file lists only the places where that order differs from the docs order.
+// It also holds the class order of the hand-written _api_structures.py.
 // It keeps the diff of the switch to this generator small enough to review.
 //
 // The section also reproduces two more habits of the old generator:
@@ -1192,8 +1200,96 @@ function emitClass(clazz, out) {
   out.push(`mapping.register(${clazz.name}Impl, ${clazz.name})`);
 }
 
+// ---------------------------------------------------------------------------
+// The public TypedDicts (playwright/_impl/_api_structures.py).
+
+/**
+ * The fields of one use of a struct, as Python annotation text.
+ * @param {PyType} t
+ */
+function structFields(t) {
+  return t.docType.properties.map(p => {
+    const place = `${t.place}.${p.name}`;
+    const type = toPy(typeAt(place, p.type), { dir: t.dir || 'out', place });
+    if (someType(type, c => c.kind === 'class' && !!c.wrapper))
+      errors.push(`The struct field ${place} refers to a class; _api_structures.py cannot import it`);
+    const text = annotation(type);
+    const optional = !p.required;
+    return { name: p.name, optional, text: optional && !text.startsWith('typing.Optional[') ? `typing.Optional[${text}]` : text };
+  });
+}
+
+/**
+ * Every struct that the API uses, with its fields. Nested structs are found
+ * while the fields are rendered.
+ */
+function buildStructs() {
+  /** @type {Map<string, { fields: { name: string, optional: boolean, text: string }[] }>} */
+  const structs = new Map();
+  for (let pending = [...structUses.keys()]; pending.length; pending = [...structUses.keys()].filter(name => !structs.has(name))) {
+    for (const name of pending) {
+      const uses = /** @type {PyType[]} */ (structUses.get(name));
+      // A struct used for input and output takes the output types:
+      // `List` rather than `Sequence`, `pathlib.Path` rather than `str | Path`.
+      const dir = uses.some(use => use.dir === 'out') ? 'out' : 'in';
+      const fields = structFields({ ...uses[0], dir });
+      const key = JSON.stringify(fields);
+      for (const use of uses.slice(1)) {
+        if (JSON.stringify(structFields({ ...use, dir })) !== key)
+          errors.push(`The struct ${name} has different fields at ${uses[0].place} and ${use.place}`);
+      }
+      structs.set(name, { fields });
+    }
+  }
+  return structs;
+}
+
+/**
+ * Struct names in alphabetical order, each after the structs that its fields
+ * use: the annotations are evaluated when the class is created.
+ * @param {Map<string, { fields: { text: string }[] }>} structs
+ */
+function orderedStructNames(structs) {
+  const result = [];
+  const done = new Set();
+  const visit = name => {
+    if (done.has(name))
+      return;
+    done.add(name);
+    const text = /** @type {any} */ (structs.get(name)).fields.map(f => f.text).join(' ');
+    for (const other of [...structs.keys()].sort()) {
+      if (other !== name && new RegExp(`\\b${other}\\b`).test(text))
+        visit(other);
+    }
+    result.push(name);
+  };
+  [...structs.keys()].sort().forEach(visit);
+  return result;
+}
+
+function emitStructs() {
+  const structs = buildStructs();
+  const body = [];
+  // TEMPORARY: sortByLegacyOrder() is the legacy order.
+  for (const name of sortByLegacyOrder(orderedStructNames(structs), legacyOrder?.structs, name => name, '_api_structures.py')) {
+    const { fields } = /** @type {any} */ (structs.get(name));
+    const totalRule = lookupRule('structTotal', name);
+    const total = totalRule !== undefined ? totalRule : !fields.some(f => f.optional);
+    body.push('', '', `class ${name}(TypedDict${total ? '' : ', total=False'}):`);
+    for (const field of fields)
+      body.push(`    ${field.name}: ${field.text.replace(/\btyping\./g, '').replace(/\bpathlib\.Path\b/g, 'Path')}`);
+  }
+  const text = body.join('\n');
+  const typingNames = ['Any', 'Dict', 'List', 'Literal', 'Optional', 'Pattern', 'Sequence', 'TypedDict', 'Union'].filter(n => new RegExp(`\\b${n}\\b`).test(text));
+  const header = [LICENSE, '# Generated from the docs by scripts/codegen/generate_api.js. Do not edit.', ''];
+  if (/\bPath\b/.test(text))
+    header.push('from pathlib import Path');
+  header.push(`from typing import ${typingNames.join(', ')}`);
+  return [...header, text, ''].join('\n');
+}
+
 function checkRules() {
-  for (const table of ['extraMembers', 'extraOptions', 'skipArgs', 'argNames', 'typeOverrides', 'positional', 'structRenames', 'structNamesByPlace', 'implModules']) {
+  for (const table of ['extraMembers', 'extraOptions', 'skipArgs', 'argNames', 'typeOverrides', 'positional', 'structRenames', 'structNamesByPlace', 'structTotal', 'implModules']) {
     for (const key of Object.keys(/** @type {any} */ (rules)[table])) {
       if (!usedRules.has(`${table}:${key}`))
         errors.push(`${table}: the entry "${key}" no longer matches anything; remove it`);
@@ -1227,6 +1323,10 @@ function main() {
   else
     header.push('from playwright._impl._sync_base import EventContextManager, SyncBase, SyncContextManager, mapping');
 
+  // Every flavor builds the structs, so that every run checks them.
+  const structsText = emitStructs();
+  const text = options.flavor === 'structs' ? structsText : [...header, ...body, ''].join('\n');
+
   checkRules();
   checkLegacyUnions();  // TEMPORARY: the legacy order.
   if (errors.length) {
@@ -1235,7 +1335,6 @@ function main() {
     process.exit(1);
   }
 
-  const text = [...header, ...body, ''].join('\n');
   if (options.out)
     fs.writeFileSync(options.out, text);
   else

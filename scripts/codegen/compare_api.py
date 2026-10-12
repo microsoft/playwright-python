@@ -27,7 +27,10 @@ compares what users can see and what the generated code does:
   (unions are flattened and sorted, Optional[X] is Union[X, None],
   quotes are removed, Literal values are sorted and merged);
 - the body: the call into the implementation, with keyword arguments sorted;
-- docstrings (reported separately; they are allowed to differ).
+- docstrings (reported separately; they are allowed to differ);
+- for TypedDicts (`playwright/_impl/_api_structures.py`): `total=`, the field
+  names and the field annotations (the field order is reported separately,
+  because it is allowed to differ).
 
 Exit code is 1 if any difference outside the allowed kinds is found.
 """
@@ -40,7 +43,7 @@ import sys
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Set, Tuple
 
-ALLOWED_KINDS = {"kwonly-order", "docstring", "member-inherited"}
+ALLOWED_KINDS = {"kwonly-order", "docstring", "member-inherited", "field-order"}
 
 
 @dataclass
@@ -66,7 +69,9 @@ class Func:
 class Klass:
     name: str
     bases: List[str]
+    keywords: List[str] = field(default_factory=list)
     members: Dict[str, Func] = field(default_factory=dict)
+    fields: Dict[str, str] = field(default_factory=dict)
 
 
 def _strip_typing(name: str) -> str:
@@ -233,8 +238,15 @@ def load(path: str) -> Dict[str, Klass]:
     for node in module.body:
         if not isinstance(node, ast.ClassDef):
             continue
-        klass = Klass(node.name, [ast.unparse(b) for b in node.bases])
+        klass = Klass(
+            node.name,
+            [ast.unparse(b) for b in node.bases],
+            [ast.unparse(k) for k in node.keywords],
+        )
         for item in node.body:
+            if isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name):
+                klass.fields[item.target.id] = canon(item.annotation)
+                continue
             if not isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)):
                 continue
             decorators = [ast.unparse(d) for d in item.decorator_list]
@@ -364,6 +376,29 @@ def _inherited(classes: Dict[str, Klass], klass: Klass, member: str) -> Optional
     return None
 
 
+def compare_fields(
+    where: str, old: Dict[str, str], new: Dict[str, str], out: List[Difference]
+) -> None:
+    for name in old:
+        if name not in new:
+            out.append(Difference("field-missing", f"{where}.{name}", old[name], "-"))
+        elif old[name] != new[name]:
+            out.append(
+                Difference("field-type", f"{where}.{name}", old[name], new[name])
+            )
+    for name in new:
+        if name not in old:
+            out.append(Difference("field-extra", f"{where}.{name}", "-", new[name]))
+    common_old = [n for n in old if n in new]
+    common_new = [n for n in new if n in old]
+    if common_old != common_new:
+        out.append(
+            Difference(
+                "field-order", where, ", ".join(common_old), ", ".join(common_new)
+            )
+        )
+
+
 def compare(old: Dict[str, Klass], new: Dict[str, Klass]) -> List[Difference]:
     out: List[Difference] = []
     for name in sorted(set(old) - set(new)):
@@ -374,6 +409,9 @@ def compare(old: Dict[str, Klass], new: Dict[str, Klass]) -> List[Difference]:
         o, n = old[name], new[name]
         if o.bases != n.bases:
             out.append(Difference("bases", name, str(o.bases), str(n.bases)))
+        if o.keywords != n.keywords:
+            out.append(Difference("keywords", name, str(o.keywords), str(n.keywords)))
+        compare_fields(name, o.fields, n.fields, out)
         for member in sorted(set(o.members) - set(n.members)):
             inherited = _inherited(new, n, member)
             if inherited:

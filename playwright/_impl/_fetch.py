@@ -25,14 +25,11 @@ from playwright._impl._api_structures import (
     ClientCertificate,
     Cookie,
     FilePayload,
-    FormField,
-    Headers,
     HttpCredentials,
     ProxySettings,
     RemoteAddr,
     ResourceTiming,
     SecurityDetails,
-    ServerFilePayload,
     SetCookieParam,
     StorageState,
 )
@@ -51,6 +48,7 @@ from playwright._impl._helper import (
     object_to_array,
     to_impl,
 )
+from playwright._impl._internal_structures import FormField, Headers, ServerFilePayload
 from playwright._impl._network import (
     serialize_headers,
     to_clear_cookies_params,
