@@ -15,12 +15,12 @@ import asyncio
 import base64
 from typing import TYPE_CHECKING, Optional, cast
 
-from playwright._impl._api_structures import HeadersArray
 from playwright._impl._helper import (
     HarLookupResult,
     RouteFromHarNotFoundPolicy,
     URLMatch,
 )
+from playwright._impl._internal_structures import HeadersArray
 from playwright._impl._local_utils import LocalUtils
 
 if TYPE_CHECKING:  # pragma: no cover

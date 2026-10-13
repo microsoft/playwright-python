@@ -38,8 +38,6 @@ from urllib import parse
 
 from playwright._impl._api_structures import (
     ClientCertificate,
-    Headers,
-    HeadersArray,
     HttpCredentials,
     RemoteAddr,
     RequestSizes,
@@ -61,6 +59,7 @@ from playwright._impl._helper import (
     locals_to_params,
     url_matches,
 )
+from playwright._impl._internal_structures import Headers, HeadersArray
 from playwright._impl._str_utils import escape_regex_flags
 from playwright._impl._waiter import Waiter
 

@@ -35,7 +35,6 @@ from typing import (
 )
 
 from playwright._impl._api_structures import (
-    AriaRole,
     FilePayload,
     FloatRect,
     PdfMargins,
@@ -85,6 +84,7 @@ from playwright._impl._helper import (
     url_matches,
 )
 from playwright._impl._input import Keyboard, Mouse, Touchscreen
+from playwright._impl._internal_structures import AriaRole
 from playwright._impl._js_handle import (
     JSHandle,
     Serializable,

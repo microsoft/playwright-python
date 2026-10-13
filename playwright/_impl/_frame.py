@@ -30,14 +30,7 @@ from typing import (
 
 from pyee import EventEmitter
 
-from playwright._impl._api_structures import (
-    AriaRole,
-    DropPayload,
-    FilePayload,
-    FrameExpectOptions,
-    FrameExpectResult,
-    Position,
-)
+from playwright._impl._api_structures import DropPayload, FilePayload, Position
 from playwright._impl._connection import (
     ChannelOwner,
     from_channel,
@@ -57,6 +50,11 @@ from playwright._impl._helper import (
     locals_to_params,
     monotonic_time,
     url_matches,
+)
+from playwright._impl._internal_structures import (
+    AriaRole,
+    FrameExpectOptions,
+    FrameExpectResult,
 )
 from playwright._impl._js_handle import (
     JSHandle,

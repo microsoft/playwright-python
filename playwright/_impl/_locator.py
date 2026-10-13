@@ -32,12 +32,9 @@ from typing import (
 )
 
 from playwright._impl._api_structures import (
-    AriaRole,
     DropPayload,
     FilePayload,
     FloatRect,
-    FrameExpectOptions,
-    FrameExpectResult,
     Position,
 )
 from playwright._impl._element_handle import ElementHandle
@@ -48,6 +45,11 @@ from playwright._impl._helper import (
     locals_to_params,
     monotonic_time,
     to_impl,
+)
+from playwright._impl._internal_structures import (
+    AriaRole,
+    FrameExpectOptions,
+    FrameExpectResult,
 )
 from playwright._impl._js_handle import Serializable, serialize_argument
 from playwright._impl._str_utils import (

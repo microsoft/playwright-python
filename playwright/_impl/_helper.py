@@ -53,7 +53,7 @@ from playwright._impl._greenlets import RouteGreenlet
 from playwright._impl._str_utils import escape_regex_flags
 
 if TYPE_CHECKING:  # pragma: no cover
-    from playwright._impl._api_structures import HeadersArray
+    from playwright._impl._internal_structures import HeadersArray
     from playwright._impl._network import Request, Response, Route, WebSocketRoute
 
 URLMatch = Union[str, Pattern[str], Callable[[str], bool]]

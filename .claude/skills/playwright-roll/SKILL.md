@@ -162,7 +162,7 @@ Implement the change in `playwright/_impl/<module>.py`. Use the upstream JS impl
 | `(await this._channel.foo()).value` | `await self._channel.send("foo", None)` (Python's `send()` auto-unwraps single-key responses; only call `send_return_as_dict` when the protocol returns multiple keys.) |
 | `(await this._channel.foo()).artifact` (multi-key, may be empty) | `result = await self._channel.send_return_as_dict("foo", None); (result or {}).get("artifact")` — `send_return_as_dict` returns **`None`** (not `{}`) when the protocol response carries no fields. |
 | `try { ... } catch (e) { if (isTargetClosedError(e)) return; throw e; }` | `try: ...; except Exception as e: if is_target_closed_error(e): return; raise` (import from `playwright._impl._errors`) |
-| Inline `[Object]` return like `{endpoint: string}` | A `TypedDict` in `playwright/_impl/_api_structures.py`. The generator names the struct from its docs `* alias:` (or a `structRenames` / `structNamesByPlace` entry in `python_rules.js`) and imports that name from `_api_structures.py`. See `RemoteAddr`, `BrowserBindResult`, `DebuggerPausedDetails`. |
+| Inline `[Object]` return like `{endpoint: string}` | A `TypedDict` in `playwright/_impl/_api_structures.py`, which the generator writes. It names the struct from its docs `* alias:` (or a `structRenames` / `structNamesByPlace` entry in `python_rules.js`). See `RemoteAddr`, `BrowserBindResult`, `DebuggerPausedDetails`. |
 | `binary` event/return field | The Python channel layer hands you a base64 string. Decode with `base64.b64decode(value)` before exposing as `bytes`. See `Screencast._dispatch_frame`. |
 
 When implementing a new ChannelOwner subclass (one constructed by the protocol with `(parent, type, guid, initializer)`):
@@ -172,8 +172,9 @@ When implementing a new ChannelOwner subclass (one constructed by the protocol w
 When implementing a non-ChannelOwner wrapper class (a plain class that holds a Page/Context reference, like `Screencast`, `Clock`):
 - Set `self._loop = parent._loop` and `self._dispatcher_fiber = parent._dispatcher_fiber` in `__init__`. The generated `AsyncBase`/`SyncBase` wrappers read these; missing them gives `AttributeError: 'X' object has no attribute '_loop'` at first use.
 
-When adding a new TypedDict in `_api_structures.py`:
-- Its name must match what the generator emits: the struct's `* alias:` in the docs, or a `structRenames` / `structNamesByPlace` entry in `python_rules.js`. The generator fails with "No Python name for the struct at …" until one exists.
+When the docs add a new struct (an inline `[Object]` with named fields):
+- The generator writes its TypedDict into `_api_structures.py`. Never edit that file by hand; internal types go in `_internal_structures.py`.
+- It needs a Python name: the struct's `* alias:` in the docs, or a `structRenames` / `structNamesByPlace` entry in `python_rules.js`. The generator fails with "No Python name for the struct at …" until one exists. Nested structs need names too.
 - Re-export it from both `playwright/async_api/__init__.py` and `playwright/sync_api/__init__.py`: assignment line plus an entry in `__all__`. Same pattern as `ViewportSize`, `RemoteAddr`.
 
 If the new API was previously recorded in `python_rules.js` (for example in `skipArgs`), **remove that entry** when implementing it. The generator fails on entries that no longer match anything, so stale entries cannot pile up.
@@ -203,7 +204,7 @@ The generator fails with "the entry … no longer matches anything; remove it" w
 
 - "Internal tooling" classes/methods whose `langs` field is empty (`Screencast.*`, `Debugger.*`, `Page.pick_locator`, `BrowserContext.debugger`, `Browser.bind/unbind`, `Page.{clear,console}_*`). The 1.59 roll suppressed all of these initially, then had to walk every one back. Verify `langs` first.
 - A renamed positional parameter (mypy: unexpected keyword argument `newName` for the impl method). Just rename in `_impl/` and update the channel-send dict key.
-- A struct return the generator cannot name ("No Python name for the struct at …"). Add a TypedDict and name it — don't type it `Dict`.
+- A struct return the generator cannot name ("No Python name for the struct at …"). Name it, so that the generator writes a TypedDict — don't type it `Dict`.
 
 #### N/A
 
@@ -247,11 +248,12 @@ Failure modes and fixes:
 | mypy: `"XImpl" has no attribute "y"` in `_generated.py` | The docs have a new member `X.y`; `_impl/` does not. | PORT it. |
 | mypy: `Unexpected keyword argument "z" for "y" of "XImpl"` | New parameter or option on an existing method. | Add the kwarg (docs camelCase name) in `_impl/`. If Python must not have it, `skipArgs`. |
 | mypy: incompatible argument type in `_generated.py` | The docs type changed, or `_impl/` declares a narrower type. | Match the type in `_impl/`, or record a `typeOverrides` entry for a justified divergence. |
-| generator: `No Python name for the struct at X.y.z` | A new inline `[Object]` with no `* alias:` in the docs. | Add the TypedDict and name it: `alias-python` upstream, or `structNamesByPlace` / `structRenames`. |
+| generator: `No Python name for the struct at X.y.z` | A new inline `[Object]` with no `* alias:` in the docs. | Name it: `alias-python` upstream, or `structNamesByPlace` / `structRenames`. |
+| generator: `The struct X has different fields at A and B` | Two places in the docs share one struct name, but their fields differ. | Give one place its own name in `structNamesByPlace`, or fix the docs. |
 | generator: `Unknown docs type "T" at X.y` | A docs type the type table in `generate_api.js` (`toPy`) does not know. | Add it to `toPy`. |
 | generator: `required parameter z follows an optional one` | The docs order params so that Python would need a default before a non-default. | Add a `positional` entry with the Python order. |
 | generator: `the entry "…" no longer matches anything; remove it` | An upstream change made a rules entry unnecessary (or renamed what it points at). | Delete it, or re-key it to the new docs name. |
-| generator: `legacy_order.json: … has no …; remove it` | A member or parameter in the temporary legacy order was removed or renamed upstream. | Delete that name from `scripts/codegen/legacy_order.json`. New members need no entry; they go last. |
+| generator: `legacy_order.json: … has no …; remove it` | A member, parameter or TypedDict in the temporary legacy order was removed or renamed upstream. | Delete that name from `scripts/codegen/legacy_order.json`. New members need no entry; they go last. |
 | `pyright … reportInconsistentOverload` (single-event class) | A class gained its first event, so there is one `Literal[…]` overload + impl, which pyright wants ≥2 of. | The generator already handles this — `emitEvents` adds a second `@typing.overload` with `event: str` when a class has exactly one event. |
 | `pre-commit` keeps reformatting `_generated.py` on each run | First run after regen always reformats once; rerun until idle. | `pre-commit run --all-files` to settle. |
 | A kwarg in `_impl/` that the docs don't mention (e.g. legacy name from a doc rename) | Nothing fails: the generator simply never passes it. | If the param is positional with no default, just rename it in `_impl/`. Check `packages/protocol/spec/*.yml` and the server dispatcher — if the wire field renamed too, also update the channel-send dict key. Only use `extraOptions` for genuinely hidden internal kwargs (`default_browser_type`). |
@@ -303,6 +305,7 @@ All keys use docs names: `Class.member` or `Class.member.arg`, with the upstream
 | `positional` | Methods whose positional parameters differ from "params positional, options keyword-only". |
 | `positionalOptions` | Option names that are positional everywhere (`predicate`). |
 | `structRenames`, `structNamesByPlace` | TypedDict names. |
+| `structTotal` | `total=` of a TypedDict, where it differs from "total=False if any field is optional". |
 | `implModules` | `_impl/` module of classes not in `_<snake_case name>.py`. |
 
 ## Tips & gotchas
@@ -313,7 +316,7 @@ All keys use docs names: `Class.member` or `Class.member.arg`, with the upstream
 - **Watch for revert pairs in the same range.** 1.59 added and reverted `Browser.isRemote` (#39613 / #39620) inside the same release. Walking chronologically lets you skip the add when you see the revert later.
 - **Watch for rename-revert pairs.** 1.59 had `Locator.normalize` → `Locator.toCode` (#39648) → `Locator.normalize` (#39754). Final state wins; only port the last.
 - **Doc renames almost always include a wire-protocol rename.** Whenever you see `### param: X.y.oldName` → `### param: X.y.newName` in a doc commit, also `git -C "$PW_SRC_DIR" show <sha> -- packages/protocol/spec/` and the corresponding `*Dispatcher.ts` file. If the wire field changed too, the channel-send dict key in `_impl/` must change. Suppressing the doc-side mismatch is hiding a real bug — the previous Python code is silently sending an unknown field that the new server ignores.
-- **TypedDicts beat `Dict[str, X]` for any structured return.** When the docs describe a return as `[Object]` with named fields, define a `TypedDict` in `_api_structures.py`, name it for the generator, and re-export it from both public `__init__.py` files. Zero runtime cost (it's still a `dict`), and the docstrings expand its fields from the docs.
+- **TypedDicts beat `Dict[str, X]` for any structured return.** When the docs describe a return as `[Object]` with named fields, name the struct for the generator, which writes its `TypedDict` into `_api_structures.py`, and re-export it from both public `__init__.py` files. Zero runtime cost (it's still a `dict`), and the docstrings expand its fields from the docs.
 - **Positional renames are free.** A param with no default before any `*` separator is positional-or-keyword in Python, but realistic call sites pass it positionally. Renaming such a param doesn't break callers.
 - **The "Backport changes" GitHub issue can be misleading.** In the 1.59 roll its checkboxes were all marked `[x]` with annotations like "✅ IMPLEMENTED", but several of those features had not actually been merged into the Python port. Trust the `docs/src/api/` walk over the issue.
 - **The docs parser has quirks.** In a type expression, everything after a function's `:` is its return type, so `[function]([A]):[any]|[B]` is one function returning `any|B`. Put a function with a return type last in a union. The parser also drops the second argument of a function type when the first is a union (see the `WebSocketRoute.onClose.handler` override, which builds the type by hand). And when a `### param:` header name differs from the backticked name on its type line, the header name is the docs name and the type-line name becomes the alias (see `argNames`).

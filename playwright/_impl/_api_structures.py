@@ -12,15 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Generated from the docs by scripts/codegen/generate_api.js. Do not edit.
+
 from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Sequence, TypedDict, Union
-
-# These are the structures that we like keeping in a JSON form for their potential
-# reuse between SDKs / services. They are public and are a part of the
-# stable API.
-
-# Explicitly mark optional params as such for the documentation
-# If there is at least one optional param, set total=False for better mypy handling.
 
 
 class Cookie(TypedDict, total=False):
@@ -46,7 +41,6 @@ class StorageStateCookie(TypedDict, total=False):
     sameSite: Literal["Lax", "None", "Strict"]
 
 
-# TODO: We are waiting for PEP705 so SetCookieParam can be readonly and matches Cookie.
 class SetCookieParam(TypedDict, total=False):
     name: str
     value: str
@@ -171,7 +165,7 @@ class FilePayload(TypedDict):
 
 class DropPayload(TypedDict, total=False):
     files: Optional[
-        Union[str, Path, FilePayload, Sequence[Union[str, Path]], Sequence[FilePayload]]
+        Union[str, Path, Sequence[Union[str, Path]], FilePayload, Sequence[FilePayload]]
     ]
     data: Optional[Dict[str, str]]
 
@@ -196,136 +190,6 @@ class SecurityDetails(TypedDict):
 class NameValue(TypedDict):
     name: str
     value: str
-
-
-HeadersArray = List[NameValue]
-Headers = Dict[str, str]
-
-
-class ServerFilePayload(TypedDict):
-    name: str
-    mimeType: str
-    buffer: str
-
-
-class FormField(TypedDict, total=False):
-    name: str
-    value: Optional[str]
-    file: Optional[ServerFilePayload]
-
-
-class ExpectedTextValue(TypedDict, total=False):
-    string: str
-    regexSource: str
-    regexFlags: str
-    matchSubstring: bool
-    normalizeWhiteSpace: bool
-    ignoreCase: Optional[bool]
-
-
-class FrameExpectOptions(TypedDict, total=False):
-    expressionArg: Any
-    expectedText: Optional[Sequence[ExpectedTextValue]]
-    expectedNumber: Optional[float]
-    expectedValue: Optional[Any]
-    useInnerText: Optional[bool]
-    isNot: bool
-    timeout: Optional[float]
-    pseudo: Optional[str]
-
-
-class FrameExpectResult(TypedDict, total=False):
-    matches: bool
-    received: Any
-    log: Optional[List[str]]
-    errorMessage: Optional[str]
-    timedOut: Optional[bool]
-
-
-AriaRole = Literal[
-    "alert",
-    "alertdialog",
-    "application",
-    "article",
-    "banner",
-    "blockquote",
-    "button",
-    "caption",
-    "cell",
-    "checkbox",
-    "code",
-    "columnheader",
-    "combobox",
-    "complementary",
-    "contentinfo",
-    "definition",
-    "deletion",
-    "dialog",
-    "directory",
-    "document",
-    "emphasis",
-    "feed",
-    "figure",
-    "form",
-    "generic",
-    "grid",
-    "gridcell",
-    "group",
-    "heading",
-    "img",
-    "insertion",
-    "link",
-    "list",
-    "listbox",
-    "listitem",
-    "log",
-    "main",
-    "marquee",
-    "math",
-    "menu",
-    "menubar",
-    "menuitem",
-    "menuitemcheckbox",
-    "menuitemradio",
-    "meter",
-    "navigation",
-    "none",
-    "note",
-    "option",
-    "paragraph",
-    "presentation",
-    "progressbar",
-    "radio",
-    "radiogroup",
-    "region",
-    "row",
-    "rowgroup",
-    "rowheader",
-    "scrollbar",
-    "search",
-    "searchbox",
-    "separator",
-    "slider",
-    "spinbutton",
-    "status",
-    "strong",
-    "subscript",
-    "superscript",
-    "switch",
-    "tab",
-    "table",
-    "tablist",
-    "tabpanel",
-    "term",
-    "textbox",
-    "time",
-    "timer",
-    "toolbar",
-    "tooltip",
-    "tree",
-    "treegrid",
-    "treeitem",
-]
 
 
 class TracingGroupLocation(TypedDict):
