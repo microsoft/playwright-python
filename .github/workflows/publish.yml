@@ -30,8 +30,25 @@ jobs:
         fetch-depth: 0
     - name: Check the tag
       run: |
-        if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+        if [[ ! "$TAG" =~ ^v([0-9]+\.[0-9]+)\.[0-9]+$ ]]; then
           echo "Can only publish a release tag (vX.Y.Z), got: $TAG"
+          exit 1
+        fi
+        MINOR="${BASH_REMATCH[1]}"
+        BRANCH="release-$MINOR"
+        if ! git rev-parse --verify --quiet "origin/$BRANCH" > /dev/null; then
+          echo "Branch $BRANCH does not exist, so $TAG cannot be on it"
+          exit 1
+        fi
+        if ! git merge-base --is-ancestor HEAD "origin/$BRANCH"; then
+          echo "$TAG is not on $BRANCH"
+          exit 1
+        fi
+        # Release branches are cut from main, so the head of an older release
+        # branch can also be on $BRANCH. Check the driver version too.
+        DRIVER="$(cat DRIVER_VERSION)"
+        if [[ "$DRIVER" != "$MINOR."* ]]; then
+          echo "$TAG has driver $DRIVER, expected $MINOR.x"
           exit 1
         fi
     - name: Set up Python
