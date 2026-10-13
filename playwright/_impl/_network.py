@@ -261,7 +261,7 @@ class Request(ChannelOwner):
             return None
         content_type = self.headers.get("content-type")
         if content_type and "application/x-www-form-urlencoded" in content_type:
-            return dict(parse.parse_qsl(post_data))
+            return dict(parse.parse_qsl(post_data, keep_blank_values=True))
         try:
             return json.loads(post_data)
         except Exception:

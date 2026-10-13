@@ -55,12 +55,12 @@ async def test_should_parse_the_data_if_content_type_is_application_x_www_form_u
             headers: {
             'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
             },
-            body: 'foo=bar&baz=123'
+            body: 'foo=bar&baz=123&empty='
         })"""
         )
     request = await request_info.value
     assert request
-    assert request.post_data_json == {"foo": "bar", "baz": "123"}
+    assert request.post_data_json == {"foo": "bar", "baz": "123", "empty": ""}
 
 
 async def test_existing_response_should_return_response_after_it_is_received(
