@@ -645,7 +645,12 @@ def is_json_parsable(value: Any) -> bool:
     if not isinstance(value, str):
         return False
     try:
-        json.loads(value)
+        # NaN and Infinity are not valid JSON, unlike what json.loads() accepts by default.
+        json.loads(value, parse_constant=_reject_json_constant)
         return True
-    except json.JSONDecodeError:
+    except ValueError:
         return False
+
+
+def _reject_json_constant(value: str) -> Any:
+    raise ValueError(f"{value} is not valid JSON")

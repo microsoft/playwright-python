@@ -391,6 +391,17 @@ async def test_should_json_stringify_string_body_when_content_type_is_applicatio
         ),
     )
     assert req.post_body == b'"foo"'
+    # https://github.com/microsoft/playwright/issues/43329
+    # NaN is not valid JSON, even though json.loads() accepts it.
+    [req, _] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        request.post(
+            server.EMPTY_PAGE,
+            headers={"content-type": "application/json"},
+            data="NaN",
+        ),
+    )
+    assert req.post_body == b'"NaN"'
     await request.dispose()
 
 
