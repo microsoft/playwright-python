@@ -369,6 +369,9 @@ async def test_response_headers_should_work(page: Page, server: Server) -> None:
     assert response
     assert response.headers["foo"] == "bar"
     assert (await response.all_headers())["foo"] == "bar"
+    # Looking up a missing header must not add it.
+    assert await response.header_value("x-missing") is None
+    assert "x-missing" not in await response.all_headers()
 
 
 async def test_request_post_data_should_work(page: Page, server: Server) -> None:
