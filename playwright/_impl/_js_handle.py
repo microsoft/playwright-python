@@ -185,7 +185,8 @@ def serialize_value(
     if isinstance(value, ParseResult):
         return {"u": urlunparse(value)}
     if isinstance(value, Pattern):
-        assert isinstance(value.pattern, str), "Only str patterns are supported."
+        if not isinstance(value.pattern, str):
+            raise Error("Only str patterns are supported.")
         return {"r": {"p": value.pattern, "f": escape_regex_flags(value)}}
 
     if value in visitor_info.visited:

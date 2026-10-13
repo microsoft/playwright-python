@@ -354,9 +354,8 @@ class APIRequestContext(ChannelOwner):
             if isinstance(to_impl(urlOrRequest), network.Request)
             else None
         )
-        assert request or isinstance(
-            urlOrRequest, str
-        ), "First argument must be either URL string or Request"
+        if not request and not isinstance(urlOrRequest, str):
+            raise Error("First argument must be either URL string or Request")
         return await self._inner_fetch(
             request,
             url,
@@ -391,17 +390,16 @@ class APIRequestContext(ChannelOwner):
     ) -> "APIResponse":
         if self._close_reason:
             raise TargetClosedError(self._close_reason)
-        assert (
+        if (
             (1 if data is not None else 0)
             + (1 if form is not None else 0)
             + (1 if multipart is not None else 0)
-        ) <= 1, "Only one of 'data', 'form' or 'multipart' can be specified"
-        assert (
-            maxRedirects is None or maxRedirects >= 0
-        ), "'max_redirects' must be greater than or equal to '0'"
-        assert (
-            maxRetries is None or maxRetries >= 0
-        ), "'max_retries' must be greater than or equal to '0'"
+        ) > 1:
+            raise Error("Only one of 'data', 'form' or 'multipart' can be specified")
+        if maxRedirects is not None and maxRedirects < 0:
+            raise Error("'max_redirects' must be greater than or equal to '0'")
+        if maxRetries is not None and maxRetries < 0:
+            raise Error("'max_retries' must be greater than or equal to '0'")
         url = url or (request.url if request else url)
         method = method or (request.method if request else "GET")
         # Cannot call allHeaders() here as the request may be paused inside route handler.
@@ -518,9 +516,8 @@ async def _form_data_field_to_form_field(name: str, value: Any) -> FormField:
         )
     if is_file_payload(value):
         payload = cast(FilePayload, value)
-        assert isinstance(
-            payload["buffer"], bytes
-        ), f"Unexpected buffer type of form field {name!r}"
+        if not isinstance(payload["buffer"], bytes):
+            raise Error(f"Unexpected buffer type of form field {name!r}")
         return FormField(name=name, file=file_payload_to_json(payload))
     if isinstance(value, (str, int, float, bool)):
         return FormField(name=name, value=str(value))

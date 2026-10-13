@@ -397,7 +397,7 @@ async def test_evaluate_return_regex_unsupported_by_python(page: Page) -> None:
 
 
 async def test_evaluate_throw_for_unsupported_regex(page: Page) -> None:
-    with pytest.raises(AssertionError, match="Unexpected re.Pattern flag"):
+    with pytest.raises(Error, match="Unexpected re.Pattern flag"):
         await page.evaluate("a => a", re.compile("foo", re.VERBOSE))
-    with pytest.raises(AssertionError, match="Only str patterns are supported"):
+    with pytest.raises(Error, match="Only str patterns are supported"):
         await page.evaluate("a => a", re.compile(b"foo"))

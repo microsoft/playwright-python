@@ -16,6 +16,8 @@ import json
 import re
 from typing import Pattern, Union
 
+from playwright._impl._errors import Error
+
 
 def escape_regex_flags(pattern: Pattern) -> str:
     flags = ""
@@ -27,11 +29,14 @@ def escape_regex_flags(pattern: Pattern) -> str:
         flags += "s"
     if (pattern.flags & int(re.MULTILINE)) != 0:
         flags += "m"
-    assert (
+    if (
         pattern.flags
         & ~(int(re.MULTILINE) | int(re.IGNORECASE) | int(re.DOTALL) | int(re.UNICODE))
-        == 0
-    ), "Unexpected re.Pattern flag, only MULTILINE, IGNORECASE and DOTALL are supported."
+        != 0
+    ):
+        raise Error(
+            "Unexpected re.Pattern flag, only MULTILINE, IGNORECASE and DOTALL are supported."
+        )
     return flags
 
 
