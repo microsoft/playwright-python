@@ -1,0 +1,83 @@
+name: Publish
+
+# Builds the wheels of a release tag and uploads them to PyPI. Uses PyPI trusted
+# publishing: PyPI trusts this workflow file in the "pypi" environment, so no
+# PyPI token is stored. Runs when a release is published. To publish an existing
+# tag, run it by hand with the tag name.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish, for example v1.64.0"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build wheels
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.tag || github.event.release.tag_name }}
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        ref: refs/tags/${{ env.TAG }}
+        # setuptools-scm reads the version from the tag.
+        fetch-depth: 0
+    - name: Check the tag
+      run: |
+        if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          echo "Can only publish a release tag (vX.Y.Z), got: $TAG"
+          exit 1
+        fi
+    - name: Set up Python
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      with:
+        python-version: "3.10"
+    - name: Set up Node.js
+      uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version: '24'
+    - name: Install dependencies
+      run: python -m pip install "$(grep '^build==' local-requirements.txt)"
+    - name: Build wheels
+      run: |
+        for wheel in $(python setup.py --list-wheels); do
+          PLAYWRIGHT_TARGET_WHEEL=$wheel python -m build --wheel --outdir dist
+        done
+    - name: Check the wheels
+      run: |
+        ls -l dist
+        test "$(ls dist/*.whl | wc -l)" -eq "$(python setup.py --list-wheels | wc -l)"
+        for file in dist/*; do
+          if [[ "$(basename "$file")" != "playwright-${TAG#v}-"*.whl ]]; then
+            echo "Unexpected file for $TAG: $file"
+            exit 1
+          fi
+        done
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: wheels
+        path: dist/
+        if-no-files-found: error
+
+  publish:
+    name: Upload to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/playwright/
+    permissions:
+      # Lets the job get the GitHub OIDC token that PyPI trusted publishing needs.
+      id-token: write
+    steps:
+    - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      with:
+        name: wheels
+        path: dist/
+    - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
