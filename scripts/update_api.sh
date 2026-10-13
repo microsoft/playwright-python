@@ -3,13 +3,14 @@
 # Generates the public API (playwright/{async,sync}_api/_generated.py) and its
 # TypedDicts (playwright/_impl/_api_structures.py) from the Playwright API docs
 # (docs/src/api) in a microsoft/playwright checkout, pointed to by PW_SRC_DIR.
-# Use the release branch for the version in DRIVER_VERSION (for example
-# release-1.64). The generator is scripts/codegen/generate_api.js; Python facts
-# that the docs do not contain are in scripts/codegen/python_rules.js.
+# Use a separate checkout on the exact release branch for the version in
+# DRIVER_VERSION (for example release-1.64). The generator is
+# scripts/codegen/generate_api.js; Python facts that the docs do not contain
+# are in scripts/codegen/python_rules.js.
 driver_version="$(cat DRIVER_VERSION)"
 if [[ -z "$PW_SRC_DIR" ]]; then
-    echo "Set PW_SRC_DIR to a microsoft/playwright checkout at the release branch for v${driver_version}, e.g.:" >&2
-    echo "    PW_SRC_DIR=../playwright ./scripts/update_api.sh" >&2
+    echo "Set PW_SRC_DIR to a separate microsoft/playwright checkout on the release branch for v${driver_version}, e.g.:" >&2
+    echo "    PW_SRC_DIR=../playwright-for-python ./scripts/update_api.sh" >&2
     exit 1
 fi
 export PW_SRC_DIR

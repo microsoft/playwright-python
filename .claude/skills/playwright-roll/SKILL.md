@@ -39,14 +39,30 @@ The upstream documentation source of truth is `docs/src/api/*.md` in the playwri
 
 ### 2. Bump the driver pin, download it, and generate api.json
 
-You need a nearby `microsoft/playwright` checkout for the docs walk and for
-codegen. Point `PW_SRC_DIR` at it and check out the release branch for the new
-version there (the branch has the release's docs plus any cherry-picks):
+The docs walk and codegen read the upstream docs from a `microsoft/playwright`
+checkout at `$PW_SRC_DIR`. **Use a separate checkout that exists only for
+rolls, on the exact release branch you roll to**: `release-<new>`, the
+`major.minor` of the new `DRIVER_VERSION` (the branch has the release's docs
+plus any cherry-picks). Never point `PW_SRC_DIR` at a checkout that someone
+works in: on `main` or a feature branch the docs differ, and the generator
+silently emits that API instead of the release's.
 
 ```sh
-export PW_SRC_DIR=../playwright
-git -C "$PW_SRC_DIR" fetch origin 'release-*:release-*'
-git -C "$PW_SRC_DIR" checkout release-<new>      # e.g. release-1.62
+export PW_SRC_DIR=../playwright-for-python      # the roll checkout, nothing else
+# First roll on this machine: clone it (no npm install needed).
+git clone https://github.com/microsoft/playwright.git "$PW_SRC_DIR"
+# Every roll: move it to the release branch.
+git -C "$PW_SRC_DIR" fetch origin
+git -C "$PW_SRC_DIR" checkout release-<new>     # e.g. release-1.62
+git -C "$PW_SRC_DIR" merge --ff-only origin/release-<new>
+```
+
+Check the checkout before you generate, and again before you commit:
+
+```sh
+git -C "$PW_SRC_DIR" rev-parse --abbrev-ref HEAD                  # must print release-<new>
+git -C "$PW_SRC_DIR" status --porcelain                           # must print nothing
+git -C "$PW_SRC_DIR" rev-parse HEAD origin/release-<new>          # both lines must be equal
 ```
 
 Then bump the pins and assemble the driver:
@@ -73,7 +89,7 @@ the walk.
 
 ### 3. Identify the commit range
 
-Use the nearby `microsoft/playwright` checkout at `$PW_SRC_DIR` (from step 2).
+Use the roll checkout at `$PW_SRC_DIR` (from step 2).
 Bring it up to date and ensure release branches/tags are present before walking
 the range:
 
@@ -221,7 +237,7 @@ Tick the box in `/tmp/roll-<new>-commits.md` with one line: `[x] <sha> <subject>
 ### 5. Regenerate
 
 ```sh
-PW_SRC_DIR=../playwright ./scripts/update_api.sh   # PW_SRC_DIR already exported in step 2
+./scripts/update_api.sh   # uses PW_SRC_DIR from step 2; run the checkout checks there first
 ```
 
 The script, for `sync` and then `async`:
@@ -250,10 +266,10 @@ Failure modes and fixes:
 | mypy: incompatible argument type in `_generated.py` | The docs type changed, or `_impl/` declares a narrower type. | Match the type in `_impl/`, or record a `typeOverrides` entry for a justified divergence. |
 | generator: `No Python name for the struct at X.y.z` | A new inline `[Object]` with no `* alias:` in the docs. | Name it: `alias-python` upstream, or `structNamesByPlace` / `structRenames`. |
 | generator: `The struct X has different fields at A and B` | Two places in the docs share one struct name, but their fields differ. | Give one place its own name in `structNamesByPlace`, or fix the docs. |
+| `_generated.py` gains or loses members that the commit walk never mentioned | `PW_SRC_DIR` is not on `release-<new>` (for example on `main` or a feature branch), or is behind `origin/release-<new>`. | Run the checkout checks from step 2, fix the checkout, regenerate. |
 | generator: `Unknown docs type "T" at X.y` | A docs type the type table in `generate_api.js` (`toPy`) does not know. | Add it to `toPy`. |
 | generator: `required parameter z follows an optional one` | The docs order params so that Python would need a default before a non-default. | Add a `positional` entry with the Python order. |
 | generator: `the entry "…" no longer matches anything; remove it` | An upstream change made a rules entry unnecessary (or renamed what it points at). | Delete it, or re-key it to the new docs name. |
-| generator: `legacy_order.json: … has no …; remove it` | A member, parameter or TypedDict in the temporary legacy order was removed or renamed upstream. | Delete that name from `scripts/codegen/legacy_order.json`. New members need no entry; they go last. |
 | `pyright … reportInconsistentOverload` (single-event class) | A class gained its first event, so there is one `Literal[…]` overload + impl, which pyright wants ≥2 of. | The generator already handles this — `emitEvents` adds a second `@typing.overload` with `event: str` when a class has exactly one event. |
 | `pre-commit` keeps reformatting `_generated.py` on each run | First run after regen always reformats once; rerun until idle. | `pre-commit run --all-files` to settle. |
 | A kwarg in `_impl/` that the docs don't mention (e.g. legacy name from a doc rename) | Nothing fails: the generator simply never passes it. | If the param is positional with no default, just rename it in `_impl/`. Check `packages/protocol/spec/*.yml` and the server dispatcher — if the wire field renamed too, also update the channel-send dict key. Only use `extraOptions` for genuinely hidden internal kwargs (`default_browser_type`). |
@@ -280,6 +296,8 @@ For each PORT, add one async test and a matching sync test. Conventions:
 - The "Backport changes" tracking issue on GitHub (filed by `microsoft-playwright-automation`) is the *intent* tracker, but it's frequently out of sync with what's actually been ported. Treat it as a starting point, not the source of truth — the `docs/src/api/` commit walk is authoritative.
 
 ### 8. Final verification
+
+Repeat the checkout checks from step 2: the committed `_generated.py` must come from `release-<new>`.
 
 ```sh
 pre-commit run --all-files

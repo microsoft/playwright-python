@@ -18,6 +18,21 @@ from pathlib import Path
 from typing import Any, Dict, List, Literal, Optional, Sequence, TypedDict, Union
 
 
+class BrowserBindResult(TypedDict):
+    endpoint: str
+
+
+class ClientCertificate(TypedDict, total=False):
+    origin: str
+    certPath: Optional[Union[str, Path]]
+    cert: Optional[bytes]
+    keyPath: Optional[Union[str, Path]]
+    key: Optional[bytes]
+    pfxPath: Optional[Union[str, Path]]
+    pfx: Optional[bytes]
+    passphrase: Optional[str]
+
+
 class Cookie(TypedDict, total=False):
     name: str
     value: str
@@ -30,28 +45,28 @@ class Cookie(TypedDict, total=False):
     partitionKey: Optional[str]
 
 
-class StorageStateCookie(TypedDict, total=False):
-    name: str
-    value: str
-    domain: str
-    path: str
-    expires: float
-    httpOnly: bool
-    secure: bool
-    sameSite: Literal["Lax", "None", "Strict"]
+class DebuggerLocation(TypedDict):
+    file: str
+    line: Optional[int]
+    column: Optional[int]
 
 
-class SetCookieParam(TypedDict, total=False):
+class DebuggerPausedDetails(TypedDict):
+    location: DebuggerLocation
+    title: str
+
+
+class FilePayload(TypedDict):
     name: str
-    value: str
-    url: Optional[str]
-    domain: Optional[str]
-    path: Optional[str]
-    expires: Optional[float]
-    httpOnly: Optional[bool]
-    secure: Optional[bool]
-    sameSite: Optional[Literal["Lax", "None", "Strict"]]
-    partitionKey: Optional[str]
+    mimeType: str
+    buffer: bytes
+
+
+class DropPayload(TypedDict, total=False):
+    files: Optional[
+        Union[str, Path, Sequence[Union[str, Path]], FilePayload, Sequence[FilePayload]]
+    ]
+    data: Optional[Dict[str, str]]
 
 
 class FloatRect(TypedDict):
@@ -75,6 +90,11 @@ class HttpCredentials(TypedDict, total=False):
 
 
 class LocalStorageEntry(TypedDict):
+    name: str
+    value: str
+
+
+class NameValue(TypedDict):
     name: str
     value: str
 
@@ -103,20 +123,16 @@ class ProxySettings(TypedDict, total=False):
     password: Optional[str]
 
 
-class StorageState(TypedDict, total=False):
-    cookies: List[StorageStateCookie]
-    origins: List[OriginState]
+class RemoteAddr(TypedDict):
+    ipAddress: str
+    port: int
 
 
-class ClientCertificate(TypedDict, total=False):
-    origin: str
-    certPath: Optional[Union[str, Path]]
-    cert: Optional[bytes]
-    keyPath: Optional[Union[str, Path]]
-    key: Optional[bytes]
-    pfxPath: Optional[Union[str, Path]]
-    pfx: Optional[bytes]
-    passphrase: Optional[str]
+class RequestSizes(TypedDict):
+    requestBodySize: int
+    requestHeadersSize: int
+    responseBodySize: int
+    responseHeadersSize: int
 
 
 class ResourceTiming(TypedDict):
@@ -131,52 +147,22 @@ class ResourceTiming(TypedDict):
     responseEnd: float
 
 
-class RequestSizes(TypedDict):
-    requestBodySize: int
-    requestHeadersSize: int
-    responseBodySize: int
-    responseHeadersSize: int
+class ScreencastActionStyle(TypedDict, total=False):
+    point: Optional[str]
+    highlight: Optional[str]
+    title: Optional[str]
 
 
-class ViewportSize(TypedDict):
+class ScreencastFrame(TypedDict):
+    data: bytes
+    timestamp: float
+    viewportWidth: int
+    viewportHeight: int
+
+
+class ScreencastSize(TypedDict):
     width: int
     height: int
-
-
-class SourceLocation(TypedDict):
-    url: str
-    line: int
-    column: int
-    lineNumber: int
-    columnNumber: int
-
-
-class WebErrorLocation(TypedDict):
-    url: str
-    line: int
-    column: int
-
-
-class FilePayload(TypedDict):
-    name: str
-    mimeType: str
-    buffer: bytes
-
-
-class DropPayload(TypedDict, total=False):
-    files: Optional[
-        Union[str, Path, Sequence[Union[str, Path]], FilePayload, Sequence[FilePayload]]
-    ]
-    data: Optional[Dict[str, str]]
-
-
-class RemoteAddr(TypedDict):
-    ipAddress: str
-    port: int
-
-
-class BrowserBindResult(TypedDict):
-    endpoint: str
 
 
 class SecurityDetails(TypedDict):
@@ -187,9 +173,41 @@ class SecurityDetails(TypedDict):
     validTo: Optional[float]
 
 
-class NameValue(TypedDict):
+class SetCookieParam(TypedDict, total=False):
     name: str
     value: str
+    url: Optional[str]
+    domain: Optional[str]
+    path: Optional[str]
+    expires: Optional[float]
+    httpOnly: Optional[bool]
+    secure: Optional[bool]
+    sameSite: Optional[Literal["Lax", "None", "Strict"]]
+    partitionKey: Optional[str]
+
+
+class SourceLocation(TypedDict):
+    url: str
+    line: int
+    column: int
+    lineNumber: int
+    columnNumber: int
+
+
+class StorageStateCookie(TypedDict, total=False):
+    name: str
+    value: str
+    domain: str
+    path: str
+    expires: float
+    httpOnly: bool
+    secure: bool
+    sameSite: Literal["Lax", "None", "Strict"]
+
+
+class StorageState(TypedDict, total=False):
+    cookies: List[StorageStateCookie]
+    origins: List[OriginState]
 
 
 class TracingGroupLocation(TypedDict):
@@ -198,26 +216,9 @@ class TracingGroupLocation(TypedDict):
     column: Optional[int]
 
 
-class DebuggerLocation(TypedDict):
-    file: str
-    line: Optional[int]
-    column: Optional[int]
-
-
-class DebuggerPausedDetails(TypedDict):
-    location: DebuggerLocation
-    title: str
-
-
-class ScreencastSize(TypedDict):
+class ViewportSize(TypedDict):
     width: int
     height: int
-
-
-class ScreencastActionStyle(TypedDict, total=False):
-    point: Optional[str]
-    highlight: Optional[str]
-    title: Optional[str]
 
 
 class VirtualCredential(TypedDict):
@@ -227,6 +228,12 @@ class VirtualCredential(TypedDict):
     privateKey: str
     publicKey: str
     signCount: int
+
+
+class WebErrorLocation(TypedDict):
+    url: str
+    line: int
+    column: int
 
 
 class WebMCPToolAnnotations(TypedDict, total=False):
@@ -240,10 +247,3 @@ class WebMCPTool(TypedDict, total=False):
     description: str
     inputSchema: Optional[Any]
     annotations: Optional[WebMCPToolAnnotations]
-
-
-class ScreencastFrame(TypedDict):
-    data: bytes
-    timestamp: float
-    viewportWidth: int
-    viewportHeight: int
