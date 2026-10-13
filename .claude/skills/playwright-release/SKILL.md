@@ -154,4 +154,7 @@ gh release list --repo microsoft/playwright-python --limit 3   # v1.xx.0 shows a
 
 Give the user the URL of the draft. Your work ends here. Do not publish the
 release: never run `gh release create` without `--draft`, and never run
-`gh release edit --draft=false`. Publishing creates the tag.
+`gh release edit --draft=false`. Publishing creates the tag and starts
+`.github/workflows/publish.yml`, which builds the wheels and uploads them to PyPI
+after a reviewer approves the `pypi` environment. Never run that workflow, and
+never approve the environment.
