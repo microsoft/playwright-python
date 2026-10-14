@@ -17,7 +17,11 @@
 
 from typing import Any, Dict, List, Literal, Optional, Sequence, TypedDict
 
-from playwright._impl._api_structures import NameValue
+
+class NameValue(TypedDict):
+    name: str
+    value: str
+
 
 HeadersArray = List[NameValue]
 Headers = Dict[str, str]

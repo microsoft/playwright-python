@@ -950,8 +950,8 @@ async def test_locator_should_support_locator_locator_with_and_or(page: Page) ->
 
 async def test_locator_highlight_should_work(page: Page, server: Server) -> None:
     await page.goto(server.PREFIX + "/grid.html")
-    await page.locator(".box").nth(3).highlight()
-    assert await page.locator("x-pw-glass").is_visible()
+    async with await page.locator(".box").nth(3).highlight():
+        assert await page.locator("x-pw-glass").is_visible()
 
 
 async def test_should_support_locator_that(page: Page) -> None:

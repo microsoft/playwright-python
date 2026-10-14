@@ -33,6 +33,13 @@ class ClientCertificate(TypedDict, total=False):
     passphrase: Optional[str]
 
 
+class Clip(TypedDict):
+    x: float
+    y: float
+    width: float
+    height: float
+
+
 class Cookie(TypedDict, total=False):
     name: str
     value: str
@@ -89,14 +96,20 @@ class HttpCredentials(TypedDict, total=False):
     send: Optional[Literal["always", "unauthorized"]]
 
 
+class HttpHeader(TypedDict):
+    name: str
+    value: str
+
+
 class LocalStorageEntry(TypedDict):
     name: str
     value: str
 
 
-class NameValue(TypedDict):
-    name: str
-    value: str
+class Location(TypedDict, total=False):
+    file: str
+    line: Optional[int]
+    column: Optional[int]
 
 
 class OriginState(TypedDict):
@@ -123,6 +136,11 @@ class ProxySettings(TypedDict, total=False):
     password: Optional[str]
 
 
+class RecordVideoSize(TypedDict):
+    width: int
+    height: int
+
+
 class RemoteAddr(TypedDict):
     ipAddress: str
     port: int
@@ -145,6 +163,11 @@ class ResourceTiming(TypedDict):
     requestStart: float
     responseStart: float
     responseEnd: float
+
+
+class ScreenSize(TypedDict):
+    width: int
+    height: int
 
 
 class ScreencastActionStyle(TypedDict, total=False):
@@ -210,12 +233,6 @@ class StorageState(TypedDict, total=False):
     origins: List[OriginState]
 
 
-class TracingGroupLocation(TypedDict):
-    file: str
-    line: Optional[int]
-    column: Optional[int]
-
-
 class ViewportSize(TypedDict):
     width: int
     height: int
@@ -247,3 +264,8 @@ class WebMCPTool(TypedDict, total=False):
     description: str
     inputSchema: Optional[Any]
     annotations: Optional[WebMCPToolAnnotations]
+
+
+class WebStorageItem(TypedDict):
+    name: str
+    value: str

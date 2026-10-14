@@ -925,12 +925,12 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_have_accessible_description(
         self,
-        name: Union[str, Pattern[str]],
+        description: Union[str, Pattern[str]],
         ignoreCase: bool = None,
         timeout: float = None,
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_have_accessible_description(name, ignoreCase, timeout)
+        await self._not.to_have_accessible_description(description, ignoreCase, timeout)
 
     async def to_have_accessible_name(
         self,

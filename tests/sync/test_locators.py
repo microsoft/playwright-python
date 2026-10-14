@@ -823,8 +823,8 @@ def test_locator_should_support_locator_or(page: Page, server: Server) -> None:
 
 def test_locator_highlight_should_work(page: Page, server: Server) -> None:
     page.goto(server.PREFIX + "/grid.html")
-    page.locator(".box").nth(3).highlight()
-    assert page.locator("x-pw-glass").is_visible()
+    with page.locator(".box").nth(3).highlight():
+        assert page.locator("x-pw-glass").is_visible()
 
 
 def test_should_support_locator_that(page: Page) -> None:

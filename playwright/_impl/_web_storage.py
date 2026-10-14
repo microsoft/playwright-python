@@ -14,7 +14,7 @@
 
 from typing import TYPE_CHECKING, List, Literal, Optional
 
-from playwright._impl._api_structures import NameValue
+from playwright._impl._api_structures import WebStorageItem
 
 if TYPE_CHECKING:
     from playwright._impl._page import Page
@@ -30,7 +30,7 @@ class WebStorage:
         self._loop = page._loop
         self._dispatcher_fiber = page._dispatcher_fiber
 
-    async def items(self) -> List[NameValue]:
+    async def items(self) -> List[WebStorageItem]:
         result = await self._page._channel.send_return_as_dict(
             "webStorageItems", None, {"kind": self._kind}
         )

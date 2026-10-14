@@ -21,6 +21,7 @@ from typing import Literal
 from playwright._impl._api_structures import (
     BrowserBindResult,
     ClientCertificate,
+    Clip,
     Cookie,
     DebuggerLocation,
     DebuggerPausedDetails,
@@ -29,25 +30,28 @@ from playwright._impl._api_structures import (
     FloatRect,
     Geolocation,
     HttpCredentials,
-    NameValue,
+    HttpHeader,
+    Location,
     PdfMargins,
     Position,
     ProxySettings,
+    RecordVideoSize,
     RemoteAddr,
     RequestSizes,
     ResourceTiming,
     ScreencastActionStyle,
     ScreencastFrame,
     ScreencastSize,
+    ScreenSize,
     SecurityDetails,
     SetCookieParam,
     SourceLocation,
     StorageState,
-    TracingGroupLocation,
     ViewportSize,
     VirtualCredential,
     WebErrorLocation,
     WebMCPTool,
+    WebStorageItem,
 )
 from playwright._impl._assertions import (
     APIResponseAssertions as APIResponseAssertionsImpl,
@@ -1107,7 +1111,7 @@ class APIResponse(SyncBase):
         return mapping.from_maybe_impl(self._impl_obj.headers)
 
     @property
-    def headers_array(self) -> typing.List[NameValue]:
+    def headers_array(self) -> typing.List[HttpHeader]:
         """APIResponse.headers_array
 
         An array with all the response HTTP headers associated with this response. Header names are not lower-cased.
@@ -1432,11 +1436,11 @@ class Browser(SyncContextManager):
         ] = None,
         record_video_dir: typing.Optional[typing.Union[str, pathlib.Path]] = None,
         record_video_fps: typing.Optional[int] = None,
-        record_video_size: typing.Optional[ViewportSize] = None,
+        record_video_size: typing.Optional[RecordVideoSize] = None,
         reduced_motion: typing.Optional[
             Literal["no-preference", "null", "reduce"]
         ] = None,
-        screen: typing.Optional[ViewportSize] = None,
+        screen: typing.Optional[ScreenSize] = None,
         service_workers: typing.Optional[Literal["allow", "block"]] = None,
         storage_state: typing.Optional[
             typing.Union[str, pathlib.Path, StorageState]
@@ -1694,11 +1698,11 @@ class Browser(SyncContextManager):
         ] = None,
         record_video_dir: typing.Optional[typing.Union[str, pathlib.Path]] = None,
         record_video_fps: typing.Optional[int] = None,
-        record_video_size: typing.Optional[ViewportSize] = None,
+        record_video_size: typing.Optional[RecordVideoSize] = None,
         reduced_motion: typing.Optional[
             Literal["no-preference", "null", "reduce"]
         ] = None,
-        screen: typing.Optional[ViewportSize] = None,
+        screen: typing.Optional[ScreenSize] = None,
         service_workers: typing.Optional[Literal["allow", "block"]] = None,
         storage_state: typing.Optional[
             typing.Union[str, pathlib.Path, StorageState]
@@ -3332,14 +3336,14 @@ class BrowserContext(SyncContextManager):
         and examples.
 
         ```py
-        def message_handler(ws: WebSocketRoute, message: Union[str, bytes]):
+        def message_handler(server: WebSocketRoute, message: Union[str, bytes]):
           if message == \"to-be-blocked\":
             return
-          ws.send(message)
+          server.send(message)
 
         def handler(ws: WebSocketRoute):
-          ws.route_send(lambda message: message_handler(ws, message))
-          ws.connect()
+          server = ws.connect_to_server()
+          ws.on_message(lambda message: message_handler(server, message))
 
         context.route_web_socket(\"/ws\", handler)
         ```
@@ -4177,11 +4181,11 @@ class BrowserType(SyncBase):
         ] = None,
         record_video_dir: typing.Optional[typing.Union[str, pathlib.Path]] = None,
         record_video_fps: typing.Optional[int] = None,
-        record_video_size: typing.Optional[ViewportSize] = None,
+        record_video_size: typing.Optional[RecordVideoSize] = None,
         reduced_motion: typing.Optional[
             Literal["no-preference", "null", "reduce"]
         ] = None,
-        screen: typing.Optional[ViewportSize] = None,
+        screen: typing.Optional[ScreenSize] = None,
         service_workers: typing.Optional[Literal["allow", "block"]] = None,
         slow_mo: typing.Optional[float] = None,
         strict_selectors: typing.Optional[bool] = None,
@@ -5124,17 +5128,13 @@ class Disposable(SyncContextManager):
     _impl_obj: DisposableImpl
 
     def close(self) -> None:
-
-        self._sync(self._impl_obj.close())
-
-    def dispose(self) -> None:
-        """Disposable.dispose
+        """Disposable.close
 
         Removes the associated resource. For example, removes the init script installed via `page.add_init_script()` or
         `browser_context.add_init_script()`.
         """
 
-        self._sync(self._impl_obj.dispose())
+        self._sync(self._impl_obj.close())
 
 
 mapping.register(DisposableImpl, Disposable)
@@ -5677,7 +5677,7 @@ class ElementHandle(JSHandle):
         )
 
     def dispatch_event(
-        self, type: str, event_init: typing.Optional[typing.Dict] = None
+        self, type: str, event_init: typing.Optional[typing.Any] = None
     ) -> None:
         """ElementHandle.dispatch_event
 
@@ -5718,7 +5718,7 @@ class ElementHandle(JSHandle):
         ----------
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
-        event_init : Union[Dict, None]
+        event_init : Union[Any, None]
             Optional event-specific initialization properties.
         """
 
@@ -7249,7 +7249,7 @@ class Frame(SyncBase):
         self,
         selector: str,
         type: str,
-        event_init: typing.Optional[typing.Dict] = None,
+        event_init: typing.Optional[typing.Any] = None,
         *,
         strict: typing.Optional[bool] = None,
         timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
@@ -7296,7 +7296,7 @@ class Frame(SyncBase):
             used.
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
-        event_init : Union[Dict, None]
+        event_init : Union[Any, None]
             Optional event-specific initialization properties.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
@@ -11217,7 +11217,7 @@ class Locator(SyncBase):
     def dispatch_event(
         self,
         type: str,
-        event_init: typing.Optional[typing.Dict] = None,
+        event_init: typing.Optional[typing.Any] = None,
         *,
         timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
@@ -11263,7 +11263,7 @@ class Locator(SyncBase):
         ----------
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
-        event_init : Union[Dict, None]
+        event_init : Union[Any, None]
             Optional event-specific initialization properties.
         timeout : Union[float, None]
             Maximum time in milliseconds. Defaults to `30000` (30 seconds). Pass `0` to disable timeout. The default value can
@@ -12278,7 +12278,7 @@ class Locator(SyncBase):
 
         self._sync(self._impl_obj.hide_highlight())
 
-    def highlight(self, *, style: typing.Optional[str] = None) -> None:
+    def highlight(self, *, style: typing.Optional[str] = None) -> "SyncContextManager":
         """Locator.highlight
 
         Highlight the corresponding element(s) on the screen. Useful for debugging, don't commit the code that uses
@@ -12288,9 +12288,13 @@ class Locator(SyncBase):
         ----------
         style : Union[str, None]
             Additional inline CSS applied to the highlight overlay, e.g. `"outline: 2px dashed red"`.
+
+        Returns
+        -------
+        SyncContextManager
         """
 
-        self._sync(self._impl_obj.highlight(style=style))
+        return mapping.from_impl(self._sync(self._impl_obj.highlight(style=style)))
 
     def hover(
         self,
@@ -13995,7 +13999,7 @@ class LocatorAssertions(SyncBase):
 
     def not_to_have_accessible_description(
         self,
-        name: typing.Union[str, typing.Pattern[str]],
+        description: typing.Union[str, typing.Pattern[str]],
         *,
         ignore_case: typing.Optional[bool] = None,
         timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
@@ -14006,7 +14010,7 @@ class LocatorAssertions(SyncBase):
 
         Parameters
         ----------
-        name : Union[Pattern[str], str]
+        description : Union[Pattern[str], str]
             Expected accessible description.
         ignore_case : Union[bool, None]
             Whether to perform case-insensitive match. `ignore_case` option takes precedence over the corresponding regular
@@ -14018,7 +14022,9 @@ class LocatorAssertions(SyncBase):
 
         self._sync(
             self._impl_obj.not_to_have_accessible_description(
-                name=name, ignoreCase=ignore_case, timeout=to_milliseconds(timeout)
+                description=description,
+                ignoreCase=ignore_case,
+                timeout=to_milliseconds(timeout),
             )
         )
 
@@ -16467,7 +16473,7 @@ class Page(SyncContextManager):
         self,
         selector: str,
         type: str,
-        event_init: typing.Optional[typing.Dict] = None,
+        event_init: typing.Optional[typing.Any] = None,
         *,
         strict: typing.Optional[bool] = None,
         timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
@@ -16514,7 +16520,7 @@ class Page(SyncContextManager):
             used.
         type : str
             DOM event type: `"click"`, `"dragstart"`, etc.
-        event_init : Union[Dict, None]
+        event_init : Union[Any, None]
             Optional event-specific initialization properties.
         strict : Union[bool, None]
             When true, the call requires selector to resolve to a single element. If given selector resolves to more than one
@@ -20163,7 +20169,7 @@ class Page(SyncContextManager):
         *,
         animations: typing.Optional[Literal["allow", "disabled"]] = None,
         caret: typing.Optional[Literal["hide", "initial"]] = None,
-        clip: typing.Optional[FloatRect] = None,
+        clip: typing.Optional[Clip] = None,
         full_page: typing.Optional[bool] = None,
         mask: typing.Optional[typing.Sequence["Locator"]] = None,
         mask_color: typing.Optional[str] = None,
@@ -21916,7 +21922,7 @@ class Request(SyncBase):
         """
         return mapping.from_maybe_impl(self._impl_obj.headers)
 
-    def headers_array(self) -> typing.List[NameValue]:
+    def headers_array(self) -> typing.List[HttpHeader]:
         """Request.headers_array
 
         An array with all the request HTTP headers associated with this request. Unlike `request.all_headers()`, header
@@ -22256,7 +22262,7 @@ class Response(SyncBase):
         """
         return mapping.from_maybe_impl(self._impl_obj.headers)
 
-    def headers_array(self) -> typing.List[NameValue]:
+    def headers_array(self) -> typing.List[HttpHeader]:
         """Response.headers_array
 
         An array with all the response HTTP headers associated with this response. Unlike `response.all_headers()`, header
@@ -23057,7 +23063,7 @@ class Tracing(SyncBase):
     _impl_obj: TracingImpl
 
     def group(
-        self, name: str, *, location: typing.Optional[TracingGroupLocation] = None
+        self, name: str, *, location: typing.Optional[Location] = None
     ) -> "SyncContextManager":
         """Tracing.group
 
@@ -23928,7 +23934,7 @@ class WebStorage(SyncBase):
 
         return mapping.from_maybe_impl(self._sync(self._impl_obj.get_item(name=name)))
 
-    def items(self) -> typing.List[NameValue]:
+    def items(self) -> typing.List[WebStorageItem]:
         """WebStorage.items
 
         Returns all items in the storage as name/value pairs.

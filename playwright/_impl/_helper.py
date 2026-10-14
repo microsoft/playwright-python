@@ -40,7 +40,6 @@ from typing import (
 )
 from urllib.parse import ParseResult, urljoin, urlparse, urlunparse
 
-from playwright._impl._api_structures import NameValue
 from playwright._impl._errors import (
     Error,
     TargetClosedError,
@@ -50,6 +49,7 @@ from playwright._impl._errors import (
 )
 from playwright._impl._glob import glob_to_regex_pattern
 from playwright._impl._greenlets import RouteGreenlet
+from playwright._impl._internal_structures import NameValue
 from playwright._impl._str_utils import escape_regex_flags
 
 if TYPE_CHECKING:  # pragma: no cover
