@@ -505,9 +505,10 @@ class LocatorAssertions(AssertionsBase):
         name: str,
         value: Union[str, Pattern[str]],
         timeout: float = None,
+        pseudo: Literal["after", "before"] = None,
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_have_css(name, value, timeout)
+        await self._not.to_have_css(name, value, timeout=timeout, pseudo=pseudo)
 
     async def to_have_id(
         self,

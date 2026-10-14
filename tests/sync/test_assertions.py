@@ -180,6 +180,20 @@ def test_assertions_locator_to_have_css(page: Page, server: Server) -> None:
             "color", "rgb(42, 42, 42)", timeout=100
         )
 
+    page.set_content(
+        "<style>div.foobar::before { content: 'foo'; color: rgb(234, 74, 90); }</style><div class=foobar>kek</div>"
+    )
+    expect(page.locator("div.foobar")).to_have_css(
+        "color", "rgb(234, 74, 90)", pseudo="before"
+    )
+    expect(page.locator("div.foobar")).not_to_have_css(
+        "color", "rgb(42, 42, 42)", pseudo="before", timeout=100
+    )
+    with pytest.raises(AssertionError):
+        expect(page.locator("div.foobar")).not_to_have_css(
+            "color", "rgb(234, 74, 90)", pseudo="before", timeout=100
+        )
+
 
 def test_assertions_locator_to_have_id(page: Page, server: Server) -> None:
     page.goto(server.EMPTY_PAGE)

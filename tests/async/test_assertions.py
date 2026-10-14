@@ -197,6 +197,20 @@ async def test_assertions_locator_to_have_css(page: Page, server: Server) -> Non
             "color", "rgb(42, 42, 42)", timeout=100
         )
 
+    await page.set_content(
+        "<style>div.foobar::before { content: 'foo'; color: rgb(234, 74, 90); }</style><div class=foobar>kek</div>"
+    )
+    await expect(page.locator("div.foobar")).to_have_css(
+        "color", "rgb(234, 74, 90)", pseudo="before"
+    )
+    await expect(page.locator("div.foobar")).not_to_have_css(
+        "color", "rgb(42, 42, 42)", pseudo="before", timeout=100
+    )
+    with pytest.raises(AssertionError):
+        await expect(page.locator("div.foobar")).not_to_have_css(
+            "color", "rgb(234, 74, 90)", pseudo="before", timeout=100
+        )
+
 
 async def test_assertions_locator_to_have_id(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
