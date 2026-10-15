@@ -78,26 +78,4 @@ module.exports = {
     // Shipped as total=False, although every field is required.
     StorageStateCookie: false,
   },
-
-  // Old implementation: the module in playwright/_impl/ that holds each class.
-  // Classes not listed are in `_<snake_case name>.py`.
-  implModules: {
-    APIRequest: '_fetch',
-    APIRequestContext: '_fetch',
-    APIResponse: '_fetch',
-    APIResponseAssertions: '_assertions',
-    FrameLocator: '_locator',
-    Keyboard: '_input',
-    LocatorAssertions: '_assertions',
-    Mouse: '_input',
-    PageAssertions: '_assertions',
-    Request: '_network',
-    Response: '_network',
-    Route: '_network',
-    Touchscreen: '_input',
-    WebMCP: '_webmcp',
-    WebSocket: '_network',
-    WebSocketRoute: '_network',
-    Worker: '_page',
-  },
 };

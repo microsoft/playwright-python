@@ -104,8 +104,8 @@ from playwright._impl._screencast import Screencast
 from playwright._impl._signature import signature
 from playwright._impl._video import Video
 from playwright._impl._waiter import Waiter
+from playwright._impl._web_mcp import WebMCP
 from playwright._impl._web_storage import WebStorage
-from playwright._impl._webmcp import WebMCP
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser_context import BrowserContext

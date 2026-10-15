@@ -18,6 +18,49 @@ import pathlib
 import typing
 from typing import Literal
 
+from playwright._impl._api_classes import APIRequest as APIRequestImpl
+from playwright._impl._api_classes import APIRequestContext as APIRequestContextImpl
+from playwright._impl._api_classes import APIResponse as APIResponseImpl
+from playwright._impl._api_classes import (
+    APIResponseAssertions as APIResponseAssertionsImpl,
+)
+from playwright._impl._api_classes import Browser as BrowserImpl
+from playwright._impl._api_classes import BrowserContext as BrowserContextImpl
+from playwright._impl._api_classes import BrowserType as BrowserTypeImpl
+from playwright._impl._api_classes import CDPSession as CDPSessionImpl
+from playwright._impl._api_classes import Clock as ClockImpl
+from playwright._impl._api_classes import ConsoleMessage as ConsoleMessageImpl
+from playwright._impl._api_classes import Credentials as CredentialsImpl
+from playwright._impl._api_classes import Debugger as DebuggerImpl
+from playwright._impl._api_classes import Dialog as DialogImpl
+from playwright._impl._api_classes import Disposable as DisposableImpl
+from playwright._impl._api_classes import Download as DownloadImpl
+from playwright._impl._api_classes import ElementHandle as ElementHandleImpl
+from playwright._impl._api_classes import FileChooser as FileChooserImpl
+from playwright._impl._api_classes import Frame as FrameImpl
+from playwright._impl._api_classes import FrameLocator as FrameLocatorImpl
+from playwright._impl._api_classes import JSHandle as JSHandleImpl
+from playwright._impl._api_classes import Keyboard as KeyboardImpl
+from playwright._impl._api_classes import Locator as LocatorImpl
+from playwright._impl._api_classes import LocatorAssertions as LocatorAssertionsImpl
+from playwright._impl._api_classes import Mouse as MouseImpl
+from playwright._impl._api_classes import Page as PageImpl
+from playwright._impl._api_classes import PageAssertions as PageAssertionsImpl
+from playwright._impl._api_classes import Playwright as PlaywrightImpl
+from playwright._impl._api_classes import Request as RequestImpl
+from playwright._impl._api_classes import Response as ResponseImpl
+from playwright._impl._api_classes import Route as RouteImpl
+from playwright._impl._api_classes import Screencast as ScreencastImpl
+from playwright._impl._api_classes import Selectors as SelectorsImpl
+from playwright._impl._api_classes import Touchscreen as TouchscreenImpl
+from playwright._impl._api_classes import Tracing as TracingImpl
+from playwright._impl._api_classes import Video as VideoImpl
+from playwright._impl._api_classes import WebError as WebErrorImpl
+from playwright._impl._api_classes import WebMCP as WebMCPImpl
+from playwright._impl._api_classes import WebSocket as WebSocketImpl
+from playwright._impl._api_classes import WebSocketRoute as WebSocketRouteImpl
+from playwright._impl._api_classes import WebStorage as WebStorageImpl
+from playwright._impl._api_classes import Worker as WorkerImpl
 from playwright._impl._api_structures import (
     BrowserBindResult,
     ClientCertificate,
@@ -53,58 +96,15 @@ from playwright._impl._api_structures import (
     WebMCPTool,
     WebStorageItem,
 )
-from playwright._impl._assertions import (
-    APIResponseAssertions as APIResponseAssertionsImpl,
-)
-from playwright._impl._assertions import LocatorAssertions as LocatorAssertionsImpl
-from playwright._impl._assertions import PageAssertions as PageAssertionsImpl
 from playwright._impl._async_base import (
     AsyncBase,
     AsyncContextManager,
     AsyncEventContextManager,
     mapping,
 )
-from playwright._impl._browser import Browser as BrowserImpl
-from playwright._impl._browser_context import BrowserContext as BrowserContextImpl
-from playwright._impl._browser_type import BrowserType as BrowserTypeImpl
-from playwright._impl._cdp_session import CDPSession as CDPSessionImpl
-from playwright._impl._clock import Clock as ClockImpl
-from playwright._impl._console_message import ConsoleMessage as ConsoleMessageImpl
-from playwright._impl._credentials import Credentials as CredentialsImpl
-from playwright._impl._debugger import Debugger as DebuggerImpl
-from playwright._impl._dialog import Dialog as DialogImpl
-from playwright._impl._disposable import Disposable as DisposableImpl
-from playwright._impl._download import Download as DownloadImpl
-from playwright._impl._element_handle import ElementHandle as ElementHandleImpl
 from playwright._impl._errors import Error
-from playwright._impl._fetch import APIRequest as APIRequestImpl
-from playwright._impl._fetch import APIRequestContext as APIRequestContextImpl
-from playwright._impl._fetch import APIResponse as APIResponseImpl
-from playwright._impl._file_chooser import FileChooser as FileChooserImpl
 from playwright._impl._form_data import FormData
-from playwright._impl._frame import Frame as FrameImpl
 from playwright._impl._helper import to_milliseconds
-from playwright._impl._input import Keyboard as KeyboardImpl
-from playwright._impl._input import Mouse as MouseImpl
-from playwright._impl._input import Touchscreen as TouchscreenImpl
-from playwright._impl._js_handle import JSHandle as JSHandleImpl
-from playwright._impl._locator import FrameLocator as FrameLocatorImpl
-from playwright._impl._locator import Locator as LocatorImpl
-from playwright._impl._network import Request as RequestImpl
-from playwright._impl._network import Response as ResponseImpl
-from playwright._impl._network import Route as RouteImpl
-from playwright._impl._network import WebSocket as WebSocketImpl
-from playwright._impl._network import WebSocketRoute as WebSocketRouteImpl
-from playwright._impl._page import Page as PageImpl
-from playwright._impl._page import Worker as WorkerImpl
-from playwright._impl._playwright import Playwright as PlaywrightImpl
-from playwright._impl._screencast import Screencast as ScreencastImpl
-from playwright._impl._selectors import Selectors as SelectorsImpl
-from playwright._impl._tracing import Tracing as TracingImpl
-from playwright._impl._video import Video as VideoImpl
-from playwright._impl._web_error import WebError as WebErrorImpl
-from playwright._impl._web_storage import WebStorage as WebStorageImpl
-from playwright._impl._webmcp import WebMCP as WebMCPImpl
 
 
 class APIRequest(AsyncBase):
