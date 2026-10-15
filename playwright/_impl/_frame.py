@@ -80,7 +80,7 @@ from playwright._impl._locator import (
 from playwright._impl._network import Response
 from playwright._impl._set_input_files_helpers import convert_input_files
 from playwright._impl._waiter import Waiter
-from playwright._impl._webmcp import WebMCP
+from playwright._impl._web_mcp import WebMCP
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._page import Page

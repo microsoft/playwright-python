@@ -183,9 +183,10 @@ Implement the change in `playwright/_impl/<module>.py`. Use the upstream JS impl
 
 When implementing a new ChannelOwner subclass (one constructed by the protocol with `(parent, type, guid, initializer)`):
 1. Register it in `playwright/_impl/_object_factory.py:create_remote_object` — otherwise the guid resolves to `DummyObject` and downstream code breaks mysteriously.
-2. Nothing to do in codegen: the generator emits every Python class in the docs. If the class does not live in `_impl/_<snake_case name>.py`, add it to `implModules` in `scripts/codegen/python_rules.js`.
+2. Add it to `playwright/_impl/_api_classes.py` (the import and `__all__`). The generator emits every Python class in the docs, and the generated API imports each implementation from that file. If the class is missing there, `_generated.py` fails to import.
 
 When implementing a non-ChannelOwner wrapper class (a plain class that holds a Page/Context reference, like `Screencast`, `Clock`):
+- Add it to `playwright/_impl/_api_classes.py`, as for a ChannelOwner subclass.
 - Set `self._loop = parent._loop` and `self._dispatcher_fiber = parent._dispatcher_fiber` in `__init__`. The generated `AsyncBase`/`SyncBase` wrappers read these; missing them gives `AttributeError: 'X' object has no attribute '_loop'` at first use.
 
 When the docs add a new struct (an inline `[Object]` with named fields):
@@ -314,7 +315,6 @@ All keys use docs names: `Class.member` or `Class.member.arg`, with the upstream
 | `extraMembers`, `extraOptions` | Python-only members and hidden options; generated without docstrings. |
 | `positionalOptions` | Option names that are positional everywhere (`predicate`). |
 | `structTotal` | `total=` of a TypedDict, where it differs from "total=False if any field is optional". |
-| `implModules` | `_impl/` module of classes not in `_<snake_case name>.py`. |
 
 ## Tips & gotchas
 

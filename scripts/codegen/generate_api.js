@@ -821,11 +821,6 @@ const LICENSE = `# Copyright (c) Microsoft Corporation.
 # limitations under the License.
 `;
 
-/** @param {string} className */
-function implModule(className) {
-  return lookupRule('implModules', className) || `_${toSnakeCase(className)}`;
-}
-
 /** @param {any} event */
 function eventPayload(clazz, event) {
   let payload = docType(toPy(event.type, { dir: 'out', place: `${clazz.name}.${event.name}` }));
@@ -1104,7 +1099,7 @@ function emitStructs() {
 }
 
 function checkRules() {
-  for (const table of ['extraMembers', 'extraOptions', 'structTotal', 'implModules']) {
+  for (const table of ['extraMembers', 'extraOptions', 'structTotal']) {
     for (const key of Object.keys(/** @type {any} */ (rules)[table])) {
       if (!usedRules.has(`${table}:${key}`))
         errors.push(`${table}: the entry "${key}" no longer matches anything; remove it`);
@@ -1128,7 +1123,7 @@ function main() {
   if (usedStructs.size)
     header.push(`from playwright._impl._api_structures import ${[...usedStructs].sort().join(', ')}`);
   for (const clazz of classes)
-    header.push(`from playwright._impl.${implModule(clazz.name)} import ${clazz.name} as ${clazz.name}Impl`);
+    header.push(`from playwright._impl._api_classes import ${clazz.name} as ${clazz.name}Impl`);
   header.push('from playwright._impl._errors import Error');
   header.push('from playwright._impl._form_data import FormData');
   header.push('from playwright._impl._helper import to_milliseconds');
