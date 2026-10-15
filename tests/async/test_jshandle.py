@@ -23,9 +23,7 @@ from playwright.async_api import Page
 async def test_jshandle_evaluate_work(page: Page) -> None:
     window_handle = await page.evaluate_handle("window")
     assert window_handle
-    assert (
-        repr(window_handle) == f"<JSHandle preview={window_handle._impl_obj._preview}>"
-    )
+    assert repr(window_handle) == f"<JSHandle preview={window_handle}>"
 
 
 async def test_jshandle_evaluate_accept_object_handle_as_argument(page: Page) -> None:

@@ -16,8 +16,7 @@ import asyncio
 import re
 from typing import Any, Awaitable, Callable, Literal, Tuple, Union
 
-from playwright.async_api import Frame, Page, WebSocketRoute
-from playwright.async_api._generated import Browser
+from playwright.async_api import Browser, Frame, Page, WebSocketRoute
 from tests.server import Server, WebSocketProtocol
 
 

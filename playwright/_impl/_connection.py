@@ -15,7 +15,6 @@
 import asyncio
 import collections.abc
 import contextvars
-import datetime
 import inspect
 import random
 import string
@@ -49,6 +48,7 @@ from playwright._impl._helper import (
     create_task_and_ignore_exception,
     parse_error,
 )
+from playwright._impl._protocol_check import check_message, is_enabled
 from playwright._impl._transport import Transport
 
 if TYPE_CHECKING:
@@ -326,6 +326,7 @@ class Connection(EventEmitter):
         self._local_utils: Optional["LocalUtils"] = local_utils
         self._tracing_count = 0
         self._closed_error: Optional[Exception] = None
+        self._check_protocol = is_enabled()
 
     @property
     def local_utils(self) -> "LocalUtils":
@@ -427,14 +428,12 @@ class Connection(EventEmitter):
             if frames
             else None
         )
-        metadata = {
-            "wallTime": int(datetime.datetime.now().timestamp() * 1000),
-            "apiName": stack_trace_information["apiName"],
+        metadata: Dict[str, Any] = {
             "internal": not stack_trace_information["apiName"],
             "timeout": timeout,
         }
         if location:
-            metadata["location"] = location  # type: ignore
+            metadata["location"] = location
         title = stack_trace_information["title"]
         if title:
             metadata["title"] = title
@@ -445,6 +444,14 @@ class Connection(EventEmitter):
             "params": self._replace_channels_with_guids(params),
             "metadata": metadata,
         }
+        if self._check_protocol:
+            check_message(
+                object._type,
+                method,
+                message["params"],
+                metadata,
+                self._type_of_guid,
+            )
         if self._tracing_count > 0 and frames and object._guid != "localUtils":
             self.local_utils.add_stack_to_tracing_no_reply(id, frames)
 
@@ -452,6 +459,10 @@ class Connection(EventEmitter):
         self._callbacks[id] = callback
 
         return callback
+
+    def _type_of_guid(self, guid: str) -> Optional[str]:
+        object = self._objects.get(guid)
+        return object._type if object else None
 
     async def _abort(
         self, object: ChannelOwner, callback: ProtocolCallback, reason: str

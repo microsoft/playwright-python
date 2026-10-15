@@ -31,14 +31,12 @@ from typing import (
     Optional,
     Pattern,
     Set,
-    Tuple,
     TypedDict,
     TypeVar,
     Union,
     cast,
     overload,
 )
-from urllib.parse import ParseResult, urljoin, urlparse, urlunparse
 
 from playwright._impl._errors import (
     Error,
@@ -47,16 +45,15 @@ from playwright._impl._errors import (
     is_target_closed_error,
     rewrite_error,
 )
-from playwright._impl._glob import glob_to_regex_pattern
 from playwright._impl._greenlets import RouteGreenlet
 from playwright._impl._internal_structures import NameValue
 from playwright._impl._str_utils import escape_regex_flags
+from playwright._impl._url_match import URLMatch, url_matches
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._internal_structures import HeadersArray
     from playwright._impl._network import Request, Response, Route, WebSocketRoute
 
-URLMatch = Union[str, Pattern[str], Callable[[str], bool]]
 URLMatchRequest = Union[
     str, Pattern[str], Callable[["Request"], Union[bool, Awaitable[bool]]]
 ]
@@ -151,133 +148,6 @@ class FrameNavigatedEvent(TypedDict):
 
 
 Env = Dict[str, Union[str, float, bool]]
-
-
-def url_matches(
-    base_url: Optional[str],
-    url_string: str,
-    match: Optional[URLMatch],
-    websocket_url: bool = None,
-) -> bool:
-    if not match:
-        return True
-    if isinstance(match, str):
-        match = re.compile(
-            resolve_glob_to_regex_pattern(base_url, match, websocket_url)
-        )
-    if isinstance(match, Pattern):
-        return bool(match.search(url_string))
-    return match(url_string)
-
-
-def resolve_glob_to_regex_pattern(
-    base_url: Optional[str], glob: str, websocket_url: bool = None
-) -> str:
-    if websocket_url:
-        base_url = to_websocket_base_url(base_url)
-    glob = resolve_glob_base(base_url, glob)
-    return glob_to_regex_pattern(glob)
-
-
-def to_websocket_base_url(base_url: Optional[str]) -> Optional[str]:
-    if base_url is not None and re.match(r"^https?://", base_url):
-        base_url = re.sub(r"^http", "ws", base_url)
-    return base_url
-
-
-def resolve_glob_base(base_url: Optional[str], match: str) -> str:
-    if match[0] == "*":
-        return match
-
-    token_map: Dict[str, str] = {}
-
-    def map_token(original: str, replacement: str) -> str:
-        if len(original) == 0:
-            return ""
-        token_map[replacement] = original
-        return replacement
-
-    # Escaped `\\?` behaves the same as `?` in our glob patterns.
-    match = match.replace(r"\\?", "?")
-    # Special case about: URLs as they are not relative to base_url
-    if (
-        match.startswith("about:")
-        or match.startswith("data:")
-        or match.startswith("chrome:")
-        or match.startswith("edge:")
-        or match.startswith("file:")
-    ):
-        # about: and data: URLs are not relative to base_url, so we return them as is.
-        return match
-    # Glob symbols may be escaped in the URL and some of them such as ? affect resolution,
-    # so we replace them with safe components first.
-    processed_parts = []
-    for index, token in enumerate(match.split("/")):
-        if token in (".", "..", ""):
-            processed_parts.append(token)
-            continue
-        # Handle special case of http*://, note that the new schema has to be
-        # a web schema so that slashes are properly inserted after domain.
-        if index == 0 and token.endswith(":"):
-            # Replace any pattern with http:
-            if "*" in token or "{" in token:
-                processed_parts.append(map_token(token, "http:"))
-            else:
-                # Preserve explicit schema as is as it may affect trailing slashes after domain.
-                processed_parts.append(token)
-            continue
-        question_index = token.find("?")
-        if question_index == -1:
-            processed_parts.append(map_token(token, f"$_{index}_$"))
-        else:
-            new_prefix = map_token(token[:question_index], f"$_{index}_$")
-            new_suffix = map_token(token[question_index:], f"?$_{index}_$")
-            processed_parts.append(new_prefix + new_suffix)
-
-    relative_path = "/".join(processed_parts)
-    resolved, case_insensitive_part = resolve_base_url(base_url, relative_path)
-
-    for token, original in token_map.items():
-        normalize = case_insensitive_part and token in case_insensitive_part
-        resolved = resolved.replace(
-            token, original.lower() if normalize else original, 1
-        )
-
-    return resolved
-
-
-def resolve_base_url(
-    base_url: Optional[str], given_url: str
-) -> Tuple[str, Optional[str]]:
-    try:
-        url = nodelike_urlparse(
-            urljoin(base_url if base_url is not None else "", given_url)
-        )
-        resolved = urlunparse(url)
-        # Schema and domain are case-insensitive.
-        hostname_port = (
-            url.hostname or ""
-        )  # can't use parsed.netloc because it includes userinfo (username:password)
-        if url.port:
-            hostname_port += f":{url.port}"
-        case_insensitive_prefix = f"{url.scheme}://{hostname_port}"
-        return resolved, case_insensitive_prefix
-    except Exception:
-        return given_url, None
-
-
-def nodelike_urlparse(url: str) -> ParseResult:
-    parsed = urlparse(url, allow_fragments=True)
-
-    # https://url.spec.whatwg.org/#special-scheme
-    is_special_url = parsed.scheme in ["http", "https", "ws", "wss", "ftp", "file"]
-    if is_special_url:
-        # special urls have a list path, list paths are serialized as follows: https://url.spec.whatwg.org/#url-path-serializer
-        # urllib diverges, so we patch it here
-        if parsed.path == "":
-            parsed = parsed._replace(path="/")
-
-    return parsed
 
 
 class HarLookupResult(TypedDict, total=False):

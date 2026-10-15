@@ -444,6 +444,9 @@ class Route(ChannelOwner):
         response: "APIResponse" = None,
     ) -> None:
         params = locals_to_params(locals())
+        # These options become the body and the headers below.
+        for name in ("json", "path", "contentType", "response"):
+            params.pop(name, None)
 
         if json is not None:
             if body is not None:
@@ -451,7 +454,6 @@ class Route(ChannelOwner):
             body = json_utils.dumps(json)
 
         if response:
-            del params["response"]
             params["status"] = (
                 params["status"] if params.get("status") else response.status
             )
@@ -476,15 +478,14 @@ class Route(ChannelOwner):
             params["isBase64"] = True
             length = len(body)
         elif path:
-            del params["path"]
             file_content = Path(path).read_bytes()
             params["body"] = base64.b64encode(file_content).decode()
             params["isBase64"] = True
             length = len(file_content)
 
         headers = {k.lower(): str(v) for k, v in params.get("headers", {}).items()}
-        if params.get("contentType"):
-            headers["content-type"] = params["contentType"]
+        if contentType:
+            headers["content-type"] = contentType
         elif json or isinstance(json, (list, tuple, dict)):
             # Like the JS client, which checks truthiness: [] and {} are truthy in JS.
             headers["content-type"] = "application/json"

@@ -1050,6 +1050,7 @@ async def test_fill_should_throw_when_element_is_not_an_input_textarea_or_conten
     assert "Element is not an <input>" in exc_info.value.message
 
 
+@pytest.mark.skip_protocol_check
 async def test_fill_should_throw_if_passed_a_non_string_value(
     page: Page, server: Server
 ) -> None:

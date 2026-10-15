@@ -241,6 +241,8 @@ The script, for `sync` and then `async`:
 1. runs `node scripts/codegen/generate_api.js --flavor <flavor>` (reads the docs from `$PW_SRC_DIR`) straight into `playwright/<flavor>_api/_generated.py`,
 2. invokes `pre-commit run --files` on the generated file.
 
+It then runs `python scripts/codegen/generate_protocol.py`, which reads `packages/protocol/spec/*.yml` from `$PW_SRC_DIR` and writes the command parameter tables to `playwright/_impl/_protocol.py`.
+
 Then run `mypy playwright` and work through the errors in `_generated.py` — each one is a call into `_impl/` that the implementation does not support yet.
 
 To see exactly what a regeneration changed in the public API, compare against the committed file:
@@ -272,6 +274,7 @@ Failure modes and fixes:
 | A kwarg in `_impl/` that the docs don't mention (e.g. legacy name from a doc rename) | Nothing fails: the generator simply never passes it. | If the param is positional with no default, just rename it in `_impl/`. Check `packages/protocol/spec/*.yml` and the server dispatcher — if the wire field renamed too, also update the channel-send dict key. Only use `extraOptions` for genuinely hidden internal kwargs (`default_browser_type`). |
 | `AttributeError: 'X' object has no attribute '_loop'` (or `_dispatcher_fiber`) at first use of a new wrapper class | The non-ChannelOwner wrapper isn't initializing the fields the generated `AsyncBase`/`SyncBase` reads. | In the wrapper's `__init__`, set `self._loop = parent._loop` and `self._dispatcher_fiber = parent._dispatcher_fiber`. |
 | `'NoneType' object has no attribute 'get'` after `send_return_as_dict` | Method's protocol response carries no fields and `send_return_as_dict` returned `None`. | `(result or {}).get(...)`. |
+| A test fails at teardown with `Protocol violations: X.y: params.z: unknown` (or `missing`, or `expected …`) | The client sends a message that the protocol spec does not allow. The driver would drop an unknown parameter without an error. | Fix the send in `_impl/`: rename the key after a wire rename, or remove a client-side option before the send. |
 | Frame/buffer payload arrives as a `str` instead of `bytes` | Protocol `binary` fields cross the wire as base64. | `base64.b64decode(value)` in the impl before exposing. |
 
 After the script settles, run `pre-commit run --all-files` once more to confirm everything is idle.
@@ -323,7 +326,7 @@ All keys use docs names: `Class.member` or `Class.member.arg`, with the upstream
 - **A cluster of rules on the same class is a smell.** If you're about to add five entries for `Foo.*`, you're almost certainly looking at a class that needs to be implemented. Implement the whole thing once and the entries disappear.
 - **Watch for revert pairs in the same range.** 1.59 added and reverted `Browser.isRemote` (#39613 / #39620) inside the same release. Walking chronologically lets you skip the add when you see the revert later.
 - **Watch for rename-revert pairs.** 1.59 had `Locator.normalize` → `Locator.toCode` (#39648) → `Locator.normalize` (#39754). Final state wins; only port the last.
-- **Doc renames almost always include a wire-protocol rename.** Whenever you see `### param: X.y.oldName` → `### param: X.y.newName` in a doc commit, also `git -C "$PW_SRC_DIR" show <sha> -- packages/protocol/spec/` and the corresponding `*Dispatcher.ts` file. If the wire field changed too, the channel-send dict key in `_impl/` must change. Suppressing the doc-side mismatch is hiding a real bug — the previous Python code is silently sending an unknown field that the new server ignores.
+- **Doc renames almost always include a wire-protocol rename.** Whenever you see `### param: X.y.oldName` → `### param: X.y.newName` in a doc commit, also `git -C "$PW_SRC_DIR" show <sha> -- packages/protocol/spec/` and the corresponding `*Dispatcher.ts` file. If the wire field changed too, the channel-send dict key in `_impl/` must change. Suppressing the doc-side mismatch is hiding a real bug — the previous Python code is silently sending an unknown field that the new server ignores. The test suite reports such a field as a protocol violation, but only in tests that send it.
 - **TypedDicts beat `Dict[str, X]` for any structured return.** When the docs describe a return as `[Object]` with named fields, name the struct for the generator, which writes its `TypedDict` into `_api_structures.py`, and re-export it from both public `__init__.py` files. Zero runtime cost (it's still a `dict`), and the docstrings expand its fields from the docs.
 - **Positional renames are free.** A param with no default before any `*` separator is positional-or-keyword in Python, but realistic call sites pass it positionally. Renaming such a param doesn't break callers.
 - **The "Backport changes" GitHub issue can be misleading.** In the 1.59 roll its checkboxes were all marked `[x]` with annotations like "✅ IMPLEMENTED", but several of those features had not actually been merged into the Python port. Trust the `docs/src/api/` walk over the issue.

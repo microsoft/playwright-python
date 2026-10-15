@@ -205,6 +205,7 @@ async def test_select_option_should_return_on_no_values(
     assert result == []
 
 
+@pytest.mark.skip_protocol_check
 async def test_select_option_should_not_allow_null_items(
     page: Page, server: Server
 ) -> None:

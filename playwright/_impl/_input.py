@@ -70,9 +70,9 @@ class Mouse:
         clickCount: int = None,
         title: str = None,
     ) -> None:
-        await self._channel.send(
-            "mouseClick", None, locals_to_params(locals()), title=title
-        )
+        params = locals_to_params(locals())
+        params.pop("title", None)
+        await self._channel.send("mouseClick", None, params, title=title)
 
     async def click(
         self,

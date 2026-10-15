@@ -29,10 +29,14 @@ from pixelmatch.contrib.PIL import from_PIL_to_raw_data
 
 import playwright
 from playwright._impl._path_utils import get_file_dirname
+from playwright._impl._protocol_check import take_violations
 
 from .server import Server, test_server
 
 _dirname = get_file_dirname()
+
+# Check each message that the client sends against the protocol spec.
+os.environ.setdefault("PW_CHECK_PROTOCOL", "1")
 
 
 def pytest_configure(config: pytest.Config) -> None:
@@ -87,6 +91,16 @@ def start_server() -> Generator[None, None, None]:
 def after_each_hook() -> Generator[None, None, None]:
     yield
     test_server.reset()
+
+
+@pytest.fixture(autouse=True)
+def check_protocol(request: pytest.FixtureRequest) -> Generator[None, None, None]:
+    yield
+    violations = take_violations()
+    # The test sends an invalid message on purpose, to test the driver's error.
+    if request.node.get_closest_marker("skip_protocol_check"):
+        return
+    assert not violations, "Protocol violations:\n" + "\n".join(violations)
 
 
 @pytest.fixture(scope="session")

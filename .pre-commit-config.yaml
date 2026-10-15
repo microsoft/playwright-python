@@ -22,7 +22,7 @@ repos:
     rev: v1.17.0
     hooks:
       - id: mypy
-        additional_dependencies: [types-pyOpenSSL==24.1.0.20240722]
+        additional_dependencies: [types-pyOpenSSL==24.1.0.20240722, types-PyYAML==6.0.12.20260906]
   - repo: https://github.com/pycqa/flake8
     rev: 7.3.0
     hooks:

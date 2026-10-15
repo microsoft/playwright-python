@@ -22,6 +22,7 @@ from playwright.async_api import Browser, Error
 from tests.server import Server, TestServerRequest
 
 
+@pytest.mark.skip_protocol_check
 async def test_should_throw_for_bad_server_value(
     browser_factory: "Callable[..., asyncio.Future[Browser]]",
 ) -> None:

@@ -275,11 +275,12 @@ class Browser(ChannelOwner):
         categories: Sequence[str] = None,
     ) -> None:
         params = locals_to_params(locals())
+        # The client writes the trace to `path` in stop_tracing().
+        params.pop("path", None)
         if page:
             params["page"] = page._channel
         if path:
             self._cr_tracing_path = str(path)
-            params["path"] = str(path)
         await self._channel.send("startTracing", None, params)
 
     async def stop_tracing(self) -> bytes:
