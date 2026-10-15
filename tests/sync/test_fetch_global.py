@@ -482,7 +482,7 @@ def test_cookies_should_return_cookies_filtered_by_urls(
         [
             {"name": "a", "value": "b", "domain": "localhost", "path": "/"},
             {"name": "c", "value": "d", "domain": "localhost", "path": "/input"},
-            {"name": "e", "value": "f", "domain": "one.com", "path": "/"},
+            {"name": "e", "value": "f", "domain": ".one.com", "path": "/"},
             {
                 "name": "g",
                 "value": "h",

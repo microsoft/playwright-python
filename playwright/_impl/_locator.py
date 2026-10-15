@@ -37,6 +37,7 @@ from playwright._impl._api_structures import (
     FloatRect,
     Position,
 )
+from playwright._impl._disposable import DisposableStub
 from playwright._impl._element_handle import ElementHandle
 from playwright._impl._helper import (
     Error,
@@ -821,8 +822,9 @@ class Locator:
     ) -> FrameExpectResult:
         return await self._frame._expect(self._selector, expression, options, title)
 
-    async def highlight(self, style: str = None) -> None:
+    async def highlight(self, style: str = None) -> DisposableStub:
         await self._frame._highlight(self._selector, style)
+        return DisposableStub(lambda: self.hide_highlight(), self._frame)
 
     async def hide_highlight(self) -> None:
         await self._frame._hide_highlight(self._selector)

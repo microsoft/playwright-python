@@ -187,18 +187,6 @@ function escapeRegExp(text) {
 
 function loadDocumentation() {
   const documentation = parseApi(path.join(PW_SRC_DIR, 'docs', 'src', 'api'));
-  for (const name of rules.extraClasses) {
-    const clazz = documentation.classes.get(name);
-    if (!clazz) {
-      errors.push(`extraClasses: the docs have no class ${name}`);
-      continue;
-    }
-    if (!clazz.langs.only || clazz.langs.only.includes('python')) {
-      errors.push(`extraClasses: ${name} is already in the Python docs; remove the entry`);
-      continue;
-    }
-    clazz.langs.only = [...clazz.langs.only, 'python'];
-  }
   documentation.filterForLanguage('python');
   return documentation;
 }
@@ -474,12 +462,7 @@ function toPy(type, ctx) {
 /** @param {PyType} t */
 function structName(t) {
   const place = /** @type {string} */ (t.place);
-  let name = lookupRule('structNamesByPlace', place);
-  if (!name) {
-    const alias = t.docType.langAliases?.python || t.docType.langAliases?.default;
-    if (alias)
-      name = lookupRule('structRenames', alias) || alias;
-  }
+  const name = t.docType.langAliases?.python || t.docType.langAliases?.default;
   if (!name) {
     errors.push(`No Python name for the struct at ${place}: {${t.docType.properties.map(p => p.name).join(', ')}}`);
     return 'typing.Dict';
@@ -678,27 +661,13 @@ function returnWrapper(t) {
 // Python model.
 
 /**
- * @param {string} place
- * @param {any} docsType
- */
-function typeAt(place, docsType) {
-  const override = lookupRule('typeOverrides', place);
-  if (override === undefined)
-    return docsType;
-  if (typeof override === 'function')
-    return override({ parse: expression => Type.parse(expression) });
-  return Type.parse(override);
-}
-
-/**
  * @param {any} clazz
  * @param {any} member
  * @returns {PyMember}
  */
 function buildMember(clazz, member) {
   const memberPlace = `${clazz.name}.${member.name}`;
-  const returnDocsType = typeAt(memberPlace, member.type);
-  const returnType = returnDocsType.name === 'void' && !returnDocsType.union ? null : toPy(returnDocsType, { dir: 'out', place: memberPlace });
+  const returnType = member.type.name === 'void' && !member.type.union ? null : toPy(member.type, { dir: 'out', place: memberPlace });
   const isEventContextManager = returnType?.kind === 'ecm';
 
   /** @type {{ arg: any, isOption: boolean }[]} */
@@ -712,20 +681,14 @@ function buildMember(clazz, member) {
     }
   }
 
-  for (let i = args.length - 1; i >= 0; i--) {
-    if (lookupRule('skipArgs', `${memberPlace}.${args[i].arg.name}`))
-      args.splice(i, 1);
-  }
-
   /** @param {{ arg: any, isOption: boolean }} entry */
   const toParam = ({ arg, isOption }) => {
     const place = `${memberPlace}.${arg.name}`;
-    const type = toPy(typeAt(place, arg.type), { dir: 'in', place });
+    const type = toPy(arg.type, { dir: 'in', place });
     const nullable = type.kind === 'union' && !!type.members?.some(isNone);
-    const renamed = lookupRule('argNames', place);
     return /** @type {PyParam} */ ({
-      name: renamed || toSnakeCase(arg.alias),
-      implName: renamed || arg.name,
+      name: toSnakeCase(arg.alias),
+      implName: arg.name,
       type,
       optional: isOption || !arg.required || nullable,
       comment: renderSpec(arg.spec),
@@ -734,23 +697,12 @@ function buildMember(clazz, member) {
     });
   };
 
-  const positionalRule = lookupRule('positional', memberPlace);
+  /** @param {{ arg: any, isOption: boolean }} entry */
+  const isPositional = ({ arg, isOption }) => !isOption || rules.positionalOptions.includes(arg.name);
   /** @type {PyParam[]} */
-  let positional;
+  const positional = args.filter(isPositional).map(toParam);
   /** @type {PyParam[]} */
-  let keywordOnly;
-  if (positionalRule) {
-    for (const name of positionalRule) {
-      if (!args.some(a => a.arg.name === name))
-        errors.push(`positional: ${memberPlace} has no argument ${name}`);
-    }
-    positional = positionalRule.map(name => args.find(a => a.arg.name === name)).filter(Boolean).map(toParam);
-    keywordOnly = args.filter(a => !positionalRule.includes(a.arg.name)).map(toParam);
-  } else {
-    const isPositional = a => !a.isOption || rules.positionalOptions.includes(a.arg.name);
-    positional = args.filter(isPositional).map(toParam);
-    keywordOnly = args.filter(a => !isPositional(a)).map(toParam);
-  }
+  const keywordOnly = args.filter(a => !isPositional(a)).map(toParam);
   for (const extra of lookupRule('extraOptions', memberPlace) || []) {
     keywordOnly.push({
       name: toSnakeCase(extra.name),
@@ -766,7 +718,7 @@ function buildMember(clazz, member) {
   let sawOptional = false;
   for (const param of positional) {
     if (sawOptional && !param.optional)
-      errors.push(`${memberPlace}: required parameter ${param.name} follows an optional one; add a "positional" rule`);
+      errors.push(`${memberPlace}: required parameter ${param.name} follows an optional one; fix the docs`);
     sawOptional = sawOptional || param.optional;
   }
 
@@ -1074,7 +1026,7 @@ function emitClass(clazz, out) {
 function structFields(t) {
   return t.docType.properties.map(p => {
     const place = `${t.place}.${p.name}`;
-    const type = toPy(typeAt(place, p.type), { dir: t.dir || 'out', place });
+    const type = toPy(p.type, { dir: t.dir || 'out', place });
     if (someType(type, c => c.kind === 'class' && !!c.wrapper))
       errors.push(`The struct field ${place} refers to a class; _api_structures.py cannot import it`);
     const text = annotation(type);
@@ -1152,7 +1104,7 @@ function emitStructs() {
 }
 
 function checkRules() {
-  for (const table of ['extraMembers', 'extraOptions', 'skipArgs', 'argNames', 'typeOverrides', 'positional', 'structRenames', 'structNamesByPlace', 'structTotal', 'implModules']) {
+  for (const table of ['extraMembers', 'extraOptions', 'structTotal', 'implModules']) {
     for (const key of Object.keys(/** @type {any} */ (rules)[table])) {
       if (!usedRules.has(`${table}:${key}`))
         errors.push(`${table}: the entry "${key}" no longer matches anything; remove it`);

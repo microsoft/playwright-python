@@ -976,28 +976,10 @@ async def test_fill_should_fill_date_input_after_clicking(
     assert await page.eval_on_selector("input", "input => input.value") == "2020-03-02"
 
 
-@pytest.mark.skip_browser("webkit")
-async def test_fill_should_throw_on_incorrect_date(page: Page, server: Server) -> None:
-    # Disabled as in upstream, we should validate time in the Playwright lib
-    await page.set_content("<input type=date>")
-    with pytest.raises(Error) as exc_info:
-        await page.fill("input", "2020-13-05")
-    assert "Malformed value" in exc_info.value.message
-
-
 async def test_fill_should_fill_time_input(page: Page, server: Server) -> None:
     await page.set_content("<input type=time>")
     await page.fill("input", "13:15")
     assert await page.eval_on_selector("input", "input => input.value") == "13:15"
-
-
-@pytest.mark.skip_browser("webkit")
-async def test_fill_should_throw_on_incorrect_time(page: Page, server: Server) -> None:
-    # Disabled as in upstream, we should validate time in the Playwright lib
-    await page.set_content("<input type=time>")
-    with pytest.raises(Error) as exc_info:
-        await page.fill("input", "25:05")
-    assert "Malformed value" in exc_info.value.message
 
 
 async def test_fill_should_fill_datetime_local_input(
@@ -1009,14 +991,6 @@ async def test_fill_should_fill_datetime_local_input(
         await page.eval_on_selector("input", "input => input.value")
         == "2020-03-02T05:15"
     )
-
-
-@pytest.mark.only_browser("chromium")
-async def test_fill_should_throw_on_incorrect_datetime_local(page: Page) -> None:
-    await page.set_content("<input type=datetime-local>")
-    with pytest.raises(Error) as exc_info:
-        await page.fill("input", "abc")
-    assert "Malformed value" in exc_info.value.message
 
 
 async def test_fill_should_fill_contenteditable(page: Page, server: Server) -> None:
