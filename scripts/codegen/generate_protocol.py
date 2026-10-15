@@ -15,10 +15,12 @@
 # Generates from the protocol spec (packages/protocol/spec/*.yml in
 # microsoft/playwright):
 # - playwright/_impl/_protocol.py: the tables that _protocol_check.py uses;
-# - playwright/_impl/_protocol_types.py: a TypedDict for each message.
+# - playwright/_impl/_protocol_types.py: the TypedDicts of the messages;
+# - playwright/_impl/_protocol_channels.py: a typed channel class per interface.
 #
 # Usage:
-#   PW_SRC_DIR=<microsoft/playwright checkout> python scripts/codegen/generate_protocol.py --out <file> --types-out <file>
+#   PW_SRC_DIR=<microsoft/playwright checkout> python scripts/codegen/generate_protocol.py \
+#       --out <file> --types-out <file> --channels-out <file>
 #
 # The spec is loaded the same way as utils/protocol_spec.js does it. The output
 # is not formatted; run black on it.

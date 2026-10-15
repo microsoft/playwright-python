@@ -421,7 +421,8 @@ class APIRequestContext(ChannelOwner):
         if max_retries is not None and max_retries < 0:
             raise Error("'max_retries' must be greater than or equal to '0'")
         url = url or (request.url if request else url)
-        assert url is not None
+        if url is None:
+            raise Error("url: expected a URL string or a Request")
         method = method or (request.method if request else "GET")
         # Cannot call allHeaders() here as the request may be paused inside route handler.
         headers_obj = headers or (request.headers if request else None)

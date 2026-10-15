@@ -261,7 +261,7 @@ Failure modes and fixes:
 | Symptom | Cause | Fix |
 |---|---|---|
 | mypy: `"XImpl" has no attribute "y"` in `_generated.py` | The docs have a new member `X.y`; `_impl/` does not. | PORT it. |
-| mypy: `Unexpected keyword argument "z" for "y" of "XImpl"` | New parameter or option on an existing method. | Add the parameter in `_impl/` under its Python (snake_case) name, as `Optional[X]` with no default, and put it in the params dict. mypy then reports each caller that must pass it. If Python must not have it, fix the docs: `* langs:` on the option. |
+| mypy: `Unexpected keyword argument "z" for "y" of "XImpl"` | New parameter or option on an existing method. | Add the parameter in `_impl/` under its Python (snake_case) name, as `Optional[X]` with no default, and pass it in the channel call. mypy then reports each caller that must pass it. If Python must not have it, fix the docs: `* langs:` on the option. |
 | mypy: `Missing named argument "z" for "y" of "XChannel"` | The protocol added a parameter to a command. | Pass the value in the channel call. If the implementation method needs a new parameter for it, add it as above. |
 | mypy: incompatible argument type in `_generated.py` | The docs type changed, or `_impl/` declares a narrower type. | Match the type in `_impl/`, or fix the docs with a Python-only declaration (`* langs: python`). |
 | generator: `No Python name for the struct at X.y.z` | A new inline `[Object]` with no name in the docs. | Name it in the docs: `` "Name" <[Object]> ``. |

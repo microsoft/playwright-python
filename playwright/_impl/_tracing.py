@@ -113,10 +113,12 @@ class Tracing(ChannelOwner):
 
         if is_local:
             result = await self._channel.tracingStopChunk(mode="entries")
-            assert result["entries"] is not None
+            entries = result["entries"]
+            if entries is None:
+                raise Error("tracingStopChunk returned no entries")
             await self._connection.local_utils.zip(
                 zip_file=str(file_path),
-                entries=result["entries"],
+                entries=entries,
                 stacks_id=self._stacks_id,
                 mode="write",
                 include_sources=self._include_sources,
@@ -246,10 +248,12 @@ class Tracing(ChannelOwner):
             if not is_zip:
                 # Server wrote HAR and resources to the user's chosen paths.
                 return
-            assert result["entries"] is not None
+            entries = result["entries"]
+            if entries is None:
+                raise Error("harExport returned no entries")
             await self._connection.local_utils.zip(
                 zip_file=recorder["path"],
-                entries=result["entries"],
+                entries=entries,
                 stacks_id=None,
                 mode="write",
                 include_sources=False,
@@ -258,7 +262,8 @@ class Tracing(ChannelOwner):
             return
 
         result = await self._channel.harExport(harId=har_id, mode="archive")
-        assert result["artifact"]
+        if result["artifact"] is None:
+            raise Error("harExport returned no artifact")
         artifact = cast(Artifact, from_channel(result["artifact"]))
         if is_zip:
             await artifact.save_as(recorder["path"])

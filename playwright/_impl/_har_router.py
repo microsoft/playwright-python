@@ -53,7 +53,8 @@ class HarRouter:
         if result["error"]:
             raise Error(result["error"])
         har_id = result["harId"]
-        assert har_id
+        if har_id is None:
+            raise Error("harOpen returned no HAR id")
         return HarRouter(
             local_utils=local_utils,
             har_id=har_id,
