@@ -52,6 +52,7 @@ from playwright._impl._connection import (
 )
 from playwright._impl._errors import Error
 from playwright._impl._event_context_manager import EventContextManagerImpl
+from playwright._impl._headers import serialize_headers
 from playwright._impl._helper import (
     URLMatch,
     WebSocketRouteHandlerCallback,
@@ -83,14 +84,6 @@ class SerializedFallbackOverrides:
         self.method: Optional[str] = None
         self.headers: Optional[Dict[str, str]] = None
         self.post_data_buffer: Optional[bytes] = None
-
-
-def serialize_headers(headers: Dict[str, str]) -> HeadersArray:
-    return [
-        {"name": name, "value": value}
-        for name, value in headers.items()
-        if value is not None
-    ]
 
 
 async def to_client_certificates_protocol(

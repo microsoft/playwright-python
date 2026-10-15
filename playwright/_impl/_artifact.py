@@ -17,7 +17,8 @@ from pathlib import Path
 from typing import Dict, Optional, Union, cast
 
 from playwright._impl._connection import ChannelOwner, from_channel
-from playwright._impl._helper import Error, make_dirs_for_file, patch_error_message
+from playwright._impl._errors import Error, patch_error_message
+from playwright._impl._helper import make_dirs_for_file
 from playwright._impl._stream import Stream
 
 

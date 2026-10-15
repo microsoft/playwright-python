@@ -12,14 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Checks each message that the client sends against the protocol spec
-# (_protocol.py). The driver drops parameters that it does not know without an
-# error, so a wrong parameter name in the client is silent without this check.
-#
-# The check is on when PW_CHECK_PROTOCOL=1; the test suite sets it. It does not
-# raise: it records each violation, and the test suite fails the test that
-# caused it. So a violation in a message that is sent without waiting for the
-# reply is reported as well.
+"""Port of the type checks in packages/protocol/src/validatorPrimitives.ts.
+
+Checks each message that the client sends against the protocol spec
+(_protocol.py). The driver drops parameters that it does not know without an
+error, so a wrong parameter name in the client is silent without this check.
+
+The check is on when PW_CHECK_PROTOCOL=1; the test suite sets it. It does not
+raise: it records each violation, and the test suite fails the test that
+caused it. So a violation in a message that is sent without waiting for the
+reply is reported as well.
+"""
 
 import os
 from typing import Any, Callable, Dict, List, Optional

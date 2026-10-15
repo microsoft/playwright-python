@@ -40,13 +40,16 @@ from pyee.asyncio import AsyncIOEventEmitter
 
 import playwright
 import playwright._impl._impl_to_api_mapping
-from playwright._impl._errors import TargetClosedError, rewrite_error
+from playwright._impl._errors import (
+    Error,
+    TargetClosedError,
+    parse_error,
+    rewrite_error,
+)
 from playwright._impl._greenlets import EventGreenlet
 from playwright._impl._helper import (
-    Error,
     ParsedMessagePayload,
     create_task_and_ignore_exception,
-    parse_error,
 )
 from playwright._impl._protocol_check import check_message, is_enabled
 from playwright._impl._transport import Transport

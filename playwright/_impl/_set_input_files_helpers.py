@@ -29,7 +29,7 @@ from typing import (
 )
 
 from playwright._impl._connection import Channel, from_channel
-from playwright._impl._helper import Error
+from playwright._impl._errors import Error
 from playwright._impl._writable_stream import WritableStream
 
 if TYPE_CHECKING:  # pragma: no cover

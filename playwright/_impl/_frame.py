@@ -44,11 +44,9 @@ from playwright._impl._helper import (
     FrameNavigatedEvent,
     KeyboardModifier,
     MouseButton,
-    TimeoutSettings,
     URLMatch,
     async_readfile,
     locals_to_params,
-    monotonic_time,
     url_matches,
 )
 from playwright._impl._internal_structures import (
@@ -61,13 +59,15 @@ from playwright._impl._js_handle import (
     Serializable,
     add_source_url_to_script,
     parse_result,
-    parse_value,
     serialize_argument,
 )
 from playwright._impl._locator import (
     ANY_FRAME_SELECTOR,
     FrameLocator,
     Locator,
+    test_id_attribute_name,
+)
+from playwright._impl._locator_utils import (
     get_by_alt_text_selector,
     get_by_label_selector,
     get_by_placeholder_selector,
@@ -75,10 +75,12 @@ from playwright._impl._locator import (
     get_by_test_id_selector,
     get_by_text_selector,
     get_by_title_selector,
-    test_id_attribute_name,
 )
 from playwright._impl._network import Response
+from playwright._impl._serializers import parse_value
 from playwright._impl._set_input_files_helpers import convert_input_files
+from playwright._impl._time import monotonic_time
+from playwright._impl._timeout_settings import TimeoutSettings
 from playwright._impl._waiter import Waiter
 from playwright._impl._web_mcp import WebMCP
 

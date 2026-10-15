@@ -16,7 +16,7 @@ from asyncio import AbstractEventLoop
 from typing import Any, Optional
 
 from playwright._impl._api_structures import WebErrorLocation
-from playwright._impl._helper import Error
+from playwright._impl._errors import Error
 from playwright._impl._page import Page
 
 

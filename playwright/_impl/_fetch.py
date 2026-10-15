@@ -34,27 +34,28 @@ from playwright._impl._api_structures import (
     StorageState,
 )
 from playwright._impl._connection import ChannelOwner, from_channel
-from playwright._impl._errors import is_target_closed_error
+from playwright._impl._errors import Error, TargetClosedError, is_target_closed_error
 from playwright._impl._form_data import FormData
+from playwright._impl._headers import serialize_headers
 from playwright._impl._helper import (
-    Error,
-    NameValue,
-    TargetClosedError,
-    TimeoutSettings,
     async_readfile,
     async_writefile,
     is_file_payload,
     locals_to_params,
-    object_to_array,
     to_impl,
 )
-from playwright._impl._internal_structures import FormField, Headers, ServerFilePayload
+from playwright._impl._internal_structures import (
+    FormField,
+    Headers,
+    NameValue,
+    ServerFilePayload,
+)
 from playwright._impl._network import (
-    serialize_headers,
     to_clear_cookies_params,
     to_client_certificates_protocol,
     to_http_credentials_protocol,
 )
+from playwright._impl._timeout_settings import TimeoutSettings
 from playwright._impl._tracing import Tracing
 
 if typing.TYPE_CHECKING:
@@ -491,6 +492,15 @@ class APIRequestContext(ChannelOwner):
         if path:
             await async_writefile(path, json.dumps(result))
         return result
+
+
+def object_to_array(obj: Optional[Dict]) -> Optional[List[NameValue]]:
+    if not obj:
+        return None
+    result = []
+    for key, value in obj.items():
+        result.append(NameValue(name=key, value=str(value)))
+    return result
 
 
 def file_payload_to_json(payload: FilePayload) -> ServerFilePayload:

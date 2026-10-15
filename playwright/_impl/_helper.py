@@ -16,10 +16,7 @@ import datetime
 import math
 import os
 import re
-import time
-import traceback
 from pathlib import Path
-from types import TracebackType
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -38,15 +35,8 @@ from typing import (
     overload,
 )
 
-from playwright._impl._errors import (
-    Error,
-    TargetClosedError,
-    TimeoutError,
-    is_target_closed_error,
-    rewrite_error,
-)
+from playwright._impl._errors import ErrorPayload, is_target_closed_error, rewrite_error
 from playwright._impl._greenlets import RouteGreenlet
-from playwright._impl._internal_structures import NameValue
 from playwright._impl._str_utils import escape_regex_flags
 from playwright._impl._url_match import URLMatch, url_matches
 
@@ -76,13 +66,6 @@ ServiceWorkersPolicy = Literal["allow", "block"]
 HarMode = Literal["full", "minimal"]
 HarContentPolicy = Literal["attach", "embed", "omit"]
 RouteFromHarNotFoundPolicy = Literal["abort", "fallback"]
-
-
-class ErrorPayload(TypedDict, total=False):
-    message: str
-    name: str
-    stack: str
-    value: Optional[Any]
 
 
 class HarRecordingMetadata(TypedDict, total=False):
@@ -159,89 +142,7 @@ class HarLookupResult(TypedDict, total=False):
     body: Optional[str]
 
 
-DEFAULT_PLAYWRIGHT_TIMEOUT_IN_MILLISECONDS = 30000
-DEFAULT_PLAYWRIGHT_LAUNCH_TIMEOUT_IN_MILLISECONDS = 180000
 PLAYWRIGHT_MAX_DEADLINE = 2147483647  # 2^31-1
-
-
-class TimeoutSettings:
-
-    @staticmethod
-    def launch_timeout(timeout: Optional[float] = None) -> float:
-        return (
-            timeout
-            if timeout is not None
-            else DEFAULT_PLAYWRIGHT_LAUNCH_TIMEOUT_IN_MILLISECONDS
-        )
-
-    def __init__(self, parent: Optional["TimeoutSettings"]) -> None:
-        self._parent = parent
-        self._default_timeout: Optional[float] = None
-        self._default_navigation_timeout: Optional[float] = None
-
-    def set_default_timeout(self, timeout: Optional[float]) -> None:
-        self._default_timeout = timeout
-
-    def timeout(self, timeout: float = None) -> float:
-        if timeout is not None:
-            return timeout
-        if self._default_timeout is not None:
-            return self._default_timeout
-        if self._parent:
-            return self._parent.timeout()
-        return DEFAULT_PLAYWRIGHT_TIMEOUT_IN_MILLISECONDS
-
-    def set_default_navigation_timeout(
-        self, navigation_timeout: Optional[float]
-    ) -> None:
-        self._default_navigation_timeout = navigation_timeout
-
-    def default_navigation_timeout(self) -> Optional[float]:
-        return self._default_navigation_timeout
-
-    def default_timeout(self) -> Optional[float]:
-        return self._default_timeout
-
-    def navigation_timeout(self, timeout: float = None) -> float:
-        if timeout is not None:
-            return timeout
-        if self._default_navigation_timeout is not None:
-            return self._default_navigation_timeout
-        if self._default_timeout is not None:
-            return self._default_timeout
-        if self._parent:
-            return self._parent.navigation_timeout()
-        return DEFAULT_PLAYWRIGHT_TIMEOUT_IN_MILLISECONDS
-
-
-def serialize_error(ex: Exception, tb: Optional[TracebackType]) -> ErrorPayload:
-    return ErrorPayload(
-        message=str(ex), name="Error", stack="".join(traceback.format_tb(tb))
-    )
-
-
-def parse_error(error: ErrorPayload, log: Optional[str] = None) -> Error:
-    base_error_class = Error
-    if error.get("name") == "TimeoutError":
-        base_error_class = TimeoutError
-    if error.get("name") == "TargetClosedError":
-        base_error_class = TargetClosedError
-    if not log:
-        log = ""
-    exc = base_error_class(patch_error_message(error["message"]) + log)
-    exc._name = error["name"]
-    exc._stack = error["stack"]
-    return exc
-
-
-def patch_error_message(message: str) -> str:
-    match = re.match(r"(\w+)(: expected .*)", message)
-    if match:
-        message = to_snake_case(match.group(1)) + match.group(2)
-    message = message.replace(
-        "Pass { acceptDownloads: true }", "Pass 'accept_downloads=True'"
-    )
-    return message
 
 
 def locals_to_params(args: Dict) -> Dict:
@@ -256,10 +157,6 @@ def locals_to_params(args: Dict) -> Dict:
                 else locals_to_params(args[key])
             )
     return copy
-
-
-def monotonic_time() -> int:
-    return math.floor(time.monotonic() * 1000)
 
 
 def create_task_and_ignore_exception(
@@ -395,13 +292,6 @@ class RouteHandler:
         return patterns
 
 
-to_snake_case_regex = re.compile("((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))")
-
-
-def to_snake_case(name: str) -> str:
-    return to_snake_case_regex.sub(r"_\1", name).lower()
-
-
 def make_dirs_for_file(path: Union[Path, str]) -> None:
     if not os.path.isabs(path):
         path = Path.cwd() / path
@@ -435,15 +325,6 @@ def to_impl(obj: T) -> T:
     return obj
 
 
-def object_to_array(obj: Optional[Dict]) -> Optional[List[NameValue]]:
-    if not obj:
-        return None
-    result = []
-    for key, value in obj.items():
-        result.append(NameValue(name=key, value=str(value)))
-    return result
-
-
 def is_file_payload(value: Optional[Any]) -> bool:
     return (
         isinstance(value, dict)
@@ -451,15 +332,6 @@ def is_file_payload(value: Optional[Any]) -> bool:
         and "mimeType" in value
         and "buffer" in value
     )
-
-
-TEXTUAL_MIME_TYPE = re.compile(
-    r"^(text\/.*?|application\/(json|(x-)?javascript|xml.*?|ecmascript|graphql|x-www-form-urlencoded)|image\/svg(\+xml)?|application\/.*?(\+json|\+xml))(;\s*charset=.*)?$"
-)
-
-
-def is_textual_mime_type(mime_type: str) -> bool:
-    return bool(TEXTUAL_MIME_TYPE.match(mime_type))
 
 
 @overload
