@@ -26,7 +26,6 @@ from typing import (
     Optional,
     Pattern,
     Sequence,
-    Tuple,
     TypeVar,
     Union,
 )
@@ -39,12 +38,11 @@ from playwright._impl._api_structures import (
 )
 from playwright._impl._disposable import DisposableStub
 from playwright._impl._element_handle import ElementHandle
+from playwright._impl._errors import Error
 from playwright._impl._helper import (
-    Error,
     KeyboardModifier,
     MouseButton,
     locals_to_params,
-    monotonic_time,
     to_impl,
 )
 from playwright._impl._internal_structures import (
@@ -53,10 +51,18 @@ from playwright._impl._internal_structures import (
     FrameExpectResult,
 )
 from playwright._impl._js_handle import Serializable, serialize_argument
-from playwright._impl._str_utils import (
-    escape_for_attribute_selector,
-    escape_for_text_selector,
+from playwright._impl._locator_utils import (
+    bool_to_js_bool,
+    get_by_alt_text_selector,
+    get_by_label_selector,
+    get_by_placeholder_selector,
+    get_by_role_selector,
+    get_by_test_id_selector,
+    get_by_text_selector,
+    get_by_title_selector,
 )
+from playwright._impl._str_utils import escape_for_text_selector
+from playwright._impl._time import monotonic_time
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._frame import Frame
@@ -969,87 +975,3 @@ def test_id_attribute_name() -> str:
 def set_test_id_attribute_name(attribute_name: str) -> None:
     global _test_id_attribute_name
     _test_id_attribute_name = attribute_name
-
-
-def get_by_test_id_selector(
-    test_id_attribute_name: str, test_id: Union[str, Pattern[str]]
-) -> str:
-    return f"internal:testid=[{test_id_attribute_name}={escape_for_attribute_selector(test_id, True)}]"
-
-
-def get_by_attribute_text_selector(
-    attr_name: str, text: Union[str, Pattern[str]], exact: bool = None
-) -> str:
-    return f"internal:attr=[{attr_name}={escape_for_attribute_selector(text, exact=exact)}]"
-
-
-def get_by_label_selector(text: Union[str, Pattern[str]], exact: bool = None) -> str:
-    return "internal:label=" + escape_for_text_selector(text, exact=exact)
-
-
-def get_by_alt_text_selector(text: Union[str, Pattern[str]], exact: bool = None) -> str:
-    return get_by_attribute_text_selector("alt", text, exact=exact)
-
-
-def get_by_title_selector(text: Union[str, Pattern[str]], exact: bool = None) -> str:
-    return get_by_attribute_text_selector("title", text, exact=exact)
-
-
-def get_by_placeholder_selector(
-    text: Union[str, Pattern[str]], exact: bool = None
-) -> str:
-    return get_by_attribute_text_selector("placeholder", text, exact=exact)
-
-
-def get_by_text_selector(text: Union[str, Pattern[str]], exact: bool = None) -> str:
-    return "internal:text=" + escape_for_text_selector(text, exact=exact)
-
-
-def bool_to_js_bool(value: bool) -> str:
-    return "true" if value else "false"
-
-
-def get_by_role_selector(
-    role: AriaRole,
-    checked: bool = None,
-    disabled: bool = None,
-    expanded: bool = None,
-    includeHidden: bool = None,
-    level: int = None,
-    name: Union[str, Pattern[str]] = None,
-    pressed: bool = None,
-    selected: bool = None,
-    exact: bool = None,
-    description: Union[str, Pattern[str]] = None,
-) -> str:
-    props: List[Tuple[str, str]] = []
-    if checked is not None:
-        props.append(("checked", bool_to_js_bool(checked)))
-    if disabled is not None:
-        props.append(("disabled", bool_to_js_bool(disabled)))
-    if selected is not None:
-        props.append(("selected", bool_to_js_bool(selected)))
-    if expanded is not None:
-        props.append(("expanded", bool_to_js_bool(expanded)))
-    if includeHidden is not None:
-        props.append(("include-hidden", bool_to_js_bool(includeHidden)))
-    if level is not None:
-        props.append(("level", str(level)))
-    if name is not None:
-        props.append(
-            (
-                "name",
-                escape_for_attribute_selector(name, exact=exact),
-            )
-        )
-    if description is not None:
-        props.append(
-            (
-                "description",
-                escape_for_attribute_selector(description, exact=exact),
-            )
-        )
-    if pressed is not None:
-        props.append(("pressed", bool_to_js_bool(pressed)))
-    props_str = "".join([f"[{t[0]}={t[1]}]" for t in props])
-    return f"internal:role={role}{props_str}"

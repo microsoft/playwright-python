@@ -29,6 +29,7 @@ from playwright._impl._browser import Browser
 from playwright._impl._browser_context import BrowserContext
 from playwright._impl._connection import ChannelOwner, Connection, from_channel
 from playwright._impl._errors import Error
+from playwright._impl._headers import serialize_headers
 from playwright._impl._helper import (
     PLAYWRIGHT_MAX_DEADLINE,
     ColorScheme,
@@ -39,16 +40,15 @@ from playwright._impl._helper import (
     HarMode,
     ReducedMotion,
     ServiceWorkersPolicy,
-    TimeoutSettings,
     async_readfile,
     locals_to_params,
 )
 from playwright._impl._json_pipe import JsonPipeTransport
 from playwright._impl._network import (
-    serialize_headers,
     to_client_certificates_protocol,
     to_http_credentials_protocol,
 )
+from playwright._impl._timeout_settings import TimeoutSettings
 from playwright._impl._waiter import throw_on_timeout
 
 if TYPE_CHECKING:

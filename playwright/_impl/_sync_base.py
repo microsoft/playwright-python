@@ -30,8 +30,8 @@ from typing import (
 )
 
 from playwright._impl._connection import _capture_stack_trace
+from playwright._impl._errors import Error
 from playwright._impl._greenlets import connection_closed_error, wait_for_future
-from playwright._impl._helper import Error
 from playwright._impl._impl_to_api_mapping import ImplToApiMapping, ImplWrapper
 
 mapping = ImplToApiMapping()

@@ -29,8 +29,8 @@ from typing import (
 
 from playwright._impl._api_structures import FilePayload, FloatRect, Position
 from playwright._impl._connection import ChannelOwner, from_nullable_channel
+from playwright._impl._errors import Error
 from playwright._impl._helper import (
-    Error,
     KeyboardModifier,
     MouseButton,
     async_writefile,

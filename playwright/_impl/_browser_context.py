@@ -50,25 +50,24 @@ from playwright._impl._credentials import Credentials
 from playwright._impl._debugger import Debugger
 from playwright._impl._dialog import Dialog
 from playwright._impl._disposable import Disposable, DisposableStub
-from playwright._impl._errors import Error, TargetClosedError
+from playwright._impl._errors import Error, TargetClosedError, parse_error
 from playwright._impl._event_context_manager import EventContextManagerImpl
 from playwright._impl._fetch import APIRequestContext
 from playwright._impl._frame import Frame
 from playwright._impl._har_router import HarRouter
+from playwright._impl._headers import serialize_headers
 from playwright._impl._helper import (
     HarContentPolicy,
     HarMode,
     RouteFromHarNotFoundPolicy,
     RouteHandler,
     RouteHandlerCallback,
-    TimeoutSettings,
     URLMatch,
     WebSocketRouteHandlerCallback,
     async_readfile,
     async_writefile,
     create_task_and_ignore_exception,
     locals_to_params,
-    parse_error,
     to_impl,
 )
 from playwright._impl._network import (
@@ -77,10 +76,10 @@ from playwright._impl._network import (
     Route,
     WebSocketRoute,
     WebSocketRouteHandler,
-    serialize_headers,
     to_clear_cookies_params,
 )
 from playwright._impl._page import BindingCall, Page, Worker
+from playwright._impl._timeout_settings import TimeoutSettings
 from playwright._impl._tracing import Tracing
 from playwright._impl._waiter import Waiter
 from playwright._impl._web_error import WebError

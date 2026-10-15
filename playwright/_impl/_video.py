@@ -16,7 +16,7 @@ import pathlib
 from typing import TYPE_CHECKING, Optional, Union
 
 from playwright._impl._artifact import Artifact
-from playwright._impl._helper import Error
+from playwright._impl._errors import Error
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._page import Page

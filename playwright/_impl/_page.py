@@ -52,12 +52,19 @@ from playwright._impl._console_message import ConsoleMessage
 from playwright._impl._disposable import Disposable, DisposableStub
 from playwright._impl._download import Download
 from playwright._impl._element_handle import ElementHandle, determine_screenshot_type
-from playwright._impl._errors import Error, TargetClosedError, is_target_closed_error
+from playwright._impl._errors import (
+    Error,
+    TargetClosedError,
+    is_target_closed_error,
+    parse_error,
+    serialize_error,
+)
 from playwright._impl._event_context_manager import EventContextManagerImpl
 from playwright._impl._file_chooser import FileChooser
 from playwright._impl._frame import Frame
 from playwright._impl._greenlets import LocatorHandlerGreenlet
 from playwright._impl._har_router import HarRouter
+from playwright._impl._headers import serialize_headers
 from playwright._impl._helper import (
     ColorScheme,
     Contrast,
@@ -70,7 +77,6 @@ from playwright._impl._helper import (
     RouteFromHarNotFoundPolicy,
     RouteHandler,
     RouteHandlerCallback,
-    TimeoutSettings,
     URLMatch,
     URLMatchRequest,
     URLMatchResponse,
@@ -79,8 +85,6 @@ from playwright._impl._helper import (
     async_writefile,
     locals_to_params,
     make_dirs_for_file,
-    parse_error,
-    serialize_error,
     url_matches,
 )
 from playwright._impl._input import Keyboard, Mouse, Touchscreen
@@ -98,10 +102,10 @@ from playwright._impl._network import (
     Route,
     WebSocketRoute,
     WebSocketRouteHandler,
-    serialize_headers,
 )
 from playwright._impl._screencast import Screencast
 from playwright._impl._signature import signature
+from playwright._impl._timeout_settings import TimeoutSettings
 from playwright._impl._video import Video
 from playwright._impl._waiter import Waiter
 from playwright._impl._web_mcp import WebMCP

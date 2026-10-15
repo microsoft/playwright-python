@@ -23,7 +23,8 @@ from playwright._impl._connection import (
     from_nullable_channel,
 )
 from playwright._impl._disposable import DisposableStub
-from playwright._impl._helper import Error, locals_to_params
+from playwright._impl._errors import Error
+from playwright._impl._helper import locals_to_params
 
 
 class Tracing(ChannelOwner):

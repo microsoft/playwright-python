@@ -12,6 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Port of packages/isomorphic/urlMatch.ts.
+
+Glob and URL matching. It has no asyncio, greenlet or I/O, so every
+implementation of the API can use it.
+"""
+
 import re
 from typing import Callable, Dict, Optional, Pattern, Tuple, Union
 from urllib.parse import ParseResult, urljoin, urlparse, urlunparse
