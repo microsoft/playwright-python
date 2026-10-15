@@ -2,7 +2,9 @@
 
 # Generates the public API (playwright/{async,sync}_api/_generated.py) and its
 # TypedDicts (playwright/_impl/_api_structures.py) from the Playwright API docs
-# (docs/src/api) in a microsoft/playwright checkout, pointed to by PW_SRC_DIR.
+# (docs/src/api) in a microsoft/playwright checkout, pointed to by PW_SRC_DIR,
+# and the protocol tables (playwright/_impl/_protocol.py) from its protocol spec
+# (packages/protocol/spec).
 # Use a separate checkout on the exact release branch for the version in
 # DRIVER_VERSION (for example release-1.64). The generator is
 # scripts/codegen/generate_api.js; Python facts that the docs do not contain
@@ -31,6 +33,14 @@ function update_api {
 update_api structs playwright/_impl/_api_structures.py
 update_api sync
 update_api async
+
+echo "Generating playwright/_impl/_protocol.py"
+if python scripts/codegen/generate_protocol.py --out playwright/_impl/_protocol.py; then
+    pre-commit run --files playwright/_impl/_protocol.py
+else
+    echo "Exited due to errors"
+    exit 1
+fi
 
 playwright install
 

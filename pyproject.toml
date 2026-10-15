@@ -61,7 +61,8 @@ markers = [
     "skip_browser",
     "only_browser",
     "skip_platform",
-    "only_platform"
+    "only_platform",
+    "skip_protocol_check"
 ]
 junit_family = "xunit2"
 asyncio_mode = "auto"

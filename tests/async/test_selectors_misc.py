@@ -14,10 +14,7 @@
 
 import pytest
 
-from playwright._impl._browser import Browser
-from playwright._impl._errors import Error
-from playwright._impl._selectors import Selectors
-from playwright.async_api import Page
+from playwright.async_api import Browser, Error, Page, Selectors
 
 
 async def test_should_work_with_internal_and(page: Page) -> None:

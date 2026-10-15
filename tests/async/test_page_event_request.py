@@ -14,8 +14,7 @@
 
 import asyncio
 
-from playwright._impl._network import Request, Route
-from playwright._impl._page import Page
+from playwright.async_api import Page, Request, Route
 from tests.server import Server
 
 

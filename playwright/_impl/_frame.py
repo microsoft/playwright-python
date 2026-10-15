@@ -650,7 +650,9 @@ class Frame(ChannelOwner):
         force: bool = None,
         title: str = None,
     ) -> None:
-        await self._channel.send("fill", self._timeout, locals_to_params(locals()))
+        params = locals_to_params(locals())
+        params.pop("title", None)
+        await self._channel.send("fill", self._timeout, params, title=title)
 
     def locator(
         self,
@@ -938,6 +940,7 @@ class Frame(ChannelOwner):
         if isinstance(polling, str) and polling != "raf":
             raise Error(f"Unknown polling option: {polling}")
         params = locals_to_params(locals())
+        params.pop("polling", None)
         params["arg"] = serialize_argument(arg)
         if polling is not None and polling != "raf":
             params["pollingInterval"] = polling

@@ -74,7 +74,7 @@ def test_browser_context_repr(context: BrowserContext) -> None:
 def test_browser_repr(browser: Browser) -> None:
     assert (
         repr(browser)
-        == f"<Browser type={browser._impl_obj._browser_type} version={browser.version}>"
+        == f"<Browser type={browser.browser_type} version={browser.version}>"
     )
 
 

@@ -880,6 +880,7 @@ async def test_set_extra_http_headers_should_override_extra_headers_from_browser
     assert request.getHeader("bar") == "foO"
 
 
+@pytest.mark.skip_protocol_check
 async def test_set_extra_http_headers_should_throw_for_non_string_header_values(
     page: Page,
 ) -> None:
