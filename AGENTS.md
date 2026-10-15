@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-Guidance for Claude when working in this repository.
+Guidance for coding agents working in this repository.
 
 ## What this is
 
@@ -14,7 +14,7 @@ Python bindings for [Playwright](https://playwright.dev). The Python client talk
 - `scripts/codegen/python_rules.js` — the Python facts that the docs do not contain (positional options, struct `total=`, hidden members and options). Policy: the shipped Python API wins; each entry is a candidate for an upstream docs fix, and the generator fails on entries that no longer match anything. Every entry needs a one-line rationale comment above it.
 - `playwright/_impl/_protocol.py` — **auto-generated** by `scripts/codegen/generate_protocol.py` (run by `./scripts/update_api.sh`) from the upstream protocol spec: the parameters of every command. With `PW_CHECK_PROTOCOL=1`, `playwright/_impl/_protocol_check.py` checks each message that the client sends against it. The test suite sets this, and fails a test that sends an unknown command, an unknown or missing parameter, or a value of the wrong type.
 - `scripts/codegen/compare_api.py` — compares two generated files (signatures, annotations, call bodies, docstrings) and lists every difference. Use it to check that a generator change does not change the API.
-- `tests/async/`, `tests/sync/` — pytest suites. Most new tests are added to the async file with a sync mirror.
+- `tests/async/`, `tests/sync/` — pytest suites, ported from the upstream tests. Most new tests are added to the async file with a sync mirror. See [Tests](#tests).
 - `DRIVER_VERSION` — the single source of truth for which Playwright release the driver is assembled from (one line, the `playwright-core` npm version, e.g. `1.61.0`, no `v` prefix). Read by `setup.py`, `scripts/build_driver.py`, and CI. The wheel build downloads `playwright-core` at this version from npm plus the matching Node.js binary and assembles the per-platform bundles — no source build. The version is baked into the staged bundle filenames (`driver/playwright-<version>-<suffix>.zip`), so it doubles as the build cache key.
 - `NODE_VERSION` — the Node.js version bundled with the driver (one line, e.g. `24.16.0`). Maintained at roll time by `scripts/update_node_version.py` (latest LTS, mirroring upstream's `utils/build/update-playwright-node.mjs`).
 - `scripts/build_driver.py` — assembles the per-platform driver bundles into `driver/` by downloading the `playwright-core` npm package (`DRIVER_VERSION`) and the official Node.js binaries (`NODE_VERSION`). Fetches `playwright-core` with `npm pack` (needs Node.js/npm on PATH; honours a root `.npmrc`) and the Node.js binaries over plain HTTP; invoked from `setup.py`'s `bdist_wheel` with the target platform's suffix (no arg builds all six).
@@ -44,6 +44,23 @@ If the system lacks `python3-venv`, `uv venv env` is an acceptable substitute (t
 - Run tests: `pytest --browser chromium [-k name]`. Browsers are installed via `playwright install chromium` (do **not** use `--with-deps`, which requires sudo).
 
 The public API comes from the upstream docs. After `./scripts/update_api.sh`, run `mypy playwright`: the generated classes type their `_impl_obj`, so every new member or option that `_impl/` does not implement yet is a mypy error in `_generated.py`. Fix it in `_impl/`, or record a justified difference in `scripts/codegen/python_rules.js` — not by hand-editing `_generated.py`.
+
+## Tests
+
+The tests are a port of the upstream tests in `microsoft/playwright` (`tests/page/`, `tests/library/`). Keep them close to upstream, so that each upstream test has one place in this repo.
+
+**First rule: follow the upstream names and files.**
+
+- When a change needs a test, find the upstream test for the same behavior and port it. Do not write a new test when an upstream test exists.
+- Put the test in the Python file that matches the upstream file: `tests/page/expect-misc.spec.ts` becomes `tests/async/test_expect_misc.py`. If that file does not exist, create it.
+- Name the test after the upstream title, in snake_case, with the `describe` title in front: `test('should support pseudo element')` in `test.describe('toHaveCSS')` becomes `test_to_have_css_should_support_pseudo_element`.
+- Add the sync mirror in `tests/sync/`, with the same file name and test name.
+
+**Second rule: keep the number of tests small.** This applies to every test, and most of all to Python-only behavior that has no upstream test (the sync API, asyncio, the driver).
+
+- **Extend before you add**: before you write a new test, look for an existing test that covers the same feature or code path. If one exists, add the new edge case or assertion to it. Create a new test only when no existing test is a good fit, or when the new scenario needs a different setup.
+- **New features**: cover the mainstream scenario and the important edge cases only. Do not create matrices of tests for every scenario, option, or aspect.
+- **Regressions**: generalize the provided regression cases into meaningful tests, and stop there. Do not add more tests around them.
 
 ## Rolling Playwright to a new version
 

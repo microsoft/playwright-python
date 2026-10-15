@@ -70,3 +70,23 @@ def test_to_be_in_viewport_should_report_intersection_even_if_fully_covered_by_o
     """
     )
     expect(page.locator("h1")).to_be_in_viewport()
+
+
+def test_to_have_css_should_support_pseudo_element(page: Page) -> None:
+    page.set_content(
+        """
+      <style>
+        #node::before {
+          color: rgb(255, 0, 0);
+          content: "Text content";
+        }
+      </style>
+      <div id=node></div>
+    """
+    )
+    locator = page.locator("#node")
+    expect(locator).to_have_css("color", "rgb(255, 0, 0)", pseudo="before")
+    with pytest.raises(AssertionError):
+        expect(locator).not_to_have_css(
+            "color", "rgb(255, 0, 0)", pseudo="before", timeout=100
+        )

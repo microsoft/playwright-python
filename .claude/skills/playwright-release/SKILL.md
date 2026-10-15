@@ -106,7 +106,7 @@ Open a PR from the branch with the roll commit:
   release version, even when `DRIVER_VERSION` is a beta build.
 - Description: the release notes from step 2, in GitHub markdown (see below).
   The user copies this description into the GitHub release, so for this PR it
-  replaces the "keep PR descriptions short" rule in `CLAUDE.md`.
+  replaces the "keep PR descriptions short" rule in `AGENTS.md`.
 
 Convert the notes to GitHub markdown yourself:
 

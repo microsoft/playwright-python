@@ -78,3 +78,23 @@ async def test_should_have_timeout_error_name(page: Page) -> None:
     with pytest.raises(TimeoutError) as exc_info:
         await page.wait_for_selector("#not-found", timeout=1)
     assert exc_info.value.name == "TimeoutError"
+
+
+async def test_to_have_css_should_support_pseudo_element(page: Page) -> None:
+    await page.set_content(
+        """
+      <style>
+        #node::before {
+          color: rgb(255, 0, 0);
+          content: "Text content";
+        }
+      </style>
+      <div id=node></div>
+    """
+    )
+    locator = page.locator("#node")
+    await expect(locator).to_have_css("color", "rgb(255, 0, 0)", pseudo="before")
+    with pytest.raises(AssertionError):
+        await expect(locator).not_to_have_css(
+            "color", "rgb(255, 0, 0)", pseudo="before", timeout=100
+        )

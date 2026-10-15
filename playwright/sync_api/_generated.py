@@ -14184,6 +14184,7 @@ class LocatorAssertions(SyncBase):
         name: str,
         value: typing.Union[str, typing.Pattern[str]],
         *,
+        pseudo: typing.Optional[Literal["after", "before"]] = None,
         timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> None:
         """LocatorAssertions.not_to_have_css
@@ -14196,6 +14197,8 @@ class LocatorAssertions(SyncBase):
             CSS property name.
         value : Union[Pattern[str], str]
             CSS property value.
+        pseudo : Union["after", "before", None]
+            Pseudo-element to read computed styles from.
         timeout : Union[float, None]
             Time to retry the assertion for in milliseconds. Defaults to `5000`.
         """
@@ -14203,7 +14206,7 @@ class LocatorAssertions(SyncBase):
 
         self._sync(
             self._impl_obj.not_to_have_css(
-                name=name, value=value, timeout=to_milliseconds(timeout)
+                name=name, value=value, pseudo=pseudo, timeout=to_milliseconds(timeout)
             )
         )
 

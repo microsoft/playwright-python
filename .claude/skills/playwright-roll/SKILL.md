@@ -281,9 +281,11 @@ After the script settles, run `pre-commit run --all-files` once more to confirm 
 
 ### 6. Add tests
 
-For each PORT, add one async test and a matching sync test. Conventions:
+For each PORT, port the upstream test that covers it, as an async test and a matching sync test. Conventions:
 
-- Tests go in the existing topic file (`test_page_network_request.py`, `test_browsercontext.py`, `test_dialog.py`, …) — don't create new files unless there's no obvious home.
+- The upstream file decides the Python file: `tests/page/expect-misc.spec.ts` becomes `tests/async/test_expect_misc.py` and `tests/sync/test_expect_misc.py`. Create the file if it does not exist.
+- The upstream title decides the test name: the `describe` title and the test title, in snake_case. `test('should support pseudo element')` in `test.describe('toHaveCSS')` becomes `test_to_have_css_should_support_pseudo_element`.
+- When no upstream test covers the change, extend an existing test before you add a new one.
 - Use `from playwright.async_api import …`, **not** `from playwright._impl._page import Page` (the impl class doesn't have the public wrappers like `expect_console_message`).
 - For event-info objects, `await message_info.value` (it's an `async` property).
 - Don't write tests that hang the page (e.g. `page.evaluate(... fetch slow ...)` followed by `page.close()` from a fixture) — the request task gets a `TargetClosedError`. Use `page.on("event", handler)` to capture state at event time instead.
