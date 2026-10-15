@@ -13,13 +13,18 @@
 # limitations under the License.
 
 from types import SimpleNamespace
-from typing import Any, Dict
+from typing import TYPE_CHECKING, Dict, Optional
 
 from playwright._impl._connection import ChannelOwner
-from playwright._impl._helper import locals_to_params
+
+if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl import _protocol_types as channels
+    from playwright._impl._protocol_channels import CDPSessionChannel
 
 
 class CDPSession(ChannelOwner):
+    _channel: "CDPSessionChannel"
+
     Events = SimpleNamespace(
         Event="event",
         Close="close",
@@ -29,18 +34,15 @@ class CDPSession(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
-        self._channel.on("event", lambda params: self._on_event(params))
-        self._channel.on("close", lambda _: self.emit(CDPSession.Events.Close, self))
+        self._channel.onEvent(self._on_event)
+        self._channel.onClose(lambda: self.emit(CDPSession.Events.Close, self))
 
-    def _on_event(self, params: Any) -> None:
-        self.emit(params["method"], params.get("params"))
-        self.emit(CDPSession.Events.Event, params)
+    def _on_event(self, event: "channels.CDPSessionEventEvent") -> None:
+        self.emit(event["method"], event["params"])
+        self.emit(CDPSession.Events.Event, event)
 
-    async def send(self, method: str, params: Dict = None) -> Dict:
-        return await self._channel.send("send", None, locals_to_params(locals()))
+    async def send(self, method: str, params: Optional[Dict]) -> Dict:
+        return (await self._channel.send(method=method, params=params))["result"]
 
     async def detach(self) -> None:
-        await self._channel.send(
-            "detach",
-            None,
-        )
+        await self._channel.detach()

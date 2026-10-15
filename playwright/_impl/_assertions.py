@@ -142,7 +142,10 @@ class PageAssertions(AssertionsBase):
         message: Optional[str] = None,
         is_soft: bool = False,
     ) -> None:
-        super().__init__(page.locator(":root"), timeout, is_not, message, is_soft)
+        locator = page.locator(
+            selector=":root", has_text=None, has_not_text=None, has=None, has_not=None
+        )
+        super().__init__(locator, timeout, is_not, message, is_soft)
         self._actual_page = page
 
     async def _call_expect(
@@ -164,56 +167,62 @@ class PageAssertions(AssertionsBase):
         )
 
     async def to_have_title(
-        self, titleOrRegExp: Union[Pattern[str], str], timeout: float = None
+        self, title_or_reg_exp: Union[Pattern[str], str], timeout: Optional[float]
     ) -> None:
         __tracebackhide__ = True
         expected_values = to_expected_text_values(
-            [titleOrRegExp], normalize_white_space=True
+            [title_or_reg_exp], normalize_white_space=True
         )
         await self._expect_impl(
             "to.have.title",
             FrameExpectOptions(expectedText=expected_values, timeout=timeout),
-            titleOrRegExp,
+            title_or_reg_exp,
             "Page title expected to be",
             'Expect "to_have_title"',
         )
 
     async def not_to_have_title(
-        self, titleOrRegExp: Union[Pattern[str], str], timeout: float = None
+        self, title_or_reg_exp: Union[Pattern[str], str], timeout: Optional[float]
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_have_title(titleOrRegExp, timeout)
+        await self._not.to_have_title(
+            title_or_reg_exp=title_or_reg_exp, timeout=timeout
+        )
 
     async def to_have_url(
         self,
-        urlOrRegExp: Union[str, Pattern[str]],
-        timeout: float = None,
-        ignoreCase: bool = None,
+        url_or_reg_exp: Union[str, Pattern[str]],
+        timeout: Optional[float],
+        ignore_case: Optional[bool],
     ) -> None:
         __tracebackhide__ = True
         base_url = self._actual_page.context._base_url
-        if isinstance(urlOrRegExp, str) and base_url:
-            urlOrRegExp = urljoin(base_url, urlOrRegExp)
-        expected_text = to_expected_text_values([urlOrRegExp], ignoreCase=ignoreCase)
+        if isinstance(url_or_reg_exp, str) and base_url:
+            url_or_reg_exp = urljoin(base_url, url_or_reg_exp)
+        expected_text = to_expected_text_values(
+            [url_or_reg_exp], ignore_case=ignore_case
+        )
         await self._expect_impl(
             "to.have.url",
             FrameExpectOptions(expectedText=expected_text, timeout=timeout),
-            urlOrRegExp,
+            url_or_reg_exp,
             "Page URL expected to be",
             'Expect "to_have_url"',
         )
 
     async def not_to_have_url(
         self,
-        urlOrRegExp: Union[Pattern[str], str],
-        timeout: float = None,
-        ignoreCase: bool = None,
+        url_or_reg_exp: Union[Pattern[str], str],
+        timeout: Optional[float],
+        ignore_case: Optional[bool],
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_have_url(urlOrRegExp, timeout, ignoreCase)
+        await self._not.to_have_url(
+            url_or_reg_exp=url_or_reg_exp, timeout=timeout, ignore_case=ignore_case
+        )
 
     async def to_match_aria_snapshot(
-        self, expected: str, timeout: float = None
+        self, expected: str, timeout: Optional[float]
     ) -> None:
         __tracebackhide__ = True
         await self._expect_impl(
@@ -225,10 +234,10 @@ class PageAssertions(AssertionsBase):
         )
 
     async def not_to_match_aria_snapshot(
-        self, expected: str, timeout: float = None
+        self, expected: str, timeout: Optional[float]
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_match_aria_snapshot(expected, timeout)
+        await self._not.to_match_aria_snapshot(expected=expected, timeout=timeout)
 
 
 class LocatorAssertions(AssertionsBase):
@@ -268,9 +277,9 @@ class LocatorAssertions(AssertionsBase):
             Pattern[str],
             str,
         ],
-        useInnerText: bool = None,
-        timeout: float = None,
-        ignoreCase: bool = None,
+        use_inner_text: Optional[bool],
+        timeout: Optional[float],
+        ignore_case: Optional[bool],
     ) -> None:
         __tracebackhide__ = True
         if isinstance(expected, collections.abc.Sequence) and not isinstance(
@@ -280,13 +289,13 @@ class LocatorAssertions(AssertionsBase):
                 expected,
                 match_substring=True,
                 normalize_white_space=True,
-                ignoreCase=ignoreCase,
+                ignore_case=ignore_case,
             )
             await self._expect_impl(
                 "to.contain.text.array",
                 FrameExpectOptions(
                     expectedText=expected_text,
-                    useInnerText=useInnerText,
+                    useInnerText=use_inner_text,
                     timeout=timeout,
                 ),
                 expected,
@@ -298,13 +307,13 @@ class LocatorAssertions(AssertionsBase):
                 [expected],
                 match_substring=True,
                 normalize_white_space=True,
-                ignoreCase=ignoreCase,
+                ignore_case=ignore_case,
             )
             await self._expect_impl(
                 "to.have.text",
                 FrameExpectOptions(
                     expectedText=expected_text,
-                    useInnerText=useInnerText,
+                    useInnerText=use_inner_text,
                     timeout=timeout,
                 ),
                 expected,
@@ -321,19 +330,24 @@ class LocatorAssertions(AssertionsBase):
             Pattern[str],
             str,
         ],
-        useInnerText: bool = None,
-        timeout: float = None,
-        ignoreCase: bool = None,
+        use_inner_text: Optional[bool],
+        timeout: Optional[float],
+        ignore_case: Optional[bool],
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_contain_text(expected, useInnerText, timeout, ignoreCase)
+        await self._not.to_contain_text(
+            expected=expected,
+            use_inner_text=use_inner_text,
+            timeout=timeout,
+            ignore_case=ignore_case,
+        )
 
     async def to_have_attribute(
         self,
         name: str,
-        value: Union[Pattern[str], str] = None,
-        ignoreCase: bool = None,
-        timeout: float = None,
+        value: Optional[Union[Pattern[str], str]],
+        ignore_case: Optional[bool],
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
         if value is None:
@@ -345,7 +359,7 @@ class LocatorAssertions(AssertionsBase):
                 'Expect "to_have_attribute"',
             )
             return
-        expected_text = to_expected_text_values([value], ignoreCase=ignoreCase)
+        expected_text = to_expected_text_values([value], ignore_case=ignore_case)
         await self._expect_impl(
             "to.have.attribute.value",
             FrameExpectOptions(
@@ -359,13 +373,13 @@ class LocatorAssertions(AssertionsBase):
     async def not_to_have_attribute(
         self,
         name: str,
-        value: Union[Pattern[str], str] = None,
-        ignoreCase: bool = None,
-        timeout: float = None,
+        value: Optional[Union[Pattern[str], str]],
+        ignore_case: Optional[bool],
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
         await self._not.to_have_attribute(
-            name, value, ignoreCase=ignoreCase, timeout=timeout
+            name=name, value=value, ignore_case=ignore_case, timeout=timeout
         )
 
     async def to_have_class(
@@ -377,7 +391,7 @@ class LocatorAssertions(AssertionsBase):
             Pattern[str],
             str,
         ],
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
         if isinstance(expected, collections.abc.Sequence) and not isinstance(
@@ -410,10 +424,10 @@ class LocatorAssertions(AssertionsBase):
             Pattern[str],
             str,
         ],
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_have_class(expected, timeout)
+        await self._not.to_have_class(expected=expected, timeout=timeout)
 
     async def to_contain_class(
         self,
@@ -421,7 +435,7 @@ class LocatorAssertions(AssertionsBase):
             Sequence[str],
             str,
         ],
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
         if isinstance(expected, collections.abc.Sequence) and not isinstance(
@@ -451,15 +465,15 @@ class LocatorAssertions(AssertionsBase):
             Sequence[str],
             str,
         ],
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_contain_class(expected, timeout)
+        await self._not.to_contain_class(expected=expected, timeout=timeout)
 
     async def to_have_count(
         self,
         count: int,
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
         await self._expect_impl(
@@ -473,17 +487,17 @@ class LocatorAssertions(AssertionsBase):
     async def not_to_have_count(
         self,
         count: int,
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_have_count(count, timeout)
+        await self._not.to_have_count(count=count, timeout=timeout)
 
     async def to_have_css(
         self,
         name: str,
         value: Union[str, Pattern[str]],
-        timeout: float = None,
-        pseudo: Literal["after", "before"] = None,
+        timeout: Optional[float],
+        pseudo: Optional[Literal["after", "before"]],
     ) -> None:
         __tracebackhide__ = True
         expected_text = to_expected_text_values([value])
@@ -504,16 +518,18 @@ class LocatorAssertions(AssertionsBase):
         self,
         name: str,
         value: Union[str, Pattern[str]],
-        timeout: float = None,
-        pseudo: Literal["after", "before"] = None,
+        timeout: Optional[float],
+        pseudo: Optional[Literal["after", "before"]],
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_have_css(name, value, timeout, pseudo)
+        await self._not.to_have_css(
+            name=name, value=value, timeout=timeout, pseudo=pseudo
+        )
 
     async def to_have_id(
         self,
         id: Union[str, Pattern[str]],
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
         expected_text = to_expected_text_values([id])
@@ -528,16 +544,16 @@ class LocatorAssertions(AssertionsBase):
     async def not_to_have_id(
         self,
         id: Union[str, Pattern[str]],
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_have_id(id, timeout)
+        await self._not.to_have_id(id=id, timeout=timeout)
 
     async def to_have_js_property(
         self,
         name: str,
         value: Any,
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
         await self._expect_impl(
@@ -554,15 +570,15 @@ class LocatorAssertions(AssertionsBase):
         self,
         name: str,
         value: Any,
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_have_js_property(name, value, timeout)
+        await self._not.to_have_js_property(name=name, value=value, timeout=timeout)
 
     async def to_have_value(
         self,
         value: Union[str, Pattern[str]],
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
         expected_text = to_expected_text_values([value])
@@ -577,17 +593,17 @@ class LocatorAssertions(AssertionsBase):
     async def not_to_have_value(
         self,
         value: Union[str, Pattern[str]],
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_have_value(value, timeout)
+        await self._not.to_have_value(value=value, timeout=timeout)
 
     async def to_have_values(
         self,
         values: Union[
             Sequence[str], Sequence[Pattern[str]], Sequence[Union[Pattern[str], str]]
         ],
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
         expected_text = to_expected_text_values(values)
@@ -604,10 +620,10 @@ class LocatorAssertions(AssertionsBase):
         values: Union[
             Sequence[str], Sequence[Pattern[str]], Sequence[Union[Pattern[str], str]]
         ],
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_have_values(values, timeout)
+        await self._not.to_have_values(values=values, timeout=timeout)
 
     async def to_have_text(
         self,
@@ -618,9 +634,9 @@ class LocatorAssertions(AssertionsBase):
             Pattern[str],
             str,
         ],
-        useInnerText: bool = None,
-        timeout: float = None,
-        ignoreCase: bool = None,
+        use_inner_text: Optional[bool],
+        timeout: Optional[float],
+        ignore_case: Optional[bool],
     ) -> None:
         __tracebackhide__ = True
         if isinstance(expected, collections.abc.Sequence) and not isinstance(
@@ -629,13 +645,13 @@ class LocatorAssertions(AssertionsBase):
             expected_text = to_expected_text_values(
                 expected,
                 normalize_white_space=True,
-                ignoreCase=ignoreCase,
+                ignore_case=ignore_case,
             )
             await self._expect_impl(
                 "to.have.text.array",
                 FrameExpectOptions(
                     expectedText=expected_text,
-                    useInnerText=useInnerText,
+                    useInnerText=use_inner_text,
                     timeout=timeout,
                 ),
                 expected,
@@ -644,13 +660,13 @@ class LocatorAssertions(AssertionsBase):
             )
         else:
             expected_text = to_expected_text_values(
-                [expected], normalize_white_space=True, ignoreCase=ignoreCase
+                [expected], normalize_white_space=True, ignore_case=ignore_case
             )
             await self._expect_impl(
                 "to.have.text",
                 FrameExpectOptions(
                     expectedText=expected_text,
-                    useInnerText=useInnerText,
+                    useInnerText=use_inner_text,
                     timeout=timeout,
                 ),
                 expected,
@@ -667,17 +683,22 @@ class LocatorAssertions(AssertionsBase):
             Pattern[str],
             str,
         ],
-        useInnerText: bool = None,
-        timeout: float = None,
-        ignoreCase: bool = None,
+        use_inner_text: Optional[bool],
+        timeout: Optional[float],
+        ignore_case: Optional[bool],
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_have_text(expected, useInnerText, timeout, ignoreCase)
+        await self._not.to_have_text(
+            expected=expected,
+            use_inner_text=use_inner_text,
+            timeout=timeout,
+            ignore_case=ignore_case,
+        )
 
     async def to_be_attached(
         self,
-        attached: bool = None,
-        timeout: float = None,
+        attached: Optional[bool],
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
         if attached is None:
@@ -693,9 +714,9 @@ class LocatorAssertions(AssertionsBase):
 
     async def to_be_checked(
         self,
-        timeout: float = None,
-        checked: bool = None,
-        indeterminate: bool = None,
+        timeout: Optional[float],
+        checked: Optional[bool],
+        indeterminate: Optional[bool],
     ) -> None:
         __tracebackhide__ = True
         expected_value = {}
@@ -718,22 +739,22 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_be_attached(
         self,
-        attached: bool = None,
-        timeout: float = None,
+        attached: Optional[bool],
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
         await self._not.to_be_attached(attached=attached, timeout=timeout)
 
     async def not_to_be_checked(
         self,
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_be_checked(timeout)
+        await self._not.to_be_checked(timeout=timeout, checked=None, indeterminate=None)
 
     async def to_be_disabled(
         self,
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
         await self._expect_impl(
@@ -746,15 +767,15 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_be_disabled(
         self,
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_be_disabled(timeout)
+        await self._not.to_be_disabled(timeout=timeout)
 
     async def to_be_editable(
         self,
-        editable: bool = None,
-        timeout: float = None,
+        editable: Optional[bool],
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
         if editable is None:
@@ -770,15 +791,15 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_be_editable(
         self,
-        editable: bool = None,
-        timeout: float = None,
+        editable: Optional[bool],
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_be_editable(editable, timeout)
+        await self._not.to_be_editable(editable=editable, timeout=timeout)
 
     async def to_be_empty(
         self,
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
         await self._expect_impl(
@@ -791,15 +812,15 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_be_empty(
         self,
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_be_empty(timeout)
+        await self._not.to_be_empty(timeout=timeout)
 
     async def to_be_enabled(
         self,
-        enabled: bool = None,
-        timeout: float = None,
+        enabled: Optional[bool],
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
         if enabled is None:
@@ -815,15 +836,15 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_be_enabled(
         self,
-        enabled: bool = None,
-        timeout: float = None,
+        enabled: Optional[bool],
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_be_enabled(enabled, timeout)
+        await self._not.to_be_enabled(enabled=enabled, timeout=timeout)
 
     async def to_be_hidden(
         self,
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
         await self._expect_impl(
@@ -836,15 +857,15 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_be_hidden(
         self,
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_be_hidden(timeout)
+        await self._not.to_be_hidden(timeout=timeout)
 
     async def to_be_visible(
         self,
-        visible: bool = None,
-        timeout: float = None,
+        visible: Optional[bool],
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
         if visible is None:
@@ -860,15 +881,15 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_be_visible(
         self,
-        visible: bool = None,
-        timeout: float = None,
+        visible: Optional[bool],
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_be_visible(visible, timeout)
+        await self._not.to_be_visible(visible=visible, timeout=timeout)
 
     async def to_be_focused(
         self,
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
         await self._expect_impl(
@@ -881,15 +902,15 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_be_focused(
         self,
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_be_focused(timeout)
+        await self._not.to_be_focused(timeout=timeout)
 
     async def to_be_in_viewport(
         self,
-        ratio: float = None,
-        timeout: float = None,
+        ratio: Optional[float],
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
         await self._expect_impl(
@@ -901,7 +922,7 @@ class LocatorAssertions(AssertionsBase):
         )
 
     async def not_to_be_in_viewport(
-        self, ratio: float = None, timeout: float = None
+        self, ratio: Optional[float], timeout: Optional[float]
     ) -> None:
         __tracebackhide__ = True
         await self._not.to_be_in_viewport(ratio=ratio, timeout=timeout)
@@ -909,12 +930,12 @@ class LocatorAssertions(AssertionsBase):
     async def to_have_accessible_description(
         self,
         description: Union[str, Pattern[str]],
-        ignoreCase: bool = None,
-        timeout: float = None,
+        ignore_case: Optional[bool],
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
         expected_values = to_expected_text_values(
-            [description], ignoreCase=ignoreCase, normalize_white_space=True
+            [description], ignore_case=ignore_case, normalize_white_space=True
         )
         await self._expect_impl(
             "to.have.accessible.description",
@@ -927,21 +948,23 @@ class LocatorAssertions(AssertionsBase):
     async def not_to_have_accessible_description(
         self,
         description: Union[str, Pattern[str]],
-        ignoreCase: bool = None,
-        timeout: float = None,
+        ignore_case: Optional[bool],
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_have_accessible_description(description, ignoreCase, timeout)
+        await self._not.to_have_accessible_description(
+            description=description, ignore_case=ignore_case, timeout=timeout
+        )
 
     async def to_have_accessible_name(
         self,
         name: Union[str, Pattern[str]],
-        ignoreCase: bool = None,
-        timeout: float = None,
+        ignore_case: Optional[bool],
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
         expected_values = to_expected_text_values(
-            [name], ignoreCase=ignoreCase, normalize_white_space=True
+            [name], ignore_case=ignore_case, normalize_white_space=True
         )
         await self._expect_impl(
             "to.have.accessible.name",
@@ -954,13 +977,15 @@ class LocatorAssertions(AssertionsBase):
     async def not_to_have_accessible_name(
         self,
         name: Union[str, Pattern[str]],
-        ignoreCase: bool = None,
-        timeout: float = None,
+        ignore_case: Optional[bool],
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_have_accessible_name(name, ignoreCase, timeout)
+        await self._not.to_have_accessible_name(
+            name=name, ignore_case=ignore_case, timeout=timeout
+        )
 
-    async def to_have_role(self, role: AriaRole, timeout: float = None) -> None:
+    async def to_have_role(self, role: AriaRole, timeout: Optional[float]) -> None:
         __tracebackhide__ = True
         if isinstance(role, Pattern):
             raise Error('"role" argument in to_have_role must be a string')
@@ -975,13 +1000,13 @@ class LocatorAssertions(AssertionsBase):
 
     async def to_have_accessible_error_message(
         self,
-        errorMessage: Union[str, Pattern[str]],
-        ignoreCase: bool = None,
-        timeout: float = None,
+        error_message: Union[str, Pattern[str]],
+        ignore_case: Optional[bool],
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
         expected_values = to_expected_text_values(
-            [errorMessage], ignoreCase=ignoreCase, normalize_white_space=True
+            [error_message], ignore_case=ignore_case, normalize_white_space=True
         )
         await self._expect_impl(
             "to.have.accessible.error.message",
@@ -993,21 +1018,21 @@ class LocatorAssertions(AssertionsBase):
 
     async def not_to_have_accessible_error_message(
         self,
-        errorMessage: Union[str, Pattern[str]],
-        ignoreCase: bool = None,
-        timeout: float = None,
+        error_message: Union[str, Pattern[str]],
+        ignore_case: Optional[bool],
+        timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
         await self._not.to_have_accessible_error_message(
-            errorMessage=errorMessage, ignoreCase=ignoreCase, timeout=timeout
+            error_message=error_message, ignore_case=ignore_case, timeout=timeout
         )
 
-    async def not_to_have_role(self, role: AriaRole, timeout: float = None) -> None:
+    async def not_to_have_role(self, role: AriaRole, timeout: Optional[float]) -> None:
         __tracebackhide__ = True
-        await self._not.to_have_role(role, timeout)
+        await self._not.to_have_role(role=role, timeout=timeout)
 
     async def to_match_aria_snapshot(
-        self, expected: str, timeout: float = None
+        self, expected: str, timeout: Optional[float]
     ) -> None:
         __tracebackhide__ = True
         await self._expect_impl(
@@ -1019,10 +1044,10 @@ class LocatorAssertions(AssertionsBase):
         )
 
     async def not_to_match_aria_snapshot(
-        self, expected: str, timeout: float = None
+        self, expected: str, timeout: Optional[float]
     ) -> None:
         __tracebackhide__ = True
-        await self._not.to_match_aria_snapshot(expected, timeout)
+        await self._not.to_match_aria_snapshot(expected=expected, timeout=timeout)
 
 
 class APIResponseAssertions:
@@ -1081,17 +1106,16 @@ def expected_regex(
     pattern: Pattern[str],
     match_substring: bool,
     normalize_white_space: bool,
-    ignoreCase: Optional[bool] = None,
+    ignore_case: Optional[bool] = None,
 ) -> ExpectedTextValue:
     expected = ExpectedTextValue(
         regexSource=pattern.pattern,
         regexFlags=escape_regex_flags(pattern),
         matchSubstring=match_substring,
         normalizeWhiteSpace=normalize_white_space,
-        ignoreCase=ignoreCase,
     )
-    if expected["ignoreCase"] is None:
-        del expected["ignoreCase"]
+    if ignore_case is not None:
+        expected["ignoreCase"] = ignore_case
     return expected
 
 
@@ -1101,7 +1125,7 @@ def to_expected_text_values(
     ],
     match_substring: bool = False,
     normalize_white_space: bool = False,
-    ignoreCase: Optional[bool] = None,
+    ignore_case: Optional[bool] = None,
 ) -> Sequence[ExpectedTextValue]:
     out: List[ExpectedTextValue] = []
     if not isinstance(items, (list, tuple)):
@@ -1112,14 +1136,15 @@ def to_expected_text_values(
                 string=item,
                 matchSubstring=match_substring,
                 normalizeWhiteSpace=normalize_white_space,
-                ignoreCase=ignoreCase,
             )
-            if o["ignoreCase"] is None:
-                del o["ignoreCase"]
+            if ignore_case is not None:
+                o["ignoreCase"] = ignore_case
             out.append(o)
         elif isinstance(item, Pattern):
             out.append(
-                expected_regex(item, match_substring, normalize_white_space, ignoreCase)
+                expected_regex(
+                    item, match_substring, normalize_white_space, ignore_case
+                )
             )
         else:
             raise Error("value must be a string or regular expression")

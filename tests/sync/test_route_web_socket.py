@@ -316,6 +316,35 @@ def test_should_work_without_server(page: Page, server: Server) -> None:
     )
 
 
+def test_should_emit_close_upon_frame_navigation(page: Page, server: Server) -> None:
+    route: Optional["WebSocketRoute"] = None
+
+    def _handle_ws(ws: WebSocketRoute) -> None:
+        ws.connect_to_server()
+        nonlocal route
+        route = ws
+
+    page.route_web_socket(re.compile(".*"), _handle_ws)
+    setup_ws(page, server, "blob")
+    page.evaluate("window.wsOpened")
+
+    assert route
+    route.send("hello")
+    assert_equal(
+        lambda: page.evaluate("window.log"),
+        [
+            "open",
+            f"message: data=hello origin=ws://localhost:{server.PORT} lastEventId=",
+        ],
+    )
+
+    closed = []
+    route.on_close(lambda code, reason: closed.append((code, reason)))
+    page.goto(server.EMPTY_PAGE)
+    # page.evaluate lets the close event arrive.
+    assert_equal(lambda: page.evaluate("1") and len(closed), 1)
+
+
 def test_should_work_with_base_url(browser: Browser, server: Server) -> None:
     context = browser.new_context(base_url=f"http://localhost:{server.PORT}")
     page = context.new_page()

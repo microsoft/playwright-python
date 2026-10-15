@@ -13,14 +13,19 @@
 # limitations under the License.
 
 import traceback
-from typing import Any, Awaitable, Callable, Coroutine, Dict
+from typing import TYPE_CHECKING, Any, Awaitable, Callable, Coroutine, Dict
 
 from playwright._impl._connection import ChannelOwner, _capture_stack_trace
 from playwright._impl._errors import Error, is_target_closed_error
 from playwright._impl._greenlets import connection_closed_error, wait_for_future
 
+if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl._protocol_channels import DisposableChannel
+
 
 class Disposable(ChannelOwner):
+    _channel: "DisposableChannel"
+
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
@@ -28,10 +33,7 @@ class Disposable(ChannelOwner):
 
     async def dispose(self) -> None:
         try:
-            await self._channel.send(
-                "dispose",
-                None,
-            )
+            await self._channel.dispose()
         except Exception as e:
             if not is_target_closed_error(e):
                 raise e

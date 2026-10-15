@@ -21,7 +21,10 @@
 import re
 import traceback
 from types import TracebackType
-from typing import Any, List, Optional, TypedDict
+from typing import TYPE_CHECKING, Any, List, Optional
+
+if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl import _protocol_types as channels
 
 
 def is_target_closed_error(error: Exception) -> bool:
@@ -69,20 +72,19 @@ def rewrite_error(error: Exception, message: str) -> Exception:
     return rewritten_exc
 
 
-class ErrorPayload(TypedDict, total=False):
-    message: str
-    name: str
-    stack: str
-    value: Optional[Any]
+def serialize_error(
+    ex: Exception, tb: Optional[TracebackType]
+) -> "channels.SerializedErrorError":
+    return {
+        "message": str(ex),
+        "name": "Error",
+        "stack": "".join(traceback.format_tb(tb)),
+    }
 
 
-def serialize_error(ex: Exception, tb: Optional[TracebackType]) -> ErrorPayload:
-    return ErrorPayload(
-        message=str(ex), name="Error", stack="".join(traceback.format_tb(tb))
-    )
-
-
-def parse_error(error: ErrorPayload, log: Optional[str] = None) -> Error:
+def parse_error(
+    error: "channels.SerializedErrorError", log: Optional[str] = None
+) -> Error:
     base_error_class = Error
     if error.get("name") == "TimeoutError":
         base_error_class = TimeoutError
@@ -92,7 +94,7 @@ def parse_error(error: ErrorPayload, log: Optional[str] = None) -> Error:
         log = ""
     exc = base_error_class(patch_error_message(error["message"]) + log)
     exc._name = error["name"]
-    exc._stack = error["stack"]
+    exc._stack = error.get("stack")
     return exc
 
 

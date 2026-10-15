@@ -36,10 +36,16 @@ from playwright._impl._api_structures import (
     ViewportSize,
 )
 from playwright._impl._artifact import Artifact
-from playwright._impl._browser_context import BrowserContext
+from playwright._impl._browser_context import (
+    BrowserContext,
+    to_accept_downloads_params,
+    to_record_video_params,
+    to_storage_state_params,
+)
 from playwright._impl._cdp_session import CDPSession
 from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._errors import is_target_closed_error
+from playwright._impl._headers import serialize_headers
 from playwright._impl._helper import (
     ColorScheme,
     Contrast,
@@ -48,16 +54,23 @@ from playwright._impl._helper import (
     HarMode,
     ReducedMotion,
     ServiceWorkersPolicy,
-    locals_to_params,
     make_dirs_for_file,
+)
+from playwright._impl._network import (
+    to_client_certificates_protocol,
+    to_http_credentials_protocol,
 )
 from playwright._impl._page import Page
 
 if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl import _protocol_types as channels
     from playwright._impl._browser_type import BrowserType
+    from playwright._impl._protocol_channels import BrowserChannel
 
 
 class Browser(ChannelOwner):
+    _channel: "BrowserChannel"
+
     Events = SimpleNamespace(
         Context="context",
         Disconnected="disconnected",
@@ -74,13 +87,12 @@ class Browser(ChannelOwner):
 
         self._contexts: Set[BrowserContext] = set()
         self._traces_dir: Optional[str] = None
-        self._channel.on(
-            "context",
-            lambda params: self._did_create_context(
-                cast(BrowserContext, from_channel(params["context"]))
-            ),
+        self._channel.onContext(
+            lambda event: self._did_create_context(
+                cast(BrowserContext, from_channel(event["context"]))
+            )
         )
-        self._channel.on("close", lambda _: self._on_close())
+        self._channel.onClose(lambda: self._on_close())
         self._close_reason: Optional[str] = None
 
     def __repr__(self) -> str:
@@ -131,103 +143,185 @@ class Browser(ChannelOwner):
 
     async def new_context(
         self,
-        viewport: ViewportSize = None,
-        screen: ViewportSize = None,
-        noViewport: bool = None,
-        ignoreHTTPSErrors: bool = None,
-        javaScriptEnabled: bool = None,
-        bypassCSP: bool = None,
-        userAgent: str = None,
-        locale: str = None,
-        timezoneId: str = None,
-        geolocation: Geolocation = None,
-        permissions: Sequence[str] = None,
-        extraHTTPHeaders: Dict[str, str] = None,
-        offline: bool = None,
-        httpCredentials: Union[HttpCredentials, Sequence[HttpCredentials]] = None,
-        deviceScaleFactor: float = None,
-        isMobile: bool = None,
-        hasTouch: bool = None,
-        colorScheme: ColorScheme = None,
-        reducedMotion: ReducedMotion = None,
-        forcedColors: ForcedColors = None,
-        contrast: Contrast = None,
-        acceptDownloads: bool = None,
-        defaultBrowserType: str = None,
-        proxy: ProxySettings = None,
-        recordHarPath: Union[Path, str] = None,
-        recordHarOmitContent: bool = None,
-        recordVideoDir: Union[Path, str] = None,
-        recordVideoSize: ViewportSize = None,
-        storageState: Union[StorageState, str, Path] = None,
-        baseURL: str = None,
-        strictSelectors: bool = None,
-        serviceWorkers: ServiceWorkersPolicy = None,
-        recordHarUrlFilter: Union[Pattern[str], str] = None,
-        recordHarMode: HarMode = None,
-        recordHarContent: HarContentPolicy = None,
-        clientCertificates: List[ClientCertificate] = None,
-        recordVideoFps: int = None,
+        viewport: Optional[ViewportSize],
+        screen: Optional[ViewportSize],
+        no_viewport: Optional[bool],
+        ignore_https_errors: Optional[bool],
+        java_script_enabled: Optional[bool],
+        bypass_csp: Optional[bool],
+        user_agent: Optional[str],
+        locale: Optional[str],
+        timezone_id: Optional[str],
+        geolocation: Optional[Geolocation],
+        permissions: Optional[Sequence[str]],
+        extra_http_headers: Optional[Dict[str, str]],
+        offline: Optional[bool],
+        http_credentials: Optional[Union[HttpCredentials, Sequence[HttpCredentials]]],
+        device_scale_factor: Optional[float],
+        is_mobile: Optional[bool],
+        has_touch: Optional[bool],
+        color_scheme: Optional[ColorScheme],
+        reduced_motion: Optional[ReducedMotion],
+        forced_colors: Optional[ForcedColors],
+        contrast: Optional[Contrast],
+        accept_downloads: Optional[bool],
+        default_browser_type: Optional[str],  # Not a protocol parameter; not sent.
+        proxy: Optional[ProxySettings],
+        record_har_path: Optional[Union[Path, str]],
+        record_har_omit_content: Optional[bool],
+        record_video_dir: Optional[Union[Path, str]],
+        record_video_size: Optional[ViewportSize],
+        storage_state: Optional[Union[StorageState, str, Path]],
+        base_url: Optional[str],
+        strict_selectors: Optional[bool],
+        service_workers: Optional[ServiceWorkersPolicy],
+        record_har_url_filter: Optional[Union[Pattern[str], str]],
+        record_har_mode: Optional[HarMode],
+        record_har_content: Optional[HarContentPolicy],
+        client_certificates: Optional[List[ClientCertificate]],
+        record_video_fps: Optional[int],
     ) -> BrowserContext:
-        params = locals_to_params(locals())
         assert self._browser_type is not None
-        await self._browser_type._prepare_browser_context_params(params)
-
-        channel = await self._channel.send("newContext", None, params)
-        context = cast(BrowserContext, from_channel(channel))
+        selectors = self._browser_type._playwright.selectors
+        result = await self._channel.newContext(
+            noDefaultViewport=True if no_viewport else None,
+            viewport=viewport,
+            screen=screen,
+            ignoreHTTPSErrors=ignore_https_errors,
+            clientCertificates=cast(
+                "Optional[List[channels.BrowserNewContextParamsClientCertificates]]",
+                await to_client_certificates_protocol(client_certificates),
+            ),
+            javaScriptEnabled=java_script_enabled,
+            bypassCSP=bypass_csp,
+            userAgent=user_agent,
+            locale=locale,
+            timezoneId=timezone_id,
+            geolocation=cast(
+                "Optional[channels.BrowserNewContextParamsGeolocation]", geolocation
+            ),
+            permissions=permissions,
+            extraHTTPHeaders=(
+                serialize_headers(extra_http_headers)
+                if extra_http_headers is not None
+                else None
+            ),
+            offline=offline,
+            httpCredentials=cast(
+                "Optional[List[channels.HttpCredentials]]",
+                to_http_credentials_protocol(http_credentials),
+            ),
+            deviceScaleFactor=device_scale_factor,
+            isMobile=is_mobile,
+            hasTouch=has_touch,
+            colorScheme="no-override" if color_scheme == "null" else color_scheme,
+            reducedMotion=(
+                "no-override" if reduced_motion == "null" else reduced_motion
+            ),
+            forcedColors="no-override" if forced_colors == "null" else forced_colors,
+            acceptDownloads=to_accept_downloads_params(accept_downloads),
+            contrast="no-override" if contrast == "null" else contrast,
+            baseURL=base_url,
+            recordVideo=to_record_video_params(
+                record_video_dir, record_video_size, record_video_fps
+            ),
+            strictSelectors=strict_selectors,
+            serviceWorkers=service_workers,
+            selectorEngines=selectors._selector_engines,
+            testIdAttributeName=selectors._test_id_attribute_name,
+            proxy=cast("Optional[channels.BrowserNewContextParamsProxy]", proxy),
+            storageState=await to_storage_state_params(storage_state),
+        )
+        context = cast(BrowserContext, from_channel(result["context"]))
         await context._initialize_har_from_options(
-            record_har_content=recordHarContent,
-            record_har_mode=recordHarMode,
-            record_har_omit_content=recordHarOmitContent,
-            record_har_path=recordHarPath,
-            record_har_url_filter=recordHarUrlFilter,
+            record_har_content=record_har_content,
+            record_har_mode=record_har_mode,
+            record_har_omit_content=record_har_omit_content,
+            record_har_path=record_har_path,
+            record_har_url_filter=record_har_url_filter,
         )
         return context
 
     async def new_page(
         self,
-        viewport: ViewportSize = None,
-        screen: ViewportSize = None,
-        noViewport: bool = None,
-        ignoreHTTPSErrors: bool = None,
-        javaScriptEnabled: bool = None,
-        bypassCSP: bool = None,
-        userAgent: str = None,
-        locale: str = None,
-        timezoneId: str = None,
-        geolocation: Geolocation = None,
-        permissions: Sequence[str] = None,
-        extraHTTPHeaders: Dict[str, str] = None,
-        offline: bool = None,
-        httpCredentials: Union[HttpCredentials, Sequence[HttpCredentials]] = None,
-        deviceScaleFactor: float = None,
-        isMobile: bool = None,
-        hasTouch: bool = None,
-        colorScheme: ColorScheme = None,
-        forcedColors: ForcedColors = None,
-        contrast: Contrast = None,
-        reducedMotion: ReducedMotion = None,
-        acceptDownloads: bool = None,
-        defaultBrowserType: str = None,
-        proxy: ProxySettings = None,
-        recordHarPath: Union[Path, str] = None,
-        recordHarOmitContent: bool = None,
-        recordVideoDir: Union[Path, str] = None,
-        recordVideoSize: ViewportSize = None,
-        storageState: Union[StorageState, str, Path] = None,
-        baseURL: str = None,
-        strictSelectors: bool = None,
-        serviceWorkers: ServiceWorkersPolicy = None,
-        recordHarUrlFilter: Union[Pattern[str], str] = None,
-        recordHarMode: HarMode = None,
-        recordHarContent: HarContentPolicy = None,
-        clientCertificates: List[ClientCertificate] = None,
-        recordVideoFps: int = None,
+        viewport: Optional[ViewportSize],
+        screen: Optional[ViewportSize],
+        no_viewport: Optional[bool],
+        ignore_https_errors: Optional[bool],
+        java_script_enabled: Optional[bool],
+        bypass_csp: Optional[bool],
+        user_agent: Optional[str],
+        locale: Optional[str],
+        timezone_id: Optional[str],
+        geolocation: Optional[Geolocation],
+        permissions: Optional[Sequence[str]],
+        extra_http_headers: Optional[Dict[str, str]],
+        offline: Optional[bool],
+        http_credentials: Optional[Union[HttpCredentials, Sequence[HttpCredentials]]],
+        device_scale_factor: Optional[float],
+        is_mobile: Optional[bool],
+        has_touch: Optional[bool],
+        color_scheme: Optional[ColorScheme],
+        forced_colors: Optional[ForcedColors],
+        contrast: Optional[Contrast],
+        reduced_motion: Optional[ReducedMotion],
+        accept_downloads: Optional[bool],
+        default_browser_type: Optional[str],
+        proxy: Optional[ProxySettings],
+        record_har_path: Optional[Union[Path, str]],
+        record_har_omit_content: Optional[bool],
+        record_video_dir: Optional[Union[Path, str]],
+        record_video_size: Optional[ViewportSize],
+        storage_state: Optional[Union[StorageState, str, Path]],
+        base_url: Optional[str],
+        strict_selectors: Optional[bool],
+        service_workers: Optional[ServiceWorkersPolicy],
+        record_har_url_filter: Optional[Union[Pattern[str], str]],
+        record_har_mode: Optional[HarMode],
+        record_har_content: Optional[HarContentPolicy],
+        client_certificates: Optional[List[ClientCertificate]],
+        record_video_fps: Optional[int],
     ) -> Page:
-        params = locals_to_params(locals())
-
         async def inner() -> Page:
-            context = await self.new_context(**params)
+            context = await self.new_context(
+                viewport=viewport,
+                screen=screen,
+                no_viewport=no_viewport,
+                ignore_https_errors=ignore_https_errors,
+                java_script_enabled=java_script_enabled,
+                bypass_csp=bypass_csp,
+                user_agent=user_agent,
+                locale=locale,
+                timezone_id=timezone_id,
+                geolocation=geolocation,
+                permissions=permissions,
+                extra_http_headers=extra_http_headers,
+                offline=offline,
+                http_credentials=http_credentials,
+                device_scale_factor=device_scale_factor,
+                is_mobile=is_mobile,
+                has_touch=has_touch,
+                color_scheme=color_scheme,
+                reduced_motion=reduced_motion,
+                forced_colors=forced_colors,
+                contrast=contrast,
+                accept_downloads=accept_downloads,
+                default_browser_type=default_browser_type,
+                proxy=proxy,
+                record_har_path=record_har_path,
+                record_har_omit_content=record_har_omit_content,
+                record_video_dir=record_video_dir,
+                record_video_size=record_video_size,
+                storage_state=storage_state,
+                base_url=base_url,
+                strict_selectors=strict_selectors,
+                service_workers=service_workers,
+                record_har_url_filter=record_har_url_filter,
+                record_har_mode=record_har_mode,
+                record_har_content=record_har_content,
+                client_certificates=client_certificates,
+                record_video_fps=record_video_fps,
+            )
             page = await context.new_page()
             page._owned_context = context
             context._owner_page = page
@@ -235,13 +329,13 @@ class Browser(ChannelOwner):
 
         return await self._connection.wrap_api_call(inner, title="Create page")
 
-    async def close(self, reason: str = None) -> None:
+    async def close(self, reason: Optional[str]) -> None:
         self._close_reason = reason
         try:
             if self._should_close_connection_on_close:
                 await self._connection.stop_async()
             else:
-                await self._channel.send("close", None, {"reason": reason})
+                await self._channel.close(reason=reason)
         except Exception as e:
             if not is_target_closed_error(e):
                 raise e
@@ -251,41 +345,41 @@ class Browser(ChannelOwner):
         return self._initializer["version"]
 
     async def new_browser_cdp_session(self) -> CDPSession:
-        return from_channel(await self._channel.send("newBrowserCDPSession", None))
+        return from_channel((await self._channel.newBrowserCDPSession())["session"])
 
     async def bind(
         self,
         title: str,
-        workspaceDir: str = None,
-        host: str = None,
-        port: int = None,
+        workspace_dir: Optional[str],
+        host: Optional[str],
+        port: Optional[int],
     ) -> BrowserBindResult:
-        return await self._channel.send_return_as_dict(
-            "startServer", None, locals_to_params(locals())
+        return await self._channel.startServer(
+            title=title, workspaceDir=workspace_dir, metadata=None, host=host, port=port
         )
 
     async def unbind(self) -> None:
-        await self._channel.send("stopServer", None)
+        await self._channel.stopServer()
 
     async def start_tracing(
         self,
-        page: Page = None,
-        path: Union[str, Path] = None,
-        screenshots: bool = None,
-        categories: Sequence[str] = None,
+        page: Optional[Page],
+        path: Optional[Union[str, Path]],
+        screenshots: Optional[bool],
+        categories: Optional[Sequence[str]],
     ) -> None:
-        params = locals_to_params(locals())
         # The client writes the trace to `path` in stop_tracing().
-        params.pop("path", None)
-        if page:
-            params["page"] = page._channel
         if path:
             self._cr_tracing_path = str(path)
-        await self._channel.send("startTracing", None, params)
+        await self._channel.startTracing(
+            page=page._channel if page else None,
+            screenshots=screenshots,
+            categories=categories,
+        )
 
     async def stop_tracing(self) -> bytes:
         artifact = cast(
-            Artifact, from_channel(await self._channel.send("stopTracing", None))
+            Artifact, from_channel((await self._channel.stopTracing())["artifact"])
         )
         buffer = await artifact.read_info_buffer()
         await artifact.delete()

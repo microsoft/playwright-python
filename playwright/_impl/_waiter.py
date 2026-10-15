@@ -63,7 +63,6 @@ class Waiter:
         try:
             self._channel.send_no_reply(
                 "__waitInfo__",
-                None,
                 params,
                 is_internal=is_internal,
                 title=title,

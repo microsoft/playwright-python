@@ -66,7 +66,7 @@ def get_by_role_selector(
     checked: bool = None,
     disabled: bool = None,
     expanded: bool = None,
-    includeHidden: bool = None,
+    include_hidden: bool = None,
     level: int = None,
     name: Union[str, Pattern[str]] = None,
     pressed: bool = None,
@@ -83,8 +83,8 @@ def get_by_role_selector(
         props.append(("selected", bool_to_js_bool(selected)))
     if expanded is not None:
         props.append(("expanded", bool_to_js_bool(expanded)))
-    if includeHidden is not None:
-        props.append(("include-hidden", bool_to_js_bool(includeHidden)))
+    if include_hidden is not None:
+        props.append(("include-hidden", bool_to_js_bool(include_hidden)))
     if level is not None:
         props.append(("level", str(level)))
     if name is not None:

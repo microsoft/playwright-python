@@ -34,9 +34,9 @@ update_api structs playwright/_impl/_api_structures.py
 update_api sync
 update_api async
 
-echo "Generating playwright/_impl/_protocol.py"
-if python scripts/codegen/generate_protocol.py --out playwright/_impl/_protocol.py; then
-    pre-commit run --files playwright/_impl/_protocol.py
+echo "Generating playwright/_impl/_protocol.py, _protocol_types.py and _protocol_channels.py"
+if python scripts/codegen/generate_protocol.py --out playwright/_impl/_protocol.py --types-out playwright/_impl/_protocol_types.py --channels-out playwright/_impl/_protocol_channels.py; then
+    pre-commit run --files playwright/_impl/_protocol.py playwright/_impl/_protocol_types.py playwright/_impl/_protocol_channels.py
 else
     echo "Exited due to errors"
     exit 1

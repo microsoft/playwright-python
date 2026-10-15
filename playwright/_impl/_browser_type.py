@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import asyncio
-import json
 import pathlib
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Sequence, Union, cast
@@ -26,7 +25,11 @@ from playwright._impl._api_structures import (
     ViewportSize,
 )
 from playwright._impl._browser import Browser
-from playwright._impl._browser_context import BrowserContext
+from playwright._impl._browser_context import (
+    BrowserContext,
+    to_accept_downloads_params,
+    to_record_video_params,
+)
 from playwright._impl._connection import ChannelOwner, Connection, from_channel
 from playwright._impl._errors import Error
 from playwright._impl._headers import serialize_headers
@@ -40,8 +43,6 @@ from playwright._impl._helper import (
     HarMode,
     ReducedMotion,
     ServiceWorkersPolicy,
-    async_readfile,
-    locals_to_params,
 )
 from playwright._impl._json_pipe import JsonPipeTransport
 from playwright._impl._network import (
@@ -51,11 +52,15 @@ from playwright._impl._network import (
 from playwright._impl._timeout_settings import TimeoutSettings
 from playwright._impl._waiter import throw_on_timeout
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl import _protocol_types as channels
     from playwright._impl._playwright import Playwright
+    from playwright._impl._protocol_channels import BrowserTypeChannel
 
 
 class BrowserType(ChannelOwner):
+    _channel: "BrowserTypeChannel"
+
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
@@ -75,142 +80,225 @@ class BrowserType(ChannelOwner):
 
     async def launch(
         self,
-        executablePath: Union[str, Path] = None,
-        channel: str = None,
-        args: Sequence[str] = None,
-        ignoreDefaultArgs: Union[bool, Sequence[str]] = None,
-        handleSIGINT: bool = None,
-        handleSIGTERM: bool = None,
-        handleSIGHUP: bool = None,
-        timeout: float = None,
-        env: Env = None,
-        headless: bool = None,
-        proxy: ProxySettings = None,
-        downloadsPath: Union[str, Path] = None,
-        slowMo: float = None,
-        tracesDir: Union[pathlib.Path, str] = None,
-        artifactsDir: Union[pathlib.Path, str] = None,
-        chromiumSandbox: bool = None,
-        firefoxUserPrefs: Dict[str, Union[str, float, bool]] = None,
+        executable_path: Optional[Union[str, Path]],
+        channel: Optional[str],
+        args: Optional[Sequence[str]],
+        ignore_default_args: Optional[Union[bool, Sequence[str]]],
+        handle_sigint: Optional[bool],
+        handle_sigterm: Optional[bool],
+        handle_sighup: Optional[bool],
+        timeout: Optional[float],
+        env: Optional[Env],
+        headless: Optional[bool],
+        proxy: Optional[ProxySettings],
+        downloads_path: Optional[Union[str, Path]],
+        slow_mo: Optional[float],
+        traces_dir: Optional[Union[pathlib.Path, str]],
+        artifacts_dir: Optional[Union[pathlib.Path, str]],
+        chromium_sandbox: Optional[bool],
+        firefox_user_prefs: Optional[Dict[str, Union[str, float, bool]]],
     ) -> Browser:
-        params = locals_to_params(locals())
-        normalize_launch_params(params)
-        browser = cast(
-            Browser,
-            from_channel(
-                await self._channel.send(
-                    "launch", TimeoutSettings.launch_timeout, params
-                )
+        result = await self._channel.launch(
+            channel=channel,
+            executablePath=to_path_param(executable_path),
+            args=args,
+            ignoreAllDefaultArgs=True if ignore_default_args is True else None,
+            ignoreDefaultArgs=(
+                None if isinstance(ignore_default_args, bool) else ignore_default_args
             ),
+            handleSIGINT=handle_sigint,
+            handleSIGTERM=handle_sigterm,
+            handleSIGHUP=handle_sighup,
+            env=to_env_params(env),
+            headless=headless,
+            proxy=cast("Optional[channels.BrowserTypeLaunchParamsProxy]", proxy),
+            downloadsPath=to_path_param(downloads_path),
+            tracesDir=to_path_param(traces_dir),
+            artifactsDir=to_path_param(artifacts_dir),
+            chromiumSandbox=chromium_sandbox,
+            firefoxUserPrefs=firefox_user_prefs,
+            cdpPort=None,
+            slowMo=slow_mo,
+            timeout=TimeoutSettings.launch_timeout(timeout),
         )
+        browser = cast(Browser, from_channel(result["browser"]))
         browser._connect_to_browser_type(
-            self, str(tracesDir) if tracesDir is not None else None
+            self, str(traces_dir) if traces_dir is not None else None
         )
         return browser
 
     async def launch_persistent_context(
         self,
-        userDataDir: Union[str, Path],
-        channel: str = None,
-        executablePath: Union[str, Path] = None,
-        args: Sequence[str] = None,
-        ignoreDefaultArgs: Union[bool, Sequence[str]] = None,
-        handleSIGINT: bool = None,
-        handleSIGTERM: bool = None,
-        handleSIGHUP: bool = None,
-        timeout: float = None,
-        env: Env = None,
-        headless: bool = None,
-        proxy: ProxySettings = None,
-        downloadsPath: Union[str, Path] = None,
-        slowMo: float = None,
-        viewport: ViewportSize = None,
-        screen: ViewportSize = None,
-        noViewport: bool = None,
-        ignoreHTTPSErrors: bool = None,
-        javaScriptEnabled: bool = None,
-        bypassCSP: bool = None,
-        userAgent: str = None,
-        locale: str = None,
-        timezoneId: str = None,
-        geolocation: Geolocation = None,
-        permissions: Sequence[str] = None,
-        extraHTTPHeaders: Dict[str, str] = None,
-        offline: bool = None,
-        httpCredentials: Union[HttpCredentials, Sequence[HttpCredentials]] = None,
-        deviceScaleFactor: float = None,
-        isMobile: bool = None,
-        hasTouch: bool = None,
-        colorScheme: ColorScheme = None,
-        reducedMotion: ReducedMotion = None,
-        forcedColors: ForcedColors = None,
-        contrast: Contrast = None,
-        acceptDownloads: bool = None,
-        tracesDir: Union[pathlib.Path, str] = None,
-        artifactsDir: Union[pathlib.Path, str] = None,
-        chromiumSandbox: bool = None,
-        firefoxUserPrefs: Dict[str, Union[str, float, bool]] = None,
-        recordHarPath: Union[Path, str] = None,
-        recordHarOmitContent: bool = None,
-        recordVideoDir: Union[Path, str] = None,
-        recordVideoSize: ViewportSize = None,
-        baseURL: str = None,
-        strictSelectors: bool = None,
-        serviceWorkers: ServiceWorkersPolicy = None,
-        recordHarUrlFilter: Union[Pattern[str], str] = None,
-        recordHarMode: HarMode = None,
-        recordHarContent: HarContentPolicy = None,
-        clientCertificates: List[ClientCertificate] = None,
-        recordVideoFps: int = None,
+        user_data_dir: Union[str, Path],
+        channel: Optional[str],
+        executable_path: Optional[Union[str, Path]],
+        args: Optional[Sequence[str]],
+        ignore_default_args: Optional[Union[bool, Sequence[str]]],
+        handle_sigint: Optional[bool],
+        handle_sigterm: Optional[bool],
+        handle_sighup: Optional[bool],
+        timeout: Optional[float],
+        env: Optional[Env],
+        headless: Optional[bool],
+        proxy: Optional[ProxySettings],
+        downloads_path: Optional[Union[str, Path]],
+        slow_mo: Optional[float],
+        viewport: Optional[ViewportSize],
+        screen: Optional[ViewportSize],
+        no_viewport: Optional[bool],
+        ignore_https_errors: Optional[bool],
+        java_script_enabled: Optional[bool],
+        bypass_csp: Optional[bool],
+        user_agent: Optional[str],
+        locale: Optional[str],
+        timezone_id: Optional[str],
+        geolocation: Optional[Geolocation],
+        permissions: Optional[Sequence[str]],
+        extra_http_headers: Optional[Dict[str, str]],
+        offline: Optional[bool],
+        http_credentials: Optional[Union[HttpCredentials, Sequence[HttpCredentials]]],
+        device_scale_factor: Optional[float],
+        is_mobile: Optional[bool],
+        has_touch: Optional[bool],
+        color_scheme: Optional[ColorScheme],
+        reduced_motion: Optional[ReducedMotion],
+        forced_colors: Optional[ForcedColors],
+        contrast: Optional[Contrast],
+        accept_downloads: Optional[bool],
+        traces_dir: Optional[Union[pathlib.Path, str]],
+        artifacts_dir: Optional[Union[pathlib.Path, str]],
+        chromium_sandbox: Optional[bool],
+        firefox_user_prefs: Optional[Dict[str, Union[str, float, bool]]],
+        record_har_path: Optional[Union[Path, str]],
+        record_har_omit_content: Optional[bool],
+        record_video_dir: Optional[Union[Path, str]],
+        record_video_size: Optional[ViewportSize],
+        base_url: Optional[str],
+        strict_selectors: Optional[bool],
+        service_workers: Optional[ServiceWorkersPolicy],
+        record_har_url_filter: Optional[Union[Pattern[str], str]],
+        record_har_mode: Optional[HarMode],
+        record_har_content: Optional[HarContentPolicy],
+        client_certificates: Optional[List[ClientCertificate]],
+        record_video_fps: Optional[int],
     ) -> BrowserContext:
-        userDataDir = self._user_data_dir(userDataDir)
-        params = locals_to_params(locals())
-        await self._prepare_browser_context_params(params)
-        normalize_launch_params(params)
-        result = await self._channel.send_return_as_dict(
-            "launchPersistentContext", TimeoutSettings.launch_timeout, params
+        selectors = self._playwright.selectors
+        result = await self._channel.launchPersistentContext(
+            channel=channel,
+            executablePath=to_path_param(executable_path),
+            args=args,
+            ignoreAllDefaultArgs=True if ignore_default_args is True else None,
+            ignoreDefaultArgs=(
+                None if isinstance(ignore_default_args, bool) else ignore_default_args
+            ),
+            handleSIGINT=handle_sigint,
+            handleSIGTERM=handle_sigterm,
+            handleSIGHUP=handle_sighup,
+            env=to_env_params(env),
+            headless=headless,
+            proxy=cast(
+                "Optional[channels.BrowserTypeLaunchPersistentContextParamsProxy]",
+                proxy,
+            ),
+            downloadsPath=to_path_param(downloads_path),
+            tracesDir=to_path_param(traces_dir),
+            artifactsDir=to_path_param(artifacts_dir),
+            chromiumSandbox=chromium_sandbox,
+            firefoxUserPrefs=firefox_user_prefs,
+            cdpPort=None,
+            noDefaultViewport=True if no_viewport else None,
+            viewport=viewport,
+            screen=screen,
+            ignoreHTTPSErrors=ignore_https_errors,
+            clientCertificates=cast(
+                "Optional[List[channels.BrowserTypeLaunchPersistentContextParamsClientCertificates]]",
+                await to_client_certificates_protocol(client_certificates),
+            ),
+            javaScriptEnabled=java_script_enabled,
+            bypassCSP=bypass_csp,
+            userAgent=user_agent,
+            locale=locale,
+            timezoneId=timezone_id,
+            geolocation=cast(
+                "Optional[channels.BrowserTypeLaunchPersistentContextParamsGeolocation]",
+                geolocation,
+            ),
+            permissions=permissions,
+            extraHTTPHeaders=(
+                serialize_headers(extra_http_headers)
+                if extra_http_headers is not None
+                else None
+            ),
+            offline=offline,
+            httpCredentials=cast(
+                "Optional[List[channels.HttpCredentials]]",
+                to_http_credentials_protocol(http_credentials),
+            ),
+            deviceScaleFactor=device_scale_factor,
+            isMobile=is_mobile,
+            hasTouch=has_touch,
+            colorScheme="no-override" if color_scheme == "null" else color_scheme,
+            reducedMotion=(
+                "no-override" if reduced_motion == "null" else reduced_motion
+            ),
+            forcedColors="no-override" if forced_colors == "null" else forced_colors,
+            acceptDownloads=to_accept_downloads_params(accept_downloads),
+            contrast="no-override" if contrast == "null" else contrast,
+            baseURL=base_url,
+            recordVideo=to_record_video_params(
+                record_video_dir, record_video_size, record_video_fps
+            ),
+            strictSelectors=strict_selectors,
+            serviceWorkers=service_workers,
+            selectorEngines=selectors._selector_engines,
+            testIdAttributeName=selectors._test_id_attribute_name,
+            userDataDir=self._user_data_dir(user_data_dir),
+            slowMo=slow_mo,
+            timeout=TimeoutSettings.launch_timeout(timeout),
         )
-        browser = cast(
-            Browser,
-            from_channel(result["browser"]),
-        )
+        browser = cast(Browser, from_channel(result["browser"]))
         browser._connect_to_browser_type(
-            self, str(tracesDir) if tracesDir is not None else None
+            self, str(traces_dir) if traces_dir is not None else None
         )
         context = cast(BrowserContext, from_channel(result["context"]))
         await context._initialize_har_from_options(
-            record_har_content=recordHarContent,
-            record_har_mode=recordHarMode,
-            record_har_omit_content=recordHarOmitContent,
-            record_har_path=recordHarPath,
-            record_har_url_filter=recordHarUrlFilter,
+            record_har_content=record_har_content,
+            record_har_mode=record_har_mode,
+            record_har_omit_content=record_har_omit_content,
+            record_har_path=record_har_path,
+            record_har_url_filter=record_har_url_filter,
         )
         return context
 
-    def _user_data_dir(self, userDataDir: Optional[Union[str, Path]]) -> str:
-        if not userDataDir:
+    def _user_data_dir(self, user_data_dir: Optional[Union[str, Path]]) -> str:
+        if not user_data_dir:
             return ""
-        if not Path(userDataDir).is_absolute():
-            return str(Path(userDataDir).resolve())
-        return str(Path(userDataDir))
+        if not Path(user_data_dir).is_absolute():
+            return str(Path(user_data_dir).resolve())
+        return str(Path(user_data_dir))
 
     async def connect_over_cdp(
         self,
-        endpointURL: str,
-        timeout: float = None,
-        slowMo: float = None,
-        headers: Dict[str, str] = None,
-        isLocal: bool = None,
-        noDefaults: bool = None,
-        artifactsDir: Union[str, Path] = None,
+        endpoint_url: str,
+        timeout: Optional[float],
+        slow_mo: Optional[float],
+        headers: Optional[Dict[str, str]],
+        is_local: Optional[bool],
+        no_defaults: Optional[bool],
+        artifacts_dir: Optional[Union[str, Path]],
     ) -> Browser:
-        params = locals_to_params(locals())
-        if params.get("headers"):
-            params["headers"] = serialize_headers(params["headers"])
-        response = await self._channel.send_return_as_dict(
-            "connectOverCDP", TimeoutSettings.launch_timeout, params
+        result = await self._channel.connectOverCDP(
+            endpointURL=endpoint_url,
+            headers=serialize_headers(headers) if headers is not None else None,
+            slowMo=slow_mo,
+            isLocal=is_local,
+            noDefaults=no_defaults,
+            isWebView=None,
+            artifactsDir=str(artifacts_dir) if artifacts_dir is not None else None,
+            transport=None,
+            timeout=TimeoutSettings.launch_timeout(timeout),
         )
-        browser = cast(Browser, from_channel(response["browser"]))
+        browser = cast(Browser, from_channel(result["browser"]))
         browser._connect_to_browser_type(self, None)
 
         return browser
@@ -218,32 +306,27 @@ class BrowserType(ChannelOwner):
     async def connect(
         self,
         endpoint: str,
-        timeout: float = None,
-        slowMo: float = None,
-        headers: Dict[str, str] = None,
-        exposeNetwork: str = None,
+        timeout: Optional[float],
+        slow_mo: Optional[float],
+        headers: Optional[Dict[str, str]],
+        expose_network: Optional[str],
     ) -> Browser:
-        if slowMo is None:
-            slowMo = 0
+        if slow_mo is None:
+            slow_mo = 0
         if timeout is None:
             timeout = 0
 
         headers = {**(headers if headers else {}), "x-playwright-browser": self.name}
         local_utils = self._connection.local_utils
-        pipe_channel = (
-            await local_utils._channel.send_return_as_dict(
-                "connect",
-                lambda t: t or 0,
-                {
-                    "endpoint": endpoint,
-                    "headers": headers,
-                    "slowMo": slowMo,
-                    "timeout": timeout,
-                    "exposeNetwork": exposeNetwork,
-                },
-            )
-        )["pipe"]
-        transport = JsonPipeTransport(self._connection._loop, pipe_channel)
+        result = await local_utils._channel.connect(
+            endpoint=endpoint,
+            headers=headers,
+            exposeNetwork=expose_network,
+            slowMo=slow_mo,
+            socksProxyRedirectPortForTest=None,
+            timeout=timeout,
+        )
+        transport = JsonPipeTransport(self._connection._loop, result["pipe"])
 
         connection = Connection(
             self._connection._dispatcher_fiber,
@@ -301,80 +384,12 @@ class BrowserType(ChannelOwner):
 
         return browser
 
-    async def _prepare_browser_context_params(self, params: Dict) -> None:
-        if params.get("noViewport"):
-            del params["noViewport"]
-            params["noDefaultViewport"] = True
-        if "defaultBrowserType" in params:
-            del params["defaultBrowserType"]
-        if "extraHTTPHeaders" in params:
-            params["extraHTTPHeaders"] = serialize_headers(params["extraHTTPHeaders"])
-        if "recordVideoDir" in params:
-            params["recordVideo"] = {"dir": Path(params["recordVideoDir"]).absolute()}
-            if "recordVideoSize" in params:
-                params["recordVideo"]["size"] = params["recordVideoSize"]
-                del params["recordVideoSize"]
-            if "recordVideoFps" in params:
-                params["recordVideo"]["fps"] = params["recordVideoFps"]
-            del params["recordVideoDir"]
-        params.pop("recordVideoFps", None)
-        if "storageState" in params:
-            storageState = params["storageState"]
-            if not isinstance(storageState, dict):
-                params["storageState"] = json.loads(
-                    (await async_readfile(storageState)).decode()
-                )
-        if params.get("colorScheme", None) == "null":
-            params["colorScheme"] = "no-override"
-        if params.get("reducedMotion", None) == "null":
-            params["reducedMotion"] = "no-override"
-        if params.get("forcedColors", None) == "null":
-            params["forcedColors"] = "no-override"
-        if params.get("contrast", None) == "null":
-            params["contrast"] = "no-override"
-        if "acceptDownloads" in params:
-            params["acceptDownloads"] = (
-                "accept" if params["acceptDownloads"] else "deny"
-            )
 
-        if "clientCertificates" in params:
-            params["clientCertificates"] = await to_client_certificates_protocol(
-                params["clientCertificates"]
-            )
-        if "httpCredentials" in params:
-            params["httpCredentials"] = to_http_credentials_protocol(
-                params["httpCredentials"]
-            )
-        params["selectorEngines"] = self._playwright.selectors._selector_engines
-        params["testIdAttributeName"] = (
-            self._playwright.selectors._test_id_attribute_name
-        )
-
-        # Remove HAR options
-        params.pop("recordHarPath", None)
-        params.pop("recordHarOmitContent", None)
-        params.pop("recordHarUrlFilter", None)
-        params.pop("recordHarMode", None)
-        params.pop("recordHarContent", None)
+def to_env_params(env: Optional[Env]) -> Optional[List["channels.NameValue"]]:
+    if env is None:
+        return None
+    return [{"name": name, "value": str(value)} for name, value in env.items()]
 
 
-def normalize_launch_params(params: Dict) -> None:
-    if "env" in params:
-        params["env"] = [
-            {"name": name, "value": str(value)}
-            for [name, value] in params["env"].items()
-        ]
-    if "ignoreDefaultArgs" in params:
-        if params["ignoreDefaultArgs"] is True:
-            params["ignoreAllDefaultArgs"] = True
-            del params["ignoreDefaultArgs"]
-        elif params["ignoreDefaultArgs"] is False:
-            del params["ignoreDefaultArgs"]
-    if "executablePath" in params:
-        params["executablePath"] = str(Path(params["executablePath"]))
-    if "downloadsPath" in params:
-        params["downloadsPath"] = str(Path(params["downloadsPath"]))
-    if "tracesDir" in params:
-        params["tracesDir"] = str(Path(params["tracesDir"]))
-    if "artifactsDir" in params:
-        params["artifactsDir"] = str(Path(params["artifactsDir"]))
+def to_path_param(path: Optional[Union[str, Path]]) -> Optional[str]:
+    return str(Path(path)) if path is not None else None

@@ -16,13 +16,15 @@ from typing import TYPE_CHECKING, Dict, Optional
 
 from playwright._impl._connection import ChannelOwner, from_nullable_channel
 from playwright._impl._errors import is_target_closed_error
-from playwright._impl._helper import locals_to_params
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._page import Page
+    from playwright._impl._protocol_channels import DialogChannel
 
 
 class Dialog(ChannelOwner):
+    _channel: "DialogChannel"
+
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
@@ -48,15 +50,12 @@ class Dialog(ChannelOwner):
     def page(self) -> Optional["Page"]:
         return self._page
 
-    async def accept(self, promptText: str = None) -> None:
-        await self._channel.send("accept", None, locals_to_params(locals()))
+    async def accept(self, prompt_text: Optional[str]) -> None:
+        await self._channel.accept(promptText=prompt_text)
 
     async def dismiss(self) -> None:
         try:
-            await self._channel.send(
-                "dismiss",
-                None,
-            )
+            await self._channel.dismiss()
         except Exception as e:
             if is_target_closed_error(e):
                 return

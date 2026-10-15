@@ -41,12 +41,10 @@ from playwright._impl._errors import Error
 from playwright._impl._event_context_manager import EventContextManagerImpl
 from playwright._impl._helper import (
     DocumentLoadState,
-    FrameNavigatedEvent,
     KeyboardModifier,
     MouseButton,
     URLMatch,
     async_readfile,
-    locals_to_params,
     url_matches,
 )
 from playwright._impl._internal_structures import (
@@ -85,10 +83,14 @@ from playwright._impl._waiter import Waiter
 from playwright._impl._web_mcp import WebMCP
 
 if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl import _protocol_types as channels
     from playwright._impl._page import Page
+    from playwright._impl._protocol_channels import FrameChannel, JSHandleChannel
 
 
 class Frame(ChannelOwner):
+    _channel: "FrameChannel"
+
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
@@ -104,14 +106,10 @@ class Frame(ChannelOwner):
         self._load_states: Set[str] = set(initializer["loadStates"])
         self._event_emitter = EventEmitter()
         self._webmcp = WebMCP(self)
-        self._channel.on(
-            "loadstate",
-            lambda params: self._on_load_state(params.get("add"), params.get("remove")),
+        self._channel.onLoadstate(
+            lambda event: self._on_load_state(event["add"], event["remove"])
         )
-        self._channel.on(
-            "navigated",
-            lambda params: self._on_frame_navigated(params),
-        )
+        self._channel.onNavigated(self._on_frame_navigated)
 
     def __repr__(self) -> str:
         return f"<Frame name={self.name} url={self.url!r}>"
@@ -130,16 +128,16 @@ class Frame(ChannelOwner):
         if not self._parent_frame and add == "domcontentloaded" and self._page:
             self._page.emit("domcontentloaded", self._page)
 
-    def _on_frame_navigated(self, event: FrameNavigatedEvent) -> None:
+    def _on_frame_navigated(self, event: "channels.FrameNavigatedEvent") -> None:
         self._url = event["url"]
         self._name = event["name"]
         self._event_emitter.emit("navigated", event)
-        if "error" not in event and self._page:
+        if not event["error"] and self._page:
             self._page.emit("framenavigated", self)
             self._page.context.emit("framenavigated", self)
 
     async def _query_count(self, selector: str) -> int:
-        return await self._channel.send("queryCount", None, {"selector": selector})
+        return (await self._channel.queryCount(selector=selector))["value"]
 
     @property
     def page(self) -> "Page":
@@ -149,18 +147,17 @@ class Frame(ChannelOwner):
     async def goto(
         self,
         url: str,
-        timeout: float = None,
-        waitUntil: DocumentLoadState = None,
-        referer: str = None,
+        timeout: Optional[float],
+        wait_until: Optional[DocumentLoadState],
+        referer: Optional[str],
     ) -> Optional[Response]:
-        return cast(
-            Optional[Response],
-            from_nullable_channel(
-                await self._channel.send(
-                    "goto", self._navigation_timeout, locals_to_params(locals())
-                )
-            ),
+        result = await self._channel.goto(
+            url=url,
+            waitUntil=wait_until,
+            referer=referer,
+            timeout=self._navigation_timeout(timeout),
         )
+        return from_nullable_channel(result["response"])
 
     def _setup_navigation_waiter(self, wait_name: str, timeout: float = None) -> Waiter:
         assert self._page
@@ -190,17 +187,24 @@ class Frame(ChannelOwner):
         options: FrameExpectOptions,
         title: str = None,
     ) -> FrameExpectResult:
-        if "expectedValue" in options:
-            options["expectedValue"] = serialize_argument(options["expectedValue"])
         try:
-            await self._channel.send(
-                "expect",
-                self._timeout,
-                {
-                    "selector": selector,
-                    "expression": expression,
-                    **options,
-                },
+            await self._connection.wrap_api_call(
+                lambda: self._channel.expect(
+                    selector=selector,
+                    expression=expression,
+                    expressionArg=options.get("expressionArg"),
+                    pseudo=options.get("pseudo"),
+                    expectedText=options.get("expectedText"),
+                    expectedNumber=options.get("expectedNumber"),
+                    expectedValue=(
+                        serialize_argument(options["expectedValue"])
+                        if "expectedValue" in options
+                        else None
+                    ),
+                    useInnerText=options.get("useInnerText"),
+                    isNot=bool(options.get("isNot")),
+                    timeout=self._timeout(options.get("timeout")),
+                ),
                 title=title,
             )
             return {"matches": not options.get("isNot")}
@@ -230,13 +234,13 @@ class Frame(ChannelOwner):
 
     def expect_navigation(
         self,
-        url: URLMatch = None,
-        waitUntil: DocumentLoadState = None,
-        timeout: float = None,
+        url: Optional[URLMatch],
+        wait_until: Optional[DocumentLoadState],
+        timeout: Optional[float],
     ) -> EventContextManagerImpl[Response]:
         assert self._page
-        if not waitUntil:
-            waitUntil = "load"
+        if not wait_until:
+            wait_until = "load"
 
         if timeout is None:
             timeout = self._page._timeout_settings.navigation_timeout()
@@ -244,11 +248,11 @@ class Frame(ChannelOwner):
         waiter = self._setup_navigation_waiter("expect_navigation", timeout)
 
         to_url = f' to "{url}"' if url else ""
-        waiter.log(f"waiting for navigation{to_url} until '{waitUntil}'")
+        waiter.log(f"waiting for navigation{to_url} until '{wait_until}'")
 
-        def predicate(event: Any) -> bool:
+        def predicate(event: "channels.FrameNavigatedEvent") -> bool:
             # Any failed navigation results in a rejection.
-            if event.get("error"):
+            if event["error"]:
                 return True
             waiter.log(f'  navigated to "{event["url"]}"')
             return url_matches(
@@ -264,15 +268,17 @@ class Frame(ChannelOwner):
         )
 
         async def continuation() -> Optional[Response]:
-            event = await waiter.result()
-            if "error" in event:
-                raise Error(event["error"])
-            if waitUntil not in self._load_states:
+            event: "channels.FrameNavigatedEvent" = await waiter.result()
+            error = event["error"]
+            if error:
+                raise Error(error)
+            if wait_until not in self._load_states:
                 t = deadline - monotonic_time()
                 if t > 0:
-                    await self._wait_for_load_state_impl(state=waitUntil, timeout=t)
-            if "newDocument" in event and "request" in event["newDocument"]:
-                request = from_channel(event["newDocument"]["request"])
+                    await self._wait_for_load_state_impl(state=wait_until, timeout=t)
+            new_document = event["newDocument"]
+            if new_document and "request" in new_document:
+                request = from_channel(new_document["request"])
                 return await request.response()
             return None
 
@@ -281,27 +287,27 @@ class Frame(ChannelOwner):
     async def wait_for_url(
         self,
         url: URLMatch,
-        waitUntil: DocumentLoadState = None,
-        timeout: float = None,
+        wait_until: Optional[DocumentLoadState],
+        timeout: Optional[float],
     ) -> None:
         assert self._page
         if url_matches(self._page._browser_context._base_url, self.url, url):
-            await self._wait_for_load_state_impl(state=waitUntil, timeout=timeout)
+            await self._wait_for_load_state_impl(state=wait_until, timeout=timeout)
             return
         async with self.expect_navigation(
-            url=url, waitUntil=waitUntil, timeout=timeout
+            url=url, wait_until=wait_until, timeout=timeout
         ):
             pass
 
     async def wait_for_load_state(
         self,
-        state: Literal["domcontentloaded", "load", "networkidle"] = None,
-        timeout: float = None,
+        state: Optional[Literal["domcontentloaded", "load", "networkidle"]],
+        timeout: Optional[float],
     ) -> None:
-        return await self._wait_for_load_state_impl(state, timeout)
+        return await self._wait_for_load_state_impl(state=state, timeout=timeout)
 
     async def _wait_for_load_state_impl(
-        self, state: DocumentLoadState = None, timeout: float = None
+        self, state: Optional[DocumentLoadState], timeout: Optional[float]
     ) -> None:
         if not state:
             state = "load"
@@ -341,175 +347,174 @@ class Frame(ChannelOwner):
         return timeout_settings.navigation_timeout(timeout)
 
     async def frame_element(self) -> ElementHandle:
-        return from_channel(await self._channel.send("frameElement", None))
+        return from_channel((await self._channel.frameElement())["element"])
 
-    async def evaluate(self, expression: str, arg: Serializable = None) -> Any:
-        return parse_result(
-            await self._channel.send(
-                "evaluateExpression",
-                None,
-                dict(
-                    expression=expression,
-                    arg=serialize_argument(arg),
-                ),
-            )
+    async def evaluate(self, expression: str, arg: Serializable) -> Any:
+        result = await self._channel.evaluateExpression(
+            expression=expression,
+            isFunction=None,
+            arg=serialize_argument(arg),
         )
+        return parse_result(result["value"])
 
-    async def evaluate_handle(
-        self, expression: str, arg: Serializable = None
-    ) -> JSHandle:
-        return from_channel(
-            await self._channel.send(
-                "evaluateExpressionHandle",
-                None,
-                dict(
-                    expression=expression,
-                    arg=serialize_argument(arg),
-                ),
-            )
+    async def evaluate_handle(self, expression: str, arg: Serializable) -> JSHandle:
+        result = await self._channel.evaluateExpressionHandle(
+            expression=expression,
+            isFunction=None,
+            arg=serialize_argument(arg),
         )
+        return from_channel(result["handle"])
 
     async def query_selector(
-        self, selector: str, strict: bool = None
+        self, selector: str, strict: Optional[bool]
     ) -> Optional[ElementHandle]:
-        return from_nullable_channel(
-            await self._channel.send("querySelector", None, locals_to_params(locals()))
-        )
+        result = await self._channel.querySelector(selector=selector, strict=strict)
+        return from_nullable_channel(result["element"])
 
     async def query_selector_all(self, selector: str) -> List[ElementHandle]:
-        return list(
-            map(
-                from_channel,
-                await self._channel.send(
-                    "querySelectorAll", None, dict(selector=selector)
-                ),
-            )
-        )
+        result = await self._channel.querySelectorAll(selector=selector)
+        return list(map(from_channel, result["elements"]))
 
     async def wait_for_selector(
         self,
         selector: str,
-        strict: bool = None,
-        timeout: float = None,
-        state: Literal["attached", "detached", "hidden", "visible"] = None,
+        strict: Optional[bool],
+        timeout: Optional[float],
+        state: Optional[Literal["attached", "detached", "hidden", "visible"]],
+        omit_return_value: Optional[bool] = None,  # Not in the docs; Locator passes it.
     ) -> Optional[ElementHandle]:
-        return from_nullable_channel(
-            await self._channel.send(
-                "waitForSelector", self._timeout, locals_to_params(locals())
-            )
+        result = await self._channel.waitForSelector(
+            selector=selector,
+            strict=strict,
+            state=state,
+            omitReturnValue=omit_return_value,
+            timeout=self._timeout(timeout),
         )
+        return from_nullable_channel(result["element"])
 
     async def is_checked(
-        self, selector: str, strict: bool = None, timeout: float = None
+        self,
+        selector: str,
+        strict: Optional[bool],
+        timeout: Optional[float],
     ) -> bool:
-        return await self._channel.send(
-            "isChecked", self._timeout, locals_to_params(locals())
+        result = await self._channel.isChecked(
+            selector=selector, strict=strict, timeout=self._timeout(timeout)
         )
+        return result["value"]
 
     async def is_disabled(
-        self, selector: str, strict: bool = None, timeout: float = None
+        self,
+        selector: str,
+        strict: Optional[bool],
+        timeout: Optional[float],
     ) -> bool:
-        return await self._channel.send(
-            "isDisabled", self._timeout, locals_to_params(locals())
+        result = await self._channel.isDisabled(
+            selector=selector, strict=strict, timeout=self._timeout(timeout)
         )
+        return result["value"]
 
     async def is_editable(
-        self, selector: str, strict: bool = None, timeout: float = None
+        self,
+        selector: str,
+        strict: Optional[bool],
+        timeout: Optional[float],
     ) -> bool:
-        return await self._channel.send(
-            "isEditable", self._timeout, locals_to_params(locals())
+        result = await self._channel.isEditable(
+            selector=selector, strict=strict, timeout=self._timeout(timeout)
         )
+        return result["value"]
 
     async def is_enabled(
-        self, selector: str, strict: bool = None, timeout: float = None
+        self,
+        selector: str,
+        strict: Optional[bool],
+        timeout: Optional[float],
     ) -> bool:
-        return await self._channel.send(
-            "isEnabled", self._timeout, locals_to_params(locals())
+        result = await self._channel.isEnabled(
+            selector=selector, strict=strict, timeout=self._timeout(timeout)
         )
+        return result["value"]
 
-    async def is_hidden(self, selector: str, strict: bool = None) -> bool:
-        return await self._channel.send(
-            "isHidden", self._timeout, locals_to_params(locals())
+    async def is_hidden(
+        self,
+        selector: str,
+        strict: Optional[bool],
+    ) -> bool:
+        result = await self._channel.isHidden(
+            selector=selector, strict=strict, timeout=self._timeout(None)
         )
+        return result["value"]
 
-    async def is_visible(self, selector: str, strict: bool = None) -> bool:
-        return await self._channel.send(
-            "isVisible", self._timeout, locals_to_params(locals())
+    async def is_visible(
+        self,
+        selector: str,
+        strict: Optional[bool],
+    ) -> bool:
+        result = await self._channel.isVisible(
+            selector=selector, strict=strict, timeout=self._timeout(None)
         )
+        return result["value"]
 
     async def dispatch_event(
         self,
         selector: str,
         type: str,
-        eventInit: Dict = None,
-        strict: bool = None,
-        timeout: float = None,
+        event_init: Optional[Dict],
+        strict: Optional[bool],
+        timeout: Optional[float],
     ) -> None:
-        await self._channel.send(
-            "dispatchEvent",
-            self._timeout,
-            locals_to_params(
-                dict(
-                    selector=selector,
-                    type=type,
-                    eventInit=serialize_argument(eventInit),
-                    strict=strict,
-                    timeout=timeout,
-                ),
-            ),
+        await self._channel.dispatchEvent(
+            selector=selector,
+            strict=strict,
+            type=type,
+            eventInit=serialize_argument(event_init),
+            timeout=self._timeout(timeout),
         )
 
     async def eval_on_selector(
         self,
         selector: str,
         expression: str,
-        arg: Serializable = None,
-        strict: bool = None,
+        arg: Serializable,
+        strict: Optional[bool],
     ) -> Any:
-        return parse_result(
-            await self._channel.send(
-                "evalOnSelector",
-                None,
-                locals_to_params(
-                    dict(
-                        selector=selector,
-                        expression=expression,
-                        arg=serialize_argument(arg),
-                        strict=strict,
-                    )
-                ),
-            )
+        result = await self._channel.evalOnSelector(
+            selector=selector,
+            strict=strict,
+            expression=expression,
+            isFunction=None,
+            arg=serialize_argument(arg),
         )
+        return parse_result(result["value"])
 
     async def eval_on_selector_all(
         self,
         selector: str,
         expression: str,
-        arg: Serializable = None,
+        arg: Serializable,
     ) -> Any:
-        return parse_result(
-            await self._channel.send(
-                "evalOnSelectorAll",
-                None,
-                dict(
-                    selector=selector,
-                    expression=expression,
-                    arg=serialize_argument(arg),
-                ),
-            )
+        result = await self._channel.evalOnSelectorAll(
+            selector=selector,
+            expression=expression,
+            isFunction=None,
+            arg=serialize_argument(arg),
         )
+        return parse_result(result["value"])
 
-    async def content(self, includeShadow: bool = None) -> str:
-        return await self._channel.send("content", None, locals_to_params(locals()))
+    async def content(self, include_shadow: Optional[bool]) -> str:
+        return (await self._channel.content(includeShadow=include_shadow))["value"]
 
     async def set_content(
         self,
         html: str,
-        timeout: float = None,
-        waitUntil: DocumentLoadState = None,
+        timeout: Optional[float],
+        wait_until: Optional[DocumentLoadState],
     ) -> None:
-        await self._channel.send(
-            "setContent", self._navigation_timeout, locals_to_params(locals())
+        await self._channel.setContent(
+            html=html,
+            waitUntil=wait_until,
+            timeout=self._navigation_timeout(timeout),
         )
 
     @property
@@ -537,300 +542,420 @@ class Frame(ChannelOwner):
 
     async def add_script_tag(
         self,
-        url: str = None,
-        path: Union[str, Path] = None,
-        content: str = None,
-        type: str = None,
+        url: Optional[str],
+        path: Optional[Union[str, Path]],
+        content: Optional[str],
+        type: Optional[str],
     ) -> ElementHandle:
-        params = locals_to_params(locals())
         if path:
-            params["content"] = add_source_url_to_script(
+            content = add_source_url_to_script(
                 (await async_readfile(path)).decode(), path
             )
-            del params["path"]
-        return from_channel(await self._channel.send("addScriptTag", None, params))
+        result = await self._channel.addScriptTag(url=url, content=content, type=type)
+        return from_channel(result["element"])
 
     async def add_style_tag(
-        self, url: str = None, path: Union[str, Path] = None, content: str = None
+        self,
+        url: Optional[str],
+        path: Optional[Union[str, Path]],
+        content: Optional[str],
     ) -> ElementHandle:
-        params = locals_to_params(locals())
         if path:
-            params["content"] = (
+            content = (
                 (await async_readfile(path)).decode()
                 + "\n/*# sourceURL="
                 + str(Path(path))
                 + "*/"
             )
-            del params["path"]
-        return from_channel(await self._channel.send("addStyleTag", None, params))
+        result = await self._channel.addStyleTag(url=url, content=content)
+        return from_channel(result["element"])
 
     async def click(
         self,
         selector: str,
-        modifiers: Sequence[KeyboardModifier] = None,
-        position: Position = None,
-        delay: float = None,
-        button: MouseButton = None,
-        clickCount: int = None,
-        timeout: float = None,
-        force: bool = None,
-        noWaitAfter: bool = None,
-        strict: bool = None,
-        trial: bool = None,
-        scroll: Literal["auto", "none"] = None,
+        modifiers: Optional[Sequence[KeyboardModifier]],
+        position: Optional[Position],
+        delay: Optional[float],
+        button: Optional[MouseButton],
+        click_count: Optional[int],
+        timeout: Optional[float],
+        force: Optional[bool],
+        no_wait_after: Optional[bool],
+        strict: Optional[bool],
+        trial: Optional[bool],
+        scroll: Optional[Literal["auto", "none"]],
+        steps: Optional[int] = None,  # Not in the docs; Locator passes it.
     ) -> None:
-        await self._click(**locals_to_params(locals()))
-
-    async def _click(
-        self,
-        selector: str,
-        modifiers: Sequence[KeyboardModifier] = None,
-        position: Position = None,
-        delay: float = None,
-        button: MouseButton = None,
-        clickCount: int = None,
-        timeout: float = None,
-        force: bool = None,
-        noWaitAfter: bool = None,
-        strict: bool = None,
-        trial: bool = None,
-        steps: int = None,
-        scroll: Literal["auto", "none"] = None,
-    ) -> None:
-        await self._channel.send("click", self._timeout, locals_to_params(locals()))
+        await self._channel.click(
+            selector=selector,
+            strict=strict,
+            force=force,
+            scroll=scroll,
+            noWaitAfter=no_wait_after,
+            modifiers=modifiers,
+            position=position,
+            delay=delay,
+            button=button,
+            clickCount=click_count,
+            trial=trial,
+            steps=steps,
+            timeout=self._timeout(timeout),
+        )
 
     async def dblclick(
         self,
         selector: str,
-        modifiers: Sequence[KeyboardModifier] = None,
-        position: Position = None,
-        delay: float = None,
-        button: MouseButton = None,
-        timeout: float = None,
-        force: bool = None,
-        noWaitAfter: bool = None,
-        strict: bool = None,
-        trial: bool = None,
-        scroll: Literal["auto", "none"] = None,
+        modifiers: Optional[Sequence[KeyboardModifier]],
+        position: Optional[Position],
+        delay: Optional[float],
+        button: Optional[MouseButton],
+        timeout: Optional[float],
+        force: Optional[bool],
+        no_wait_after: Optional[bool],  # Deprecated; does nothing.
+        strict: Optional[bool],
+        trial: Optional[bool],
+        scroll: Optional[Literal["auto", "none"]],
+        steps: Optional[int] = None,  # Not in the docs; Locator passes it.
     ) -> None:
-        await self._channel.send(
-            "dblclick", self._timeout, locals_to_params(locals()), title="Double click"
+        await self._connection.wrap_api_call(
+            lambda: self._channel.dblclick(
+                selector=selector,
+                strict=strict,
+                force=force,
+                scroll=scroll,
+                modifiers=modifiers,
+                position=position,
+                delay=delay,
+                button=button,
+                trial=trial,
+                steps=steps,
+                timeout=self._timeout(timeout),
+            ),
+            title="Double click",
         )
 
     async def tap(
         self,
         selector: str,
-        modifiers: Sequence[KeyboardModifier] = None,
-        position: Position = None,
-        timeout: float = None,
-        force: bool = None,
-        noWaitAfter: bool = None,
-        strict: bool = None,
-        trial: bool = None,
-        scroll: Literal["auto", "none"] = None,
+        modifiers: Optional[Sequence[KeyboardModifier]],
+        position: Optional[Position],
+        timeout: Optional[float],
+        force: Optional[bool],
+        no_wait_after: Optional[bool],  # Deprecated; does nothing.
+        strict: Optional[bool],
+        trial: Optional[bool],
+        scroll: Optional[Literal["auto", "none"]],
     ) -> None:
-        await self._channel.send("tap", self._timeout, locals_to_params(locals()))
+        await self._channel.tap(
+            selector=selector,
+            strict=strict,
+            force=force,
+            scroll=scroll,
+            modifiers=modifiers,
+            position=position,
+            trial=trial,
+            timeout=self._timeout(timeout),
+        )
 
     async def fill(
         self,
         selector: str,
         value: str,
-        timeout: float = None,
-        noWaitAfter: bool = None,
-        strict: bool = None,
-        force: bool = None,
+        timeout: Optional[float],
+        no_wait_after: Optional[bool],  # Deprecated; does nothing.
+        strict: Optional[bool],
+        force: Optional[bool],
     ) -> None:
-        await self._fill(**locals_to_params(locals()))
+        await self._fill(
+            selector,
+            value,
+            title=None,
+            timeout=timeout,
+            no_wait_after=no_wait_after,
+            strict=strict,
+            force=force,
+        )
 
     async def _fill(
         self,
         selector: str,
         value: str,
-        timeout: float = None,
-        noWaitAfter: bool = None,
-        strict: bool = None,
-        force: bool = None,
-        title: str = None,
+        timeout: Optional[float],
+        no_wait_after: Optional[bool],  # Deprecated; does nothing.
+        strict: Optional[bool],
+        force: Optional[bool],
+        title: Optional[str],
     ) -> None:
-        params = locals_to_params(locals())
-        params.pop("title", None)
-        await self._channel.send("fill", self._timeout, params, title=title)
+        await self._connection.wrap_api_call(
+            lambda: self._channel.fill(
+                selector=selector,
+                strict=strict,
+                value=value,
+                force=force,
+                timeout=self._timeout(timeout),
+            ),
+            title=title,
+        )
 
     def locator(
         self,
         selector: str,
-        hasText: Union[str, Pattern[str]] = None,
-        hasNotText: Union[str, Pattern[str]] = None,
-        has: Locator = None,
-        hasNot: Locator = None,
+        has_text: Optional[Union[str, Pattern[str]]],
+        has_not_text: Optional[Union[str, Pattern[str]]],
+        has: Optional[Locator],
+        has_not: Optional[Locator],
     ) -> Locator:
         return Locator(
             self,
             selector,
-            has_text=hasText,
-            has_not_text=hasNotText,
+            has_text=has_text,
+            has_not_text=has_not_text,
             has=has,
-            has_not=hasNot,
+            has_not=has_not,
         )
 
     def get_by_alt_text(
-        self, text: Union[str, Pattern[str]], exact: bool = None
+        self, text: Union[str, Pattern[str]], exact: Optional[bool]
     ) -> "Locator":
-        return self.locator(get_by_alt_text_selector(text, exact=exact))
+        return self.locator(
+            selector=get_by_alt_text_selector(text, exact=exact),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
 
     def get_by_label(
-        self, text: Union[str, Pattern[str]], exact: bool = None
+        self, text: Union[str, Pattern[str]], exact: Optional[bool]
     ) -> "Locator":
-        return self.locator(get_by_label_selector(text, exact=exact))
+        return self.locator(
+            selector=get_by_label_selector(text, exact=exact),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
 
     def get_by_placeholder(
-        self, text: Union[str, Pattern[str]], exact: bool = None
+        self, text: Union[str, Pattern[str]], exact: Optional[bool]
     ) -> "Locator":
-        return self.locator(get_by_placeholder_selector(text, exact=exact))
+        return self.locator(
+            selector=get_by_placeholder_selector(text, exact=exact),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
 
     def get_by_role(
         self,
         role: AriaRole,
-        checked: bool = None,
-        disabled: bool = None,
-        expanded: bool = None,
-        includeHidden: bool = None,
-        level: int = None,
-        name: Union[str, Pattern[str]] = None,
-        pressed: bool = None,
-        selected: bool = None,
-        exact: bool = None,
-        description: Union[str, Pattern[str]] = None,
+        checked: Optional[bool],
+        disabled: Optional[bool],
+        expanded: Optional[bool],
+        include_hidden: Optional[bool],
+        level: Optional[int],
+        name: Optional[Union[str, Pattern[str]]],
+        pressed: Optional[bool],
+        selected: Optional[bool],
+        exact: Optional[bool],
+        description: Optional[Union[str, Pattern[str]]],
     ) -> "Locator":
         return self.locator(
-            get_by_role_selector(
+            selector=get_by_role_selector(
                 role,
                 checked=checked,
                 disabled=disabled,
                 expanded=expanded,
-                includeHidden=includeHidden,
+                include_hidden=include_hidden,
                 level=level,
                 name=name,
                 pressed=pressed,
                 selected=selected,
                 exact=exact,
                 description=description,
-            )
+            ),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
         )
 
-    def get_by_test_id(self, testId: Union[str, Pattern[str]]) -> "Locator":
-        return self.locator(get_by_test_id_selector(test_id_attribute_name(), testId))
+    def get_by_test_id(self, test_id: Union[str, Pattern[str]]) -> "Locator":
+        return self.locator(
+            selector=get_by_test_id_selector(test_id_attribute_name(), test_id),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
 
     def get_by_text(
-        self, text: Union[str, Pattern[str]], exact: bool = None
+        self, text: Union[str, Pattern[str]], exact: Optional[bool]
     ) -> "Locator":
-        return self.locator(get_by_text_selector(text, exact=exact))
+        return self.locator(
+            selector=get_by_text_selector(text, exact=exact),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
 
     def get_by_title(
-        self, text: Union[str, Pattern[str]], exact: bool = None
+        self, text: Union[str, Pattern[str]], exact: Optional[bool]
     ) -> "Locator":
-        return self.locator(get_by_title_selector(text, exact=exact))
+        return self.locator(
+            selector=get_by_title_selector(text, exact=exact),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
 
-    def frame_locator(self, selector: str = None) -> FrameLocator:
+    def frame_locator(self, selector: Optional[str]) -> FrameLocator:
         return FrameLocator(self, ANY_FRAME_SELECTOR if selector is None else selector)
 
     async def focus(
-        self, selector: str, strict: bool = None, timeout: float = None
+        self,
+        selector: str,
+        strict: Optional[bool],
+        timeout: Optional[float],
     ) -> None:
-        await self._channel.send("focus", self._timeout, locals_to_params(locals()))
+        await self._channel.focus(
+            selector=selector, strict=strict, timeout=self._timeout(timeout)
+        )
 
     async def text_content(
-        self, selector: str, strict: bool = None, timeout: float = None
+        self,
+        selector: str,
+        strict: Optional[bool],
+        timeout: Optional[float],
     ) -> Optional[str]:
-        return await self._channel.send(
-            "textContent", self._timeout, locals_to_params(locals())
+        result = await self._channel.textContent(
+            selector=selector, strict=strict, timeout=self._timeout(timeout)
         )
+        return result["value"]
 
     async def inner_text(
-        self, selector: str, strict: bool = None, timeout: float = None
+        self,
+        selector: str,
+        strict: Optional[bool],
+        timeout: Optional[float],
     ) -> str:
-        return await self._channel.send(
-            "innerText", self._timeout, locals_to_params(locals())
+        result = await self._channel.innerText(
+            selector=selector, strict=strict, timeout=self._timeout(timeout)
         )
+        return result["value"]
 
     async def inner_html(
-        self, selector: str, strict: bool = None, timeout: float = None
+        self,
+        selector: str,
+        strict: Optional[bool],
+        timeout: Optional[float],
     ) -> str:
-        return await self._channel.send(
-            "innerHTML", self._timeout, locals_to_params(locals())
+        result = await self._channel.innerHTML(
+            selector=selector, strict=strict, timeout=self._timeout(timeout)
         )
+        return result["value"]
 
     async def get_attribute(
-        self, selector: str, name: str, strict: bool = None, timeout: float = None
+        self,
+        selector: str,
+        name: str,
+        strict: Optional[bool],
+        timeout: Optional[float],
     ) -> Optional[str]:
-        return await self._channel.send(
-            "getAttribute", self._timeout, locals_to_params(locals())
+        result = await self._channel.getAttribute(
+            selector=selector,
+            strict=strict,
+            name=name,
+            timeout=self._timeout(timeout),
         )
+        return result["value"]
 
     async def hover(
         self,
         selector: str,
-        modifiers: Sequence[KeyboardModifier] = None,
-        position: Position = None,
-        timeout: float = None,
-        noWaitAfter: bool = None,
-        force: bool = None,
-        strict: bool = None,
-        trial: bool = None,
-        scroll: Literal["auto", "none"] = None,
+        modifiers: Optional[Sequence[KeyboardModifier]],
+        position: Optional[Position],
+        timeout: Optional[float],
+        no_wait_after: Optional[bool],  # Deprecated; does nothing.
+        force: Optional[bool],
+        strict: Optional[bool],
+        trial: Optional[bool],
+        scroll: Optional[Literal["auto", "none"]],
     ) -> None:
-        await self._channel.send("hover", self._timeout, locals_to_params(locals()))
+        await self._channel.hover(
+            selector=selector,
+            strict=strict,
+            force=force,
+            scroll=scroll,
+            modifiers=modifiers,
+            position=position,
+            trial=trial,
+            timeout=self._timeout(timeout),
+        )
 
     async def drag_and_drop(
         self,
         source: str,
         target: str,
-        sourcePosition: Position = None,
-        targetPosition: Position = None,
-        force: bool = None,
-        noWaitAfter: bool = None,
-        strict: bool = None,
-        timeout: float = None,
-        trial: bool = None,
-        steps: int = None,
-        scroll: Literal["auto", "none"] = None,
+        source_position: Optional[Position],
+        target_position: Optional[Position],
+        force: Optional[bool],
+        no_wait_after: Optional[bool],  # Deprecated; does nothing.
+        strict: Optional[bool],
+        timeout: Optional[float],
+        trial: Optional[bool],
+        steps: Optional[int],
+        scroll: Optional[Literal["auto", "none"]],
     ) -> None:
-        await self._channel.send(
-            "dragAndDrop", self._timeout, locals_to_params(locals())
+        await self._channel.dragAndDrop(
+            source=source,
+            target=target,
+            force=force,
+            scroll=scroll,
+            trial=trial,
+            sourcePosition=source_position,
+            targetPosition=target_position,
+            strict=strict,
+            steps=steps,
+            timeout=self._timeout(timeout),
         )
 
     async def select_option(
         self,
         selector: str,
-        value: Union[str, Sequence[str]] = None,
-        index: Union[int, Sequence[int]] = None,
-        label: Union[str, Sequence[str]] = None,
-        element: Union["ElementHandle", Sequence["ElementHandle"]] = None,
-        timeout: float = None,
-        noWaitAfter: bool = None,
-        strict: bool = None,
-        force: bool = None,
+        value: Optional[Union[str, Sequence[str]]],
+        index: Optional[Union[int, Sequence[int]]],
+        label: Optional[Union[str, Sequence[str]]],
+        element: Optional[Union["ElementHandle", Sequence["ElementHandle"]]],
+        timeout: Optional[float],
+        no_wait_after: Optional[bool],  # Deprecated; does nothing.
+        strict: Optional[bool],
+        force: Optional[bool],
     ) -> List[str]:
-        params = locals_to_params(
-            dict(
-                selector=selector,
-                timeout=timeout,
-                strict=strict,
-                force=force,
-                **convert_select_option_values(value, index, label, element),
-            )
+        values = convert_select_option_values(value, index, label, element)
+        result = await self._channel.selectOption(
+            selector=selector,
+            strict=strict,
+            elements=values.get("elements"),
+            options=values.get("options"),
+            force=force,
+            timeout=self._timeout(timeout),
         )
-        return await self._channel.send("selectOption", self._timeout, params)
+        return result["values"]
 
     async def input_value(
         self,
         selector: str,
-        strict: bool = None,
-        timeout: float = None,
+        strict: Optional[bool],
+        timeout: Optional[float],
     ) -> str:
-        return await self._channel.send(
-            "inputValue", self._timeout, locals_to_params(locals())
+        result = await self._channel.inputValue(
+            selector=selector, strict=strict, timeout=self._timeout(timeout)
         )
+        return result["value"]
 
     async def set_input_files(
         self,
@@ -838,158 +963,200 @@ class Frame(ChannelOwner):
         files: Union[
             str, Path, FilePayload, Sequence[Union[str, Path]], Sequence[FilePayload]
         ],
-        strict: bool = None,
-        timeout: float = None,
-        noWaitAfter: bool = None,
+        strict: Optional[bool],
+        timeout: Optional[float],
+        no_wait_after: Optional[bool],  # Deprecated; does nothing.
     ) -> None:
         converted = await convert_input_files(files, self.page.context)
-        await self._channel.send(
-            "setInputFiles",
-            self._timeout,
-            {
-                "selector": selector,
-                "strict": strict,
-                "timeout": self._timeout(timeout),
-                **converted,
-            },
+        await self._channel.setInputFiles(
+            selector=selector,
+            strict=strict,
+            payloads=converted.get("payloads"),
+            localDirectory=converted.get("localDirectory"),
+            directoryStream=converted.get("directoryStream"),
+            localPaths=converted.get("localPaths"),
+            streams=converted.get("streams"),
+            timeout=self._timeout(timeout),
         )
 
     async def _drop(
         self,
         selector: str,
         payload: "DropPayload",
-        strict: bool = None,
-        position: Position = None,
-        timeout: float = None,
+        strict: Optional[bool],
+        position: Optional[Position],
+        timeout: Optional[float],
     ) -> None:
-        params: Dict[str, Any] = {
-            "selector": selector,
-            "strict": strict,
-            "position": position,
-            "timeout": self._timeout(timeout),
-        }
+        payloads = None
+        local_paths = None
+        streams = None
         files = payload.get("files") if payload else None
         if files is not None:
             converted = await convert_input_files(files, self.page.context)
-            if "directoryStream" in converted or "directoryLocalPath" in converted:
+            if converted.get("directoryStream") or converted.get("localDirectory"):
                 raise Error(
                     "Dropping a directory is not supported, pass individual files instead."
                 )
-            params.update(converted)
+            payloads = converted.get("payloads")
+            local_paths = converted.get("localPaths")
+            streams = converted.get("streams")
         data = payload.get("data") if payload else None
-        if data is not None:
-            params["data"] = [{"mimeType": k, "value": v} for k, v in data.items()]
-        await self._channel.send("drop", self._timeout, params)
+        await self._channel.drop(
+            selector=selector,
+            strict=strict,
+            position=position,
+            payloads=payloads,
+            localPaths=local_paths,
+            streams=streams,
+            data=(
+                [{"mimeType": k, "value": v} for k, v in data.items()]
+                if data is not None
+                else None
+            ),
+            timeout=self._timeout(timeout),
+        )
 
     async def type(
         self,
         selector: str,
         text: str,
-        delay: float = None,
-        strict: bool = None,
-        timeout: float = None,
-        noWaitAfter: bool = None,
+        delay: Optional[float],
+        strict: Optional[bool],
+        timeout: Optional[float],
+        no_wait_after: Optional[bool],  # Deprecated; does nothing.
     ) -> None:
-        await self._channel.send("type", self._timeout, locals_to_params(locals()))
+        await self._channel.type(
+            selector=selector,
+            strict=strict,
+            text=text,
+            delay=delay,
+            timeout=self._timeout(timeout),
+        )
 
     async def press(
         self,
         selector: str,
         key: str,
-        delay: float = None,
-        strict: bool = None,
-        timeout: float = None,
-        noWaitAfter: bool = None,
+        delay: Optional[float],
+        strict: Optional[bool],
+        timeout: Optional[float],
+        no_wait_after: Optional[bool],
     ) -> None:
-        await self._channel.send("press", self._timeout, locals_to_params(locals()))
+        await self._channel.press(
+            selector=selector,
+            strict=strict,
+            key=key,
+            delay=delay,
+            noWaitAfter=no_wait_after,
+            timeout=self._timeout(timeout),
+        )
 
     async def check(
         self,
         selector: str,
-        position: Position = None,
-        timeout: float = None,
-        force: bool = None,
-        noWaitAfter: bool = None,
-        strict: bool = None,
-        trial: bool = None,
-        scroll: Literal["auto", "none"] = None,
+        position: Optional[Position],
+        timeout: Optional[float],
+        force: Optional[bool],
+        no_wait_after: Optional[bool],  # Deprecated; does nothing.
+        strict: Optional[bool],
+        trial: Optional[bool],
+        scroll: Optional[Literal["auto", "none"]],
     ) -> None:
-        await self._channel.send("check", self._timeout, locals_to_params(locals()))
+        await self._channel.check(
+            selector=selector,
+            strict=strict,
+            force=force,
+            scroll=scroll,
+            position=position,
+            trial=trial,
+            timeout=self._timeout(timeout),
+        )
 
     async def uncheck(
         self,
         selector: str,
-        position: Position = None,
-        timeout: float = None,
-        force: bool = None,
-        noWaitAfter: bool = None,
-        strict: bool = None,
-        trial: bool = None,
-        scroll: Literal["auto", "none"] = None,
+        position: Optional[Position],
+        timeout: Optional[float],
+        force: Optional[bool],
+        no_wait_after: Optional[bool],  # Deprecated; does nothing.
+        strict: Optional[bool],
+        trial: Optional[bool],
+        scroll: Optional[Literal["auto", "none"]],
     ) -> None:
-        await self._channel.send("uncheck", self._timeout, locals_to_params(locals()))
+        await self._channel.uncheck(
+            selector=selector,
+            strict=strict,
+            force=force,
+            scroll=scroll,
+            position=position,
+            trial=trial,
+            timeout=self._timeout(timeout),
+        )
 
     async def wait_for_timeout(self, timeout: float) -> None:
-        await self._channel.send("waitForTimeout", None, {"waitTimeout": timeout})
+        await self._channel.waitForTimeout(waitTimeout=timeout)
 
     async def wait_for_function(
         self,
         expression: str,
-        arg: Serializable = None,
-        timeout: float = None,
-        polling: Union[float, Literal["raf"]] = None,
+        arg: Serializable,
+        timeout: Optional[float],
+        polling: Optional[Union[float, Literal["raf"]]],
     ) -> JSHandle:
         if isinstance(polling, str) and polling != "raf":
             raise Error(f"Unknown polling option: {polling}")
-        params = locals_to_params(locals())
-        params.pop("polling", None)
-        params["arg"] = serialize_argument(arg)
-        if polling is not None and polling != "raf":
-            params["pollingInterval"] = polling
-        return from_channel(
-            await self._channel.send("waitForFunction", self._timeout, params)
+        result = await self._channel.waitForFunction(
+            expression=expression,
+            isFunction=None,
+            arg=serialize_argument(arg),
+            # "raf" is the default polling, sent as no interval.
+            pollingInterval=None if isinstance(polling, str) else polling,
+            selector=None,
+            strict=None,
+            timeout=self._timeout(timeout),
         )
+        return from_channel(cast("JSHandleChannel", result["handle"]))
 
     async def title(self) -> str:
-        return await self._channel.send("title", None)
+        return (await self._channel.title())["value"]
 
     async def set_checked(
         self,
         selector: str,
         checked: bool,
-        position: Position = None,
-        timeout: float = None,
-        force: bool = None,
-        noWaitAfter: bool = None,
-        strict: bool = None,
-        trial: bool = None,
-        scroll: Literal["auto", "none"] = None,
+        position: Optional[Position],
+        timeout: Optional[float],
+        force: Optional[bool],
+        no_wait_after: Optional[bool],
+        strict: Optional[bool],
+        trial: Optional[bool],
+        scroll: Optional[Literal["auto", "none"]],
     ) -> None:
         if checked:
             await self.check(
-                selector=selector,
+                selector,
                 position=position,
                 timeout=timeout,
                 force=force,
+                no_wait_after=no_wait_after,
                 strict=strict,
                 trial=trial,
                 scroll=scroll,
             )
         else:
             await self.uncheck(
-                selector=selector,
+                selector,
                 position=position,
                 timeout=timeout,
                 force=force,
+                no_wait_after=no_wait_after,
                 strict=strict,
                 trial=trial,
                 scroll=scroll,
             )
 
-    async def _highlight(self, selector: str, style: str = None) -> None:
-        await self._channel.send(
-            "highlight", None, {"selector": selector, "style": style}
-        )
+    async def _highlight(self, selector: str, style: Optional[str]) -> None:
+        await self._channel.highlight(selector=selector, style=style)
 
     async def _hide_highlight(self, selector: str) -> None:
-        await self._channel.send("hideHighlight", None, {"selector": selector})
+        await self._channel.hideHighlight(selector=selector)

@@ -12,15 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Dict
+from typing import TYPE_CHECKING, Dict
 
 from playwright._impl._browser_type import BrowserType
 from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._fetch import APIRequest
 from playwright._impl._selectors import Selectors
 
+if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl._protocol_channels import PlaywrightChannel
+
 
 class Playwright(ChannelOwner):
+    _channel: "PlaywrightChannel"
+
     devices: Dict
     selectors: Selectors
     chromium: BrowserType

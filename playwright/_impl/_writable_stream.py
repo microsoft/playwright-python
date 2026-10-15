@@ -15,9 +15,12 @@
 import base64
 import os
 from pathlib import Path
-from typing import Dict, Union
+from typing import TYPE_CHECKING, Dict, Union
 
 from playwright._impl._connection import ChannelOwner
+
+if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl._protocol_channels import WritableStreamChannel
 
 # COPY_BUFSIZE is taken from shutil.py in the standard library
 _WINDOWS = os.name == "nt"
@@ -25,6 +28,8 @@ COPY_BUFSIZE = 1024 * 1024 if _WINDOWS else 64 * 1024
 
 
 class WritableStream(ChannelOwner):
+    _channel: "WritableStreamChannel"
+
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
@@ -36,7 +41,5 @@ class WritableStream(ChannelOwner):
                 data = f.read(COPY_BUFSIZE)
                 if not data:
                     break
-                await self._channel.send(
-                    "write", None, {"binary": base64.b64encode(data).decode()}
-                )
-        await self._channel.send("close", None)
+                await self._channel.write(binary=base64.b64encode(data).decode())
+        await self._channel.close()

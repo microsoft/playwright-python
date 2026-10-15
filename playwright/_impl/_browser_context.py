@@ -34,6 +34,7 @@ from typing import (
 from playwright._impl._api_structures import (
     Cookie,
     Geolocation,
+    RecordVideoSize,
     SetCookieParam,
     StorageState,
     WebErrorLocation,
@@ -67,7 +68,6 @@ from playwright._impl._helper import (
     async_readfile,
     async_writefile,
     create_task_and_ignore_exception,
-    locals_to_params,
     to_impl,
 )
 from playwright._impl._network import (
@@ -76,19 +76,23 @@ from playwright._impl._network import (
     Route,
     WebSocketRoute,
     WebSocketRouteHandler,
-    to_clear_cookies_params,
 )
 from playwright._impl._page import BindingCall, Page, Worker
+from playwright._impl._str_utils import escape_regex_flags
 from playwright._impl._timeout_settings import TimeoutSettings
 from playwright._impl._tracing import Tracing
 from playwright._impl._waiter import Waiter
 from playwright._impl._web_error import WebError
 
 if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl import _protocol_types as channels
     from playwright._impl._browser import Browser
+    from playwright._impl._protocol_channels import BrowserContextChannel
 
 
 class BrowserContext(ChannelOwner):
+    _channel: "BrowserContextChannel"
+
     Events = SimpleNamespace(
         # Deprecated in v1.56, never emitted anymore.
         BackgroundPage="backgroundpage",
@@ -136,88 +140,70 @@ class BrowserContext(ChannelOwner):
         self._request._timeout_settings = self._timeout_settings
         self._clock = Clock(self)
         self._credentials = Credentials(self)
-        self._channel.on(
-            "bindingCall",
-            lambda params: self._on_binding(from_channel(params["binding"])),
+        self._channel.onBindingCall(
+            lambda event: self._on_binding(from_channel(event["binding"]))
         )
-        self._channel.on("close", lambda _: self._on_close())
-        self._channel.on(
-            "page", lambda params: self._on_page(from_channel(params["page"]))
-        )
-        self._channel.on(
-            "route",
-            lambda params: self._loop.create_task(
+        self._channel.onClose(lambda: self._on_close())
+        self._channel.onPage(lambda event: self._on_page(from_channel(event["page"])))
+        self._channel.onRoute(
+            lambda event: self._loop.create_task(
                 self._on_route(
-                    from_channel(params.get("route")),
+                    from_channel(event["route"]),
                 )
             ),
         )
-        self._channel.on(
-            "webSocketRoute",
-            lambda params: self._loop.create_task(
+        self._channel.onWebSocketRoute(
+            lambda event: self._loop.create_task(
                 self._on_web_socket_route(
-                    from_channel(params["webSocketRoute"]),
+                    from_channel(event["webSocketRoute"]),
                 )
             ),
         )
 
-        self._channel.on(
-            "serviceWorker",
-            lambda params: self._on_service_worker(from_channel(params["worker"])),
+        self._channel.onServiceWorker(
+            lambda event: self._on_service_worker(from_channel(event["worker"]))
         )
-        self._channel.on(
-            "console",
-            lambda event: self._on_console_message(event),
-        )
+        self._channel.onConsole(self._on_console_message)
 
-        self._channel.on(
-            "dialog", lambda params: self._on_dialog(from_channel(params["dialog"]))
+        self._channel.onDialog(
+            lambda event: self._on_dialog(from_channel(event["dialog"]))
         )
-        self._channel.on(
-            "dialogClosed",
-            lambda params: self._on_dialog_closed(from_channel(params["dialog"])),
+        self._channel.onDialogClosed(
+            lambda event: self._on_dialog_closed(from_channel(event["dialog"]))
         )
-        self._channel.on(
-            "pageError",
-            lambda params: self._on_page_error(
-                parse_error(params["error"]["error"]),
-                from_nullable_channel(params["page"]),
-                cast(
-                    WebErrorLocation,
-                    params.get("location") or {"url": "", "line": 0, "column": 0},
-                ),
+        self._channel.onPageError(
+            lambda event: self._on_page_error(
+                parse_error(event["error"]["error"]),
+                from_nullable_channel(event["page"]),
+                event["location"],
             ),
         )
-        self._channel.on(
-            "request",
-            lambda params: self._on_request(
-                from_channel(params["request"]),
-                from_nullable_channel(params.get("page")),
+        self._channel.onRequest(
+            lambda event: self._on_request(
+                from_channel(event["request"]),
+                from_nullable_channel(event["page"]),
             ),
         )
-        self._channel.on(
-            "response",
-            lambda params: self._on_response(
-                from_channel(params["response"]),
-                from_nullable_channel(params.get("page")),
+        self._channel.onResponse(
+            lambda event: self._on_response(
+                from_channel(event["response"]),
+                from_nullable_channel(event["page"]),
             ),
         )
-        self._channel.on(
-            "requestFailed",
-            lambda params: self._on_request_failed(
-                from_channel(params["request"]),
-                params["responseEndTiming"],
-                params.get("failureText"),
-                from_nullable_channel(params.get("page")),
+        self._channel.onRequestFailed(
+            lambda event: self._on_request_failed(
+                from_channel(event["request"]),
+                event["responseEndTiming"],
+                event["failureText"],
+                from_nullable_channel(event["page"]),
             ),
         )
-        self._channel.on(
-            "requestFinished",
-            lambda params: self._on_request_finished(
-                from_channel(params["request"]),
-                from_nullable_channel(params.get("response")),
-                params["responseEndTiming"],
-                from_nullable_channel(params.get("page")),
+        self._channel.onRequestFinished(
+            lambda event: self._on_request_finished(
+                from_channel(event["request"]),
+                from_nullable_channel(event["response"]),
+                event["responseEndTiming"],
+                from_nullable_channel(event["page"]),
             ),
         )
         self._closed_future: asyncio.Future = asyncio.Future()
@@ -349,57 +335,76 @@ class BrowserContext(ChannelOwner):
     async def new_page(self) -> Page:
         if self._owner_page:
             raise Error("Please use browser.new_context()")
-        return from_channel(await self._channel.send("newPage", None))
+        return from_channel((await self._channel.newPage())["page"])
 
-    async def cookies(self, urls: Union[str, Sequence[str]] = None) -> List[Cookie]:
+    async def cookies(self, urls: Optional[Union[str, Sequence[str]]]) -> List[Cookie]:
         if urls is None:
             urls = []
         if isinstance(urls, str):
             urls = [urls]
-        return await self._channel.send("cookies", None, dict(urls=urls))
+        result = await self._channel.cookies(urls=urls)
+        return cast(List[Cookie], result["cookies"])
 
     async def add_cookies(self, cookies: Sequence[SetCookieParam]) -> None:
-        await self._channel.send("addCookies", None, dict(cookies=cookies))
+        await self._channel.addCookies(
+            cookies=cast("Sequence[channels.SetNetworkCookie]", cookies)
+        )
 
     async def clear_cookies(
         self,
-        name: Union[str, Pattern[str]] = None,
-        domain: Union[str, Pattern[str]] = None,
-        path: Union[str, Pattern[str]] = None,
+        name: Optional[Union[str, Pattern[str]]],
+        domain: Optional[Union[str, Pattern[str]]],
+        path: Optional[Union[str, Pattern[str]]],
     ) -> None:
-        await self._channel.send(
-            "clearCookies", None, to_clear_cookies_params(name, domain, path)
+        await self._channel.clearCookies(
+            name=name if isinstance(name, str) else None,
+            nameRegexSource=name.pattern if isinstance(name, Pattern) else None,
+            nameRegexFlags=(
+                escape_regex_flags(name) if isinstance(name, Pattern) else None
+            ),
+            domain=domain if isinstance(domain, str) else None,
+            domainRegexSource=domain.pattern if isinstance(domain, Pattern) else None,
+            domainRegexFlags=(
+                escape_regex_flags(domain) if isinstance(domain, Pattern) else None
+            ),
+            path=path if isinstance(path, str) else None,
+            pathRegexSource=path.pattern if isinstance(path, Pattern) else None,
+            pathRegexFlags=(
+                escape_regex_flags(path) if isinstance(path, Pattern) else None
+            ),
         )
 
     async def grant_permissions(
-        self, permissions: Sequence[str], origin: str = None
+        self, permissions: Sequence[str], origin: Optional[str]
     ) -> None:
-        await self._channel.send("grantPermissions", None, locals_to_params(locals()))
+        await self._channel.grantPermissions(permissions=permissions, origin=origin)
 
     async def clear_permissions(self) -> None:
-        await self._channel.send("clearPermissions", None)
+        await self._channel.clearPermissions()
 
-    async def set_geolocation(self, geolocation: Geolocation = None) -> None:
-        await self._channel.send("setGeolocation", None, locals_to_params(locals()))
-
-    async def set_extra_http_headers(self, headers: Dict[str, str]) -> None:
-        await self._channel.send(
-            "setExtraHTTPHeaders", None, dict(headers=serialize_headers(headers))
+    async def set_geolocation(self, geolocation: Optional[Geolocation]) -> None:
+        await self._channel.setGeolocation(
+            geolocation=cast(
+                "Optional[channels.BrowserContextSetGeolocationParamsGeolocation]",
+                geolocation,
+            )
         )
 
+    async def set_extra_http_headers(self, headers: Dict[str, str]) -> None:
+        await self._channel.setExtraHTTPHeaders(headers=serialize_headers(headers))
+
     async def set_offline(self, offline: bool) -> None:
-        await self._channel.send("setOffline", None, dict(offline=offline))
+        await self._channel.setOffline(offline=offline)
 
     async def add_init_script(
-        self, script: str = None, path: Union[str, Path] = None
+        self, script: Optional[str], path: Optional[Union[str, Path]]
     ) -> Disposable:
         if path:
             script = (await async_readfile(path)).decode()
         if not isinstance(script, str):
             raise Error("Either path or script parameter must be specified")
-        return from_channel(
-            await self._channel.send("addInitScript", None, dict(source=script))
-        )
+        result = await self._channel.addInitScript(source=script)
+        return from_channel(result["disposable"])
 
     async def expose_binding(self, name: str, callback: Callable) -> Disposable:
         for page in self._pages:
@@ -410,15 +415,16 @@ class BrowserContext(ChannelOwner):
         if name in self._bindings:
             raise Error(f'Function "{name}" has been already registered')
         self._bindings[name] = callback
-        return from_channel(
-            await self._channel.send("exposeBinding", None, dict(name=name))
-        )
+        result = await self._channel.exposeBinding(name=name, noGlobal=None)
+        return from_channel(result["disposable"])
 
     async def expose_function(self, name: str, callback: Callable) -> Disposable:
-        return await self.expose_binding(name, lambda source, *args: callback(*args))
+        return await self.expose_binding(
+            name=name, callback=lambda source, *args: callback(*args)
+        )
 
     async def route(
-        self, url: URLMatch, handler: RouteHandlerCallback, times: int = None
+        self, url: URLMatch, handler: RouteHandlerCallback, times: Optional[int]
     ) -> DisposableStub:
         self._routes.insert(
             0,
@@ -431,10 +437,10 @@ class BrowserContext(ChannelOwner):
             ),
         )
         await self._update_interception_patterns()
-        return DisposableStub(lambda: self.unroute(url, handler), self)
+        return DisposableStub(lambda: self.unroute(url=url, handler=handler), self)
 
     async def unroute(
-        self, url: URLMatch, handler: Optional[RouteHandlerCallback] = None
+        self, url: URLMatch, handler: Optional[RouteHandlerCallback]
     ) -> None:
         removed = []
         remaining = []
@@ -471,7 +477,7 @@ class BrowserContext(ChannelOwner):
         self._har_routers = []
 
     async def unroute_all(
-        self, behavior: Literal["default", "ignoreErrors", "wait"] = None
+        self, behavior: Optional[Literal["default", "ignoreErrors", "wait"]]
     ) -> None:
         await self._unroute_internal(self._routes, [], behavior)
         self._dispose_har_routers()
@@ -479,49 +485,47 @@ class BrowserContext(ChannelOwner):
     async def route_from_har(
         self,
         har: Union[Path, str],
-        url: Union[Pattern[str], str] = None,
-        notFound: RouteFromHarNotFoundPolicy = None,
-        update: bool = None,
-        updateContent: Literal["attach", "embed"] = None,
-        updateMode: HarMode = None,
+        url: Optional[Union[Pattern[str], str]],
+        not_found: Optional[RouteFromHarNotFoundPolicy],
+        update: Optional[bool],
+        update_content: Optional[Literal["attach", "embed"]],
+        update_mode: Optional[HarMode],
     ) -> None:
         if update:
             await self._tracing._record_into_har(
                 har=har,
                 page=None,
                 url=url,
-                update_content=updateContent,
-                update_mode=updateMode,
+                update_content=update_content,
+                update_mode=update_mode,
             )
             return
         router = await HarRouter.create(
             local_utils=self._connection.local_utils,
             file=str(har),
-            not_found_action=notFound or "abort",
+            not_found_action=not_found or "abort",
             url_matcher=url,
         )
         self._har_routers.append(router)
         await router.add_context_route(self)
 
     async def _update_interception_patterns(self) -> None:
-        patterns = RouteHandler.prepare_interception_patterns(self._routes)
-        await self._channel.send(
-            "setNetworkInterceptionPatterns", None, {"patterns": patterns}
+        await self._channel.setNetworkInterceptionPatterns(
+            patterns=RouteHandler.prepare_interception_patterns(self._routes)
         )
 
     async def _update_web_socket_interception_patterns(self) -> None:
-        patterns = WebSocketRouteHandler.prepare_interception_patterns(
-            self._web_socket_routes
-        )
-        await self._channel.send(
-            "setWebSocketInterceptionPatterns", None, {"patterns": patterns}
+        await self._channel.setWebSocketInterceptionPatterns(
+            patterns=WebSocketRouteHandler.prepare_interception_patterns(
+                self._web_socket_routes
+            )
         )
 
     def expect_event(
         self,
         event: str,
-        predicate: Callable = None,
-        timeout: float = None,
+        predicate: Optional[Callable],
+        timeout: Optional[float],
     ) -> EventContextManagerImpl:
         if timeout is None:
             timeout = self._timeout_settings.timeout()
@@ -558,7 +562,7 @@ class BrowserContext(ChannelOwner):
     def is_closed(self) -> bool:
         return self._closing_or_closed
 
-    async def close(self, reason: str = None) -> None:
+    async def close(self, reason: Optional[str]) -> None:
         if self._closing_or_closed:
             return
         self._close_reason = reason
@@ -570,33 +574,31 @@ class BrowserContext(ChannelOwner):
             await self._tracing._export_all_hars()
 
         await self._channel._connection.wrap_api_call(_inner_close, True)
-        await self._channel.send("close", None, {"reason": reason})
+        await self._channel.close(reason=reason)
         await self._closed_future
 
     async def storage_state(
         self,
-        path: Union[str, Path] = None,
-        indexedDB: bool = None,
-        opfs: bool = None,
-        credentials: bool = None,
+        path: Optional[Union[str, Path]],
+        indexed_db: Optional[bool],
+        opfs: Optional[bool],
+        credentials: Optional[bool],
     ) -> StorageState:
-        result = await self._channel.send_return_as_dict(
-            "storageState",
-            None,
-            {"indexedDB": indexedDB, "opfs": opfs, "credentials": credentials},
+        result = await self._channel.storageState(
+            indexedDB=indexed_db, opfs=opfs, credentials=credentials
         )
+        # Leave out the fields that the driver did not send, such as "credentials".
+        state = {key: value for key, value in result.items() if value is not None}
         if path:
-            await async_writefile(path, json.dumps(result))
-        return result
+            await async_writefile(path, json.dumps(state))
+        return cast(StorageState, state)
 
     async def set_storage_state(
-        self, storageState: Union[StorageState, str, Path]
+        self, storage_state: Union[StorageState, str, Path]
     ) -> None:
-        if isinstance(storageState, (str, Path)):
-            state = json.loads(await async_readfile(storageState))
-        else:
-            state = storageState
-        await self._channel.send("setStorageState", None, {"storageState": state})
+        await self._channel.setStorageState(
+            storageState=await to_storage_state_params(storage_state)
+        )
 
     def _effective_close_reason(self) -> Optional[str]:
         if self._close_reason:
@@ -606,25 +608,31 @@ class BrowserContext(ChannelOwner):
         return None
 
     async def wait_for_event(
-        self, event: str, predicate: Callable = None, timeout: float = None
+        self, event: str, predicate: Optional[Callable], timeout: Optional[float]
     ) -> Any:
-        async with self.expect_event(event, predicate, timeout) as event_info:
+        async with self.expect_event(
+            event=event, predicate=predicate, timeout=timeout
+        ) as event_info:
             pass
         return await event_info
 
     def expect_console_message(
         self,
-        predicate: Callable[[ConsoleMessage], bool] = None,
-        timeout: float = None,
+        predicate: Optional[Callable[[ConsoleMessage], bool]],
+        timeout: Optional[float],
     ) -> EventContextManagerImpl[ConsoleMessage]:
-        return self.expect_event(Page.Events.Console, predicate, timeout)
+        return self.expect_event(
+            event=Page.Events.Console, predicate=predicate, timeout=timeout
+        )
 
     def expect_page(
         self,
-        predicate: Callable[[Page], bool] = None,
-        timeout: float = None,
+        predicate: Optional[Callable[[Page], bool]],
+        timeout: Optional[float],
     ) -> EventContextManagerImpl[Page]:
-        return self.expect_event(BrowserContext.Events.Page, predicate, timeout)
+        return self.expect_event(
+            event=BrowserContext.Events.Page, predicate=predicate, timeout=timeout
+        )
 
     def _on_service_worker(self, worker: Worker) -> None:
         worker._context = self
@@ -658,7 +666,7 @@ class BrowserContext(ChannelOwner):
         if response:
             response._finished_future.set_result(True)
 
-    def _on_console_message(self, event: Dict) -> None:
+    def _on_console_message(self, event: "channels.BrowserContextConsoleEvent") -> None:
         message = ConsoleMessage(event, self._loop, self._dispatcher_fiber)
         worker = message.worker
         if worker:
@@ -679,7 +687,9 @@ class BrowserContext(ChannelOwner):
             # a) removing "dialog" listener subscription (client->server)
             # b) actual "dialog" event (server->client)
             if dialog.type == "beforeunload":
-                create_task_and_ignore_exception(self._loop, dialog.accept())
+                create_task_and_ignore_exception(
+                    self._loop, dialog.accept(prompt_text=None)
+                )
             else:
                 create_task_and_ignore_exception(self._loop, dialog.dismiss())
 
@@ -719,14 +729,13 @@ class BrowserContext(ChannelOwner):
 
     async def new_cdp_session(self, page: Union[Page, Frame]) -> CDPSession:
         page = to_impl(page)
-        params = {}
         if isinstance(page, Page):
-            params["page"] = page._channel
+            result = await self._channel.newCDPSession(page=page._channel, frame=None)
         elif isinstance(page, Frame):
-            params["frame"] = page._channel
+            result = await self._channel.newCDPSession(page=None, frame=page._channel)
         else:
             raise Error("page: expected Page or Frame")
-        return from_channel(await self._channel.send("newCDPSession", None, params))
+        return from_channel(result["session"])
 
     @property
     def tracing(self) -> Tracing:
@@ -747,3 +756,35 @@ class BrowserContext(ChannelOwner):
     @property
     def credentials(self) -> Credentials:
         return self._credentials
+
+
+def to_record_video_params(
+    record_video_dir: Optional[Union[str, Path]],
+    record_video_size: Optional[RecordVideoSize],
+    record_video_fps: Optional[int],
+) -> "Optional[channels.BrowserNewContextParamsRecordVideo]":
+    if record_video_dir is None:
+        return None
+    return {
+        "dir": str(Path(record_video_dir).absolute()),
+        "size": record_video_size,
+        "fps": record_video_fps,
+    }
+
+
+def to_accept_downloads_params(
+    accept_downloads: Optional[bool],
+) -> Optional[Literal["accept", "deny"]]:
+    if accept_downloads is None:
+        return None
+    return "accept" if accept_downloads else "deny"
+
+
+async def to_storage_state_params(
+    storage_state: Optional[Union[StorageState, str, Path]],
+) -> "Optional[channels.BrowserNewContextParamsStorageState]":
+    if storage_state is None:
+        return None
+    if isinstance(storage_state, dict):
+        return cast("channels.BrowserNewContextParamsStorageState", storage_state)
+    return json.loads((await async_readfile(storage_state)).decode())

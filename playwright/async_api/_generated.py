@@ -198,17 +198,17 @@ class APIRequest(AsyncBase):
 
         return mapping.from_impl(
             await self._impl_obj.new_context(
-                baseURL=base_url,
-                clientCertificates=mapping.to_impl(client_certificates),
-                extraHTTPHeaders=mapping.to_impl(extra_http_headers),
-                failOnStatusCode=fail_on_status_code,
-                httpCredentials=mapping.to_impl(http_credentials),
-                ignoreHTTPSErrors=ignore_https_errors,
-                maxRedirects=max_redirects,
+                base_url=base_url,
+                client_certificates=mapping.to_impl(client_certificates),
+                extra_http_headers=mapping.to_impl(extra_http_headers),
+                fail_on_status_code=fail_on_status_code,
+                http_credentials=mapping.to_impl(http_credentials),
+                ignore_https_errors=ignore_https_errors,
+                max_redirects=max_redirects,
                 proxy=proxy,
-                storageState=storage_state,
+                storage_state=storage_state,
                 timeout=to_milliseconds(timeout),
-                userAgent=user_agent,
+                user_agent=user_agent,
             )
         )
 
@@ -373,12 +373,12 @@ class APIRequestContext(AsyncBase):
             await self._impl_obj.delete(
                 url=url,
                 data=mapping.to_impl(data),
-                failOnStatusCode=fail_on_status_code,
+                fail_on_status_code=fail_on_status_code,
                 form=mapping.to_impl(form),
                 headers=mapping.to_impl(headers),
-                ignoreHTTPSErrors=ignore_https_errors,
-                maxRedirects=max_redirects,
-                maxRetries=max_retries,
+                ignore_https_errors=ignore_https_errors,
+                max_redirects=max_redirects,
+                max_retries=max_retries,
                 multipart=mapping.to_impl(multipart),
                 params=mapping.to_impl(params),
                 timeout=to_milliseconds(timeout),
@@ -504,14 +504,14 @@ class APIRequestContext(AsyncBase):
 
         return mapping.from_impl(
             await self._impl_obj.fetch(
-                urlOrRequest=mapping.to_impl(url_or_request),
+                url_or_request=mapping.to_impl(url_or_request),
                 data=mapping.to_impl(data),
-                failOnStatusCode=fail_on_status_code,
+                fail_on_status_code=fail_on_status_code,
                 form=mapping.to_impl(form),
                 headers=mapping.to_impl(headers),
-                ignoreHTTPSErrors=ignore_https_errors,
-                maxRedirects=max_redirects,
-                maxRetries=max_retries,
+                ignore_https_errors=ignore_https_errors,
+                max_redirects=max_redirects,
+                max_retries=max_retries,
                 method=method,
                 multipart=mapping.to_impl(multipart),
                 params=mapping.to_impl(params),
@@ -607,12 +607,12 @@ class APIRequestContext(AsyncBase):
             await self._impl_obj.get(
                 url=url,
                 data=mapping.to_impl(data),
-                failOnStatusCode=fail_on_status_code,
+                fail_on_status_code=fail_on_status_code,
                 form=mapping.to_impl(form),
                 headers=mapping.to_impl(headers),
-                ignoreHTTPSErrors=ignore_https_errors,
-                maxRedirects=max_redirects,
-                maxRetries=max_retries,
+                ignore_https_errors=ignore_https_errors,
+                max_redirects=max_redirects,
+                max_retries=max_retries,
                 multipart=mapping.to_impl(multipart),
                 params=mapping.to_impl(params),
                 timeout=to_milliseconds(timeout),
@@ -695,12 +695,12 @@ class APIRequestContext(AsyncBase):
             await self._impl_obj.head(
                 url=url,
                 data=mapping.to_impl(data),
-                failOnStatusCode=fail_on_status_code,
+                fail_on_status_code=fail_on_status_code,
                 form=mapping.to_impl(form),
                 headers=mapping.to_impl(headers),
-                ignoreHTTPSErrors=ignore_https_errors,
-                maxRedirects=max_redirects,
-                maxRetries=max_retries,
+                ignore_https_errors=ignore_https_errors,
+                max_redirects=max_redirects,
+                max_retries=max_retries,
                 multipart=mapping.to_impl(multipart),
                 params=mapping.to_impl(params),
                 timeout=to_milliseconds(timeout),
@@ -783,12 +783,12 @@ class APIRequestContext(AsyncBase):
             await self._impl_obj.patch(
                 url=url,
                 data=mapping.to_impl(data),
-                failOnStatusCode=fail_on_status_code,
+                fail_on_status_code=fail_on_status_code,
                 form=mapping.to_impl(form),
                 headers=mapping.to_impl(headers),
-                ignoreHTTPSErrors=ignore_https_errors,
-                maxRedirects=max_redirects,
-                maxRetries=max_retries,
+                ignore_https_errors=ignore_https_errors,
+                max_redirects=max_redirects,
+                max_retries=max_retries,
                 multipart=mapping.to_impl(multipart),
                 params=mapping.to_impl(params),
                 timeout=to_milliseconds(timeout),
@@ -910,12 +910,12 @@ class APIRequestContext(AsyncBase):
             await self._impl_obj.post(
                 url=url,
                 data=mapping.to_impl(data),
-                failOnStatusCode=fail_on_status_code,
+                fail_on_status_code=fail_on_status_code,
                 form=mapping.to_impl(form),
                 headers=mapping.to_impl(headers),
-                ignoreHTTPSErrors=ignore_https_errors,
-                maxRedirects=max_redirects,
-                maxRetries=max_retries,
+                ignore_https_errors=ignore_https_errors,
+                max_redirects=max_redirects,
+                max_retries=max_retries,
                 multipart=mapping.to_impl(multipart),
                 params=mapping.to_impl(params),
                 timeout=to_milliseconds(timeout),
@@ -998,12 +998,12 @@ class APIRequestContext(AsyncBase):
             await self._impl_obj.put(
                 url=url,
                 data=mapping.to_impl(data),
-                failOnStatusCode=fail_on_status_code,
+                fail_on_status_code=fail_on_status_code,
                 form=mapping.to_impl(form),
                 headers=mapping.to_impl(headers),
-                ignoreHTTPSErrors=ignore_https_errors,
-                maxRedirects=max_redirects,
-                maxRetries=max_retries,
+                ignore_https_errors=ignore_https_errors,
+                max_redirects=max_redirects,
+                max_retries=max_retries,
                 multipart=mapping.to_impl(multipart),
                 params=mapping.to_impl(params),
                 timeout=to_milliseconds(timeout),
@@ -1039,7 +1039,7 @@ class APIRequestContext(AsyncBase):
 
         return mapping.from_impl(
             await self._impl_obj.storage_state(
-                indexedDB=indexed_db, opfs=opfs, path=path
+                indexed_db=indexed_db, opfs=opfs, path=path
             )
         )
 
@@ -1294,7 +1294,7 @@ class Browser(AsyncContextManager):
 
         return mapping.from_impl(
             await self._impl_obj.bind(
-                title=title, host=host, port=port, workspaceDir=workspace_dir
+                title=title, host=host, port=port, workspace_dir=workspace_dir
             )
         )
 
@@ -1600,42 +1600,42 @@ class Browser(AsyncContextManager):
 
         return mapping.from_impl(
             await self._impl_obj.new_context(
-                acceptDownloads=accept_downloads,
-                baseURL=base_url,
-                bypassCSP=bypass_csp,
-                clientCertificates=mapping.to_impl(client_certificates),
-                colorScheme=color_scheme,
+                accept_downloads=accept_downloads,
+                base_url=base_url,
+                bypass_csp=bypass_csp,
+                client_certificates=mapping.to_impl(client_certificates),
+                color_scheme=color_scheme,
                 contrast=contrast,
-                defaultBrowserType=default_browser_type,
-                deviceScaleFactor=device_scale_factor,
-                extraHTTPHeaders=mapping.to_impl(extra_http_headers),
-                forcedColors=forced_colors,
+                default_browser_type=default_browser_type,
+                device_scale_factor=device_scale_factor,
+                extra_http_headers=mapping.to_impl(extra_http_headers),
+                forced_colors=forced_colors,
                 geolocation=geolocation,
-                hasTouch=has_touch,
-                httpCredentials=mapping.to_impl(http_credentials),
-                ignoreHTTPSErrors=ignore_https_errors,
-                isMobile=is_mobile,
-                javaScriptEnabled=java_script_enabled,
+                has_touch=has_touch,
+                http_credentials=mapping.to_impl(http_credentials),
+                ignore_https_errors=ignore_https_errors,
+                is_mobile=is_mobile,
+                java_script_enabled=java_script_enabled,
                 locale=locale,
-                noViewport=no_viewport,
+                no_viewport=no_viewport,
                 offline=offline,
                 permissions=mapping.to_impl(permissions),
                 proxy=proxy,
-                recordHarContent=record_har_content,
-                recordHarMode=record_har_mode,
-                recordHarOmitContent=record_har_omit_content,
-                recordHarPath=record_har_path,
-                recordHarUrlFilter=record_har_url_filter,
-                recordVideoDir=record_video_dir,
-                recordVideoFps=record_video_fps,
-                recordVideoSize=record_video_size,
-                reducedMotion=reduced_motion,
+                record_har_content=record_har_content,
+                record_har_mode=record_har_mode,
+                record_har_omit_content=record_har_omit_content,
+                record_har_path=record_har_path,
+                record_har_url_filter=record_har_url_filter,
+                record_video_dir=record_video_dir,
+                record_video_fps=record_video_fps,
+                record_video_size=record_video_size,
+                reduced_motion=reduced_motion,
                 screen=screen,
-                serviceWorkers=service_workers,
-                storageState=storage_state,
-                strictSelectors=strict_selectors,
-                timezoneId=timezone_id,
-                userAgent=user_agent,
+                service_workers=service_workers,
+                storage_state=storage_state,
+                strict_selectors=strict_selectors,
+                timezone_id=timezone_id,
+                user_agent=user_agent,
                 viewport=viewport,
             )
         )
@@ -1844,42 +1844,42 @@ class Browser(AsyncContextManager):
 
         return mapping.from_impl(
             await self._impl_obj.new_page(
-                acceptDownloads=accept_downloads,
-                baseURL=base_url,
-                bypassCSP=bypass_csp,
-                clientCertificates=mapping.to_impl(client_certificates),
-                colorScheme=color_scheme,
+                accept_downloads=accept_downloads,
+                base_url=base_url,
+                bypass_csp=bypass_csp,
+                client_certificates=mapping.to_impl(client_certificates),
+                color_scheme=color_scheme,
                 contrast=contrast,
-                defaultBrowserType=default_browser_type,
-                deviceScaleFactor=device_scale_factor,
-                extraHTTPHeaders=mapping.to_impl(extra_http_headers),
-                forcedColors=forced_colors,
+                default_browser_type=default_browser_type,
+                device_scale_factor=device_scale_factor,
+                extra_http_headers=mapping.to_impl(extra_http_headers),
+                forced_colors=forced_colors,
                 geolocation=geolocation,
-                hasTouch=has_touch,
-                httpCredentials=mapping.to_impl(http_credentials),
-                ignoreHTTPSErrors=ignore_https_errors,
-                isMobile=is_mobile,
-                javaScriptEnabled=java_script_enabled,
+                has_touch=has_touch,
+                http_credentials=mapping.to_impl(http_credentials),
+                ignore_https_errors=ignore_https_errors,
+                is_mobile=is_mobile,
+                java_script_enabled=java_script_enabled,
                 locale=locale,
-                noViewport=no_viewport,
+                no_viewport=no_viewport,
                 offline=offline,
                 permissions=mapping.to_impl(permissions),
                 proxy=proxy,
-                recordHarContent=record_har_content,
-                recordHarMode=record_har_mode,
-                recordHarOmitContent=record_har_omit_content,
-                recordHarPath=record_har_path,
-                recordHarUrlFilter=record_har_url_filter,
-                recordVideoDir=record_video_dir,
-                recordVideoFps=record_video_fps,
-                recordVideoSize=record_video_size,
-                reducedMotion=reduced_motion,
+                record_har_content=record_har_content,
+                record_har_mode=record_har_mode,
+                record_har_omit_content=record_har_omit_content,
+                record_har_path=record_har_path,
+                record_har_url_filter=record_har_url_filter,
+                record_video_dir=record_video_dir,
+                record_video_fps=record_video_fps,
+                record_video_size=record_video_size,
+                reduced_motion=reduced_motion,
                 screen=screen,
-                serviceWorkers=service_workers,
-                storageState=storage_state,
-                strictSelectors=strict_selectors,
-                timezoneId=timezone_id,
-                userAgent=user_agent,
+                service_workers=service_workers,
+                storage_state=storage_state,
+                strict_selectors=strict_selectors,
+                timezone_id=timezone_id,
+                user_agent=user_agent,
                 viewport=viewport,
             )
         )
@@ -3397,10 +3397,10 @@ class BrowserContext(AsyncContextManager):
 
         await self._impl_obj.route_from_har(
             har=har,
-            notFound=not_found,
+            not_found=not_found,
             update=update,
-            updateContent=update_content,
-            updateMode=update_mode,
+            update_content=update_content,
+            update_mode=update_mode,
             url=url,
         )
 
@@ -3587,7 +3587,7 @@ class BrowserContext(AsyncContextManager):
             information obtained via `browser_context.storage_state()`.
         """
 
-        await self._impl_obj.set_storage_state(storageState=storage_state)
+        await self._impl_obj.set_storage_state(storage_state=storage_state)
 
     async def storage_state(
         self,
@@ -3632,7 +3632,7 @@ class BrowserContext(AsyncContextManager):
 
         return mapping.from_impl(
             await self._impl_obj.storage_state(
-                credentials=credentials, indexedDB=indexed_db, opfs=opfs, path=path
+                credentials=credentials, indexed_db=indexed_db, opfs=opfs, path=path
             )
         )
 
@@ -3962,9 +3962,9 @@ class BrowserType(AsyncBase):
         return mapping.from_impl(
             await self._impl_obj.connect(
                 endpoint=endpoint,
-                exposeNetwork=expose_network,
+                expose_network=expose_network,
                 headers=mapping.to_impl(headers),
-                slowMo=slow_mo,
+                slow_mo=slow_mo,
                 timeout=to_milliseconds(timeout),
             )
         )
@@ -4036,12 +4036,12 @@ class BrowserType(AsyncBase):
 
         return mapping.from_impl(
             await self._impl_obj.connect_over_cdp(
-                endpointURL=endpoint_url,
-                artifactsDir=artifacts_dir,
+                endpoint_url=endpoint_url,
+                artifacts_dir=artifacts_dir,
                 headers=mapping.to_impl(headers),
-                isLocal=is_local,
-                noDefaults=no_defaults,
-                slowMo=slow_mo,
+                is_local=is_local,
+                no_defaults=no_defaults,
+                slow_mo=slow_mo,
                 timeout=to_milliseconds(timeout),
             )
         )
@@ -4180,22 +4180,22 @@ class BrowserType(AsyncBase):
         return mapping.from_impl(
             await self._impl_obj.launch(
                 args=mapping.to_impl(args),
-                artifactsDir=artifacts_dir,
+                artifacts_dir=artifacts_dir,
                 channel=channel,
-                chromiumSandbox=chromium_sandbox,
-                downloadsPath=downloads_path,
+                chromium_sandbox=chromium_sandbox,
+                downloads_path=downloads_path,
                 env=mapping.to_impl(env),
-                executablePath=executable_path,
-                firefoxUserPrefs=mapping.to_impl(firefox_user_prefs),
-                handleSIGHUP=handle_sighup,
-                handleSIGINT=handle_sigint,
-                handleSIGTERM=handle_sigterm,
+                executable_path=executable_path,
+                firefox_user_prefs=mapping.to_impl(firefox_user_prefs),
+                handle_sighup=handle_sighup,
+                handle_sigint=handle_sigint,
+                handle_sigterm=handle_sigterm,
                 headless=headless,
-                ignoreDefaultArgs=mapping.to_impl(ignore_default_args),
+                ignore_default_args=mapping.to_impl(ignore_default_args),
                 proxy=proxy,
-                slowMo=slow_mo,
+                slow_mo=slow_mo,
                 timeout=to_milliseconds(timeout),
-                tracesDir=traces_dir,
+                traces_dir=traces_dir,
             )
         )
 
@@ -4486,57 +4486,57 @@ class BrowserType(AsyncBase):
 
         return mapping.from_impl(
             await self._impl_obj.launch_persistent_context(
-                userDataDir=user_data_dir,
-                acceptDownloads=accept_downloads,
+                user_data_dir=user_data_dir,
+                accept_downloads=accept_downloads,
                 args=mapping.to_impl(args),
-                artifactsDir=artifacts_dir,
-                baseURL=base_url,
-                bypassCSP=bypass_csp,
+                artifacts_dir=artifacts_dir,
+                base_url=base_url,
+                bypass_csp=bypass_csp,
                 channel=channel,
-                chromiumSandbox=chromium_sandbox,
-                clientCertificates=mapping.to_impl(client_certificates),
-                colorScheme=color_scheme,
+                chromium_sandbox=chromium_sandbox,
+                client_certificates=mapping.to_impl(client_certificates),
+                color_scheme=color_scheme,
                 contrast=contrast,
-                deviceScaleFactor=device_scale_factor,
-                downloadsPath=downloads_path,
+                device_scale_factor=device_scale_factor,
+                downloads_path=downloads_path,
                 env=mapping.to_impl(env),
-                executablePath=executable_path,
-                extraHTTPHeaders=mapping.to_impl(extra_http_headers),
-                firefoxUserPrefs=mapping.to_impl(firefox_user_prefs),
-                forcedColors=forced_colors,
+                executable_path=executable_path,
+                extra_http_headers=mapping.to_impl(extra_http_headers),
+                firefox_user_prefs=mapping.to_impl(firefox_user_prefs),
+                forced_colors=forced_colors,
                 geolocation=geolocation,
-                handleSIGHUP=handle_sighup,
-                handleSIGINT=handle_sigint,
-                handleSIGTERM=handle_sigterm,
-                hasTouch=has_touch,
+                handle_sighup=handle_sighup,
+                handle_sigint=handle_sigint,
+                handle_sigterm=handle_sigterm,
+                has_touch=has_touch,
                 headless=headless,
-                httpCredentials=mapping.to_impl(http_credentials),
-                ignoreDefaultArgs=mapping.to_impl(ignore_default_args),
-                ignoreHTTPSErrors=ignore_https_errors,
-                isMobile=is_mobile,
-                javaScriptEnabled=java_script_enabled,
+                http_credentials=mapping.to_impl(http_credentials),
+                ignore_default_args=mapping.to_impl(ignore_default_args),
+                ignore_https_errors=ignore_https_errors,
+                is_mobile=is_mobile,
+                java_script_enabled=java_script_enabled,
                 locale=locale,
-                noViewport=no_viewport,
+                no_viewport=no_viewport,
                 offline=offline,
                 permissions=mapping.to_impl(permissions),
                 proxy=proxy,
-                recordHarContent=record_har_content,
-                recordHarMode=record_har_mode,
-                recordHarOmitContent=record_har_omit_content,
-                recordHarPath=record_har_path,
-                recordHarUrlFilter=record_har_url_filter,
-                recordVideoDir=record_video_dir,
-                recordVideoFps=record_video_fps,
-                recordVideoSize=record_video_size,
-                reducedMotion=reduced_motion,
+                record_har_content=record_har_content,
+                record_har_mode=record_har_mode,
+                record_har_omit_content=record_har_omit_content,
+                record_har_path=record_har_path,
+                record_har_url_filter=record_har_url_filter,
+                record_video_dir=record_video_dir,
+                record_video_fps=record_video_fps,
+                record_video_size=record_video_size,
+                reduced_motion=reduced_motion,
                 screen=screen,
-                serviceWorkers=service_workers,
-                slowMo=slow_mo,
-                strictSelectors=strict_selectors,
+                service_workers=service_workers,
+                slow_mo=slow_mo,
+                strict_selectors=strict_selectors,
                 timeout=to_milliseconds(timeout),
-                timezoneId=timezone_id,
-                tracesDir=traces_dir,
-                userAgent=user_agent,
+                timezone_id=timezone_id,
+                traces_dir=traces_dir,
+                user_agent=user_agent,
                 viewport=viewport,
             )
         )
@@ -4983,12 +4983,12 @@ class Credentials(AsyncBase):
 
         return mapping.from_impl(
             await self._impl_obj.create(
-                rpId=rp_id,
+                rp_id=rp_id,
                 id=id,
-                privateKey=private_key,
-                publicKey=public_key,
-                signCount=sign_count,
-                userHandle=user_handle,
+                private_key=private_key,
+                public_key=public_key,
+                sign_count=sign_count,
+                user_handle=user_handle,
             )
         )
 
@@ -5031,7 +5031,7 @@ class Credentials(AsyncBase):
         List[{id: str, rpId: str, userHandle: str, privateKey: str, publicKey: str, signCount: int}]
         """
 
-        return mapping.from_impl_list(await self._impl_obj.get(id=id, rpId=rp_id))
+        return mapping.from_impl_list(await self._impl_obj.get(id=id, rp_id=rp_id))
 
     async def install(self) -> None:
         """Credentials.install
@@ -5174,7 +5174,7 @@ class Dialog(AsyncBase):
             A text to enter in prompt. Does not cause any effects if the dialog's `type` is not prompt. Optional.
         """
 
-        await self._impl_obj.accept(promptText=prompt_text)
+        await self._impl_obj.accept(prompt_text=prompt_text)
 
     @property
     def default_value(self) -> str:
@@ -5497,7 +5497,7 @@ class JSHandle(AsyncBase):
         """
 
         return mapping.from_impl(
-            await self._impl_obj.get_property(propertyName=property_name)
+            await self._impl_obj.get_property(property_name=property_name)
         )
 
     async def json_value(self) -> typing.Any:
@@ -5602,7 +5602,7 @@ class ElementHandle(JSHandle):
 
         await self._impl_obj.check(
             force=force,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             timeout=to_milliseconds(timeout),
@@ -5679,11 +5679,11 @@ class ElementHandle(JSHandle):
 
         await self._impl_obj.click(
             button=button,
-            clickCount=click_count,
+            click_count=click_count,
             delay=delay,
             force=force,
             modifiers=mapping.to_impl(modifiers),
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             steps=steps,
@@ -5772,7 +5772,7 @@ class ElementHandle(JSHandle):
             delay=delay,
             force=force,
             modifiers=mapping.to_impl(modifiers),
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             steps=steps,
@@ -5827,7 +5827,7 @@ class ElementHandle(JSHandle):
         """
 
         await self._impl_obj.dispatch_event(
-            type=type, eventInit=mapping.to_impl(event_init)
+            type=type, event_init=mapping.to_impl(event_init)
         )
 
     async def eval_on_selector(
@@ -5957,7 +5957,7 @@ class ElementHandle(JSHandle):
         await self._impl_obj.fill(
             value=value,
             force=force,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             timeout=to_milliseconds(timeout),
         )
 
@@ -6041,7 +6041,7 @@ class ElementHandle(JSHandle):
         await self._impl_obj.hover(
             force=force,
             modifiers=mapping.to_impl(modifiers),
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             timeout=to_milliseconds(timeout),
@@ -6234,7 +6234,7 @@ class ElementHandle(JSHandle):
         await self._impl_obj.press(
             key=key,
             delay=delay,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             timeout=to_milliseconds(timeout),
         )
 
@@ -6360,8 +6360,8 @@ class ElementHandle(JSHandle):
                 animations=animations,
                 caret=caret,
                 mask=mapping.to_impl(mask),
-                maskColor=mask_color,
-                omitBackground=omit_background,
+                mask_color=mask_color,
+                omit_background=omit_background,
                 path=path,
                 quality=quality,
                 scale=scale,
@@ -6469,7 +6469,7 @@ class ElementHandle(JSHandle):
                 force=force,
                 index=mapping.to_impl(index),
                 label=mapping.to_impl(label),
-                noWaitAfter=no_wait_after,
+                no_wait_after=no_wait_after,
                 timeout=to_milliseconds(timeout),
             )
         )
@@ -6553,7 +6553,7 @@ class ElementHandle(JSHandle):
         await self._impl_obj.set_checked(
             checked=checked,
             force=force,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             timeout=to_milliseconds(timeout),
@@ -6597,7 +6597,7 @@ class ElementHandle(JSHandle):
 
         await self._impl_obj.set_input_files(
             files=mapping.to_impl(files),
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             timeout=to_milliseconds(timeout),
         )
 
@@ -6658,7 +6658,7 @@ class ElementHandle(JSHandle):
         await self._impl_obj.tap(
             force=force,
             modifiers=mapping.to_impl(modifiers),
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             timeout=to_milliseconds(timeout),
@@ -6711,7 +6711,7 @@ class ElementHandle(JSHandle):
         await self._impl_obj.type(
             text=text,
             delay=delay,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             timeout=to_milliseconds(timeout),
         )
 
@@ -6765,7 +6765,7 @@ class ElementHandle(JSHandle):
 
         await self._impl_obj.uncheck(
             force=force,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             timeout=to_milliseconds(timeout),
@@ -6948,7 +6948,7 @@ class FileChooser(AsyncBase):
 
         await self._impl_obj.set_files(
             files=mapping.to_impl(files),
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             timeout=to_milliseconds(timeout),
         )
 
@@ -7089,7 +7089,7 @@ class Frame(AsyncBase):
         await self._impl_obj.check(
             selector=selector,
             force=force,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             strict=strict,
@@ -7184,11 +7184,11 @@ class Frame(AsyncBase):
         await self._impl_obj.click(
             selector=selector,
             button=button,
-            clickCount=click_count,
+            click_count=click_count,
             delay=delay,
             force=force,
             modifiers=mapping.to_impl(modifiers),
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             strict=strict,
@@ -7215,7 +7215,7 @@ class Frame(AsyncBase):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.content(includeShadow=include_shadow)
+            await self._impl_obj.content(include_shadow=include_shadow)
         )
 
     async def dblclick(
@@ -7295,7 +7295,7 @@ class Frame(AsyncBase):
             delay=delay,
             force=force,
             modifiers=mapping.to_impl(modifiers),
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             strict=strict,
@@ -7367,7 +7367,7 @@ class Frame(AsyncBase):
         await self._impl_obj.dispatch_event(
             selector=selector,
             type=type,
-            eventInit=mapping.to_impl(event_init),
+            event_init=mapping.to_impl(event_init),
             strict=strict,
             timeout=to_milliseconds(timeout),
         )
@@ -7431,12 +7431,12 @@ class Frame(AsyncBase):
             source=source,
             target=target,
             force=force,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             scroll=scroll,
-            sourcePosition=source_position,
+            source_position=source_position,
             steps=steps,
             strict=strict,
-            targetPosition=target_position,
+            target_position=target_position,
             timeout=to_milliseconds(timeout),
             trial=trial,
         )
@@ -7704,7 +7704,7 @@ class Frame(AsyncBase):
             self._impl_obj.expect_navigation(
                 timeout=to_milliseconds(timeout),
                 url=self._wrap_handler(url),
-                waitUntil=wait_until,
+                wait_until=wait_until,
             ).future
         )
 
@@ -7755,7 +7755,7 @@ class Frame(AsyncBase):
             selector=selector,
             value=value,
             force=force,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             strict=strict,
             timeout=to_milliseconds(timeout),
         )
@@ -8213,7 +8213,7 @@ class Frame(AsyncBase):
                 disabled=disabled,
                 exact=exact,
                 expanded=expanded,
-                includeHidden=include_hidden,
+                include_hidden=include_hidden,
                 level=level,
                 name=name,
                 pressed=pressed,
@@ -8257,7 +8257,7 @@ class Frame(AsyncBase):
         Locator
         """
 
-        return mapping.from_impl(self._impl_obj.get_by_test_id(testId=test_id))
+        return mapping.from_impl(self._impl_obj.get_by_test_id(test_id=test_id))
 
     def get_by_text(
         self,
@@ -8425,7 +8425,7 @@ class Frame(AsyncBase):
                 url=url,
                 referer=referer,
                 timeout=to_milliseconds(timeout),
-                waitUntil=wait_until,
+                wait_until=wait_until,
             )
         )
 
@@ -8495,7 +8495,7 @@ class Frame(AsyncBase):
             selector=selector,
             force=force,
             modifiers=mapping.to_impl(modifiers),
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             strict=strict,
@@ -8864,9 +8864,9 @@ class Frame(AsyncBase):
             self._impl_obj.locator(
                 selector=selector,
                 has=has._impl_obj if has else None,
-                hasNot=has_not._impl_obj if has_not else None,
-                hasNotText=has_not_text,
-                hasText=has_text,
+                has_not=has_not._impl_obj if has_not else None,
+                has_not_text=has_not_text,
+                has_text=has_text,
             )
         )
 
@@ -8969,7 +8969,7 @@ class Frame(AsyncBase):
             selector=selector,
             key=key,
             delay=delay,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             strict=strict,
             timeout=to_milliseconds(timeout),
         )
@@ -9106,7 +9106,7 @@ class Frame(AsyncBase):
                 force=force,
                 index=mapping.to_impl(index),
                 label=mapping.to_impl(label),
-                noWaitAfter=no_wait_after,
+                no_wait_after=no_wait_after,
                 strict=strict,
                 timeout=to_milliseconds(timeout),
             )
@@ -9175,7 +9175,7 @@ class Frame(AsyncBase):
             selector=selector,
             checked=checked,
             force=force,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             strict=strict,
@@ -9217,7 +9217,7 @@ class Frame(AsyncBase):
         """
 
         await self._impl_obj.set_content(
-            html=html, timeout=to_milliseconds(timeout), waitUntil=wait_until
+            html=html, timeout=to_milliseconds(timeout), wait_until=wait_until
         )
 
     async def set_input_files(
@@ -9265,7 +9265,7 @@ class Frame(AsyncBase):
         await self._impl_obj.set_input_files(
             selector=selector,
             files=mapping.to_impl(files),
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             strict=strict,
             timeout=to_milliseconds(timeout),
         )
@@ -9338,7 +9338,7 @@ class Frame(AsyncBase):
             selector=selector,
             force=force,
             modifiers=mapping.to_impl(modifiers),
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             strict=strict,
@@ -9435,7 +9435,7 @@ class Frame(AsyncBase):
             selector=selector,
             text=text,
             delay=delay,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             strict=strict,
             timeout=to_milliseconds(timeout),
         )
@@ -9499,7 +9499,7 @@ class Frame(AsyncBase):
         await self._impl_obj.uncheck(
             selector=selector,
             force=force,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             strict=strict,
@@ -9777,7 +9777,7 @@ class Frame(AsyncBase):
         await self._impl_obj.wait_for_url(
             url=self._wrap_handler(url),
             timeout=to_milliseconds(timeout),
-            waitUntil=wait_until,
+            wait_until=wait_until,
         )
 
     @property
@@ -10148,7 +10148,7 @@ class FrameLocator(AsyncBase):
                 disabled=disabled,
                 exact=exact,
                 expanded=expanded,
-                includeHidden=include_hidden,
+                include_hidden=include_hidden,
                 level=level,
                 name=name,
                 pressed=pressed,
@@ -10192,7 +10192,7 @@ class FrameLocator(AsyncBase):
         Locator
         """
 
-        return mapping.from_impl(self._impl_obj.get_by_test_id(testId=test_id))
+        return mapping.from_impl(self._impl_obj.get_by_test_id(test_id=test_id))
 
     def get_by_text(
         self,
@@ -10359,11 +10359,11 @@ class FrameLocator(AsyncBase):
 
         return mapping.from_impl(
             self._impl_obj.locator(
-                selectorOrLocator=mapping.to_impl(selector_or_locator),
+                selector_or_locator=mapping.to_impl(selector_or_locator),
                 has=has._impl_obj if has else None,
-                hasNot=has_not._impl_obj if has_not else None,
-                hasNotText=has_not_text,
-                hasText=has_text,
+                has_not=has_not._impl_obj if has_not else None,
+                has_not_text=has_not_text,
+                has_text=has_text,
             )
         )
 
@@ -10875,7 +10875,7 @@ class Locator(AsyncBase):
 
         await self._impl_obj.check(
             force=force,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             timeout=to_milliseconds(timeout),
@@ -10922,7 +10922,7 @@ class Locator(AsyncBase):
         """
 
         await self._impl_obj.clear(
-            force=force, noWaitAfter=no_wait_after, timeout=to_milliseconds(timeout)
+            force=force, no_wait_after=no_wait_after, timeout=to_milliseconds(timeout)
         )
 
     async def click(
@@ -11017,11 +11017,11 @@ class Locator(AsyncBase):
 
         await self._impl_obj.click(
             button=button,
-            clickCount=click_count,
+            click_count=click_count,
             delay=delay,
             force=force,
             modifiers=mapping.to_impl(modifiers),
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             steps=steps,
@@ -11151,7 +11151,7 @@ class Locator(AsyncBase):
             delay=delay,
             force=force,
             modifiers=mapping.to_impl(modifiers),
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             steps=steps,
@@ -11265,7 +11265,7 @@ class Locator(AsyncBase):
 
         await self._impl_obj.dispatch_event(
             type=type,
-            eventInit=mapping.to_impl(event_init),
+            event_init=mapping.to_impl(event_init),
             timeout=to_milliseconds(timeout),
         )
 
@@ -11340,11 +11340,11 @@ class Locator(AsyncBase):
         await self._impl_obj.drag_to(
             target=target._impl_obj,
             force=force,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             scroll=scroll,
-            sourcePosition=source_position,
+            source_position=source_position,
             steps=steps,
-            targetPosition=target_position,
+            target_position=target_position,
             timeout=to_milliseconds(timeout),
             trial=trial,
         )
@@ -11621,7 +11621,7 @@ class Locator(AsyncBase):
         await self._impl_obj.fill(
             value=value,
             force=force,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             timeout=to_milliseconds(timeout),
         )
 
@@ -11686,9 +11686,9 @@ class Locator(AsyncBase):
         return mapping.from_impl(
             self._impl_obj.filter(
                 has=has._impl_obj if has else None,
-                hasNot=has_not._impl_obj if has_not else None,
-                hasNotText=has_not_text,
-                hasText=has_text,
+                has_not=has_not._impl_obj if has_not else None,
+                has_not_text=has_not_text,
+                has_text=has_text,
                 visible=visible,
             )
         )
@@ -12099,7 +12099,7 @@ class Locator(AsyncBase):
                 disabled=disabled,
                 exact=exact,
                 expanded=expanded,
-                includeHidden=include_hidden,
+                include_hidden=include_hidden,
                 level=level,
                 name=name,
                 pressed=pressed,
@@ -12143,7 +12143,7 @@ class Locator(AsyncBase):
         Locator
         """
 
-        return mapping.from_impl(self._impl_obj.get_by_test_id(testId=test_id))
+        return mapping.from_impl(self._impl_obj.get_by_test_id(test_id=test_id))
 
     def get_by_text(
         self,
@@ -12343,7 +12343,7 @@ class Locator(AsyncBase):
         await self._impl_obj.hover(
             force=force,
             modifiers=mapping.to_impl(modifiers),
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             timeout=to_milliseconds(timeout),
@@ -12707,11 +12707,11 @@ class Locator(AsyncBase):
 
         return mapping.from_impl(
             self._impl_obj.locator(
-                selectorOrLocator=mapping.to_impl(selector_or_locator),
+                selector_or_locator=mapping.to_impl(selector_or_locator),
                 has=has._impl_obj if has else None,
-                hasNot=has_not._impl_obj if has_not else None,
-                hasNotText=has_not_text,
-                hasText=has_text,
+                has_not=has_not._impl_obj if has_not else None,
+                has_not_text=has_not_text,
+                has_text=has_text,
             )
         )
 
@@ -12878,7 +12878,7 @@ class Locator(AsyncBase):
         await self._impl_obj.press(
             key=key,
             delay=delay,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             timeout=to_milliseconds(timeout),
         )
 
@@ -12932,7 +12932,7 @@ class Locator(AsyncBase):
         await self._impl_obj.press_sequentially(
             text=text,
             delay=delay,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             timeout=to_milliseconds(timeout),
         )
 
@@ -13034,8 +13034,8 @@ class Locator(AsyncBase):
                 animations=animations,
                 caret=caret,
                 mask=mapping.to_impl(mask),
-                maskColor=mask_color,
-                omitBackground=omit_background,
+                mask_color=mask_color,
+                omit_background=omit_background,
                 path=path,
                 quality=quality,
                 scale=scale,
@@ -13152,7 +13152,7 @@ class Locator(AsyncBase):
                 force=force,
                 index=mapping.to_impl(index),
                 label=mapping.to_impl(label),
-                noWaitAfter=no_wait_after,
+                no_wait_after=no_wait_after,
                 timeout=to_milliseconds(timeout),
             )
         )
@@ -13246,7 +13246,7 @@ class Locator(AsyncBase):
         await self._impl_obj.set_checked(
             checked=checked,
             force=force,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             timeout=to_milliseconds(timeout),
@@ -13317,7 +13317,7 @@ class Locator(AsyncBase):
 
         await self._impl_obj.set_input_files(
             files=mapping.to_impl(files),
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             timeout=to_milliseconds(timeout),
         )
 
@@ -13385,7 +13385,7 @@ class Locator(AsyncBase):
         await self._impl_obj.tap(
             force=force,
             modifiers=mapping.to_impl(modifiers),
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             timeout=to_milliseconds(timeout),
@@ -13453,7 +13453,7 @@ class Locator(AsyncBase):
         await self._impl_obj.type(
             text=text,
             delay=delay,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             timeout=to_milliseconds(timeout),
         )
 
@@ -13517,7 +13517,7 @@ class Locator(AsyncBase):
 
         await self._impl_obj.uncheck(
             force=force,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             timeout=to_milliseconds(timeout),
@@ -13932,9 +13932,9 @@ class LocatorAssertions(AsyncBase):
 
         await self._impl_obj.not_to_contain_text(
             expected=mapping.to_impl(expected),
-            ignoreCase=ignore_case,
+            ignore_case=ignore_case,
             timeout=to_milliseconds(timeout),
-            useInnerText=use_inner_text,
+            use_inner_text=use_inner_text,
         )
 
     async def not_to_have_accessible_description(
@@ -13962,7 +13962,7 @@ class LocatorAssertions(AsyncBase):
 
         await self._impl_obj.not_to_have_accessible_description(
             description=description,
-            ignoreCase=ignore_case,
+            ignore_case=ignore_case,
             timeout=to_milliseconds(timeout),
         )
 
@@ -13990,8 +13990,8 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         await self._impl_obj.not_to_have_accessible_error_message(
-            errorMessage=error_message,
-            ignoreCase=ignore_case,
+            error_message=error_message,
+            ignore_case=ignore_case,
             timeout=to_milliseconds(timeout),
         )
 
@@ -14019,7 +14019,7 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         await self._impl_obj.not_to_have_accessible_name(
-            name=name, ignoreCase=ignore_case, timeout=to_milliseconds(timeout)
+            name=name, ignore_case=ignore_case, timeout=to_milliseconds(timeout)
         )
 
     async def not_to_have_attribute(
@@ -14051,7 +14051,7 @@ class LocatorAssertions(AsyncBase):
         await self._impl_obj.not_to_have_attribute(
             name=name,
             value=value,
-            ignoreCase=ignore_case,
+            ignore_case=ignore_case,
             timeout=to_milliseconds(timeout),
         )
 
@@ -14323,9 +14323,9 @@ class LocatorAssertions(AsyncBase):
 
         await self._impl_obj.not_to_have_text(
             expected=mapping.to_impl(expected),
-            ignoreCase=ignore_case,
+            ignore_case=ignore_case,
             timeout=to_milliseconds(timeout),
-            useInnerText=use_inner_text,
+            use_inner_text=use_inner_text,
         )
 
     async def not_to_have_value(
@@ -14867,9 +14867,9 @@ class LocatorAssertions(AsyncBase):
 
         await self._impl_obj.to_contain_text(
             expected=mapping.to_impl(expected),
-            ignoreCase=ignore_case,
+            ignore_case=ignore_case,
             timeout=to_milliseconds(timeout),
-            useInnerText=use_inner_text,
+            use_inner_text=use_inner_text,
         )
 
     async def to_have_accessible_description(
@@ -14905,7 +14905,7 @@ class LocatorAssertions(AsyncBase):
 
         await self._impl_obj.to_have_accessible_description(
             description=description,
-            ignoreCase=ignore_case,
+            ignore_case=ignore_case,
             timeout=to_milliseconds(timeout),
         )
 
@@ -14941,8 +14941,8 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         await self._impl_obj.to_have_accessible_error_message(
-            errorMessage=error_message,
-            ignoreCase=ignore_case,
+            error_message=error_message,
+            ignore_case=ignore_case,
             timeout=to_milliseconds(timeout),
         )
 
@@ -14978,7 +14978,7 @@ class LocatorAssertions(AsyncBase):
         __tracebackhide__ = True
 
         await self._impl_obj.to_have_accessible_name(
-            name=name, ignoreCase=ignore_case, timeout=to_milliseconds(timeout)
+            name=name, ignore_case=ignore_case, timeout=to_milliseconds(timeout)
         )
 
     async def to_have_attribute(
@@ -15021,7 +15021,7 @@ class LocatorAssertions(AsyncBase):
         await self._impl_obj.to_have_attribute(
             name=name,
             value=value,
-            ignoreCase=ignore_case,
+            ignore_case=ignore_case,
             timeout=to_milliseconds(timeout),
         )
 
@@ -15414,9 +15414,9 @@ class LocatorAssertions(AsyncBase):
 
         await self._impl_obj.to_have_text(
             expected=mapping.to_impl(expected),
-            ignoreCase=ignore_case,
+            ignore_case=ignore_case,
             timeout=to_milliseconds(timeout),
-            useInnerText=use_inner_text,
+            use_inner_text=use_inner_text,
         )
 
     async def to_have_value(
@@ -15569,7 +15569,7 @@ class Mouse(AsyncBase):
         """
 
         await self._impl_obj.click(
-            x=x, y=y, button=button, clickCount=click_count, delay=delay
+            x=x, y=y, button=button, click_count=click_count, delay=delay
         )
 
     async def dblclick(
@@ -15616,7 +15616,7 @@ class Mouse(AsyncBase):
             defaults to 1. See [UIEvent.detail].
         """
 
-        await self._impl_obj.down(button=button, clickCount=click_count)
+        await self._impl_obj.down(button=button, click_count=click_count)
 
     async def move(
         self, x: float, y: float, *, steps: typing.Optional[int] = None
@@ -15656,7 +15656,7 @@ class Mouse(AsyncBase):
             defaults to 1. See [UIEvent.detail].
         """
 
-        await self._impl_obj.up(button=button, clickCount=click_count)
+        await self._impl_obj.up(button=button, click_count=click_count)
 
     async def wheel(self, delta_x: float, delta_y: float) -> None:
         """Mouse.wheel
@@ -15675,7 +15675,7 @@ class Mouse(AsyncBase):
             Pixels to scroll vertically.
         """
 
-        await self._impl_obj.wheel(deltaX=delta_x, deltaY=delta_y)
+        await self._impl_obj.wheel(delta_x=delta_x, delta_y=delta_y)
 
 
 mapping.register(MouseImpl, Mouse)
@@ -15845,7 +15845,7 @@ class Page(AsyncContextManager):
         await self._impl_obj.add_locator_handler(
             locator=locator._impl_obj,
             handler=self._wrap_handler(handler),
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             times=times,
         )
 
@@ -16032,7 +16032,7 @@ class Page(AsyncContextManager):
         await self._impl_obj.check(
             selector=selector,
             force=force,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             strict=strict,
@@ -16135,11 +16135,11 @@ class Page(AsyncContextManager):
         await self._impl_obj.click(
             selector=selector,
             button=button,
-            clickCount=click_count,
+            click_count=click_count,
             delay=delay,
             force=force,
             modifiers=mapping.to_impl(modifiers),
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             strict=strict,
@@ -16184,7 +16184,7 @@ class Page(AsyncContextManager):
             [before unload](https://developer.mozilla.org/en-US/docs/Web/Events/beforeunload) page handlers.
         """
 
-        await self._impl_obj.close(reason=reason, runBeforeUnload=run_before_unload)
+        await self._impl_obj.close(reason=reason, run_before_unload=run_before_unload)
 
     async def console_messages(
         self, *, filter: typing.Optional[Literal["all", "since-navigation"]] = None
@@ -16226,7 +16226,7 @@ class Page(AsyncContextManager):
         """
 
         return mapping.from_maybe_impl(
-            await self._impl_obj.content(includeShadow=include_shadow)
+            await self._impl_obj.content(include_shadow=include_shadow)
         )
 
     @property
@@ -16317,7 +16317,7 @@ class Page(AsyncContextManager):
             delay=delay,
             force=force,
             modifiers=mapping.to_impl(modifiers),
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             strict=strict,
@@ -16389,7 +16389,7 @@ class Page(AsyncContextManager):
         await self._impl_obj.dispatch_event(
             selector=selector,
             type=type,
-            eventInit=mapping.to_impl(event_init),
+            event_init=mapping.to_impl(event_init),
             strict=strict,
             timeout=to_milliseconds(timeout),
         )
@@ -16469,12 +16469,12 @@ class Page(AsyncContextManager):
             source=source,
             target=target,
             force=force,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             scroll=scroll,
-            sourcePosition=source_position,
+            source_position=source_position,
             steps=steps,
             strict=strict,
-            targetPosition=target_position,
+            target_position=target_position,
             timeout=to_milliseconds(timeout),
             trial=trial,
         )
@@ -16543,11 +16543,11 @@ class Page(AsyncContextManager):
         """
 
         await self._impl_obj.emulate_media(
-            colorScheme=color_scheme,
+            color_scheme=color_scheme,
             contrast=contrast,
-            forcedColors=forced_colors,
+            forced_colors=forced_colors,
             media=media,
-            reducedMotion=reduced_motion,
+            reduced_motion=reduced_motion,
         )
 
     async def eval_on_selector(
@@ -17141,7 +17141,7 @@ class Page(AsyncContextManager):
             self._impl_obj.expect_navigation(
                 timeout=to_milliseconds(timeout),
                 url=self._wrap_handler(url),
-                waitUntil=wait_until,
+                wait_until=wait_until,
             ).future
         )
 
@@ -17222,7 +17222,7 @@ class Page(AsyncContextManager):
 
         return AsyncEventContextManager(
             self._impl_obj.expect_request(
-                urlOrPredicate=self._wrap_handler(url_or_predicate),
+                url_or_predicate=self._wrap_handler(url_or_predicate),
                 timeout=to_milliseconds(timeout),
             ).future
         )
@@ -17306,7 +17306,7 @@ class Page(AsyncContextManager):
 
         return AsyncEventContextManager(
             self._impl_obj.expect_response(
-                urlOrPredicate=self._wrap_handler(url_or_predicate),
+                url_or_predicate=self._wrap_handler(url_or_predicate),
                 timeout=to_milliseconds(timeout),
             ).future
         )
@@ -17555,7 +17555,7 @@ class Page(AsyncContextManager):
             selector=selector,
             value=value,
             force=force,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             strict=strict,
             timeout=to_milliseconds(timeout),
         )
@@ -18065,7 +18065,7 @@ class Page(AsyncContextManager):
                 disabled=disabled,
                 exact=exact,
                 expanded=expanded,
-                includeHidden=include_hidden,
+                include_hidden=include_hidden,
                 level=level,
                 name=name,
                 pressed=pressed,
@@ -18109,7 +18109,7 @@ class Page(AsyncContextManager):
         Locator
         """
 
-        return mapping.from_impl(self._impl_obj.get_by_test_id(testId=test_id))
+        return mapping.from_impl(self._impl_obj.get_by_test_id(test_id=test_id))
 
     def get_by_text(
         self,
@@ -18258,7 +18258,7 @@ class Page(AsyncContextManager):
 
         return mapping.from_impl_nullable(
             await self._impl_obj.go_back(
-                timeout=to_milliseconds(timeout), waitUntil=wait_until
+                timeout=to_milliseconds(timeout), wait_until=wait_until
             )
         )
 
@@ -18306,7 +18306,7 @@ class Page(AsyncContextManager):
 
         return mapping.from_impl_nullable(
             await self._impl_obj.go_forward(
-                timeout=to_milliseconds(timeout), waitUntil=wait_until
+                timeout=to_milliseconds(timeout), wait_until=wait_until
             )
         )
 
@@ -18375,7 +18375,7 @@ class Page(AsyncContextManager):
                 url=url,
                 referer=referer,
                 timeout=to_milliseconds(timeout),
-                waitUntil=wait_until,
+                wait_until=wait_until,
             )
         )
 
@@ -18453,7 +18453,7 @@ class Page(AsyncContextManager):
             selector=selector,
             force=force,
             modifiers=mapping.to_impl(modifiers),
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             strict=strict,
@@ -18858,9 +18858,9 @@ class Page(AsyncContextManager):
             self._impl_obj.locator(
                 selector=selector,
                 has=has._impl_obj if has else None,
-                hasNot=has_not._impl_obj if has_not else None,
-                hasNotText=has_not_text,
-                hasText=has_text,
+                has_not=has_not._impl_obj if has_not else None,
+                has_not_text=has_not_text,
+                has_text=has_text,
             )
         )
 
@@ -19607,18 +19607,18 @@ class Page(AsyncContextManager):
 
         return mapping.from_maybe_impl(
             await self._impl_obj.pdf(
-                displayHeaderFooter=display_header_footer,
-                footerTemplate=footer_template,
+                display_header_footer=display_header_footer,
+                footer_template=footer_template,
                 format=format,
-                headerTemplate=header_template,
+                header_template=header_template,
                 height=height,
                 landscape=landscape,
                 margin=margin,
                 outline=outline,
-                pageRanges=page_ranges,
+                page_ranges=page_ranges,
                 path=path,
-                preferCSSPageSize=prefer_css_page_size,
-                printBackground=print_background,
+                prefer_css_page_size=prefer_css_page_size,
+                print_background=print_background,
                 scale=scale,
                 tagged=tagged,
                 width=width,
@@ -19719,7 +19719,7 @@ class Page(AsyncContextManager):
             selector=selector,
             key=key,
             delay=delay,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             strict=strict,
             timeout=to_milliseconds(timeout),
         )
@@ -19806,7 +19806,7 @@ class Page(AsyncContextManager):
 
         return mapping.from_impl_nullable(
             await self._impl_obj.reload(
-                timeout=to_milliseconds(timeout), waitUntil=wait_until
+                timeout=to_milliseconds(timeout), wait_until=wait_until
             )
         )
 
@@ -20014,10 +20014,10 @@ class Page(AsyncContextManager):
 
         await self._impl_obj.route_from_har(
             har=har,
-            notFound=not_found,
+            not_found=not_found,
             update=update,
-            updateContent=update_content,
-            updateMode=update_mode,
+            update_content=update_content,
+            update_mode=update_mode,
             url=url,
         )
 
@@ -20158,10 +20158,10 @@ class Page(AsyncContextManager):
                 animations=animations,
                 caret=caret,
                 clip=clip,
-                fullPage=full_page,
+                full_page=full_page,
                 mask=mapping.to_impl(mask),
-                maskColor=mask_color,
-                omitBackground=omit_background,
+                mask_color=mask_color,
+                omit_background=omit_background,
                 path=path,
                 quality=quality,
                 scale=scale,
@@ -20251,7 +20251,7 @@ class Page(AsyncContextManager):
                 force=force,
                 index=mapping.to_impl(index),
                 label=mapping.to_impl(label),
-                noWaitAfter=no_wait_after,
+                no_wait_after=no_wait_after,
                 strict=strict,
                 timeout=to_milliseconds(timeout),
             )
@@ -20332,7 +20332,7 @@ class Page(AsyncContextManager):
             selector=selector,
             checked=checked,
             force=force,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             strict=strict,
@@ -20374,7 +20374,7 @@ class Page(AsyncContextManager):
         """
 
         await self._impl_obj.set_content(
-            html=html, timeout=to_milliseconds(timeout), waitUntil=wait_until
+            html=html, timeout=to_milliseconds(timeout), wait_until=wait_until
         )
 
     def set_default_navigation_timeout(
@@ -20480,7 +20480,7 @@ class Page(AsyncContextManager):
         await self._impl_obj.set_input_files(
             selector=selector,
             files=mapping.to_impl(files),
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             strict=strict,
             timeout=to_milliseconds(timeout),
         )
@@ -20509,7 +20509,7 @@ class Page(AsyncContextManager):
         viewport_size : {width: int, height: int}
         """
 
-        await self._impl_obj.set_viewport_size(viewportSize=viewport_size)
+        await self._impl_obj.set_viewport_size(viewport_size=viewport_size)
 
     async def tap(
         self,
@@ -20579,7 +20579,7 @@ class Page(AsyncContextManager):
             selector=selector,
             force=force,
             modifiers=mapping.to_impl(modifiers),
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             strict=strict,
@@ -20686,7 +20686,7 @@ class Page(AsyncContextManager):
             selector=selector,
             text=text,
             delay=delay,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             strict=strict,
             timeout=to_milliseconds(timeout),
         )
@@ -20750,7 +20750,7 @@ class Page(AsyncContextManager):
         await self._impl_obj.uncheck(
             selector=selector,
             force=force,
-            noWaitAfter=no_wait_after,
+            no_wait_after=no_wait_after,
             position=position,
             scroll=scroll,
             strict=strict,
@@ -21340,7 +21340,7 @@ class Page(AsyncContextManager):
         await self._impl_obj.wait_for_url(
             url=self._wrap_handler(url),
             timeout=to_milliseconds(timeout),
-            waitUntil=wait_until,
+            wait_until=wait_until,
         )
 
     @property
@@ -21400,7 +21400,7 @@ class PageAssertions(AsyncBase):
         __tracebackhide__ = True
 
         await self._impl_obj.not_to_have_title(
-            titleOrRegExp=title_or_reg_exp, timeout=to_milliseconds(timeout)
+            title_or_reg_exp=title_or_reg_exp, timeout=to_milliseconds(timeout)
         )
 
     async def not_to_have_url(
@@ -21427,8 +21427,8 @@ class PageAssertions(AsyncBase):
         __tracebackhide__ = True
 
         await self._impl_obj.not_to_have_url(
-            urlOrRegExp=url_or_reg_exp,
-            ignoreCase=ignore_case,
+            url_or_reg_exp=url_or_reg_exp,
+            ignore_case=ignore_case,
             timeout=to_milliseconds(timeout),
         )
 
@@ -21484,7 +21484,7 @@ class PageAssertions(AsyncBase):
         __tracebackhide__ = True
 
         await self._impl_obj.to_have_title(
-            titleOrRegExp=title_or_reg_exp, timeout=to_milliseconds(timeout)
+            title_or_reg_exp=title_or_reg_exp, timeout=to_milliseconds(timeout)
         )
 
     async def to_have_url(
@@ -21521,8 +21521,8 @@ class PageAssertions(AsyncBase):
         __tracebackhide__ = True
 
         await self._impl_obj.to_have_url(
-            urlOrRegExp=url_or_reg_exp,
-            ignoreCase=ignore_case,
+            url_or_reg_exp=url_or_reg_exp,
+            ignore_case=ignore_case,
             timeout=to_milliseconds(timeout),
         )
 
@@ -22304,7 +22304,7 @@ class Route(AsyncBase):
             - `'failed'` - A generic failure occurred.
         """
 
-        await self._impl_obj.abort(errorCode=error_code)
+        await self._impl_obj.abort(error_code=error_code)
 
     async def continue_(
         self,
@@ -22363,7 +22363,7 @@ class Route(AsyncBase):
         await self._impl_obj.continue_(
             headers=mapping.to_impl(headers),
             method=method,
-            postData=mapping.to_impl(post_data),
+            post_data=mapping.to_impl(post_data),
             url=url,
         )
 
@@ -22452,7 +22452,7 @@ class Route(AsyncBase):
         await self._impl_obj.fallback(
             headers=mapping.to_impl(headers),
             method=method,
-            postData=mapping.to_impl(post_data),
+            post_data=mapping.to_impl(post_data),
             url=url,
         )
 
@@ -22518,10 +22518,10 @@ class Route(AsyncBase):
         return mapping.from_impl(
             await self._impl_obj.fetch(
                 headers=mapping.to_impl(headers),
-                maxRedirects=max_redirects,
-                maxRetries=max_retries,
+                max_redirects=max_redirects,
+                max_retries=max_retries,
                 method=method,
-                postData=mapping.to_impl(post_data),
+                post_data=mapping.to_impl(post_data),
                 timeout=to_milliseconds(timeout),
                 url=url,
             )
@@ -22581,7 +22581,7 @@ class Route(AsyncBase):
 
         await self._impl_obj.fulfill(
             body=body,
-            contentType=content_type,
+            content_type=content_type,
             headers=mapping.to_impl(headers),
             json=mapping.to_impl(json),
             path=path,
@@ -22667,7 +22667,7 @@ class Screencast(AsyncBase):
             await self._impl_obj.show_actions(
                 cursor=cursor,
                 duration=duration,
-                fontSize=font_size,
+                font_size=font_size,
                 position=position,
                 style=style,
             )
@@ -22778,7 +22778,7 @@ class Screencast(AsyncBase):
         return mapping.from_impl(
             await self._impl_obj.start(
                 fps=fps,
-                onFrame=self._wrap_handler(on_frame),
+                on_frame=self._wrap_handler(on_frame),
                 path=path,
                 quality=quality,
                 size=size,
@@ -22873,7 +22873,7 @@ class Selectors(AsyncBase):
         """
 
         await self._impl_obj.register(
-            name=name, script=script, contentScript=content_script, path=path
+            name=name, script=script, content_script=content_script, path=path
         )
 
     def set_test_id_attribute(self, attribute_name: str) -> None:
@@ -22888,7 +22888,7 @@ class Selectors(AsyncBase):
             `"data-pw,data-ti"`.
         """
 
-        self._impl_obj.set_test_id_attribute(attributeName=attribute_name)
+        self._impl_obj.set_test_id_attribute(attribute_name=attribute_name)
 
 
 mapping.register(SelectorsImpl, Selectors)
@@ -23032,10 +23032,10 @@ class Tracing(AsyncBase):
 
         return mapping.from_impl(
             await self._impl_obj.start(
-                ariaSnapshots=aria_snapshots,
+                aria_snapshots=aria_snapshots,
                 live=live,
                 name=name,
-                screenSnapshots=screen_snapshots,
+                screen_snapshots=screen_snapshots,
                 screenshots=screenshots,
                 snapshots=snapshots,
                 sources=sources,
@@ -23136,7 +23136,7 @@ class Tracing(AsyncBase):
 
         return mapping.from_impl(
             await self._impl_obj.start_har(
-                path=path, content=content, mode=mode, urlFilter=url_filter
+                path=path, content=content, mode=mode, url_filter=url_filter
             )
         )
 

@@ -12,12 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 
 from playwright._impl._api_structures import VirtualCredential
-from playwright._impl._helper import locals_to_params
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser_context import BrowserContext
 
 
@@ -28,31 +27,34 @@ class Credentials:
         self._dispatcher_fiber = browser_context._dispatcher_fiber
 
     async def install(self) -> None:
-        await self._browser_context._channel.send("credentialsInstall", None)
+        await self._browser_context._channel.credentialsInstall()
 
     async def create(
         self,
-        rpId: str,
-        id: str = None,
-        userHandle: str = None,
-        privateKey: str = None,
-        publicKey: str = None,
-        signCount: int = None,
+        rp_id: str,
+        id: Optional[str],
+        user_handle: Optional[str],
+        private_key: Optional[str],
+        public_key: Optional[str],
+        sign_count: Optional[int],
     ) -> VirtualCredential:
-        result = await self._browser_context._channel.send_return_as_dict(
-            "credentialsCreate", None, locals_to_params(locals())
+        result = await self._browser_context._channel.credentialsCreate(
+            rpId=rp_id,
+            id=id,
+            userHandle=user_handle,
+            privateKey=private_key,
+            publicKey=public_key,
+            signCount=sign_count,
         )
-        return (result or {})["credential"]
+        return result["credential"]
 
     async def delete(self, id: str) -> None:
-        await self._browser_context._channel.send("credentialsDelete", None, {"id": id})
+        await self._browser_context._channel.credentialsDelete(id=id)
 
     async def get(
         self,
-        rpId: str = None,
-        id: str = None,
+        rp_id: Optional[str],
+        id: Optional[str],
     ) -> List[VirtualCredential]:
-        result = await self._browser_context._channel.send_return_as_dict(
-            "credentialsGet", None, locals_to_params(locals())
-        )
-        return (result or {}).get("credentials", [])
+        result = await self._browser_context._channel.credentialsGet(rpId=rp_id, id=id)
+        return result["credentials"]

@@ -18,7 +18,6 @@ import stat
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
-    Dict,
     List,
     Optional,
     Sequence,
@@ -28,12 +27,14 @@ from typing import (
     cast,
 )
 
-from playwright._impl._connection import Channel, from_channel
+from playwright._impl._connection import from_channel
 from playwright._impl._errors import Error
 from playwright._impl._writable_stream import WritableStream
 
 if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl import _protocol_types as channels
     from playwright._impl._browser_context import BrowserContext
+    from playwright._impl._protocol_channels import WritableStreamChannel
 
 from playwright._impl._api_structures import FilePayload
 
@@ -41,11 +42,11 @@ SIZE_LIMIT_IN_BYTES = 50 * 1024 * 1024
 
 
 class InputFilesList(TypedDict, total=False):
-    streams: Optional[List[Channel]]
-    directoryStream: Optional[Channel]
+    streams: Optional[List["WritableStreamChannel"]]
+    directoryStream: Optional["WritableStreamChannel"]
     localDirectory: Optional[str]
     localPaths: Optional[List[str]]
-    payloads: Optional[List[Dict[str, Union[str, bytes]]]]
+    payloads: Optional[List["channels.ElementHandleSetInputFilesParamsPayloads"]]
 
 
 def _list_files(directory: str) -> List[str]:
@@ -82,30 +83,25 @@ async def convert_input_files(
                 (_list_files(local_directory) if local_directory else local_paths),
             )
             streams = []
-            result = await context._connection.wrap_api_call(
-                lambda: context._channel.send_return_as_dict(
-                    "createTempFiles",
-                    None,
-                    {
-                        "rootDirName": (
-                            os.path.basename(local_directory)
-                            if local_directory
-                            else None
-                        ),
-                        "items": list(
-                            map(
-                                lambda file: dict(
-                                    name=(
-                                        os.path.relpath(file, local_directory)
-                                        if local_directory
-                                        else os.path.basename(file)
-                                    ),
-                                    lastModifiedMs=int(os.path.getmtime(file) * 1000),
-                                ),
-                                files_to_stream,
-                            )
-                        ),
-                    },
+            root_dir_name = (
+                os.path.basename(local_directory) if local_directory else None
+            )
+            temp_files: List[channels.BrowserContextCreateTempFilesParamsItems] = [
+                {
+                    "name": (
+                        os.path.relpath(file, local_directory)
+                        if local_directory
+                        else os.path.basename(file)
+                    ),
+                    "lastModifiedMs": int(os.path.getmtime(file) * 1000),
+                }
+                for file in files_to_stream
+            ]
+            result: channels.BrowserContextCreateTempFilesResult = (
+                await context._connection.wrap_api_call(
+                    lambda: context._channel.createTempFiles(
+                        rootDirName=root_dir_name, items=temp_files
+                    )
                 )
             )
             for i, file in enumerate(result["writableStreams"]):
@@ -114,7 +110,7 @@ async def convert_input_files(
                 streams.append(stream._channel)
             return InputFilesList(
                 streams=None if local_directory else streams,
-                directoryStream=result.get("rootDir"),
+                directoryStream=result["rootDir"],
             )
         return InputFilesList(localPaths=local_paths, localDirectory=local_directory)
 

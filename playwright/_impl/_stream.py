@@ -14,12 +14,17 @@
 
 import base64
 from pathlib import Path
-from typing import Dict, Union
+from typing import TYPE_CHECKING, Dict, Union
 
 from playwright._impl._connection import ChannelOwner
 
+if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl._protocol_channels import StreamChannel
+
 
 class Stream(ChannelOwner):
+    _channel: "StreamChannel"
+
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
@@ -29,7 +34,7 @@ class Stream(ChannelOwner):
         file = await self._loop.run_in_executor(None, lambda: open(path, "wb"))
         try:
             while True:
-                binary = await self._channel.send("read", None, {"size": 1024 * 1024})
+                binary = (await self._channel.read(size=1024 * 1024))["binary"]
                 if not binary:
                     break
                 await self._loop.run_in_executor(
@@ -41,7 +46,7 @@ class Stream(ChannelOwner):
     async def read_all(self) -> bytes:
         binary = b""
         while True:
-            chunk = await self._channel.send("read", None, {"size": 1024 * 1024})
+            chunk = (await self._channel.read(size=1024 * 1024))["binary"]
             if not chunk:
                 break
             binary += base64.b64decode(chunk)

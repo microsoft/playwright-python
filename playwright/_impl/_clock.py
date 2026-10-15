@@ -13,9 +13,9 @@
 # limitations under the License.
 
 import datetime
-from typing import TYPE_CHECKING, Dict, Union
+from typing import TYPE_CHECKING, Optional, Tuple, Union
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser_context import BrowserContext
 
 
@@ -25,80 +25,80 @@ class Clock:
         self._loop = browser_context._loop
         self._dispatcher_fiber = browser_context._dispatcher_fiber
 
-    async def install(self, time: Union[float, str, datetime.datetime] = None) -> None:
-        await self._browser_context._channel.send(
-            "clockInstall",
-            None,
-            parse_time(time) if time is not None else {},
+    async def install(
+        self, time: Optional[Union[float, str, datetime.datetime]]
+    ) -> None:
+        time_number, time_string = (
+            parse_time(time) if time is not None else (None, None)
+        )
+        await self._browser_context._channel.clockInstall(
+            timeNumber=time_number, timeString=time_string
         )
 
     async def fast_forward(
         self,
         ticks: Union[int, str],
     ) -> None:
-        await self._browser_context._channel.send(
-            "clockFastForward",
-            None,
-            parse_ticks(ticks),
+        ticks_number, ticks_string = parse_ticks(ticks)
+        await self._browser_context._channel.clockFastForward(
+            ticksNumber=ticks_number, ticksString=ticks_string
         )
 
     async def pause_at(
         self,
         time: Union[float, str, datetime.datetime],
     ) -> None:
-        await self._browser_context._channel.send(
-            "clockPauseAt",
-            None,
-            parse_time(time),
+        time_number, time_string = parse_time(time)
+        await self._browser_context._channel.clockPauseAt(
+            timeNumber=time_number, timeString=time_string
         )
 
     async def resume(
         self,
     ) -> None:
-        await self._browser_context._channel.send("clockResume", None)
+        await self._browser_context._channel.clockResume()
 
     async def run_for(
         self,
         ticks: Union[int, str],
     ) -> None:
-        await self._browser_context._channel.send(
-            "clockRunFor",
-            None,
-            parse_ticks(ticks),
+        ticks_number, ticks_string = parse_ticks(ticks)
+        await self._browser_context._channel.clockRunFor(
+            ticksNumber=ticks_number, ticksString=ticks_string
         )
 
     async def set_fixed_time(
         self,
         time: Union[float, str, datetime.datetime],
     ) -> None:
-        await self._browser_context._channel.send(
-            "clockSetFixedTime",
-            None,
-            parse_time(time),
+        time_number, time_string = parse_time(time)
+        await self._browser_context._channel.clockSetFixedTime(
+            timeNumber=time_number, timeString=time_string
         )
 
     async def set_system_time(
         self,
         time: Union[float, str, datetime.datetime],
     ) -> None:
-        await self._browser_context._channel.send(
-            "clockSetSystemTime",
-            None,
-            parse_time(time),
+        time_number, time_string = parse_time(time)
+        await self._browser_context._channel.clockSetSystemTime(
+            timeNumber=time_number, timeString=time_string
         )
 
 
 def parse_time(
     time: Union[float, str, datetime.datetime],
-) -> Dict[str, Union[int, str]]:
+) -> Tuple[Optional[int], Optional[str]]:
+    """Returns (timeNumber, timeString)."""
     if isinstance(time, (float, int)):
-        return {"timeNumber": int(time * 1_000)}
+        return int(time * 1_000), None
     if isinstance(time, str):
-        return {"timeString": time}
-    return {"timeNumber": int(time.timestamp() * 1_000)}
+        return None, time
+    return int(time.timestamp() * 1_000), None
 
 
-def parse_ticks(ticks: Union[int, str]) -> Dict[str, Union[int, str]]:
+def parse_ticks(ticks: Union[int, str]) -> Tuple[Optional[int], Optional[str]]:
+    """Returns (ticksNumber, ticksString)."""
     if isinstance(ticks, int):
-        return {"ticksNumber": ticks}
-    return {"ticksString": ticks}
+        return ticks, None
+    return None, ticks

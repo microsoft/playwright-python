@@ -321,6 +321,34 @@ async def test_should_work_without_server(page: Page, server: Server) -> None:
     )
 
 
+async def test_should_emit_close_upon_frame_navigation(
+    page: Page, server: Server
+) -> None:
+    future: asyncio.Future[WebSocketRoute] = asyncio.Future()
+
+    async def _handle_ws(ws: WebSocketRoute) -> None:
+        ws.connect_to_server()
+        future.set_result(ws)
+
+    await page.route_web_socket(re.compile(".*"), _handle_ws)
+    await setup_ws(page, server, "blob")
+
+    route = await future
+    route.send("hello")
+    await assert_equal(
+        lambda: page.evaluate("window.log"),
+        [
+            "open",
+            f"message: data=hello origin=ws://localhost:{server.PORT} lastEventId=",
+        ],
+    )
+
+    closed: asyncio.Future[None] = asyncio.Future()
+    route.on_close(lambda code, reason: closed.set_result(None))
+    await page.goto(server.EMPTY_PAGE)
+    await closed
+
+
 async def test_should_work_with_base_url(browser: Browser, server: Server) -> None:
     context = await browser.new_context(base_url=f"http://localhost:{server.PORT}")
     page = await context.new_page()
