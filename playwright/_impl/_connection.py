@@ -49,7 +49,6 @@ from playwright._impl._errors import (
 from playwright._impl._greenlets import EventGreenlet
 from playwright._impl._helper import (
     ParsedMessagePayload,
-    create_task_and_ignore_exception,
 )
 from playwright._impl._protocol_check import check_message, is_enabled
 from playwright._impl._transport import Transport
@@ -57,96 +56,76 @@ from playwright._impl._transport import Transport
 if TYPE_CHECKING:
     from playwright._impl._local_utils import LocalUtils
     from playwright._impl._playwright import Playwright
+    from playwright._impl._protocol_channels import RootChannel
 
-TimeoutCalculator = Optional[Callable[[Optional[float]], float]]
 _PLAYWRIGHT_MODULE_PATH = str(Path(playwright.__file__).parents[0])
 
 
-class Channel(AsyncIOEventEmitter):
+class Channel:
+    """The base of the generated channels in _protocol_channels.py.
+
+    Port of the channel proxy in packages/playwright-core/src/client/channelOwner.ts.
+    """
+
     def __init__(self, connection: "Connection", object: "ChannelOwner") -> None:
-        super().__init__()
         self._connection = connection
         self._guid = object._guid
         self._object = object
-        self.on("error", lambda exc: self._connection._on_event_listener_error(exc))
-
-    async def send(
-        self,
-        method: str,
-        timeout_calculator: TimeoutCalculator,
-        params: Dict = None,
-        is_internal: bool = False,
-        title: str = None,
-    ) -> Any:
-        return await self._connection.wrap_api_call(
-            lambda: self._inner_send(method, timeout_calculator, params, False),
-            is_internal,
-            title,
+        self._emitter = AsyncIOEventEmitter()
+        self._emitter.on(
+            "error", lambda exc: self._connection._on_event_listener_error(exc)
         )
+        self._event_listeners: Dict[Tuple[str, Any], Callable[[Any], Any]] = {}
 
-    def send_may_fail(
-        self,
-        method: str,
-        timeout_calculator: TimeoutCalculator,
-        params: Dict = None,
-        is_internal: bool = False,
-        title: str = None,
+    async def _call(
+        self, method: str, params: Mapping[str, Any], timeout: float
+    ) -> Dict[str, Any]:
+        """Sends a command and returns its result, {} when it has none."""
+        result = await self._connection.wrap_api_call(
+            lambda: self._inner_send(method, _filter_none(params), timeout)
+        )
+        return result or {}
+
+    def _add_event_listener(
+        self, event: str, handler: Any, listener: Callable[[Any], Any]
     ) -> None:
-        create_task_and_ignore_exception(
-            self._connection._loop,
-            self.send(method, timeout_calculator, params, is_internal, title),
-        )
+        self._event_listeners[(event, handler)] = listener
+        self._emitter.on(event, listener)
 
-    async def send_return_as_dict(
-        self,
-        method: str,
-        timeout_calculator: TimeoutCalculator,
-        params: Dict = None,
-        is_internal: bool = False,
-        title: str = None,
-    ) -> Any:
-        return await self._connection.wrap_api_call(
-            lambda: self._inner_send(method, timeout_calculator, params, True),
-            is_internal,
-            title,
-        )
+    def _remove_event_listener(self, event: str, handler: Any) -> None:
+        listener = self._event_listeners.pop((event, handler), None)
+        if listener:
+            self._emitter.remove_listener(event, listener)
 
     def send_no_reply(
         self,
         method: str,
-        timeout_calculator: TimeoutCalculator,
-        params: Dict = None,
+        params: Mapping[str, Any] = None,
         is_internal: bool = False,
         title: str = None,
     ) -> None:
-        # No reply messages are used to e.g. __waitInfo__(after).
-        augmented_params, timeout = _augment_params(params, timeout_calculator)
+        """Sends a message without waiting for the reply.
+
+        For messages that must go out synchronously, such as __waitInfo__ and
+        updateSubscription.
+        """
         self._connection.wrap_api_call_sync(
             lambda: self._connection._send_message_to_server(
-                self._object,
-                method,
-                augmented_params,
-                timeout,
-                True,
+                self._object, method, _filter_none(params or {}), 0, True
             ),
             is_internal,
             title,
         )
 
     async def _inner_send(
-        self,
-        method: str,
-        timeout_calculator: TimeoutCalculator,
-        params: Optional[Dict],
-        return_as_dict: bool,
-    ) -> Any:
+        self, method: str, params: Dict[str, Any], timeout: float
+    ) -> Optional[Dict[str, Any]]:
         if self._connection._error:
             error = self._connection._error
             self._connection._error = None
             raise error
-        augmented_params, timeout = _augment_params(params, timeout_calculator)
         callback = self._connection._send_message_to_server(
-            self._object, method, augmented_params, timeout
+            self._object, method, params, timeout
         )
         try:
             done, _ = await asyncio.wait(
@@ -166,18 +145,10 @@ class Channel(AsyncIOEventEmitter):
         if not callback.future.done():
             callback.future.cancel()
         result = next(iter(done)).result()
-        # Protocol now has named return values, assume result is one level deeper unless
-        # there is explicit ambiguity.
         if not result:
             return None
         assert isinstance(result, dict)
-        if return_as_dict:
-            return result
-        if len(result) == 0:
-            return None
-        assert len(result) == 1
-        key = next(iter(result))
-        return result[key]
+        return result
 
 
 class ChannelOwner(AsyncIOEventEmitter):
@@ -200,7 +171,12 @@ class ChannelOwner(AsyncIOEventEmitter):
             parent if isinstance(parent, ChannelOwner) else None
         )
         self._objects: Dict[str, "ChannelOwner"] = {}
-        self._channel: Channel = Channel(self._connection, self)
+        # Imported here: the generated channels import this module.
+        from playwright._impl._protocol_channels import CHANNEL_CLASSES
+
+        self._channel: Channel = CHANNEL_CLASSES.get(type, Channel)(
+            self._connection, self
+        )
         self._initializer = initializer
         self._was_collected = False
 
@@ -236,7 +212,6 @@ class ChannelOwner(AsyncIOEventEmitter):
             self._connection.wrap_api_call_sync(
                 lambda: self._channel.send_no_reply(
                     "updateSubscription",
-                    None,
                     {"event": protocol_event, "enabled": enabled},
                 ),
                 True,
@@ -282,19 +257,14 @@ class ProtocolCallback:
 
 
 class RootChannelOwner(ChannelOwner):
+    _channel: "RootChannel"
+
     def __init__(self, connection: "Connection") -> None:
         super().__init__(connection, "Root", "", {})
 
     async def initialize(self) -> "Playwright":
-        return from_channel(
-            await self._channel.send(
-                "initialize",
-                None,
-                {
-                    "sdkLanguage": "python",
-                },
-            )
-        )
+        result = await self._channel.initialize(sdkLanguage="python")
+        return from_channel(result["playwright"])
 
 
 class Connection(EventEmitter):
@@ -510,7 +480,7 @@ class Connection(EventEmitter):
             error = msg.get("error")
             if error and not msg.get("result"):
                 parsed_error = parse_error(
-                    error["error"], format_call_log(msg.get("log"))  # type: ignore
+                    error["error"], format_call_log(msg.get("log"))
                 )
                 parsed_error._log = msg.get("log")
                 parsed_error._details = self._replace_guids_with_channels(
@@ -554,7 +524,7 @@ class Connection(EventEmitter):
         should_replace_guids_with_channels = "jsonPipe@" not in guid
         try:
             if self._is_sync:
-                for listener in object._channel.listeners(method):
+                for listener in object._channel._emitter.listeners(method):
                     # Event handlers like route/locatorHandlerTriggered require us to perform async work.
                     # In order to report their potential errors to the user, we need to catch it and store it in the connection
                     def _done_callback(future: asyncio.Future) -> None:
@@ -577,11 +547,11 @@ class Connection(EventEmitter):
                         g.switch(params)
             else:
                 if should_replace_guids_with_channels:
-                    object._channel.emit(
+                    object._channel._emitter.emit(
                         method, self._replace_guids_with_channels(params)
                     )
                 else:
-                    object._channel.emit(method, params)
+                    object._channel._emitter.emit(method, params)
         except BaseException as exc:
             self._on_event_listener_error(exc)
 
@@ -750,19 +720,6 @@ def _attach_api_call_information(
         stack_trace_information["apiName"] = ""
     stack_trace_information["title"] = title
     return stack_trace_information
-
-
-def _augment_params(
-    params: Optional[Dict],
-    timeout_calculator: Optional[Callable[[Optional[float]], float]],
-) -> Tuple[Dict, float]:
-    if params is None:
-        params = {}
-    timeout_param = params.pop("timeout", None)
-    timeout: float = 0
-    if timeout_calculator:
-        timeout = timeout_calculator(timeout_param)
-    return _filter_none(params), timeout
 
 
 def _filter_none(d: Mapping) -> Dict:

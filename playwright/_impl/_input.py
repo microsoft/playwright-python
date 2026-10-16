@@ -12,100 +12,112 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from playwright._impl._connection import Channel
-from playwright._impl._helper import MouseButton, locals_to_params
+from typing import TYPE_CHECKING, Optional
+
+from playwright._impl._helper import MouseButton
+
+if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl._protocol_channels import PageChannel
 
 
 class Keyboard:
-    def __init__(self, channel: Channel) -> None:
+    def __init__(self, channel: "PageChannel") -> None:
         self._channel = channel
         self._loop = channel._connection._loop
         self._dispatcher_fiber = channel._connection._dispatcher_fiber
 
     async def down(self, key: str) -> None:
-        await self._channel.send("keyboardDown", None, locals_to_params(locals()))
+        await self._channel.keyboardDown(key=key)
 
     async def up(self, key: str) -> None:
-        await self._channel.send("keyboardUp", None, locals_to_params(locals()))
+        await self._channel.keyboardUp(key=key)
 
     async def insert_text(self, text: str) -> None:
-        await self._channel.send("keyboardInsertText", None, locals_to_params(locals()))
+        await self._channel.keyboardInsertText(text=text)
 
-    async def type(self, text: str, delay: float = None) -> None:
-        await self._channel.send("keyboardType", None, locals_to_params(locals()))
+    async def type(self, text: str, delay: Optional[float]) -> None:
+        await self._channel.keyboardType(text=text, delay=delay)
 
-    async def press(self, key: str, delay: float = None) -> None:
-        await self._channel.send("keyboardPress", None, locals_to_params(locals()))
+    async def press(self, key: str, delay: Optional[float]) -> None:
+        await self._channel.keyboardPress(key=key, delay=delay)
 
 
 class Mouse:
-    def __init__(self, channel: Channel) -> None:
+    def __init__(self, channel: "PageChannel") -> None:
         self._channel = channel
         self._loop = channel._connection._loop
         self._dispatcher_fiber = channel._connection._dispatcher_fiber
 
-    async def move(self, x: float, y: float, steps: int = None) -> None:
-        await self._channel.send("mouseMove", None, locals_to_params(locals()))
+    async def move(self, x: float, y: float, steps: Optional[int]) -> None:
+        await self._channel.mouseMove(x=x, y=y, steps=steps)
 
     async def down(
         self,
-        button: MouseButton = None,
-        clickCount: int = None,
+        button: Optional[MouseButton],
+        click_count: Optional[int],
     ) -> None:
-        await self._channel.send("mouseDown", None, locals_to_params(locals()))
+        await self._channel.mouseDown(button=button, clickCount=click_count)
 
     async def up(
         self,
-        button: MouseButton = None,
-        clickCount: int = None,
+        button: Optional[MouseButton],
+        click_count: Optional[int],
     ) -> None:
-        await self._channel.send("mouseUp", None, locals_to_params(locals()))
+        await self._channel.mouseUp(button=button, clickCount=click_count)
 
     async def _click(
         self,
         x: float,
         y: float,
-        delay: float = None,
-        button: MouseButton = None,
-        clickCount: int = None,
-        title: str = None,
+        delay: Optional[float],
+        button: Optional[MouseButton],
+        click_count: Optional[int],
+        title: Optional[str],
     ) -> None:
-        params = locals_to_params(locals())
-        params.pop("title", None)
-        await self._channel.send("mouseClick", None, params, title=title)
+        await self._channel._connection.wrap_api_call(
+            lambda: self._channel.mouseClick(
+                x=x, y=y, delay=delay, button=button, clickCount=click_count
+            ),
+            title=title,
+        )
 
     async def click(
         self,
         x: float,
         y: float,
-        delay: float = None,
-        button: MouseButton = None,
-        clickCount: int = None,
+        delay: Optional[float],
+        button: Optional[MouseButton],
+        click_count: Optional[int],
     ) -> None:
-        params = locals()
-        del params["self"]
-        await self._click(**params)
+        await self._click(
+            x,
+            y,
+            delay=delay,
+            button=button,
+            click_count=click_count,
+            title=None,
+        )
 
     async def dblclick(
         self,
         x: float,
         y: float,
-        delay: float = None,
-        button: MouseButton = None,
+        delay: Optional[float],
+        button: Optional[MouseButton],
     ) -> None:
         await self._click(
-            x, y, delay=delay, button=button, clickCount=2, title="Double click"
+            x, y, delay=delay, button=button, click_count=2, title="Double click"
         )
 
-    async def wheel(self, deltaX: float, deltaY: float) -> None:
-        await self._channel.send("mouseWheel", None, locals_to_params(locals()))
+    async def wheel(self, delta_x: float, delta_y: float) -> None:
+        await self._channel.mouseWheel(deltaX=delta_x, deltaY=delta_y)
 
 
 class Touchscreen:
-    def __init__(self, channel: Channel) -> None:
+    def __init__(self, channel: "PageChannel") -> None:
         self._channel = channel
         self._loop = channel._connection._loop
         self._dispatcher_fiber = channel._connection._dispatcher_fiber
 
     async def tap(self, x: float, y: float) -> None:
-        await self._channel.send("touchscreenTap", None, locals_to_params(locals()))
+        await self._channel.touchscreenTap(x=x, y=y)

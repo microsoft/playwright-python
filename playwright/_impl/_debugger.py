@@ -13,13 +13,19 @@
 # limitations under the License.
 
 from types import SimpleNamespace
-from typing import Any, Dict, Optional
+from typing import TYPE_CHECKING, Dict, Optional, cast
 
 from playwright._impl._api_structures import DebuggerLocation, DebuggerPausedDetails
 from playwright._impl._connection import ChannelOwner
 
+if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl import _protocol_types as channels
+    from playwright._impl._protocol_channels import DebuggerChannel
+
 
 class Debugger(ChannelOwner):
+    _channel: "DebuggerChannel"
+
     Events = SimpleNamespace(
         PausedStateChanged="pausedstatechanged",
     )
@@ -29,25 +35,33 @@ class Debugger(ChannelOwner):
     ) -> None:
         super().__init__(parent, type, guid, initializer)
         self._paused_details: Optional[DebuggerPausedDetails] = None
-        self._channel.on(
-            "pausedStateChanged", lambda params: self._on_paused_state_changed(params)
-        )
+        self._channel.onPausedStateChanged(self._on_paused_state_changed)
 
-    def _on_paused_state_changed(self, params: Dict[str, Any]) -> None:
-        self._paused_details = params.get("pausedDetails")
+    def _on_paused_state_changed(
+        self, event: "channels.DebuggerPausedStateChangedEvent"
+    ) -> None:
+        self._paused_details = cast(
+            Optional[DebuggerPausedDetails], event["pausedDetails"]
+        )
         self.emit(Debugger.Events.PausedStateChanged)
 
     async def request_pause(self) -> None:
-        await self._channel.send("requestPause", None)
+        await self._channel.requestPause()
 
     async def resume(self) -> None:
-        await self._channel.send("resume", None)
+        await self._channel.resume()
 
     async def next(self) -> None:
-        await self._channel.send("next", None)
+        await self._channel.next()
 
     async def run_to(self, location: DebuggerLocation) -> None:
-        await self._channel.send("runTo", None, {"location": location})
+        await self._channel.runTo(
+            location={
+                "file": location["file"],
+                "line": location.get("line"),
+                "column": location.get("column"),
+            }
+        )
 
     @property
     def paused_details(self) -> Optional[DebuggerPausedDetails]:

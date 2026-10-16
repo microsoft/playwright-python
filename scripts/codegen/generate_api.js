@@ -56,7 +56,6 @@ const rules = require('./python_rules');
 /**
  * @typedef {{
  *   name: string,
- *   implName: string,
  *   type: PyType,
  *   optional: boolean,
  *   comment: string,
@@ -620,7 +619,7 @@ function forwardExpression(param) {
   const name = param.name;
   if (someType(t, c => c.kind === 'callable'))
     return `self._wrap_handler(${name})`;
-  if (param.implName === 'timeout' && someType(t, c => c.kind === 'name' && c.name === 'float'))
+  if (param.name === 'timeout' && someType(t, c => c.kind === 'name' && c.name === 'float'))
     return `to_milliseconds(${name})`;
   if (someType(t, c =>
     (c.kind === 'name' && c.name === 'Any') ||
@@ -688,7 +687,6 @@ function buildMember(clazz, member) {
     const nullable = type.kind === 'union' && !!type.members?.some(isNone);
     return /** @type {PyParam} */ ({
       name: toSnakeCase(arg.alias),
-      implName: arg.name,
       type,
       optional: isOption || !arg.required || nullable,
       comment: renderSpec(arg.spec),
@@ -706,7 +704,6 @@ function buildMember(clazz, member) {
   for (const extra of lookupRule('extraOptions', memberPlace) || []) {
     keywordOnly.push({
       name: toSnakeCase(extra.name),
-      implName: extra.name,
       type: toPy(Type.parse(extra.type), { dir: 'in', place: `${memberPlace}.${extra.name}` }),
       optional: true,
       comment: '',
@@ -749,7 +746,6 @@ function buildExtraMember(className, extra) {
     isAsync: extra.async,
     positional: extra.args.map(arg => ({
       name: toSnakeCase(arg.name),
-      implName: arg.name,
       type: toPy(Type.parse(arg.type), { dir: 'in', place: `${place}.${arg.name}` }),
       optional: false,
       comment: '',
@@ -891,7 +887,7 @@ function emitEventOverloads(clazz, methodName, out) {
 /** @param {PyParam} param */
 function paramAnnotation(param) {
   let type = param.type;
-  if (param.implName === 'timeout' && type.kind === 'name' && type.name === 'float')
+  if (param.name === 'timeout' && type.kind === 'name' && type.name === 'float')
     type = makeUnion([NAME('float'), NAME('datetime.timedelta')]);
   if (param.optional && !(type.kind === 'union' && type.members?.some(isNone)))
     type = { kind: 'union', members: [type, NONE] };
@@ -958,7 +954,7 @@ function emitMember(clazz, member, out) {
 
   // Dunder methods take positional arguments only.
   const isDunder = member.name.startsWith('__');
-  const callArgs = [...member.positional, ...member.keywordOnly].map(p => isDunder ? forwardExpression(p) : `${p.implName}=${forwardExpression(p)}`).join(', ');
+  const callArgs = [...member.positional, ...member.keywordOnly].map(p => isDunder ? forwardExpression(p) : `${p.name}=${forwardExpression(p)}`).join(', ');
   const call = `self._impl_obj.${member.name}(${callArgs})`;
   if (member.returnType?.kind === 'ecm') {
     if (isAsync) {

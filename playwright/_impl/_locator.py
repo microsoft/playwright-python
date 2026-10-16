@@ -42,7 +42,6 @@ from playwright._impl._errors import Error
 from playwright._impl._helper import (
     KeyboardModifier,
     MouseButton,
-    locals_to_params,
     to_impl,
 )
 from playwright._impl._internal_structures import (
@@ -145,7 +144,7 @@ class Locator:
     def page(self) -> "Page":
         return self._frame.page
 
-    async def bounding_box(self, timeout: float = None) -> Optional[FloatRect]:
+    async def bounding_box(self, timeout: Optional[float]) -> Optional[FloatRect]:
         return await self._with_element(
             lambda h, _: h.bounding_box(),
             timeout,
@@ -153,193 +152,286 @@ class Locator:
 
     async def check(
         self,
-        position: Position = None,
-        timeout: float = None,
-        force: bool = None,
-        noWaitAfter: bool = None,
-        trial: bool = None,
-        scroll: Literal["auto", "none"] = None,
+        position: Optional[Position],
+        timeout: Optional[float],
+        force: Optional[bool],
+        no_wait_after: Optional[bool],
+        trial: Optional[bool],
+        scroll: Optional[Literal["auto", "none"]],
     ) -> None:
-        params = locals_to_params(locals())
-        return await self._frame.check(self._selector, strict=True, **params)
+        await self._frame.check(
+            self._selector,
+            strict=True,
+            position=position,
+            timeout=timeout,
+            force=force,
+            no_wait_after=no_wait_after,
+            trial=trial,
+            scroll=scroll,
+        )
 
     async def click(
         self,
-        modifiers: Sequence[KeyboardModifier] = None,
-        position: Position = None,
-        delay: float = None,
-        button: MouseButton = None,
-        clickCount: int = None,
-        timeout: float = None,
-        force: bool = None,
-        noWaitAfter: bool = None,
-        trial: bool = None,
-        steps: int = None,
-        scroll: Literal["auto", "none"] = None,
+        modifiers: Optional[Sequence[KeyboardModifier]],
+        position: Optional[Position],
+        delay: Optional[float],
+        button: Optional[MouseButton],
+        click_count: Optional[int],
+        timeout: Optional[float],
+        force: Optional[bool],
+        no_wait_after: Optional[bool],
+        trial: Optional[bool],
+        steps: Optional[int],
+        scroll: Optional[Literal["auto", "none"]],
     ) -> None:
-        params = locals_to_params(locals())
-        return await self._frame._click(self._selector, strict=True, **params)
+        await self._frame.click(
+            self._selector,
+            strict=True,
+            modifiers=modifiers,
+            position=position,
+            delay=delay,
+            button=button,
+            click_count=click_count,
+            timeout=timeout,
+            force=force,
+            no_wait_after=no_wait_after,
+            trial=trial,
+            steps=steps,
+            scroll=scroll,
+        )
 
     async def dblclick(
         self,
-        modifiers: Sequence[KeyboardModifier] = None,
-        position: Position = None,
-        delay: float = None,
-        button: MouseButton = None,
-        timeout: float = None,
-        force: bool = None,
-        noWaitAfter: bool = None,
-        trial: bool = None,
-        steps: int = None,
-        scroll: Literal["auto", "none"] = None,
+        modifiers: Optional[Sequence[KeyboardModifier]],
+        position: Optional[Position],
+        delay: Optional[float],
+        button: Optional[MouseButton],
+        timeout: Optional[float],
+        force: Optional[bool],
+        no_wait_after: Optional[bool],
+        trial: Optional[bool],
+        steps: Optional[int],
+        scroll: Optional[Literal["auto", "none"]],
     ) -> None:
-        params = locals_to_params(locals())
-        return await self._frame.dblclick(self._selector, strict=True, **params)
+        await self._frame.dblclick(
+            self._selector,
+            strict=True,
+            modifiers=modifiers,
+            position=position,
+            delay=delay,
+            button=button,
+            timeout=timeout,
+            force=force,
+            no_wait_after=no_wait_after,
+            trial=trial,
+            steps=steps,
+            scroll=scroll,
+        )
 
     async def dispatch_event(
         self,
         type: str,
-        eventInit: Dict = None,
-        timeout: float = None,
+        event_init: Optional[Dict],
+        timeout: Optional[float],
     ) -> None:
-        params = locals_to_params(locals())
-        return await self._frame.dispatch_event(self._selector, strict=True, **params)
+        await self._frame.dispatch_event(
+            self._selector,
+            type=type,
+            event_init=event_init,
+            strict=True,
+            timeout=timeout,
+        )
 
     async def evaluate(
-        self, expression: str, arg: Serializable = None, timeout: float = None
+        self, expression: str, arg: Serializable, timeout: Optional[float]
     ) -> Any:
         return await self._with_element(
-            lambda h, _: h.evaluate(expression, arg),
+            lambda h, _: h.evaluate(expression=expression, arg=arg),
             timeout,
         )
 
-    async def evaluate_all(self, expression: str, arg: Serializable = None) -> Any:
-        params = locals_to_params(locals())
-        return await self._frame.eval_on_selector_all(self._selector, **params)
+    async def evaluate_all(self, expression: str, arg: Serializable) -> Any:
+        return await self._frame.eval_on_selector_all(
+            self._selector, expression=expression, arg=arg
+        )
 
     async def evaluate_handle(
-        self, expression: str, arg: Serializable = None, timeout: float = None
+        self, expression: str, arg: Serializable, timeout: Optional[float]
     ) -> "JSHandle":
         return await self._with_element(
-            lambda h, _: h.evaluate_handle(expression, arg), timeout
+            lambda h, _: h.evaluate_handle(expression=expression, arg=arg), timeout
         )
 
     async def fill(
         self,
         value: str,
-        timeout: float = None,
-        noWaitAfter: bool = None,
-        force: bool = None,
+        timeout: Optional[float],
+        no_wait_after: Optional[bool],
+        force: Optional[bool],
     ) -> None:
-        params = locals_to_params(locals())
-        return await self._frame.fill(self._selector, strict=True, **params)
+        await self._frame.fill(
+            self._selector,
+            value,
+            strict=True,
+            timeout=timeout,
+            no_wait_after=no_wait_after,
+            force=force,
+        )
 
     async def clear(
         self,
-        timeout: float = None,
-        noWaitAfter: bool = None,
-        force: bool = None,
+        timeout: Optional[float],
+        no_wait_after: Optional[bool],
+        force: Optional[bool],
     ) -> None:
-        params = locals_to_params(locals())
-        await self._frame._fill(self._selector, value="", title="Clear", **params)
+        await self._frame._fill(
+            self._selector,
+            "",
+            title="Clear",
+            strict=True,
+            timeout=timeout,
+            no_wait_after=no_wait_after,
+            force=force,
+        )
 
     def locator(
         self,
-        selectorOrLocator: Union[str, "Locator"],
-        hasText: Union[str, Pattern[str]] = None,
-        hasNotText: Union[str, Pattern[str]] = None,
-        has: "Locator" = None,
-        hasNot: "Locator" = None,
+        selector_or_locator: Union[str, "Locator"],
+        has_text: Optional[Union[str, Pattern[str]]],
+        has_not_text: Optional[Union[str, Pattern[str]]],
+        has: Optional["Locator"],
+        has_not: Optional["Locator"],
     ) -> "Locator":
-        if isinstance(selectorOrLocator, str):
+        if isinstance(selector_or_locator, str):
             return Locator(
                 self._frame,
-                f"{self._selector} >> {selectorOrLocator}",
-                has_text=hasText,
-                has_not_text=hasNotText,
-                has_not=hasNot,
+                f"{self._selector} >> {selector_or_locator}",
+                has_text=has_text,
+                has_not_text=has_not_text,
+                has_not=has_not,
                 has=has,
             )
-        selectorOrLocator = to_impl(selectorOrLocator)
-        if selectorOrLocator._frame != self._frame:
+        selector_or_locator = to_impl(selector_or_locator)
+        if selector_or_locator._frame != self._frame:
             raise Error("Locators must belong to the same frame.")
         return Locator(
             self._frame,
-            f"{self._selector} >> internal:chain={json.dumps(selectorOrLocator._selector)}",
-            has_text=hasText,
-            has_not_text=hasNotText,
-            has_not=hasNot,
+            f"{self._selector} >> internal:chain={json.dumps(selector_or_locator._selector)}",
+            has_text=has_text,
+            has_not_text=has_not_text,
+            has_not=has_not,
             has=has,
         )
 
     def get_by_alt_text(
-        self, text: Union[str, Pattern[str]], exact: bool = None
+        self, text: Union[str, Pattern[str]], exact: Optional[bool]
     ) -> "Locator":
-        return self.locator(get_by_alt_text_selector(text, exact=exact))
+        return self.locator(
+            selector_or_locator=get_by_alt_text_selector(text, exact=exact),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
 
     def get_by_label(
-        self, text: Union[str, Pattern[str]], exact: bool = None
+        self, text: Union[str, Pattern[str]], exact: Optional[bool]
     ) -> "Locator":
-        return self.locator(get_by_label_selector(text, exact=exact))
+        return self.locator(
+            selector_or_locator=get_by_label_selector(text, exact=exact),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
 
     def get_by_placeholder(
-        self, text: Union[str, Pattern[str]], exact: bool = None
+        self, text: Union[str, Pattern[str]], exact: Optional[bool]
     ) -> "Locator":
-        return self.locator(get_by_placeholder_selector(text, exact=exact))
+        return self.locator(
+            selector_or_locator=get_by_placeholder_selector(text, exact=exact),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
 
     def get_by_role(
         self,
         role: AriaRole,
-        checked: bool = None,
-        disabled: bool = None,
-        expanded: bool = None,
-        includeHidden: bool = None,
-        level: int = None,
-        name: Union[str, Pattern[str]] = None,
-        pressed: bool = None,
-        selected: bool = None,
-        exact: bool = None,
-        description: Union[str, Pattern[str]] = None,
+        checked: Optional[bool],
+        disabled: Optional[bool],
+        expanded: Optional[bool],
+        include_hidden: Optional[bool],
+        level: Optional[int],
+        name: Optional[Union[str, Pattern[str]]],
+        pressed: Optional[bool],
+        selected: Optional[bool],
+        exact: Optional[bool],
+        description: Optional[Union[str, Pattern[str]]],
     ) -> "Locator":
         return self.locator(
-            get_by_role_selector(
+            selector_or_locator=get_by_role_selector(
                 role,
                 checked=checked,
                 disabled=disabled,
                 expanded=expanded,
-                includeHidden=includeHidden,
+                include_hidden=include_hidden,
                 level=level,
                 name=name,
                 pressed=pressed,
                 selected=selected,
                 exact=exact,
                 description=description,
-            )
+            ),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
         )
 
-    def get_by_test_id(self, testId: Union[str, Pattern[str]]) -> "Locator":
-        return self.locator(get_by_test_id_selector(test_id_attribute_name(), testId))
+    def get_by_test_id(self, test_id: Union[str, Pattern[str]]) -> "Locator":
+        return self.locator(
+            selector_or_locator=get_by_test_id_selector(
+                test_id_attribute_name(), test_id
+            ),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
 
     def get_by_text(
-        self, text: Union[str, Pattern[str]], exact: bool = None
+        self, text: Union[str, Pattern[str]], exact: Optional[bool]
     ) -> "Locator":
-        return self.locator(get_by_text_selector(text, exact=exact))
+        return self.locator(
+            selector_or_locator=get_by_text_selector(text, exact=exact),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
 
     def get_by_title(
-        self, text: Union[str, Pattern[str]], exact: bool = None
+        self, text: Union[str, Pattern[str]], exact: Optional[bool]
     ) -> "Locator":
-        return self.locator(get_by_title_selector(text, exact=exact))
+        return self.locator(
+            selector_or_locator=get_by_title_selector(text, exact=exact),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
 
     def frame_locator(self, selector: str) -> "FrameLocator":
         return FrameLocator(self._frame, self._selector + " >> " + selector)
 
     async def element_handle(
         self,
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> ElementHandle:
-        params = locals_to_params(locals())
         handle = await self._frame.wait_for_selector(
-            self._selector, strict=True, state="attached", **params
+            self._selector, strict=True, state="attached", timeout=timeout
         )
         assert handle
         return handle
@@ -384,19 +476,19 @@ class Locator:
 
     def filter(
         self,
-        hasText: Union[str, Pattern[str]] = None,
-        hasNotText: Union[str, Pattern[str]] = None,
-        has: "Locator" = None,
-        hasNot: "Locator" = None,
-        visible: bool = None,
+        has_text: Optional[Union[str, Pattern[str]]],
+        has_not_text: Optional[Union[str, Pattern[str]]],
+        has: Optional["Locator"],
+        has_not: Optional["Locator"],
+        visible: Optional[bool],
     ) -> "Locator":
         return Locator(
             self._frame,
             self._selector,
-            has_text=hasText,
-            has_not_text=hasNotText,
+            has_text=has_text,
+            has_not_text=has_not_text,
             has=has,
-            has_not=hasNot,
+            has_not=has_not,
             visible=visible,
         )
 
@@ -421,21 +513,23 @@ class Locator:
         )
 
     def within(self, locator: "Locator") -> "Locator":
-        return locator.locator(self)
+        return locator.locator(
+            selector_or_locator=self,
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
 
-    async def focus(self, timeout: float = None) -> None:
-        params = locals_to_params(locals())
-        return await self._frame.focus(self._selector, strict=True, **params)
+    async def focus(
+        self,
+        timeout: Optional[float],
+    ) -> None:
+        await self._frame.focus(self._selector, strict=True, timeout=timeout)
 
-    async def blur(self, timeout: float = None) -> None:
-        await self._frame._channel.send(
-            "blur",
-            self._frame._timeout,
-            {
-                "selector": self._selector,
-                "strict": True,
-                **locals_to_params(locals()),
-            },
+    async def blur(self, timeout: Optional[float]) -> None:
+        await self._frame._channel.blur(
+            selector=self._selector, strict=True, timeout=self._frame._timeout(timeout)
         )
 
     async def all(
@@ -454,26 +548,34 @@ class Locator:
     async def drag_to(
         self,
         target: "Locator",
-        force: bool = None,
-        noWaitAfter: bool = None,
-        timeout: float = None,
-        trial: bool = None,
-        sourcePosition: Position = None,
-        targetPosition: Position = None,
-        steps: int = None,
-        scroll: Literal["auto", "none"] = None,
+        force: Optional[bool],
+        no_wait_after: Optional[bool],
+        timeout: Optional[float],
+        trial: Optional[bool],
+        source_position: Optional[Position],
+        target_position: Optional[Position],
+        steps: Optional[int],
+        scroll: Optional[Literal["auto", "none"]],
     ) -> None:
-        params = locals_to_params(locals())
-        del params["target"]
         return await self._frame.drag_and_drop(
-            self._selector, target._selector, strict=True, **params
+            self._selector,
+            target._selector,
+            strict=True,
+            force=force,
+            no_wait_after=no_wait_after,
+            timeout=timeout,
+            trial=trial,
+            source_position=source_position,
+            target_position=target_position,
+            steps=steps,
+            scroll=scroll,
         )
 
     async def drop(
         self,
         payload: DropPayload,
-        position: Position = None,
-        timeout: float = None,
+        position: Optional[Position],
+        timeout: Optional[float],
     ) -> None:
         await self._frame._drop(
             self._selector,
@@ -483,96 +585,106 @@ class Locator:
             timeout=timeout,
         )
 
-    async def get_attribute(self, name: str, timeout: float = None) -> Optional[str]:
-        params = locals_to_params(locals())
+    async def get_attribute(
+        self,
+        name: str,
+        timeout: Optional[float],
+    ) -> Optional[str]:
         return await self._frame.get_attribute(
-            self._selector,
-            strict=True,
-            **params,
+            self._selector, name, strict=True, timeout=timeout
         )
 
     async def hover(
         self,
-        modifiers: Sequence[KeyboardModifier] = None,
-        position: Position = None,
-        timeout: float = None,
-        noWaitAfter: bool = None,
-        force: bool = None,
-        trial: bool = None,
-        scroll: Literal["auto", "none"] = None,
+        modifiers: Optional[Sequence[KeyboardModifier]],
+        position: Optional[Position],
+        timeout: Optional[float],
+        no_wait_after: Optional[bool],
+        force: Optional[bool],
+        trial: Optional[bool],
+        scroll: Optional[Literal["auto", "none"]],
     ) -> None:
-        params = locals_to_params(locals())
-        return await self._frame.hover(
+        await self._frame.hover(
             self._selector,
             strict=True,
-            **params,
+            modifiers=modifiers,
+            position=position,
+            timeout=timeout,
+            no_wait_after=no_wait_after,
+            force=force,
+            trial=trial,
+            scroll=scroll,
         )
 
-    async def inner_html(self, timeout: float = None) -> str:
-        params = locals_to_params(locals())
+    async def inner_html(
+        self,
+        timeout: Optional[float],
+    ) -> str:
         return await self._frame.inner_html(
-            self._selector,
-            strict=True,
-            **params,
+            self._selector, strict=True, timeout=timeout
         )
 
-    async def inner_text(self, timeout: float = None) -> str:
-        params = locals_to_params(locals())
+    async def inner_text(
+        self,
+        timeout: Optional[float],
+    ) -> str:
         return await self._frame.inner_text(
-            self._selector,
-            strict=True,
-            **params,
+            self._selector, strict=True, timeout=timeout
         )
 
-    async def input_value(self, timeout: float = None) -> str:
-        params = locals_to_params(locals())
+    async def input_value(
+        self,
+        timeout: Optional[float],
+    ) -> str:
         return await self._frame.input_value(
-            self._selector,
-            strict=True,
-            **params,
+            self._selector, strict=True, timeout=timeout
         )
 
-    async def is_checked(self, timeout: float = None) -> bool:
-        params = locals_to_params(locals())
+    async def is_checked(
+        self,
+        timeout: Optional[float],
+    ) -> bool:
         return await self._frame.is_checked(
-            self._selector,
-            strict=True,
-            **params,
+            self._selector, strict=True, timeout=timeout
         )
 
-    async def is_disabled(self, timeout: float = None) -> bool:
-        params = locals_to_params(locals())
+    async def is_disabled(
+        self,
+        timeout: Optional[float],
+    ) -> bool:
         return await self._frame.is_disabled(
-            self._selector,
-            strict=True,
-            **params,
+            self._selector, strict=True, timeout=timeout
         )
 
-    async def is_editable(self, timeout: float = None) -> bool:
-        params = locals_to_params(locals())
+    async def is_editable(
+        self,
+        timeout: Optional[float],
+    ) -> bool:
         return await self._frame.is_editable(
-            self._selector,
-            strict=True,
-            **params,
+            self._selector, strict=True, timeout=timeout
         )
 
-    async def is_enabled(self, timeout: float = None) -> bool:
-        params = locals_to_params(locals())
+    async def is_enabled(
+        self,
+        timeout: Optional[float],
+    ) -> bool:
         return await self._frame.is_enabled(
-            self._selector,
-            strict=True,
-            **params,
+            self._selector, strict=True, timeout=timeout
         )
 
-    async def is_hidden(self, timeout: float = None) -> bool:
-        # timeout is deprecated and does nothing
+    async def is_hidden(
+        self,
+        timeout: Optional[float],  # Deprecated; does nothing.
+    ) -> bool:
         return await self._frame.is_hidden(
             self._selector,
             strict=True,
         )
 
-    async def is_visible(self, timeout: float = None) -> bool:
-        # timeout is deprecated and does nothing
+    async def is_visible(
+        self,
+        timeout: Optional[float],  # Deprecated; does nothing.
+    ) -> bool:
         return await self._frame.is_visible(
             self._selector,
             strict=True,
@@ -581,64 +693,77 @@ class Locator:
     async def press(
         self,
         key: str,
-        delay: float = None,
-        timeout: float = None,
-        noWaitAfter: bool = None,
+        delay: Optional[float],
+        timeout: Optional[float],
+        no_wait_after: Optional[bool],
     ) -> None:
-        params = locals_to_params(locals())
-        return await self._frame.press(self._selector, strict=True, **params)
+        await self._frame.press(
+            self._selector,
+            key,
+            strict=True,
+            delay=delay,
+            timeout=timeout,
+            no_wait_after=no_wait_after,
+        )
 
     async def screenshot(
         self,
-        timeout: float = None,
-        type: Literal["jpeg", "png", "webp"] = None,
-        path: Union[str, pathlib.Path] = None,
-        quality: int = None,
-        omitBackground: bool = None,
-        animations: Literal["allow", "disabled"] = None,
-        caret: Literal["hide", "initial"] = None,
-        scale: Literal["css", "device"] = None,
-        mask: Sequence["Locator"] = None,
-        maskColor: str = None,
-        style: str = None,
+        timeout: Optional[float],
+        type: Optional[Literal["jpeg", "png", "webp"]],
+        path: Optional[Union[str, pathlib.Path]],
+        quality: Optional[int],
+        omit_background: Optional[bool],
+        animations: Optional[Literal["allow", "disabled"]],
+        caret: Optional[Literal["hide", "initial"]],
+        scale: Optional[Literal["css", "device"]],
+        mask: Optional[Sequence["Locator"]],
+        mask_color: Optional[str],
+        style: Optional[str],
     ) -> bytes:
-        params = locals_to_params(locals())
         return await self._with_element(
             lambda h, timeout: h.screenshot(
-                **{**params, "timeout": timeout},
+                timeout=timeout,
+                type=type,
+                path=path,
+                quality=quality,
+                omit_background=omit_background,
+                animations=animations,
+                caret=caret,
+                scale=scale,
+                mask=mask,
+                mask_color=mask_color,
+                style=style,
             ),
             timeout,
         )
 
     async def aria_snapshot(
         self,
-        timeout: float = None,
-        depth: int = None,
-        mode: Literal["ai", "default"] = None,
-        boxes: bool = None,
+        timeout: Optional[float],
+        depth: Optional[int],
+        mode: Optional[Literal["ai", "default"]],
+        boxes: Optional[bool],
     ) -> str:
-        return await self._frame._channel.send(
-            "ariaSnapshot",
-            self._frame._timeout,
-            {
-                "selector": self._selector,
-                **locals_to_params(locals()),
-            },
+        result = await self._frame._channel.ariaSnapshot(
+            mode=mode,
+            selector=self._selector,
+            depth=depth,
+            boxes=boxes,
+            timeout=self._frame._timeout(timeout),
         )
+        return result["snapshot"]
 
     async def normalize(self) -> "Locator":
-        result = await self._frame._channel.send_return_as_dict(
-            "resolveSelector",
-            None,
-            {"selector": self._selector, "sdkLanguage": "python"},
+        result = await self._frame._channel.resolveSelector(
+            selector=self._selector, sdkLanguage="python"
         )
         locator = Locator(self._frame, result["resolvedSelector"])
-        locator._locator_code = result.get("locatorCode")
+        locator._locator_code = result["locatorCode"]
         return locator
 
     async def scroll_into_view_if_needed(
         self,
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> None:
         return await self._with_element(
             lambda h, timeout: h.scroll_into_view_if_needed(timeout=timeout),
@@ -647,25 +772,33 @@ class Locator:
 
     async def select_option(
         self,
-        value: Union[str, Sequence[str]] = None,
-        index: Union[int, Sequence[int]] = None,
-        label: Union[str, Sequence[str]] = None,
-        element: Union["ElementHandle", Sequence["ElementHandle"]] = None,
-        timeout: float = None,
-        noWaitAfter: bool = None,
-        force: bool = None,
+        value: Optional[Union[str, Sequence[str]]],
+        index: Optional[Union[int, Sequence[int]]],
+        label: Optional[Union[str, Sequence[str]]],
+        element: Optional[Union["ElementHandle", Sequence["ElementHandle"]]],
+        timeout: Optional[float],
+        no_wait_after: Optional[bool],
+        force: Optional[bool],
     ) -> List[str]:
-        params = locals_to_params(locals())
         return await self._frame.select_option(
             self._selector,
             strict=True,
-            **params,
+            value=value,
+            index=index,
+            label=label,
+            element=element,
+            timeout=timeout,
+            no_wait_after=no_wait_after,
+            force=force,
         )
 
-    async def select_text(self, force: bool = None, timeout: float = None) -> None:
-        params = locals_to_params(locals())
+    async def select_text(
+        self,
+        force: Optional[bool],
+        timeout: Optional[float],
+    ) -> None:
         return await self._with_element(
-            lambda h, timeout: h.select_text(**{**params, "timeout": timeout}),
+            lambda h, timeout: h.select_text(force=force, timeout=timeout),
             timeout,
         )
 
@@ -678,136 +811,153 @@ class Locator:
             Sequence[Union[str, pathlib.Path]],
             Sequence[FilePayload],
         ],
-        timeout: float = None,
-        noWaitAfter: bool = None,
+        timeout: Optional[float],
+        no_wait_after: Optional[bool],
     ) -> None:
-        params = locals_to_params(locals())
         return await self._frame.set_input_files(
             self._selector,
+            files=files,
             strict=True,
-            **params,
+            timeout=timeout,
+            no_wait_after=no_wait_after,
         )
 
     async def tap(
         self,
-        modifiers: Sequence[KeyboardModifier] = None,
-        position: Position = None,
-        timeout: float = None,
-        force: bool = None,
-        noWaitAfter: bool = None,
-        trial: bool = None,
-        scroll: Literal["auto", "none"] = None,
+        modifiers: Optional[Sequence[KeyboardModifier]],
+        position: Optional[Position],
+        timeout: Optional[float],
+        force: Optional[bool],
+        no_wait_after: Optional[bool],
+        trial: Optional[bool],
+        scroll: Optional[Literal["auto", "none"]],
     ) -> None:
-        params = locals_to_params(locals())
-        return await self._frame.tap(
+        await self._frame.tap(
             self._selector,
             strict=True,
-            **params,
+            modifiers=modifiers,
+            position=position,
+            timeout=timeout,
+            force=force,
+            no_wait_after=no_wait_after,
+            trial=trial,
+            scroll=scroll,
         )
 
-    async def text_content(self, timeout: float = None) -> Optional[str]:
-        params = locals_to_params(locals())
+    async def text_content(
+        self,
+        timeout: Optional[float],
+    ) -> Optional[str]:
         return await self._frame.text_content(
-            self._selector,
-            strict=True,
-            **params,
+            self._selector, strict=True, timeout=timeout
         )
 
     async def type(
         self,
         text: str,
-        delay: float = None,
-        timeout: float = None,
-        noWaitAfter: bool = None,
+        delay: Optional[float],
+        timeout: Optional[float],
+        no_wait_after: Optional[bool],
     ) -> None:
-        params = locals_to_params(locals())
-        return await self._frame.type(
+        await self._frame.type(
             self._selector,
+            text,
             strict=True,
-            **params,
+            delay=delay,
+            timeout=timeout,
+            no_wait_after=no_wait_after,
         )
 
     async def press_sequentially(
         self,
         text: str,
-        delay: float = None,
-        timeout: float = None,
-        noWaitAfter: bool = None,
+        delay: Optional[float],
+        timeout: Optional[float],
+        no_wait_after: Optional[bool],
     ) -> None:
-        await self.type(text, delay=delay, timeout=timeout)
+        await self.type(text, delay=delay, timeout=timeout, no_wait_after=no_wait_after)
 
     async def uncheck(
         self,
-        position: Position = None,
-        timeout: float = None,
-        force: bool = None,
-        noWaitAfter: bool = None,
-        trial: bool = None,
-        scroll: Literal["auto", "none"] = None,
+        position: Optional[Position],
+        timeout: Optional[float],
+        force: Optional[bool],
+        no_wait_after: Optional[bool],
+        trial: Optional[bool],
+        scroll: Optional[Literal["auto", "none"]],
     ) -> None:
-        params = locals_to_params(locals())
-        return await self._frame.uncheck(
+        await self._frame.uncheck(
             self._selector,
             strict=True,
-            **params,
+            position=position,
+            timeout=timeout,
+            force=force,
+            no_wait_after=no_wait_after,
+            trial=trial,
+            scroll=scroll,
         )
 
     async def all_inner_texts(
         self,
     ) -> List[str]:
         return await self._frame.eval_on_selector_all(
-            self._selector, "ee => ee.map(e => e.innerText)"
+            self._selector, expression="ee => ee.map(e => e.innerText)", arg=None
         )
 
     async def all_text_contents(
         self,
     ) -> List[str]:
         return await self._frame.eval_on_selector_all(
-            self._selector, "ee => ee.map(e => e.textContent || '')"
+            self._selector,
+            expression="ee => ee.map(e => e.textContent || '')",
+            arg=None,
         )
 
     async def wait_for(
         self,
-        timeout: float = None,
-        state: Literal["attached", "detached", "hidden", "visible"] = None,
+        timeout: Optional[float],
+        state: Optional[Literal["attached", "detached", "hidden", "visible"]],
     ) -> None:
         await self._frame.wait_for_selector(
-            self._selector, strict=True, timeout=timeout, state=state
+            self._selector,
+            strict=True,
+            timeout=timeout,
+            state=state,
+            omit_return_value=True,
         )
 
     async def wait_for_function(
         self,
         expression: str,
-        arg: Serializable = None,
-        timeout: float = None,
+        arg: Serializable,
+        timeout: Optional[float],
     ) -> None:
-        await self._frame._channel.send(
-            "waitForFunction",
-            self._frame._timeout,
-            {
-                "selector": self._selector,
-                "strict": True,
-                "expression": expression,
-                "arg": serialize_argument(arg),
-                "timeout": timeout,
-            },
+        await self._frame._channel.waitForFunction(
+            expression=expression,
+            isFunction=None,
+            arg=serialize_argument(arg),
+            pollingInterval=None,
+            selector=self._selector,
+            strict=True,
+            timeout=self._frame._timeout(timeout),
         )
 
     async def set_checked(
         self,
         checked: bool,
-        position: Position = None,
-        timeout: float = None,
-        force: bool = None,
-        noWaitAfter: bool = None,
-        trial: bool = None,
-        scroll: Literal["auto", "none"] = None,
+        position: Optional[Position],
+        timeout: Optional[float],
+        force: Optional[bool],
+        no_wait_after: Optional[bool],
+        trial: Optional[bool],
+        scroll: Optional[Literal["auto", "none"]],
     ) -> None:
         if checked:
             await self.check(
                 position=position,
                 timeout=timeout,
                 force=force,
+                no_wait_after=no_wait_after,
                 trial=trial,
                 scroll=scroll,
             )
@@ -816,6 +966,7 @@ class Locator:
                 position=position,
                 timeout=timeout,
                 force=force,
+                no_wait_after=no_wait_after,
                 trial=trial,
                 scroll=scroll,
             )
@@ -828,7 +979,7 @@ class Locator:
     ) -> FrameExpectResult:
         return await self._frame._expect(self._selector, expression, options, title)
 
-    async def highlight(self, style: str = None) -> DisposableStub:
+    async def highlight(self, style: Optional[str]) -> DisposableStub:
         await self._frame._highlight(self._selector, style)
         return DisposableStub(lambda: self.hide_highlight(), self._frame)
 
@@ -858,90 +1009,132 @@ class FrameLocator:
 
     def locator(
         self,
-        selectorOrLocator: Union["Locator", str],
-        hasText: Union[str, Pattern[str]] = None,
-        hasNotText: Union[str, Pattern[str]] = None,
-        has: Locator = None,
-        hasNot: Locator = None,
+        selector_or_locator: Union["Locator", str],
+        has_text: Optional[Union[str, Pattern[str]]],
+        has_not_text: Optional[Union[str, Pattern[str]]],
+        has: Optional[Locator],
+        has_not: Optional[Locator],
     ) -> Locator:
-        if isinstance(selectorOrLocator, str):
+        if isinstance(selector_or_locator, str):
             return Locator(
                 self._frame,
-                self._child_selector(selectorOrLocator),
-                has_text=hasText,
-                has_not_text=hasNotText,
+                self._child_selector(selector_or_locator),
+                has_text=has_text,
+                has_not_text=has_not_text,
                 has=has,
-                has_not=hasNot,
+                has_not=has_not,
             )
-        selectorOrLocator = to_impl(selectorOrLocator)
-        if selectorOrLocator._frame != self._frame:
+        selector_or_locator = to_impl(selector_or_locator)
+        if selector_or_locator._frame != self._frame:
             raise ValueError("Locators must belong to the same frame.")
         return Locator(
             self._frame,
-            self._child_selector(selectorOrLocator._selector),
-            has_text=hasText,
-            has_not_text=hasNotText,
+            self._child_selector(selector_or_locator._selector),
+            has_text=has_text,
+            has_not_text=has_not_text,
             has=has,
-            has_not=hasNot,
+            has_not=has_not,
         )
 
     def get_by_alt_text(
-        self, text: Union[str, Pattern[str]], exact: bool = None
+        self, text: Union[str, Pattern[str]], exact: Optional[bool]
     ) -> "Locator":
-        return self.locator(get_by_alt_text_selector(text, exact=exact))
+        return self.locator(
+            selector_or_locator=get_by_alt_text_selector(text, exact=exact),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
 
     def get_by_label(
-        self, text: Union[str, Pattern[str]], exact: bool = None
+        self, text: Union[str, Pattern[str]], exact: Optional[bool]
     ) -> "Locator":
-        return self.locator(get_by_label_selector(text, exact=exact))
+        return self.locator(
+            selector_or_locator=get_by_label_selector(text, exact=exact),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
 
     def get_by_placeholder(
-        self, text: Union[str, Pattern[str]], exact: bool = None
+        self, text: Union[str, Pattern[str]], exact: Optional[bool]
     ) -> "Locator":
-        return self.locator(get_by_placeholder_selector(text, exact=exact))
+        return self.locator(
+            selector_or_locator=get_by_placeholder_selector(text, exact=exact),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
 
     def get_by_role(
         self,
         role: AriaRole,
-        checked: bool = None,
-        disabled: bool = None,
-        expanded: bool = None,
-        includeHidden: bool = None,
-        level: int = None,
-        name: Union[str, Pattern[str]] = None,
-        pressed: bool = None,
-        selected: bool = None,
-        exact: bool = None,
-        description: Union[str, Pattern[str]] = None,
+        checked: Optional[bool],
+        disabled: Optional[bool],
+        expanded: Optional[bool],
+        include_hidden: Optional[bool],
+        level: Optional[int],
+        name: Optional[Union[str, Pattern[str]]],
+        pressed: Optional[bool],
+        selected: Optional[bool],
+        exact: Optional[bool],
+        description: Optional[Union[str, Pattern[str]]],
     ) -> "Locator":
         return self.locator(
-            get_by_role_selector(
+            selector_or_locator=get_by_role_selector(
                 role,
                 checked=checked,
                 disabled=disabled,
                 expanded=expanded,
-                includeHidden=includeHidden,
+                include_hidden=include_hidden,
                 level=level,
                 name=name,
                 pressed=pressed,
                 selected=selected,
                 exact=exact,
                 description=description,
-            )
+            ),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
         )
 
-    def get_by_test_id(self, testId: Union[str, Pattern[str]]) -> "Locator":
-        return self.locator(get_by_test_id_selector(test_id_attribute_name(), testId))
+    def get_by_test_id(self, test_id: Union[str, Pattern[str]]) -> "Locator":
+        return self.locator(
+            selector_or_locator=get_by_test_id_selector(
+                test_id_attribute_name(), test_id
+            ),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
 
     def get_by_text(
-        self, text: Union[str, Pattern[str]], exact: bool = None
+        self, text: Union[str, Pattern[str]], exact: Optional[bool]
     ) -> "Locator":
-        return self.locator(get_by_text_selector(text, exact=exact))
+        return self.locator(
+            selector_or_locator=get_by_text_selector(text, exact=exact),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
 
     def get_by_title(
-        self, text: Union[str, Pattern[str]], exact: bool = None
+        self, text: Union[str, Pattern[str]], exact: Optional[bool]
     ) -> "Locator":
-        return self.locator(get_by_title_selector(text, exact=exact))
+        return self.locator(
+            selector_or_locator=get_by_title_selector(text, exact=exact),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
 
     def frame_locator(self, selector: str) -> "FrameLocator":
         return FrameLocator(self._frame, self._child_selector(selector))

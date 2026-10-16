@@ -35,13 +35,13 @@ from typing import (
     overload,
 )
 
-from playwright._impl._errors import ErrorPayload, is_target_closed_error, rewrite_error
+from playwright._impl._errors import is_target_closed_error, rewrite_error
 from playwright._impl._greenlets import RouteGreenlet
 from playwright._impl._str_utils import escape_regex_flags
 from playwright._impl._url_match import URLMatch, url_matches
 
 if TYPE_CHECKING:  # pragma: no cover
-    from playwright._impl._internal_structures import HeadersArray
+    from playwright._impl import _protocol_types as channels
     from playwright._impl._network import Request, Response, Route, WebSocketRoute
 
 URLMatchRequest = Union[
@@ -73,35 +73,6 @@ class HarRecordingMetadata(TypedDict, total=False):
     content: Optional[HarContentPolicy]
 
 
-def prepare_record_har_options(params: Dict) -> Dict[str, Any]:
-    out_params: Dict[str, Any] = {"path": str(params["recordHarPath"])}
-    if "recordHarUrlFilter" in params:
-        opt = params["recordHarUrlFilter"]
-        if isinstance(opt, str):
-            out_params["urlGlob"] = opt
-        if isinstance(opt, Pattern):
-            out_params["urlRegexSource"] = opt.pattern
-            out_params["urlRegexFlags"] = escape_regex_flags(opt)
-        del params["recordHarUrlFilter"]
-    if "recordHarMode" in params:
-        out_params["mode"] = params["recordHarMode"]
-        del params["recordHarMode"]
-
-    new_content_api = None
-    old_content_api = None
-    if "recordHarContent" in params:
-        new_content_api = params["recordHarContent"]
-        del params["recordHarContent"]
-    if "recordHarOmitContent" in params:
-        old_content_api = params["recordHarOmitContent"]
-        del params["recordHarOmitContent"]
-    content = new_content_api or ("omit" if old_content_api else None)
-    if content:
-        out_params["content"] = content
-
-    return out_params
-
-
 class ParsedMessageParams(TypedDict):
     type: str
     guid: str
@@ -114,49 +85,15 @@ class ParsedMessagePayload(TypedDict, total=False):
     method: str
     params: ParsedMessageParams
     result: Any
-    error: ErrorPayload
+    error: "channels.SerializedError"
     errorDetails: Any
     log: List[str]
-
-
-class Document(TypedDict):
-    request: Optional[Any]
-
-
-class FrameNavigatedEvent(TypedDict):
-    url: str
-    name: str
-    newDocument: Optional[Document]
-    error: Optional[str]
 
 
 Env = Dict[str, Union[str, float, bool]]
 
 
-class HarLookupResult(TypedDict, total=False):
-    action: Literal["error", "redirect", "fulfill", "noentry"]
-    message: Optional[str]
-    redirectURL: Optional[str]
-    status: Optional[int]
-    headers: Optional["HeadersArray"]
-    body: Optional[str]
-
-
 PLAYWRIGHT_MAX_DEADLINE = 2147483647  # 2^31-1
-
-
-def locals_to_params(args: Dict) -> Dict:
-    copy = {}
-    for key in args:
-        if key == "self":
-            continue
-        if args[key] is not None:
-            copy[key] = (
-                args[key]
-                if not isinstance(args[key], Dict)
-                else locals_to_params(args[key])
-            )
-    return copy
 
 
 def create_task_and_ignore_exception(
@@ -272,8 +209,10 @@ class RouteHandler:
     @staticmethod
     def prepare_interception_patterns(
         handlers: List["RouteHandler"],
-    ) -> List[Dict[str, str]]:
-        patterns = []
+    ) -> List["channels.BrowserContextSetNetworkInterceptionPatternsParamsPatterns"]:
+        patterns: List[
+            "channels.BrowserContextSetNetworkInterceptionPatternsParamsPatterns"
+        ] = []
         all = False
         for handler in handlers:
             if isinstance(handler.url, str):

@@ -12,10 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, Any, List, Optional, cast
 
 from playwright._impl._api_structures import WebMCPTool
-from playwright._impl._helper import locals_to_params
 from playwright._impl._js_handle import Serializable, parse_result, serialize_argument
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -28,17 +27,18 @@ class WebMCP:
         self._loop = frame._loop
         self._dispatcher_fiber = frame._dispatcher_fiber
 
-    async def tools(self, timeout: float = None) -> List[WebMCPTool]:
-        return await self._frame._channel.send(
-            "webmcpTools", self._frame._timeout, locals_to_params(locals())
+    async def tools(self, timeout: Optional[float]) -> List[WebMCPTool]:
+        result = await self._frame._channel.webmcpTools(
+            timeout=self._frame._timeout(timeout)
         )
+        return cast(List[WebMCPTool], result["tools"])
 
     async def call_tool(
-        self, name: str, input: Serializable = None, timeout: float = None
+        self, name: str, input: Serializable, timeout: Optional[float]
     ) -> Any:
-        result = await self._frame._channel.send(
-            "webmcpCallTool",
-            self._frame._timeout,
-            {"name": name, "input": serialize_argument(input), "timeout": timeout},
+        result = await self._frame._channel.webmcpCallTool(
+            name=name,
+            input=serialize_argument(input),
+            timeout=self._frame._timeout(timeout),
         )
-        return parse_result(result)
+        return parse_result(result["result"])

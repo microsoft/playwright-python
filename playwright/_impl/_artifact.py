@@ -14,15 +14,20 @@
 
 import pathlib
 from pathlib import Path
-from typing import Dict, Optional, Union, cast
+from typing import TYPE_CHECKING, Dict, Optional, Union, cast
 
 from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._errors import Error, patch_error_message
 from playwright._impl._helper import make_dirs_for_file
 from playwright._impl._stream import Stream
 
+if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl._protocol_channels import ArtifactChannel
+
 
 class Artifact(ChannelOwner):
+    _channel: "ArtifactChannel"
+
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
@@ -34,55 +39,29 @@ class Artifact(ChannelOwner):
             raise Error(
                 "Path is not available when using browser_type.connect(). Use save_as() to save a local copy."
             )
-        path = await self._channel.send(
-            "pathAfterFinished",
-            None,
-        )
+        path = (await self._channel.pathAfterFinished())["value"]
         return pathlib.Path(path)
 
     async def save_as(self, path: Union[str, Path]) -> None:
         stream = cast(
-            Stream,
-            from_channel(
-                await self._channel.send(
-                    "saveAsStream",
-                    None,
-                )
-            ),
+            Stream, from_channel((await self._channel.saveAsStream())["stream"])
         )
         make_dirs_for_file(path)
         await stream.save_as(path)
 
     async def failure(self) -> Optional[str]:
-        reason = await self._channel.send(
-            "failure",
-            None,
-        )
+        reason = (await self._channel.failure())["error"]
         if reason is None:
             return None
         return patch_error_message(reason)
 
     async def delete(self) -> None:
-        await self._channel.send(
-            "delete",
-            None,
-        )
+        await self._channel.delete()
 
     async def read_info_buffer(self) -> bytes:
-        stream = cast(
-            Stream,
-            from_channel(
-                await self._channel.send(
-                    "stream",
-                    None,
-                )
-            ),
-        )
+        stream = cast(Stream, from_channel((await self._channel.stream())["stream"]))
         buffer = await stream.read_all()
         return buffer
 
     async def cancel(self) -> None:  # pyright: ignore[reportIncompatibleMethodOverride]
-        await self._channel.send(
-            "cancel",
-            None,
-        )
+        await self._channel.cancel()

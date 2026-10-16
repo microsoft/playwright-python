@@ -13,21 +13,23 @@
 # limitations under the License.
 
 import asyncio
-from typing import Dict, Optional, cast
+from typing import TYPE_CHECKING, Dict, Optional, cast
 
 from pyee.asyncio import AsyncIOEventEmitter
 
-from playwright._impl._connection import Channel
 from playwright._impl._errors import Error, TargetClosedError
 from playwright._impl._helper import ParsedMessagePayload
 from playwright._impl._transport import Transport
+
+if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl._protocol_channels import JsonPipeChannel
 
 
 class JsonPipeTransport(AsyncIOEventEmitter, Transport):
     def __init__(
         self,
         loop: asyncio.AbstractEventLoop,
-        pipe_channel: Channel,
+        pipe_channel: "JsonPipeChannel",
     ) -> None:
         super().__init__(loop)
         Transport.__init__(self, loop)
@@ -36,7 +38,7 @@ class JsonPipeTransport(AsyncIOEventEmitter, Transport):
 
     def request_stop(self) -> None:
         self._stop_requested = True
-        self._pipe_channel.send_no_reply("close", None, {})
+        self._pipe_channel.send_no_reply("close")
 
     def dispose(self) -> None:
         self.on_error_future.cancel()
@@ -59,14 +61,8 @@ class JsonPipeTransport(AsyncIOEventEmitter, Transport):
                 self.on_error_future.set_exception(TargetClosedError(reason))
             self._stopped_future.set_result(None)
 
-        self._pipe_channel.on(
-            "message",
-            lambda params: handle_message(params["message"]),
-        )
-        self._pipe_channel.on(
-            "closed",
-            lambda params: handle_closed(params.get("reason")),
-        )
+        self._pipe_channel.onMessage(lambda event: handle_message(event["message"]))
+        self._pipe_channel.onClosed(lambda event: handle_closed(event["reason"]))
 
     async def run(self) -> None:
         await self._stopped_future
@@ -74,4 +70,5 @@ class JsonPipeTransport(AsyncIOEventEmitter, Transport):
     def send(self, message: Dict) -> None:
         if self._stop_requested:
             raise Error("Playwright connection closed")
-        self._pipe_channel.send_no_reply("send", None, {"message": message})
+        # The transport sends synchronously, so this does not wait for the reply.
+        self._pipe_channel.send_no_reply("send", {"message": message})

@@ -25,9 +25,9 @@ from playwright._impl._artifact import Artifact
 from playwright._impl._connection import from_nullable_channel
 from playwright._impl._disposable import DisposableStub
 from playwright._impl._errors import Error
-from playwright._impl._helper import locals_to_params
 
 if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl import _protocol_types as channels
     from playwright._impl._page import Page
 
 
@@ -55,12 +55,12 @@ class Screencast:
         self._save_path: Optional[Union[str, Path]] = None
         self._on_frame: Optional[ScreencastFrameCallback] = None
         self._artifact: Optional[Artifact] = None
-        page._channel.on("screencastFrame", self._dispatch_frame)
+        page._channel.onScreencastFrame(self._dispatch_frame)
 
     def _ack_frame(self, frame_id: int) -> None:
         try:
             self._page._channel.send_no_reply(
-                "screencastFrameAck", None, {"frameId": frame_id}
+                "screencastFrameAck", {"frameId": frame_id}
             )
         except (Error, OSError):
             pass
@@ -71,65 +71,57 @@ class Screencast:
         finally:
             self._ack_frame(frame_id)
 
-    def _dispatch_frame(self, params: dict) -> Any:
+    def _dispatch_frame(self, event: "channels.PageScreencastFrameEvent") -> Any:
         result = None
         task = None
         try:
             if not self._on_frame:
                 return
-            data = params["data"]
-            if isinstance(data, str):
-                data = base64.b64decode(data)
             result = self._on_frame(
                 {
-                    "data": data,
-                    "timestamp": params.get("timestamp", 0),
-                    "viewportWidth": params["viewportWidth"],
-                    "viewportHeight": params["viewportHeight"],
+                    "data": base64.b64decode(event["data"]),
+                    "timestamp": event["timestamp"],
+                    "viewportWidth": event["viewportWidth"],
+                    "viewportHeight": event["viewportHeight"],
                 }
             )
         finally:
             if hasattr(result, "__await__"):
                 task = self._loop.create_task(
-                    self._await_callback_and_ack(result, params["frameId"])
+                    self._await_callback_and_ack(result, event["frameId"])
                 )
             else:
-                self._ack_frame(params["frameId"])
+                self._ack_frame(event["frameId"])
         return task
 
     async def start(
         self,
-        onFrame: ScreencastFrameCallback = None,
-        path: Union[str, Path] = None,
-        quality: int = None,
-        size: ScreencastSize = None,
-        fps: int = None,
+        on_frame: Optional[ScreencastFrameCallback],
+        path: Optional[Union[str, Path]],
+        quality: Optional[int],
+        size: Optional[ScreencastSize],
+        fps: Optional[int],
     ) -> DisposableStub:
         if self._started:
             raise Error("Screencast is already started")
         self._started = True
-        self._on_frame = onFrame
-        result = await self._page._channel.send_return_as_dict(
-            "screencastStart",
-            None,
-            {
-                "size": size,
-                "quality": quality,
-                "fps": fps,
-                "sendFrames": bool(onFrame),
-                "record": bool(path),
-            },
+        self._on_frame = on_frame
+        result = await self._page._channel.screencastStart(
+            size=size,
+            quality=quality,
+            fps=fps,
+            sendFrames=bool(on_frame),
+            record=bool(path),
         )
-        artifact_channel = (result or {}).get("artifact")
-        if artifact_channel:
-            self._artifact = from_nullable_channel(artifact_channel)
+        if result["artifact"]:
+            self._artifact = from_nullable_channel(result["artifact"])
             self._save_path = path
         return DisposableStub(lambda: self.stop(), self._page)
 
     async def stop(self) -> None:
         self._started = False
         self._on_frame = None
-        await self._page._channel.send("screencastStop", None)
+        await self._page._channel.screencastStop()
         if self._save_path and self._artifact:
             await self._artifact.save_as(self._save_path)
         self._artifact = None
@@ -137,48 +129,48 @@ class Screencast:
 
     async def show_actions(
         self,
-        duration: float = None,
-        position: ScreencastPosition = None,
-        fontSize: int = None,
-        cursor: ScreencastCursor = None,
-        style: ScreencastActionStyle = None,
+        duration: Optional[float],
+        position: Optional[ScreencastPosition],
+        font_size: Optional[int],
+        cursor: Optional[ScreencastCursor],
+        style: Optional[ScreencastActionStyle],
     ) -> DisposableStub:
-        await self._page._channel.send(
-            "screencastShowActions", None, locals_to_params(locals())
+        await self._page._channel.screencastShowActions(
+            duration=duration,
+            position=position,
+            fontSize=font_size,
+            cursor=cursor,
+            style=style,
         )
         return DisposableStub(lambda: self.hide_actions(), self._page)
 
     async def hide_actions(self) -> None:
-        await self._page._channel.send("screencastHideActions", None)
+        await self._page._channel.screencastHideActions()
 
-    async def show_overlay(self, html: str, duration: float = None) -> DisposableStub:
-        result = await self._page._channel.send_return_as_dict(
-            "screencastShowOverlay", None, locals_to_params(locals())
+    async def show_overlay(
+        self, html: str, duration: Optional[float]
+    ) -> DisposableStub:
+        result = await self._page._channel.screencastShowOverlay(
+            html=html, duration=duration
         )
-        overlay_id = (result or {}).get("id")
+        overlay_id = result["id"]
         return DisposableStub(
-            lambda: self._page._channel.send(
-                "screencastRemoveOverlay", None, {"id": overlay_id}
-            ),
+            lambda: self._page._channel.screencastRemoveOverlay(id=overlay_id),
             self._page,
         )
 
     async def show_chapter(
         self,
         title: str,
-        description: str = None,
-        duration: float = None,
+        description: Optional[str],
+        duration: Optional[float],
     ) -> None:
-        await self._page._channel.send(
-            "screencastChapter", None, locals_to_params(locals())
+        await self._page._channel.screencastChapter(
+            title=title, description=description, duration=duration
         )
 
     async def show_overlays(self) -> None:
-        await self._page._channel.send(
-            "screencastSetOverlayVisible", None, {"visible": True}
-        )
+        await self._page._channel.screencastSetOverlayVisible(visible=True)
 
     async def hide_overlays(self) -> None:
-        await self._page._channel.send(
-            "screencastSetOverlayVisible", None, {"visible": False}
-        )
+        await self._page._channel.screencastSetOverlayVisible(visible=False)

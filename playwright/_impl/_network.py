@@ -28,9 +28,8 @@ from typing import (
     Dict,
     List,
     Optional,
-    Pattern,
     Sequence,
-    TypedDict,
+    Tuple,
     Union,
     cast,
 )
@@ -57,7 +56,7 @@ from playwright._impl._helper import (
     URLMatch,
     WebSocketRouteHandlerCallback,
     async_readfile,
-    locals_to_params,
+    create_task_and_ignore_exception,
     url_matches,
 )
 from playwright._impl._internal_structures import Headers, HeadersArray
@@ -65,17 +64,18 @@ from playwright._impl._str_utils import escape_regex_flags
 from playwright._impl._waiter import Waiter
 
 if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl import _protocol_types as channels
     from playwright._impl._browser_context import BrowserContext
     from playwright._impl._fetch import APIResponse
     from playwright._impl._frame import Frame
     from playwright._impl._page import Page, Worker
-
-
-class FallbackOverrideParameters(TypedDict, total=False):
-    url: Optional[str]
-    method: Optional[str]
-    headers: Optional[Dict[str, str]]
-    postData: Optional[Union[str, bytes]]
+    from playwright._impl._protocol_channels import (
+        RequestChannel,
+        ResponseChannel,
+        RouteChannel,
+        WebSocketChannel,
+        WebSocketRouteChannel,
+    )
 
 
 class SerializedFallbackOverrides:
@@ -134,31 +134,9 @@ def to_http_credentials_protocol(
     ] or None
 
 
-def to_clear_cookies_params(
-    name: Optional[Union[str, Pattern[str]]],
-    domain: Optional[Union[str, Pattern[str]]],
-    path: Optional[Union[str, Pattern[str]]],
-) -> Dict[str, Optional[str]]:
-    return {
-        "name": name if isinstance(name, str) else None,
-        "nameRegexSource": name.pattern if isinstance(name, Pattern) else None,
-        "nameRegexFlags": (
-            escape_regex_flags(name) if isinstance(name, Pattern) else None
-        ),
-        "domain": domain if isinstance(domain, str) else None,
-        "domainRegexSource": (domain.pattern if isinstance(domain, Pattern) else None),
-        "domainRegexFlags": (
-            escape_regex_flags(domain) if isinstance(domain, Pattern) else None
-        ),
-        "path": path if isinstance(path, str) else None,
-        "pathRegexSource": path.pattern if isinstance(path, Pattern) else None,
-        "pathRegexFlags": (
-            escape_regex_flags(path) if isinstance(path, Pattern) else None
-        ),
-    }
-
-
 class Request(ChannelOwner):
+    _channel: "RequestChannel"
+
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
@@ -191,17 +169,22 @@ class Request(ChannelOwner):
     def __repr__(self) -> str:
         return f"<Request url={self.url!r} method={self.method!r}>"
 
-    def _apply_fallback_overrides(self, overrides: FallbackOverrideParameters) -> None:
-        self._fallback_overrides.url = overrides.get(
-            "url", self._fallback_overrides.url
-        )
-        self._fallback_overrides.method = overrides.get(
-            "method", self._fallback_overrides.method
-        )
-        self._fallback_overrides.headers = overrides.get(
-            "headers", self._fallback_overrides.headers
-        )
-        post_data = overrides.get("postData")
+    def _apply_fallback_overrides(
+        self,
+        url: Optional[str],
+        method: Optional[str],
+        headers: Optional[Dict[str, str]],
+        post_data: Optional[Union[Any, str, bytes]],
+    ) -> None:
+        if url is not None:
+            self._fallback_overrides.url = url
+        if method is not None:
+            self._fallback_overrides.method = method
+        if headers is not None:
+            # A None value removes the header.
+            self._fallback_overrides.headers = {
+                name: value for name, value in headers.items() if value is not None
+            }
         if isinstance(post_data, str):
             self._fallback_overrides.post_data_buffer = post_data.encode()
         elif isinstance(post_data, bytes):
@@ -232,10 +215,7 @@ class Request(ChannelOwner):
         response = await self.response()
         if not response:
             raise Error("Unable to fetch sizes for failed request")
-        return await response._channel.send(
-            "sizes",
-            None,
-        )
+        return (await response._channel.sizes())["sizes"]
 
     @property
     def post_data(self) -> Optional[str]:
@@ -269,12 +249,7 @@ class Request(ChannelOwner):
         return None
 
     async def response(self) -> Optional["Response"]:
-        return from_nullable_channel(
-            await self._channel.send(
-                "response",
-                None,
-            )
-        )
+        return from_nullable_channel((await self._channel.response())["response"])
 
     @property
     def existing_response(self) -> Optional["Response"]:
@@ -343,10 +318,10 @@ class Request(ChannelOwner):
             return RawHeaders(serialize_headers(override))
         if not self._all_headers_future:
             self._all_headers_future = asyncio.Future()
-            headers = await self._channel.send(
-                "rawRequestHeaders", None, is_internal=True
+            result = await self._connection.wrap_api_call(
+                lambda: self._channel.rawRequestHeaders(), is_internal=True
             )
-            self._all_headers_future.set_result(RawHeaders(headers))
+            self._all_headers_future.set_result(RawHeaders(result["headers"]))
         return await self._all_headers_future
 
     def _target_closed_future(self) -> asyncio.Future:
@@ -368,6 +343,8 @@ class Request(ChannelOwner):
 
 
 class Route(ChannelOwner):
+    _channel: "RouteChannel"
+
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
@@ -397,88 +374,86 @@ class Route(ChannelOwner):
     def request(self) -> Request:
         return from_channel(self._initializer["request"])
 
-    async def abort(self, errorCode: str = None) -> None:
+    async def abort(self, error_code: Optional[str]) -> None:
         await self._handle_route(
             lambda: self._race_with_page_close(
-                self._channel.send(
-                    "abort",
-                    None,
-                    {
-                        "errorCode": errorCode,
-                    },
-                )
+                self._channel.abort(errorCode=error_code)
             )
         )
 
     async def fulfill(
         self,
-        status: int = None,
-        headers: Dict[str, str] = None,
-        body: Union[str, bytes] = None,
-        json: Any = None,
-        path: Union[str, Path] = None,
-        contentType: str = None,
-        response: "APIResponse" = None,
+        status: Optional[int],
+        headers: Optional[Dict[str, str]],
+        body: Optional[Union[str, bytes]],
+        json: Optional[Any],
+        path: Optional[Union[str, Path]],
+        content_type: Optional[str],
+        response: Optional["APIResponse"],
     ) -> None:
         await self._handle_route(
             lambda: self._inner_fulfill(
-                status, headers, body, json, path, contentType, response
+                status=status,
+                headers=headers,
+                body=body,
+                json=json,
+                path=path,
+                content_type=content_type,
+                response=response,
             )
         )
 
     async def _inner_fulfill(
         self,
-        status: int = None,
-        headers: Dict[str, str] = None,
-        body: Union[str, bytes] = None,
-        json: Any = None,
-        path: Union[str, Path] = None,
-        contentType: str = None,
-        response: "APIResponse" = None,
+        status: Optional[int],
+        headers: Optional[Dict[str, str]],
+        body: Optional[Union[str, bytes]],
+        json: Optional[Any],
+        path: Optional[Union[str, Path]],
+        content_type: Optional[str],
+        response: Optional["APIResponse"],
     ) -> None:
-        params = locals_to_params(locals())
-        # These options become the body and the headers below.
-        for name in ("json", "path", "contentType", "response"):
-            params.pop(name, None)
-
         if json is not None:
             if body is not None:
                 raise Error("Can specify either body or json parameters")
             body = json_utils.dumps(json)
 
+        if headers is not None:
+            # A None value removes the header.
+            headers = {k: v for k, v in headers.items() if v is not None}
+
+        fetch_response_uid: Optional[str] = None
         if response:
-            params["status"] = (
-                params["status"] if params.get("status") else response.status
-            )
-            params["headers"] = (
-                params["headers"] if params.get("headers") else response.headers
-            )
+            status = status if status else response.status
+            headers = headers if headers else response.headers
             from playwright._impl._fetch import APIResponse
 
             if body is None and path is None and isinstance(response, APIResponse):
                 if response._request._connection is self._connection:
-                    params["fetchResponseUid"] = response._fetch_uid
+                    fetch_response_uid = response._fetch_uid
                 else:
                     body = await response.body()
 
         length = 0
+        encoded_body: Optional[str] = None
+        is_base64: Optional[bool] = None
         if isinstance(body, str):
-            params["body"] = body
-            params["isBase64"] = False
+            encoded_body = body
+            is_base64 = False
             length = len(body.encode())
         elif isinstance(body, bytes):
-            params["body"] = base64.b64encode(body).decode()
-            params["isBase64"] = True
+            encoded_body = base64.b64encode(body).decode()
+            is_base64 = True
             length = len(body)
         elif path:
             file_content = Path(path).read_bytes()
-            params["body"] = base64.b64encode(file_content).decode()
-            params["isBase64"] = True
+            encoded_body = base64.b64encode(file_content).decode()
+            is_base64 = True
             length = len(file_content)
 
-        headers = {k.lower(): str(v) for k, v in params.get("headers", {}).items()}
-        if contentType:
-            headers["content-type"] = contentType
+        headers = {k.lower(): str(v) for k, v in (headers or {}).items()}
+        if content_type:
+            headers["content-type"] = content_type
         elif json or isinstance(json, (list, tuple, dict)):
             # Like the JS client, which checks truthiness: [] and {} are truthy in JS.
             headers["content-type"] = "application/json"
@@ -488,9 +463,16 @@ class Route(ChannelOwner):
             )
         if length and "content-length" not in headers:
             headers["content-length"] = str(length)
-        params["headers"] = serialize_headers(headers)
 
-        await self._race_with_page_close(self._channel.send("fulfill", None, params))
+        await self._race_with_page_close(
+            self._channel.fulfill(
+                status=status,
+                headers=serialize_headers(headers),
+                body=encoded_body,
+                isBase64=is_base64,
+                fetchResponseUid=fetch_response_uid,
+            )
+        )
 
     async def _handle_route(self, callback: Callable) -> None:
         self._check_not_handled()
@@ -503,50 +485,56 @@ class Route(ChannelOwner):
 
     async def fetch(
         self,
-        url: str = None,
-        method: str = None,
-        headers: Dict[str, str] = None,
-        postData: Union[Any, str, bytes] = None,
-        maxRedirects: int = None,
-        maxRetries: int = None,
-        timeout: float = None,
+        url: Optional[str],
+        method: Optional[str],
+        headers: Optional[Dict[str, str]],
+        post_data: Optional[Union[Any, str, bytes]],
+        max_redirects: Optional[int],
+        max_retries: Optional[int],
+        timeout: Optional[float],
     ) -> "APIResponse":
         return await self._connection.wrap_api_call(
             lambda: self._context.request._inner_fetch(
-                self.request,
-                url,
-                method,
-                headers,
-                postData,
-                maxRedirects=maxRedirects,
-                maxRetries=maxRetries,
+                request=self.request,
+                url=url,
+                method=method,
+                headers=headers,
+                data=post_data,
+                params=None,
+                form=None,
+                multipart=None,
                 timeout=timeout,
+                fail_on_status_code=None,
+                ignore_https_errors=None,
+                max_redirects=max_redirects,
+                max_retries=max_retries,
             )
         )
 
     async def fallback(
         self,
-        url: str = None,
-        method: str = None,
-        headers: Dict[str, str] = None,
-        postData: Union[Any, str, bytes] = None,
+        url: Optional[str],
+        method: Optional[str],
+        headers: Optional[Dict[str, str]],
+        post_data: Optional[Union[Any, str, bytes]],
     ) -> None:
-        overrides = cast(FallbackOverrideParameters, locals_to_params(locals()))
         self._check_not_handled()
-        self.request._apply_fallback_overrides(overrides)
+        self.request._apply_fallback_overrides(
+            url=url, method=method, headers=headers, post_data=post_data
+        )
         self._report_handled(False)
 
     async def continue_(
         self,
-        url: str = None,
-        method: str = None,
-        headers: Dict[str, str] = None,
-        postData: Union[Any, str, bytes] = None,
+        url: Optional[str],
+        method: Optional[str],
+        headers: Optional[Dict[str, str]],
+        post_data: Optional[Union[Any, str, bytes]],
     ) -> None:
-        overrides = cast(FallbackOverrideParameters, locals_to_params(locals()))
-
         async def _inner() -> None:
-            self.request._apply_fallback_overrides(overrides)
+            self.request._apply_fallback_overrides(
+                url=url, method=method, headers=headers, post_data=post_data
+            )
             await self._inner_continue(False)
 
         return await self._handle_route(_inner)
@@ -554,29 +542,25 @@ class Route(ChannelOwner):
     async def _inner_continue(self, is_fallback: bool = False) -> None:
         options = self.request._fallback_overrides
         await self._race_with_page_close(
-            self._channel.send(
-                "continue",
-                None,
-                {
-                    "url": options.url,
-                    "method": options.method,
-                    "headers": (
-                        serialize_headers(options.headers) if options.headers else None
-                    ),
-                    "postData": (
-                        base64.b64encode(options.post_data_buffer).decode()
-                        if options.post_data_buffer is not None
-                        else None
-                    ),
-                    "isFallback": is_fallback,
-                },
+            self._channel.continue_(
+                url=options.url,
+                method=options.method,
+                headers=(
+                    serialize_headers(options.headers) if options.headers else None
+                ),
+                postData=(
+                    base64.b64encode(options.post_data_buffer).decode()
+                    if options.post_data_buffer is not None
+                    else None
+                ),
+                isFallback=is_fallback,
             )
         )
 
     async def _redirected_navigation_request(self, url: str) -> None:
         await self._handle_route(
             lambda: self._race_with_page_close(
-                self._channel.send("redirectNavigationRequest", None, {"url": url})
+                self._channel.redirectNavigationRequest(url=url)
             )
         )
 
@@ -623,31 +607,29 @@ class ServerWebSocketRoute:
     def protocols(self) -> List[str]:
         return list(self._ws._initializer.get("protocols", []))
 
-    def close(self, code: int = None, reason: str = None) -> None:
-        self._ws._channel.send_may_fail(
-            "closeServer",
-            None,
-            {
-                "code": code,
-                "reason": reason,
-                "wasClean": True,
-            },
+    def close(self, code: Optional[int], reason: Optional[str]) -> None:
+        create_task_and_ignore_exception(
+            self._ws._loop,
+            self._ws._channel.closeServer(code=code, reason=reason, wasClean=True),
         )
 
     def send(self, message: Union[str, bytes]) -> None:
-        if isinstance(message, str):
-            self._ws._channel.send_may_fail(
-                "sendToServer", None, {"message": message, "isBase64": False}
-            )
-        else:
-            self._ws._channel.send_may_fail(
-                "sendToServer",
-                None,
-                {"message": base64.b64encode(message).decode(), "isBase64": True},
-            )
+        text, is_base64 = _encode_web_socket_message(message)
+        create_task_and_ignore_exception(
+            self._ws._loop,
+            self._ws._channel.sendToServer(message=text, isBase64=is_base64),
+        )
+
+
+def _encode_web_socket_message(message: Union[str, bytes]) -> Tuple[str, bool]:
+    if isinstance(message, str):
+        return message, False
+    return base64.b64encode(message).decode(), True
 
 
 class WebSocketRoute(ChannelOwner):
+    _channel: "WebSocketRouteChannel"
+
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
@@ -663,12 +645,14 @@ class WebSocketRoute(ChannelOwner):
         self._server = ServerWebSocketRoute(self)
         self._connected = False
 
-        self._channel.on("messageFromPage", self._channel_message_from_page)
-        self._channel.on("messageFromServer", self._channel_message_from_server)
-        self._channel.on("closePage", self._channel_close_page)
-        self._channel.on("closeServer", self._channel_close_server)
+        self._channel.onMessageFromPage(self._channel_message_from_page)
+        self._channel.onMessageFromServer(self._channel_message_from_server)
+        self._channel.onClosePage(self._channel_close_page)
+        self._channel.onCloseServer(self._channel_close_server)
 
-    def _channel_message_from_page(self, event: Dict) -> None:
+    def _channel_message_from_page(
+        self, event: "channels.WebSocketRouteMessageFromPageEvent"
+    ) -> None:
         if self._on_page_message:
             self._on_page_message(
                 base64.b64decode(event["message"])
@@ -676,9 +660,16 @@ class WebSocketRoute(ChannelOwner):
                 else event["message"]
             )
         elif self._connected:
-            self._channel.send_may_fail("sendToServer", None, event)
+            create_task_and_ignore_exception(
+                self._loop,
+                self._channel.sendToServer(
+                    message=event["message"], isBase64=event["isBase64"]
+                ),
+            )
 
-    def _channel_message_from_server(self, event: Dict) -> None:
+    def _channel_message_from_server(
+        self, event: "channels.WebSocketRouteMessageFromServerEvent"
+    ) -> None:
         if self._on_server_message:
             self._on_server_message(
                 base64.b64decode(event["message"])
@@ -686,19 +677,42 @@ class WebSocketRoute(ChannelOwner):
                 else event["message"]
             )
         else:
-            self._channel.send_may_fail("sendToPage", None, event)
+            create_task_and_ignore_exception(
+                self._loop,
+                self._channel.sendToPage(
+                    message=event["message"], isBase64=event["isBase64"]
+                ),
+            )
 
-    def _channel_close_page(self, event: Dict) -> None:
+    def _channel_close_page(
+        self, event: "channels.WebSocketRouteClosePageEvent"
+    ) -> None:
         if self._on_page_close:
             self._on_page_close(event["code"], event["reason"])
         else:
-            self._channel.send_may_fail("closeServer", None, event)
+            create_task_and_ignore_exception(
+                self._loop,
+                self._channel.closeServer(
+                    code=event["code"],
+                    reason=event["reason"],
+                    wasClean=event["wasClean"],
+                ),
+            )
 
-    def _channel_close_server(self, event: Dict) -> None:
+    def _channel_close_server(
+        self, event: "channels.WebSocketRouteCloseServerEvent"
+    ) -> None:
         if self._on_server_close:
             self._on_server_close(event["code"], event["reason"])
         else:
-            self._channel.send_may_fail("closePage", None, event)
+            create_task_and_ignore_exception(
+                self._loop,
+                self._channel.closePage(
+                    code=event["code"],
+                    reason=event["reason"],
+                    wasClean=event["wasClean"],
+                ),
+            )
 
     @property
     def url(self) -> str:
@@ -708,11 +722,9 @@ class WebSocketRoute(ChannelOwner):
     def protocols(self) -> List[str]:
         return list(self._initializer.get("protocols", []))
 
-    async def close(self, code: int = None, reason: str = None) -> None:
+    async def close(self, code: Optional[int], reason: Optional[str]) -> None:
         try:
-            await self._channel.send(
-                "closePage", None, {"code": code, "reason": reason, "wasClean": True}
-            )
+            await self._channel.closePage(code=code, reason=reason, wasClean=True)
         except Exception:
             pass
 
@@ -720,23 +732,14 @@ class WebSocketRoute(ChannelOwner):
         if self._connected:
             raise Error("Already connected to the server")
         self._connected = True
-        self._channel.send_may_fail("connect", None)
+        create_task_and_ignore_exception(self._loop, self._channel.connect())
         return cast("WebSocketRoute", self._server)
 
     def send(self, message: Union[str, bytes]) -> None:
-        if isinstance(message, str):
-            self._channel.send_may_fail(
-                "sendToPage", None, {"message": message, "isBase64": False}
-            )
-        else:
-            self._channel.send_may_fail(
-                "sendToPage",
-                None,
-                {
-                    "message": base64.b64encode(message).decode(),
-                    "isBase64": True,
-                },
-            )
+        text, is_base64 = _encode_web_socket_message(message)
+        create_task_and_ignore_exception(
+            self._loop, self._channel.sendToPage(message=text, isBase64=is_base64)
+        )
 
     def on_message(self, handler: Callable[[Union[str, bytes]], Any]) -> None:
         self._on_page_message = handler
@@ -749,10 +752,7 @@ class WebSocketRoute(ChannelOwner):
             return
         # Ensure that websocket is "open" and can send messages without an actual server connection.
         try:
-            await self._channel.send(
-                "ensureOpened",
-                None,
-            )
+            await self._channel.ensureOpened()
         except Exception:
             pass
 
@@ -771,8 +771,8 @@ class WebSocketRouteHandler:
     @staticmethod
     def prepare_interception_patterns(
         handlers: List["WebSocketRouteHandler"],
-    ) -> List[dict]:
-        patterns = []
+    ) -> List["channels.PageSetWebSocketInterceptionPatternsParamsPatterns"]:
+        patterns: List[channels.PageSetWebSocketInterceptionPatternsParamsPatterns] = []
         all_urls = False
         for handler in handlers:
             if isinstance(handler.url, str):
@@ -802,6 +802,8 @@ class WebSocketRouteHandler:
 
 
 class Response(ChannelOwner):
+    _channel: "ResponseChannel"
+
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
@@ -868,33 +870,20 @@ class Response(ChannelOwner):
     async def _actual_headers(self) -> "RawHeaders":
         if not self._raw_headers_future:
             self._raw_headers_future = asyncio.Future()
-            headers = cast(
-                HeadersArray,
-                await self._channel.send(
-                    "rawResponseHeaders",
-                    None,
-                ),
-            )
+            headers = (await self._channel.rawResponseHeaders())["headers"]
             self._raw_headers_future.set_result(RawHeaders(headers))
         return await self._raw_headers_future
 
     async def server_addr(self) -> Optional[RemoteAddr]:
-        return await self._channel.send(
-            "serverAddr",
-            None,
-        )
+        return (await self._channel.serverAddr())["value"]
 
     async def security_details(self) -> Optional[SecurityDetails]:
-        return await self._channel.send(
-            "securityDetails",
-            None,
+        return cast(
+            Optional[SecurityDetails], (await self._channel.securityDetails())["value"]
         )
 
     async def http_version(self) -> str:
-        return await self._channel.send(
-            "httpVersion",
-            None,
-        )
+        return (await self._channel.httpVersion())["value"]
 
     async def finished(self) -> None:
         async def on_finished() -> None:
@@ -913,11 +902,7 @@ class Response(ChannelOwner):
             await on_finished_task
 
     async def body(self) -> bytes:
-        binary = await self._channel.send(
-            "body",
-            None,
-        )
-        return base64.b64decode(binary)
+        return base64.b64decode((await self._channel.body())["binary"])
 
     async def text(self) -> str:
         content = await self.body()
@@ -936,6 +921,8 @@ class Response(ChannelOwner):
 
 
 class WebSocket(ChannelOwner):
+    _channel: "WebSocketChannel"
+
     Events = SimpleNamespace(
         Close="close",
         FrameReceived="framereceived",
@@ -949,19 +936,16 @@ class WebSocket(ChannelOwner):
         super().__init__(parent, type, guid, initializer)
         self._is_closed = False
         self._page = cast("Page", parent)
-        self._channel.on(
-            "frameSent",
-            lambda params: self._on_frame_sent(params["opcode"], params["data"]),
+        self._channel.onFrameSent(
+            lambda event: self._on_frame_sent(event["opcode"], event["data"])
         )
-        self._channel.on(
-            "frameReceived",
-            lambda params: self._on_frame_received(params["opcode"], params["data"]),
+        self._channel.onFrameReceived(
+            lambda event: self._on_frame_received(event["opcode"], event["data"])
         )
-        self._channel.on(
-            "socketError",
-            lambda params: self.emit(WebSocket.Events.Error, params["error"]),
+        self._channel.onSocketError(
+            lambda event: self.emit(WebSocket.Events.Error, event["error"])
         )
-        self._channel.on("close", lambda params: self._on_close())
+        self._channel.onClose(self._on_close)
 
     def __repr__(self) -> str:
         return f"<WebSocket url={self.url!r}>"
@@ -973,8 +957,8 @@ class WebSocket(ChannelOwner):
     def expect_event(
         self,
         event: str,
-        predicate: Callable = None,
-        timeout: float = None,
+        predicate: Optional[Callable],
+        timeout: Optional[float],
     ) -> EventContextManagerImpl:
         if timeout is None:
             timeout = cast(Any, self._parent)._timeout_settings.timeout()
@@ -994,9 +978,11 @@ class WebSocket(ChannelOwner):
         return EventContextManagerImpl(waiter.result())
 
     async def wait_for_event(
-        self, event: str, predicate: Callable = None, timeout: float = None
+        self, event: str, predicate: Optional[Callable], timeout: Optional[float]
     ) -> Any:
-        async with self.expect_event(event, predicate, timeout) as event_info:
+        async with self.expect_event(
+            event=event, predicate=predicate, timeout=timeout
+        ) as event_info:
             pass
         return await event_info
 

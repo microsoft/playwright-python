@@ -27,25 +27,13 @@ HeadersArray = List[NameValue]
 Headers = Dict[str, str]
 
 
-class ServerFilePayload(TypedDict):
-    name: str
-    mimeType: str
-    buffer: str
-
-
-class FormField(TypedDict, total=False):
-    name: str
-    value: Optional[str]
-    file: Optional[ServerFilePayload]
-
-
 class ExpectedTextValue(TypedDict, total=False):
     string: str
     regexSource: str
     regexFlags: str
     matchSubstring: bool
     normalizeWhiteSpace: bool
-    ignoreCase: Optional[bool]
+    ignoreCase: bool
 
 
 class FrameExpectOptions(TypedDict, total=False):
@@ -56,7 +44,7 @@ class FrameExpectOptions(TypedDict, total=False):
     useInnerText: Optional[bool]
     isNot: bool
     timeout: Optional[float]
-    pseudo: Optional[str]
+    pseudo: Optional[Literal["before", "after"]]
 
 
 class FrameExpectResult(TypedDict, total=False):

@@ -174,9 +174,9 @@ Implement the change in `playwright/_impl/<module>.py`. Use the upstream JS impl
 |---|---|
 | `async foo(): Promise<X>` | `async def foo(self) -> X:` |
 | `foo(): X` (sync getter, no args, no body) | `@property def foo(self) -> X:` (the generator makes argument-less sync members properties — see `isPythonProperty` in `scripts/codegen/generate_api.js` — and reads `self._impl_obj.foo` without calling it. mypy does not catch a plain method here; the test does.) |
-| `await this._channel.foo({ a, b })` | `await self._channel.send("foo", None, locals_to_params(locals()))` |
-| `(await this._channel.foo()).value` | `await self._channel.send("foo", None)` (Python's `send()` auto-unwraps single-key responses; only call `send_return_as_dict` when the protocol returns multiple keys.) |
-| `(await this._channel.foo()).artifact` (multi-key, may be empty) | `result = await self._channel.send_return_as_dict("foo", None); (result or {}).get("artifact")` — `send_return_as_dict` returns **`None`** (not `{}`) when the protocol response carries no fields. |
+| `await this._channel.foo({ a, b }, this._timeout(options))` | `await self._channel.foo(a=a, b=b, timeout=self._timeout(timeout))`. The generated channel method takes every protocol parameter, with no defaults; an absent option is `None`. The implementation method's own parameters use the Python (snake_case) names, with no defaults. |
+| `(await this._channel.foo()).value` | `(await self._channel.foo())["value"]`. The result dict has every top-level field; a field that the driver left out is `None`. |
+| `this._channel.on('foo', ({ a }) => ...)` | `self._channel.onFoo(lambda event: ...)`; `event["a"]` is `None` when the driver left the optional field out. |
 | `try { ... } catch (e) { if (isTargetClosedError(e)) return; throw e; }` | `try: ...; except Exception as e: if is_target_closed_error(e): return; raise` (import from `playwright._impl._errors`) |
 | Inline `[Object]` return like `{endpoint: string}` | A `TypedDict` in `playwright/_impl/_api_structures.py`, which the generator writes. It names the struct from the docs: `` "Name" <[Object]> ``, or an `* alias-python:` line under it. See `RemoteAddr`, `BrowserBindResult`, `DebuggerPausedDetails`. |
 | `binary` event/return field | The Python channel layer hands you a base64 string. Decode with `base64.b64decode(value)` before exposing as `bytes`. See `Screencast._dispatch_frame`. |
@@ -216,7 +216,7 @@ The generator fails with "the entry … no longer matches anything; remove it" w
 **Do not suppress** these — they're PORTs in disguise:
 
 - "Internal tooling" classes/methods whose `langs` field is empty (`Screencast.*`, `Debugger.*`, `Page.pick_locator`, `BrowserContext.debugger`, `Browser.bind/unbind`, `Page.{clear,console}_*`). The 1.59 roll suppressed all of these initially, then had to walk every one back. Verify `langs` first.
-- A renamed positional parameter (mypy: unexpected keyword argument `newName` for the impl method). Just rename in `_impl/` and update the channel-send dict key.
+- A renamed positional parameter (mypy: unexpected keyword argument `newName` for the impl method). Just rename in `_impl/`; if the wire name changed too, mypy reports the generated channel call.
 - A struct return the generator cannot name ("No Python name for the struct at …"). Name it, so that the generator writes a TypedDict — don't type it `Dict`.
 
 #### N/A
@@ -241,7 +241,7 @@ The script, for `sync` and then `async`:
 1. runs `node scripts/codegen/generate_api.js --flavor <flavor>` (reads the docs from `$PW_SRC_DIR`) straight into `playwright/<flavor>_api/_generated.py`,
 2. invokes `pre-commit run --files` on the generated file.
 
-It then runs `python scripts/codegen/generate_protocol.py`, which reads `packages/protocol/spec/*.yml` from `$PW_SRC_DIR` and writes the command parameter tables to `playwright/_impl/_protocol.py`.
+It then runs `python scripts/codegen/generate_protocol.py`, which reads `packages/protocol/spec/*.yml` from `$PW_SRC_DIR` and writes the command parameter tables to `playwright/_impl/_protocol.py`, the message types to `playwright/_impl/_protocol_types.py` and the typed channels to `playwright/_impl/_protocol_channels.py`.
 
 Then run `mypy playwright` and work through the errors in `_generated.py` — each one is a call into `_impl/` that the implementation does not support yet.
 
@@ -261,7 +261,8 @@ Failure modes and fixes:
 | Symptom | Cause | Fix |
 |---|---|---|
 | mypy: `"XImpl" has no attribute "y"` in `_generated.py` | The docs have a new member `X.y`; `_impl/` does not. | PORT it. |
-| mypy: `Unexpected keyword argument "z" for "y" of "XImpl"` | New parameter or option on an existing method. | Add the kwarg (docs camelCase name) in `_impl/`. If Python must not have it, fix the docs: `* langs:` on the option. |
+| mypy: `Unexpected keyword argument "z" for "y" of "XImpl"` | New parameter or option on an existing method. | Add the parameter in `_impl/` under its Python (snake_case) name, as `Optional[X]` with no default, and pass it in the channel call. mypy then reports each caller that must pass it. If Python must not have it, fix the docs: `* langs:` on the option. |
+| mypy: `Missing named argument "z" for "y" of "XChannel"` | The protocol added a parameter to a command. | Pass the value in the channel call. If the implementation method needs a new parameter for it, add it as above. |
 | mypy: incompatible argument type in `_generated.py` | The docs type changed, or `_impl/` declares a narrower type. | Match the type in `_impl/`, or fix the docs with a Python-only declaration (`* langs: python`). |
 | generator: `No Python name for the struct at X.y.z` | A new inline `[Object]` with no name in the docs. | Name it in the docs: `` "Name" <[Object]> ``. |
 | generator: `The struct X has different fields at A and B` | Two places in the docs share one struct name, but their fields differ. | Give one place its own name in the docs. |
@@ -328,7 +329,7 @@ All keys use docs names: `Class.member` or `Class.member.arg`, with the upstream
 - **A cluster of rules on the same class is a smell.** If you're about to add five entries for `Foo.*`, you're almost certainly looking at a class that needs to be implemented. Implement the whole thing once and the entries disappear.
 - **Watch for revert pairs in the same range.** 1.59 added and reverted `Browser.isRemote` (#39613 / #39620) inside the same release. Walking chronologically lets you skip the add when you see the revert later.
 - **Watch for rename-revert pairs.** 1.59 had `Locator.normalize` → `Locator.toCode` (#39648) → `Locator.normalize` (#39754). Final state wins; only port the last.
-- **Doc renames almost always include a wire-protocol rename.** Whenever you see `### param: X.y.oldName` → `### param: X.y.newName` in a doc commit, also `git -C "$PW_SRC_DIR" show <sha> -- packages/protocol/spec/` and the corresponding `*Dispatcher.ts` file. If the wire field changed too, the channel-send dict key in `_impl/` must change. Suppressing the doc-side mismatch is hiding a real bug — the previous Python code is silently sending an unknown field that the new server ignores. The test suite reports such a field as a protocol violation, but only in tests that send it.
+- **Doc renames almost always include a wire-protocol rename.** Whenever you see `### param: X.y.oldName` → `### param: X.y.newName` in a doc commit, also `git -C "$PW_SRC_DIR" show <sha> -- packages/protocol/spec/` and the corresponding `*Dispatcher.ts` file. If the wire field changed too, the regenerated `_protocol_channels.py` renames the argument of the channel method, and mypy reports each call in `_impl/` that passes the old name.
 - **TypedDicts beat `Dict[str, X]` for any structured return.** When the docs describe a return as `[Object]` with named fields, name the struct for the generator, which writes its `TypedDict` into `_api_structures.py`, and re-export it from both public `__init__.py` files. Zero runtime cost (it's still a `dict`), and the docstrings expand its fields from the docs.
 - **Positional renames are free.** A param with no default before any `*` separator is positional-or-keyword in Python, but realistic call sites pass it positionally. Renaming such a param doesn't break callers.
 - **The "Backport changes" GitHub issue can be misleading.** In the 1.59 roll its checkboxes were all marked `[x]` with annotations like "✅ IMPLEMENTED", but several of those features had not actually been merged into the Python port. Trust the `docs/src/api/` walk over the issue.

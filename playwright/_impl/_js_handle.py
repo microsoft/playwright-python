@@ -22,21 +22,23 @@ from playwright._impl._errors import is_target_closed_error
 from playwright._impl._serializers import parse_value, serialize_value
 
 if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl import _protocol_types as channels
     from playwright._impl._element_handle import ElementHandle
+    from playwright._impl._protocol_channels import JSHandleChannel
 
 
 Serializable = Any
 
 
 class JSHandle(ChannelOwner):
+    _channel: "JSHandleChannel"
+
     def __init__(
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
         self._preview = self._initializer["preview"]
-        self._channel.on(
-            "previewUpdated", lambda params: self._on_preview_updated(params["preview"])
-        )
+        self._channel.onPreviewUpdated(self._on_preview_updated)
 
     def __repr__(self) -> str:
         return f"<JSHandle preview={self._preview}>"
@@ -44,47 +46,32 @@ class JSHandle(ChannelOwner):
     def __str__(self) -> str:
         return self._preview
 
-    def _on_preview_updated(self, preview: str) -> None:
-        self._preview = preview
+    def _on_preview_updated(
+        self, event: "channels.JSHandlePreviewUpdatedEvent"
+    ) -> None:
+        self._preview = event["preview"]
 
-    async def evaluate(self, expression: str, arg: Serializable = None) -> Any:
-        return parse_result(
-            await self._channel.send(
-                "evaluateExpression",
-                None,
-                dict(
-                    expression=expression,
-                    arg=serialize_argument(arg),
-                ),
-            )
+    async def evaluate(self, expression: str, arg: Serializable) -> Any:
+        result = await self._channel.evaluateExpression(
+            expression=expression, isFunction=None, arg=serialize_argument(arg)
         )
+        return parse_result(result["value"])
 
-    async def evaluate_handle(
-        self, expression: str, arg: Serializable = None
-    ) -> "JSHandle":
-        return from_channel(
-            await self._channel.send(
-                "evaluateExpressionHandle",
-                None,
-                dict(
-                    expression=expression,
-                    arg=serialize_argument(arg),
-                ),
-            )
+    async def evaluate_handle(self, expression: str, arg: Serializable) -> "JSHandle":
+        result = await self._channel.evaluateExpressionHandle(
+            expression=expression, isFunction=None, arg=serialize_argument(arg)
         )
+        return from_channel(result["handle"])
 
-    async def get_property(self, propertyName: str) -> "JSHandle":
+    async def get_property(self, property_name: str) -> "JSHandle":
         return from_channel(
-            await self._channel.send("getProperty", None, dict(name=propertyName))
+            (await self._channel.getProperty(name=property_name))["handle"]
         )
 
     async def get_properties(self) -> Dict[str, "JSHandle"]:
+        result = await self._channel.getPropertyList()
         return {
-            prop["name"]: from_channel(prop["value"])
-            for prop in await self._channel.send(
-                "getPropertyList",
-                None,
-            )
+            prop["name"]: from_channel(prop["value"]) for prop in result["properties"]
         }
 
     def as_element(self) -> Optional["ElementHandle"]:
@@ -92,21 +79,13 @@ class JSHandle(ChannelOwner):
 
     async def dispose(self) -> None:
         try:
-            await self._channel.send(
-                "dispose",
-                None,
-            )
+            await self._channel.dispose()
         except Exception as e:
             if not is_target_closed_error(e):
                 raise e
 
     async def json_value(self) -> Any:
-        return parse_result(
-            await self._channel.send(
-                "jsonValue",
-                None,
-            )
-        )
+        return parse_result((await self._channel.jsonValue())["value"])
 
 
 def serialize_argument(arg: Serializable = None) -> Any:

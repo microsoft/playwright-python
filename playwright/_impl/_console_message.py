@@ -13,26 +13,53 @@
 # limitations under the License.
 
 from asyncio import AbstractEventLoop
-from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Union
+from typing import TYPE_CHECKING, Any, List, Literal, Optional, cast
 
 from playwright._impl._api_structures import SourceLocation
 from playwright._impl._connection import from_channel, from_nullable_channel
 from playwright._impl._js_handle import JSHandle
 
 if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl import _protocol_types as channels
     from playwright._impl._page import Page
     from playwright._impl._worker import Worker
 
 
+ConsoleMessageType = Literal[
+    "assert",
+    "clear",
+    "count",
+    "debug",
+    "dir",
+    "dirxml",
+    "endGroup",
+    "error",
+    "info",
+    "log",
+    "profile",
+    "profileEnd",
+    "startGroup",
+    "startGroupCollapsed",
+    "table",
+    "time",
+    "timeEnd",
+    "trace",
+    "warning",
+]
+
+
 class ConsoleMessage:
     def __init__(
-        self, event: Dict, loop: AbstractEventLoop, dispatcher_fiber: Any
+        self,
+        event: "channels.BrowserContextConsoleEvent",
+        loop: AbstractEventLoop,
+        dispatcher_fiber: Any,
     ) -> None:
         self._event = event
         self._loop = loop
         self._dispatcher_fiber = dispatcher_fiber
-        self._page: Optional["Page"] = from_nullable_channel(event.get("page"))
-        self._worker: Optional["Worker"] = from_nullable_channel(event.get("worker"))
+        self._page: Optional["Page"] = from_nullable_channel(event["page"])
+        self._worker: Optional["Worker"] = from_nullable_channel(event["worker"])
 
     def __repr__(self) -> str:
         return f"<ConsoleMessage type={self.type} text={self.text}>"
@@ -41,28 +68,8 @@ class ConsoleMessage:
         return self.text
 
     @property
-    def type(self) -> Union[
-        Literal["assert"],
-        Literal["clear"],
-        Literal["count"],
-        Literal["debug"],
-        Literal["dir"],
-        Literal["dirxml"],
-        Literal["endGroup"],
-        Literal["error"],
-        Literal["info"],
-        Literal["log"],
-        Literal["profile"],
-        Literal["profileEnd"],
-        Literal["startGroup"],
-        Literal["startGroupCollapsed"],
-        Literal["table"],
-        Literal["time"],
-        Literal["timeEnd"],
-        Literal["trace"],
-        Literal["warning"],
-    ]:
-        return self._event["type"]
+    def type(self) -> ConsoleMessageType:
+        return cast(ConsoleMessageType, self._event["type"])
 
     @property
     def text(self) -> str:
