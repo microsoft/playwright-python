@@ -83,25 +83,30 @@ async def convert_input_files(
                 (_list_files(local_directory) if local_directory else local_paths),
             )
             streams = []
-            root_dir_name = (
-                os.path.basename(local_directory) if local_directory else None
-            )
-            temp_files: List[channels.BrowserContextCreateTempFilesParamsItems] = [
-                {
-                    "name": (
-                        os.path.relpath(file, local_directory)
-                        if local_directory
-                        else os.path.basename(file)
+
+            async def create_temp_files() -> (
+                "channels.BrowserContextCreateTempFilesResult"
+            ):
+                return await context._channel.createTempFiles(
+                    rootDirName=(
+                        os.path.basename(local_directory) if local_directory else None
                     ),
-                    "lastModifiedMs": int(os.path.getmtime(file) * 1000),
-                }
-                for file in files_to_stream
-            ]
+                    items=[
+                        {
+                            "name": (
+                                os.path.relpath(file, local_directory)
+                                if local_directory
+                                else os.path.basename(file)
+                            ),
+                            "lastModifiedMs": int(os.path.getmtime(file) * 1000),
+                        }
+                        for file in files_to_stream
+                    ],
+                )
+
             result: channels.BrowserContextCreateTempFilesResult = (
                 await context._connection.wrap_api_call(
-                    lambda: context._channel.createTempFiles(
-                        rootDirName=root_dir_name, items=temp_files
-                    )
+                    create_temp_files, is_internal=True
                 )
             )
             for i, file in enumerate(result["writableStreams"]):

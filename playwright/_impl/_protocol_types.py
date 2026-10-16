@@ -45,7 +45,7 @@ from typing import (
 if TYPE_CHECKING:
     from typing_extensions import NotRequired
 
-    from playwright._impl._connection import Channel
+    from playwright._impl._channel import Channel
     from playwright._impl._protocol_channels import (
         AndroidChannel,
         AndroidDeviceChannel,

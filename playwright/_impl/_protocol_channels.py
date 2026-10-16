@@ -28,7 +28,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Callable, Dict, Literal, Optional, Sequence, Type
 
-from playwright._impl._connection import Channel
+from playwright._impl._channel import Channel
 
 if TYPE_CHECKING:
     from playwright._impl import _protocol_types as channels
