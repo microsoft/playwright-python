@@ -39,7 +39,10 @@ class CDPSession(ChannelOwner):
 
     def _on_event(self, event: "channels.CDPSessionEventEvent") -> None:
         self.emit(event["method"], event["params"])
-        self.emit(CDPSession.Events.Event, event)
+        self.emit(
+            CDPSession.Events.Event,
+            {key: value for key, value in event.items() if value is not None},
+        )
 
     async def send(self, method: str, params: Optional[Dict]) -> Dict:
         return (await self._channel.send(method=method, params=params))["result"]

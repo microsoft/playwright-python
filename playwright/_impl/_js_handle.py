@@ -17,7 +17,8 @@
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from playwright._impl._connection import Channel, ChannelOwner, from_channel
+from playwright._impl._channel import Channel
+from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._errors import is_target_closed_error
 from playwright._impl._serializers import parse_value, serialize_value
 

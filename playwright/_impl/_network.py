@@ -445,6 +445,8 @@ class Route(ChannelOwner):
             encoded_body = base64.b64encode(body).decode()
             is_base64 = True
             length = len(body)
+        elif body is not None:
+            raise Error(f"body must be a str or bytes, got {type(body).__name__}")
         elif path:
             file_content = Path(path).read_bytes()
             encoded_body = base64.b64encode(file_content).decode()
