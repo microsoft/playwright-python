@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import contextlib
+import logging
 import multiprocessing
 import os
 import signal
@@ -34,6 +35,7 @@ from playwright.sync_api import (
     Dialog,
     Error,
     Page,
+    Route,
     TimeoutError,
     sync_playwright,
 )
@@ -337,6 +339,43 @@ def test_expect_response_should_use_context_timeout(
             pass
     assert exc_info.type is TimeoutError
     assert "Timeout 1000ms exceeded" in exc_info.value.message
+
+
+def _test_sync_playwright_should_not_log_cancelled_route_handler_on_exit(
+    browser_name: str, launch_arguments: Dict[str, Any], empty_page: str
+) -> None:
+    records: List[logging.LogRecord] = []
+
+    class RecordingHandler(logging.Handler):
+        def emit(self, record: logging.LogRecord) -> None:
+            records.append(record)
+
+    logging.getLogger("asyncio").addHandler(RecordingHandler())
+    held: List[Route] = []
+    with sync_playwright() as p:
+        browser = p[browser_name].launch(**launch_arguments)
+        page = browser.new_page()
+        page.route("**/held", lambda route: held.append(route))
+        page.goto(empty_page)
+        page.evaluate("() => { fetch('/held').catch(() => {}); }")
+        while not held:
+            page.wait_for_timeout(50)
+        browser.close()
+    # Exiting the context manager cancels the pending route handler task.
+    assert [r.getMessage() for r in records] == []
+
+
+def test_sync_playwright_should_not_log_cancelled_route_handler_on_exit(
+    server: Server, browser_name: str, launch_arguments: Dict[str, Any]
+) -> None:
+    # https://github.com/microsoft/playwright/issues/43463
+    p = multiprocessing.Process(
+        target=_test_sync_playwright_should_not_log_cancelled_route_handler_on_exit,
+        args=[browser_name, launch_arguments, server.EMPTY_PAGE],
+    )
+    p.start()
+    p.join()
+    assert p.exitcode == 0
 
 
 def _test_sync_playwright_stop_multiple_times() -> None:
