@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional, TypeVar
+import re
+from typing import Optional, Pattern, TypeVar
 
 TARGET_CLOSED_ERROR_MESSAGE = "Target page, context or browser has been closed"
 
@@ -33,3 +34,18 @@ def chromium_version_less_than(a: str, b: str) -> bool:
         if left[i] < right[i]:
             return True
     return False
+
+
+def expected_ssl_error(
+    browser_name: str, platform: str, channel: Optional[str]
+) -> Pattern[str]:
+    """Port of expectedSSLError() in tests/config/utils.ts."""
+    if browser_name == "chromium":
+        return re.compile(r"net::(ERR_CERT_AUTHORITY_INVALID|ERR_CERT_INVALID)")
+    if browser_name == "webkit":
+        if platform == "darwin":
+            return re.compile(r"The certificate for this server is invalid")
+        if platform == "win32" and channel != "webkit-wsl":
+            return re.compile(r"SSL peer certificate or SSH remote key was not OK")
+        return re.compile(r"Unacceptable TLS certificate|Operation was cancelled")
+    return re.compile(r"SSL_ERROR_UNKNOWN")
