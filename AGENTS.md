@@ -17,7 +17,7 @@ Python bindings for [Playwright](https://playwright.dev). The Python client talk
   - `_protocol_types.py` has the TypedDicts for initializers, results, events and nested types, named as upstream's `utils/generate_channels.js` names them (`PageInitializer`, `FrameGotoResult`, `PageRouteEvent`, …).
   - `_protocol.py` has the parameters of every command. With `PW_CHECK_PROTOCOL=1`, `playwright/_impl/_protocol_check.py` checks each message that the client sends against it. The test suite sets this, and fails a test that sends an unknown command, an unknown or missing parameter, or a value of the wrong type.
 - `scripts/codegen/compare_api.py` — compares two generated files (signatures, annotations, call bodies, docstrings) and lists every difference. Use it to check that a generator change does not change the API.
-- `tests/async/`, `tests/sync/` — pytest suites, ported from the upstream tests. Most new tests are added to the async file with a sync mirror. See [Tests](#tests).
+- `tests/async/`, `tests/sync/` — pytest suites, ported test for test from the upstream tests, which `tests/upstream_registry.md` lists by identifier. See [Tests](#tests).
 - `DRIVER_VERSION` — the single source of truth for which Playwright release the driver is assembled from (one line, the `playwright-core` npm version, e.g. `1.61.0`, no `v` prefix). Read by `setup.py`, `scripts/build_driver.py`, and CI. The wheel build downloads `playwright-core` at this version from npm plus the matching Node.js binary and assembles the per-platform bundles — no source build. The version is baked into the staged bundle filenames (`driver/playwright-<version>-<suffix>.zip`), so it doubles as the build cache key.
 - `NODE_VERSION` — the Node.js version bundled with the driver (one line, e.g. `24.16.0`). Maintained at roll time by `scripts/update_node_version.py` (latest LTS, mirroring upstream's `utils/build/update-playwright-node.mjs`).
 - `scripts/build_driver.py` — assembles the per-platform driver bundles into `driver/` by downloading the `playwright-core` npm package (`DRIVER_VERSION`) and the official Node.js binaries (`NODE_VERSION`). Fetches `playwright-core` with `npm pack` (needs Node.js/npm on PATH; honours a root `.npmrc`) and the Node.js binaries over plain HTTP; invoked from `setup.py`'s `bdist_wheel` with the target platform's suffix (no arg builds all six).
@@ -50,14 +50,16 @@ The public API comes from the upstream docs. After `./scripts/update_api.sh`, ru
 
 ## Tests
 
-The tests are a port of the upstream tests in `microsoft/playwright` (`tests/page/`, `tests/library/`). Keep them close to upstream, so that each upstream test has one place in this repo.
+The tests are a port of the upstream tests in `microsoft/playwright` (`tests/page/`, `tests/library/`), test for test. Upstream gives each test an identifier, the first token of its title: `it('CH-001 should check the box', ...)`. `tests/upstream_registry.md` is a copy of upstream's `tests/registry.md`, which lists every identifier with its file and title.
 
-**First rule: follow the upstream names and files.**
+**First rule: every upstream test is ported, or listed as not ported.**
 
-- When a change needs a test, find the upstream test for the same behavior and port it. Do not write a new test when an upstream test exists.
-- Put the test in the Python file that matches the upstream file: `tests/page/expect-misc.spec.ts` becomes `tests/async/test_expect_misc.py`. If that file does not exist, create it.
-- Name the test after the upstream title, in snake_case, with the `describe` title in front: `test('should support pseudo element')` in `test.describe('toHaveCSS')` becomes `test_to_have_css_should_support_pseudo_element`.
-- Add the sync mirror in `tests/sync/`, with the same file name and test name.
+- Port each upstream test twice, to `tests/async/` and to `tests/sync/`, in the file that matches the upstream file: `tests/page/page-check.spec.ts` becomes `tests/async/page/test_page_check.py` and `tests/sync/page/test_page_check.py`; `tests/library/chromium/oopif.spec.ts` becomes `tests/async/library/chromium/test_oopif.py`.
+- Name the test `test_<ID>_<title>`: the identifier with `_`, then the `describe` titles and the title in snake_case. `test('EX-181 toHaveCount pass')` in `test.describe('toHaveCount')` becomes `test_EX_181_to_have_count_to_have_count_pass`. A test that a loop declares several times is one function with `@pytest.mark.parametrize`.
+- Port faithfully: the same steps, assertions and skip conditions. A test that fails because of a bug in the Python client stays, marked `@pytest.mark.xfail(reason="python: ...", strict=True)`.
+- A test that can not exist in Python (a JavaScript-only API, Node.js client internals, tools that run in the driver, `@playwright/test` features) goes in `tests/upstream_not_ported.txt`, with the reason.
+- `python scripts/check_test_registry.py` checks all of this. `--missing <code or file glob>` prints the expected names of the tests still to port; `--report` prints the coverage per subsystem.
+- Do not write a new test when an upstream test exists. `tests/async/legacy/` and `tests/sync/legacy/` hold older ports named after old upstream titles; do not add tests there.
 
 **Second rule: keep the number of tests small.** This applies to every test, and most of all to Python-only behavior that has no upstream test (the sync API, asyncio, the driver).
 
