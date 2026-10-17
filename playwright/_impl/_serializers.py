@@ -25,7 +25,7 @@ import math
 import re
 import struct
 import traceback
-from typing import Any, Callable, Dict, List, Optional, Pattern
+from typing import Any, Callable, Dict, List, Optional, Pattern, Union
 from urllib.parse import ParseResult, urlparse, urlunparse
 
 from playwright._impl._errors import Error
@@ -52,13 +52,16 @@ class VisitorInfo:
         return self.last_id
 
 
-def serialize_value(
+def serialize_value(value: Any, handle_serializer: HandleSerializer) -> Any:
+    return _inner_serialize_value(value, handle_serializer, VisitorInfo(), [])
+
+
+def _inner_serialize_value(
     value: Any,
     handle_serializer: HandleSerializer,
-    visitor_info: Optional[VisitorInfo] = None,
+    visitor_info: VisitorInfo,
+    access_chain: List[Union[str, int]],
 ) -> Any:
-    if visitor_info is None:
-        visitor_info = VisitorInfo()
     handle = handle_serializer(value)
     if handle is not None:
         return handle
@@ -93,7 +96,9 @@ def serialize_value(
                     (value.stack or "")
                     if isinstance(value, Error)
                     else "".join(
-                        traceback.format_exception(type(value), value=value, tb=None)
+                        traceback.format_exception(
+                            type(value), value=value, tb=value.__traceback__
+                        )
                     )
                 ),
             }
@@ -117,8 +122,12 @@ def serialize_value(
     if isinstance(value, collections.abc.Sequence) and not isinstance(value, str):
         id = visitor_info.visit(value)
         a = []
-        for e in value:
-            a.append(serialize_value(e, handle_serializer, visitor_info))
+        for i, e in enumerate(value):
+            a.append(
+                _inner_serialize_value(
+                    e, handle_serializer, visitor_info, [*access_chain, i]
+                )
+            )
         return dict(a=a, id=id)
 
     if isinstance(value, dict):
@@ -128,11 +137,31 @@ def serialize_value(
             o.append(
                 {
                     "k": name,
-                    "v": serialize_value(value[name], handle_serializer, visitor_info),
+                    "v": _inner_serialize_value(
+                        value[name],
+                        handle_serializer,
+                        visitor_info,
+                        [*access_chain, name],
+                    ),
                 }
             )
         return dict(o=o, id=id)
-    return dict(v="undefined")
+    # Functions, and other values that have no protocol form, reach here.
+    raise Error(
+        f"Attempting to serialize unexpected value{_access_chain_to_display_string(access_chain)}: {value}"
+    )
+
+
+def _access_chain_to_display_string(access_chain: List[Union[str, int]]) -> str:
+    chain_string = "".join(
+        (
+            (f".{accessor}" if i else accessor)
+            if isinstance(accessor, str)
+            else f"[{accessor}]"
+        )
+        for i, accessor in enumerate(access_chain)
+    )
+    return f' at position "{chain_string}"' if chain_string else ""
 
 
 def parse_value(value: Any, refs: Optional[Dict[int, Any]] = None) -> Any:

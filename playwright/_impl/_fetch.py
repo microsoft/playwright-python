@@ -41,6 +41,7 @@ from playwright._impl._helper import (
     async_readfile,
     async_writefile,
     is_file_payload,
+    json_stringify,
     to_impl,
 )
 from playwright._impl._internal_structures import Headers, NameValue
@@ -434,7 +435,7 @@ class APIRequestContext(ChannelOwner):
         if data is not None:
             if isinstance(data, str):
                 if is_json_content_type(serialized_headers):
-                    json_data = data if is_json_parsable(data) else json.dumps(data)
+                    json_data = data if is_json_parsable(data) else json_stringify(data)
                 else:
                     post_data_buffer = data.encode()
             elif isinstance(data, bytes):
@@ -442,11 +443,11 @@ class APIRequestContext(ChannelOwner):
             elif isinstance(data, (dict, list, int, float, bool)):
                 try:
                     # NaN and Infinity are not valid JSON.
-                    json_data = json.dumps(data, allow_nan=False)
+                    json_data = json_stringify(data)
                 except ValueError as e:
                     raise Error(str(e)) from None
             else:
-                raise Error(f"Unsupported 'data' type: {type(data)}")
+                raise Error("Unexpected 'data' type")
         elif form is not None:
             if isinstance(form, FormData):
                 form_data = []
@@ -510,17 +511,28 @@ class APIRequestContext(ChannelOwner):
             await self._channel.storageState(indexedDB=indexed_db, opfs=opfs),
         )
         if path:
-            await async_writefile(path, json.dumps(result))
+            await async_writefile(path, json_stringify(result, indent=2))
         return result
 
 
+# Port of objectToArray() in packages/playwright-core/src/client/fetch.ts.
 def object_to_array(obj: Optional[Dict]) -> Optional[List[NameValue]]:
     if not obj:
         return None
     result = []
     for key, value in obj.items():
-        result.append(NameValue(name=key, value=str(value)))
+        # None is Python's undefined.
+        if value is not None:
+            result.append(NameValue(name=key, value=_to_string(value)))
     return result
+
+
+# Converts a value to a string as String() does in JavaScript, for the values
+# that the API accepts.
+def _to_string(value: Any) -> str:
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    return str(value)
 
 
 def file_payload_to_json(payload: FilePayload) -> "channels.FormFieldFile":
@@ -646,12 +658,13 @@ class APIResponse:
         return (await self._request._channel.fetchLog(fetchUid=self._fetch_uid))["log"]
 
 
+# Port of isJsonContentType() in packages/playwright-core/src/client/fetch.ts.
 def is_json_content_type(headers: network.HeadersArray = None) -> bool:
     if not headers:
         return False
     for header in headers:
         if header["name"].lower() == "content-type":
-            return header["value"].startswith("application/json")
+            return header["value"].split(";")[0].strip().lower() == "application/json"
     return False
 
 

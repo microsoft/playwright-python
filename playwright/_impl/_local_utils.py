@@ -79,9 +79,11 @@ class LocalUtils(ChannelOwner):
     async def har_close(self, har_id: str) -> None:
         await self._channel.harClose(harId=har_id)
 
-    async def har_unzip(self, zip_file: str, har_file: str) -> None:
+    async def har_unzip(
+        self, zip_file: str, har_file: str, resources_dir: Optional[str]
+    ) -> None:
         await self._channel.harUnzip(
-            zipFile=zip_file, harFile=har_file, resourcesDir=None
+            zipFile=zip_file, harFile=har_file, resourcesDir=resources_dir
         )
 
     async def tracing_started(
@@ -105,7 +107,7 @@ class LocalUtils(ChannelOwner):
 
 
 def parse_device_descriptor(dict: Dict) -> Dict:
-    return {
+    result = {
         "user_agent": dict["userAgent"],
         "viewport": dict["viewport"],
         "device_scale_factor": dict["deviceScaleFactor"],
@@ -113,3 +115,7 @@ def parse_device_descriptor(dict: Dict) -> Dict:
         "has_touch": dict["hasTouch"],
         "default_browser_type": dict["defaultBrowserType"],
     }
+    # "screen" is optional in the protocol.
+    if dict.get("screen"):
+        result["screen"] = dict["screen"]
+    return result

@@ -1,0 +1,466 @@
+# Copyright (c) Microsoft Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import json
+import time
+from pathlib import Path
+from typing import Any, Dict, List, cast
+from urllib.parse import parse_qs
+
+import pytest
+
+from playwright.sync_api import (
+    Browser,
+    BrowserContext,
+    Error,
+    FilePayload,
+    FormData,
+    Page,
+)
+from tests.server import HTTPServer, Server
+from tests.utils import must
+
+
+def test_get_should_work(context: BrowserContext, server: Server) -> None:
+    response = context.request.get(server.PREFIX + "/simple.json")
+    assert response.url == server.PREFIX + "/simple.json"
+    assert response.status == 200
+    assert response.status_text == "OK"
+    assert response.ok is True
+    assert response.headers["content-type"] == "application/json; charset=utf-8"
+    assert {
+        "name": "Content-Type",
+        "value": "application/json; charset=utf-8",
+    } in response.headers_array
+    assert response.text() == '{"foo": "bar"}\n'
+
+
+def test_fetch_should_work(context: BrowserContext, server: Server) -> None:
+    response = context.request.fetch(server.PREFIX + "/simple.json")
+    assert response.url == server.PREFIX + "/simple.json"
+    assert response.status == 200
+    assert response.status_text == "OK"
+    assert response.ok is True
+    assert response.headers["content-type"] == "application/json; charset=utf-8"
+    assert {
+        "name": "Content-Type",
+        "value": "application/json; charset=utf-8",
+    } in response.headers_array
+    assert response.text() == '{"foo": "bar"}\n'
+
+
+def test_should_return_timing(context: BrowserContext) -> None:
+    fresh_server = HTTPServer()
+    fresh_server.start()
+    try:
+        response = context.request.get(fresh_server.EMPTY_PAGE)
+        timing = response.timing
+        assert abs(timing["startTime"] - time.time() * 1000) < 10000
+        assert timing["domainLookupStart"] == 0
+        assert timing["domainLookupEnd"] >= timing["domainLookupStart"]
+        assert timing["connectStart"] == timing["domainLookupEnd"]
+        assert timing["secureConnectionStart"] == -1
+        assert timing["connectEnd"] >= timing["connectStart"]
+        assert timing["requestStart"] == timing["connectEnd"]
+        assert timing["responseStart"] >= timing["requestStart"]
+        assert timing["responseEnd"] >= timing["responseStart"]
+        assert timing["responseEnd"] < 60000
+    finally:
+        fresh_server.stop()
+
+
+def test_should_throw_on_network_error(context: BrowserContext, server: Server) -> None:
+    server.set_route("/test", lambda request: request.loseConnection())
+    with pytest.raises(Error, match="socket hang up"):
+        context.request.fetch(server.PREFIX + "/test")
+
+
+def test_should_add_session_cookies_to_request(
+    context: BrowserContext, server: Server
+) -> None:
+    context.add_cookies(
+        [
+            {
+                "name": "username",
+                "value": "John Doe",
+                "url": server.EMPTY_PAGE,
+                "expires": -1,
+                "httpOnly": False,
+                "secure": False,
+                "sameSite": "Lax",
+            }
+        ]
+    )
+    with server.expect_request("/empty.html") as server_req:
+        context.request.get(server.EMPTY_PAGE)
+    assert server_req.value.getHeader("Cookie") == "username=John Doe"
+
+
+@pytest.mark.parametrize(
+    "method", ["fetch", "delete", "get", "head", "patch", "post", "put"]
+)
+def test_should_support_query_params(
+    context: BrowserContext, server: Server, method: str
+) -> None:
+    expected_params = {"p1": "v1", "парам2": "знач2"}
+    with server.expect_request("/empty.html") as server_req:
+        getattr(context.request, method)(
+            server.EMPTY_PAGE + "?p1=foo", params=expected_params
+        )
+    assert list(map(lambda x: x.decode(), server_req.value.args["p1".encode()])) == [
+        "foo",
+        "v1",
+    ]
+    assert server_req.value.args["парам2".encode()][0].decode() == "знач2"
+
+
+@pytest.mark.parametrize(
+    "method", ["fetch", "delete", "get", "head", "patch", "post", "put"]
+)
+def test_should_support_params_passed_as_object(
+    context: BrowserContext, server: Server, method: str
+) -> None:
+    params = {
+        "param1": "value1",
+        "парам2": "знач2",
+    }
+    with server.expect_request("/empty.html") as server_req:
+        getattr(context.request, method)(server.EMPTY_PAGE, params=params)
+    assert server_req.value.args["param1".encode()][0].decode() == "value1"
+    assert len(server_req.value.args["param1".encode()]) == 1
+    assert server_req.value.args["парам2".encode()][0].decode() == "знач2"
+
+
+@pytest.mark.parametrize(
+    "method", ["fetch", "delete", "get", "head", "patch", "post", "put"]
+)
+def test_should_support_params_passed_as_strings(
+    context: BrowserContext, server: Server, method: str
+) -> None:
+    params = "?param1=value1&param1=value2&парам2=знач2"
+    with server.expect_request("/empty.html") as server_req:
+        getattr(context.request, method)(server.EMPTY_PAGE, params=params)
+    assert list(
+        map(lambda x: x.decode(), server_req.value.args["param1".encode()])
+    ) == ["value1", "value2"]
+    assert len(server_req.value.args["param1".encode()]) == 2
+    assert server_req.value.args["парам2".encode()][0].decode() == "знач2"
+
+
+@pytest.mark.parametrize(
+    "method", ["fetch", "delete", "get", "head", "patch", "post", "put"]
+)
+def test_should_support_fail_on_status_code(
+    context: BrowserContext, server: Server, method: str
+) -> None:
+    with pytest.raises(Error, match="404 Not Found"):
+        getattr(context.request, method)(
+            server.PREFIX + "/this-does-clearly-not-exist.html",
+            fail_on_status_code=True,
+        )
+
+
+@pytest.mark.parametrize(
+    "method", ["fetch", "delete", "get", "head", "patch", "post", "put"]
+)
+def test_should_support_ignore_https_errors_option(
+    context: BrowserContext, https_server: Server, method: str
+) -> None:
+    response = getattr(context.request, method)(
+        https_server.EMPTY_PAGE, ignore_https_errors=True
+    )
+    assert response.ok
+    assert response.status == 200
+
+
+def test_should_not_add_context_cookie_if_cookie_header_passed_as_parameter(
+    context: BrowserContext, server: Server
+) -> None:
+    context.add_cookies(
+        [
+            {
+                "name": "username",
+                "value": "John Doe",
+                "url": server.EMPTY_PAGE,
+                "expires": -1,
+                "httpOnly": False,
+                "secure": False,
+                "sameSite": "Lax",
+            }
+        ]
+    )
+    with server.expect_request("/empty.html") as server_req:
+        context.request.get(server.EMPTY_PAGE, headers={"Cookie": "foo=bar"})
+    assert server_req.value.getHeader("Cookie") == "foo=bar"
+
+
+@pytest.mark.parametrize("method", ["delete", "patch", "post", "put"])
+def test_should_support_post_data(
+    context: BrowserContext, method: str, server: Server
+) -> None:
+    def support_post_data(fetch_data: Any, request_post_data: Any) -> None:
+        with server.expect_request("/simple.json") as request:
+            response = getattr(context.request, method)(
+                server.PREFIX + "/simple.json", data=fetch_data
+            )
+        assert request.value.method.decode() == method.upper()
+        assert request.value.post_body == request_post_data
+        assert response.status == 200
+        assert response.url == server.PREFIX + "/simple.json"
+        assert request.value.getHeader("Content-Length") == str(
+            len(must(request.value.post_body))
+        )
+
+    support_post_data("My request", "My request".encode())
+    support_post_data(b"My request", "My request".encode())
+    support_post_data(
+        ["my", "request"], json.dumps(["my", "request"], separators=(",", ":")).encode()
+    )
+    support_post_data(
+        {"my": "request"}, json.dumps({"my": "request"}, separators=(",", ":")).encode()
+    )
+    with pytest.raises(Error, match="Unexpected 'data' type"):
+        support_post_data(lambda: None, None)
+
+
+def test_should_support_application_x_www_form_urlencoded(
+    context: BrowserContext, server: Server
+) -> None:
+    with server.expect_request("/empty.html") as server_req:
+        context.request.post(
+            server.PREFIX + "/empty.html",
+            form={
+                "firstName": "John",
+                "lastName": "Doe",
+                "file": "f.js",
+            },
+        )
+    assert server_req.value.method == b"POST"
+    assert (
+        server_req.value.getHeader("Content-Type")
+        == "application/x-www-form-urlencoded"
+    )
+    body = must(server_req.value.post_body).decode()
+    assert server_req.value.getHeader("Content-Length") == str(len(body))
+    params: Dict[bytes, List[bytes]] = parse_qs(server_req.value.post_body)
+    assert params[b"firstName"] == [b"John"]
+    assert params[b"lastName"] == [b"Doe"]
+    assert params[b"file"] == [b"f.js"]
+
+
+def test_should_support_multipart_form_data(
+    context: BrowserContext, server: Server
+) -> None:
+    file: FilePayload = {
+        "name": "f.js",
+        "mimeType": "text/javascript",
+        "buffer": b"var x = 10;\r\n;console.log(x);",
+    }
+    with server.expect_request("/empty.html") as server_req:
+        context.request.post(
+            server.PREFIX + "/empty.html",
+            multipart={
+                "firstName": "John",
+                "lastName": "Doe",
+                "score": 42.5,
+                "active": True,
+                "file": file,
+            },
+        )
+    assert server_req.value.method == b"POST"
+    content_type = server_req.value.getHeader("Content-Type")
+    assert content_type
+    assert content_type.startswith("multipart/form-data; ")
+    assert server_req.value.getHeader("Content-Length") == str(
+        len(must(server_req.value.post_body))
+    )
+    assert server_req.value.args[b"firstName"] == [b"John"]
+    assert server_req.value.args[b"lastName"] == [b"Doe"]
+    assert server_req.value.args[b"score"] == [b"42.5"]
+    assert server_req.value.args[b"active"] == [b"True"]
+    assert server_req.value.args[b"file"][0] == file["buffer"]
+
+
+def test_should_send_empty_form(context: BrowserContext, server: Server) -> None:
+    with server.expect_request("/empty.html") as server_req:
+        context.request.post(server.EMPTY_PAGE, form={})
+    assert (
+        server_req.value.getHeader("Content-Type")
+        == "application/x-www-form-urlencoded"
+    )
+    assert server_req.value.getHeader("Content-Length") == "0"
+
+
+def test_should_send_empty_multipart(context: BrowserContext, server: Server) -> None:
+    # The test server rejects an empty multipart body in POST requests before handling them.
+    with server.expect_request("/empty.html") as server_req:
+        context.request.put(server.EMPTY_PAGE, multipart={})
+    content_type = server_req.value.getHeader("Content-Type")
+    assert content_type
+    assert content_type.startswith("multipart/form-data; ")
+    assert server_req.value.getHeader("Content-Length") == str(
+        len(must(server_req.value.post_body))
+    )
+
+
+def test_should_support_form_data_with_repeated_keys(
+    context: BrowserContext, server: Server
+) -> None:
+    form = FormData()
+    form.append("name", "John")
+    form.append("name", "Doe")
+    form.set("email", "john@example.com")
+    with server.expect_request("/empty.html") as server_req:
+        context.request.post(server.EMPTY_PAGE, form=form)
+    params = parse_qs(must(server_req.value.post_body))
+    assert params[b"name"] == [b"John", b"Doe"]
+    assert params[b"email"] == [b"john@example.com"]
+
+
+def test_should_reject_file_value_in_form(
+    context: BrowserContext, server: Server, tmp_path: Path
+) -> None:
+    file = tmp_path / "f.txt"
+    file.write_bytes(b"hello")
+    form = FormData()
+    form.set("attachment", file)
+    with pytest.raises(Error, match="Use 'multipart' for file uploads"):
+        context.request.post(server.EMPTY_PAGE, form=form)
+
+
+def test_should_support_multipart_form_data_with_multiple_files_in_one_field(
+    context: BrowserContext, server: Server
+) -> None:
+    file1: FilePayload = {
+        "name": "f1.txt",
+        "mimeType": "text/plain",
+        "buffer": b"file 1 content",
+    }
+    file2: FilePayload = {
+        "name": "f2.txt",
+        "mimeType": "text/plain",
+        "buffer": b"file 2 content",
+    }
+    form = FormData()
+    form.append("files", file1)
+    form.append("files", file2)
+    form.set("user", "alice")
+    with server.expect_request("/empty.html") as server_req:
+        context.request.post(server.EMPTY_PAGE, multipart=form)
+    assert cast(str, server_req.value.getHeader("Content-Type")).startswith(
+        "multipart/form-data; "
+    )
+    assert server_req.value.args[b"user"] == [b"alice"]
+    assert server_req.value.args[b"files"] == [file1["buffer"], file2["buffer"]]
+
+
+def test_should_support_multipart_form_data_with_path_value(
+    context: BrowserContext, server: Server, tmp_path: Path
+) -> None:
+    file = tmp_path / "data.csv"
+    file.write_bytes(b"a,b,c\n1,2,3\n")
+    form = FormData()
+    form.set("attachment", file)
+    with server.expect_request("/empty.html") as server_req:
+        context.request.post(server.EMPTY_PAGE, multipart=form)
+    assert cast(str, server_req.value.getHeader("Content-Type")).startswith(
+        "multipart/form-data; "
+    )
+    assert server_req.value.args[b"attachment"] == [b"a,b,c\n1,2,3\n"]
+
+
+def test_should_add_default_headers(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    with server.expect_request("/empty.html") as server_req:
+        context.request.get(server.EMPTY_PAGE)
+    assert server_req.value.getHeader("Accept") == "*/*"
+    assert server_req.value.getHeader("Accept-Encoding") == "gzip,deflate,br"
+    assert server_req.value.getHeader("User-Agent") == page.evaluate(
+        "() => navigator.userAgent"
+    )
+
+
+def test_should_support_multiple_http_credentials(
+    browser: Browser, server: Server
+) -> None:
+    server.set_auth("/empty.html", "user1", "pass1")
+    context = browser.new_context(
+        http_credentials=[
+            {"username": "user1", "password": "pass1", "origin": server.PREFIX},
+            {
+                "username": "user2",
+                "password": "pass2",
+                "origin": server.CROSS_PROCESS_PREFIX,
+            },
+        ]
+    )
+    response1 = context.request.get(server.EMPTY_PAGE)
+    assert response1.status == 200
+    # Wrong credentials are picked for the other origin.
+    response2 = context.request.get(server.CROSS_PROCESS_PREFIX + "/empty.html")
+    assert response2.status == 401
+    context.close()
+
+
+def test_page_request_add_cookies_should_add_cookies_to_the_browser_context(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    page.request.add_cookies(
+        [
+            {"name": "a", "value": "b", "url": server.EMPTY_PAGE},
+            {
+                "name": "c",
+                "value": "d",
+                "domain": "localhost",
+                "path": "/",
+                "expires": time.time() + 3600,
+            },
+        ]
+    )
+    assert sorted(c["name"] for c in context.cookies()) == ["a", "c"]
+    with server.expect_request("/empty.html") as server_req:
+        context.request.get(server.EMPTY_PAGE)
+    cookie_header = server_req.value.getHeader("cookie")
+    assert cookie_header
+    assert sorted(s.strip() for s in cookie_header.split(";")) == ["a=b", "c=d"]
+
+
+def test_page_request_cookies_should_return_browser_context_cookies(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    context.add_cookies(
+        [
+            {"name": "a", "value": "b", "url": server.EMPTY_PAGE},
+            {"name": "c", "value": "d", "domain": "example.com", "path": "/"},
+        ]
+    )
+    assert sorted(c["name"] for c in page.request.cookies()) == ["a", "c"]
+    assert [c["name"] for c in page.request.cookies(server.EMPTY_PAGE)] == ["a"]
+    assert page.request.cookies(server.EMPTY_PAGE) == context.cookies(server.EMPTY_PAGE)
+
+
+def test_page_request_clear_cookies_should_clear_browser_context_cookies(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    context.add_cookies(
+        [
+            {"name": "a", "value": "b", "url": server.EMPTY_PAGE},
+            {"name": "c", "value": "d", "url": server.EMPTY_PAGE},
+        ]
+    )
+    page.request.clear_cookies(name="a")
+    assert [c["name"] for c in context.cookies()] == ["c"]
+    page.request.clear_cookies()
+    assert context.cookies() == []

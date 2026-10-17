@@ -92,21 +92,46 @@ class Tracing(ChannelOwner):
         await self._do_stop_chunk(path)
 
     async def stop(self, path: Optional[Union[pathlib.Path, str]]) -> None:
-        await self._do_stop_chunk(path)
+        # Port of stop() in packages/playwright-core/src/client/tracing.ts: tracing stops
+        # even when saving the chunk fails, so that it can start again.
+        error: Optional[Exception] = None
+        try:
+            await self._do_stop_chunk(path)
+        except Exception as e:
+            error = e
         await self._channel.tracingStop()
+        if error:
+            raise error
 
     async def _do_stop_chunk(
         self, file_path: Optional[Union[pathlib.Path, str]]
     ) -> None:
+        # Port of _doStopChunk() in packages/playwright-core/src/client/tracing.ts.
         self._reset_stack_counter()
+        stacks_id = self._stacks_id
+        self._stacks_id = None
+        try:
+            await self._save_chunk(file_path, stacks_id)
+        except Exception:
+            # Release the stack session even on failure, otherwise later traces keep
+            # appending to it.
+            if stacks_id:
+                try:
+                    await self._connection.local_utils.trace_discarded(
+                        stacks_id=stacks_id
+                    )
+                except Exception:
+                    pass
+            raise
 
+    async def _save_chunk(
+        self, file_path: Optional[Union[pathlib.Path, str]], stacks_id: Optional[str]
+    ) -> None:
         if not file_path:
             # Not interested in any artifacts
             await self._channel.tracingStopChunk(mode="discard")
-            if self._stacks_id:
-                await self._connection.local_utils.trace_discarded(
-                    stacks_id=self._stacks_id
-                )
+            if stacks_id:
+                await self._connection.local_utils.trace_discarded(stacks_id=stacks_id)
             return
 
         is_local = not self._connection.is_remote
@@ -119,7 +144,7 @@ class Tracing(ChannelOwner):
             await self._connection.local_utils.zip(
                 zip_file=str(file_path),
                 entries=entries,
-                stacks_id=self._stacks_id,
+                stacks_id=stacks_id,
                 mode="write",
                 include_sources=self._include_sources,
                 additional_sources=None,
@@ -132,20 +157,26 @@ class Tracing(ChannelOwner):
 
         # The artifact may be missing if the browser closed while stopping tracing.
         if not artifact:
-            if self._stacks_id:
-                await self._connection.local_utils.trace_discarded(
-                    stacks_id=self._stacks_id
-                )
+            if stacks_id:
+                await self._connection.local_utils.trace_discarded(stacks_id=stacks_id)
             return
 
         # Save trace to the final local file.
-        await artifact.save_as(file_path)
+        try:
+            await artifact.save_as(file_path)
+        except Exception:
+            # Delete the artifact best-effort, the save error is the one to surface.
+            try:
+                await artifact.delete()
+            except Exception:
+                pass
+            raise
         await artifact.delete()
 
         await self._connection.local_utils.zip(
             zip_file=str(file_path),
             entries=[],
-            stacks_id=self._stacks_id,
+            stacks_id=stacks_id,
             mode="append",
             include_sources=self._include_sources,
             additional_sources=None,
@@ -222,6 +253,8 @@ class Tracing(ChannelOwner):
         )
         har_id = result["harId"]
         self._har_recorders[har_id] = {"path": str(har)}
+        if resourcesDir is not None:
+            self._har_recorders[har_id]["resourcesDir"] = resourcesDir
         return har_id
 
     async def _export_all_hars(self) -> None:
@@ -269,6 +302,10 @@ class Tracing(ChannelOwner):
             await artifact.save_as(recorder["path"])
             await artifact.delete()
             return
-        # Uncompressed har is not supported in thin clients
         await artifact.save_as(recorder["path"] + ".tmp")
+        await self._connection.local_utils.har_unzip(
+            zip_file=recorder["path"] + ".tmp",
+            har_file=recorder["path"],
+            resources_dir=recorder.get("resourcesDir"),
+        )
         await artifact.delete()

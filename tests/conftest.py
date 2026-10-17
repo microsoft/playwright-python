@@ -18,6 +18,7 @@ import json
 import os
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any, Callable, Dict, Generator, List, Optional, cast
 
@@ -37,6 +38,12 @@ _dirname = get_file_dirname()
 
 # Check each message that the client sends against the protocol spec.
 os.environ.setdefault("PW_CHECK_PROTOCOL", "1")
+# Run the driver as upstream runs it in its tests (for example, pages get window.builtins).
+os.environ.setdefault("PWTEST_UNDER_TEST", "1")
+# Keep the registry of bound browsers (browser.bind()) out of the user's cache folder.
+os.environ.setdefault(
+    "PWTEST_SERVER_REGISTRY", tempfile.mkdtemp(prefix="playwright-server-registry-")
+)
 
 
 def pytest_configure(config: pytest.Config) -> None:
@@ -134,6 +141,64 @@ def is_firefox(browser_name: str) -> bool:
 @pytest.fixture(scope="session")
 def is_chromium(browser_name: str) -> bool:
     return browser_name == "chromium"
+
+
+@pytest.fixture(scope="session")
+def platform() -> str:
+    """Like Node.js process.platform: "linux", "darwin" or "win32"."""
+    return "linux" if sys.platform.startswith("linux") else sys.platform
+
+
+@pytest.fixture(scope="session")
+def mac_version() -> int:
+    """The major macOS version, 0 elsewhere. Port of macVersion() in platformFixtures.ts."""
+    if sys.platform != "darwin":
+        return 0
+    darwin_major = int(os.uname().release.split(".")[0])
+    # Apple jumped from macOS 15 to macOS 26, so Darwin 25 is macOS 26.
+    return darwin_major + 1 if darwin_major >= 25 else darwin_major - 9
+
+
+@pytest.fixture(scope="session")
+def is_frozen_webkit(browser_name: str, mac_version: int) -> bool:
+    """WebKit builds that no longer get updates. Port of isFrozenWebkit in browserTest.ts."""
+    if browser_name != "webkit":
+        return False
+    if sys.platform == "darwin":
+        return mac_version < 15
+    try:
+        os_release = Path("/etc/os-release").read_text()
+    except OSError:
+        return False
+    return ("ID=debian" in os_release and 'VERSION_ID="11"' in os_release) or (
+        "ID=ubuntu" in os_release and 'VERSION_ID="20.04"' in os_release
+    )
+
+
+@pytest.fixture(scope="session")
+def allows_third_party(browser_name: str) -> bool:
+    return browser_name == "firefox"
+
+
+@pytest.fixture(scope="session")
+def default_same_site_cookie_value(browser_name: str, is_linux: bool) -> str:
+    if browser_name == "chromium":
+        return "Lax"
+    if browser_name == "firefox":
+        return "None"
+    if browser_name == "webkit" and is_linux:
+        return "Lax"
+    if browser_name == "webkit" and not is_linux:
+        return "None"
+    raise Exception(f"Invalid browser_name: {browser_name}")
+
+
+@pytest.fixture
+def create_user_data_dir(
+    tmp_path_factory: pytest.TempPathFactory,
+) -> Callable[[], Path]:
+    """Returns a function that makes a new empty user data directory."""
+    return lambda: tmp_path_factory.mktemp("user-data-dir")
 
 
 @pytest.fixture(scope="session")

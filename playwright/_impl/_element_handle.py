@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import base64
+import collections.abc
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
@@ -42,6 +43,7 @@ from playwright._impl._js_handle import (
     parse_result,
     serialize_argument,
 )
+from playwright._impl._mime_type import get_mime_type_for_path
 from playwright._impl._set_input_files_helpers import convert_input_files
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -477,17 +479,14 @@ def convert_select_option_values(
     options: Any = None
     elements: Any = None
     if value is not None:
-        if isinstance(value, str):
-            value = [value]
-        options = (options or []) + list(map(lambda e: dict(valueOrLabel=e), value))
+        options = (options or []) + [dict(valueOrLabel=e) for e in _to_list(value)]
     if index is not None:
-        if isinstance(index, int):
-            index = [index]
-        options = (options or []) + list(map(lambda e: dict(index=e), index))
+        options = (options or []) + [dict(index=e) for e in _to_list(index)]
     if label is not None:
-        if isinstance(label, str):
-            label = [label]
-        options = (options or []) + list(map(lambda e: dict(label=e), label))
+        options = (options or []) + [dict(label=e) for e in _to_list(label)]
+    for i, option in enumerate(options or []):
+        if None in option.values():
+            raise Error(f"options[{i}]: expected object, got null")
     if element:
         if isinstance(element, ElementHandle):
             element = [element]
@@ -496,16 +495,24 @@ def convert_select_option_values(
     return dict(options=options, elements=elements)
 
 
+# Like convertSelectOptionValues() in packages/playwright-core/src/client/elementHandle.ts,
+# wraps a single value of any type in a list. The driver checks the type.
+def _to_list(value: Any) -> List[Any]:
+    if isinstance(value, str) or not isinstance(value, collections.abc.Iterable):
+        return [value]
+    return list(value)
+
+
 def determine_screenshot_type(path: Union[str, Path]) -> Literal["jpeg", "png", "webp"]:
-    # Detect by file extension rather than mimetypes.guess_type, whose result is
-    # OS-dependent (e.g. Windows does not register image/webp), mirroring
-    # upstream's getMimeTypeForPath extension map:
-    # https://github.com/microsoft/playwright/blob/e0e814deed7b0a4c4d2bdf98481e6be7419cda16/packages/isomorphic/mimeType.ts#L28
-    suffix = Path(path).suffix.lower()
-    if suffix == ".png":
+    # Port of determineScreenshotType() in elementHandle.ts. It uses the
+    # extension map of mimeType.ts, not mimetypes.guess_type, whose result is
+    # OS-dependent (e.g. Windows does not register image/webp).
+    mime_type = get_mime_type_for_path(str(path))
+    if mime_type == "image/png":
         return "png"
-    if suffix in (".jpeg", ".jpg"):
+    if mime_type == "image/jpeg":
         return "jpeg"
-    if suffix == ".webp":
+    if mime_type == "image/webp":
         return "webp"
-    raise Error(f'path: unsupported mime type "{suffix}"')
+    # JavaScript prints null as "null".
+    raise Error(f'path: unsupported mime type "{mime_type or "null"}"')

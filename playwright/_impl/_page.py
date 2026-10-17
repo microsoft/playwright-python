@@ -45,6 +45,7 @@ from playwright._impl._artifact import Artifact
 from playwright._impl._clock import Clock
 from playwright._impl._connection import (
     ChannelOwner,
+    api_call,
     from_channel,
     from_nullable_channel,
 )
@@ -62,7 +63,7 @@ from playwright._impl._errors import (
 from playwright._impl._event_context_manager import EventContextManagerImpl
 from playwright._impl._file_chooser import FileChooser
 from playwright._impl._frame import Frame
-from playwright._impl._greenlets import LocatorHandlerGreenlet
+from playwright._impl._greenlets import BindingCallGreenlet, LocatorHandlerGreenlet
 from playwright._impl._har_router import HarRouter
 from playwright._impl._headers import serialize_headers
 from playwright._impl._helper import (
@@ -87,6 +88,7 @@ from playwright._impl._helper import (
     make_dirs_for_file,
     url_matches,
 )
+from playwright._impl._impl_to_api_mapping import ImplToApiMapping
 from playwright._impl._input import Keyboard, Mouse, Touchscreen
 from playwright._impl._internal_structures import AriaRole
 from playwright._impl._js_handle import (
@@ -102,9 +104,11 @@ from playwright._impl._network import (
     Route,
     WebSocketRoute,
     WebSocketRouteHandler,
+    validate_headers,
 )
 from playwright._impl._screencast import Screencast
 from playwright._impl._signature import signature
+from playwright._impl._str_utils import trim_string_with_ellipsis
 from playwright._impl._timeout_settings import TimeoutSettings
 from playwright._impl._video import Video
 from playwright._impl._waiter import Waiter
@@ -561,6 +565,8 @@ class Page(ChannelOwner):
             name, callback=lambda source, *args: callback(*args)
         )
 
+    # The client checks for duplicates before it calls the driver.
+    @api_call
     async def expose_binding(self, name: str, callback: Callable) -> Disposable:
         if name in self._bindings:
             raise Error(f'Function "{name}" has been already registered')
@@ -574,6 +580,7 @@ class Page(ChannelOwner):
         )
 
     async def set_extra_http_headers(self, headers: Dict[str, str]) -> None:
+        validate_headers(headers)
         await self._channel.setExtraHTTPHeaders(headers=serialize_headers(headers))
 
     @property
@@ -628,6 +635,7 @@ class Page(ChannelOwner):
     ) -> None:
         await self._main_frame.wait_for_url(url, wait_until=wait_until, timeout=timeout)
 
+    @api_call
     async def wait_for_event(
         self, event: str, predicate: Optional[Callable], timeout: Optional[float]
     ) -> Any:
@@ -702,7 +710,7 @@ class Page(ChannelOwner):
                 (await async_readfile(path)).decode(), path
             )
         if not isinstance(script, str):
-            raise Error("Either path or script parameter must be specified")
+            raise Error("Either path or script parameter must be present")
         return from_channel(
             (await self._channel.addInitScript(source=script))["disposable"]
         )
@@ -1439,6 +1447,9 @@ class Page(ChannelOwner):
             event, predicate, timeout, f'waiting for event "{event}"'
         )
 
+    # Port of _waitForEvent() in page.ts. Its callers waitForEvent(),
+    # waitForRequest() and waitForResponse() are @apiCall()s.
+    @api_call
     def _expect_event(
         self,
         event: str,
@@ -1448,7 +1459,7 @@ class Page(ChannelOwner):
     ) -> EventContextManagerImpl:
         if timeout is None:
             timeout = self._timeout_settings.timeout()
-        waiter = Waiter(self, f"page.expect_event({event})")
+        waiter = Waiter(self, event)
         waiter.reject_on_timeout(
             timeout, f'Timeout {timeout}ms exceeded while waiting for event "{event}"'
         )
@@ -1757,6 +1768,8 @@ class Worker(ChannelOwner):
         )
         return from_channel(result["handle"])
 
+    # Port of waitForEvent() in worker.ts.
+    @api_call
     def expect_event(
         self,
         event: str,
@@ -1770,7 +1783,7 @@ class Worker(ChannelOwner):
                 timeout = self._context._timeout_settings.timeout()
             else:
                 timeout = 30000
-        waiter = Waiter(self, f"worker.expect_event({event})")
+        waiter = Waiter(self, event)
         waiter.reject_on_timeout(
             cast(float, timeout),
             f'Timeout {timeout}ms exceeded while waiting for event "{event}"',
@@ -1791,17 +1804,21 @@ class BindingCall(ChannelOwner):
     ) -> None:
         super().__init__(parent, type, guid, initializer)
 
+    # Port of BindingCall.call in packages/playwright-core/src/client/page.ts.
     async def call(self, func: Callable) -> None:
         try:
             frame = from_channel(self._initializer["frame"])
             source = dict(context=frame._page.context, page=frame._page, frame=frame)
-            if self._initializer.get("handle"):
-                result = func(source, from_channel(self._initializer["handle"]))
+            func_args = list(map(parse_result, self._initializer["args"]))
+            if self._dispatcher_fiber:
+                result = await self._call_in_greenlet(func, source, func_args)
             else:
-                func_args = list(map(parse_result, self._initializer["args"]))
                 result = func(source, *func_args)
-            if inspect.iscoroutine(result):
-                result = await result
+                if inspect.iscoroutine(result):
+                    result = await result
+            # The callback returns objects of the public API, e.g. a JSHandle.
+            # Send their implementation objects, so that handles go by guid.
+            result = ImplToApiMapping().to_impl(result)
             create_task_and_ignore_exception(
                 self._loop,
                 self._channel.resolve(result=serialize_argument(result)),
@@ -1813,19 +1830,41 @@ class BindingCall(ChannelOwner):
                 self._channel.reject(error={"error": serialize_error(e, tb)}),
             )
 
+    def _call_in_greenlet(
+        self, func: Callable, source: Dict, args: List[Any]
+    ) -> "asyncio.Future[Any]":
+        # In the sync API the callback can call the API, which waits for the
+        # dispatcher. As with route handlers, the callback is a potentially
+        # blocking context, so it runs in its own greenlet.
+        finished: "asyncio.Future[Any]" = self._loop.create_future()
+
+        def _handler() -> None:
+            try:
+                finished.set_result(func(source, *args))
+            except Exception as e:
+                finished.set_exception(e)
+
+        BindingCallGreenlet(_handler).switch()
+        return finished
+
 
 def trim_url(param: Union[URLMatchRequest, URLMatchResponse]) -> Optional[str]:
+    # Port of trimUrl() in page.ts.
     if isinstance(param, re.Pattern):
-        return trim_end(param.pattern)
+        # The flags of a JavaScript RegExp, in the order of RegExp.prototype.flags.
+        flags = "".join(
+            flag
+            for flag, bit in (
+                ("i", re.IGNORECASE),
+                ("m", re.MULTILINE),
+                ("s", re.DOTALL),
+            )
+            if param.flags & bit
+        )
+        return f"/{trim_string_with_ellipsis(param.pattern, 50)}/{flags}"
     if isinstance(param, str):
-        return trim_end(param)
+        return f'"{trim_string_with_ellipsis(param, 50)}"'
     return None
-
-
-def trim_end(s: str) -> str:
-    if len(s) > 50:
-        return s[:50] + "\u2026"
-    return s
 
 
 def to_pdf_size(value: Any) -> Any:

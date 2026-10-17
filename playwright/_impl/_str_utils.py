@@ -91,3 +91,15 @@ def escape_for_attribute_selector(
         + '"'
         + ("s" if exact else "i")
     )
+
+
+# Port of trimString() in packages/isomorphic/stringUtils.ts.
+def trim_string(input: str, cap: int, suffix: str = "") -> str:
+    if len(input) <= cap:
+        return input
+    return input[: cap - len(suffix)] + suffix
+
+
+# Port of trimStringWithEllipsis() in packages/isomorphic/stringUtils.ts.
+def trim_string_with_ellipsis(input: str, cap: int) -> str:
+    return trim_string(input, cap, "…")

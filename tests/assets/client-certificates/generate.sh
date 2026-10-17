@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Client Certificate test-certificates
 
 cd "$(dirname "$0")"

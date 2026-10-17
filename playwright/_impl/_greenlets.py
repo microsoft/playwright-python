@@ -52,6 +52,11 @@ class EventGreenlet(greenlet.greenlet):
         return "<EventGreenlet>"
 
 
+class BindingCallGreenlet(greenlet.greenlet):
+    def __str__(self) -> str:
+        return "<BindingCallGreenlet>"
+
+
 def connection_closed_error() -> TargetClosedError:
     return TargetClosedError("Playwright connection closed")
 

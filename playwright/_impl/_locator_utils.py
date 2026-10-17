@@ -14,6 +14,7 @@
 
 """Port of packages/isomorphic/locatorUtils.ts."""
 
+import json
 from typing import List, Pattern, Tuple, Union
 
 from playwright._impl._internal_structures import AriaRole
@@ -23,10 +24,19 @@ from playwright._impl._str_utils import (
 )
 
 
+def encode_test_id_attribute_name(test_id_attribute_name: str) -> str:
+    # JSON.stringify() of a string.
+    return (
+        json.dumps(test_id_attribute_name, ensure_ascii=False)
+        if "," in test_id_attribute_name
+        else test_id_attribute_name
+    )
+
+
 def get_by_test_id_selector(
     test_id_attribute_name: str, test_id: Union[str, Pattern[str]]
 ) -> str:
-    return f"internal:testid=[{test_id_attribute_name}={escape_for_attribute_selector(test_id, True)}]"
+    return f"internal:testid=[{encode_test_id_attribute_name(test_id_attribute_name)}={escape_for_attribute_selector(test_id, True)}]"
 
 
 def get_by_attribute_text_selector(

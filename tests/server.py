@@ -18,6 +18,7 @@ import contextlib
 import gzip
 import mimetypes
 import pathlib
+import re
 import socket
 import threading
 from contextlib import closing
@@ -36,14 +37,16 @@ from typing import (
     Union,
     cast,
 )
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 from autobahn.twisted.resource import WebSocketResource
 from autobahn.twisted.websocket import WebSocketServerFactory, WebSocketServerProtocol
+from autobahn.websocket.types import ConnectionRequest
 from OpenSSL import crypto
 from pyee import EventEmitter
 from twisted.internet import reactor as _twisted_reactor
 from twisted.internet import ssl
+from twisted.internet.error import CannotListenError
 from twisted.internet.selectreactor import SelectReactor
 from twisted.web import http
 
@@ -63,6 +66,18 @@ def find_free_port() -> int:
 T = TypeVar("T")
 
 
+def _resolve_threadsafe(future: "asyncio.Future[T]", value: T) -> None:
+    """Resolves the future from the reactor thread, on the loop that owns it."""
+
+    def resolve() -> None:
+        if not future.done():
+            future.set_result(value)
+
+    loop = future.get_loop()
+    if not loop.is_closed():
+        loop.call_soon_threadsafe(resolve)
+
+
 class ExpectResponse(Generic[T]):
     def __init__(self) -> None:
         self._value: T
@@ -79,6 +94,26 @@ class TestServerRequest(http.Request):
     channel: "TestServerHTTPChannel"
     post_body: Optional[bytes] = None
 
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        # Twisted answers 400 to some multipart bodies that browsers send, and
+        # upstream's server accepts any body. process() parses forms leniently.
+        kwargs["parsePOSTFormSubmission"] = False
+        super().__init__(*args, **kwargs)
+
+    def _parse_form(self) -> None:
+        """Adds the fields of a POSTed form to self.args, ignoring a malformed body."""
+        if self.method != b"POST" or not self.post_body or self.args is None:
+            return
+        content_type = (self.getHeader("content-type") or "").encode()
+        kind = http._parseContentType(content_type)
+        try:
+            if kind == b"application/x-www-form-urlencoded":
+                self.args.update(parse_qs(self.post_body, keep_blank_values=True))
+            elif kind == b"multipart/form-data":
+                self.args.update(http._getMultiPartArgs(self.post_body, content_type))
+        except Exception:
+            pass
+
     def process(self) -> None:
         server = self.channel.factory.server_instance
         if self.content:
@@ -86,24 +121,25 @@ class TestServerRequest(http.Request):
             self.content.seek(0, 0)
         else:
             self.post_body = None
-        path = urlparse(self.uri.decode()).path
+        self._parse_form()
+        # The headers that Node.js adds to every response; tests measure header sizes.
+        self.setHeader(b"Date", http.datetimeToString())
+        self.setHeader(b"Connection", b"keep-alive")
+        self.setHeader(b"Keep-Alive", b"timeout=5")
+        url = urlparse(self.uri.decode())
+        path = url.path
+        # Like the upstream test server, match the path with the query first.
+        keys = [f"{path}?{url.query}", path] if url.query else [path]
 
-        request_subscriber = server.request_subscribers.get(path)
-        if request_subscriber:
-            request_subscriber._loop.call_soon_threadsafe(
-                request_subscriber.set_result, self
-            )
-            server.request_subscribers.pop(path)
+        def lookup(table: Dict[str, Any]) -> Optional[str]:
+            return next((key for key in keys if key in table), None)
 
-        if path == "/ws":
-            server._ws_resource.render(self)
-            return
-
-        if server.auth.get(path):
+        auth_key = lookup(server.auth)
+        if auth_key:
             authorization_header = self.requestHeaders.getRawHeaders("authorization")
             creds_correct = False
             if authorization_header:
-                creds_correct = server.auth.get(path) == (
+                creds_correct = server.auth[auth_key] == (
                     self.getUser().decode(),
                     self.getPassword().decode(),
                 )
@@ -113,30 +149,85 @@ class TestServerRequest(http.Request):
                 self.write(b"HTTP Error 401 Unauthorized: Access is denied")
                 self.finish()
                 return
-        if server.csp.get(path):
-            self.setHeader(b"Content-Security-Policy", server.csp[path])
-        if server.routes.get(path):
-            server.routes[path](self)
+
+        subscriber_key = lookup(server.request_subscribers)
+        if subscriber_key:
+            request_subscriber = server.request_subscribers.pop(subscriber_key)
+            # Like a promise upstream, the waiting test gets the request after the
+            # route handler below has run.
+            reactor.callLater(
+                0,
+                request_subscriber._loop.call_soon_threadsafe,
+                request_subscriber.set_result,
+                self,
+            )
+
+        if self._is_web_socket_upgrade():
+            # Like upstream's 'upgrade' handler: waitForUpgrade() takes every upgrade.
+            if server._upgrade_callback:
+                server._upgrade_callback(UpgradeActions(self))
+                return
+            if path == "/ws-401":
+                # cast: mypy reads the zope ITransport interface as a plain function.
+                transport = cast(Any, self.channel.transport)
+                assert transport
+                transport.write(b"HTTP/1.1 401 Unauthorized\r\n\r\nUnauthorized body")
+                transport.loseConnection()
+                return
+            if path == "/ws-slow":
+                reactor.callLater(2, self._upgrade_to_web_socket)
+                return
+            if path != "/ws":
+                transport = cast(Any, self.channel.transport)
+                assert transport
+                transport.write(b"HTTP/1.1 400 Bad Request\r\n\r\n")
+                transport.loseConnection()
+                return
+
+        if path == "/ws":
+            server._ws_resource.render(self)
             return
 
+        if server.csp.get(path):
+            self.setHeader(b"Content-Security-Policy", server.csp[path])
+        route_key = lookup(server.routes)
+        if route_key:
+            server.routes[route_key](self)
+            return
+
+        if path == "/":
+            path = "/index.html"
         self._serve_file(server.static_path / path[1:], path)
 
     def serve_file(self, path: pathlib.Path) -> None:
         return self._serve_file(path, urlparse(self.uri.decode()).path)
+
+    def _is_web_socket_upgrade(self) -> bool:
+        return (self.getHeader("upgrade") or "").lower() == "websocket"
+
+    def _upgrade_to_web_socket(self) -> None:
+        """Hands the connection to the WebSocket server, unless it is gone."""
+        if self._disconnected or self.channel is None or not self.channel.transport:
+            return
+        self.channel.factory.server_instance._ws_resource.render(self)
 
     def _serve_file(self, path: pathlib.Path, request_path: str) -> None:
         server = self.channel.factory.server_instance
         file_content = None
         try:
             file_content = path.read_bytes()
-            content_type = mimetypes.guess_type(path)[0]
-            if content_type and content_type.startswith("text/"):
+            content_type = mimetypes.guess_type(path)[0] or "application/octet-stream"
+            if re.match(r"^text/|^application/(javascript|json)", content_type):
                 content_type += "; charset=utf-8"
             self.setHeader(b"Content-Type", content_type)
             self.setHeader(b"Cache-Control", "no-cache, no-store")
+            for name, value in server.extra_headers.get(request_path, {}).items():
+                self.setHeader(name, value)
             if request_path in server.gzip_routes:
                 self.setHeader("Content-Encoding", "gzip")
-                self.write(gzip.compress(file_content))
+                compressed = gzip.compress(file_content)
+                self.setHeader(b"Content-Length", str(len(compressed)))
+                self.write(compressed)
             else:
                 self.setHeader(b"Content-Length", str(len(file_content)))
                 self.write(file_content)
@@ -163,16 +254,21 @@ class Server:
     protocol = "http"
 
     def __init__(self) -> None:
-        self.PORT = find_free_port()
-        self.EMPTY_PAGE = f"{self.protocol}://localhost:{self.PORT}/empty.html"
-        self.PREFIX = f"{self.protocol}://localhost:{self.PORT}"
-        self.CROSS_PROCESS_PREFIX = f"{self.protocol}://127.0.0.1:{self.PORT}"
+        self._set_port(find_free_port())
+        self.HOSTNAME = "localhost"
         # On Windows, this list can be empty, reporting text/plain for scripts.
         mimetypes.add_type("text/html", ".html")
         mimetypes.add_type("text/css", ".css")
         mimetypes.add_type("application/javascript", ".js")
         mimetypes.add_type("image/png", ".png")
         mimetypes.add_type("font/woff2", ".woff2")
+
+    def _set_port(self, port: int) -> None:
+        self.PORT = port
+        self.EMPTY_PAGE = f"{self.protocol}://localhost:{self.PORT}/empty.html"
+        self.PREFIX = f"{self.protocol}://localhost:{self.PORT}"
+        self.CROSS_PROCESS_PREFIX = f"{self.protocol}://127.0.0.1:{self.PORT}"
+        self.HOST = f"localhost:{self.PORT}"
 
     def __repr__(self) -> str:
         return self.PREFIX
@@ -187,11 +283,13 @@ class Server:
         csp: Dict[str, str] = {}
         routes: Dict[str, Callable[[TestServerRequest], Any]] = {}
         gzip_routes: Set[str] = set()
+        self.extra_headers: Dict[str, Dict[str, str]] = {}
         self.request_subscribers = request_subscribers
         self.auth = auth
         self.csp = csp
         self.routes = routes
         self._ws_handlers: List[Callable[["WebSocketProtocol"], None]] = []
+        self._upgrade_callback: Optional[Callable[["UpgradeActions"], None]] = None
         self.gzip_routes = gzip_routes
         self.static_path = static_path
         factory = TestServerFactory()
@@ -199,10 +297,21 @@ class Server:
 
         ws_factory = WebSocketServerFactory()
         ws_factory.protocol = WebSocketProtocol
+        # Like upstream's `ws` server, answer a close with the client's code and reason.
+        # setProtocolOptions() resets allowNullOrigin unless it is passed.
+        ws_factory.setProtocolOptions(echoCloseCodeReason=True, allowNullOrigin=True)
         setattr(ws_factory, "server_instance", self)
         self._ws_resource = WebSocketResource(ws_factory)
 
-        self.listen(factory)
+        for attempt in range(10):
+            try:
+                self.listen(factory)
+                return
+            except CannotListenError:
+                # Another process took the port after find_free_port() released it.
+                if attempt == 9:
+                    raise
+                self._set_port(find_free_port())
 
     async def wait_for_request(self, path: str) -> TestServerRequest:
         if path in self.request_subscribers:
@@ -213,7 +322,39 @@ class Server:
 
     def wait_for_web_socket(self) -> 'asyncio.Future["WebSocketProtocol"]':
         future: asyncio.Future[WebSocketProtocol] = asyncio.Future()
-        self.once_web_socket_connection(future.set_result)
+        # The handler runs on the reactor thread.
+        self.once_web_socket_connection(lambda ws: _resolve_threadsafe(future, ws))
+        return future
+
+    def wait_for_upgrade(self) -> 'asyncio.Future["UpgradeActions"]':
+        """Port of waitForUpgrade(): the next WebSocket upgrade request waits for the test.
+
+        The future resolves with the UpgradeActions of the first upgrade request. Like
+        upstream, every later upgrade request waits too, until reset().
+        """
+        future: asyncio.Future[UpgradeActions] = (
+            asyncio.get_running_loop().create_future()
+        )
+        self._upgrade_callback = lambda actions: _resolve_threadsafe(future, actions)
+        return future
+
+    def wait_for_web_socket_connection_request(
+        self,
+    ) -> "asyncio.Future[ConnectionRequest]":
+        """Port of waitForWebSocketConnectionRequest().
+
+        Resolves with the handshake request of the next WebSocket connection:
+        request.headers maps the lower-case header names to their values, as in Node.js.
+        """
+        future: asyncio.Future[ConnectionRequest] = (
+            asyncio.get_running_loop().create_future()
+        )
+
+        def on_connection(ws: WebSocketProtocol) -> None:
+            assert ws.connection_request
+            _resolve_threadsafe(future, ws.connection_request)
+
+        self.once_web_socket_connection(on_connection)
         return future
 
     @contextlib.contextmanager
@@ -255,8 +396,10 @@ class Server:
         self.auth.clear()
         self.csp.clear()
         self.gzip_routes.clear()
+        self.extra_headers.clear()
         self.routes.clear()
         self._ws_handlers.clear()
+        self._upgrade_callback = None
 
     def set_route(
         self, path: str, callback: Callable[[TestServerRequest], Any]
@@ -269,10 +412,25 @@ class Server:
     def set_redirect(self, from_: str, to: str) -> None:
         def handle_redirect(request: http.Request) -> None:
             request.setResponseCode(HTTPStatus.FOUND)
+            for name, value in self.extra_headers.get(from_, {}).items():
+                request.setHeader(name, value)
             request.setHeader("location", to)
             request.finish()
 
         self.set_route(from_, handle_redirect)
+
+    def set_extra_headers(self, path: str, headers: Dict[str, str]) -> None:
+        """Adds headers to the response for a file, or for a redirect from set_redirect()."""
+        self.extra_headers[path] = headers
+
+    def set_content(self, path: str, content: str, mime_type: str) -> None:
+        def handle_content(request: http.Request) -> None:
+            request.setHeader("Content-Type", mime_type)
+            body = f"<!DOCTYPE html>{content}" if mime_type == "text/html" else content
+            request.write(body.encode())
+            request.finish()
+
+        self.set_route(path, handle_content)
 
     def send_on_web_socket_connection(self, data: bytes) -> None:
         self.once_web_socket_connection(lambda ws: ws.sendMessage(data))
@@ -338,10 +496,63 @@ class HTTPSServer(Server):
         self._listeners.clear()
 
 
+class UpgradeSocket:
+    """The connection of an upgrade request: the `socket` of upstream's UpgradeActions.
+
+    The methods are safe to call from any thread.
+    """
+
+    def __init__(self, transport: Any) -> None:
+        self._transport = transport
+
+    def write(self, data: Union[str, bytes]) -> None:
+        """Writes raw bytes to the connection, like socket.write()."""
+        payload = data.encode() if isinstance(data, str) else data
+        reactor.callFromThread(self._transport.write, payload)
+
+    def destroy(self) -> None:
+        """Closes the connection, like socket.destroy()."""
+        reactor.callFromThread(self._transport.loseConnection)
+
+
+class UpgradeActions:
+    """Port of UpgradeActions of upstream's waitForUpgrade()."""
+
+    def __init__(self, request: TestServerRequest) -> None:
+        self.request = request
+        self.socket = UpgradeSocket(request.channel.transport)
+
+    def do_upgrade(self) -> None:
+        """Completes the WebSocket handshake. Safe to call from any thread."""
+        reactor.callFromThread(self.request._upgrade_to_web_socket)
+
+
 class WebSocketProtocol(WebSocketServerProtocol):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self.events = EventEmitter()
+        self.connection_request: Optional[ConnectionRequest] = None
+
+    def onConnect(self, request: ConnectionRequest) -> Optional[str]:
+        self.connection_request = request
+        # Like upstream's `ws` server, accept the first subprotocol that the client offers.
+        return request.protocols[0] if request.protocols else None
+
+    def dropConnection(self, abort: bool = False) -> None:
+        # Like upstream's `ws` server, end the TCP connection gracefully after a clean
+        # closing handshake. Autobahn resets it, and browsers then report wasClean=false.
+        super().dropConnection(abort=abort and not self.wasClean)
+
+    def terminate(self) -> None:
+        """Port of ws.terminate(): closes the TCP connection without a closing handshake.
+
+        Not dropConnection(abort=True): abortConnection() also drops the handshake
+        response that may still be in the write buffer, and a browser that gets no
+        response may never fire the close event (WebKit on macOS).
+        """
+        transport = self.transport
+        assert transport
+        reactor.callFromThread(transport.loseConnection)
 
     def onClose(self, wasClean: bool, code: int, reason: str) -> None:
         super().onClose(wasClean, code, reason)

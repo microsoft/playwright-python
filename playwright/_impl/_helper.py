@@ -13,6 +13,7 @@
 # limitations under the License.
 import asyncio
 import datetime
+import json
 import math
 import os
 import re
@@ -38,7 +39,11 @@ from typing import (
 from playwright._impl._errors import is_target_closed_error, rewrite_error
 from playwright._impl._greenlets import RouteGreenlet
 from playwright._impl._str_utils import escape_regex_flags
-from playwright._impl._url_match import URLMatch, url_matches
+from playwright._impl._url_match import (
+    URLMatch,
+    resolve_glob_to_regex_pattern,
+    url_matches,
+)
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl import _protocol_types as channels
@@ -93,9 +98,6 @@ class ParsedMessagePayload(TypedDict, total=False):
 Env = Dict[str, Union[str, float, bool]]
 
 
-PLAYWRIGHT_MAX_DEADLINE = 2147483647  # 2^31-1
-
-
 def create_task_and_ignore_exception(
     loop: asyncio.AbstractEventLoop, coro: Awaitable[Any]
 ) -> None:
@@ -134,6 +136,10 @@ class RouteHandler:
         self._is_sync = is_sync
         self._ignore_exception = False
         self._active_invocations: Set[RouteHandlerInvocation] = set()
+        # Eagerly validate string globs so that invalid patterns throw at the call site
+        # (e.g. page.route()) rather than silently aborting requests later.
+        if isinstance(url, str):
+            resolve_glob_to_regex_pattern(base_url, url)
 
     def matches(self, request_url: str) -> bool:
         return url_matches(self._base_url, request_url, self.url)
@@ -295,3 +301,16 @@ def to_milliseconds(
     if isinstance(value, datetime.timedelta):
         return value / datetime.timedelta(milliseconds=1)
     return value
+
+
+def json_stringify(value: Any, indent: Optional[int] = None) -> str:
+    # Writes the same text as JSON.stringify(value, undefined, indent) in JavaScript:
+    # no spaces without an indent, and no escapes for non-ASCII characters. NaN and
+    # Infinity are not valid JSON.
+    return json.dumps(
+        value,
+        allow_nan=False,
+        ensure_ascii=False,
+        indent=indent,
+        separators=(",", ":") if indent is None else None,
+    )

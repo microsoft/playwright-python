@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
 from pathlib import Path
 from types import SimpleNamespace
 from typing import (
@@ -21,7 +22,6 @@ from typing import (
     Optional,
     Pattern,
     Sequence,
-    Set,
     Union,
     cast,
 )
@@ -59,6 +59,7 @@ from playwright._impl._helper import (
 from playwright._impl._network import (
     to_client_certificates_protocol,
     to_http_credentials_protocol,
+    validate_headers,
 )
 from playwright._impl._page import Page
 
@@ -85,7 +86,8 @@ class Browser(ChannelOwner):
         self._should_close_connection_on_close = False
         self._cr_tracing_path: Optional[str] = None
 
-        self._contexts: Set[BrowserContext] = set()
+        # In creation order, like the Set in browser.ts.
+        self._contexts: List[BrowserContext] = []
         self._traces_dir: Optional[str] = None
         self._channel.onContext(
             lambda event: self._did_create_context(
@@ -94,6 +96,7 @@ class Browser(ChannelOwner):
         )
         self._channel.onClose(lambda: self._on_close())
         self._close_reason: Optional[str] = None
+        self._closed_future: asyncio.Future = self._loop.create_future()
 
     def __repr__(self) -> str:
         return f"<Browser type={self._browser_type} version={self.version}>"
@@ -112,7 +115,7 @@ class Browser(ChannelOwner):
 
     def _did_create_context(self, context: BrowserContext) -> None:
         context._browser = self
-        self._contexts.add(context)
+        self._contexts.append(context)
         # Note: when connecting to a browser, initial contexts arrive before `_browserType` is set,
         # and will be configured later in `ConnectToBrowserType`.
         if self._browser_type:
@@ -128,6 +131,8 @@ class Browser(ChannelOwner):
     def _on_close(self) -> None:
         self._is_connected = False
         self.emit(Browser.Events.Disconnected, self)
+        if not self._closed_future.done():
+            self._closed_future.set_result(None)
 
     @property
     def contexts(self) -> List[BrowserContext]:
@@ -182,6 +187,8 @@ class Browser(ChannelOwner):
         record_video_fps: Optional[int],
     ) -> BrowserContext:
         assert self._browser_type is not None
+        if extra_http_headers:
+            validate_headers(extra_http_headers)
         selectors = self._browser_type._playwright.selectors
         result = await self._channel.newContext(
             noDefaultViewport=True if no_viewport else None,
@@ -330,12 +337,15 @@ class Browser(ChannelOwner):
         return await self._connection.wrap_api_call(inner, title="Create page")
 
     async def close(self, reason: Optional[str]) -> None:
+        # Port of Browser.close() in client/browser.ts: it returns after the
+        # "disconnected" event.
         self._close_reason = reason
         try:
             if self._should_close_connection_on_close:
                 await self._connection.stop_async()
             else:
                 await self._channel.close(reason=reason)
+            await self._closed_future
         except Exception as e:
             if not is_target_closed_error(e):
                 raise e

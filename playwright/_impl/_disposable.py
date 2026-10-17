@@ -12,10 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import traceback
 from typing import TYPE_CHECKING, Any, Awaitable, Callable, Coroutine, Dict
 
-from playwright._impl._connection import ChannelOwner, _capture_stack_trace
+from playwright._impl._connection import (
+    ChannelOwner,
+    _capture_stack_trace,
+    _extract_stack,
+)
 from playwright._impl._errors import Error, is_target_closed_error
 from playwright._impl._greenlets import connection_closed_error, wait_for_future
 
@@ -84,7 +87,7 @@ class DisposableStub:
             "__pw_stack__",
             _capture_stack_trace(),
         )
-        setattr(task, "__pw_stack_trace__", traceback.extract_stack(limit=10))
+        setattr(task, "__pw_stack_trace__", _extract_stack(limit=10))
         wait_for_future(self._loop, self._dispatcher_fiber, task)
         return task.result()
 

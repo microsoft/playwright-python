@@ -15,12 +15,17 @@
 import asyncio
 import collections.abc
 import contextvars
+import functools
 import inspect
+import os
 import random
+import site
 import string
 import sys
+import sysconfig
 import traceback
 from pathlib import Path
+from types import FrameType
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -28,7 +33,9 @@ from typing import (
     Dict,
     List,
     Optional,
+    Tuple,
     TypedDict,
+    TypeVar,
     Union,
     cast,
 )
@@ -45,6 +52,7 @@ from playwright._impl._errors import (
     parse_error,
     rewrite_error,
 )
+from playwright._impl._event_context_manager import EventContextManagerImpl
 from playwright._impl._greenlets import EventGreenlet
 from playwright._impl._helper import (
     ParsedMessagePayload,
@@ -58,7 +66,57 @@ if TYPE_CHECKING:
     from playwright._impl._playwright import Playwright
     from playwright._impl._protocol_channels import RootChannel
 
-_PLAYWRIGHT_MODULE_PATH = str(Path(playwright.__file__).parents[0])
+_PLAYWRIGHT_MODULE_PATH = os.path.join(str(Path(playwright.__file__).parents[0]), "")
+
+
+def _non_user_code_dirs() -> Tuple[str, ...]:
+    # The directories of the Python standard library (asyncio, threading, ...), of the
+    # installed packages (pytest, pluggy, greenlet, pyee, ...) and of their launcher
+    # scripts. The Python counterpart of the node internals and of the test runner's
+    # boxed stack prefixes that filterStackFile() in packages/utils/stackTrace.ts drops.
+    paths = sysconfig.get_paths()
+    dirs = {
+        paths.get(name)
+        for name in ("stdlib", "platstdlib", "purelib", "platlib", "scripts")
+    }
+    if hasattr(site, "getsitepackages"):
+        dirs.update(site.getsitepackages())
+    if hasattr(site, "getusersitepackages"):
+        dirs.add(site.getusersitepackages())
+    dirs.update(
+        entry
+        for entry in sys.path
+        if os.path.basename(entry) in ("site-packages", "dist-packages")
+    )
+    result = set()
+    for dir in dirs:
+        if not dir:
+            continue
+        for variant in (dir, os.path.realpath(dir)):
+            result.add(os.path.join(os.path.normcase(os.path.abspath(variant)), ""))
+    return tuple(result)
+
+
+_NON_USER_CODE_DIRS = _non_user_code_dirs()
+
+
+@functools.lru_cache(maxsize=None)
+def _is_user_file(filename: str) -> bool:
+    # Port of filterStackFile() in packages/utils/stackTrace.ts.
+    if filename.startswith(_PLAYWRIGHT_MODULE_PATH):
+        return False
+    # Code without a source file: frozen modules of the standard library (runpy,
+    # importlib), and code that exec() runs, such as the pytest-xdist workers.
+    if filename.startswith("<") and filename.endswith(">"):
+        return False
+    return not os.path.normcase(filename).startswith(_NON_USER_CODE_DIRS)
+
+
+# The event loop runs each task step and callback from Handle._run(). The frames below
+# it run the event loop and did not call the task, like in the Node.js event loop. So an
+# action in a task that asyncio.create_task() started does not get the location of the
+# asyncio.run() call.
+_EVENT_LOOP_CALLBACK_CODE = asyncio.events.Handle._run.__code__
 
 
 class ChannelOwner(AsyncIOEventEmitter):
@@ -140,7 +198,7 @@ class ProtocolCallback:
         self, loop: asyncio.AbstractEventLoop, id: str, no_reply: bool = False
     ) -> None:
         self.id = id
-        self.stack_trace: traceback.StackSummary
+        self.stack_trace: "RawStack"
         self.no_reply = no_reply
         self.future = loop.create_future()
         if no_reply:
@@ -292,9 +350,8 @@ class Connection(EventEmitter):
         callback = ProtocolCallback(self._loop, id, no_reply=no_reply)
         task = asyncio.current_task(self._loop)
         callback.stack_trace = cast(
-            traceback.StackSummary,
-            getattr(task, "__pw_stack_trace__", None)
-            or traceback.extract_stack(limit=10),
+            RawStack,
+            getattr(task, "__pw_stack_trace__", None) or _extract_stack(limit=10),
         )
         callback.no_reply = no_reply
         stack_trace_information = cast(ParsedStackTrace, self._api_zone.get())
@@ -393,7 +450,7 @@ class Connection(EventEmitter):
                 parsed_error._details = self._replace_guids_with_channels(
                     msg.get("errorDetails")
                 )
-                parsed_error._stack = "".join(callback.stack_trace.format())
+                parsed_error._stack = _format_stack(callback.stack_trace)
                 callback.future.set_exception(parsed_error)
             else:
                 result = self._replace_guids_with_channels(msg.get("result"))
@@ -547,6 +604,64 @@ class Connection(EventEmitter):
         finally:
             self._api_zone.set(None)
 
+    def wrap_api_call_event(
+        self, cb: Callable[[], EventContextManagerImpl]
+    ) -> EventContextManagerImpl:
+        """wrap_api_call_sync() for an expect_*() method.
+
+        The wait settles after the method returns, so the method records its API
+        name on the future, and event_future_error() adds it to the error.
+        """
+        if self._api_zone.get():
+            return cb()
+        api_name = ""
+
+        def inner() -> EventContextManagerImpl:
+            nonlocal api_name
+            api_name = cast(ParsedStackTrace, self._api_zone.get())["apiName"] or ""
+            return cb()
+
+        result = self.wrap_api_call_sync(inner)
+        if api_name:
+            setattr(result.future, "__pw_api_name__", api_name)
+        return result
+
+
+def event_future_error(future: asyncio.Future, error: Exception) -> Exception:
+    """The error of the future of an expect_*() method, with the API name prefix."""
+    api_name = getattr(future, "__pw_api_name__", None)
+    if not api_name:
+        return error
+    return rewrite_error(error, f"{api_name}: {error}")
+
+
+ApiCallMethod = TypeVar("ApiCallMethod", bound=Callable[..., Any])
+
+
+def api_call(method: ApiCallMethod) -> ApiCallMethod:
+    """Port of the apiCall() decorator in packages/playwright-core/src/client/channelOwner.ts.
+
+    For a method that does its work on the client: its errors get the API name
+    prefix ("Page.wait_for_url: ..."), as the errors of the protocol calls do.
+    """
+    if inspect.iscoroutinefunction(method):
+
+        @functools.wraps(method)
+        async def async_wrapper(self: "ChannelOwner", *args: Any, **kwargs: Any) -> Any:
+            return await self._connection.wrap_api_call(
+                lambda: method(self, *args, **kwargs)
+            )
+
+        return cast(ApiCallMethod, async_wrapper)
+
+    @functools.wraps(method)
+    def event_wrapper(self: "ChannelOwner", *args: Any, **kwargs: Any) -> Any:
+        return self._connection.wrap_api_call_event(
+            lambda: method(self, *args, **kwargs)
+        )
+
+    return cast(ApiCallMethod, event_wrapper)
+
 
 def from_channel(channel: Channel) -> Any:
     return channel._object
@@ -569,7 +684,32 @@ class ParsedStackTrace(TypedDict):
     title: Optional[str]
 
 
+# The (file, line, function) of each frame, the outermost first.
+RawStack = List[Tuple[str, int, str]]
+
+
+def _extract_stack(limit: int) -> RawStack:
+    # Like traceback.extract_stack(), but cheaper: every message records the stack of
+    # its call for the error, and the time it takes delays the next message.
+    stack: RawStack = []
+    frame: Optional[FrameType] = sys._getframe(1)
+    while frame and len(stack) < limit:
+        stack.append((frame.f_code.co_filename, frame.f_lineno, frame.f_code.co_name))
+        frame = frame.f_back
+    stack.reverse()
+    return stack
+
+
+def _format_stack(stack: RawStack) -> str:
+    return "".join(
+        traceback.StackSummary.from_list(
+            [(file, line, name, None) for file, line, name in stack]
+        ).format()
+    )
+
+
 def _capture_stack_trace() -> ParsedStackTrace:
+    # Port of captureLibraryStackTrace() in packages/playwright-core/src/client/clientStackTrace.ts.
     frame = inspect.currentframe()
     # Skip this helper and the caller that only captures the stack.
     frame = frame.f_back.f_back if frame and frame.f_back else None
@@ -578,6 +718,8 @@ def _capture_stack_trace() -> ParsedStackTrace:
     parsed_frames: List[StackFrame] = []
     while frame:
         code = frame.f_code
+        if code is _EVENT_LOOP_CALLBACK_CODE:
+            break
         filename = code.co_filename
         # Sync and Async implementations can have event handlers. When these are sync, they
         # get evaluated in the context of the event loop, so they contain the stack trace of when
@@ -593,7 +735,8 @@ def _capture_stack_trace() -> ParsedStackTrace:
             method_name = frame.f_locals["self"].__class__.__name__ + "."
         method_name += code.co_name
 
-        if not is_playwright_internal:
+        # Keep only the user's frames, as the inspector and the trace viewer show them.
+        if _is_user_file(filename):
             parsed_frames.append(
                 {
                     "file": filename,
@@ -602,10 +745,11 @@ def _capture_stack_trace() -> ParsedStackTrace:
                     "function": method_name,
                 }
             )
+        # The deepest transition from non-library code into library code is the API entry.
         if is_playwright_internal:
             last_internal_api_name = method_name
         elif last_internal_api_name:
-            api_name = last_internal_api_name
+            api_name = api_name or last_internal_api_name
             last_internal_api_name = ""
         frame = frame.f_back
     if not api_name:

@@ -44,8 +44,15 @@ class CDPSession(ChannelOwner):
             {key: value for key, value in event.items() if value is not None},
         )
 
-    async def send(self, method: str, params: Optional[Dict]) -> Dict:
-        return (await self._channel.send(method=method, params=params))["result"]
+    async def send(
+        self, method: str, params: Optional[Dict], timeout: Optional[float]
+    ) -> Dict:
+        # No timeout by default, as send() in client/cdpSession.ts.
+        return (
+            await self._channel.send(
+                method=method, params=params, timeout=0 if timeout is None else timeout
+            )
+        )["result"]
 
     async def detach(self) -> None:
         await self._channel.detach()

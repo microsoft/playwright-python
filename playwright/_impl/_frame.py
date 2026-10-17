@@ -33,6 +33,7 @@ from pyee import EventEmitter
 from playwright._impl._api_structures import DropPayload, FilePayload, Position
 from playwright._impl._connection import (
     ChannelOwner,
+    api_call,
     from_channel,
     from_nullable_channel,
 )
@@ -77,7 +78,6 @@ from playwright._impl._locator_utils import (
 from playwright._impl._network import Response
 from playwright._impl._serializers import parse_value
 from playwright._impl._set_input_files_helpers import convert_input_files
-from playwright._impl._time import monotonic_time
 from playwright._impl._timeout_settings import TimeoutSettings
 from playwright._impl._waiter import Waiter
 from playwright._impl._web_mcp import WebMCP
@@ -159,9 +159,14 @@ class Frame(ChannelOwner):
         )
         return from_nullable_channel(result["response"])
 
-    def _setup_navigation_waiter(self, wait_name: str, timeout: float = None) -> Waiter:
+    def _setup_navigation_waiter(self, title: str, timeout: float = None) -> Waiter:
+        # Port of Frame._setupNavigationWaiter() in client/frame.ts. Upstream titles
+        # the wait with the title of the outer API call, such as 'Wait for
+        # navigation' of waitForNavigation().
         assert self._page
-        waiter = Waiter(self._page, f"frame.{wait_name}")
+        waiter = Waiter(self._page, "", title)
+        if self._page.is_closed():
+            waiter.reject_immediately(self._page._close_error_with_reason())
         waiter.reject_on_event(
             self._page,
             "close",
@@ -232,23 +237,22 @@ class Frame(ChannelOwner):
                 "log": e._log,
             }
 
+    @api_call
     def expect_navigation(
         self,
         url: Optional[URLMatch],
         wait_until: Optional[DocumentLoadState],
         timeout: Optional[float],
     ) -> EventContextManagerImpl[Response]:
+        # Port of waitForNavigation() in frame.ts: one waiter, so that its
+        # timeout and its log cover the whole wait.
         assert self._page
         if not wait_until:
             wait_until = "load"
+        waiter = self._setup_navigation_waiter("Wait for navigation", timeout)
 
-        if timeout is None:
-            timeout = self._page._timeout_settings.navigation_timeout()
-        deadline = monotonic_time() + timeout
-        waiter = self._setup_navigation_waiter("expect_navigation", timeout)
-
-        to_url = f' to "{url}"' if url else ""
-        waiter.log(f"waiting for navigation{to_url} until '{wait_until}'")
+        to_url = f' to "{url}"' if isinstance(url, str) else ""
+        waiter.log(f'waiting for navigation{to_url} until "{wait_until}"')
 
         def predicate(event: "channels.FrameNavigatedEvent") -> bool:
             # Any failed navigation results in a rejection.
@@ -261,29 +265,54 @@ class Frame(ChannelOwner):
                 url,
             )
 
-        waiter.wait_for_event(
+        navigated = waiter.wait_for_event(
             self._event_emitter,
             "navigated",
             predicate=predicate,
         )
 
         async def continuation() -> Optional[Response]:
-            event: "channels.FrameNavigatedEvent" = await waiter.result()
+            event: "channels.FrameNavigatedEvent" = await navigated
             error = event["error"]
             if error:
-                raise Error(error)
+                failed: asyncio.Future = self._loop.create_future()
+                failed.set_exception(Error(error))
+                await waiter.wait_for_future(failed)
+
             if wait_until not in self._load_states:
-                t = deadline - monotonic_time()
-                if t > 0:
-                    await self._wait_for_load_state_impl(state=wait_until, timeout=t)
+
+                def on_load_state(state: str) -> bool:
+                    waiter.log(f'  "{state}" event fired')
+                    return state == wait_until
+
+                await waiter.wait_for_event(
+                    self._event_emitter, "loadstate", on_load_state
+                )
+
+            response: Optional[Response] = None
             new_document = event["newDocument"]
-            if new_document and "request" in new_document:
+            if new_document and new_document.get("request"):
                 request = from_channel(new_document["request"])
-                return await request.response()
-            return None
+                # Request._finalRequest() in network.ts.
+                while request.redirected_to:
+                    request = request.redirected_to
+                response_task = self._loop.create_task(request.response())
 
-        return EventContextManagerImpl(asyncio.create_task(continuation()))
+                def cancel_response() -> None:
+                    response_task.cancel()
 
+                response = await waiter.wait_for_future(response_task, cancel_response)
+            waiter.dispose()
+            return response
+
+        task = self._loop.create_task(continuation())
+        # Cancelled before it started: stop the wait for the navigation, too.
+        task.add_done_callback(
+            lambda _: navigated.cancel() if task.cancelled() else None
+        )
+        return EventContextManagerImpl(task)
+
+    @api_call
     async def wait_for_url(
         self,
         url: URLMatch,
@@ -299,6 +328,7 @@ class Frame(ChannelOwner):
         ):
             pass
 
+    @api_call
     async def wait_for_load_state(
         self,
         state: Optional[Literal["domcontentloaded", "load", "networkidle"]],
@@ -309,30 +339,28 @@ class Frame(ChannelOwner):
     async def _wait_for_load_state_impl(
         self, state: Optional[DocumentLoadState], timeout: Optional[float]
     ) -> None:
+        # Port of waitForLoadState() in frame.ts.
         if not state:
             state = "load"
         if state not in ("load", "domcontentloaded", "networkidle", "commit"):
             raise Error(
                 "state: expected one of (load|domcontentloaded|networkidle|commit)"
             )
-        waiter = self._setup_navigation_waiter("wait_for_load_state", timeout)
+        waiter = self._setup_navigation_waiter("Wait for load state", timeout)
+        try:
+            if state in self._load_states:
+                waiter.log(f'  not waiting, "{state}" event already fired')
+            else:
 
-        if state in self._load_states:
-            waiter.log(f'  not waiting, "{state}" event already fired')
-            # TODO: align with upstream
-            waiter._fulfill(None)
-        else:
+                def on_load_state(actual_state: str) -> bool:
+                    waiter.log(f'  "{actual_state}" event fired')
+                    return actual_state == state
 
-            def handle_load_state_event(actual_state: str) -> bool:
-                waiter.log(f'"{actual_state}" event fired')
-                return actual_state == state
-
-            waiter.wait_for_event(
-                self._event_emitter,
-                "loadstate",
-                handle_load_state_event,
-            )
-        await waiter.result()
+                await waiter.wait_for_event(
+                    self._event_emitter, "loadstate", on_load_state
+                )
+        finally:
+            waiter.dispose()
 
     def _timeout(self, timeout: Optional[float]) -> float:
         timeout_settings = (

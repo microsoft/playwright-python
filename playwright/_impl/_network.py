@@ -15,7 +15,6 @@
 import asyncio
 import base64
 import json
-import json as json_utils
 import mimetypes
 import re
 from pathlib import Path
@@ -46,6 +45,7 @@ from playwright._impl._api_structures import (
 from playwright._impl._connection import (
     ChannelOwner,
     _capture_stack_trace,
+    api_call,
     from_channel,
     from_nullable_channel,
 )
@@ -56,11 +56,12 @@ from playwright._impl._helper import (
     URLMatch,
     WebSocketRouteHandlerCallback,
     async_readfile,
-    create_task_and_ignore_exception,
+    json_stringify,
     url_matches,
 )
 from playwright._impl._internal_structures import Headers, HeadersArray
 from playwright._impl._str_utils import escape_regex_flags
+from playwright._impl._url_match import resolve_glob_to_regex_pattern
 from playwright._impl._waiter import Waiter
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -134,6 +135,26 @@ def to_http_credentials_protocol(
     ] or None
 
 
+# Upstream: validateHeaders() in client/network.ts.
+def validate_headers(headers: Dict[str, str]) -> None:
+    for key, value in headers.items():
+        if not isinstance(value, str):
+            raise Error(
+                f'Expected value of header "{key}" to be String, but "{_js_typeof(value)}" is found.'
+            )
+
+
+def _js_typeof(value: Any) -> str:
+    # The result of JavaScript's typeof for the value that the driver would get.
+    if isinstance(value, bool):
+        return "boolean"
+    if isinstance(value, (int, float)):
+        return "number"
+    if callable(value):
+        return "function"
+    return "object"
+
+
 class Request(ChannelOwner):
     _channel: "RequestChannel"
 
@@ -190,7 +211,9 @@ class Request(ChannelOwner):
         elif isinstance(post_data, bytes):
             self._fallback_overrides.post_data_buffer = post_data
         elif post_data is not None:
-            self._fallback_overrides.post_data_buffer = json.dumps(post_data).encode()
+            self._fallback_overrides.post_data_buffer = json_stringify(
+                post_data
+            ).encode()
 
     @property
     def url(self) -> str:
@@ -416,7 +439,7 @@ class Route(ChannelOwner):
         if json is not None:
             if body is not None:
                 raise Error("Can specify either body or json parameters")
-            body = json_utils.dumps(json)
+            body = json_stringify(json)
 
         if headers is not None:
             # A None value removes the header.
@@ -610,16 +633,14 @@ class ServerWebSocketRoute:
         return list(self._ws._initializer.get("protocols", []))
 
     def close(self, code: Optional[int], reason: Optional[str]) -> None:
-        create_task_and_ignore_exception(
-            self._ws._loop,
-            self._ws._channel.closeServer(code=code, reason=reason, wasClean=True),
+        self._ws._send_no_reply(
+            "closeServer", {"code": code, "reason": reason, "wasClean": True}
         )
 
     def send(self, message: Union[str, bytes]) -> None:
         text, is_base64 = _encode_web_socket_message(message)
-        create_task_and_ignore_exception(
-            self._ws._loop,
-            self._ws._channel.sendToServer(message=text, isBase64=is_base64),
+        self._ws._send_no_reply(
+            "sendToServer", {"message": text, "isBase64": is_base64}
         )
 
 
@@ -652,69 +673,78 @@ class WebSocketRoute(ChannelOwner):
         self._channel.onClosePage(self._channel_close_page)
         self._channel.onCloseServer(self._channel_close_server)
 
+    # The handlers return the result of the user's handler: the channel's event
+    # emitter runs a coroutine that an `async def` handler returns.
+
     def _channel_message_from_page(
         self, event: "channels.WebSocketRouteMessageFromPageEvent"
-    ) -> None:
+    ) -> Any:
         if self._on_page_message:
-            self._on_page_message(
+            return self._on_page_message(
                 base64.b64decode(event["message"])
                 if event["isBase64"]
                 else event["message"]
             )
-        elif self._connected:
-            create_task_and_ignore_exception(
-                self._loop,
-                self._channel.sendToServer(
-                    message=event["message"], isBase64=event["isBase64"]
-                ),
+        if self._connected:
+            self._send_no_reply(
+                "sendToServer",
+                {"message": event["message"], "isBase64": event["isBase64"]},
             )
+        return None
 
     def _channel_message_from_server(
         self, event: "channels.WebSocketRouteMessageFromServerEvent"
-    ) -> None:
+    ) -> Any:
         if self._on_server_message:
-            self._on_server_message(
+            return self._on_server_message(
                 base64.b64decode(event["message"])
                 if event["isBase64"]
                 else event["message"]
             )
-        else:
-            create_task_and_ignore_exception(
-                self._loop,
-                self._channel.sendToPage(
-                    message=event["message"], isBase64=event["isBase64"]
-                ),
-            )
+        self._send_no_reply(
+            "sendToPage", {"message": event["message"], "isBase64": event["isBase64"]}
+        )
+        return None
 
     def _channel_close_page(
         self, event: "channels.WebSocketRouteClosePageEvent"
-    ) -> None:
+    ) -> Any:
         if self._on_page_close:
-            self._on_page_close(event["code"], event["reason"])
-        else:
-            create_task_and_ignore_exception(
-                self._loop,
-                self._channel.closeServer(
-                    code=event["code"],
-                    reason=event["reason"],
-                    wasClean=event["wasClean"],
-                ),
-            )
+            return self._on_page_close(event["code"], event["reason"])
+        self._send_no_reply(
+            "closeServer",
+            {
+                "code": event["code"],
+                "reason": event["reason"],
+                "wasClean": event["wasClean"],
+            },
+        )
+        return None
 
     def _channel_close_server(
         self, event: "channels.WebSocketRouteCloseServerEvent"
-    ) -> None:
+    ) -> Any:
         if self._on_server_close:
-            self._on_server_close(event["code"], event["reason"])
-        else:
-            create_task_and_ignore_exception(
-                self._loop,
-                self._channel.closePage(
-                    code=event["code"],
-                    reason=event["reason"],
-                    wasClean=event["wasClean"],
-                ),
-            )
+            return self._on_server_close(event["code"], event["reason"])
+        self._send_no_reply(
+            "closePage",
+            {
+                "code": event["code"],
+                "reason": event["reason"],
+                "wasClean": event["wasClean"],
+            },
+        )
+        return None
+
+    def _send_no_reply(self, method: str, params: Dict[str, Any]) -> None:
+        # Upstream sends these messages right away and ignores the result:
+        # `this._channel.sendToPage(...).catch(() => {})`. A task would send the
+        # message on a later loop iteration, after the message of an awaited call
+        # such as close() that comes after it, so the order of messages would change.
+        try:
+            self._channel.send_no_reply(method, params)
+        except Exception:
+            pass
 
     @property
     def url(self) -> str:
@@ -734,14 +764,12 @@ class WebSocketRoute(ChannelOwner):
         if self._connected:
             raise Error("Already connected to the server")
         self._connected = True
-        create_task_and_ignore_exception(self._loop, self._channel.connect())
+        self._send_no_reply("connect", {})
         return cast("WebSocketRoute", self._server)
 
     def send(self, message: Union[str, bytes]) -> None:
         text, is_base64 = _encode_web_socket_message(message)
-        create_task_and_ignore_exception(
-            self._loop, self._channel.sendToPage(message=text, isBase64=is_base64)
-        )
+        self._send_no_reply("sendToPage", {"message": text, "isBase64": is_base64})
 
     def on_message(self, handler: Callable[[Union[str, bytes]], Any]) -> None:
         self._on_page_message = handler
@@ -769,6 +797,10 @@ class WebSocketRouteHandler:
         self._base_url = base_url
         self.url = url
         self.handler = handler
+        # Eagerly validate string globs so that invalid patterns throw at the call site
+        # (e.g. page.route_web_socket()) rather than silently failing later.
+        if isinstance(url, str):
+            resolve_glob_to_regex_pattern(base_url, url, True)
 
     @staticmethod
     def prepare_interception_patterns(
@@ -956,6 +988,8 @@ class WebSocket(ChannelOwner):
     def url(self) -> str:
         return self._initializer["url"]
 
+    # Port of waitForEvent() in network.ts.
+    @api_call
     def expect_event(
         self,
         event: str,
@@ -964,7 +998,7 @@ class WebSocket(ChannelOwner):
     ) -> EventContextManagerImpl:
         if timeout is None:
             timeout = cast(Any, self._parent)._timeout_settings.timeout()
-        waiter = Waiter(self, f"web_socket.expect_event({event})")
+        waiter = Waiter(self, event)
         waiter.reject_on_timeout(
             cast(float, timeout),
             f'Timeout {timeout}ms exceeded while waiting for event "{event}"',
@@ -979,6 +1013,7 @@ class WebSocket(ChannelOwner):
         waiter.wait_for_event(self, event, predicate)
         return EventContextManagerImpl(waiter.result())
 
+    @api_call
     async def wait_for_event(
         self, event: str, predicate: Optional[Callable], timeout: Optional[float]
     ) -> Any:
@@ -1008,13 +1043,16 @@ class WebSocket(ChannelOwner):
         self.emit(WebSocket.Events.Close, self)
 
 
+# Upstream: RawHeaders in client/network.ts.
 class RawHeaders:
     def __init__(self, headers: HeadersArray) -> None:
         self._headers_array = headers
-        self._headers_map: Dict[str, Dict[str, bool]] = {}
+        # A multimap: a header can repeat, with the same value too.
+        self._headers_map: Dict[str, List[str]] = {}
         for header in headers:
-            values = self._headers_map.setdefault(header["name"].lower(), {})
-            values[header["value"]] = True
+            self._headers_map.setdefault(header["name"].lower(), []).append(
+                header["value"]
+            )
 
     @staticmethod
     def _from_headers_dict_lossy(headers: Dict[str, str]) -> "RawHeaders":
@@ -1028,7 +1066,7 @@ class RawHeaders:
         return separator.join(values)
 
     def get_all(self, name: str) -> List[str]:
-        return list(self._headers_map.get(name.lower(), {}).keys())
+        return list(self._headers_map.get(name.lower(), []))
 
     def headers(self) -> Dict[str, str]:
         result = {}

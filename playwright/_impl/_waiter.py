@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Port of packages/playwright-core/src/client/waiter.ts."""
+
 import asyncio
 import inspect
 import math
@@ -26,32 +28,48 @@ from playwright._impl._errors import Error, TimeoutError
 
 
 class Waiter:
-    def __init__(self, channel_owner: ChannelOwner, event: str) -> None:
-        self._result: asyncio.Future = asyncio.Future()
+    # Port of packages/playwright-core/src/client/waiter.ts. `event` is the name of the
+    # event that it waits for, "" when it waits for something else; `title` replaces
+    # the title of the wait, as the title of the outer API call does upstream.
+    def __init__(
+        self, channel_owner: ChannelOwner, event: str, title: Optional[str] = None
+    ) -> None:
         self._wait_id = uuid.uuid4().hex
         self._loop = channel_owner._loop
         self._pending_tasks: List[Task] = []
         self._channel = channel_owner._channel
-        self._registered_listeners: List[Tuple[EventEmitter, str, Callable]] = []
+        self._connection = channel_owner._connection
         self._logs: List[str] = []
-        self._wait_for_event_info_before(self._wait_id, event)
+        self._error: Optional[str] = None
+        # The first rejection; it fails the active waits and the later ones.
+        self._failure: Optional[Exception] = None
+        self._active_waits: List[Callable[[Exception], None]] = []
+        self._dispose_callbacks: List[Callable[[], None]] = []
+        self._disposed = False
+        self._dispose_on_settle = False
+        self._result: Optional[asyncio.Future] = None
+        self._wait_for_event_info_before(
+            self._wait_id, event, title or f'Wait for event "{event}"'
+        )
 
-    def _wait_for_event_info_before(self, wait_id: str, event: str) -> None:
+    def _wait_for_event_info_before(self, wait_id: str, event: str, title: str) -> None:
         self._send_wait_for_event_info(
             {
                 "waitId": wait_id,
                 "phase": "before",
                 "event": event,
             },
-            title=f'Wait for event "{event}"',
+            title=title,
         )
 
-    def _wait_for_event_info_after(self, wait_id: str, error: Exception = None) -> None:
+    def _wait_for_event_info_after(
+        self, wait_id: str, error: Optional[str] = None
+    ) -> None:
         self._send_wait_for_event_info(
             {
                 "waitId": wait_id,
                 "phase": "after",
-                **({"error": str(error)} if error else {}),
+                **({"error": error} if error else {}),
             },
             is_internal=True,
         )
@@ -61,6 +79,11 @@ class Waiter:
     ) -> None:
         # Wait info is fire-and-forget telemetry and must not affect the waiter.
         try:
+            # An outer api_call() may have left the title blank; then the wait
+            # names the call, as _sendWaitInfo() in waiter.ts does.
+            zone = self._connection._api_zone.get()
+            if zone is not None and title and not zone["title"]:
+                zone["title"] = title
             self._channel.send_no_reply(
                 "__waitInfo__",
                 params,
@@ -78,65 +101,162 @@ class Waiter:
         predicate: Callable = None,
     ) -> None:
         def on_match() -> None:
-            self._reject(error() if callable(error) else error)
+            self._fail(error() if callable(error) else error)
 
         def listener(event_data: Any = None) -> None:
-            self._evaluate_predicate(predicate, event_data, on_match)
+            self._evaluate_predicate(predicate, event_data, on_match, self._fail)
 
         emitter.on(event, listener)
-        self._registered_listeners.append((emitter, event, listener))
+        self._dispose_callbacks.append(lambda: emitter.remove_listener(event, listener))
+
+    def reject_immediately(self, error: Exception) -> None:
+        """Port of Waiter.rejectImmediately() in client/waiter.ts: the waits fail with error."""
+        self._fail(error)
 
     def reject_on_timeout(self, timeout: float, message: str) -> None:
         if timeout == 0:
             return
+        handle = self._loop.call_later(
+            timeout / 1000, lambda: self._fail(TimeoutError(message))
+        )
+        self._dispose_callbacks.append(handle.cancel)
 
-        async def reject() -> None:
-            await asyncio.sleep(timeout / 1000)
-            self._reject(TimeoutError(message))
-
-        self._pending_tasks.append(self._loop.create_task(reject()))
-
-    def _cleanup(self) -> None:
-        for task in self._pending_tasks:
-            if not task.done():
-                task.cancel()
-        for listener in self._registered_listeners:
-            listener[0].remove_listener(listener[1], listener[2])
-
-    def _fulfill(self, result: Any) -> None:
-        self._cleanup()
-        if not self._result.done():
-            self._result.set_result(result)
-        self._wait_for_event_info_after(self._wait_id)
-
-    def _reject(self, exception: Exception) -> None:
-        self._cleanup()
-        if exception:
-            base_class = TimeoutError if isinstance(exception, TimeoutError) else Error
-            exception = base_class(str(exception) + format_log_recording(self._logs))
-        if not self._result.done():
-            self._result.set_exception(exception)
-        self._wait_for_event_info_after(self._wait_id, exception)
+    def _fail(self, error: Exception) -> None:
+        if self._failure:
+            return
+        self._failure = error
+        for fail in list(self._active_waits):
+            fail(error)
 
     def wait_for_event(
         self,
         emitter: EventEmitter,
         event: str,
         predicate: Callable = None,
-    ) -> None:
+    ) -> asyncio.Future:
+        """Starts to listen right away.
+
+        Returns a future that settles with the event, or fails when the waiter
+        fails first.
+        """
+
         def listener(event_data: Any = None) -> None:
             self._evaluate_predicate(
-                predicate, event_data, lambda: self._fulfill(event_data)
+                predicate, event_data, lambda: resolve(event_data), fail
             )
 
         emitter.on(event, listener)
-        self._registered_listeners.append((emitter, event, listener))
+        result, resolve, fail = self._start_wait(
+            lambda: emitter.remove_listener(event, listener)
+        )
+        self._result = result
+        return result
+
+    def wait_for_future(
+        self, future: asyncio.Future, dispose: Callable[[], None] = None
+    ) -> asyncio.Future:
+        """Port of waitForPromise().
+
+        Returns a future that settles as `future` does, or fails when the waiter
+        fails first.
+        """
+
+        def on_done(_: asyncio.Future) -> None:
+            if future.cancelled():
+                return
+            error = future.exception()
+            if error is None:
+                resolve(future.result())
+            elif isinstance(error, Exception):
+                fail(error)
+
+        def cancel() -> None:
+            future.remove_done_callback(on_done)
+            if not future.done():
+                future.cancel()
+            if dispose:
+                dispose()
+
+        future.add_done_callback(on_done)
+        result, resolve, fail = self._start_wait(cancel)
+        return result
+
+    def _start_wait(
+        self, dispose: Callable[[], None]
+    ) -> Tuple[asyncio.Future, Callable[[Any], None], Callable[[Exception], None]]:
+        """Returns the future of a wait, and the functions that settle it.
+
+        Settling ends the wait and calls `dispose`. A failure also disposes the
+        waiter and adds the log to the error.
+        """
+        result: asyncio.Future = self._loop.create_future()
+        settled = False
+
+        def finish() -> bool:
+            nonlocal settled
+            if settled:
+                return False
+            settled = True
+            if fail in self._active_waits:
+                self._active_waits.remove(fail)
+            dispose()
+            return True
+
+        def resolve(value: Any) -> None:
+            if not finish():
+                return
+            if not result.done():
+                result.set_result(value)
+            if self._dispose_on_settle or result.cancelled():
+                self.dispose()
+
+        def fail(error: Exception) -> None:
+            if not finish():
+                return
+            self._error = str(error)
+            self.dispose()
+            base_class = TimeoutError if isinstance(error, TimeoutError) else Error
+            if not result.done():
+                result.set_exception(
+                    base_class(str(error) + format_log_recording(self._logs))
+                )
+
+        def on_result_done(_: asyncio.Future) -> None:
+            # The caller cancelled the wait.
+            if result.cancelled() and finish():
+                self.dispose()
+
+        result.add_done_callback(on_result_done)
+        if self._failure:
+            fail(self._failure)
+        else:
+            self._active_waits.append(fail)
+        return result, resolve, fail
+
+    def result(self) -> asyncio.Future:
+        """The future of the last wait_for_event(), for a waiter that waits for
+        one event: the waiter is disposed when it settles."""
+        assert self._result
+        self._dispose_on_settle = True
+        return self._result
+
+    def dispose(self) -> None:
+        if self._disposed:
+            return
+        self._disposed = True
+        for dispose in self._dispose_callbacks:
+            dispose()
+        for task in self._pending_tasks:
+            if not task.done():
+                task.cancel()
+        self._wait_for_event_info_after(self._wait_id, self._error)
 
     def _evaluate_predicate(
         self,
         predicate: Optional[Callable],
         event_data: Any,
         on_match: Callable[[], None],
+        on_error: Callable[[Exception], None],
     ) -> None:
         if predicate is None:
             on_match()
@@ -144,7 +264,7 @@ class Waiter:
         try:
             result = predicate(event_data)
         except Exception as e:
-            self._reject(e)
+            on_error(e)
             return
         if inspect.iscoroutine(result):
 
@@ -152,18 +272,15 @@ class Waiter:
                 try:
                     matched = await coro
                 except Exception as e:
-                    self._reject(e)
+                    on_error(e)
                     return
-                if matched and not self._result.done():
+                if matched:
                     on_match()
 
             self._pending_tasks.append(self._loop.create_task(_await_predicate(result)))
             return
         if result:
             on_match()
-
-    def result(self) -> asyncio.Future:
-        return self._result
 
     def log(self, message: str) -> None:
         self._logs.append(message)
@@ -175,14 +292,6 @@ class Waiter:
             },
             is_internal=True,
         )
-
-
-def throw_on_timeout(timeout: float, exception: Exception) -> asyncio.Task:
-    async def throw() -> None:
-        await asyncio.sleep(timeout / 1000)
-        raise exception
-
-    return asyncio.create_task(throw())
 
 
 def format_log_recording(log: List[str]) -> str:

@@ -13,7 +13,7 @@
 # limitations under the License.
 import asyncio
 import base64
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Dict, Optional
 
 from playwright._impl._errors import Error
 from playwright._impl._helper import (
@@ -87,11 +87,24 @@ class HarRouter:
             # test when HAR was recorded but we'd abort it immediately.
             if response["status"] == -1:
                 return
+            # route.fulfill does not support multiple set-cookie headers. We need to merge them into one.
+            transformed_headers: Dict[str, str] = {}
+            for header in response["headers"] or []:
+                name, value = header["name"], header["value"]
+                if name.lower() != "set-cookie":
+                    # non-set-cookie header gets set as-is
+                    transformed_headers[name] = value
+                elif "set-cookie" not in transformed_headers:
+                    # first set-cookie header gets included as-is
+                    transformed_headers["set-cookie"] = value
+                else:
+                    # subsequent set-cookie headers get appended to existing header
+                    transformed_headers["set-cookie"] += f"\n{value}"
             body = response["body"]
             assert body is not None
             await route.fulfill(
                 status=response["status"],
-                headers={v["name"]: v["value"] for v in response["headers"] or []},
+                headers=transformed_headers,
                 body=base64.b64decode(body),
                 json=None,
                 path=None,

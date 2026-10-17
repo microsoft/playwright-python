@@ -17,6 +17,7 @@ from contextlib import AbstractAsyncContextManager
 from types import TracebackType
 from typing import Any, Callable, Generic, Optional, Type, TypeVar, Union
 
+from playwright._impl._connection import event_future_error
 from playwright._impl._impl_to_api_mapping import ImplToApiMapping, ImplWrapper
 
 mapping = ImplToApiMapping()
@@ -32,7 +33,14 @@ class AsyncEventInfo(Generic[T]):
 
     @property
     async def value(self) -> T:
-        return mapping.from_maybe_impl(await self._future)
+        try:
+            result = await self._future
+        except Exception as error:
+            rewritten = event_future_error(self._future, error)
+            if rewritten is error:
+                raise
+            raise rewritten from None
+        return mapping.from_maybe_impl(result)
 
     def _cancel(self) -> None:
         self._future.cancel()

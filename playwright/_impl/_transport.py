@@ -19,7 +19,7 @@ import os
 import subprocess
 import sys
 from abc import ABC, abstractmethod
-from typing import Callable, Dict, Optional, Union
+from typing import Callable, Dict, List, Optional, Union
 
 from playwright._impl._driver import compute_driver_executable, get_driver_env
 from playwright._impl._errors import Error
@@ -44,6 +44,23 @@ def _get_stderr_fileno() -> Optional[int]:
         if not hasattr(sys, "__stderr__") or not sys.__stderr__:
             return None
         return sys.__stderr__.fileno()
+
+
+# The most loop iterations that the transport waits after a message.
+_MAX_IDLE_YIELDS = 100
+
+
+async def _yield_until_idle() -> None:
+    # The Node.js client dispatches each message from the driver in its own macrotask,
+    # so the code that awaits an event runs before the next message is dispatched. In
+    # asyncio, that code resumes through a chain of callbacks (the future, then a task
+    # step for each awaiting coroutine, or the switch to a sync API greenlet). So wait
+    # until the event loop has no other callback ready to run.
+    ready = getattr(asyncio.get_running_loop(), "_ready", None)
+    for _ in range(_MAX_IDLE_YIELDS):
+        await asyncio.sleep(0)
+        if not ready:
+            return
 
 
 class Transport(ABC):
@@ -149,21 +166,20 @@ class PipeTransport(Transport):
                     if self._stopped:
                         break
                     length = int.from_bytes(buffer, byteorder="little", signed=False)
-                    buffer = bytes(0)
+                    # Join the chunks once at the end: appending each chunk to
+                    # the message copies all of it, which is quadratic.
+                    chunks: List[bytes] = []
                     while length:
                         to_read = min(length, 32768)
                         data = await self._proc.stdout.readexactly(to_read)
                         if self._stopped:
                             break
                         length -= to_read
-                        if len(buffer):
-                            buffer = buffer + data
-                        else:
-                            buffer = data
+                        chunks.append(data)
                     if self._stopped:
                         break
 
-                    obj = self.deserialize_message(buffer)
+                    obj = self.deserialize_message(b"".join(chunks))
                     self.on_message(obj)
                 except asyncio.IncompleteReadError:
                     if not self._stopped:
@@ -171,7 +187,7 @@ class PipeTransport(Transport):
                             Exception("Connection closed while reading from the driver")
                         )
                     break
-                await asyncio.sleep(0)
+                await _yield_until_idle()
 
             await self._proc.communicate()
         finally:

@@ -43,6 +43,7 @@ from playwright._impl._cdp_session import CDPSession
 from playwright._impl._clock import Clock
 from playwright._impl._connection import (
     ChannelOwner,
+    api_call,
     from_channel,
     from_nullable_channel,
 )
@@ -68,6 +69,7 @@ from playwright._impl._helper import (
     async_readfile,
     async_writefile,
     create_task_and_ignore_exception,
+    json_stringify,
     to_impl,
 )
 from playwright._impl._network import (
@@ -76,6 +78,7 @@ from playwright._impl._network import (
     Route,
     WebSocketRoute,
     WebSocketRouteHandler,
+    validate_headers,
 )
 from playwright._impl._page import BindingCall, Page, Worker
 from playwright._impl._str_utils import escape_regex_flags
@@ -83,6 +86,7 @@ from playwright._impl._timeout_settings import TimeoutSettings
 from playwright._impl._tracing import Tracing
 from playwright._impl._waiter import Waiter
 from playwright._impl._web_error import WebError
+from playwright._impl._whatwg_url import parse_url
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl import _protocol_types as channels
@@ -391,6 +395,7 @@ class BrowserContext(ChannelOwner):
         )
 
     async def set_extra_http_headers(self, headers: Dict[str, str]) -> None:
+        validate_headers(headers)
         await self._channel.setExtraHTTPHeaders(headers=serialize_headers(headers))
 
     async def set_offline(self, offline: bool) -> None:
@@ -402,10 +407,12 @@ class BrowserContext(ChannelOwner):
         if path:
             script = (await async_readfile(path)).decode()
         if not isinstance(script, str):
-            raise Error("Either path or script parameter must be specified")
+            raise Error("Either path or script parameter must be present")
         result = await self._channel.addInitScript(source=script)
         return from_channel(result["disposable"])
 
+    # The client checks for duplicates before it calls the driver.
+    @api_call
     async def expose_binding(self, name: str, callback: Callable) -> Disposable:
         for page in self._pages:
             if name in page._bindings:
@@ -521,6 +528,8 @@ class BrowserContext(ChannelOwner):
             )
         )
 
+    # Port of waitForEvent() in browserContext.ts.
+    @api_call
     def expect_event(
         self,
         event: str,
@@ -529,7 +538,7 @@ class BrowserContext(ChannelOwner):
     ) -> EventContextManagerImpl:
         if timeout is None:
             timeout = self._timeout_settings.timeout()
-        waiter = Waiter(self, f"browser_context.expect_event({event})")
+        waiter = Waiter(self, event)
         waiter.reject_on_timeout(
             timeout, f'Timeout {timeout}ms exceeded while waiting for event "{event}"'
         )
@@ -573,9 +582,17 @@ class BrowserContext(ChannelOwner):
         async def _inner_close() -> None:
             await self._tracing._export_all_hars()
 
-        await self._channel._connection.wrap_api_call(_inner_close, True)
+        # Upstream: BrowserContext.close() in client/browserContext.ts closes the
+        # context even when saving the HAR fails, and throws the error after.
+        har_error: Optional[Exception] = None
+        try:
+            await self._channel._connection.wrap_api_call(_inner_close, True)
+        except Exception as error:
+            har_error = error
         await self._channel.close(reason=reason)
         await self._closed_future
+        if har_error:
+            raise har_error
 
     async def storage_state(
         self,
@@ -590,7 +607,8 @@ class BrowserContext(ChannelOwner):
         # Leave out the fields that the driver did not send, such as "credentials".
         state = {key: value for key, value in result.items() if value is not None}
         if path:
-            await async_writefile(path, json.dumps(state))
+            # JSON.stringify(state, undefined, 2) in browserContext.ts.
+            await async_writefile(path, json_stringify(state, indent=2))
         return cast(StorageState, state)
 
     async def set_storage_state(
@@ -607,6 +625,7 @@ class BrowserContext(ChannelOwner):
             return self._browser._close_reason
         return None
 
+    @api_call
     async def wait_for_event(
         self, event: str, predicate: Optional[Callable], timeout: Optional[float]
     ) -> Any:
@@ -674,7 +693,23 @@ class BrowserContext(ChannelOwner):
         page = message.page
         if page:
             page.emit(Page.Events.Console, message)
+        if worker and worker in self._service_workers:
+            # A service worker's messages go to the pages in its scope too.
+            scope = self._service_worker_scope(worker)
+            for scope_page in self._pages:
+                if scope and scope_page.url.startswith(scope):
+                    scope_page.emit(Page.Events.Console, message)
         self.emit(BrowserContext.Events.Console, message)
+
+    # Upstream: BrowserContext._serviceWorkerScope().
+    def _service_worker_scope(self, service_worker: Worker) -> Optional[str]:
+        url = parse_url(".", service_worker.url)
+        if url is None:
+            return None
+        scope = url.href
+        if not scope.endswith("/"):
+            scope += "/"
+        return scope
 
     def _on_dialog(self, dialog: Dialog) -> None:
         has_listeners = self.emit(BrowserContext.Events.Dialog, dialog)
@@ -787,4 +822,10 @@ async def to_storage_state_params(
         return None
     if isinstance(storage_state, dict):
         return cast("channels.BrowserNewContextParamsStorageState", storage_state)
-    return json.loads((await async_readfile(storage_state)).decode())
+    # Port of prepareStorageState() in browserContext.ts.
+    try:
+        return json.loads((await async_readfile(storage_state)).decode())
+    except Exception as error:
+        raise Error(
+            f"Error reading storage state from {storage_state}:\n{error}"
+        ) from error

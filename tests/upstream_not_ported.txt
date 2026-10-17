@@ -1,0 +1,256 @@
+# Upstream tests that the Python port does not run, with the reason.
+#
+# The registry of upstream tests is tests/upstream_registry.md, a copy of
+# tests/registry.md in microsoft/playwright. scripts/check_test_registry.py checks
+# that every test in it is ported to tests/async and tests/sync, or matches a rule
+# here. One rule per line: a selector, then the reason. A selector is a test
+# identifier (CH-017), a subsystem code (CG), or an upstream file glob without
+# ".spec.ts" (library/unit/*). The checker fails on a rule that matches no test,
+# and on a test that is ported and also matches a rule.
+
+# Upstream internals, not the client API.
+library/unit/*                      Unit tests of upstream internals.
+library/events/*                    Tests the EventEmitter class of the Node.js client.
+library/channels                    Checks the object tree of the Node.js client through its internals.
+library/heap                        Measures the heap of the Node.js client.
+page/page-leaks                     Counts server objects through toImpl(), which only the Node.js tests can reach.
+library/role-utils                  Calls the injected script directly.
+library/locator-parser              Tests the locator parser of the driver.
+library/component-parser            Tests the component selector parser of the driver.
+library/css-parser                  Tests the CSS selector parser of the driver.
+library/locator-generator           Tests the locator generator of the driver.
+library/selector-generator          Tests the selector generator of the driver.
+library/coverage                    Checks the API coverage of the Node.js tests.
+
+# Tools that run in the driver. The Python client only starts them.
+library/inspector/*                 Codegen and the Inspector run in the driver.
+library/trace-viewer                The trace viewer runs in the driver.
+library/snapshot-renderer           The trace viewer runs in the driver.
+library/debug-controller            Internal protocol of the VS Code extension.
+
+# Node.js packaging.
+library/browsers-path               Tests importing the Node.js package on an unsupported platform.
+library/playwright-client           Tests the @playwright/client package.
+
+# API that the Python API does not have.
+library/chromium/js-coverage        page.coverage is not in the Python API.
+library/chromium/css-coverage       page.coverage is not in the Python API.
+library/logger                      The logger option is not in the Python API.
+library/browsertype-launch-server   browserType.launchServer() is not in the Python API.
+page/page-listeners                 removeAllListeners() is not in the Python API.
+
+# Features of the @playwright/test runner.
+page/expect-builtins                Generic matchers of @playwright/test, such as toBe().
+page/matchers.misc                  Generic matchers of @playwright/test.
+page/expect-matcher-result          The matcher result objects of @playwright/test.
+page/expect-with-snapshot           toHaveScreenshot() and toMatchSnapshot() are not in the Python API.
+
+# Per test, found while porting.
+# library/browser
+BR-007      passes __testHookBeforeSetStorageState, a JS function, as a context option, and reads toImpl(browser).
+# library/browsercontext-add-init-script
+IS-031      browserContext.addInitScript(script, arg, { exposeFunctions }) exposes functions passed in arg; the arg parameter and the exposeFunctions option are JavaScript-only (docs: langs: js); Python add_init_script takes only script=<str> or path=.
+IS-032      browserContext.addInitScript(script, arg, { exposeFunctions }) exposes functions passed in arg; the arg parameter and the exposeFunctions option are JavaScript-only (docs: langs: js); Python add_init_script takes only script=<str> or path=.
+IS-033      browserContext.addInitScript(script, arg, { exposeFunctions }) exposes functions passed in arg; the arg parameter and the exposeFunctions option are JavaScript-only (docs: langs: js); Python add_init_script takes only script=<str> or path=.
+IS-034      browserContext.addInitScript(script, arg, { exposeFunctions }) exposes functions passed in arg; the arg parameter and the exposeFunctions option are JavaScript-only (docs: langs: js); Python add_init_script takes only script=<str> or path=.
+# library/browsercontext-credentials
+AU-002      BrowserContext.setHTTPCredentials() is JavaScript-only (langs: js); it is not in the Python API.
+AU-003      BrowserContext.setHTTPCredentials() is JavaScript-only (langs: js); it is not in the Python API.
+# library/browsercontext-fetch
+FE-119      browserContext.setHTTPCredentials() is JavaScript-only (docs langs: js); it is not in the Python API.
+FE-120      browserContext.setHTTPCredentials() is JavaScript-only (docs langs: js); it is not in the Python API.
+# library/browsercontext-fetch-happy-eyeballs
+FE-185      passes __testHookLookup, a JS function, as a request option, and asserts that it was called; only an in-process server can receive it. A proxy can not stand in: the test checks the direct Happy Eyeballs connection through unreachable addresses.
+FE-186      passes __testHookLookup, a JS function, as a request option, and asserts that it was called; only an in-process server can receive it. A proxy can not stand in: the test checks the direct Happy Eyeballs connection through unreachable addresses.
+FE-187      passes __testHookLookup, a JS function, as a request option, and asserts that it was called; only an in-process server can receive it. A proxy can not stand in: the test checks the direct Happy Eyeballs connection through unreachable addresses.
+library/browsercontext-reuse        uses the private context-reuse mode of the JS client (browser._newContextForReuse() / _disconnectFromReusedContext() and browserType._instrumentation, used by @playwright/test); the Python Browser has no such methods, only the raw newContextForReuse/disconnectFromReusedContext channel commands, without the client-side bookkeeping (closing the old Page/BrowserContext objects, marking the context for reuse).
+# library/browsercontext-route
+RO-185      URLPattern is not in the Python API: route() takes a str glob, a re.Pattern or a predicate, so there is no URLPattern ignoreCase option to test.
+# library/browsertype-connect
+BT-052      passes __testHookBeforeCreateBrowser, a JS function that the JS client calls during connect; the Python connect() has no such hook.
+BT-096      starts an in-process remote.PlaywrightServer and reads its internal _dontReuseBrowsers.
+# library/browsertype-launch
+BT-005      launch({ userDataDir }) is an untyped option that only the JS client checks; Python's launch() has no user_data_dir keyword.
+BT-007      launch({ port }) is an untyped option that only the JS client checks; Python's launch() has no port keyword.
+BT-008      launchPersistentContext({ port }) is an untyped option that only the JS client checks; Python's launch_persistent_context() has no port keyword.
+BT-012      passes __testHookBeforeCreateBrowser, a JS function, as a launch option; only an in-process server can receive it.
+BT-013      passes __testHookBeforeCreateBrowser, a JS function, as a launch option; only an in-process server can receive it.
+BT-014      launch({ process }) passes an untyped Node.js object as an option; Python's launch() takes only its documented keywords.
+# library/chromium/chromium
+CR-032      toImpl(browser)._connection._sessions is a server internal; the Python client can not reach it.
+# library/chromium/connect-over-cdp
+CD-005      toImpl(cdpBrowser).options.artifactsDir is a server internal; the Python client can not reach it.
+CD-030      toImpl(cdpBrowser)._isBrowserCollocatedWithServer is a server internal; the Python client can not reach it.
+CD-032      toImpl(frame).evaluateExpression() in the utility world is a server internal; the Python client can not reach it.
+CD-036      connectOverCDP(transport) takes a server ConnectionTransport object (WebSocketTransport), which only the in-process Node.js client can pass.
+library/chromium/connect-to-worker  browserType._connectToWorker() is a private method of the Node.js client; the Python client has no such API.
+# library/chromium/session
+CD-041      page.coverage (startJSCoverage/stopJSCoverage) is JavaScript-only; it is not in the Python API.
+# library/debugger
+DB-004      Uses Debugger._enable() and the 'apicallsupdated' event, private to the Node.js client (the dashboard bridge); the Python Debugger has neither.
+DB-005      Uses Debugger._enable() and the 'apicallsupdated' event, private to the Node.js client (the dashboard bridge); the Python Debugger has neither.
+DB-006      Uses Debugger._enable() and the 'apicallsupdated' event, private to the Node.js client (the dashboard bridge); the Python Debugger has neither.
+DB-008      Uses Debugger._enable() and the 'apicallsupdated' event, private to the Node.js client (the dashboard bridge); the Python Debugger has neither.
+DB-009      Uses Debugger._enable() and the 'apicallsupdated' event, private to the Node.js client (the dashboard bridge); the Python Debugger has neither.
+DB-010      Uses Debugger._enable() and the 'apicallsupdated' event, private to the Node.js client (the dashboard bridge); the Python Debugger has neither.
+# library/defaultbrowsercontext-2
+DC-030      reads toImpl(browserType).defaultArgs(...) (a server internal) to build the launch arguments.
+DC-031      passes __testHookBeforeCreateBrowser, a JS function, as a launchPersistentContext option; only an in-process server can receive it.
+DC-032      passes __testHookBeforeCreateBrowser, a JS function, as a launchPersistentContext option; only an in-process server can receive it.
+DC-034      page.coverage (Coverage) is JavaScript-only (docs langs: js).
+DC-036      passes __testHookOnConnectToBrowser, a JS function, as a launchPersistentContext option; only an in-process server can receive it.
+# library/download
+DO-019      download.createReadStream() is not in the Python API.
+# library/global-fetch
+FE-028      Uses playwright._instrumentation.runBeforeCreateRequestContext(), an internal hook of the Node.js client that @playwright/test uses to fill context options; Python has no such hook.
+FE-036      Calls response[util.inspect.custom](), the Node.js console formatter of the JavaScript client; Python's APIResponse has its own one-line __repr__ instead.
+FE-046      Checks that the JavaScript client calls the data object's toJSON() synchronously, before its first await; Python has no toJSON() and a coroutine does not run until it is awaited.
+# library/har
+HA-066      tracing.startHar({ resourcesDir }) is not in the Python API (langs: js).
+HA-067      tracing.startHar({ resourcesDir }) is not in the Python API (langs: js).
+# library/launcher
+BT-018      playwright.errors is JavaScript-only (docs langs: js); Python exports TimeoutError from the module.
+BT-020      passes __testHookGracefullyClose, a JS function, as a launch option; only an in-process server can receive it.
+# library/locator-highlight
+LO-194      locator.highlight({ style }) with an object style is JavaScript-only: Python's highlight() takes style as a string only.
+# library/multiclient
+MC-005      page.coverage (Coverage) is JavaScript-only (docs langs: js).
+MC-006      page.coverage (Coverage) is JavaScript-only (docs langs: js).
+MC-019      calls the internal context._startRecording() / _stopRecording() with JS recorder callbacks.
+# library/network-timeout
+NE-128      Tests utils.httpRequest, an internal of the Node.js playwright-core package (not reachable from the Python client).
+NE-129      Tests utils.httpRequest, an internal of the Node.js playwright-core package (not reachable from the Python client).
+NE-130      Tests utils.httpRequest and Node.js dns module behavior inside playwright-core (not reachable from the Python client).
+# library/page-clock
+CK-048      Calls clock.runFor(0.5); Python's Clock.run_for takes int | str (the docs type ticks as long|string), so a fractional tick count cannot be passed.
+library/proxy-pattern               Tests parsePattern() of the Node.js utils bundle (SOCKS proxy pattern matcher), an internal with no Python API.
+# library/screenshot
+SS-080      Uses the __testHookBeforeScreenshot screenshot option, a JavaScript function that the server calls; upstream skips it in driver mode ('test hooks are not available in driver mode').
+SS-086      Uses the __testHookBeforeScreenshot screenshot option, a JavaScript function that the server calls; it can not be sent over the protocol from Python (upstream skips it outside in-process mode).
+SS-087      Uses the __testHookAfterScreenshot screenshot option, a JavaScript function that the server calls; it can not be sent over the protocol from Python (upstream skips it outside in-process mode).
+SS-089      Uses the __testHookBeforeScreenshot screenshot option, a JavaScript function that the server calls; it can not be sent over the protocol from Python (upstream skips it outside in-process mode).
+# library/signals
+SI-007      needs the stallOnClose launch hook: __testHookGracefullyClose is a JavaScript function in the launch options, which the Python client cannot send to the driver; the double-SIGINT kill runs in the signal handlers of the Node.js process that launched the browser (the driver, which does not get the signals sent to the Python process).
+SI-008      needs the stallOnClose launch hook: __testHookGracefullyClose is a JavaScript function in the launch options, which the Python client cannot send to the driver; the SIGINT + SIGTERM kill runs in the signal handlers of the Node.js process that launched the browser (the driver, which does not get the signals sent to the Python process).
+SI-009      needs the stallOnClose launch hook: __testHookGracefullyClose is a JavaScript function in the launch options, which the Python client cannot send to the driver; the SIGTERM + SIGINT kill runs in the signal handlers of the Node.js process that launched the browser (the driver, which does not get the signals sent to the Python process); in Python the first SIGTERM already ends the process.
+library/slowmo                      Hooks the server's DispatcherConnection._doSlowMo through toImpl to check that slowMo runs once; server internals are not reachable from Python.
+# library/video
+VI-002      recordVideo: {} (recording without a dir) can not be expressed in Python: the options are flattened, and record_video_dir is what turns recording on.
+# page/expect-boolean
+EX-003      not.toBeChecked({ checked: false }): Python's not_to_be_checked() takes only timeout (docs: LocatorAssertions.NotToBeChecked has no checked option).
+EX-068      checks the JS matcher's runtime type error "toBeOK can be only used with APIResponse object" for expect(page); Python's expect() is typed by overload and PageAssertions has no to_be_ok.
+EX-069      checks the JS matcher's runtime type error for expect(<Promise>).toBeOK(); Python's expect() accepts only Page, Locator and APIResponse and has no such check.
+# page/expect-misc
+EX-198      to_have_js_property(name, undefined): Python has no undefined value; None is sent as null, which does not match a missing property.
+EX-217      expect(page).to_have_url(predicate) is not in the Python API (the docs limit the function overload to JS).
+EX-218      expect(page).not_to_have_url(predicate) is not in the Python API (the docs limit the function overload to JS).
+EX-219      expect(page).to_have_url(predicate) is not in the Python API (the docs limit the function overload to JS).
+EX-220      expect(page).to_have_url(predicate) is not in the Python API (the docs limit the function overload to JS).
+EX-222      expect(page).to_have_url(URLPattern) is not in the Python API (URLPattern is JS-only).
+# page/expect-timeout
+EX-253      the assertion `signal` (AbortSignal) option is JavaScript-only (docs: %%-js-assertions-signal-%%).
+EX-254      the assertion `signal` (AbortSignal) option is JavaScript-only (docs: %%-js-assertions-signal-%%).
+EX-255      the assertion `signal` (AbortSignal) option is JavaScript-only (docs: %%-js-assertions-signal-%%).
+EX-256      the assertion `signal` (AbortSignal) option is JavaScript-only (docs: %%-js-assertions-signal-%%).
+EX-257      the assertion `signal` (AbortSignal) option is JavaScript-only (docs: %%-js-assertions-signal-%%).
+EX-258      the assertion `signal` (AbortSignal) option is JavaScript-only (docs: %%-js-assertions-signal-%%).
+# page/frame-evaluate
+FR-003      Reads the server-side execution context map through toImpl(page) (pageImpl.delegate._contextIdToContext); the Python client can not reach server internals.
+FR-004      Reads the server-side execution context map through toImpl(page) (pageImpl.delegate._contextIdToContext); the Python client can not reach server internals.
+# page/interception
+RO-160      Creates the RegExp in another Node.js vm context (vm.runInContext) to test the JS client's cross-realm RegExp detection; Python has no vm contexts and its re.Pattern has no realm.
+RO-161      Tests the JavaScript RegExp g flag (its lastIndex state makes RegExp.test() stateful); Python's re has no global flag, so the client can not send such a regex.
+# page/locator-convenience
+LO-077      Locator.toString() is JavaScript-only (docs langs: js); Python's str(locator) is the raw <Locator frame=... selector=...> repr, not the formatted locator.
+LO-078      Locator.toString() is JavaScript-only (docs langs: js); Python's str(locator) is the raw repr and does not use the description.
+# page/locator-wait-for-function
+LO-191      locator.waitForFunction({ signal }) takes an AbortSignal; the signal option is JavaScript-only (docs langs: js) and is not in the Python API.
+LO-192      locator.waitForFunction({ signal }) takes an AbortSignal; the signal option is JavaScript-only (docs langs: js) and is not in the Python API.
+# page/page-add-init-script-callback
+IS-012      page.addInitScript(script, arg) passes an argument to a function script; the arg parameter is JavaScript-only (docs: langs: js); Python add_init_script takes only script=<str> or path=.
+IS-013      page.addInitScript(script, arg, { exposeFunctions }) exposes functions passed in arg; the arg parameter and the exposeFunctions option are JavaScript-only (docs: langs: js, %%-js-init-script-expose-functions-%%); Python add_init_script takes only script=<str> or path=.
+IS-014      page.addInitScript(script, arg, { exposeFunctions }) exposes functions passed in arg; the arg parameter and the exposeFunctions option are JavaScript-only (docs: langs: js, %%-js-init-script-expose-functions-%%); Python add_init_script takes only script=<str> or path=.
+IS-015      page.addInitScript(script, arg, { exposeFunctions }) exposes functions passed in arg; the arg parameter and the exposeFunctions option are JavaScript-only (docs: langs: js, %%-js-init-script-expose-functions-%%); Python add_init_script takes only script=<str> or path=.
+IS-016      page.addInitScript(script, arg, { exposeFunctions }) exposes functions passed in arg; the arg parameter and the exposeFunctions option are JavaScript-only (docs: langs: js, %%-js-init-script-expose-functions-%%); Python add_init_script takes only script=<str> or path=.
+IS-017      page.addInitScript(script, arg, { exposeFunctions }) exposes functions passed in arg; the arg parameter and the exposeFunctions option are JavaScript-only (docs: langs: js, %%-js-init-script-expose-functions-%%); Python add_init_script takes only script=<str> or path=.
+IS-018      page.addInitScript(script, arg, { exposeFunctions }) exposes functions passed in arg; the arg parameter and the exposeFunctions option are JavaScript-only (docs: langs: js, %%-js-init-script-expose-functions-%%); Python add_init_script takes only script=<str> or path=.
+IS-019      page.addInitScript(script, arg, { exposeFunctions }) exposes functions passed in arg; the arg parameter and the exposeFunctions option are JavaScript-only (docs: langs: js, %%-js-init-script-expose-functions-%%); Python add_init_script takes only script=<str> or path=.
+IS-020      page.addInitScript(script, arg, { exposeFunctions }) exposes functions passed in arg; the arg parameter and the exposeFunctions option are JavaScript-only (docs: langs: js, %%-js-init-script-expose-functions-%%); Python add_init_script takes only script=<str> or path=.
+IS-021      page.addInitScript(script, arg, { exposeFunctions }) exposes functions passed in arg; the arg parameter and the exposeFunctions option are JavaScript-only (docs: langs: js, %%-js-init-script-expose-functions-%%); Python add_init_script takes only script=<str> or path=.
+IS-022      page.addInitScript(script, arg, { exposeFunctions }) exposes functions passed in arg; the arg parameter and the exposeFunctions option are JavaScript-only (docs: langs: js, %%-js-init-script-expose-functions-%%); Python add_init_script takes only script=<str> or path=.
+IS-023      page.addInitScript(script, arg, { exposeFunctions }) exposes functions passed in arg; the arg parameter and the exposeFunctions option are JavaScript-only (docs: langs: js, %%-js-init-script-expose-functions-%%); Python add_init_script takes only script=<str> or path=.
+# page/page-add-locator-handler
+LH-008      Uses expect(page).toHaveScreenshot(); the Python API has no to_have_screenshot assertion (it is a @playwright/test feature), so the handler can not be triggered by a screenshot assertion.
+page/page-aria-snapshot-json        page.aria_snapshot_json() / locator.aria_snapshot_json() is not in the Python API (docs: Page.ariaSnapshotJSON and Locator.ariaSnapshotJSON are langs: js).
+# page/page-autowaiting-basic
+AW-010      Passes the server-side __testHookAfterPointerAction function as a click option; only the in-process Node.js client can pass it, and the protocol has no such parameter.
+# page/page-click
+CL-067      Passes the server-side __testHookBeforeStable function as a click option; only the in-process Node.js client can pass it, and the protocol has no such parameter.
+CL-068      Passes the server-side __testHookBeforeStable function as a click option; only the in-process Node.js client can pass it, and the protocol has no such parameter.
+CL-069      Passes the server-side __testHookBeforeStable function as a click option; only the in-process Node.js client can pass it, and the protocol has no such parameter.
+CL-090      The signal (AbortSignal) option of actions is JavaScript-only (langs: js); it is not in the Python API.
+CL-091      The signal (AbortSignal) option of actions is JavaScript-only (langs: js); it is not in the Python API.
+CL-092      The signal (AbortSignal) option of actions is JavaScript-only (langs: js); it is not in the Python API.
+CL-093      The signal (AbortSignal) option of actions is JavaScript-only (langs: js); it is not in the Python API.
+page/page-click-during-navigation   Passes the server-side __testHookAfterStable function as a click option; only the in-process Node.js client can pass it, and the protocol has no such parameter.
+# page/page-click-timeout-1
+CL-110      Passes the server-side __testHookBeforePointerAction function as a click option; only the in-process Node.js client can pass it, and the protocol has no such parameter.
+# page/page-click-timeout-3
+CL-116      Passes the server-side __testHookBeforeHitTarget function as a click option; only the in-process Node.js client can pass it, and the protocol has no such parameter.
+# page/page-click-timeout-4
+CL-121      Passes the server-side __testHookBeforePointerAction function as a click option; only the in-process Node.js client can pass it, and the protocol has no such parameter.
+# page/page-evaluate
+EV-018      Function shorthands come from the JS client stringifying a method (Function.prototype.toString) and sending isFunction: true; Python passes the expression string as written.
+# page/page-evaluate-callback
+EV-113      The exposeFunctions option of evaluate/evaluateHandle is JavaScript-only (langs: js); it is not in the Python API.
+EV-114      The exposeFunctions option of evaluate/evaluateHandle is JavaScript-only (langs: js); it is not in the Python API.
+EV-115      The exposeFunctions option of evaluate/evaluateHandle is JavaScript-only (langs: js); it is not in the Python API.
+EV-116      The exposeFunctions option of evaluate/evaluateHandle is JavaScript-only (langs: js); it is not in the Python API.
+EV-117      The exposeFunctions option of evaluate/evaluateHandle is JavaScript-only (langs: js); it is not in the Python API.
+EV-118      The exposeFunctions option of evaluate/evaluateHandle is JavaScript-only (langs: js); it is not in the Python API.
+EV-119      The exposeFunctions option of evaluate/evaluateHandle is JavaScript-only (langs: js); it is not in the Python API.
+EV-120      The exposeFunctions option of evaluate/evaluateHandle is JavaScript-only (langs: js); it is not in the Python API.
+EV-121      The exposeFunctions option of evaluate/evaluateHandle is JavaScript-only (langs: js); it is not in the Python API.
+EV-122      The exposeFunctions option of evaluate/evaluateHandle is JavaScript-only (langs: js); it is not in the Python API.
+EV-123      The exposeFunctions option of evaluate/evaluateHandle is JavaScript-only (langs: js); it is not in the Python API.
+EV-124      The exposeFunctions option of evaluate/evaluateHandle is JavaScript-only (langs: js); it is not in the Python API.
+EV-125      The exposeFunctions option of evaluate/evaluateHandle is JavaScript-only (langs: js); it is not in the Python API.
+EV-126      The exposeFunctions option of evaluate/evaluateHandle is JavaScript-only (langs: js); it is not in the Python API.
+EV-127      The exposeFunctions option of evaluate/evaluateHandle is JavaScript-only (langs: js); it is not in the Python API.
+EV-128      The exposeFunctions option of evaluate/evaluateHandle is JavaScript-only (langs: js); it is not in the Python API.
+EV-129      The exposeFunctions option of evaluate/evaluateHandle is JavaScript-only (langs: js); it is not in the Python API.
+EV-130      The exposeFunctions option of evaluate/evaluateHandle is JavaScript-only (langs: js); it is not in the Python API.
+EV-131      The exposeFunctions option of evaluate/evaluateHandle is JavaScript-only (langs: js); it is not in the Python API.
+EV-132      The exposeFunctions option of evaluate/evaluateHandle is JavaScript-only (langs: js); it is not in the Python API.
+EV-133      The exposeFunctions option of evaluate/evaluateHandle is JavaScript-only (langs: js); it is not in the Python API.
+EV-134      The exposeFunctions option of evaluate/evaluateHandle is JavaScript-only (langs: js); it is not in the Python API.
+page/page-evaluate-no-stall         Uses toImpl(frame).nonStallingRawEvaluateInExistingMainContext, a server internal.
+# page/page-expose-function
+EF-006      Throws null from the exposed function; a Python callback can only raise an exception object, so there is no Python form of 'throw null'.
+# page/page-filechooser
+FC-003      page.prependListener() is a Node.js EventEmitter method; Python's event API has only on(), once() and remove_listener().
+FC-006      page.addListener() is a Node.js EventEmitter alias; Python's event API has only on(), once() and remove_listener() (on() with remove_listener() is covered by FC-005).
+FC-015      The signal (AbortSignal) option of waitForEvent is JavaScript-only (langs: js); it is not in the Python API.
+# page/page-goto
+NA-027      networkidle0 is an undocumented alias that only the JavaScript client maps to networkidle (verifyLoadState); Python's wait_until type does not have it and the driver rejects it.
+# page/page-route
+RO-056      page.route(URLPattern) is not in the Python API (URLPattern is JavaScript-only; route() takes a str, a re.Pattern or a predicate).
+# page/page-screenshot
+SS-055      Uses the __testHookBeforeScreenshot screenshot option, a JavaScript function that the server calls; it can not be sent over the protocol from Python (upstream skips it outside in-process mode).
+# page/page-select-option
+SO-009      Selects with one option object that must match both value and label ({ value: 'green', label: 'Brown' }); Python's select_option has no such object: value= and label= are separate options, and a single select takes the first option that matches either one (it selects 'brown' instead of timing out).
+# page/page-set-content
+PA-036      Uses toImpl(page).mainFrame().evaluateExpression(..., { world: 'utility' }) to tamper with console.debug in the utility world; the Python client can not reach server internals or the utility world.
+PA-037      Uses toImpl(page).mainFrame().evaluateExpression(..., { world: 'utility' }) to replace document.close in the utility world; the Python client can not reach server internals or the utility world.
+# page/page-wait-for-request
+WA-128      tests a RegExp made in another Node.js vm context; Python has no cross-context regular expressions.
+# page/page-wait-for-selector-1
+WA-027      page.waitForSelector({ waitFor }) is an undocumented JS-client option; the Python API has no waitFor keyword.
+WA-028      page.waitForSelector({ waitFor: 'visible' }) is an undocumented JS-client option; the Python API has no waitFor keyword.
+# page/page-wait-for-selector-2
+WA-059      page.waitForSelector({ visibility }) is an undocumented JS-client option; the Python API has no visibility keyword.
+WA-072      uses the __testHookBeforeAdoptNode server test hook, a JS function that only an in-process Node.js test can pass.
+WA-073      uses the __testHookBeforeAdoptNode server test hook, a JS function that only an in-process Node.js test can pass.
+# page/selectors-get-by
+SE-092      Tests the JavaScript RegExp v flag (/Click me/v); Python's re has no v flag, and the client sends only the i, s and m flags (escape_regex_flags raises on any other flag).
+SE-097      Tests the JavaScript RegExp g and y flags (/foo/g, /foo/y); Python's re has no global or sticky flag, so the client can not send such a regex.

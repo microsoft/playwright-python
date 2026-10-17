@@ -36,7 +36,7 @@ class Video:
     async def path(self) -> pathlib.Path:
         if self._is_remote:
             raise Error(
-                "Path is not available when using browserType.connect(). Use save_as() to save a local copy."
+                "Path is not available when connecting remotely. Use save_as() to save a local copy."
             )
         if not self._artifact:
             raise Error("Video recording has not been started.")

@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import asyncio
-import traceback
 from contextlib import AbstractContextManager
 from types import TracebackType
 from typing import (
@@ -29,7 +28,11 @@ from typing import (
     cast,
 )
 
-from playwright._impl._connection import _capture_stack_trace
+from playwright._impl._connection import (
+    _capture_stack_trace,
+    _extract_stack,
+    event_future_error,
+)
 from playwright._impl._errors import Error
 from playwright._impl._greenlets import connection_closed_error, wait_for_future
 from playwright._impl._impl_to_api_mapping import ImplToApiMapping, ImplWrapper
@@ -52,6 +55,8 @@ class EventInfo(Generic[T]):
             self._sync_base._loop, self._sync_base._dispatcher_fiber, self._future
         )
         exception = self._future.exception()
+        if isinstance(exception, Exception):
+            raise event_future_error(self._future, exception)
         if exception:
             raise exception
         return cast(T, mapping.from_maybe_impl(self._future.result()))
@@ -105,7 +110,7 @@ class SyncBase(ImplWrapper):
 
         task: asyncio.tasks.Task[Any] = self._loop.create_task(coro)
         setattr(task, "__pw_stack__", _capture_stack_trace())
-        setattr(task, "__pw_stack_trace__", traceback.extract_stack(limit=10))
+        setattr(task, "__pw_stack_trace__", _extract_stack(limit=10))
 
         wait_for_future(self._loop, self._dispatcher_fiber, task)
         return task.result()

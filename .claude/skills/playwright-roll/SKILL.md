@@ -282,11 +282,17 @@ After the script settles, run `pre-commit run --all-files` once more to confirm 
 
 ### 6. Add tests
 
-For each PORT, port the upstream test that covers it, as an async test and a matching sync test. Conventions:
+Copy the upstream registry of the new release, then bring the Python tests in line with it:
 
-- The upstream file decides the Python file: `tests/page/expect-misc.spec.ts` becomes `tests/async/test_expect_misc.py` and `tests/sync/test_expect_misc.py`. Create the file if it does not exist.
-- The upstream title decides the test name: the `describe` title and the test title, in snake_case. `test('should support pseudo element')` in `test.describe('toHaveCSS')` becomes `test_to_have_css_should_support_pseudo_element`.
-- When no upstream test covers the change, extend an existing test before you add a new one.
+```sh
+cp "$PW_SRC_DIR/tests/registry.md" tests/upstream_registry.md
+python scripts/check_test_registry.py --report
+```
+
+- **New identifiers**: port each new upstream test, as an async test and a matching sync test. `python scripts/check_test_registry.py --missing <code or file glob>` prints the file and the expected name of each. The upstream file decides the Python file (`tests/page/expect-misc.spec.ts` becomes `tests/async/page/test_expect_misc.py` and `tests/sync/page/test_expect_misc.py`); the identifier and the title decide the name (see [Tests](../../../AGENTS.md#tests)).
+- **Changed titles**: the checker names the expected name; rename the Python test and port the changed body.
+- **Removed identifiers**: delete the Python test (the checker reports it as not in the registry).
+- **Not ported**: a test that can not exist in Python goes in `tests/upstream_not_ported.txt`, with the reason. The checker fails on a rule that no longer matches a test.
 - Use `from playwright.async_api import …`, **not** `from playwright._impl._page import Page` (the impl class doesn't have the public wrappers like `expect_console_message`).
 - For event-info objects, `await message_info.value` (it's an `async` property).
 - Don't write tests that hang the page (e.g. `page.evaluate(... fetch slow ...)` followed by `page.close()` from a fixture) — the request task gets a `TargetClosedError`. Use `page.on("event", handler)` to capture state at event time instead.
@@ -308,7 +314,7 @@ mypy playwright                 # 2 pre-existing errors in _json_pipe.py and _ar
 pytest --browser chromium tests/async/<files-you-touched> tests/sync/<files-you-touched>
 ```
 
-Then a smoke regression on a few neighboring suites (`tests/async/test_browser*.py`, `test_cdp_session.py`, `test_tracing.py`, `test_dialog.py`, `test_page_*.py`) to make sure nothing inherent to the port shifted.
+Then run `python scripts/check_test_registry.py`, and a smoke regression on a few neighboring suites (for example `tests/async/library/test_browser*.py`, `tests/async/library/chromium/test_session.py`, `tests/async/library/test_tracing.py`, `tests/async/page/test_page_*.py`) to make sure nothing inherent to the port shifted.
 
 ## Reference: `python_rules.js` tables
 

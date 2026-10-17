@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import collections.abc
+import re
 from contextlib import contextmanager
 from typing import Any, Iterator, List, Literal, Optional, Pattern, Sequence, Union
 from urllib.parse import urljoin
@@ -29,7 +30,6 @@ from playwright._impl._internal_structures import (
 from playwright._impl._locator import Locator
 from playwright._impl._mime_type import is_textual_mime_type
 from playwright._impl._page import Page
-from playwright._impl._serializers import parse_value
 from playwright._impl._str_utils import escape_regex_flags
 
 _soft_errors: Optional[List[AssertionError]] = None
@@ -58,6 +58,17 @@ def _record_soft_or_raise(error: AssertionError, is_soft: bool) -> None:
         _soft_errors.append(error)
         return
     raise error
+
+
+# Port of the checks in toContainClass() in packages/playwright/src/matchers/matchers.ts.
+def _check_contain_class_expected(expected: Any) -> None:
+    if isinstance(expected, collections.abc.Sequence) and not isinstance(expected, str):
+        if any(isinstance(e, re.Pattern) for e in expected):
+            raise Error(
+                '"expected" argument in to_contain_class cannot contain RegExp values'
+            )
+    elif isinstance(expected, re.Pattern):
+        raise Error('"expected" argument in to_contain_class cannot be a RegExp value')
 
 
 class AssertionsBase:
@@ -108,10 +119,14 @@ class AssertionsBase:
             aria_snapshot = None
             if isinstance(received, dict):
                 aria_snapshot = received.get("ariaSnapshot")
-                value = received.get("value")
-                actual = parse_value(value) if value is not None else None
+                # Frame._expect() has already parsed the received value.
+                actual = received.get("value")
             else:
                 actual = received
+            if expression == "to.match.aria" and isinstance(actual, dict):
+                # The driver sends {raw, regex}; toMatchAriaSnapshot() in
+                # matchers/toMatchAriaSnapshot.ts prints the raw snapshot.
+                actual = actual.get("raw")
             if self._custom_message:
                 out_message = self._custom_message
                 if expected is not None:
@@ -438,6 +453,7 @@ class LocatorAssertions(AssertionsBase):
         timeout: Optional[float],
     ) -> None:
         __tracebackhide__ = True
+        _check_contain_class_expected(expected)
         if isinstance(expected, collections.abc.Sequence) and not isinstance(
             expected, str
         ):

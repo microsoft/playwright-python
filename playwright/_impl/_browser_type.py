@@ -31,10 +31,9 @@ from playwright._impl._browser_context import (
     to_record_video_params,
 )
 from playwright._impl._connection import ChannelOwner, Connection, from_channel
-from playwright._impl._errors import Error
+from playwright._impl._errors import Error, TargetClosedError
 from playwright._impl._headers import serialize_headers
 from playwright._impl._helper import (
-    PLAYWRIGHT_MAX_DEADLINE,
     ColorScheme,
     Contrast,
     Env,
@@ -48,9 +47,10 @@ from playwright._impl._json_pipe import JsonPipeTransport
 from playwright._impl._network import (
     to_client_certificates_protocol,
     to_http_credentials_protocol,
+    validate_headers,
 )
+from playwright._impl._time import monotonic_time
 from playwright._impl._timeout_settings import TimeoutSettings
-from playwright._impl._waiter import throw_on_timeout
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl import _protocol_types as channels
@@ -182,6 +182,8 @@ class BrowserType(ChannelOwner):
         client_certificates: Optional[List[ClientCertificate]],
         record_video_fps: Optional[int],
     ) -> BrowserContext:
+        if extra_http_headers:
+            validate_headers(extra_http_headers)
         selectors = self._playwright.selectors
         result = await self._channel.launchPersistentContext(
             channel=channel,
@@ -287,6 +289,9 @@ class BrowserType(ChannelOwner):
         no_defaults: Optional[bool],
         artifacts_dir: Optional[Union[str, Path]],
     ) -> Browser:
+        # Port of BrowserType.connectOverCDP() in client/browserType.ts.
+        if self.name != "chromium" and self.name != "webkit":
+            raise Error("Connecting over CDP is only supported in Chromium and WebKit.")
         result = await self._channel.connectOverCDP(
             endpointURL=endpoint_url,
             headers=serialize_headers(headers) if headers is not None else None,
@@ -311,10 +316,26 @@ class BrowserType(ChannelOwner):
         headers: Optional[Dict[str, str]],
         expose_network: Optional[str],
     ) -> Browser:
+        # Like @apiCall() in client/browserType.ts: the errors that the client
+        # raises itself also start with "BrowserType.connect: ".
+        return await self._connection.wrap_api_call(
+            lambda: self._connect(endpoint, timeout, slow_mo, headers, expose_network)
+        )
+
+    async def _connect(
+        self,
+        endpoint: str,
+        timeout: Optional[float],
+        slow_mo: Optional[float],
+        headers: Optional[Dict[str, str]],
+        expose_network: Optional[str],
+    ) -> Browser:
+        # Port of connectToBrowser() and connectToEndpoint() in client/connect.ts.
         if slow_mo is None:
             slow_mo = 0
         if timeout is None:
             timeout = 0
+        deadline = monotonic_time() + timeout if timeout else 0
 
         headers = {**(headers if headers else {}), "x-playwright-browser": self.name}
         local_utils = self._connection.local_utils
@@ -336,6 +357,7 @@ class BrowserType(ChannelOwner):
             local_utils=self._connection.local_utils,
         )
         connection.mark_as_remote()
+        playwright_future = connection.playwright_future
 
         browser = None
 
@@ -346,38 +368,69 @@ class BrowserType(ChannelOwner):
                         page._on_close()
                     context._on_close()
             connection.cleanup(reason)
+            # cleanup() cancels the initialize call; upstream's connection.close()
+            # rejects it with the close error.
+            if not playwright_future.done():
+                playwright_future.set_exception(
+                    connection._closed_error or TargetClosedError(reason)
+                )
             # Give a chance to any API call promises to reject upon page/context closure.
             # This happens naturally when we receive page.onClose and browser.onClose from the server
             # in separate tasks. However, upon pipe closure we used to dispatch them all synchronously
             # here and promises did not have a chance to reject.
             # The order of rejects vs closure is a part of the API contract and our test runner
             # relies on it to attribute rejections to the right test.
+            # The sync API resumes its greenlet in a callback of the task that it waits
+            # for, one loop iteration later, so there the event waits one more iteration.
             if browser:
-                connection._loop.call_soon(browser._on_close)
+                if connection._is_sync:
+                    connection._loop.call_soon(
+                        connection._loop.call_soon, browser._on_close
+                    )
+                else:
+                    connection._loop.call_soon(browser._on_close)
 
         transport.once("close", handle_transport_close)
 
         connection._is_sync = self._connection._is_sync
         connection._loop.create_task(connection.run())
-        playwright_future = connection.playwright_future
 
-        timeout_future = throw_on_timeout(
-            timeout if timeout else PLAYWRIGHT_MAX_DEADLINE,
-            Error("Connection timed out"),
-        )
-        done, pending = await asyncio.wait(
-            {transport.on_error_future, playwright_future, timeout_future},
-            return_when=asyncio.FIRST_COMPLETED,
-        )
+        def close_connection() -> None:
+            # Port of connection.close() in client/connection.ts, which also closes
+            # the transport in client/connect.ts.
+            if not playwright_future.done():
+                playwright_future.cancel()
+            connection.cleanup()
+            try:
+                transport.request_stop()
+            except Error:
+                pass
+
+        try:
+            done, _ = await asyncio.wait(
+                {transport.on_error_future, playwright_future},
+                timeout=(
+                    max(0, deadline - monotonic_time()) / 1000 if deadline else None
+                ),
+                return_when=asyncio.FIRST_COMPLETED,
+            )
+        except BaseException:
+            close_connection()
+            raise
+        if not done:
+            close_connection()
+            raise Error(f"Timeout {timeout}ms exceeded")
         if not playwright_future.done():
-            playwright_future.cancel()
-        if not timeout_future.done():
-            timeout_future.cancel()
-        playwright: "Playwright" = next(iter(done)).result()
+            transport.on_error_future.result()
+        playwright: "Playwright" = playwright_future.result()
+        pre_launched_browser = playwright._initializer.get("preLaunchedBrowser")
+        if not pre_launched_browser:
+            close_connection()
+            raise Error(
+                "Malformed endpoint. Did you use BrowserType.launchServer method?"
+            )
         playwright._set_selectors(self._playwright.selectors)
         self._connection._child_ws_connections.append(connection)
-        pre_launched_browser = playwright._initializer.get("preLaunchedBrowser")
-        assert pre_launched_browser
         browser = cast(Browser, from_channel(pre_launched_browser))
         browser._should_close_connection_on_close = True
         browser._connect_to_browser_type(self, None)

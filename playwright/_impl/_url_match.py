@@ -18,9 +18,12 @@ Glob and URL matching. It has no asyncio, greenlet or I/O, so every
 implementation of the API can use it.
 """
 
+import json
 import re
 from typing import Callable, Dict, Optional, Pattern, Tuple, Union
-from urllib.parse import ParseResult, urljoin, urlparse, urlunparse
+
+from playwright._impl._errors import Error
+from playwright._impl._whatwg_url import parse_url
 
 URLMatch = Union[str, Pattern[str], Callable[[str], bool]]
 
@@ -47,6 +50,7 @@ def glob_to_regex_pattern(glob: str) -> str:
                 i += 1
             if star_count > 1:
                 char_after = glob[i + 1] if i + 1 < len(glob) else None
+                # Match either /..something../ or /.
                 if char_after == "/":
                     if char_before == "/":
                         tokens.append("((.+/)|)")
@@ -59,9 +63,17 @@ def glob_to_regex_pattern(glob: str) -> str:
                 tokens.append("([^/]*)")
         else:
             if c == "{":
+                if in_group:
+                    raise Error(
+                        f"Invalid glob pattern {_json_stringify(glob)}: nested '{{' is not supported"
+                    )
                 in_group = True
                 tokens.append("(")
             elif c == "}":
+                if not in_group:
+                    raise Error(
+                        f"Invalid glob pattern {_json_stringify(glob)}: unmatched '}}'"
+                    )
                 in_group = False
                 tokens.append(")")
             elif c == ",":
@@ -73,8 +85,15 @@ def glob_to_regex_pattern(glob: str) -> str:
                 tokens.append("\\" + c if c in escaped_chars else c)
         i += 1
 
+    if in_group:
+        raise Error(f"Invalid glob pattern {_json_stringify(glob)}: unmatched '{{'")
     tokens.append("$")
     return "".join(tokens)
+
+
+def _json_stringify(value: str) -> str:
+    # JSON.stringify() of a string.
+    return json.dumps(value, ensure_ascii=False)
 
 
 def url_matches(
@@ -83,7 +102,7 @@ def url_matches(
     match: Optional[URLMatch],
     websocket_url: bool = None,
 ) -> bool:
-    if not match:
+    if match is None or match == "":
         return True
     if isinstance(match, str):
         match = re.compile(
@@ -104,13 +123,21 @@ def resolve_glob_to_regex_pattern(
 
 
 def to_websocket_base_url(base_url: Optional[str]) -> Optional[str]:
-    if base_url is not None and re.match(r"^https?://", base_url):
-        base_url = re.sub(r"^http", "ws", base_url)
+    # Allow http(s) base_url to match ws(s) urls. Schemes are case-insensitive,
+    # same as elsewhere in this file, so 'HTTP://...' should be rewritten too.
+    if base_url and re.match(r"^https?://", base_url, re.IGNORECASE):
+        base_url = re.sub(
+            r"^https?",
+            lambda m: "wss" if m.group(0).lower() == "https" else "ws",
+            base_url,
+            count=1,
+            flags=re.IGNORECASE,
+        )
     return base_url
 
 
 def resolve_glob_base(base_url: Optional[str], match: str) -> str:
-    if match[0] == "*":
+    if match.startswith("*"):
         return match
 
     token_map: Dict[str, str] = {}
@@ -131,7 +158,6 @@ def resolve_glob_base(base_url: Optional[str], match: str) -> str:
         or match.startswith("edge:")
         or match.startswith("file:")
     ):
-        # about: and data: URLs are not relative to base_url, so we return them as is.
         return match
     # Glob symbols may be escaped in the URL and some of them such as ? affect resolution,
     # so we replace them with safe components first.
@@ -150,6 +176,12 @@ def resolve_glob_base(base_url: Optional[str], match: str) -> str:
                 # Preserve explicit schema as is as it may affect trailing slashes after domain.
                 processed_parts.append(token)
             continue
+        # Components without glob metacharacters are literal, so let them round-trip
+        # through the URL parser to preserve normalization (default ports such as :80/:443,
+        # percent-encoding, IDN hosts). Only opaque tokens defeat that normalization.
+        if not re.search(r"[*?{}\\]", token):
+            processed_parts.append(token)
+            continue
         question_index = token.find("?")
         if question_index == -1:
             processed_parts.append(map_token(token, f"$_{index}_$"))
@@ -162,7 +194,7 @@ def resolve_glob_base(base_url: Optional[str], match: str) -> str:
     resolved, case_insensitive_part = resolve_base_url(base_url, relative_path)
 
     for token, original in token_map.items():
-        normalize = case_insensitive_part and token in case_insensitive_part
+        normalize = case_insensitive_part is not None and token in case_insensitive_part
         resolved = resolved.replace(
             token, original.lower() if normalize else original, 1
         )
@@ -173,32 +205,9 @@ def resolve_glob_base(base_url: Optional[str], match: str) -> str:
 def resolve_base_url(
     base_url: Optional[str], given_url: str
 ) -> Tuple[str, Optional[str]]:
-    try:
-        url = nodelike_urlparse(
-            urljoin(base_url if base_url is not None else "", given_url)
-        )
-        resolved = urlunparse(url)
-        # Schema and domain are case-insensitive.
-        hostname_port = (
-            url.hostname or ""
-        )  # can't use parsed.netloc because it includes userinfo (username:password)
-        if url.port:
-            hostname_port += f":{url.port}"
-        case_insensitive_prefix = f"{url.scheme}://{hostname_port}"
-        return resolved, case_insensitive_prefix
-    except Exception:
+    # new URL(givenURL, baseURL); None where it throws.
+    url = parse_url(given_url, base_url)
+    if url is None:
         return given_url, None
-
-
-def nodelike_urlparse(url: str) -> ParseResult:
-    parsed = urlparse(url, allow_fragments=True)
-
-    # https://url.spec.whatwg.org/#special-scheme
-    is_special_url = parsed.scheme in ["http", "https", "ws", "wss", "ftp", "file"]
-    if is_special_url:
-        # special urls have a list path, list paths are serialized as follows: https://url.spec.whatwg.org/#url-path-serializer
-        # urllib diverges, so we patch it here
-        if parsed.path == "":
-            parsed = parsed._replace(path="/")
-
-    return parsed
+    # Schema and domain are case-insensitive.
+    return url.href, url.origin

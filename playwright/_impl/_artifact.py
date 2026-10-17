@@ -37,7 +37,7 @@ class Artifact(ChannelOwner):
     async def path_after_finished(self) -> pathlib.Path:
         if self._connection.is_remote:
             raise Error(
-                "Path is not available when using browser_type.connect(). Use save_as() to save a local copy."
+                "Path is not available when connecting remotely. Use save_as() to save a local copy."
             )
         path = (await self._channel.pathAfterFinished())["value"]
         return pathlib.Path(path)
