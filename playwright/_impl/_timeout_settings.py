@@ -16,21 +16,14 @@
 
 from typing import Optional
 
+from playwright._impl._helper import debug_mode
 from playwright._impl._time import (
-    DEFAULT_PLAYWRIGHT_LAUNCH_TIMEOUT_IN_MILLISECONDS,
-    DEFAULT_PLAYWRIGHT_TIMEOUT_IN_MILLISECONDS,
+    DEFAULT_PLAYWRIGHT_LAUNCH_TIMEOUT,
+    DEFAULT_PLAYWRIGHT_TIMEOUT,
 )
 
 
 class TimeoutSettings:
-
-    @staticmethod
-    def launch_timeout(timeout: Optional[float] = None) -> float:
-        return (
-            timeout
-            if timeout is not None
-            else DEFAULT_PLAYWRIGHT_LAUNCH_TIMEOUT_IN_MILLISECONDS
-        )
 
     def __init__(self, parent: Optional["TimeoutSettings"]) -> None:
         self._parent = parent
@@ -39,15 +32,6 @@ class TimeoutSettings:
 
     def set_default_timeout(self, timeout: Optional[float]) -> None:
         self._default_timeout = timeout
-
-    def timeout(self, timeout: float = None) -> float:
-        if timeout is not None:
-            return timeout
-        if self._default_timeout is not None:
-            return self._default_timeout
-        if self._parent:
-            return self._parent.timeout()
-        return DEFAULT_PLAYWRIGHT_TIMEOUT_IN_MILLISECONDS
 
     def set_default_navigation_timeout(
         self, navigation_timeout: Optional[float]
@@ -65,8 +49,30 @@ class TimeoutSettings:
             return timeout
         if self._default_navigation_timeout is not None:
             return self._default_navigation_timeout
+        if debug_mode() == "inspector":
+            return 0
         if self._default_timeout is not None:
             return self._default_timeout
         if self._parent:
             return self._parent.navigation_timeout()
-        return DEFAULT_PLAYWRIGHT_TIMEOUT_IN_MILLISECONDS
+        return DEFAULT_PLAYWRIGHT_TIMEOUT
+
+    def timeout(self, timeout: float = None) -> float:
+        if timeout is not None:
+            return timeout
+        if debug_mode() == "inspector":
+            return 0
+        if self._default_timeout is not None:
+            return self._default_timeout
+        if self._parent:
+            return self._parent.timeout()
+        return DEFAULT_PLAYWRIGHT_TIMEOUT
+
+    def launch_timeout(self, timeout: Optional[float] = None) -> float:
+        if timeout is not None:
+            return timeout
+        if debug_mode() == "inspector":
+            return 0
+        if self._parent:
+            return self._parent.launch_timeout(timeout)
+        return DEFAULT_PLAYWRIGHT_LAUNCH_TIMEOUT

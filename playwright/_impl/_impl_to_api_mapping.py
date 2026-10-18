@@ -63,7 +63,9 @@ class ImplToApiMapping:
             for item in obj:
                 a.append(self.from_maybe_impl(item, visited))
             return a
-        api_class = self._mapping.get(type(obj))
+        # An impl object can have the API of another impl class: the server side of
+        # a WebSocketRoute (ServerWebSocketRoute) is a WebSocketRoute in the API.
+        api_class = self._mapping.get(getattr(obj, "_api_impl_class", type(obj)))
         if api_class:
             api_instance = getattr(obj, API_ATTR, None)
             if not api_instance:

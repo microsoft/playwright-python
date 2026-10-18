@@ -288,7 +288,7 @@ def test_should_support_multipart_form_data(
     assert server_req.value.args[b"firstName"] == [b"John"]
     assert server_req.value.args[b"lastName"] == [b"Doe"]
     assert server_req.value.args[b"score"] == [b"42.5"]
-    assert server_req.value.args[b"active"] == [b"True"]
+    assert server_req.value.args[b"active"] == [b"true"]
     assert server_req.value.args[b"file"][0] == file["buffer"]
 
 
@@ -335,7 +335,7 @@ def test_should_reject_file_value_in_form(
     file.write_bytes(b"hello")
     form = FormData()
     form.set("attachment", file)
-    with pytest.raises(Error, match="Use 'multipart' for file uploads"):
+    with pytest.raises(Error, match="Please use options.multipart instead"):
         context.request.post(server.EMPTY_PAGE, form=form)
 
 

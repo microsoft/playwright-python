@@ -13,16 +13,15 @@
 # limitations under the License.
 
 from asyncio import AbstractEventLoop
-from typing import TYPE_CHECKING, Any, List, Literal, Optional, cast
+from typing import TYPE_CHECKING, Any, List, Literal, Optional, Union, cast
 
 from playwright._impl._api_structures import SourceLocation
-from playwright._impl._connection import from_channel, from_nullable_channel
+from playwright._impl._connection import from_channel
 from playwright._impl._js_handle import JSHandle
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl import _protocol_types as channels
-    from playwright._impl._page import Page
-    from playwright._impl._worker import Worker
+    from playwright._impl._page import Page, Worker
 
 
 ConsoleMessageType = Literal[
@@ -51,15 +50,21 @@ ConsoleMessageType = Literal[
 class ConsoleMessage:
     def __init__(
         self,
-        event: "channels.BrowserContextConsoleEvent",
+        event: Union[
+            "channels.BrowserContextConsoleEvent",
+            "channels.WorkerConsoleEvent",
+            "channels.PageConsoleMessagesResultMessages",
+        ],
+        page: Optional["Page"],
+        worker: Optional["Worker"],
         loop: AbstractEventLoop,
         dispatcher_fiber: Any,
     ) -> None:
+        self._page = page
+        self._worker = worker
         self._event = event
         self._loop = loop
         self._dispatcher_fiber = dispatcher_fiber
-        self._page: Optional["Page"] = from_nullable_channel(event["page"])
-        self._worker: Optional["Worker"] = from_nullable_channel(event["worker"])
 
     def __repr__(self) -> str:
         return f"<ConsoleMessage type={self.type} text={self.text}>"

@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import base64
-import os
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, Union
 
@@ -22,9 +21,8 @@ from playwright._impl._connection import ChannelOwner
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._protocol_channels import WritableStreamChannel
 
-# COPY_BUFSIZE is taken from shutil.py in the standard library
-_WINDOWS = os.name == "nt"
-COPY_BUFSIZE = 1024 * 1024 if _WINDOWS else 64 * 1024
+# The default highWaterMark of fs.createReadStream().
+COPY_BUFSIZE = 64 * 1024
 
 
 class WritableStream(ChannelOwner):
@@ -35,10 +33,12 @@ class WritableStream(ChannelOwner):
     ) -> None:
         super().__init__(parent, type, guid, initializer)
 
+    # stream.promises.pipeline(fs.createReadStream(path), stream()) in
+    # packages/playwright-core/src/client/elementHandle.ts.
     async def copy(self, path: Union[str, Path]) -> None:
         with open(path, "rb") as f:
             while True:
-                data = f.read(COPY_BUFSIZE)
+                data = await self._loop.run_in_executor(None, f.read, COPY_BUFSIZE)
                 if not data:
                     break
                 await self._channel.write(binary=base64.b64encode(data).decode())

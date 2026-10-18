@@ -211,7 +211,7 @@ class PageAssertions(AssertionsBase):
         ignore_case: Optional[bool],
     ) -> None:
         __tracebackhide__ = True
-        base_url = self._actual_page.context._base_url
+        base_url = self._actual_page.context._options.get("baseURL")
         if isinstance(url_or_reg_exp, str) and base_url:
             url_or_reg_exp = urljoin(base_url, url_or_reg_exp)
         expected_text = to_expected_text_values(

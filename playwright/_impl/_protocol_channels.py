@@ -46,6 +46,7 @@ class AndroidChannel(Channel):
             "devices",
             {"host": host, "port": port, "omitDriverInstall": omitDriverInstall},
             timeout,
+            is_internal=True,
         )
         return {"devices": result["devices"]}
 
@@ -56,13 +57,13 @@ class AndroidSocketChannel(Channel):
         data: str,
         timeout: float = 0,
     ) -> None:
-        await self._call("write", {"data": data}, timeout)
+        await self._call("write", {"data": data}, timeout, is_internal=True)
 
     async def close(
         self,
         timeout: float = 0,
     ) -> None:
-        await self._call("close", {}, timeout)
+        await self._call("close", {}, timeout, is_internal=True)
 
     def onData(self, handler: Callable[[channels.AndroidSocketDataEvent], Any]) -> None:
         self._add_event_listener(
@@ -218,7 +219,9 @@ class AndroidDeviceChannel(Channel):
         androidSelector: channels.AndroidSelector,
         timeout: float = 0,
     ) -> channels.AndroidDeviceInfoResult:
-        result = await self._call("info", {"androidSelector": androidSelector}, timeout)
+        result = await self._call(
+            "info", {"androidSelector": androidSelector}, timeout, is_internal=True
+        )
         return {"info": result["info"]}
 
     async def screenshot(
@@ -395,7 +398,7 @@ class AndroidDeviceChannel(Channel):
         self,
         timeout: float = 0,
     ) -> None:
-        await self._call("close", {}, timeout)
+        await self._call("close", {}, timeout, is_internal=True)
 
     def onClose(self, handler: Callable[[], Any]) -> None:
         self._add_event_listener("close", handler, lambda event: handler())
@@ -484,7 +487,9 @@ class APIRequestContextChannel(Channel):
         fetchUid: str,
         timeout: float = 0,
     ) -> channels.APIRequestContextFetchLogResult:
-        result = await self._call("fetchLog", {"fetchUid": fetchUid}, timeout)
+        result = await self._call(
+            "fetchLog", {"fetchUid": fetchUid}, timeout, is_internal=True
+        )
         return {"log": result["log"]}
 
     async def addCookies(
@@ -547,14 +552,16 @@ class APIRequestContextChannel(Channel):
         fetchUid: str,
         timeout: float = 0,
     ) -> None:
-        await self._call("disposeAPIResponse", {"fetchUid": fetchUid}, timeout)
+        await self._call(
+            "disposeAPIResponse", {"fetchUid": fetchUid}, timeout, is_internal=True
+        )
 
     async def dispose(
         self,
         reason: Optional[str],
         timeout: float = 0,
     ) -> None:
-        await self._call("dispose", {"reason": reason}, timeout)
+        await self._call("dispose", {"reason": reason}, timeout, is_internal=True)
 
 
 class ArtifactChannel(Channel):
@@ -562,7 +569,7 @@ class ArtifactChannel(Channel):
         self,
         timeout: float = 0,
     ) -> channels.ArtifactPathAfterFinishedResult:
-        result = await self._call("pathAfterFinished", {}, timeout)
+        result = await self._call("pathAfterFinished", {}, timeout, is_internal=True)
         return {"value": result["value"]}
 
     async def saveAs(
@@ -570,40 +577,40 @@ class ArtifactChannel(Channel):
         path: str,
         timeout: float = 0,
     ) -> None:
-        await self._call("saveAs", {"path": path}, timeout)
+        await self._call("saveAs", {"path": path}, timeout, is_internal=True)
 
     async def saveAsStream(
         self,
         timeout: float = 0,
     ) -> channels.ArtifactSaveAsStreamResult:
-        result = await self._call("saveAsStream", {}, timeout)
+        result = await self._call("saveAsStream", {}, timeout, is_internal=True)
         return {"stream": result["stream"]}
 
     async def failure(
         self,
         timeout: float = 0,
     ) -> channels.ArtifactFailureResult:
-        result = await self._call("failure", {}, timeout)
+        result = await self._call("failure", {}, timeout, is_internal=True)
         return {"error": result.get("error")}
 
     async def stream(
         self,
         timeout: float = 0,
     ) -> channels.ArtifactStreamResult:
-        result = await self._call("stream", {}, timeout)
+        result = await self._call("stream", {}, timeout, is_internal=True)
         return {"stream": result["stream"]}
 
     async def cancel(
         self,
         timeout: float = 0,
     ) -> None:
-        await self._call("cancel", {}, timeout)
+        await self._call("cancel", {}, timeout, is_internal=True)
 
     async def delete(
         self,
         timeout: float = 0,
     ) -> None:
-        await self._call("delete", {}, timeout)
+        await self._call("delete", {}, timeout, is_internal=True)
 
 
 class StreamChannel(Channel):
@@ -612,14 +619,14 @@ class StreamChannel(Channel):
         size: Optional[int],
         timeout: float = 0,
     ) -> channels.StreamReadResult:
-        result = await self._call("read", {"size": size}, timeout)
+        result = await self._call("read", {"size": size}, timeout, is_internal=True)
         return {"binary": result["binary"]}
 
     async def close(
         self,
         timeout: float = 0,
     ) -> None:
-        await self._call("close", {}, timeout)
+        await self._call("close", {}, timeout, is_internal=True)
 
 
 class WritableStreamChannel(Channel):
@@ -628,13 +635,13 @@ class WritableStreamChannel(Channel):
         binary: str,
         timeout: float = 0,
     ) -> None:
-        await self._call("write", {"binary": binary}, timeout)
+        await self._call("write", {"binary": binary}, timeout, is_internal=True)
 
     async def close(
         self,
         timeout: float = 0,
     ) -> None:
-        await self._call("close", {}, timeout)
+        await self._call("close", {}, timeout, is_internal=True)
 
 
 class BrowserChannel(Channel):
@@ -677,13 +684,15 @@ class BrowserChannel(Channel):
         self,
         timeout: float = 0,
     ) -> None:
-        await self._call("killForTests", {}, timeout)
+        await self._call("killForTests", {}, timeout, is_internal=True)
 
     async def defaultUserAgentForTest(
         self,
         timeout: float = 0,
     ) -> channels.BrowserDefaultUserAgentForTestResult:
-        result = await self._call("defaultUserAgentForTest", {}, timeout)
+        result = await self._call(
+            "defaultUserAgentForTest", {}, timeout, is_internal=True
+        )
         return {"userAgent": result["userAgent"]}
 
     async def newContext(
@@ -839,6 +848,7 @@ class BrowserChannel(Channel):
                 "storageState": storageState,
             },
             timeout,
+            is_internal=True,
         )
         return {"context": result["context"]}
 
@@ -847,7 +857,9 @@ class BrowserChannel(Channel):
         reason: str,
         timeout: float = 0,
     ) -> None:
-        await self._call("disconnectFromReusedContext", {"reason": reason}, timeout)
+        await self._call(
+            "disconnectFromReusedContext", {"reason": reason}, timeout, is_internal=True
+        )
 
     async def newBrowserCDPSession(
         self,
@@ -993,7 +1005,10 @@ class BrowserContextChannel(Channel):
         timeout: float = 0,
     ) -> None:
         await self._call(
-            "registerSelectorEngine", {"selectorEngine": selectorEngine}, timeout
+            "registerSelectorEngine",
+            {"selectorEngine": selectorEngine},
+            timeout,
+            is_internal=True,
         )
 
     async def setTestIdAttributeName(
@@ -1005,6 +1020,7 @@ class BrowserContextChannel(Channel):
             "setTestIdAttributeName",
             {"testIdAttributeName": testIdAttributeName},
             timeout,
+            is_internal=True,
         )
 
     async def setExtraHTTPHeaders(
@@ -1123,6 +1139,7 @@ class BrowserContextChannel(Channel):
                 "omitCallTracking": omitCallTracking,
             },
             timeout,
+            is_internal=True,
         )
 
     async def startRecording(
@@ -1130,19 +1147,21 @@ class BrowserContextChannel(Channel):
         language: Optional[str],
         timeout: float = 0,
     ) -> None:
-        await self._call("startRecording", {"language": language}, timeout)
+        await self._call(
+            "startRecording", {"language": language}, timeout, is_internal=True
+        )
 
     async def stopRecording(
         self,
         timeout: float = 0,
     ) -> None:
-        await self._call("stopRecording", {}, timeout)
+        await self._call("stopRecording", {}, timeout, is_internal=True)
 
     async def exposeConsoleApi(
         self,
         timeout: float = 0,
     ) -> None:
-        await self._call("exposeConsoleApi", {}, timeout)
+        await self._call("exposeConsoleApi", {}, timeout, is_internal=True)
 
     async def newCDPSession(
         self,
@@ -1162,7 +1181,10 @@ class BrowserContextChannel(Channel):
         timeout: float = 0,
     ) -> channels.BrowserContextCreateTempFilesResult:
         result = await self._call(
-            "createTempFiles", {"rootDirName": rootDirName, "items": items}, timeout
+            "createTempFiles",
+            {"rootDirName": rootDirName, "items": items},
+            timeout,
+            is_internal=True,
         )
         return {
             "rootDir": result.get("rootDir"),
@@ -1184,7 +1206,10 @@ class BrowserContextChannel(Channel):
         timeout: float = 0,
     ) -> None:
         await self._call(
-            "updateSubscription", {"event": event, "enabled": enabled}, timeout
+            "updateSubscription",
+            {"event": event, "enabled": enabled},
+            timeout,
+            is_internal=True,
         )
 
     async def clockFastForward(
@@ -1755,7 +1780,7 @@ class DisposableChannel(Channel):
         self,
         timeout: float = 0,
     ) -> None:
-        await self._call("dispose", {}, timeout)
+        await self._call("dispose", {}, timeout, is_internal=True)
 
 
 class ElectronChannel(Channel):
@@ -1822,7 +1847,9 @@ class ElectronApplicationChannel(Channel):
         page: PageChannel,
         timeout: float = 0,
     ) -> channels.ElectronApplicationBrowserWindowResult:
-        result = await self._call("browserWindow", {"page": page}, timeout)
+        result = await self._call(
+            "browserWindow", {"page": page}, timeout, is_internal=True
+        )
         return {"handle": result["handle"]}
 
     async def evaluateExpression(
@@ -1860,7 +1887,10 @@ class ElectronApplicationChannel(Channel):
         timeout: float = 0,
     ) -> None:
         await self._call(
-            "updateSubscription", {"event": event, "enabled": enabled}, timeout
+            "updateSubscription",
+            {"event": event, "enabled": enabled},
+            timeout,
+            is_internal=True,
         )
 
     def onClose(self, handler: Callable[[], Any]) -> None:
@@ -2237,6 +2267,7 @@ class FrameChannel(Channel):
             "resolveSelector",
             {"selector": selector, "sdkLanguage": sdkLanguage},
             timeout,
+            is_internal=True,
         )
         return {
             "resolvedSelector": result["resolvedSelector"],
@@ -2249,14 +2280,21 @@ class FrameChannel(Channel):
         style: Optional[str],
         timeout: float = 0,
     ) -> None:
-        await self._call("highlight", {"selector": selector, "style": style}, timeout)
+        await self._call(
+            "highlight",
+            {"selector": selector, "style": style},
+            timeout,
+            is_internal=True,
+        )
 
     async def hideHighlight(
         self,
         selector: str,
         timeout: float = 0,
     ) -> None:
-        await self._call("hideHighlight", {"selector": selector}, timeout)
+        await self._call(
+            "hideHighlight", {"selector": selector}, timeout, is_internal=True
+        )
 
     async def getAttribute(
         self,
@@ -2736,7 +2774,7 @@ class JSHandleChannel(Channel):
         self,
         timeout: float = 0,
     ) -> None:
-        await self._call("dispose", {}, timeout)
+        await self._call("dispose", {}, timeout, is_internal=True)
 
     async def evaluateExpression(
         self,
@@ -3267,6 +3305,7 @@ class LocalUtilsChannel(Channel):
                 "additionalSources": additionalSources,
             },
             timeout,
+            is_internal=True,
         )
 
     async def harOpen(
@@ -3274,7 +3313,7 @@ class LocalUtilsChannel(Channel):
         file: str,
         timeout: float = 0,
     ) -> channels.LocalUtilsHarOpenResult:
-        result = await self._call("harOpen", {"file": file}, timeout)
+        result = await self._call("harOpen", {"file": file}, timeout, is_internal=True)
         return {"harId": result.get("harId"), "error": result.get("error")}
 
     async def harLookup(
@@ -3298,6 +3337,7 @@ class LocalUtilsChannel(Channel):
                 "isNavigationRequest": isNavigationRequest,
             },
             timeout,
+            is_internal=True,
         )
         return {
             "action": result["action"],
@@ -3313,7 +3353,7 @@ class LocalUtilsChannel(Channel):
         harId: str,
         timeout: float = 0,
     ) -> None:
-        await self._call("harClose", {"harId": harId}, timeout)
+        await self._call("harClose", {"harId": harId}, timeout, is_internal=True)
 
     async def harUnzip(
         self,
@@ -3326,6 +3366,7 @@ class LocalUtilsChannel(Channel):
             "harUnzip",
             {"zipFile": zipFile, "harFile": harFile, "resourcesDir": resourcesDir},
             timeout,
+            is_internal=True,
         )
 
     async def connect(
@@ -3347,6 +3388,7 @@ class LocalUtilsChannel(Channel):
                 "socksProxyRedirectPortForTest": socksProxyRedirectPortForTest,
             },
             timeout,
+            is_internal=True,
         )
         return {"pipe": result["pipe"], "headers": result["headers"]}
 
@@ -3361,6 +3403,7 @@ class LocalUtilsChannel(Channel):
             "tracingStarted",
             {"tracesDir": tracesDir, "traceName": traceName, "live": live},
             timeout,
+            is_internal=True,
         )
         return {"stacksId": result["stacksId"]}
 
@@ -3369,14 +3412,21 @@ class LocalUtilsChannel(Channel):
         callData: channels.ClientSideCallMetadata,
         timeout: float = 0,
     ) -> None:
-        await self._call("addStackToTracingNoReply", {"callData": callData}, timeout)
+        await self._call(
+            "addStackToTracingNoReply",
+            {"callData": callData},
+            timeout,
+            is_internal=True,
+        )
 
     async def traceDiscarded(
         self,
         stacksId: str,
         timeout: float = 0,
     ) -> None:
-        await self._call("traceDiscarded", {"stacksId": stacksId}, timeout)
+        await self._call(
+            "traceDiscarded", {"stacksId": stacksId}, timeout, is_internal=True
+        )
 
     async def globToRegex(
         self,
@@ -3389,6 +3439,7 @@ class LocalUtilsChannel(Channel):
             "globToRegex",
             {"glob": glob, "baseURL": baseURL, "webSocketUrl": webSocketUrl},
             timeout,
+            is_internal=True,
         )
         return {"regex": result["regex"]}
 
@@ -3402,6 +3453,7 @@ class LocalUtilsChannel(Channel):
             "asLocatorDescription",
             {"selector": selector, "sdkLanguage": sdkLanguage},
             timeout,
+            is_internal=True,
         )
         return {"description": result["description"]}
 
@@ -3411,14 +3463,14 @@ class RequestChannel(Channel):
         self,
         timeout: float = 0,
     ) -> channels.RequestResponseResult:
-        result = await self._call("response", {}, timeout)
+        result = await self._call("response", {}, timeout, is_internal=True)
         return {"response": result.get("response")}
 
     async def rawRequestHeaders(
         self,
         timeout: float = 0,
     ) -> channels.RequestRawRequestHeadersResult:
-        result = await self._call("rawRequestHeaders", {}, timeout)
+        result = await self._call("rawRequestHeaders", {}, timeout, is_internal=True)
         return {"headers": result["headers"]}
 
 
@@ -3428,7 +3480,9 @@ class RouteChannel(Channel):
         url: str,
         timeout: float = 0,
     ) -> None:
-        await self._call("redirectNavigationRequest", {"url": url}, timeout)
+        await self._call(
+            "redirectNavigationRequest", {"url": url}, timeout, is_internal=True
+        )
 
     async def abort(
         self,
@@ -3491,7 +3545,7 @@ class WebSocketRouteChannel(Channel):
         self,
         timeout: float = 0,
     ) -> None:
-        await self._call("ensureOpened", {}, timeout)
+        await self._call("ensureOpened", {}, timeout, is_internal=True)
 
     async def sendToPage(
         self,
@@ -3521,7 +3575,10 @@ class WebSocketRouteChannel(Channel):
         timeout: float = 0,
     ) -> None:
         await self._call(
-            "closePage", {"code": code, "reason": reason, "wasClean": wasClean}, timeout
+            "closePage",
+            {"code": code, "reason": reason, "wasClean": wasClean},
+            timeout,
+            is_internal=True,
         )
 
     async def closeServer(
@@ -3535,6 +3592,7 @@ class WebSocketRouteChannel(Channel):
             "closeServer",
             {"code": code, "reason": reason, "wasClean": wasClean},
             timeout,
+            is_internal=True,
         )
 
     def onMessageFromPage(
@@ -3622,35 +3680,35 @@ class ResponseChannel(Channel):
         self,
         timeout: float = 0,
     ) -> channels.ResponseSecurityDetailsResult:
-        result = await self._call("securityDetails", {}, timeout)
+        result = await self._call("securityDetails", {}, timeout, is_internal=True)
         return {"value": result.get("value")}
 
     async def serverAddr(
         self,
         timeout: float = 0,
     ) -> channels.ResponseServerAddrResult:
-        result = await self._call("serverAddr", {}, timeout)
+        result = await self._call("serverAddr", {}, timeout, is_internal=True)
         return {"value": result.get("value")}
 
     async def rawResponseHeaders(
         self,
         timeout: float = 0,
     ) -> channels.ResponseRawResponseHeadersResult:
-        result = await self._call("rawResponseHeaders", {}, timeout)
+        result = await self._call("rawResponseHeaders", {}, timeout, is_internal=True)
         return {"headers": result["headers"]}
 
     async def httpVersion(
         self,
         timeout: float = 0,
     ) -> channels.ResponseHttpVersionResult:
-        result = await self._call("httpVersion", {}, timeout)
+        result = await self._call("httpVersion", {}, timeout, is_internal=True)
         return {"value": result["value"]}
 
     async def sizes(
         self,
         timeout: float = 0,
     ) -> channels.ResponseSizesResult:
-        result = await self._call("sizes", {}, timeout)
+        result = await self._call("sizes", {}, timeout, is_internal=True)
         return {"sizes": result["sizes"]}
 
 
@@ -3818,7 +3876,10 @@ class PageChannel(Channel):
         timeout: float = 0,
     ) -> None:
         await self._call(
-            "resolveLocatorHandlerNoReply", {"uid": uid, "remove": remove}, timeout
+            "resolveLocatorHandlerNoReply",
+            {"uid": uid, "remove": remove},
+            timeout,
+            is_internal=True,
         )
 
     async def unregisterLocatorHandler(
@@ -4271,7 +4332,9 @@ class PageChannel(Channel):
         frameId: int,
         timeout: float = 0,
     ) -> None:
-        await self._call("screencastFrameAck", {"frameId": frameId}, timeout)
+        await self._call(
+            "screencastFrameAck", {"frameId": frameId}, timeout, is_internal=True
+        )
 
     async def screencastStop(
         self,
@@ -4295,7 +4358,10 @@ class PageChannel(Channel):
         timeout: float = 0,
     ) -> None:
         await self._call(
-            "updateSubscription", {"event": event, "enabled": enabled}, timeout
+            "updateSubscription",
+            {"event": event, "enabled": enabled},
+            timeout,
+            is_internal=True,
         )
 
     async def setDockTile(
@@ -4303,7 +4369,7 @@ class PageChannel(Channel):
         image: str,
         timeout: float = 0,
     ) -> None:
-        await self._call("setDockTile", {"image": image}, timeout)
+        await self._call("setDockTile", {"image": image}, timeout, is_internal=True)
 
     async def webStorageItems(
         self,
@@ -4531,7 +4597,9 @@ class RootChannel(Channel):
         sdkLanguage: channels.SDKLanguage,
         timeout: float = 0,
     ) -> channels.RootInitializeResult:
-        result = await self._call("initialize", {"sdkLanguage": sdkLanguage}, timeout)
+        result = await self._call(
+            "initialize", {"sdkLanguage": sdkLanguage}, timeout, is_internal=True
+        )
         return {"playwright": result["playwright"]}
 
 
@@ -4581,7 +4649,10 @@ class DebugControllerChannel(Channel):
         timeout: float = 0,
     ) -> None:
         await self._call(
-            "initialize", {"codegenId": codegenId, "sdkLanguage": sdkLanguage}, timeout
+            "initialize",
+            {"codegenId": codegenId, "sdkLanguage": sdkLanguage},
+            timeout,
+            is_internal=True,
         )
 
     async def setReportStateChanged(
@@ -4589,7 +4660,9 @@ class DebugControllerChannel(Channel):
         enabled: bool,
         timeout: float = 0,
     ) -> None:
-        await self._call("setReportStateChanged", {"enabled": enabled}, timeout)
+        await self._call(
+            "setReportStateChanged", {"enabled": enabled}, timeout, is_internal=True
+        )
 
     async def setRecorderMode(
         self,
@@ -4606,6 +4679,7 @@ class DebugControllerChannel(Channel):
                 "generateAutoExpect": generateAutoExpect,
             },
             timeout,
+            is_internal=True,
         )
 
     async def highlight(
@@ -4615,26 +4689,29 @@ class DebugControllerChannel(Channel):
         timeout: float = 0,
     ) -> None:
         await self._call(
-            "highlight", {"selector": selector, "ariaTemplate": ariaTemplate}, timeout
+            "highlight",
+            {"selector": selector, "ariaTemplate": ariaTemplate},
+            timeout,
+            is_internal=True,
         )
 
     async def hideHighlight(
         self,
         timeout: float = 0,
     ) -> None:
-        await self._call("hideHighlight", {}, timeout)
+        await self._call("hideHighlight", {}, timeout, is_internal=True)
 
     async def resume(
         self,
         timeout: float = 0,
     ) -> None:
-        await self._call("resume", {}, timeout)
+        await self._call("resume", {}, timeout, is_internal=True)
 
     async def kill(
         self,
         timeout: float = 0,
     ) -> None:
-        await self._call("kill", {}, timeout)
+        await self._call("kill", {}, timeout, is_internal=True)
 
     def onInspectRequested(
         self, handler: Callable[[channels.DebugControllerInspectRequestedEvent], Any]
@@ -4725,7 +4802,10 @@ class SocksSupportChannel(Channel):
         timeout: float = 0,
     ) -> None:
         await self._call(
-            "socksConnected", {"uid": uid, "host": host, "port": port}, timeout
+            "socksConnected",
+            {"uid": uid, "host": host, "port": port},
+            timeout,
+            is_internal=True,
         )
 
     async def socksFailed(
@@ -4734,7 +4814,12 @@ class SocksSupportChannel(Channel):
         errorCode: str,
         timeout: float = 0,
     ) -> None:
-        await self._call("socksFailed", {"uid": uid, "errorCode": errorCode}, timeout)
+        await self._call(
+            "socksFailed",
+            {"uid": uid, "errorCode": errorCode},
+            timeout,
+            is_internal=True,
+        )
 
     async def socksData(
         self,
@@ -4742,7 +4827,9 @@ class SocksSupportChannel(Channel):
         data: str,
         timeout: float = 0,
     ) -> None:
-        await self._call("socksData", {"uid": uid, "data": data}, timeout)
+        await self._call(
+            "socksData", {"uid": uid, "data": data}, timeout, is_internal=True
+        )
 
     async def socksError(
         self,
@@ -4750,14 +4837,16 @@ class SocksSupportChannel(Channel):
         error: str,
         timeout: float = 0,
     ) -> None:
-        await self._call("socksError", {"uid": uid, "error": error}, timeout)
+        await self._call(
+            "socksError", {"uid": uid, "error": error}, timeout, is_internal=True
+        )
 
     async def socksEnd(
         self,
         uid: str,
         timeout: float = 0,
     ) -> None:
-        await self._call("socksEnd", {"uid": uid}, timeout)
+        await self._call("socksEnd", {"uid": uid}, timeout, is_internal=True)
 
     def onSocksRequested(
         self, handler: Callable[[channels.SocksSupportSocksRequestedEvent], Any]
@@ -4808,13 +4897,13 @@ class JsonPipeChannel(Channel):
         message: Any,
         timeout: float = 0,
     ) -> None:
-        await self._call("send", {"message": message}, timeout)
+        await self._call("send", {"message": message}, timeout, is_internal=True)
 
     async def close(
         self,
         timeout: float = 0,
     ) -> None:
-        await self._call("close", {}, timeout)
+        await self._call("close", {}, timeout, is_internal=True)
 
     def onMessage(
         self, handler: Callable[[channels.JsonPipeMessageEvent], Any]
@@ -4878,14 +4967,14 @@ class BindingCallChannel(Channel):
         error: channels.SerializedError,
         timeout: float = 0,
     ) -> None:
-        await self._call("reject", {"error": error}, timeout)
+        await self._call("reject", {"error": error}, timeout, is_internal=True)
 
     async def resolve(
         self,
         result: channels.SerializedArgument,
         timeout: float = 0,
     ) -> None:
-        await self._call("resolve", {"result": result}, timeout)
+        await self._call("resolve", {"result": result}, timeout, is_internal=True)
 
 
 class DebuggerChannel(Channel):
@@ -4918,7 +5007,7 @@ class DebuggerChannel(Channel):
         self,
         timeout: float = 0,
     ) -> None:
-        await self._call("enable", {}, timeout)
+        await self._call("enable", {}, timeout, is_internal=True)
 
     def onPausedStateChanged(
         self, handler: Callable[[channels.DebuggerPausedStateChangedEvent], Any]
@@ -5036,7 +5125,7 @@ class TracingChannel(Channel):
         timeout: float = 0,
     ) -> channels.TracingHarStartResult:
         result = await self._call(
-            "harStart", {"page": page, "options": options}, timeout
+            "harStart", {"page": page, "options": options}, timeout, is_internal=True
         )
         return {"harId": result["harId"]}
 
@@ -5046,7 +5135,9 @@ class TracingChannel(Channel):
         mode: Literal["archive", "entries"],
         timeout: float = 0,
     ) -> channels.TracingHarExportResult:
-        result = await self._call("harExport", {"harId": harId, "mode": mode}, timeout)
+        result = await self._call(
+            "harExport", {"harId": harId, "mode": mode}, timeout, is_internal=True
+        )
         return {"artifact": result.get("artifact"), "entries": result.get("entries")}
 
 
@@ -5093,7 +5184,10 @@ class WorkerChannel(Channel):
         timeout: float = 0,
     ) -> None:
         await self._call(
-            "updateSubscription", {"event": event, "enabled": enabled}, timeout
+            "updateSubscription",
+            {"event": event, "enabled": enabled},
+            timeout,
+            is_internal=True,
         )
 
     def onConsole(self, handler: Callable[[channels.WorkerConsoleEvent], Any]) -> None:

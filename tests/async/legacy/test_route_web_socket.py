@@ -14,7 +14,7 @@
 
 import asyncio
 import re
-from typing import Any, Awaitable, Callable, Literal, Tuple, Union
+from typing import Any, Awaitable, Callable, Literal, Optional, Tuple, Union
 
 from playwright.async_api import Browser, Frame, Page, WebSocketRoute
 from tests.server import Server, WebSocketProtocol
@@ -172,6 +172,12 @@ async def test_should_work_with_server(page: Page, server: Server) -> None:
             ws.send(message)
 
         server.on_message(_server_on_message)
+
+        # Forward the close of the page through the server side of the route.
+        async def _ws_on_close(code: Optional[int], reason: Optional[str]) -> None:
+            await server.close(code=code, reason=reason)
+
+        ws.on_close(_ws_on_close)
         server.send("fake")
         future.set_result(ws)
 

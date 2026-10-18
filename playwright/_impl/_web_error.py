@@ -13,11 +13,13 @@
 # limitations under the License.
 
 from asyncio import AbstractEventLoop
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from playwright._impl._api_structures import WebErrorLocation
 from playwright._impl._errors import Error
-from playwright._impl._page import Page
+
+if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl._page import Page
 
 
 class WebError:
@@ -25,7 +27,7 @@ class WebError:
         self,
         loop: AbstractEventLoop,
         dispatcher_fiber: Any,
-        page: Optional[Page],
+        page: Optional["Page"],
         error: Error,
         location: WebErrorLocation,
     ) -> None:
@@ -36,7 +38,7 @@ class WebError:
         self._location = location
 
     @property
-    def page(self) -> Optional[Page]:
+    def page(self) -> Optional["Page"]:
         return self._page
 
     @property

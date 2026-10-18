@@ -14,11 +14,11 @@
 
 import pathlib
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, Optional, Union, cast
+from typing import TYPE_CHECKING, Optional, Union, cast
 
 from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._errors import Error, patch_error_message
-from playwright._impl._helper import make_dirs_for_file
+from playwright._impl._file_utils import mkdir_if_needed
 from playwright._impl._stream import Stream
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -27,12 +27,6 @@ if TYPE_CHECKING:  # pragma: no cover
 
 class Artifact(ChannelOwner):
     _channel: "ArtifactChannel"
-
-    def __init__(
-        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
-    ) -> None:
-        super().__init__(parent, type, guid, initializer)
-        self.absolute_path = initializer["absolutePath"]
 
     async def path_after_finished(self) -> pathlib.Path:
         if self._connection.is_remote:
@@ -43,25 +37,27 @@ class Artifact(ChannelOwner):
         return pathlib.Path(path)
 
     async def save_as(self, path: Union[str, Path]) -> None:
-        stream = cast(
-            Stream, from_channel((await self._channel.saveAsStream())["stream"])
-        )
-        make_dirs_for_file(path)
+        if not self._connection.is_remote:
+            # The driver is another process: resolve the path against the current
+            # directory of this process.
+            await self._channel.saveAs(path=str(Path(path).absolute()))
+            return
+
+        result = await self._channel.saveAsStream()
+        stream = cast(Stream, from_channel(result["stream"]))
+        mkdir_if_needed(path)
         await stream.save_as(path)
 
     async def failure(self) -> Optional[str]:
         reason = (await self._channel.failure())["error"]
-        if reason is None:
-            return None
-        return patch_error_message(reason)
+        return patch_error_message(reason) if reason else None
 
-    async def delete(self) -> None:
-        await self._channel.delete()
-
-    async def read_info_buffer(self) -> bytes:
+    async def read_into_buffer(self) -> bytes:
         stream = cast(Stream, from_channel((await self._channel.stream())["stream"]))
-        buffer = await stream.read_all()
-        return buffer
+        return await stream.read_all()
 
     async def cancel(self) -> None:  # pyright: ignore[reportIncompatibleMethodOverride]
         await self._channel.cancel()
+
+    async def delete(self) -> None:
+        await self._channel.delete()

@@ -2335,3 +2335,27 @@ COMMANDS: Dict[str, Dict[str, Dict[str, Any]]] = {
         },
     },
 }
+
+# The error details of the commands that declare them, by interface and method.
+ERROR_DETAILS: Dict[str, Dict[str, Dict[str, Any]]] = {
+    "Frame": {
+        "expect": {
+            "received": {
+                "type": "object?",
+                "properties": {"value": "SerializedValue?", "ariaSnapshot": "string?"},
+            },
+            "timedOut": "boolean?",
+            "customErrorMessage": "string?",
+        }
+    },
+    "Page": {
+        "expectScreenshot": {
+            "diff": "binary?",
+            "customErrorMessage": "string?",
+            "actual": "binary?",
+            "previous": "binary?",
+            "timedOut": "boolean?",
+            "log": {"type": "array?", "items": "string"},
+        }
+    },
+}

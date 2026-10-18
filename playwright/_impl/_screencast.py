@@ -14,7 +14,16 @@
 
 import base64
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable, Literal, Optional, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Awaitable,
+    Callable,
+    Literal,
+    Optional,
+    TypeVar,
+    Union,
+)
 
 from playwright._impl._api_structures import (
     ScreencastActionStyle,
@@ -22,7 +31,7 @@ from playwright._impl._api_structures import (
     ScreencastSize,
 )
 from playwright._impl._artifact import Artifact
-from playwright._impl._connection import from_nullable_channel
+from playwright._impl._connection import api_call, from_channel
 from playwright._impl._disposable import DisposableStub
 from playwright._impl._errors import Error
 
@@ -30,6 +39,8 @@ if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl import _protocol_types as channels
     from playwright._impl._page import Page
 
+
+T = TypeVar("T")
 
 ScreencastFrameCallback = Callable[[ScreencastFrame], Any]
 ScreencastPosition = Literal[
@@ -58,6 +69,9 @@ class Screencast:
         page._channel.onScreencastFrame(self._dispatch_frame)
 
     def _ack_frame(self, frame_id: int) -> None:
+        # Upstream awaits screencastFrameAck() and ignores its errors. A channel call
+        # here would raise, and so clear, an error of an event listener that the
+        # connection holds for the next API call; send without the reply instead.
         try:
             self._page._channel.send_no_reply(
                 "screencastFrameAck", {"frameId": frame_id}
@@ -72,6 +86,9 @@ class Screencast:
             self._ack_frame(frame_id)
 
     def _dispatch_frame(self, event: "channels.PageScreencastFrameEvent") -> Any:
+        # The 'screencastFrame' handler of the Screencast constructor in
+        # client/screencast.ts. The callback runs here, not in a task, so that a
+        # callback of the sync API runs in its event greenlet.
         result = None
         task = None
         try:
@@ -94,6 +111,14 @@ class Screencast:
                 self._ack_frame(event["frameId"])
         return task
 
+    async def _wrap_api_call(
+        self,
+        cb: Callable[[], Awaitable[T]],
+        is_internal: bool = False,
+        title: Optional[str] = None,
+    ) -> T:
+        return await self._page._wrap_api_call(cb, is_internal, title)
+
     async def start(
         self,
         on_frame: Optional[ScreencastFrameCallback],
@@ -105,7 +130,8 @@ class Screencast:
         if self._started:
             raise Error("Screencast is already started")
         self._started = True
-        self._on_frame = on_frame
+        if on_frame:
+            self._on_frame = on_frame
         result = await self._page._channel.screencastStart(
             size=size,
             quality=quality,
@@ -114,10 +140,11 @@ class Screencast:
             record=bool(path),
         )
         if result["artifact"]:
-            self._artifact = from_nullable_channel(result["artifact"])
+            self._artifact = from_channel(result["artifact"])
             self._save_path = path
         return DisposableStub(lambda: self.stop(), self._page)
 
+    @api_call
     async def stop(self) -> None:
         self._started = False
         self._on_frame = None
@@ -142,7 +169,9 @@ class Screencast:
             cursor=cursor,
             style=style,
         )
-        return DisposableStub(lambda: self.hide_actions(), self._page)
+        return DisposableStub(
+            lambda: self._page._channel.screencastHideActions(), self._page
+        )
 
     async def hide_actions(self) -> None:
         await self._page._channel.screencastHideActions()

@@ -97,8 +97,9 @@ def parse_time(
     return int(time.timestamp() * 1_000), None
 
 
-def parse_ticks(ticks: Union[int, str]) -> Tuple[Optional[int], Optional[str]]:
+def parse_ticks(ticks: Union[int, str]) -> Tuple[Optional[float], Optional[str]]:
     """Returns (ticksNumber, ticksString)."""
-    if isinstance(ticks, int):
-        return ticks, None
-    return None, ticks
+    return (
+        ticks if isinstance(ticks, (int, float)) else None,
+        ticks if isinstance(ticks, str) else None,
+    )

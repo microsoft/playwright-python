@@ -11,22 +11,23 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import asyncio
+
+"""Port of packages/playwright-core/src/client/harRouter.ts."""
+
 import base64
-from typing import TYPE_CHECKING, Dict, Optional
+from typing import TYPE_CHECKING, Dict, Literal, Optional, cast
 
 from playwright._impl._errors import Error
-from playwright._impl._helper import (
-    RouteFromHarNotFoundPolicy,
-    URLMatch,
-    create_task_and_ignore_exception,
-)
+from playwright._impl._helper import create_task_and_ignore_exception
 from playwright._impl._local_utils import LocalUtils
+from playwright._impl._url_match import URLMatch
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl._browser_context import BrowserContext
     from playwright._impl._network import Route
     from playwright._impl._page import Page
+
+HarNotFoundAction = Literal["abort", "fallback"]
 
 
 class HarRouter:
@@ -34,32 +35,29 @@ class HarRouter:
         self,
         local_utils: LocalUtils,
         har_id: str,
-        not_found_action: RouteFromHarNotFoundPolicy,
-        url_matcher: Optional[URLMatch] = None,
+        not_found_action: HarNotFoundAction,
+        url_match: Optional[URLMatch],
     ) -> None:
         self._local_utils: LocalUtils = local_utils
         self._har_id: str = har_id
-        self._not_found_action: RouteFromHarNotFoundPolicy = not_found_action
-        self._options_url_match: Optional[URLMatch] = url_matcher
+        self._not_found_action: HarNotFoundAction = not_found_action
+        self._url_match: Optional[URLMatch] = url_match
 
     @staticmethod
     async def create(
         local_utils: LocalUtils,
         file: str,
-        not_found_action: RouteFromHarNotFoundPolicy,
-        url_matcher: Optional[URLMatch] = None,
+        not_found_action: HarNotFoundAction,
+        url_match: Optional[URLMatch],
     ) -> "HarRouter":
-        result = await local_utils._channel.harOpen(file=file)
+        result = await local_utils.har_open(file)
         if result["error"]:
             raise Error(result["error"])
-        har_id = result["harId"]
-        if har_id is None:
-            raise Error("harOpen returned no HAR id")
         return HarRouter(
             local_utils=local_utils,
-            har_id=har_id,
+            har_id=cast(str, result["harId"]),
             not_found_action=not_found_action,
-            url_matcher=url_matcher,
+            url_match=url_match,
         )
 
     async def _handle(self, route: "Route") -> None:
@@ -72,14 +70,11 @@ class HarRouter:
             post_data=request.post_data_buffer,
             is_navigation_request=request.is_navigation_request(),
         )
-        action = response["action"]
-        if action == "redirect":
-            redirect_url = response["redirectURL"]
-            assert redirect_url
-            await route._redirected_navigation_request(redirect_url)
+        if response["action"] == "redirect":
+            await route._redirect_navigation_request(cast(str, response["redirectURL"]))
             return
 
-        if action == "fulfill":
+        if response["action"] == "fulfill":
             # If the response status is -1, the request was canceled or stalled, so we just stall it here.
             # See https://github.com/microsoft/playwright/issues/29311.
             # TODO: it'd be better to abort such requests, but then we likely need to respect the timing,
@@ -100,12 +95,10 @@ class HarRouter:
                 else:
                     # subsequent set-cookie headers get appended to existing header
                     transformed_headers["set-cookie"] += f"\n{value}"
-            body = response["body"]
-            assert body is not None
             await route.fulfill(
                 status=response["status"],
                 headers=transformed_headers,
-                body=base64.b64decode(body),
+                body=base64.b64decode(cast(str, response["body"])),
                 json=None,
                 path=None,
                 content_type=None,
@@ -113,8 +106,7 @@ class HarRouter:
             )
             return
 
-        if action == "error":
-            pass
+        # Upstream logs the "error" action with the debug logger, which Python does not have.
         # Report the error, but fall through to the default handler.
 
         if self._not_found_action == "abort":
@@ -125,20 +117,20 @@ class HarRouter:
 
     async def add_context_route(self, context: "BrowserContext") -> None:
         await context.route(
-            url=self._options_url_match or "**/*",
-            handler=lambda route, _: asyncio.create_task(self._handle(route)),
+            url=self._url_match or "**/*",
+            handler=lambda route, _: self._handle(route),
             times=None,
         )
 
     async def add_page_route(self, page: "Page") -> None:
         await page.route(
-            url=self._options_url_match or "**/*",
-            handler=lambda route, _: asyncio.create_task(self._handle(route)),
+            url=self._url_match or "**/*",
+            handler=lambda route, _: self._handle(route),
             times=None,
         )
 
     def dispose(self) -> None:
         create_task_and_ignore_exception(
             self._local_utils._loop,
-            self._local_utils._channel.harClose(harId=self._har_id),
+            self._local_utils.har_close(self._har_id),
         )

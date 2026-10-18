@@ -17,9 +17,10 @@
 import math
 import time
 
-DEFAULT_PLAYWRIGHT_TIMEOUT_IN_MILLISECONDS = 30000
-DEFAULT_PLAYWRIGHT_LAUNCH_TIMEOUT_IN_MILLISECONDS = 180000
+DEFAULT_PLAYWRIGHT_TIMEOUT = 30_000
+DEFAULT_PLAYWRIGHT_LAUNCH_TIMEOUT = 3 * 60 * 1000  # 3 minutes
 
 
-def monotonic_time() -> int:
-    return math.floor(time.monotonic() * 1000)
+def monotonic_time() -> float:
+    # Milliseconds, with microsecond precision.
+    return math.floor(time.monotonic() * 1000 * 1000) / 1000

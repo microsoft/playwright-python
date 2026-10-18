@@ -44,10 +44,8 @@ class Playwright(ChannelOwner):
         self.firefox._playwright = self
         self.webkit = from_channel(initializer["webkit"])
         self.webkit._playwright = self
-
-        self.selectors = Selectors(self._loop, self._dispatcher_fiber)
-
         self.devices = self._connection.local_utils.devices
+        self.selectors = Selectors(self._loop, self._dispatcher_fiber)
 
     def __getitem__(self, value: str) -> "BrowserType":
         if value == "chromium":
@@ -57,9 +55,6 @@ class Playwright(ChannelOwner):
         elif value == "webkit":
             return self.webkit
         raise ValueError("Invalid browser " + value)
-
-    def _set_selectors(self, selectors: Selectors) -> None:
-        self.selectors = selectors
 
     async def stop(self) -> None:
         pass

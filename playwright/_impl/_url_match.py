@@ -20,10 +20,14 @@ implementation of the API can use it.
 
 import json
 import re
-from typing import Callable, Dict, Optional, Pattern, Tuple, Union
+from typing import TYPE_CHECKING, Callable, Dict, Optional, Pattern, Tuple, Union
 
 from playwright._impl._errors import Error
+from playwright._impl._str_utils import escape_regex_flags
 from playwright._impl._whatwg_url import parse_url
+
+if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl import _protocol_types as channels
 
 URLMatch = Union[str, Pattern[str], Callable[[str], bool]]
 
@@ -110,6 +114,10 @@ def url_matches(
         )
     if isinstance(match, Pattern):
         return bool(match.search(url_string))
+    if parse_url(url_string) is None:
+        return False
+    if not callable(match):
+        raise Error("url parameter should be string, RegExp or function")
     return match(url_string)
 
 
@@ -211,3 +219,20 @@ def resolve_base_url(
         return given_url, None
     # Schema and domain are case-insensitive.
     return url.href, url.origin
+
+
+def url_matches_equal(match1: URLMatch, match2: URLMatch) -> bool:
+    if isinstance(match1, Pattern) and isinstance(match2, Pattern):
+        return match1.pattern == match2.pattern and match1.flags == match2.flags
+    return match1 == match2
+
+
+def serialize_url_match(
+    match: URLMatch,
+) -> Optional["channels.BrowserContextSetNetworkInterceptionPatternsParamsPatterns"]:
+    if isinstance(match, str):
+        return {"glob": match}
+    if isinstance(match, Pattern):
+        return {"regexSource": match.pattern, "regexFlags": escape_regex_flags(match)}
+    # Functions cannot be serialized
+    return None

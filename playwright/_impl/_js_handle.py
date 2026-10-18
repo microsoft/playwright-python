@@ -14,13 +14,16 @@
 
 """Port of packages/playwright-core/src/client/jsHandle.ts."""
 
-from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 from playwright._impl._channel import Channel
 from playwright._impl._connection import ChannelOwner, from_channel
 from playwright._impl._errors import is_target_closed_error
-from playwright._impl._serializers import parse_value, serialize_value
+from playwright._impl._serializers import (
+    HandleOrValue,
+    parse_serialized_value,
+    serialize_value,
+)
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl import _protocol_types as channels
@@ -65,15 +68,17 @@ class JSHandle(ChannelOwner):
         return from_channel(result["handle"])
 
     async def get_property(self, property_name: str) -> "JSHandle":
-        return from_channel(
-            (await self._channel.getProperty(name=property_name))["handle"]
-        )
+        result = await self._channel.getProperty(name=property_name)
+        return from_channel(result["handle"])
 
     async def get_properties(self) -> Dict[str, "JSHandle"]:
         result = await self._channel.getPropertyList()
         return {
             prop["name"]: from_channel(prop["value"]) for prop in result["properties"]
         }
+
+    async def json_value(self) -> Any:
+        return parse_result((await self._channel.jsonValue())["value"])
 
     def as_element(self) -> Optional["ElementHandle"]:
         return None
@@ -82,29 +87,28 @@ class JSHandle(ChannelOwner):
         try:
             await self._channel.dispose()
         except Exception as e:
-            if not is_target_closed_error(e):
-                raise e
-
-    async def json_value(self) -> Any:
-        return parse_result((await self._channel.jsonValue())["value"])
+            if is_target_closed_error(e):
+                return
+            raise e
 
 
-def serialize_argument(arg: Serializable = None) -> Any:
+# This function takes care of converting all JSHandles to their channels,
+# so that generic channel serializer converts them to guids.
+def serialize_argument(arg: Serializable) -> "channels.SerializedArgument":
     handles: List[Channel] = []
 
-    def serialize_handle(value: Any) -> Optional[Dict[str, Any]]:
+    def push_handle(channel: Channel) -> int:
+        handles.append(channel)
+        return len(handles) - 1
+
+    def handle_serializer(value: Any) -> HandleOrValue:
         if isinstance(value, JSHandle):
-            handles.append(value._channel)
-            return {"h": len(handles) - 1}
-        return None
+            return {"h": push_handle(value._channel)}
+        return {"fallThrough": value}
 
-    value = serialize_value(arg, serialize_handle)
-    return dict(value=value, handles=handles)
-
-
-def parse_result(result: Any) -> Any:
-    return parse_value(result)
+    value = serialize_value(arg, handle_serializer)
+    return {"value": value, "handles": handles}
 
 
-def add_source_url_to_script(source: str, path: Union[str, Path]) -> str:
-    return source + "\n//# sourceURL=" + str(path).replace("\n", "")
+def parse_result(value: "channels.SerializedValue") -> Any:
+    return parse_serialized_value(value, None)

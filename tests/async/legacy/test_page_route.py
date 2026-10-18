@@ -844,7 +844,7 @@ async def test_request_fulfill_should_stringify_intercepted_request_response_hea
     assert response
     assert response.status == 200
     headers = response.headers
-    assert headers["foo"] == "True"
+    assert headers["foo"] == "true"
     assert await page.evaluate("() => document.body.textContent") == "Yo, page!"
 
 

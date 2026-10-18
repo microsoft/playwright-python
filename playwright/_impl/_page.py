@@ -15,6 +15,7 @@
 import asyncio
 import base64
 import inspect
+import os
 import re
 import sys
 from pathlib import Path
@@ -48,6 +49,7 @@ from playwright._impl._connection import (
     api_call,
     from_channel,
     from_nullable_channel,
+    internal,
 )
 from playwright._impl._console_message import ConsoleMessage
 from playwright._impl._disposable import Disposable, DisposableStub
@@ -62,10 +64,11 @@ from playwright._impl._errors import (
 )
 from playwright._impl._event_context_manager import EventContextManagerImpl
 from playwright._impl._file_chooser import FileChooser
-from playwright._impl._frame import Frame
+from playwright._impl._file_utils import mkdir_if_needed
+from playwright._impl._frame import Frame, verify_load_state
 from playwright._impl._greenlets import BindingCallGreenlet, LocatorHandlerGreenlet
 from playwright._impl._har_router import HarRouter
-from playwright._impl._headers import serialize_headers
+from playwright._impl._headers import headers_object_to_array
 from playwright._impl._helper import (
     ColorScheme,
     Contrast,
@@ -75,18 +78,11 @@ from playwright._impl._helper import (
     KeyboardModifier,
     MouseButton,
     ReducedMotion,
-    RouteFromHarNotFoundPolicy,
-    RouteHandler,
-    RouteHandlerCallback,
-    URLMatch,
     URLMatchRequest,
     URLMatchResponse,
-    WebSocketRouteHandlerCallback,
-    async_readfile,
     async_writefile,
     create_task_and_ignore_exception,
-    make_dirs_for_file,
-    url_matches,
+    evaluation_script,
 )
 from playwright._impl._impl_to_api_mapping import ImplToApiMapping
 from playwright._impl._input import Keyboard, Mouse, Touchscreen
@@ -94,7 +90,6 @@ from playwright._impl._internal_structures import AriaRole
 from playwright._impl._js_handle import (
     JSHandle,
     Serializable,
-    add_source_url_to_script,
     parse_result,
     serialize_argument,
 )
@@ -102,14 +97,18 @@ from playwright._impl._network import (
     Request,
     Response,
     Route,
+    RouteHandler,
+    RouteHandlerCallback,
     WebSocketRoute,
     WebSocketRouteHandler,
+    WebSocketRouteHandlerCallback,
     validate_headers,
 )
 from playwright._impl._screencast import Screencast
 from playwright._impl._signature import signature
-from playwright._impl._str_utils import trim_string_with_ellipsis
+from playwright._impl._str_utils import js_string, trim_string_with_ellipsis
 from playwright._impl._timeout_settings import TimeoutSettings
+from playwright._impl._url_match import URLMatch, url_matches, url_matches_equal
 from playwright._impl._video import Video
 from playwright._impl._waiter import Waiter
 from playwright._impl._web_mcp import WebMCP
@@ -180,39 +179,43 @@ class Page(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
-        self._browser_context = cast("BrowserContext", parent)
-        self.keyboard = Keyboard(self._channel)
-        self.mouse = Mouse(self._channel)
-        self.touchscreen = Touchscreen(self._channel)
-
-        self._main_frame: Frame = from_channel(initializer["mainFrame"])
-        self._main_frame._page = self
-        self._frames = [self._main_frame]
-        self._viewport_size: Optional[ViewportSize] = initializer.get("viewportSize")
-        self._is_closed = False
+        self._owned_context: Optional["BrowserContext"] = None
         self._workers: List["Worker"] = []
-        self._bindings: Dict[str, Any] = {}
         self._routes: List[RouteHandler] = []
         self._web_socket_routes: List[WebSocketRouteHandler] = []
-        self._owned_context: Optional["BrowserContext"] = None
-        self._timeout_settings: TimeoutSettings = TimeoutSettings(
-            self._browser_context._timeout_settings
-        )
-        self._video: Video = Video(
-            self,
-            cast(Optional[Artifact], from_nullable_channel(initializer.get("video"))),
-        )
-        self._screencast: Screencast = Screencast(self)
-        self._local_storage = WebStorage(self, "local")
-        self._session_storage = WebStorage(self, "session")
-        self._opener = cast("Page", from_nullable_channel(initializer.get("opener")))
+        self._bindings: Dict[str, Any] = {}
         self._close_reason: Optional[str] = None
         self._close_was_called = False
         self._har_routers: List[HarRouter] = []
         self._locator_handlers: Dict[int, LocatorHandler] = {}
 
+        self._browser_context = cast("BrowserContext", parent)
+        self._timeout_settings: TimeoutSettings = TimeoutSettings(
+            self._browser_context._timeout_settings
+        )
+
+        self.keyboard = Keyboard(self)
+        self.mouse = Mouse(self)
+        self.touchscreen = Touchscreen(self)
+        self._local_storage = WebStorage(self, "local")
+        self._session_storage = WebStorage(self, "session")
+
+        self._main_frame: Frame = from_channel(initializer["mainFrame"])
+        self._main_frame._page = self
+        self._frames = [self._main_frame]
+        self._viewport_size: Optional[ViewportSize] = initializer.get("viewportSize")
+        self._closed: bool = initializer["isClosed"]
+        self._opener = cast("Page", from_nullable_channel(initializer.get("opener")))
+        self._video: Video = Video(
+            self,
+            cast(Optional[Artifact], from_nullable_channel(initializer.get("video"))),
+        )
+        self._screencast: Screencast = Screencast(self)
+
         self._channel.onBindingCall(
-            lambda event: self._on_binding(from_channel(event["binding"]))
+            lambda event: self._loop.create_task(
+                self._on_binding(from_channel(event["binding"]))
+            )
         )
         self._channel.onClose(lambda: self._on_close())
         self._channel.onCrash(lambda: self._on_crash())
@@ -253,8 +256,9 @@ class Page(ChannelOwner):
         self._channel.onWorker(
             lambda event: self._on_worker(from_channel(event["worker"]))
         )
-        self._closed_or_crashed_future: asyncio.Future = asyncio.Future()
-        self.on(
+        # The counterpart of _closedOrCrashedScope in page.ts.
+        self._closed_or_crashed_future: asyncio.Future = self._loop.create_future()
+        self.once(
             Page.Events.Close,
             lambda _: (
                 self._closed_or_crashed_future.set_result(
@@ -264,7 +268,7 @@ class Page(ChannelOwner):
                 else None
             ),
         )
-        self.on(
+        self.once(
             Page.Events.Crash,
             lambda _: (
                 self._closed_or_crashed_future.set_result(TargetClosedError())
@@ -292,44 +296,37 @@ class Page(ChannelOwner):
     def _on_frame_attached(self, frame: Frame) -> None:
         frame._page = self
         self._frames.append(frame)
+        if frame._parent_frame:
+            frame._parent_frame._child_frames[frame] = None
         self.emit(Page.Events.FrameAttached, frame)
-        self._browser_context.emit("frameattached", frame)
+        self._browser_context.emit(self._browser_context.Events.FrameAttached, frame)
 
     def _on_frame_detached(self, frame: Frame) -> None:
         self._frames.remove(frame)
         frame._detached = True
+        if frame._parent_frame:
+            frame._parent_frame._child_frames.pop(frame, None)
         self.emit(Page.Events.FrameDetached, frame)
-        self._browser_context.emit("framedetached", frame)
+        self._browser_context.emit(self._browser_context.Events.FrameDetached, frame)
 
     async def _on_route(self, route: Route) -> None:
         route._context = self.context
         route_handlers = self._routes.copy()
         for route_handler in route_handlers:
             # If the page was closed we stall all requests right away.
-            if self._close_was_called or self.context._closing_or_closed:
+            if self._close_was_called or self._browser_context.is_closed():
                 return
             if not route_handler.matches(route.request.url):
                 continue
             if route_handler not in self._routes:
                 continue
-            if route_handler.will_expire:
+            if route_handler.will_expire():
                 self._routes.remove(route_handler)
-            try:
-                handled = await route_handler.handle(route)
-            finally:
-                if len(self._routes) == 0:
-
-                    async def _update_interceptor_patterns_ignore_exceptions() -> None:
-                        try:
-                            await self._update_interception_patterns()
-                        except Error:
-                            pass
-
-                    asyncio.create_task(
-                        self._connection.wrap_api_call(
-                            _update_interceptor_patterns_ignore_exceptions, True
-                        )
-                    )
+            handled = await route_handler.handle(route)
+            if len(self._routes) == 0:
+                create_task_and_ignore_exception(
+                    self._loop, self._disable_interception()
+                )
             if handled:
                 return
         await self._browser_context._on_route(route)
@@ -348,11 +345,12 @@ class Page(ChannelOwner):
         else:
             await self._browser_context._on_web_socket_route(web_socket_route)
 
-    def _on_binding(self, binding_call: "BindingCall") -> None:
+    async def _on_binding(self, binding_call: "BindingCall") -> None:
         func = self._bindings.get(binding_call._initializer["name"])
         if func:
-            asyncio.create_task(binding_call.call(func))
-        self._browser_context._on_binding(binding_call)
+            await binding_call.call(func)
+            return
+        await self._browser_context._on_binding(binding_call)
 
     def _on_worker(self, worker: "Worker") -> None:
         self._workers.append(worker)
@@ -360,12 +358,12 @@ class Page(ChannelOwner):
         self.emit(Page.Events.Worker, worker)
 
     def _on_close(self) -> None:
-        self._is_closed = True
+        self._closed = True
         if self in self._browser_context._pages:
             self._browser_context._pages.remove(self)
         self._dispose_har_routers()
         self.emit(Page.Events.Close, self)
-        self._browser_context.emit("pageclose", self)
+        self._browser_context.emit(self._browser_context.Events.PageClose, self)
 
     def _on_crash(self) -> None:
         self.emit(Page.Events.Crash, self)
@@ -376,7 +374,7 @@ class Page(ChannelOwner):
         artifact = cast(Artifact, from_channel(event["artifact"]))
         download = Download(self, url, suggested_filename, artifact)
         self.emit(Page.Events.Download, download)
-        self._browser_context.emit("download", download)
+        self._browser_context.emit(self._browser_context.Events.Download, download)
 
     def _on_viewport_size_changed(
         self, event: "channels.PageViewportSizeChangedEvent"
@@ -387,12 +385,8 @@ class Page(ChannelOwner):
     def context(self) -> "BrowserContext":
         return self._browser_context
 
-    @property
-    def clock(self) -> Clock:
-        return self._browser_context.clock
-
     async def opener(self) -> Optional["Page"]:
-        if self._opener and self._opener.is_closed():
+        if not self._opener or self._opener.is_closed():
             return None
         return self._opener
 
@@ -401,12 +395,16 @@ class Page(ChannelOwner):
         return self._main_frame
 
     def frame(self, name: Optional[str], url: Optional[URLMatch]) -> Optional[Frame]:
+        if not name and not url:
+            raise Error("Either name or url matcher should be specified")
         for frame in self._frames:
-            if name and frame.name == name:
+            if name:
+                if frame.name == name:
+                    return frame
+            elif url_matches(
+                self._browser_context._options.get("baseURL"), frame.url, url
+            ):
                 return frame
-            if url and url_matches(self._browser_context._base_url, frame.url, url):
-                return frame
-
         return None
 
     @property
@@ -419,15 +417,55 @@ class Page(ChannelOwner):
     def set_default_timeout(self, timeout: float) -> None:
         self._timeout_settings.set_default_timeout(timeout)
 
+    @property
+    def video(self) -> Optional[Video]:
+        # A remote server clears recordVideo.dir and sends {}, which is still set.
+        if self._browser_context._options.get("recordVideo") is None:
+            return None
+        return self._video
+
+    @property
+    def request(self) -> "APIRequestContext":
+        return self.context.request
+
+    @property
+    def clock(self) -> Clock:
+        return self._browser_context.clock
+
+    @property
+    def screencast(self) -> Screencast:
+        return self._screencast
+
+    @property
+    def local_storage(self) -> WebStorage:
+        return self._local_storage
+
+    @property
+    def session_storage(self) -> WebStorage:
+        return self._session_storage
+
+    @property
+    def webmcp(self) -> WebMCP:
+        return self._main_frame.webmcp
+
+    async def pick_locator(self) -> "Locator":
+        selector = (await self._channel.pickLocator())["selector"]
+        return self.locator(
+            selector, has_text=None, has_not_text=None, has=None, has_not=None
+        )
+
+    async def cancel_pick_locator(self) -> None:
+        await self._channel.cancelPickLocator()
+
+    async def hide_highlight(self) -> None:
+        await self._channel.hideHighlight()
+
     async def query_selector(
         self,
         selector: str,
         strict: Optional[bool],
     ) -> Optional[ElementHandle]:
         return await self._main_frame.query_selector(selector, strict=strict)
-
-    async def query_selector_all(self, selector: str) -> List[ElementHandle]:
-        return await self._main_frame.query_selector_all(selector)
 
     async def wait_for_selector(
         self,
@@ -439,62 +477,6 @@ class Page(ChannelOwner):
         return await self._main_frame.wait_for_selector(
             selector, timeout=timeout, state=state, strict=strict
         )
-
-    async def is_checked(
-        self,
-        selector: str,
-        strict: Optional[bool],
-        timeout: Optional[float],
-    ) -> bool:
-        return await self._main_frame.is_checked(
-            selector, strict=strict, timeout=timeout
-        )
-
-    async def is_disabled(
-        self,
-        selector: str,
-        strict: Optional[bool],
-        timeout: Optional[float],
-    ) -> bool:
-        return await self._main_frame.is_disabled(
-            selector, strict=strict, timeout=timeout
-        )
-
-    async def is_editable(
-        self,
-        selector: str,
-        strict: Optional[bool],
-        timeout: Optional[float],
-    ) -> bool:
-        return await self._main_frame.is_editable(
-            selector, strict=strict, timeout=timeout
-        )
-
-    async def is_enabled(
-        self,
-        selector: str,
-        strict: Optional[bool],
-        timeout: Optional[float],
-    ) -> bool:
-        return await self._main_frame.is_enabled(
-            selector, strict=strict, timeout=timeout
-        )
-
-    async def is_hidden(
-        self,
-        selector: str,
-        strict: Optional[bool],
-        timeout: Optional[float],  # Deprecated; does nothing.
-    ) -> bool:
-        return await self._main_frame.is_hidden(selector, strict=strict)
-
-    async def is_visible(
-        self,
-        selector: str,
-        strict: Optional[bool],
-        timeout: Optional[float],  # Deprecated; does nothing.
-    ) -> bool:
-        return await self._main_frame.is_visible(selector, strict=strict)
 
     async def dispatch_event(
         self,
@@ -511,9 +493,6 @@ class Page(ChannelOwner):
             timeout=timeout,
             strict=strict,
         )
-
-    async def evaluate(self, expression: str, arg: Optional[Serializable]) -> Any:
-        return await self._main_frame.evaluate(expression, arg=arg)
 
     async def evaluate_handle(
         self, expression: str, arg: Optional[Serializable]
@@ -541,6 +520,9 @@ class Page(ChannelOwner):
             selector, expression, arg=arg
         )
 
+    async def query_selector_all(self, selector: str) -> List[ElementHandle]:
+        return await self._main_frame.query_selector_all(selector)
+
     async def add_script_tag(
         self,
         url: Optional[str],
@@ -561,27 +543,20 @@ class Page(ChannelOwner):
         return await self._main_frame.add_style_tag(url=url, path=path, content=content)
 
     async def expose_function(self, name: str, callback: Callable) -> Disposable:
-        return await self.expose_binding(
-            name, callback=lambda source, *args: callback(*args)
-        )
+        result = await self._channel.exposeBinding(name=name, noGlobal=None)
+        self._bindings[name] = lambda source, *args: callback(*args)
+        return from_channel(result["disposable"])
 
-    # The client checks for duplicates before it calls the driver.
-    @api_call
     async def expose_binding(self, name: str, callback: Callable) -> Disposable:
-        if name in self._bindings:
-            raise Error(f'Function "{name}" has been already registered')
-        if name in self._browser_context._bindings:
-            raise Error(
-                f'Function "{name}" has been already registered in the browser context'
-            )
+        result = await self._channel.exposeBinding(name=name, noGlobal=None)
         self._bindings[name] = callback
-        return from_channel(
-            (await self._channel.exposeBinding(name=name, noGlobal=None))["disposable"]
-        )
+        return from_channel(result["disposable"])
 
     async def set_extra_http_headers(self, headers: Dict[str, str]) -> None:
         validate_headers(headers)
-        await self._channel.setExtraHTTPHeaders(headers=serialize_headers(headers))
+        await self._channel.setExtraHTTPHeaders(
+            headers=headers_object_to_array(headers)
+        )
 
     @property
     def url(self) -> str:
@@ -615,10 +590,73 @@ class Page(ChannelOwner):
         wait_until: Optional[DocumentLoadState],
     ) -> Optional[Response]:
         result = await self._channel.reload(
-            waitUntil=wait_until,
+            waitUntil=verify_load_state(
+                "wait_until", "load" if wait_until is None else wait_until
+            ),
             timeout=self._timeout_settings.navigation_timeout(timeout),
         )
         return from_nullable_channel(result["response"])
+
+    async def add_locator_handler(
+        self,
+        locator: "Locator",
+        handler: Union[Callable[["Locator"], Any], Callable[[], Any]],
+        no_wait_after: Optional[bool],
+        times: Optional[int],
+    ) -> None:
+        if locator._frame != self._main_frame:
+            raise Error("Locator must belong to the main frame of this page")
+        if times == 0:
+            return
+        result = await self._channel.registerLocatorHandler(
+            selector=locator._selector, noWaitAfter=no_wait_after
+        )
+        uid = result["uid"]
+        self._locator_handlers[uid] = LocatorHandler(
+            handler=handler, times=times, locator=locator
+        )
+
+    async def _on_locator_handler_triggered(self, uid: int) -> None:
+        remove = False
+        try:
+            handler = self._locator_handlers.get(uid)
+            if handler and handler.times != 0:
+                if handler.times is not None:
+                    handler.times -= 1
+                if self._dispatcher_fiber:
+                    handler_finished_future = self._loop.create_future()
+
+                    def _handler() -> None:
+                        try:
+                            handler()
+                            handler_finished_future.set_result(None)
+                        except Exception as e:
+                            handler_finished_future.set_exception(e)
+
+                    g = LocatorHandlerGreenlet(_handler)
+                    g.switch()
+                    await handler_finished_future
+                else:
+                    result = handler()
+                    if inspect.isawaitable(result):
+                        await result
+            remove = handler is not None and handler.times == 0
+        finally:
+            if remove:
+                self._locator_handlers.pop(uid, None)
+            create_task_and_ignore_exception(
+                self._loop,
+                self._channel.resolveLocatorHandlerNoReply(uid=uid, remove=remove),
+            )
+
+    async def remove_locator_handler(self, locator: "Locator") -> None:
+        for uid, data in list(self._locator_handlers.items()):
+            if data.locator._equals(locator):
+                del self._locator_handlers[uid]
+                try:
+                    await self._channel.unregisterLocatorHandler(uid=uid)
+                except Exception:
+                    pass
 
     async def wait_for_load_state(
         self,
@@ -627,6 +665,16 @@ class Page(ChannelOwner):
     ) -> None:
         await self._main_frame.wait_for_load_state(state=state, timeout=timeout)
 
+    def expect_navigation(
+        self,
+        url: Optional[URLMatch],
+        wait_until: Optional[DocumentLoadState],
+        timeout: Optional[float],
+    ) -> EventContextManagerImpl[Response]:
+        return self.main_frame.expect_navigation(
+            url=url, wait_until=wait_until, timeout=timeout
+        )
+
     async def wait_for_url(
         self,
         url: URLMatch,
@@ -634,6 +682,62 @@ class Page(ChannelOwner):
         timeout: Optional[float],
     ) -> None:
         await self._main_frame.wait_for_url(url, wait_until=wait_until, timeout=timeout)
+
+    def expect_request(
+        self,
+        url_or_predicate: URLMatchRequest,
+        timeout: Optional[float],
+    ) -> EventContextManagerImpl[Request]:
+        def my_predicate(request: Request) -> Union[bool, Awaitable[bool]]:
+            if not callable(url_or_predicate):
+                return url_matches(
+                    self._browser_context._options.get("baseURL"),
+                    request.url,
+                    url_or_predicate,
+                )
+            return url_or_predicate(request)
+
+        trimmed_url = trim_url(url_or_predicate)
+        log_line = f"waiting for request {trimmed_url}" if trimmed_url else None
+        return self._expect_event(
+            Page.Events.Request,
+            predicate=my_predicate,
+            timeout=timeout,
+            log_line=log_line,
+        )
+
+    def expect_response(
+        self,
+        url_or_predicate: URLMatchResponse,
+        timeout: Optional[float],
+    ) -> EventContextManagerImpl[Response]:
+        def my_predicate(response: Response) -> Union[bool, Awaitable[bool]]:
+            if not callable(url_or_predicate):
+                return url_matches(
+                    self._browser_context._options.get("baseURL"),
+                    response.url,
+                    url_or_predicate,
+                )
+            return url_or_predicate(response)
+
+        trimmed_url = trim_url(url_or_predicate)
+        log_line = f"waiting for response {trimmed_url}" if trimmed_url else None
+        return self._expect_event(
+            Page.Events.Response,
+            predicate=my_predicate,
+            timeout=timeout,
+            log_line=log_line,
+        )
+
+    def expect_event(
+        self,
+        event: str,
+        predicate: Optional[Callable],
+        timeout: Optional[float],
+    ) -> EventContextManagerImpl:
+        return self._expect_event(
+            event, predicate, timeout, f'waiting for event "{event}"'
+        )
 
     @api_call
     async def wait_for_event(
@@ -645,13 +749,110 @@ class Page(ChannelOwner):
             pass
         return await event_info
 
+    def _close_error_with_reason(self) -> TargetClosedError:
+        return TargetClosedError(
+            self._close_reason or self._browser_context._effective_close_reason()
+        )
+
+    # Port of _waitForEvent() in page.ts. Its callers waitForEvent(),
+    # waitForRequest() and waitForResponse() are @apiCall()s.
+    @api_call
+    def _expect_event(
+        self,
+        event: str,
+        predicate: Callable = None,
+        timeout: float = None,
+        log_line: str = None,
+    ) -> EventContextManagerImpl:
+        timeout = self._timeout_settings.timeout(timeout)
+        waiter = Waiter.create_for_event(self, event)
+        if log_line:
+            waiter.log(log_line)
+        waiter.reject_on_timeout(
+            timeout,
+            f'Timeout {js_string(timeout)}ms exceeded while waiting for event "{event}"',
+        )
+        if event != Page.Events.Crash:
+            waiter.reject_on_event(self, Page.Events.Crash, Error("Page crashed"))
+        if event != Page.Events.Close:
+            waiter.reject_on_event(
+                self, Page.Events.Close, lambda: self._close_error_with_reason()
+            )
+        waiter.wait_for_event(self, event, predicate)
+        return EventContextManagerImpl(waiter.result())
+
+    def expect_console_message(
+        self,
+        predicate: Optional[Callable[[ConsoleMessage], bool]],
+        timeout: Optional[float],
+    ) -> EventContextManagerImpl[ConsoleMessage]:
+        return self.expect_event(
+            Page.Events.Console, predicate=predicate, timeout=timeout
+        )
+
+    def expect_download(
+        self,
+        predicate: Optional[Callable[[Download], bool]],
+        timeout: Optional[float],
+    ) -> EventContextManagerImpl[Download]:
+        return self.expect_event(
+            Page.Events.Download, predicate=predicate, timeout=timeout
+        )
+
+    def expect_file_chooser(
+        self,
+        predicate: Optional[Callable[[FileChooser], bool]],
+        timeout: Optional[float],
+    ) -> EventContextManagerImpl[FileChooser]:
+        return self.expect_event(
+            Page.Events.FileChooser, predicate=predicate, timeout=timeout
+        )
+
+    def expect_popup(
+        self,
+        predicate: Optional[Callable[["Page"], bool]],
+        timeout: Optional[float],
+    ) -> EventContextManagerImpl["Page"]:
+        return self.expect_event(
+            Page.Events.Popup, predicate=predicate, timeout=timeout
+        )
+
+    def expect_request_finished(
+        self,
+        predicate: Optional[Callable[["Request"], bool]],
+        timeout: Optional[float],
+    ) -> EventContextManagerImpl[Request]:
+        return self.expect_event(
+            Page.Events.RequestFinished, predicate=predicate, timeout=timeout
+        )
+
+    def expect_websocket(
+        self,
+        predicate: Optional[Callable[["WebSocket"], bool]],
+        timeout: Optional[float],
+    ) -> EventContextManagerImpl["WebSocket"]:
+        return self.expect_event(
+            Page.Events.WebSocket, predicate=predicate, timeout=timeout
+        )
+
+    def expect_worker(
+        self,
+        predicate: Optional[Callable[["Worker"], bool]],
+        timeout: Optional[float],
+    ) -> EventContextManagerImpl["Worker"]:
+        return self.expect_event(
+            Page.Events.Worker, predicate=predicate, timeout=timeout
+        )
+
     async def go_back(
         self,
         timeout: Optional[float],
         wait_until: Optional[DocumentLoadState],
     ) -> Optional[Response]:
         result = await self._channel.goBack(
-            waitUntil=wait_until,
+            waitUntil=verify_load_state(
+                "wait_until", "load" if wait_until is None else wait_until
+            ),
             timeout=self._timeout_settings.navigation_timeout(timeout),
         )
         return from_nullable_channel(result["response"])
@@ -662,7 +863,9 @@ class Page(ChannelOwner):
         wait_until: Optional[DocumentLoadState],
     ) -> Optional[Response]:
         result = await self._channel.goForward(
-            waitUntil=wait_until,
+            waitUntil=verify_load_state(
+                "wait_until", "load" if wait_until is None else wait_until
+            ),
             timeout=self._timeout_settings.navigation_timeout(timeout),
         )
         return from_nullable_channel(result["response"])
@@ -696,94 +899,35 @@ class Page(ChannelOwner):
     def viewport_size(self) -> Optional[ViewportSize]:
         return self._viewport_size
 
-    async def bring_to_front(self) -> None:
-        await self._channel.bringToFront()
-
-    async def hide_highlight(self) -> None:
-        await self._channel.hideHighlight()
+    async def evaluate(self, expression: str, arg: Optional[Serializable]) -> Any:
+        return await self._main_frame.evaluate(expression, arg=arg)
 
     async def add_init_script(
         self, script: Optional[str], path: Optional[Union[str, Path]]
     ) -> Disposable:
-        if path:
-            script = add_source_url_to_script(
-                (await async_readfile(path)).decode(), path
-            )
-        if not isinstance(script, str):
-            raise Error("Either path or script parameter must be present")
+        source = await evaluation_script(script, path)
         return from_channel(
-            (await self._channel.addInitScript(source=script))["disposable"]
+            (await self._channel.addInitScript(source=source))["disposable"]
         )
 
+    @api_call(title="Route requests")
     async def route(
         self, url: URLMatch, handler: RouteHandlerCallback, times: Optional[int]
     ) -> DisposableStub:
         self._routes.insert(
             0,
             RouteHandler(
-                self._browser_context._base_url,
-                url,
-                handler,
-                True if self._dispatcher_fiber else False,
-                times,
+                self._browser_context._options.get("baseURL"), url, handler, times
             ),
         )
         await self._update_interception_patterns()
         return DisposableStub(lambda: self.unroute(url, handler=handler), self)
 
-    async def unroute(
-        self, url: URLMatch, handler: Optional[RouteHandlerCallback]
-    ) -> None:
-        removed = []
-        remaining = []
-        for route in self._routes:
-            if route.url != url or (handler and route.handler != handler):
-                remaining.append(route)
-            else:
-                removed.append(route)
-        await self._unroute_internal(removed, remaining, "default")
-
-    async def _unroute_internal(
-        self,
-        removed: List[RouteHandler],
-        remaining: List[RouteHandler],
-        behavior: Literal["default", "ignoreErrors", "wait"] = None,
-    ) -> None:
-        self._routes = remaining
-        if behavior is not None and behavior != "default":
-            await asyncio.gather(
-                *map(
-                    lambda route: route.stop(behavior),  # type: ignore
-                    removed,
-                )
-            )
-        await self._update_interception_patterns()
-
-    async def route_web_socket(
-        self, url: URLMatch, handler: WebSocketRouteHandlerCallback
-    ) -> None:
-        self._web_socket_routes.insert(
-            0,
-            WebSocketRouteHandler(self._browser_context._base_url, url, handler),
-        )
-        await self._update_web_socket_interception_patterns()
-
-    def _dispose_har_routers(self) -> None:
-        for router in self._har_routers:
-            router.dispose()
-        self._har_routers = []
-
-    async def unroute_all(
-        self, behavior: Optional[Literal["default", "ignoreErrors", "wait"]]
-    ) -> None:
-        await self._unroute_internal(self._routes, [], behavior)
-        self._dispose_har_routers()
-
     async def route_from_har(
         self,
         har: Union[Path, str],
         url: Optional[Union[Pattern[str], str]],
-        not_found: Optional[RouteFromHarNotFoundPolicy],
+        not_found: Optional[Literal["abort", "fallback"]],
         update: Optional[bool],
         update_content: Optional[Literal["attach", "embed"]],
         update_mode: Optional[HarMode],
@@ -801,10 +945,64 @@ class Page(ChannelOwner):
             local_utils=self._connection.local_utils,
             file=str(har),
             not_found_action=not_found or "abort",
-            url_matcher=url,
+            url_match=url,
         )
         self._har_routers.append(router)
         await router.add_page_route(self)
+
+    @api_call(title="Route WebSockets")
+    async def route_web_socket(
+        self, url: URLMatch, handler: WebSocketRouteHandlerCallback
+    ) -> None:
+        self._web_socket_routes.insert(
+            0,
+            WebSocketRouteHandler(
+                self._browser_context._options.get("baseURL"), url, handler
+            ),
+        )
+        await self._update_web_socket_interception_patterns()
+
+    def _dispose_har_routers(self) -> None:
+        for router in self._har_routers:
+            router.dispose()
+        self._har_routers = []
+
+    @api_call(title="Unroute requests")
+    async def unroute_all(
+        self, behavior: Optional[Literal["default", "ignoreErrors", "wait"]]
+    ) -> None:
+        await self._unroute_internal(self._routes, [], behavior)
+        self._dispose_har_routers()
+
+    @api_call(title="Unroute requests")
+    async def unroute(
+        self, url: URLMatch, handler: Optional[RouteHandlerCallback]
+    ) -> None:
+        removed = []
+        remaining = []
+        for route in self._routes:
+            if url_matches_equal(route.url, url) and (
+                not handler or route.handler == handler
+            ):
+                removed.append(route)
+            else:
+                remaining.append(route)
+        await self._unroute_internal(removed, remaining, "default")
+
+    async def _unroute_internal(
+        self,
+        removed: List[RouteHandler],
+        remaining: List[RouteHandler],
+        behavior: Optional[Literal["default", "ignoreErrors", "wait"]],
+    ) -> None:
+        self._routes = remaining
+        if behavior == "ignoreErrors" or behavior == "wait":
+            await asyncio.gather(*[route.stop(behavior) for route in removed])
+        await self._update_interception_patterns()
+
+    @internal
+    async def _disable_interception(self) -> None:
+        await self._update_interception_patterns()
 
     async def _update_interception_patterns(self) -> None:
         await self._channel.setNetworkInterceptionPatterns(
@@ -834,8 +1032,8 @@ class Page(ChannelOwner):
         mask_color: Optional[str],
         style: Optional[str],
     ) -> bytes:
-        if path is not None and type is None:
-            type = determine_screenshot_type(path)
+        if not type:
+            type = determine_screenshot_type(path, type)
         result = await self._channel.screenshot(
             type=type,
             quality=quality,
@@ -859,28 +1057,15 @@ class Page(ChannelOwner):
         )
         decoded_binary = base64.b64decode(result["binary"])
         if path:
-            make_dirs_for_file(path)
+            mkdir_if_needed(path)
             await async_writefile(path, decoded_binary)
         return decoded_binary
 
     async def title(self) -> str:
         return await self._main_frame.title()
 
-    async def aria_snapshot(
-        self,
-        timeout: Optional[float],
-        depth: Optional[int],
-        mode: Optional[Literal["ai", "default"]],
-        boxes: Optional[bool],
-    ) -> str:
-        result = await self._main_frame._channel.ariaSnapshot(
-            mode=mode,
-            selector=None,
-            depth=depth,
-            boxes=boxes,
-            timeout=self._main_frame._timeout(timeout),
-        )
-        return result["snapshot"]
+    async def bring_to_front(self) -> None:
+        await self._channel.bringToFront()
 
     async def close(
         self, run_before_unload: Optional[bool], reason: Optional[str]
@@ -901,7 +1086,7 @@ class Page(ChannelOwner):
             raise e
 
     def is_closed(self) -> bool:
-        return self._is_closed
+        return self._closed
 
     async def click(
         self,
@@ -930,6 +1115,34 @@ class Page(ChannelOwner):
             no_wait_after=no_wait_after,
             trial=trial,
             strict=strict,
+            scroll=scroll,
+        )
+
+    async def drag_and_drop(
+        self,
+        source: str,
+        target: str,
+        source_position: Optional[Position],
+        target_position: Optional[Position],
+        force: Optional[bool],
+        no_wait_after: Optional[bool],
+        timeout: Optional[float],
+        strict: Optional[bool],
+        trial: Optional[bool],
+        steps: Optional[int],
+        scroll: Optional[Literal["auto", "none"]],
+    ) -> None:
+        await self._main_frame.drag_and_drop(
+            source,
+            target,
+            source_position=source_position,
+            target_position=target_position,
+            force=force,
+            no_wait_after=no_wait_after,
+            timeout=timeout,
+            strict=strict,
+            trial=trial,
+            steps=steps,
             scroll=scroll,
         )
 
@@ -1003,6 +1216,27 @@ class Page(ChannelOwner):
             force=force,
         )
 
+    async def clear_console_messages(self) -> None:
+        await self._channel.clearConsoleMessages()
+
+    async def console_messages(
+        self, filter: Optional[Literal["all", "since-navigation"]]
+    ) -> List[ConsoleMessage]:
+        result = await self._channel.consoleMessages(filter=filter)
+        return [
+            ConsoleMessage(message, self, None, self._loop, self._dispatcher_fiber)
+            for message in result["messages"]
+        ]
+
+    async def clear_page_errors(self) -> None:
+        await self._channel.clearPageErrors()
+
+    async def page_errors(
+        self, filter: Optional[Literal["all", "since-navigation"]]
+    ) -> List[Error]:
+        result = await self._channel.pageErrors(filter=filter)
+        return [parse_error(error) for error in result["errors"]]
+
     def locator(
         self,
         selector: str,
@@ -1018,6 +1252,9 @@ class Page(ChannelOwner):
             has=has,
             has_not=has_not,
         )
+
+    def get_by_test_id(self, test_id: Union[str, Pattern[str]]) -> "Locator":
+        return self._main_frame.get_by_test_id(test_id)
 
     def get_by_alt_text(
         self, text: Union[str, Pattern[str]], exact: Optional[bool]
@@ -1038,6 +1275,16 @@ class Page(ChannelOwner):
         return self.locator(
             f"aria-ref={ref}", has_text=None, has_not_text=None, has=None, has_not=None
         )
+
+    def get_by_text(
+        self, text: Union[str, Pattern[str]], exact: Optional[bool]
+    ) -> "Locator":
+        return self._main_frame.get_by_text(text, exact=exact)
+
+    def get_by_title(
+        self, text: Union[str, Pattern[str]], exact: Optional[bool]
+    ) -> "Locator":
+        return self._main_frame.get_by_title(text, exact=exact)
 
     def get_by_role(
         self,
@@ -1066,19 +1313,6 @@ class Page(ChannelOwner):
             exact=exact,
             description=description,
         )
-
-    def get_by_test_id(self, test_id: Union[str, Pattern[str]]) -> "Locator":
-        return self._main_frame.get_by_test_id(test_id)
-
-    def get_by_text(
-        self, text: Union[str, Pattern[str]], exact: Optional[bool]
-    ) -> "Locator":
-        return self._main_frame.get_by_text(text, exact=exact)
-
-    def get_by_title(
-        self, text: Union[str, Pattern[str]], exact: Optional[bool]
-    ) -> "Locator":
-        return self._main_frame.get_by_title(text, exact=exact)
 
     def frame_locator(self, selector: Optional[str]) -> "FrameLocator":
         return self.main_frame.frame_locator(selector=selector)
@@ -1132,6 +1366,72 @@ class Page(ChannelOwner):
             selector, name, strict=strict, timeout=timeout
         )
 
+    async def input_value(
+        self,
+        selector: str,
+        strict: Optional[bool],
+        timeout: Optional[float],
+    ) -> str:
+        return await self._main_frame.input_value(
+            selector, strict=strict, timeout=timeout
+        )
+
+    async def is_checked(
+        self,
+        selector: str,
+        strict: Optional[bool],
+        timeout: Optional[float],
+    ) -> bool:
+        return await self._main_frame.is_checked(
+            selector, strict=strict, timeout=timeout
+        )
+
+    async def is_disabled(
+        self,
+        selector: str,
+        strict: Optional[bool],
+        timeout: Optional[float],
+    ) -> bool:
+        return await self._main_frame.is_disabled(
+            selector, strict=strict, timeout=timeout
+        )
+
+    async def is_editable(
+        self,
+        selector: str,
+        strict: Optional[bool],
+        timeout: Optional[float],
+    ) -> bool:
+        return await self._main_frame.is_editable(
+            selector, strict=strict, timeout=timeout
+        )
+
+    async def is_enabled(
+        self,
+        selector: str,
+        strict: Optional[bool],
+        timeout: Optional[float],
+    ) -> bool:
+        return await self._main_frame.is_enabled(
+            selector, strict=strict, timeout=timeout
+        )
+
+    async def is_hidden(
+        self,
+        selector: str,
+        strict: Optional[bool],
+        timeout: Optional[float],  # Deprecated; does nothing.
+    ) -> bool:
+        return await self._main_frame.is_hidden(selector, strict=strict)
+
+    async def is_visible(
+        self,
+        selector: str,
+        strict: Optional[bool],
+        timeout: Optional[float],  # Deprecated; does nothing.
+    ) -> bool:
+        return await self._main_frame.is_visible(selector, strict=strict)
+
     async def hover(
         self,
         selector: str,
@@ -1153,34 +1453,6 @@ class Page(ChannelOwner):
             force=force,
             strict=strict,
             trial=trial,
-            scroll=scroll,
-        )
-
-    async def drag_and_drop(
-        self,
-        source: str,
-        target: str,
-        source_position: Optional[Position],
-        target_position: Optional[Position],
-        force: Optional[bool],
-        no_wait_after: Optional[bool],
-        timeout: Optional[float],
-        strict: Optional[bool],
-        trial: Optional[bool],
-        steps: Optional[int],
-        scroll: Optional[Literal["auto", "none"]],
-    ) -> None:
-        await self._main_frame.drag_and_drop(
-            source,
-            target,
-            source_position=source_position,
-            target_position=target_position,
-            force=force,
-            no_wait_after=no_wait_after,
-            timeout=timeout,
-            strict=strict,
-            trial=trial,
-            steps=steps,
             scroll=scroll,
         )
 
@@ -1206,16 +1478,6 @@ class Page(ChannelOwner):
             no_wait_after=no_wait_after,
             force=force,
             strict=strict,
-        )
-
-    async def input_value(
-        self,
-        selector: str,
-        strict: Optional[bool],
-        timeout: Optional[float],
-    ) -> str:
-        return await self._main_frame.input_value(
-            selector, strict=strict, timeout=timeout
         )
 
     async def set_input_files(
@@ -1316,6 +1578,30 @@ class Page(ChannelOwner):
             scroll=scroll,
         )
 
+    async def set_checked(
+        self,
+        selector: str,
+        checked: bool,
+        position: Optional[Position],
+        timeout: Optional[float],
+        force: Optional[bool],
+        no_wait_after: Optional[bool],
+        strict: Optional[bool],
+        trial: Optional[bool],
+        scroll: Optional[Literal["auto", "none"]],
+    ) -> None:
+        await self._main_frame.set_checked(
+            selector,
+            checked,
+            position=position,
+            timeout=timeout,
+            force=force,
+            no_wait_after=no_wait_after,
+            strict=strict,
+            trial=trial,
+            scroll=scroll,
+        )
+
     async def wait_for_timeout(self, timeout: float) -> None:
         await self._main_frame.wait_for_timeout(timeout)
 
@@ -1330,13 +1616,13 @@ class Page(ChannelOwner):
             expression, arg=arg, timeout=timeout, polling=polling
         )
 
+    async def requests(self) -> List[Request]:
+        result = await self._channel.requests()
+        return [from_channel(r) for r in result["requests"]]
+
     @property
     def workers(self) -> List["Worker"]:
         return self._workers.copy()
-
-    @property
-    def request(self) -> "APIRequestContext":
-        return self.context.request
 
     async def pause(self) -> None:
         default_navigation_timeout = (
@@ -1345,19 +1631,27 @@ class Page(ChannelOwner):
         default_timeout = self._browser_context._timeout_settings.default_timeout()
         self._browser_context.set_default_navigation_timeout(0)
         self._browser_context.set_default_timeout(0)
+        # Unlike upstream, restore the timeouts also when the pause fails or the
+        # task is cancelled.
         try:
+            # Port of _closedOrCrashedScope.safeRace(): the pause ends when the page
+            # closes or crashes, and fails when the pause call fails first.
+            pause = self._loop.create_task(self._browser_context._channel.pause())
             await asyncio.wait(
-                [
-                    asyncio.create_task(self._browser_context._channel.pause()),
-                    self._closed_or_crashed_future,
-                ],
+                [pause, self._closed_or_crashed_future],
                 return_when=asyncio.FIRST_COMPLETED,
             )
+            if not self._closed_or_crashed_future.done():
+                pause.result()
+            else:
+                pause.add_done_callback(
+                    lambda _: pause.cancelled() or pause.exception()
+                )
         finally:
-            self._browser_context._set_default_navigation_timeout_impl(
+            self._browser_context.set_default_navigation_timeout(
                 default_navigation_timeout
             )
-            self._browser_context._set_default_timeout_impl(default_timeout)
+            self._browser_context.set_default_timeout(default_timeout)
 
     async def pdf(
         self,
@@ -1404,326 +1698,25 @@ class Page(ChannelOwner):
         )
         decoded_binary = base64.b64decode(result["pdf"])
         if path:
-            make_dirs_for_file(path)
+            os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
             await async_writefile(path, decoded_binary)
         return decoded_binary
 
-    @property
-    def video(self) -> Optional[Video]:
-        # Video is only exposed when the page actually produced a recording artifact.
-        # The initializer carries the artifact; if absent, no video was recorded.
-        if not self._video._artifact:
-            return None
-        return self._video
-
-    @property
-    def screencast(self) -> Screencast:
-        return self._screencast
-
-    @property
-    def webmcp(self) -> WebMCP:
-        return self._main_frame.webmcp
-
-    @property
-    def local_storage(self) -> WebStorage:
-        return self._local_storage
-
-    @property
-    def session_storage(self) -> WebStorage:
-        return self._session_storage
-
-    def _close_error_with_reason(self) -> TargetClosedError:
-        return TargetClosedError(
-            self._close_reason or self._browser_context._effective_close_reason()
-        )
-
-    def expect_event(
+    async def aria_snapshot(
         self,
-        event: str,
-        predicate: Optional[Callable],
         timeout: Optional[float],
-    ) -> EventContextManagerImpl:
-        return self._expect_event(
-            event, predicate, timeout, f'waiting for event "{event}"'
+        depth: Optional[int],
+        mode: Optional[Literal["ai", "default"]],
+        boxes: Optional[bool],
+    ) -> str:
+        result = await self._main_frame._channel.ariaSnapshot(
+            mode=mode,
+            selector=None,
+            depth=depth,
+            boxes=boxes,
+            timeout=self._timeout_settings.timeout(timeout),
         )
-
-    # Port of _waitForEvent() in page.ts. Its callers waitForEvent(),
-    # waitForRequest() and waitForResponse() are @apiCall()s.
-    @api_call
-    def _expect_event(
-        self,
-        event: str,
-        predicate: Callable = None,
-        timeout: float = None,
-        log_line: str = None,
-    ) -> EventContextManagerImpl:
-        if timeout is None:
-            timeout = self._timeout_settings.timeout()
-        waiter = Waiter(self, event)
-        waiter.reject_on_timeout(
-            timeout, f'Timeout {timeout}ms exceeded while waiting for event "{event}"'
-        )
-        if log_line:
-            waiter.log(log_line)
-        if event != Page.Events.Crash:
-            waiter.reject_on_event(self, Page.Events.Crash, Error("Page crashed"))
-        if event != Page.Events.Close:
-            waiter.reject_on_event(
-                self, Page.Events.Close, lambda: self._close_error_with_reason()
-            )
-        waiter.wait_for_event(self, event, predicate)
-        return EventContextManagerImpl(waiter.result())
-
-    def expect_console_message(
-        self,
-        predicate: Optional[Callable[[ConsoleMessage], bool]],
-        timeout: Optional[float],
-    ) -> EventContextManagerImpl[ConsoleMessage]:
-        return self.expect_event(
-            Page.Events.Console, predicate=predicate, timeout=timeout
-        )
-
-    def expect_download(
-        self,
-        predicate: Optional[Callable[[Download], bool]],
-        timeout: Optional[float],
-    ) -> EventContextManagerImpl[Download]:
-        return self.expect_event(
-            Page.Events.Download, predicate=predicate, timeout=timeout
-        )
-
-    def expect_file_chooser(
-        self,
-        predicate: Optional[Callable[[FileChooser], bool]],
-        timeout: Optional[float],
-    ) -> EventContextManagerImpl[FileChooser]:
-        return self.expect_event(
-            Page.Events.FileChooser, predicate=predicate, timeout=timeout
-        )
-
-    def expect_navigation(
-        self,
-        url: Optional[URLMatch],
-        wait_until: Optional[DocumentLoadState],
-        timeout: Optional[float],
-    ) -> EventContextManagerImpl[Response]:
-        return self.main_frame.expect_navigation(
-            url=url, wait_until=wait_until, timeout=timeout
-        )
-
-    def expect_popup(
-        self,
-        predicate: Optional[Callable[["Page"], bool]],
-        timeout: Optional[float],
-    ) -> EventContextManagerImpl["Page"]:
-        return self.expect_event(
-            Page.Events.Popup, predicate=predicate, timeout=timeout
-        )
-
-    def expect_request(
-        self,
-        url_or_predicate: URLMatchRequest,
-        timeout: Optional[float],
-    ) -> EventContextManagerImpl[Request]:
-        def my_predicate(request: Request) -> Union[bool, Awaitable[bool]]:
-            if not callable(url_or_predicate):
-                return url_matches(
-                    self._browser_context._base_url,
-                    request.url,
-                    url_or_predicate,
-                )
-            return url_or_predicate(request)
-
-        trimmed_url = trim_url(url_or_predicate)
-        log_line = f"waiting for request {trimmed_url}" if trimmed_url else None
-        return self._expect_event(
-            Page.Events.Request,
-            predicate=my_predicate,
-            timeout=timeout,
-            log_line=log_line,
-        )
-
-    def expect_request_finished(
-        self,
-        predicate: Optional[Callable[["Request"], bool]],
-        timeout: Optional[float],
-    ) -> EventContextManagerImpl[Request]:
-        return self.expect_event(
-            Page.Events.RequestFinished, predicate=predicate, timeout=timeout
-        )
-
-    def expect_response(
-        self,
-        url_or_predicate: URLMatchResponse,
-        timeout: Optional[float],
-    ) -> EventContextManagerImpl[Response]:
-        def my_predicate(request: Response) -> Union[bool, Awaitable[bool]]:
-            if not callable(url_or_predicate):
-                return url_matches(
-                    self._browser_context._base_url,
-                    request.url,
-                    url_or_predicate,
-                )
-            return url_or_predicate(request)
-
-        trimmed_url = trim_url(url_or_predicate)
-        log_line = f"waiting for response {trimmed_url}" if trimmed_url else None
-        return self._expect_event(
-            Page.Events.Response,
-            predicate=my_predicate,
-            timeout=timeout,
-            log_line=log_line,
-        )
-
-    def expect_websocket(
-        self,
-        predicate: Optional[Callable[["WebSocket"], bool]],
-        timeout: Optional[float],
-    ) -> EventContextManagerImpl["WebSocket"]:
-        return self.expect_event("websocket", predicate=predicate, timeout=timeout)
-
-    def expect_worker(
-        self,
-        predicate: Optional[Callable[["Worker"], bool]],
-        timeout: Optional[float],
-    ) -> EventContextManagerImpl["Worker"]:
-        return self.expect_event("worker", predicate=predicate, timeout=timeout)
-
-    async def set_checked(
-        self,
-        selector: str,
-        checked: bool,
-        position: Optional[Position],
-        timeout: Optional[float],
-        force: Optional[bool],
-        no_wait_after: Optional[bool],
-        strict: Optional[bool],
-        trial: Optional[bool],
-        scroll: Optional[Literal["auto", "none"]],
-    ) -> None:
-        if checked:
-            await self.check(
-                selector,
-                position=position,
-                timeout=timeout,
-                force=force,
-                no_wait_after=no_wait_after,
-                strict=strict,
-                trial=trial,
-                scroll=scroll,
-            )
-        else:
-            await self.uncheck(
-                selector,
-                position=position,
-                timeout=timeout,
-                force=force,
-                no_wait_after=no_wait_after,
-                strict=strict,
-                trial=trial,
-                scroll=scroll,
-            )
-
-    async def add_locator_handler(
-        self,
-        locator: "Locator",
-        handler: Union[Callable[["Locator"], Any], Callable[[], Any]],
-        no_wait_after: Optional[bool],
-        times: Optional[int],
-    ) -> None:
-        if locator._frame != self._main_frame:
-            raise Error("Locator must belong to the main frame of this page")
-        if times == 0:
-            return
-        result = await self._channel.registerLocatorHandler(
-            selector=locator._selector, noWaitAfter=no_wait_after
-        )
-        uid = result["uid"]
-        self._locator_handlers[uid] = LocatorHandler(
-            handler=handler, times=times, locator=locator
-        )
-
-    async def _on_locator_handler_triggered(self, uid: int) -> None:
-        remove = False
-        try:
-            handler = self._locator_handlers.get(uid)
-            if handler and handler.times != 0:
-                if handler.times is not None:
-                    handler.times -= 1
-                if self._dispatcher_fiber:
-                    handler_finished_future = self._loop.create_future()
-
-                    def _handler() -> None:
-                        try:
-                            handler()
-                            handler_finished_future.set_result(None)
-                        except Exception as e:
-                            handler_finished_future.set_exception(e)
-
-                    g = LocatorHandlerGreenlet(_handler)
-                    g.switch()
-                    await handler_finished_future
-                else:
-                    coro_or_future = handler()
-                    if coro_or_future:
-                        await coro_or_future
-                remove = handler.times == 0
-        finally:
-            if remove:
-                del self._locator_handlers[uid]
-            try:
-                await self._connection.wrap_api_call(
-                    lambda: self._channel.resolveLocatorHandlerNoReply(
-                        uid=uid, remove=remove
-                    ),
-                    is_internal=True,
-                )
-            except Error:
-                pass
-
-    async def remove_locator_handler(self, locator: "Locator") -> None:
-        for uid, data in self._locator_handlers.copy().items():
-            if data.locator._equals(locator):
-                del self._locator_handlers[uid]
-                self._channel.send_no_reply("unregisterLocatorHandler", {"uid": uid})
-
-    async def requests(self) -> List[Request]:
-        result = await self._channel.requests()
-        return [from_channel(r) for r in result["requests"]]
-
-    async def console_messages(
-        self, filter: Optional[Literal["all", "since-navigation"]]
-    ) -> List[ConsoleMessage]:
-        result = await self._channel.consoleMessages(filter=filter)
-        return [
-            ConsoleMessage(
-                {**event, "page": self._channel, "worker": None},
-                self._loop,
-                self._dispatcher_fiber,
-            )
-            for event in result["messages"]
-        ]
-
-    async def page_errors(
-        self, filter: Optional[Literal["all", "since-navigation"]]
-    ) -> List[Error]:
-        result = await self._channel.pageErrors(filter=filter)
-        return [parse_error(error["error"]) for error in result["errors"]]
-
-    async def clear_console_messages(self) -> None:
-        await self._channel.clearConsoleMessages()
-
-    async def clear_page_errors(self) -> None:
-        await self._channel.clearPageErrors()
-
-    async def pick_locator(self) -> "Locator":
-        selector = (await self._channel.pickLocator())["selector"]
-        return self.locator(
-            selector, has_text=None, has_not_text=None, has=None, has_not=None
-        )
-
-    async def cancel_pick_locator(self) -> None:
-        await self._channel.cancelPickLocator()
+        return result["snapshot"]
 
 
 class Worker(ChannelOwner):
@@ -1735,20 +1728,40 @@ class Worker(ChannelOwner):
         self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
     ) -> None:
         super().__init__(parent, type, guid, initializer)
-        self._set_event_to_subscription_mapping({Worker.Events.Console: "console"})
-        self._channel.onClose(lambda: self._on_close())
+        # Set for web workers.
         self._page: Optional[Page] = None
+        # Set for service workers.
         self._context: Optional["BrowserContext"] = None
+        self._set_event_to_subscription_mapping({Worker.Events.Console: "console"})
+        # Note: we only receive console events here for workers from "chromium._connectToWorker".
+        self._channel.onConsole(
+            lambda event: self.emit(
+                Worker.Events.Console,
+                ConsoleMessage(event, None, self, self._loop, self._dispatcher_fiber),
+            )
+        )
+        self._channel.onClose(lambda: self._on_close())
+        # The counterpart of _closedScope in worker.ts.
+        self._closed_future: asyncio.Future = self._loop.create_future()
+        self.once(
+            Worker.Events.Close,
+            lambda _: self._closed_future.set_result(self._close_error_with_reason()),
+        )
 
     def __repr__(self) -> str:
         return f"<Worker url={self.url!r}>"
 
     def _on_close(self) -> None:
-        if self._page:
+        if self._page and self in self._page._workers:
             self._page._workers.remove(self)
         if self._context:
-            self._context._service_workers.remove(self)
+            self._context._service_workers.discard(self)
         self.emit(Worker.Events.Close, self)
+
+    def _close_error_with_reason(self) -> TargetClosedError:
+        if self._page:
+            return self._page._close_error_with_reason()
+        return TargetClosedError()
 
     @property
     def url(self) -> str:
@@ -1776,21 +1789,21 @@ class Worker(ChannelOwner):
         predicate: Optional[Callable],
         timeout: Optional[float],
     ) -> EventContextManagerImpl:
-        if timeout is None:
-            if self._page:
-                timeout = self._page._timeout_settings.timeout()
-            elif self._context:
-                timeout = self._context._timeout_settings.timeout()
-            else:
-                timeout = 30000
-        waiter = Waiter(self, event)
+        if self._page:
+            timeout_settings = self._page._timeout_settings
+        elif self._context:
+            timeout_settings = self._context._timeout_settings
+        else:
+            timeout_settings = TimeoutSettings(None)
+        timeout = timeout_settings.timeout(timeout)
+        waiter = Waiter.create_for_event(self, event)
         waiter.reject_on_timeout(
-            cast(float, timeout),
-            f'Timeout {timeout}ms exceeded while waiting for event "{event}"',
+            timeout,
+            f'Timeout {js_string(timeout)}ms exceeded while waiting for event "{event}"',
         )
         if event != Worker.Events.Close:
             waiter.reject_on_event(
-                self, Worker.Events.Close, lambda: TargetClosedError()
+                self, Worker.Events.Close, lambda: self._close_error_with_reason()
             )
         waiter.wait_for_event(self, event, predicate)
         return EventContextManagerImpl(waiter.result())
@@ -1814,7 +1827,7 @@ class BindingCall(ChannelOwner):
                 result = await self._call_in_greenlet(func, source, func_args)
             else:
                 result = func(source, *func_args)
-                if inspect.iscoroutine(result):
+                if inspect.isawaitable(result):
                     result = await result
             # The callback returns objects of the public API, e.g. a JSHandle.
             # Send their implementation objects, so that handles go by guid.
@@ -1827,7 +1840,7 @@ class BindingCall(ChannelOwner):
             tb = sys.exc_info()[2]
             create_task_and_ignore_exception(
                 self._loop,
-                self._channel.reject(error={"error": serialize_error(e, tb)}),
+                self._channel.reject(error=serialize_error(e, tb)),
             )
 
     def _call_in_greenlet(

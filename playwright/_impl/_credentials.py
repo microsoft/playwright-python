@@ -48,9 +48,6 @@ class Credentials:
         )
         return result["credential"]
 
-    async def delete(self, id: str) -> None:
-        await self._browser_context._channel.credentialsDelete(id=id)
-
     async def get(
         self,
         rp_id: Optional[str],
@@ -58,3 +55,6 @@ class Credentials:
     ) -> List[VirtualCredential]:
         result = await self._browser_context._channel.credentialsGet(rpId=rp_id, id=id)
         return result["credentials"]
+
+    async def delete(self, id: str) -> None:
+        await self._browser_context._channel.credentialsDelete(id=id)

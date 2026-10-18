@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import TYPE_CHECKING, Any, Awaitable, Callable, Coroutine, Dict
+from typing import TYPE_CHECKING, Any, Awaitable, Callable, Coroutine, Dict, Optional
 
 from playwright._impl._connection import (
     ChannelOwner,
@@ -38,8 +38,9 @@ class Disposable(ChannelOwner):
         try:
             await self._channel.dispose()
         except Exception as e:
-            if not is_target_closed_error(e):
-                raise e
+            if is_target_closed_error(e):
+                return
+            raise e
 
     async def close(self) -> None:
         await self.dispose()
@@ -51,15 +52,24 @@ class Disposable(ChannelOwner):
 class DisposableStub:
     def __init__(
         self,
-        dispose_fn: Callable[[], Awaitable[None]],
+        dispose: Callable[[], Awaitable[None]],
         parent: ChannelOwner,
     ) -> None:
-        self._dispose_fn = dispose_fn
+        self._dispose: Optional[Callable[[], Awaitable[None]]] = dispose
         self._loop = parent._loop
         self._dispatcher_fiber = parent._dispatcher_fiber
 
     async def dispose(self) -> None:
-        await self._dispose_fn()
+        if not self._dispose:
+            return
+        try:
+            dispose = self._dispose
+            self._dispose = None
+            await dispose()
+        except Exception as e:
+            if is_target_closed_error(e):
+                return
+            raise e
 
     async def __aenter__(self) -> "DisposableStub":
         return self

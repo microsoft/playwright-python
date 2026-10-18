@@ -20,7 +20,7 @@ from playwright._impl._internal_structures import HeadersArray
 
 
 # Upstream: headersObjectToArray().
-def serialize_headers(headers: Dict[str, str]) -> HeadersArray:
+def headers_object_to_array(headers: Dict[str, str]) -> HeadersArray:
     return [
         {"name": name, "value": value}
         for name, value in headers.items()

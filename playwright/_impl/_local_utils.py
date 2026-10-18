@@ -53,8 +53,8 @@ class LocalUtils(ChannelOwner):
             additionalSources=additional_sources,
         )
 
-    async def har_open(self, file: str) -> None:
-        await self._channel.harOpen(file=file)
+    async def har_open(self, file: str) -> "channels.LocalUtilsHarOpenResult":
+        return await self._channel.harOpen(file=file)
 
     async def har_lookup(
         self,
@@ -88,11 +88,10 @@ class LocalUtils(ChannelOwner):
 
     async def tracing_started(
         self, traces_dir: Optional[str], trace_name: str, live: bool
-    ) -> str:
-        result = await self._channel.tracingStarted(
+    ) -> "channels.LocalUtilsTracingStartedResult":
+        return await self._channel.tracingStarted(
             tracesDir=traces_dir, traceName=trace_name, live=live
         )
-        return result["stacksId"]
 
     async def trace_discarded(self, stacks_id: str) -> None:
         await self._channel.traceDiscarded(stacksId=stacks_id)
@@ -103,7 +102,9 @@ class LocalUtils(ChannelOwner):
             "stack": cast("List[channels.StackFrame]", frames),
             "id": id,
         }
-        self._channel.send_no_reply("addStackToTracingNoReply", {"callData": call_data})
+        self._channel.send_no_reply(
+            "addStackToTracingNoReply", {"callData": call_data}, is_internal=True
+        )
 
 
 def parse_device_descriptor(dict: Dict) -> Dict:

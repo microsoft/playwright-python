@@ -21,6 +21,7 @@ from playwright._impl._internal_structures import AriaRole
 from playwright._impl._str_utils import (
     escape_for_attribute_selector,
     escape_for_text_selector,
+    js_string,
 )
 
 
@@ -39,36 +40,32 @@ def get_by_test_id_selector(
     return f"internal:testid=[{encode_test_id_attribute_name(test_id_attribute_name)}={escape_for_attribute_selector(test_id, True)}]"
 
 
-def get_by_attribute_text_selector(
+def _get_by_attribute_text_selector(
     attr_name: str, text: Union[str, Pattern[str]], exact: bool = None
 ) -> str:
-    return f"internal:attr=[{attr_name}={escape_for_attribute_selector(text, exact=exact)}]"
+    return f"internal:attr=[{attr_name}={escape_for_attribute_selector(text, exact=bool(exact))}]"
 
 
 def get_by_label_selector(text: Union[str, Pattern[str]], exact: bool = None) -> str:
-    return "internal:label=" + escape_for_text_selector(text, exact=exact)
+    return "internal:label=" + escape_for_text_selector(text, exact=bool(exact))
 
 
 def get_by_alt_text_selector(text: Union[str, Pattern[str]], exact: bool = None) -> str:
-    return get_by_attribute_text_selector("alt", text, exact=exact)
+    return _get_by_attribute_text_selector("alt", text, exact=exact)
 
 
 def get_by_title_selector(text: Union[str, Pattern[str]], exact: bool = None) -> str:
-    return get_by_attribute_text_selector("title", text, exact=exact)
+    return _get_by_attribute_text_selector("title", text, exact=exact)
 
 
 def get_by_placeholder_selector(
     text: Union[str, Pattern[str]], exact: bool = None
 ) -> str:
-    return get_by_attribute_text_selector("placeholder", text, exact=exact)
+    return _get_by_attribute_text_selector("placeholder", text, exact=exact)
 
 
 def get_by_text_selector(text: Union[str, Pattern[str]], exact: bool = None) -> str:
-    return "internal:text=" + escape_for_text_selector(text, exact=exact)
-
-
-def bool_to_js_bool(value: bool) -> str:
-    return "true" if value else "false"
+    return "internal:text=" + escape_for_text_selector(text, exact=bool(exact))
 
 
 def get_by_role_selector(
@@ -86,32 +83,32 @@ def get_by_role_selector(
 ) -> str:
     props: List[Tuple[str, str]] = []
     if checked is not None:
-        props.append(("checked", bool_to_js_bool(checked)))
+        props.append(("checked", js_string(checked)))
     if disabled is not None:
-        props.append(("disabled", bool_to_js_bool(disabled)))
+        props.append(("disabled", js_string(disabled)))
     if selected is not None:
-        props.append(("selected", bool_to_js_bool(selected)))
+        props.append(("selected", js_string(selected)))
     if expanded is not None:
-        props.append(("expanded", bool_to_js_bool(expanded)))
+        props.append(("expanded", js_string(expanded)))
     if include_hidden is not None:
-        props.append(("include-hidden", bool_to_js_bool(include_hidden)))
+        props.append(("include-hidden", js_string(include_hidden)))
     if level is not None:
-        props.append(("level", str(level)))
+        props.append(("level", js_string(level)))
     if name is not None:
         props.append(
             (
                 "name",
-                escape_for_attribute_selector(name, exact=exact),
+                escape_for_attribute_selector(name, exact=bool(exact)),
             )
         )
     if description is not None:
         props.append(
             (
                 "description",
-                escape_for_attribute_selector(description, exact=exact),
+                escape_for_attribute_selector(description, exact=bool(exact)),
             )
         )
     if pressed is not None:
-        props.append(("pressed", bool_to_js_bool(pressed)))
+        props.append(("pressed", js_string(pressed)))
     props_str = "".join([f"[{t[0]}={t[1]}]" for t in props])
     return f"internal:role={role}{props_str}"

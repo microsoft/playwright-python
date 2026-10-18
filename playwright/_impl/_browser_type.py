@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import asyncio
+import os
 import pathlib
 from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Optional, Pattern, Sequence, Union, cast
@@ -27,12 +27,12 @@ from playwright._impl._api_structures import (
 from playwright._impl._browser import Browser
 from playwright._impl._browser_context import (
     BrowserContext,
-    to_accept_downloads_params,
-    to_record_video_params,
+    prepare_browser_context_params,
 )
-from playwright._impl._connection import ChannelOwner, Connection, from_channel
-from playwright._impl._errors import Error, TargetClosedError
-from playwright._impl._headers import serialize_headers
+from playwright._impl._connect import connect_to_browser
+from playwright._impl._connection import ChannelOwner, api_call, from_channel
+from playwright._impl._errors import Error
+from playwright._impl._headers import headers_object_to_array
 from playwright._impl._helper import (
     ColorScheme,
     Contrast,
@@ -42,14 +42,8 @@ from playwright._impl._helper import (
     HarMode,
     ReducedMotion,
     ServiceWorkersPolicy,
+    env_object_to_array,
 )
-from playwright._impl._json_pipe import JsonPipeTransport
-from playwright._impl._network import (
-    to_client_certificates_protocol,
-    to_http_credentials_protocol,
-    validate_headers,
-)
-from playwright._impl._time import monotonic_time
 from playwright._impl._timeout_settings import TimeoutSettings
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -76,8 +70,11 @@ class BrowserType(ChannelOwner):
 
     @property
     def executable_path(self) -> str:
+        if not self._initializer.get("executablePath"):
+            raise Error("Browser is not supported on current platform")
         return self._initializer["executablePath"]
 
+    @api_call
     async def launch(
         self,
         executable_path: Optional[Union[str, Path]],
@@ -102,14 +99,14 @@ class BrowserType(ChannelOwner):
             channel=channel,
             executablePath=to_path_param(executable_path),
             args=args,
-            ignoreAllDefaultArgs=True if ignore_default_args is True else None,
+            ignoreAllDefaultArgs=ignore_default_args is True,
             ignoreDefaultArgs=(
                 None if isinstance(ignore_default_args, bool) else ignore_default_args
             ),
             handleSIGINT=handle_sigint,
             handleSIGTERM=handle_sigterm,
             handleSIGHUP=handle_sighup,
-            env=to_env_params(env),
+            env=env_object_to_array(env) if env is not None else None,
             headless=headless,
             proxy=cast("Optional[channels.BrowserTypeLaunchParamsProxy]", proxy),
             downloadsPath=to_path_param(downloads_path),
@@ -119,14 +116,13 @@ class BrowserType(ChannelOwner):
             firefoxUserPrefs=firefox_user_prefs,
             cdpPort=None,
             slowMo=slow_mo,
-            timeout=TimeoutSettings.launch_timeout(timeout),
+            timeout=TimeoutSettings(None).launch_timeout(timeout),
         )
         browser = cast(Browser, from_channel(result["browser"]))
-        browser._connect_to_browser_type(
-            self, str(traces_dir) if traces_dir is not None else None
-        )
+        browser._connect_to_browser_type(self, {"tracesDir": to_path_param(traces_dir)})
         return browser
 
+    @api_call
     async def launch_persistent_context(
         self,
         user_data_dir: Union[str, Path],
@@ -182,21 +178,53 @@ class BrowserType(ChannelOwner):
         client_certificates: Optional[List[ClientCertificate]],
         record_video_fps: Optional[int],
     ) -> BrowserContext:
-        if extra_http_headers:
-            validate_headers(extra_http_headers)
         selectors = self._playwright.selectors
+        context_params = await prepare_browser_context_params(
+            viewport=viewport,
+            screen=screen,
+            no_viewport=no_viewport,
+            ignore_https_errors=ignore_https_errors,
+            java_script_enabled=java_script_enabled,
+            bypass_csp=bypass_csp,
+            user_agent=user_agent,
+            locale=locale,
+            timezone_id=timezone_id,
+            geolocation=geolocation,
+            permissions=permissions,
+            extra_http_headers=extra_http_headers,
+            offline=offline,
+            http_credentials=http_credentials,
+            device_scale_factor=device_scale_factor,
+            is_mobile=is_mobile,
+            has_touch=has_touch,
+            color_scheme=color_scheme,
+            reduced_motion=reduced_motion,
+            forced_colors=forced_colors,
+            contrast=contrast,
+            accept_downloads=accept_downloads,
+            base_url=base_url,
+            record_video_dir=record_video_dir,
+            record_video_size=record_video_size,
+            record_video_fps=record_video_fps,
+            strict_selectors=strict_selectors,
+            service_workers=service_workers,
+            client_certificates=client_certificates,
+            **selectors._with_selector_options(),
+        )
+        user_data_dir = str(user_data_dir)
         result = await self._channel.launchPersistentContext(
+            **context_params,
             channel=channel,
             executablePath=to_path_param(executable_path),
             args=args,
-            ignoreAllDefaultArgs=True if ignore_default_args is True else None,
+            ignoreAllDefaultArgs=ignore_default_args is True,
             ignoreDefaultArgs=(
                 None if isinstance(ignore_default_args, bool) else ignore_default_args
             ),
             handleSIGINT=handle_sigint,
             handleSIGTERM=handle_sigterm,
             handleSIGHUP=handle_sighup,
-            env=to_env_params(env),
+            env=env_object_to_array(env) if env is not None else None,
             headless=headless,
             proxy=cast(
                 "Optional[channels.BrowserTypeLaunchPersistentContextParamsProxy]",
@@ -208,60 +236,16 @@ class BrowserType(ChannelOwner):
             chromiumSandbox=chromium_sandbox,
             firefoxUserPrefs=firefox_user_prefs,
             cdpPort=None,
-            noDefaultViewport=True if no_viewport else None,
-            viewport=viewport,
-            screen=screen,
-            ignoreHTTPSErrors=ignore_https_errors,
-            clientCertificates=cast(
-                "Optional[List[channels.BrowserTypeLaunchPersistentContextParamsClientCertificates]]",
-                await to_client_certificates_protocol(client_certificates),
+            userDataDir=(
+                user_data_dir
+                if os.path.isabs(user_data_dir) or not user_data_dir
+                else os.path.abspath(user_data_dir)
             ),
-            javaScriptEnabled=java_script_enabled,
-            bypassCSP=bypass_csp,
-            userAgent=user_agent,
-            locale=locale,
-            timezoneId=timezone_id,
-            geolocation=cast(
-                "Optional[channels.BrowserTypeLaunchPersistentContextParamsGeolocation]",
-                geolocation,
-            ),
-            permissions=permissions,
-            extraHTTPHeaders=(
-                serialize_headers(extra_http_headers)
-                if extra_http_headers is not None
-                else None
-            ),
-            offline=offline,
-            httpCredentials=cast(
-                "Optional[List[channels.HttpCredentials]]",
-                to_http_credentials_protocol(http_credentials),
-            ),
-            deviceScaleFactor=device_scale_factor,
-            isMobile=is_mobile,
-            hasTouch=has_touch,
-            colorScheme="no-override" if color_scheme == "null" else color_scheme,
-            reducedMotion=(
-                "no-override" if reduced_motion == "null" else reduced_motion
-            ),
-            forcedColors="no-override" if forced_colors == "null" else forced_colors,
-            acceptDownloads=to_accept_downloads_params(accept_downloads),
-            contrast="no-override" if contrast == "null" else contrast,
-            baseURL=base_url,
-            recordVideo=to_record_video_params(
-                record_video_dir, record_video_size, record_video_fps
-            ),
-            strictSelectors=strict_selectors,
-            serviceWorkers=service_workers,
-            selectorEngines=selectors._selector_engines,
-            testIdAttributeName=selectors._test_id_attribute_name,
-            userDataDir=self._user_data_dir(user_data_dir),
             slowMo=slow_mo,
-            timeout=TimeoutSettings.launch_timeout(timeout),
+            timeout=TimeoutSettings(None).launch_timeout(timeout),
         )
         browser = cast(Browser, from_channel(result["browser"]))
-        browser._connect_to_browser_type(
-            self, str(traces_dir) if traces_dir is not None else None
-        )
+        browser._connect_to_browser_type(self, {"tracesDir": to_path_param(traces_dir)})
         context = cast(BrowserContext, from_channel(result["context"]))
         await context._initialize_har_from_options(
             record_har_content=record_har_content,
@@ -271,13 +255,6 @@ class BrowserType(ChannelOwner):
             record_har_url_filter=record_har_url_filter,
         )
         return context
-
-    def _user_data_dir(self, user_data_dir: Optional[Union[str, Path]]) -> str:
-        if not user_data_dir:
-            return ""
-        if not Path(user_data_dir).is_absolute():
-            return str(Path(user_data_dir).resolve())
-        return str(Path(user_data_dir))
 
     async def connect_over_cdp(
         self,
@@ -290,24 +267,29 @@ class BrowserType(ChannelOwner):
         artifacts_dir: Optional[Union[str, Path]],
     ) -> Browser:
         # Port of BrowserType.connectOverCDP() in client/browserType.ts.
-        if self.name != "chromium" and self.name != "webkit":
+        if endpoint_url and self.name != "chromium" and self.name != "webkit":
             raise Error("Connecting over CDP is only supported in Chromium and WebKit.")
         result = await self._channel.connectOverCDP(
             endpointURL=endpoint_url,
-            headers=serialize_headers(headers) if headers is not None else None,
+            transport=None,
+            headers=headers_object_to_array(headers) if headers is not None else None,
             slowMo=slow_mo,
             isLocal=is_local,
             noDefaults=no_defaults,
             isWebView=None,
-            artifactsDir=str(artifacts_dir) if artifacts_dir is not None else None,
-            transport=None,
-            timeout=TimeoutSettings.launch_timeout(timeout),
+            artifactsDir=to_path_param(artifacts_dir),
+            timeout=TimeoutSettings(None).timeout(timeout),
         )
-        browser = cast(Browser, from_channel(result["browser"]))
-        browser._connect_to_browser_type(self, None)
+        return self._browser_from_connect_result(result)
 
+    def _browser_from_connect_result(
+        self, result: "channels.BrowserTypeConnectOverCDPResult"
+    ) -> Browser:
+        browser = cast(Browser, from_channel(result["browser"]))
+        browser._connect_to_browser_type(self, {})
         return browser
 
+    @api_call
     async def connect(
         self,
         endpoint: str,
@@ -316,10 +298,12 @@ class BrowserType(ChannelOwner):
         headers: Optional[Dict[str, str]],
         expose_network: Optional[str],
     ) -> Browser:
-        # Like @apiCall() in client/browserType.ts: the errors that the client
-        # raises itself also start with "BrowserType.connect: ".
-        return await self._connection.wrap_api_call(
-            lambda: self._connect(endpoint, timeout, slow_mo, headers, expose_network)
+        return await self._connect(
+            endpoint=endpoint,
+            timeout=timeout,
+            slow_mo=slow_mo,
+            headers=headers,
+            expose_network=expose_network,
         )
 
     async def _connect(
@@ -330,119 +314,18 @@ class BrowserType(ChannelOwner):
         headers: Optional[Dict[str, str]],
         expose_network: Optional[str],
     ) -> Browser:
-        # Port of connectToBrowser() and connectToEndpoint() in client/connect.ts.
-        if slow_mo is None:
-            slow_mo = 0
-        if timeout is None:
-            timeout = 0
-        deadline = monotonic_time() + timeout if timeout else 0
-
-        headers = {**(headers if headers else {}), "x-playwright-browser": self.name}
-        local_utils = self._connection.local_utils
-        result = await local_utils._channel.connect(
+        browser = await connect_to_browser(
+            self._playwright,
+            browser_name=self.name,
             endpoint=endpoint,
             headers=headers,
-            exposeNetwork=expose_network,
-            slowMo=slow_mo,
-            socksProxyRedirectPortForTest=None,
+            expose_network=expose_network,
+            slow_mo=slow_mo,
             timeout=timeout,
         )
-        transport = JsonPipeTransport(self._connection._loop, result["pipe"])
-
-        connection = Connection(
-            self._connection._dispatcher_fiber,
-            self._connection._object_factory,
-            transport,
-            self._connection._loop,
-            local_utils=self._connection.local_utils,
-        )
-        connection.mark_as_remote()
-        playwright_future = connection.playwright_future
-
-        browser = None
-
-        def handle_transport_close(reason: Optional[str]) -> None:
-            if browser:
-                for context in browser.contexts:
-                    for page in context.pages:
-                        page._on_close()
-                    context._on_close()
-            connection.cleanup(reason)
-            # cleanup() cancels the initialize call; upstream's connection.close()
-            # rejects it with the close error.
-            if not playwright_future.done():
-                playwright_future.set_exception(
-                    connection._closed_error or TargetClosedError(reason)
-                )
-            # Give a chance to any API call promises to reject upon page/context closure.
-            # This happens naturally when we receive page.onClose and browser.onClose from the server
-            # in separate tasks. However, upon pipe closure we used to dispatch them all synchronously
-            # here and promises did not have a chance to reject.
-            # The order of rejects vs closure is a part of the API contract and our test runner
-            # relies on it to attribute rejections to the right test.
-            # The sync API resumes its greenlet in a callback of the task that it waits
-            # for, one loop iteration later, so there the event waits one more iteration.
-            if browser:
-                if connection._is_sync:
-                    connection._loop.call_soon(
-                        connection._loop.call_soon, browser._on_close
-                    )
-                else:
-                    connection._loop.call_soon(browser._on_close)
-
-        transport.once("close", handle_transport_close)
-
-        connection._is_sync = self._connection._is_sync
-        connection._loop.create_task(connection.run())
-
-        def close_connection() -> None:
-            # Port of connection.close() in client/connection.ts, which also closes
-            # the transport in client/connect.ts.
-            if not playwright_future.done():
-                playwright_future.cancel()
-            connection.cleanup()
-            try:
-                transport.request_stop()
-            except Error:
-                pass
-
-        try:
-            done, _ = await asyncio.wait(
-                {transport.on_error_future, playwright_future},
-                timeout=(
-                    max(0, deadline - monotonic_time()) / 1000 if deadline else None
-                ),
-                return_when=asyncio.FIRST_COMPLETED,
-            )
-        except BaseException:
-            close_connection()
-            raise
-        if not done:
-            close_connection()
-            raise Error(f"Timeout {timeout}ms exceeded")
-        if not playwright_future.done():
-            transport.on_error_future.result()
-        playwright: "Playwright" = playwright_future.result()
-        pre_launched_browser = playwright._initializer.get("preLaunchedBrowser")
-        if not pre_launched_browser:
-            close_connection()
-            raise Error(
-                "Malformed endpoint. Did you use BrowserType.launchServer method?"
-            )
-        playwright._set_selectors(self._playwright.selectors)
-        self._connection._child_ws_connections.append(connection)
-        browser = cast(Browser, from_channel(pre_launched_browser))
-        browser._should_close_connection_on_close = True
-        browser._connect_to_browser_type(self, None)
-
+        browser._connect_to_browser_type(self, {})
         return browser
 
 
-def to_env_params(env: Optional[Env]) -> Optional[List["channels.NameValue"]]:
-    if env is None:
-        return None
-    return [{"name": name, "value": str(value)} for name, value in env.items()]
-
-
 def to_path_param(path: Optional[Union[str, Path]]) -> Optional[str]:
-    return str(Path(path)) if path is not None else None
+    return str(path) if path is not None else None

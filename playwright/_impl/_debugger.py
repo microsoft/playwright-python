@@ -28,6 +28,7 @@ class Debugger(ChannelOwner):
 
     Events = SimpleNamespace(
         PausedStateChanged="pausedstatechanged",
+        ApiCallsUpdated="apicallsupdated",
     )
 
     def __init__(
@@ -36,6 +37,9 @@ class Debugger(ChannelOwner):
         super().__init__(parent, type, guid, initializer)
         self._paused_details: Optional[DebuggerPausedDetails] = None
         self._channel.onPausedStateChanged(self._on_paused_state_changed)
+        self._channel.onApiCallsUpdated(
+            lambda event: self.emit(Debugger.Events.ApiCallsUpdated, event["apiCalls"])
+        )
 
     def _on_paused_state_changed(
         self, event: "channels.DebuggerPausedStateChangedEvent"
@@ -44,6 +48,9 @@ class Debugger(ChannelOwner):
             Optional[DebuggerPausedDetails], event["pausedDetails"]
         )
         self.emit(Debugger.Events.PausedStateChanged)
+
+    async def _enable(self) -> None:
+        await self._channel.enable()
 
     async def request_pause(self) -> None:
         await self._channel.requestPause()
@@ -56,11 +63,7 @@ class Debugger(ChannelOwner):
 
     async def run_to(self, location: DebuggerLocation) -> None:
         await self._channel.runTo(
-            location={
-                "file": location["file"],
-                "line": location.get("line"),
-                "column": location.get("column"),
-            }
+            location=cast("channels.DebuggerRunToParamsLocation", location)
         )
 
     @property

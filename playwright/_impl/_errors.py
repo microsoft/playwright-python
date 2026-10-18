@@ -18,6 +18,7 @@
 # stable API.
 
 
+import copy
 import re
 import traceback
 from types import TracebackType
@@ -34,10 +35,10 @@ def is_target_closed_error(error: Exception) -> bool:
 class Error(Exception):
     def __init__(self, message: str) -> None:
         self._message = message
-        self._name: Optional[str] = None
+        self._name = "Error"
         self._stack: Optional[str] = None
         self._details: Optional[Any] = None
-        self._log: Optional[List[str]] = None
+        self._log: List[str] = []
         super().__init__(message)
 
     @property
@@ -45,7 +46,7 @@ class Error(Exception):
         return self._message
 
     @property
-    def name(self) -> Optional[str]:
+    def name(self) -> str:
         return self._name
 
     @property
@@ -54,7 +55,9 @@ class Error(Exception):
 
 
 class TimeoutError(Error):
-    pass
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+        self._name = "TimeoutError"
 
 
 class TargetClosedError(Error):
@@ -62,43 +65,68 @@ class TargetClosedError(Error):
         super().__init__(message or "Target page, context or browser has been closed")
 
 
-def rewrite_error(error: Exception, message: str) -> Exception:
-    rewritten_exc = type(error)(message)
-    if isinstance(rewritten_exc, Error) and isinstance(error, Error):
-        rewritten_exc._name = error.name
-        rewritten_exc._stack = error.stack
-        rewritten_exc._details = error._details
-        rewritten_exc._log = error._log
-    return rewritten_exc
+def rewrite_error_message(error: Exception, message: str) -> Exception:
+    """Port of rewriteErrorMessage() in packages/utils/stackTrace.ts.
+
+    The rewritten error keeps the class, the fields and the traceback. Upstream
+    changes the error itself; this changes a copy, because the same error can fail
+    several calls (the closed error of a connection), and each call adds its prefix.
+    An exception that formats its message from other fields (OSError, KeyError)
+    keeps its message.
+    """
+    try:
+        rewritten = copy.copy(error)
+    except Exception:
+        # The class can not be built from its args: change the error itself.
+        rewritten = error
+    if isinstance(rewritten, Error):
+        rewritten._message = message
+        rewritten.args = (message,)
+    elif len(rewritten.args) <= 1 and type(rewritten).__str__ is BaseException.__str__:
+        rewritten.args = (message,)
+    return rewritten.with_traceback(error.__traceback__)
 
 
 def serialize_error(
     ex: Exception, tb: Optional[TracebackType]
-) -> "channels.SerializedErrorError":
+) -> "channels.SerializedError":
+    # Port of serializeError() in client/errors.ts. Python raises only exceptions, so
+    # there is no "value" form. Only an Error has a name: other exceptions use the
+    # class name, as e.name in JavaScript.
     return {
-        "message": str(ex),
-        "name": "Error",
-        "stack": "".join(traceback.format_tb(tb)),
+        "error": {
+            "message": str(ex),
+            "name": ex.name if isinstance(ex, Error) else type(ex).__name__,
+            "stack": "".join(traceback.format_tb(tb)),
+        }
     }
 
 
-def parse_error(
-    error: "channels.SerializedErrorError", log: Optional[str] = None
-) -> Error:
-    base_error_class = Error
+def parse_error(serialized: "channels.SerializedError") -> Error:
+    # Port of parseError() in client/errors.ts.
+    error = serialized.get("error")
+    if not error:
+        if "value" not in serialized:
+            raise Error("Serialized error must have either an error or a value")
+        # Upstream throws the value itself; Python can only raise an exception.
+        from playwright._impl._serializers import parse_serialized_value
+
+        return Error(str(parse_serialized_value(serialized["value"], None)))
+    exc: Error
     if error.get("name") == "TimeoutError":
-        base_error_class = TimeoutError
-    if error.get("name") == "TargetClosedError":
-        base_error_class = TargetClosedError
-    if not log:
-        log = ""
-    exc = base_error_class(patch_error_message(error["message"]) + log)
-    exc._name = error["name"]
-    exc._stack = error.get("stack")
+        exc = TimeoutError(patch_error_message(error["message"]))
+    elif error.get("name") == "TargetClosedError":
+        exc = TargetClosedError(patch_error_message(error["message"]))
+    else:
+        exc = Error(patch_error_message(error["message"]))
+        exc._name = error["name"]
+    exc._stack = error.get("stack") or ""
     return exc
 
 
 def patch_error_message(message: str) -> str:
+    from playwright._impl._str_utils import to_snake_case
+
     match = re.match(r"(\w+)(: expected .*)", message)
     if match:
         message = to_snake_case(match.group(1)) + match.group(2)
@@ -106,12 +134,3 @@ def patch_error_message(message: str) -> str:
         "Pass { acceptDownloads: true }", "Pass 'accept_downloads=True'"
     )
     return message
-
-
-# Upstream: toSnakeCase() in packages/isomorphic/stringUtils.ts. It is here, not
-# in _str_utils.py, because _str_utils.py imports this module.
-to_snake_case_regex = re.compile("((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))")
-
-
-def to_snake_case(name: str) -> str:
-    return to_snake_case_regex.sub(r"_\1", name).lower()

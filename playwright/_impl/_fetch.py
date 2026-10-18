@@ -14,11 +14,23 @@
 
 import base64
 import json
-import mimetypes
+import os
 import pathlib
 import typing
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Pattern, Sequence, Union, cast
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Pattern,
+    Sequence,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import playwright._impl._network as network
 from playwright._impl._api_structures import (
@@ -33,23 +45,28 @@ from playwright._impl._api_structures import (
     SetCookieParam,
     StorageState,
 )
-from playwright._impl._connection import ChannelOwner, from_channel
-from playwright._impl._errors import Error, TargetClosedError, is_target_closed_error
-from playwright._impl._form_data import FormData
-from playwright._impl._headers import serialize_headers
-from playwright._impl._helper import (
-    async_readfile,
-    async_writefile,
-    is_file_payload,
-    json_stringify,
-    to_impl,
-)
-from playwright._impl._internal_structures import Headers, NameValue
-from playwright._impl._network import (
+from playwright._impl._browser_context import (
     to_client_certificates_protocol,
     to_http_credentials_protocol,
 )
-from playwright._impl._str_utils import escape_regex_flags
+from playwright._impl._connection import (
+    ChannelOwner,
+    api_call,
+    from_channel,
+    internal,
+)
+from playwright._impl._errors import Error, TargetClosedError, is_target_closed_error
+from playwright._impl._file_utils import mkdir_if_needed
+from playwright._impl._form_data import FormData
+from playwright._impl._headers import headers_object_to_array
+from playwright._impl._helper import (
+    async_readfile,
+    async_writefile,
+    json_stringify,
+)
+from playwright._impl._internal_structures import Headers, NameValue
+from playwright._impl._network import to_clear_cookies_params
+from playwright._impl._str_utils import js_string
 from playwright._impl._timeout_settings import TimeoutSettings
 from playwright._impl._tracing import Tracing
 
@@ -65,9 +82,12 @@ MultipartType = Union[Dict[str, Union[bytes, bool, float, str, FilePayload]], Fo
 ParamsType = Union[Dict[str, Union[bool, float, str]], str]
 
 
+T = TypeVar("T")
+
+
 class APIRequest:
     def __init__(self, playwright: "Playwright") -> None:
-        self.playwright = playwright
+        self._playwright = playwright
         self._loop = playwright._loop
         self._dispatcher_fiber = playwright._connection._dispatcher_fiber
 
@@ -85,27 +105,23 @@ class APIRequest:
         fail_on_status_code: Optional[bool],
         max_redirects: Optional[int],
     ) -> "APIRequestContext":
-        if storage_state and not isinstance(storage_state, dict):
+        if isinstance(storage_state, (str, Path)):
             storage_state = json.loads((await async_readfile(storage_state)).decode())
-        result = await self.playwright._channel.newRequest(
+        result = await self._playwright._channel.newRequest(
             baseURL=base_url,
             userAgent=user_agent,
             ignoreHTTPSErrors=ignore_https_errors,
             extraHTTPHeaders=(
-                serialize_headers(extra_http_headers)
+                headers_object_to_array(extra_http_headers)
                 if extra_http_headers is not None
                 else None
             ),
             failOnStatusCode=fail_on_status_code,
-            clientCertificates=cast(
-                "Optional[List[channels.PlaywrightNewRequestParamsClientCertificates]]",
-                await to_client_certificates_protocol(client_certificates),
+            clientCertificates=await to_client_certificates_protocol(
+                client_certificates
             ),
             maxRedirects=max_redirects,
-            httpCredentials=cast(
-                "Optional[List[channels.HttpCredentials]]",
-                to_http_credentials_protocol(http_credentials),
-            ),
+            httpCredentials=to_http_credentials_protocol(http_credentials),
             proxy=cast("Optional[channels.PlaywrightNewRequestParamsProxy]", proxy),
             storageState=cast(
                 "Optional[channels.PlaywrightNewRequestParamsStorageState]",
@@ -145,7 +161,7 @@ class APIRequestContext(ChannelOwner):
         return self._tracing
 
     async def cookies(self, urls: Optional[Union[str, Sequence[str]]]) -> List[Cookie]:
-        if urls is None:
+        if not urls:
             urls = []
         if isinstance(urls, str):
             urls = [urls]
@@ -162,23 +178,7 @@ class APIRequestContext(ChannelOwner):
         domain: Optional[Union[str, Pattern[str]]],
         path: Optional[Union[str, Pattern[str]]],
     ) -> None:
-        await self._channel.clearCookies(
-            name=name if isinstance(name, str) else None,
-            nameRegexSource=name.pattern if isinstance(name, Pattern) else None,
-            nameRegexFlags=(
-                escape_regex_flags(name) if isinstance(name, Pattern) else None
-            ),
-            domain=domain if isinstance(domain, str) else None,
-            domainRegexSource=domain.pattern if isinstance(domain, Pattern) else None,
-            domainRegexFlags=(
-                escape_regex_flags(domain) if isinstance(domain, Pattern) else None
-            ),
-            path=path if isinstance(path, str) else None,
-            pathRegexSource=path.pattern if isinstance(path, Pattern) else None,
-            pathRegexFlags=(
-                escape_regex_flags(path) if isinstance(path, Pattern) else None
-            ),
-        )
+        await self._channel.clearCookies(**to_clear_cookies_params(name, domain, path))
 
     async def delete(
         self,
@@ -296,35 +296,6 @@ class APIRequestContext(ChannelOwner):
             max_retries=max_retries,
         )
 
-    async def put(
-        self,
-        url: str,
-        params: Optional[ParamsType],
-        headers: Optional[Headers],
-        data: Optional[DataType],
-        form: Optional[FormType],
-        multipart: Optional[MultipartType],
-        timeout: Optional[float],
-        fail_on_status_code: Optional[bool],
-        ignore_https_errors: Optional[bool],
-        max_redirects: Optional[int],
-        max_retries: Optional[int],
-    ) -> "APIResponse":
-        return await self.fetch(
-            url_or_request=url,
-            params=params,
-            method="PUT",
-            headers=headers,
-            data=data,
-            form=form,
-            multipart=multipart,
-            timeout=timeout,
-            fail_on_status_code=fail_on_status_code,
-            ignore_https_errors=ignore_https_errors,
-            max_redirects=max_redirects,
-            max_retries=max_retries,
-        )
-
     async def post(
         self,
         url: str,
@@ -354,6 +325,36 @@ class APIRequestContext(ChannelOwner):
             max_retries=max_retries,
         )
 
+    async def put(
+        self,
+        url: str,
+        params: Optional[ParamsType],
+        headers: Optional[Headers],
+        data: Optional[DataType],
+        form: Optional[FormType],
+        multipart: Optional[MultipartType],
+        timeout: Optional[float],
+        fail_on_status_code: Optional[bool],
+        ignore_https_errors: Optional[bool],
+        max_redirects: Optional[int],
+        max_retries: Optional[int],
+    ) -> "APIResponse":
+        return await self.fetch(
+            url_or_request=url,
+            params=params,
+            method="PUT",
+            headers=headers,
+            data=data,
+            form=form,
+            multipart=multipart,
+            timeout=timeout,
+            fail_on_status_code=fail_on_status_code,
+            ignore_https_errors=ignore_https_errors,
+            max_redirects=max_redirects,
+            max_retries=max_retries,
+        )
+
+    @api_call
     async def fetch(
         self,
         url_or_request: Union[str, network.Request],
@@ -370,13 +371,7 @@ class APIRequestContext(ChannelOwner):
         max_retries: Optional[int],
     ) -> "APIResponse":
         url = url_or_request if isinstance(url_or_request, str) else None
-        request = (
-            cast(network.Request, to_impl(url_or_request))
-            if isinstance(to_impl(url_or_request), network.Request)
-            else None
-        )
-        if not request and not isinstance(url_or_request, str):
-            raise Error("First argument must be either URL string or Request")
+        request = None if isinstance(url_or_request, str) else url_or_request
         return await self._inner_fetch(
             request=request,
             url=url,
@@ -411,6 +406,8 @@ class APIRequestContext(ChannelOwner):
     ) -> "APIResponse":
         if self._close_reason:
             raise TargetClosedError(self._close_reason)
+        if not (request or isinstance(url, str)):
+            raise Error("First argument must be either URL string or Request")
         if (
             (1 if data is not None else 0)
             + (1 if form is not None else 0)
@@ -421,13 +418,15 @@ class APIRequestContext(ChannelOwner):
             raise Error("'max_redirects' must be greater than or equal to '0'")
         if max_retries is not None and max_retries < 0:
             raise Error("'max_retries' must be greater than or equal to '0'")
-        url = url or (request.url if request else url)
-        if url is None:
-            raise Error("url: expected a URL string or a Request")
-        method = method or (request.method if request else "GET")
+        url = url if url is not None else cast(network.Request, request).url
+        method = method or (request.method if request else None)
         # Cannot call allHeaders() here as the request may be paused inside route handler.
-        headers_obj = headers or (request.headers if request else None)
-        serialized_headers = serialize_headers(headers_obj) if headers_obj else None
+        headers_obj = (
+            headers if headers is not None else (request.headers if request else None)
+        )
+        serialized_headers = (
+            headers_object_to_array(headers_obj) if headers_obj is not None else None
+        )
         json_data: Any = None
         form_data: Optional[List[NameValue]] = None
         multipart_data: Optional[List[channels.FormField]] = None
@@ -452,25 +451,23 @@ class APIRequestContext(ChannelOwner):
             if isinstance(form, FormData):
                 form_data = []
                 for fd_name, fd_value in form._fields:
-                    if isinstance(fd_value, (pathlib.Path, dict)):
+                    # A Path or a FilePayload is the Python counterpart of a File.
+                    if not isinstance(fd_value, (str, int, float, bool)):
                         raise Error(
-                            f"Form field {fd_name!r} must be a string, number or boolean. Use 'multipart' for file uploads."
+                            f'Expected string for options.form["{fd_name}"], found File. Please use options.multipart instead.'
                         )
-                    form_data.append(NameValue(name=fd_name, value=str(fd_value)))
+                    form_data.append(NameValue(name=fd_name, value=js_string(fd_value)))
             else:
-                form_data = object_to_array(form) or []
+                form_data = object_to_array(form)
         elif multipart is not None:
             multipart_data = []
             if isinstance(multipart, FormData):
+                # A FormData holds the same values as a multipart dict.
                 for fd_name, fd_value in multipart._fields:
-                    multipart_data.append(
-                        await _form_data_field_to_form_field(fd_name, fd_value)
-                    )
+                    multipart_data.append(await to_form_field(fd_name, fd_value))
             else:
                 for name, value in multipart.items():
-                    multipart_data.append(
-                        await _form_data_field_to_form_field(name, value)
-                    )
+                    multipart_data.append(await to_form_field(name, value))
         if (
             post_data_buffer is None
             and json_data is None
@@ -479,7 +476,9 @@ class APIRequestContext(ChannelOwner):
         ):
             post_data_buffer = request.post_data_buffer if request else None
         post_data = (
-            base64.b64encode(post_data_buffer).decode() if post_data_buffer else None
+            base64.b64encode(post_data_buffer).decode()
+            if post_data_buffer is not None
+            else None
         )
 
         result = await self._channel.fetch(
@@ -511,57 +510,38 @@ class APIRequestContext(ChannelOwner):
             await self._channel.storageState(indexedDB=indexed_db, opfs=opfs),
         )
         if path:
+            mkdir_if_needed(path)
             await async_writefile(path, json_stringify(result, indent=2))
         return result
 
 
-# Port of objectToArray() in packages/playwright-core/src/client/fetch.ts.
-def object_to_array(obj: Optional[Dict]) -> Optional[List[NameValue]]:
-    if not obj:
-        return None
-    result = []
-    for key, value in obj.items():
-        # None is Python's undefined.
-        if value is not None:
-            result.append(NameValue(name=key, value=_to_string(value)))
-    return result
-
-
-# Converts a value to a string as String() does in JavaScript, for the values
-# that the API accepts.
-def _to_string(value: Any) -> str:
-    if isinstance(value, bool):
-        return "true" if value else "false"
-    return str(value)
-
-
-def file_payload_to_json(payload: FilePayload) -> "channels.FormFieldFile":
-    return {
-        "name": payload["name"],
-        "mimeType": payload["mimeType"],
-        "buffer": base64.b64encode(payload["buffer"]).decode(),
-    }
-
-
-async def _form_data_field_to_form_field(name: str, value: Any) -> "channels.FormField":
-    if isinstance(value, pathlib.Path):
-        mime_type, _ = mimetypes.guess_type(str(value))
-        return {
-            "name": name,
-            "file": {
-                "name": value.name,
-                "mimeType": mime_type or "application/octet-stream",
-                "buffer": base64.b64encode(await async_readfile(str(value))).decode(),
-            },
-        }
+async def to_form_field(name: str, value: Any) -> "channels.FormField":
     if is_file_payload(value):
         payload = cast(FilePayload, value)
         if not isinstance(payload["buffer"], bytes):
-            raise Error(f"Unexpected buffer type of form field {name!r}")
+            raise Error(f"Unexpected buffer type of 'data.{name}'")
         return {"name": name, "file": file_payload_to_json(payload)}
-    if isinstance(value, (str, int, float, bool)):
-        return {"name": name, "value": str(value)}
-    raise Error(f"Unsupported form field {name!r} value type: {type(value).__name__}")
+    elif isinstance(value, (str, int, float, bool)):
+        return {"name": name, "value": js_string(value)}
+    elif isinstance(value, Path):
+        # A Path is the Python counterpart of fs.ReadStream.
+        return {"name": name, "file": await read_stream_to_json(value)}
+    raise Error(f"Unexpected value type of 'multipart.{name}'")
+
+
+def is_json_parsable(value: Any) -> bool:
+    if not isinstance(value, str):
+        return False
+    try:
+        # NaN and Infinity are not valid JSON, unlike what json.loads() accepts by default.
+        json.loads(value, parse_constant=_reject_json_constant)
+        return True
+    except ValueError:
+        return False
+
+
+def _reject_json_constant(value: str) -> Any:
+    raise ValueError(f"{value} is not valid JSON")
 
 
 class APIResponse:
@@ -571,6 +551,14 @@ class APIResponse:
         self._request = context
         self._initializer = initializer
         self._headers = network.RawHeaders(initializer["headers"])
+
+    async def _wrap_api_call(
+        self,
+        cb: Callable[[], Awaitable[T]],
+        is_internal: bool = False,
+        title: Optional[str] = None,
+    ) -> T:
+        return await self._request._wrap_api_call(cb, is_internal, title)
 
     def __repr__(self) -> str:
         return f"<APIResponse url={self.url!r} status={self.status!r} status_text={self.status_text!r}>"
@@ -599,6 +587,12 @@ class APIResponse:
     def headers_array(self) -> network.HeadersArray:
         return self._headers.headers_array()
 
+    async def security_details(self) -> Optional[SecurityDetails]:
+        return self._initializer.get("securityDetails")
+
+    async def server_addr(self) -> Optional[RemoteAddr]:
+        return self._initializer.get("serverAddr")
+
     @property
     def timing(self) -> ResourceTiming:
         return cast(
@@ -617,13 +611,11 @@ class APIResponse:
             },
         )
 
+    @internal
     async def body(self) -> bytes:
         try:
-            result = await self._request._connection.wrap_api_call(
-                lambda: self._request._channel.fetchResponseBody(
-                    fetchUid=self._fetch_uid
-                ),
-                is_internal=True,
+            result = await self._request._channel.fetchResponseBody(
+                fetchUid=self._fetch_uid
             )
             if result["binary"] is None:
                 raise Error("Response has been disposed")
@@ -635,17 +627,12 @@ class APIResponse:
 
     async def text(self) -> str:
         content = await self.body()
-        return content.decode()
+        # Like toString('utf8'): invalid bytes become U+FFFD.
+        return content.decode("utf-8", errors="replace")
 
     async def json(self) -> Any:
         content = await self.text()
         return json.loads(content)
-
-    async def security_details(self) -> Optional[SecurityDetails]:
-        return self._initializer.get("securityDetails") or None
-
-    async def server_addr(self) -> Optional[RemoteAddr]:
-        return self._initializer.get("serverAddr") or None
 
     async def dispose(self) -> None:
         await self._request._channel.disposeAPIResponse(fetchUid=self._fetch_uid)
@@ -658,6 +645,22 @@ class APIResponse:
         return (await self._request._channel.fetchLog(fetchUid=self._fetch_uid))["log"]
 
 
+def file_payload_to_json(payload: FilePayload) -> "channels.FormFieldFile":
+    return {
+        "name": payload["name"],
+        "mimeType": payload["mimeType"],
+        "buffer": base64.b64encode(payload["buffer"]).decode(),
+    }
+
+
+async def read_stream_to_json(path: Union[str, Path]) -> "channels.FormFieldFile":
+    buffer = await async_readfile(path)
+    return {
+        "name": os.path.basename(path),
+        "buffer": base64.b64encode(buffer).decode(),
+    }
+
+
 # Port of isJsonContentType() in packages/playwright-core/src/client/fetch.ts.
 def is_json_content_type(headers: network.HeadersArray = None) -> bool:
     if not headers:
@@ -668,16 +671,22 @@ def is_json_content_type(headers: network.HeadersArray = None) -> bool:
     return False
 
 
-def is_json_parsable(value: Any) -> bool:
-    if not isinstance(value, str):
-        return False
-    try:
-        # NaN and Infinity are not valid JSON, unlike what json.loads() accepts by default.
-        json.loads(value, parse_constant=_reject_json_constant)
-        return True
-    except ValueError:
-        return False
+# Port of objectToArray() in packages/playwright-core/src/client/fetch.ts.
+def object_to_array(obj: Optional[Dict]) -> Optional[List[NameValue]]:
+    if obj is None:
+        return None
+    result = []
+    for key, value in obj.items():
+        # None is Python's undefined.
+        if value is not None:
+            result.append(NameValue(name=key, value=js_string(value)))
+    return result
 
 
-def _reject_json_constant(value: str) -> Any:
-    raise ValueError(f"{value} is not valid JSON")
+def is_file_payload(value: Optional[Any]) -> bool:
+    return (
+        isinstance(value, dict)
+        and "name" in value
+        and "mimeType" in value
+        and "buffer" in value
+    )

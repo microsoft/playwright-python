@@ -38,11 +38,20 @@ class Channel:
         self._event_listeners: Dict[Tuple[str, Any], List[Callable[[Any], Any]]] = {}
 
     async def _call(
-        self, method: str, params: Mapping[str, Any], timeout: float
+        self,
+        method: str,
+        params: Mapping[str, Any],
+        timeout: float,
+        is_internal: bool = False,
     ) -> Dict[str, Any]:
-        """Sends a command and returns its result, {} when it has none."""
-        result = await self._connection.wrap_api_call(
-            lambda: self._inner_send(method, _filter_none(params), timeout)
+        """Sends a command and returns its result, {} when it has none.
+
+        `is_internal` is the `internal` flag of the command in the protocol spec, as
+        upstream's channel proxy reads it from getMetainfo().
+        """
+        result = await self._object._wrap_api_call(
+            lambda: self._inner_send(method, _filter_none(params), timeout),
+            is_internal,
         )
         return result or {}
 
@@ -96,6 +105,7 @@ class Channel:
         callback = self._connection._send_message_to_server(
             self._object, method, params, timeout
         )
+        assert callback
         try:
             done, _ = await asyncio.wait(
                 {
@@ -121,6 +131,9 @@ class Channel:
 
 
 def _filter_none(d: Mapping) -> Dict:
+    # None is undefined here, as the protocol validator drops it. Not in the items of
+    # lists: there None can be a JSON null that matters (IndexedDB values in a storage
+    # state), so the list items are built without None where it means undefined.
     result = {}
     for k, v in d.items():
         if v is None:

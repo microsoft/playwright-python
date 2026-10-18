@@ -36,13 +36,14 @@ from playwright._impl._api_structures import (
     FloatRect,
     Position,
 )
+from playwright._impl._connection import api_call, from_nullable_channel
 from playwright._impl._disposable import DisposableStub
 from playwright._impl._element_handle import ElementHandle
 from playwright._impl._errors import Error
 from playwright._impl._helper import (
     KeyboardModifier,
     MouseButton,
-    to_impl,
+    json_stringify,
 )
 from playwright._impl._internal_structures import (
     AriaRole,
@@ -51,7 +52,6 @@ from playwright._impl._internal_structures import (
 )
 from playwright._impl._js_handle import Serializable, serialize_argument
 from playwright._impl._locator_utils import (
-    bool_to_js_bool,
     get_by_alt_text_selector,
     get_by_label_selector,
     get_by_placeholder_selector,
@@ -92,41 +92,52 @@ class Locator:
         if has_text:
             self._selector += f" >> internal:has-text={escape_for_text_selector(has_text, exact=False)}"
 
-        if has:
-            if has._frame != frame:
-                raise Error('Inner "has" locator must belong to the same frame.')
-            self._selector += " >> internal:has=" + json.dumps(
-                has._selector, ensure_ascii=False
-            )
-
         if has_not_text:
             self._selector += f" >> internal:has-not-text={escape_for_text_selector(has_not_text, exact=False)}"
+
+        if has:
+            locator = has
+            if locator._frame != frame:
+                raise Error('Inner "has" locator must belong to the same frame.')
+            self._selector += " >> internal:has=" + json_stringify(locator._selector)
 
         if has_not:
             locator = has_not
             if locator._frame != frame:
                 raise Error('Inner "has_not" locator must belong to the same frame.')
-            self._selector += " >> internal:has-not=" + json.dumps(locator._selector)
+            self._selector += " >> internal:has-not=" + json_stringify(
+                locator._selector
+            )
 
         if visible is not None:
-            self._selector += f" >> visible={bool_to_js_bool(visible)}"
+            self._selector += " >> visible=" + ("true" if visible else "false")
 
     def __repr__(self) -> str:
         return f"<Locator frame={self._frame!r} selector={self._selector!r}>"
 
-    def __str__(self) -> str:
-        if self._locator_code is not None:
-            return self._locator_code
-        return self.__repr__()
+    async def _wrap_api_call(
+        self,
+        cb: Callable[[], Awaitable[T]],
+        is_internal: bool = False,
+        title: Optional[str] = None,
+    ) -> T:
+        return await self._frame._wrap_api_call(cb, is_internal, title)
 
     async def _with_element(
         self,
         task: Callable[[ElementHandle, float], Awaitable[T]],
-        timeout: float = None,
+        timeout: Optional[float],
     ) -> T:
         timeout = self._frame._timeout(timeout)
         deadline = (monotonic_time() + timeout) if timeout else 0
-        handle = await self.element_handle(timeout=timeout)
+        result = await self._frame._channel.waitForSelector(
+            selector=self._selector,
+            strict=True,
+            state="attached",
+            omitReturnValue=None,
+            timeout=timeout,
+        )
+        handle: Optional[ElementHandle] = from_nullable_channel(result["element"])
         if not handle:
             raise Error(f"Could not resolve {self._selector} to DOM Element")
         try:
@@ -144,11 +155,9 @@ class Locator:
     def page(self) -> "Page":
         return self._frame.page
 
+    @api_call(title="Bounding box")
     async def bounding_box(self, timeout: Optional[float]) -> Optional[FloatRect]:
-        return await self._with_element(
-            lambda h, _: h.bounding_box(),
-            timeout,
-        )
+        return await self._with_element(lambda h, _: h.bounding_box(), timeout)
 
     async def check(
         self,
@@ -237,313 +246,10 @@ class Locator:
         await self._frame.dispatch_event(
             self._selector,
             type=type,
-            event_init=event_init,
+            event_init=event_init or {},
             strict=True,
             timeout=timeout,
         )
-
-    async def evaluate(
-        self, expression: str, arg: Serializable, timeout: Optional[float]
-    ) -> Any:
-        return await self._with_element(
-            lambda h, _: h.evaluate(expression=expression, arg=arg),
-            timeout,
-        )
-
-    async def evaluate_all(self, expression: str, arg: Serializable) -> Any:
-        return await self._frame.eval_on_selector_all(
-            self._selector, expression=expression, arg=arg
-        )
-
-    async def evaluate_handle(
-        self, expression: str, arg: Serializable, timeout: Optional[float]
-    ) -> "JSHandle":
-        return await self._with_element(
-            lambda h, _: h.evaluate_handle(expression=expression, arg=arg), timeout
-        )
-
-    async def fill(
-        self,
-        value: str,
-        timeout: Optional[float],
-        no_wait_after: Optional[bool],
-        force: Optional[bool],
-    ) -> None:
-        await self._frame.fill(
-            self._selector,
-            value,
-            strict=True,
-            timeout=timeout,
-            no_wait_after=no_wait_after,
-            force=force,
-        )
-
-    async def clear(
-        self,
-        timeout: Optional[float],
-        no_wait_after: Optional[bool],
-        force: Optional[bool],
-    ) -> None:
-        await self._frame._fill(
-            self._selector,
-            "",
-            title="Clear",
-            strict=True,
-            timeout=timeout,
-            no_wait_after=no_wait_after,
-            force=force,
-        )
-
-    def locator(
-        self,
-        selector_or_locator: Union[str, "Locator"],
-        has_text: Optional[Union[str, Pattern[str]]],
-        has_not_text: Optional[Union[str, Pattern[str]]],
-        has: Optional["Locator"],
-        has_not: Optional["Locator"],
-    ) -> "Locator":
-        if isinstance(selector_or_locator, str):
-            return Locator(
-                self._frame,
-                f"{self._selector} >> {selector_or_locator}",
-                has_text=has_text,
-                has_not_text=has_not_text,
-                has_not=has_not,
-                has=has,
-            )
-        selector_or_locator = to_impl(selector_or_locator)
-        if selector_or_locator._frame != self._frame:
-            raise Error("Locators must belong to the same frame.")
-        return Locator(
-            self._frame,
-            f"{self._selector} >> internal:chain={json.dumps(selector_or_locator._selector)}",
-            has_text=has_text,
-            has_not_text=has_not_text,
-            has_not=has_not,
-            has=has,
-        )
-
-    def get_by_alt_text(
-        self, text: Union[str, Pattern[str]], exact: Optional[bool]
-    ) -> "Locator":
-        return self.locator(
-            selector_or_locator=get_by_alt_text_selector(text, exact=exact),
-            has_text=None,
-            has_not_text=None,
-            has=None,
-            has_not=None,
-        )
-
-    def get_by_label(
-        self, text: Union[str, Pattern[str]], exact: Optional[bool]
-    ) -> "Locator":
-        return self.locator(
-            selector_or_locator=get_by_label_selector(text, exact=exact),
-            has_text=None,
-            has_not_text=None,
-            has=None,
-            has_not=None,
-        )
-
-    def get_by_placeholder(
-        self, text: Union[str, Pattern[str]], exact: Optional[bool]
-    ) -> "Locator":
-        return self.locator(
-            selector_or_locator=get_by_placeholder_selector(text, exact=exact),
-            has_text=None,
-            has_not_text=None,
-            has=None,
-            has_not=None,
-        )
-
-    def get_by_role(
-        self,
-        role: AriaRole,
-        checked: Optional[bool],
-        disabled: Optional[bool],
-        expanded: Optional[bool],
-        include_hidden: Optional[bool],
-        level: Optional[int],
-        name: Optional[Union[str, Pattern[str]]],
-        pressed: Optional[bool],
-        selected: Optional[bool],
-        exact: Optional[bool],
-        description: Optional[Union[str, Pattern[str]]],
-    ) -> "Locator":
-        return self.locator(
-            selector_or_locator=get_by_role_selector(
-                role,
-                checked=checked,
-                disabled=disabled,
-                expanded=expanded,
-                include_hidden=include_hidden,
-                level=level,
-                name=name,
-                pressed=pressed,
-                selected=selected,
-                exact=exact,
-                description=description,
-            ),
-            has_text=None,
-            has_not_text=None,
-            has=None,
-            has_not=None,
-        )
-
-    def get_by_test_id(self, test_id: Union[str, Pattern[str]]) -> "Locator":
-        return self.locator(
-            selector_or_locator=get_by_test_id_selector(
-                test_id_attribute_name(), test_id
-            ),
-            has_text=None,
-            has_not_text=None,
-            has=None,
-            has_not=None,
-        )
-
-    def get_by_text(
-        self, text: Union[str, Pattern[str]], exact: Optional[bool]
-    ) -> "Locator":
-        return self.locator(
-            selector_or_locator=get_by_text_selector(text, exact=exact),
-            has_text=None,
-            has_not_text=None,
-            has=None,
-            has_not=None,
-        )
-
-    def get_by_title(
-        self, text: Union[str, Pattern[str]], exact: Optional[bool]
-    ) -> "Locator":
-        return self.locator(
-            selector_or_locator=get_by_title_selector(text, exact=exact),
-            has_text=None,
-            has_not_text=None,
-            has=None,
-            has_not=None,
-        )
-
-    def frame_locator(self, selector: str) -> "FrameLocator":
-        return FrameLocator(self._frame, self._selector + " >> " + selector)
-
-    async def element_handle(
-        self,
-        timeout: Optional[float],
-    ) -> ElementHandle:
-        handle = await self._frame.wait_for_selector(
-            self._selector, strict=True, state="attached", timeout=timeout
-        )
-        assert handle
-        return handle
-
-    async def element_handles(self) -> List[ElementHandle]:
-        return await self._frame.query_selector_all(self._selector)
-
-    @property
-    def first(self) -> "Locator":
-        return Locator(self._frame, f"{self._selector} >> nth=0")
-
-    @property
-    def last(self) -> "Locator":
-        return Locator(self._frame, f"{self._selector} >> nth=-1")
-
-    def nth(self, index: int) -> "Locator":
-        return Locator(self._frame, f"{self._selector} >> nth={index}")
-
-    @property
-    def content_frame(self) -> "FrameLocator":
-        return FrameLocator(self._frame, self._selector)
-
-    def describe(self, description: str) -> "Locator":
-        return Locator(
-            self._frame,
-            f"{self._selector} >> internal:describe={json.dumps(description)}",
-        )
-
-    @property
-    def description(self) -> Optional[str]:
-        try:
-            match = re.search(
-                r' >> internal:describe=("(?:[^"\\]|\\.)*")$', self._selector
-            )
-            if match:
-                description = json.loads(match.group(1))
-                if isinstance(description, str):
-                    return description
-        except (json.JSONDecodeError, ValueError):
-            pass
-        return None
-
-    def filter(
-        self,
-        has_text: Optional[Union[str, Pattern[str]]],
-        has_not_text: Optional[Union[str, Pattern[str]]],
-        has: Optional["Locator"],
-        has_not: Optional["Locator"],
-        visible: Optional[bool],
-    ) -> "Locator":
-        return Locator(
-            self._frame,
-            self._selector,
-            has_text=has_text,
-            has_not_text=has_not_text,
-            has=has,
-            has_not=has_not,
-            visible=visible,
-        )
-
-    @property
-    def visible(self) -> "Locator":
-        return Locator(self._frame, self._selector, visible=True)
-
-    def or_(self, locator: "Locator") -> "Locator":
-        if locator._frame != self._frame:
-            raise Error("Locators must belong to the same frame.")
-        return Locator(
-            self._frame,
-            self._selector + " >> internal:or=" + json.dumps(locator._selector),
-        )
-
-    def and_(self, locator: "Locator") -> "Locator":
-        if locator._frame != self._frame:
-            raise Error("Locators must belong to the same frame.")
-        return Locator(
-            self._frame,
-            self._selector + " >> internal:and=" + json.dumps(locator._selector),
-        )
-
-    def within(self, locator: "Locator") -> "Locator":
-        return locator.locator(
-            selector_or_locator=self,
-            has_text=None,
-            has_not_text=None,
-            has=None,
-            has_not=None,
-        )
-
-    async def focus(
-        self,
-        timeout: Optional[float],
-    ) -> None:
-        await self._frame.focus(self._selector, strict=True, timeout=timeout)
-
-    async def blur(self, timeout: Optional[float]) -> None:
-        await self._frame._channel.blur(
-            selector=self._selector, strict=True, timeout=self._frame._timeout(timeout)
-        )
-
-    async def all(
-        self,
-    ) -> List["Locator"]:
-        result = []
-        for index in range(await self.count()):
-            result.append(self.nth(index))
-        return result
-
-    async def count(
-        self,
-    ) -> int:
-        return await self._frame._query_count(self._selector)
 
     async def drag_to(
         self,
@@ -584,6 +290,308 @@ class Locator:
             position=position,
             timeout=timeout,
         )
+
+    @api_call(title="Evaluate")
+    async def evaluate(
+        self, expression: str, arg: Serializable, timeout: Optional[float]
+    ) -> Any:
+        return await self._with_element(
+            lambda h, _: h.evaluate(expression=expression, arg=arg), timeout
+        )
+
+    async def evaluate_all(self, expression: str, arg: Serializable) -> Any:
+        return await self._frame.eval_on_selector_all(
+            self._selector, expression=expression, arg=arg
+        )
+
+    @api_call(title="Evaluate")
+    async def evaluate_handle(
+        self, expression: str, arg: Serializable, timeout: Optional[float]
+    ) -> "JSHandle":
+        return await self._with_element(
+            lambda h, _: h.evaluate_handle(expression=expression, arg=arg),
+            timeout,
+        )
+
+    async def fill(
+        self,
+        value: str,
+        timeout: Optional[float],
+        no_wait_after: Optional[bool],
+        force: Optional[bool],
+    ) -> None:
+        await self._frame.fill(
+            self._selector,
+            value,
+            strict=True,
+            timeout=timeout,
+            no_wait_after=no_wait_after,
+            force=force,
+        )
+
+    @api_call(title="Clear")
+    async def clear(
+        self,
+        timeout: Optional[float],
+        no_wait_after: Optional[bool],
+        force: Optional[bool],
+    ) -> None:
+        await self.fill("", timeout=timeout, no_wait_after=no_wait_after, force=force)
+
+    async def highlight(self, style: Optional[str]) -> DisposableStub:
+        await self._frame._highlight(self._selector, style)
+        return DisposableStub(lambda: self.hide_highlight(), self._frame)
+
+    async def hide_highlight(self) -> None:
+        await self._frame._hide_highlight(self._selector)
+
+    def locator(
+        self,
+        selector_or_locator: Union[str, "Locator"],
+        has_text: Optional[Union[str, Pattern[str]]],
+        has_not_text: Optional[Union[str, Pattern[str]]],
+        has: Optional["Locator"],
+        has_not: Optional["Locator"],
+    ) -> "Locator":
+        if isinstance(selector_or_locator, str):
+            return Locator(
+                self._frame,
+                f"{self._selector} >> {selector_or_locator}",
+                has_text=has_text,
+                has_not_text=has_not_text,
+                has_not=has_not,
+                has=has,
+            )
+        if selector_or_locator._frame != self._frame:
+            raise Error("Locators must belong to the same frame.")
+        return Locator(
+            self._frame,
+            f"{self._selector} >> internal:chain={json_stringify(selector_or_locator._selector)}",
+            has_text=has_text,
+            has_not_text=has_not_text,
+            has_not=has_not,
+            has=has,
+        )
+
+    def within(self, locator: "Locator") -> "Locator":
+        return locator.locator(
+            selector_or_locator=self,
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
+
+    def get_by_test_id(self, test_id: Union[str, Pattern[str]]) -> "Locator":
+        return self.locator(
+            selector_or_locator=get_by_test_id_selector(
+                test_id_attribute_name(), test_id
+            ),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
+
+    def get_by_alt_text(
+        self, text: Union[str, Pattern[str]], exact: Optional[bool]
+    ) -> "Locator":
+        return self.locator(
+            selector_or_locator=get_by_alt_text_selector(text, exact=exact),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
+
+    def get_by_label(
+        self, text: Union[str, Pattern[str]], exact: Optional[bool]
+    ) -> "Locator":
+        return self.locator(
+            selector_or_locator=get_by_label_selector(text, exact=exact),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
+
+    def get_by_placeholder(
+        self, text: Union[str, Pattern[str]], exact: Optional[bool]
+    ) -> "Locator":
+        return self.locator(
+            selector_or_locator=get_by_placeholder_selector(text, exact=exact),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
+
+    def get_by_text(
+        self, text: Union[str, Pattern[str]], exact: Optional[bool]
+    ) -> "Locator":
+        return self.locator(
+            selector_or_locator=get_by_text_selector(text, exact=exact),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
+
+    def get_by_title(
+        self, text: Union[str, Pattern[str]], exact: Optional[bool]
+    ) -> "Locator":
+        return self.locator(
+            selector_or_locator=get_by_title_selector(text, exact=exact),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
+
+    def get_by_role(
+        self,
+        role: AriaRole,
+        checked: Optional[bool],
+        disabled: Optional[bool],
+        expanded: Optional[bool],
+        include_hidden: Optional[bool],
+        level: Optional[int],
+        name: Optional[Union[str, Pattern[str]]],
+        pressed: Optional[bool],
+        selected: Optional[bool],
+        exact: Optional[bool],
+        description: Optional[Union[str, Pattern[str]]],
+    ) -> "Locator":
+        return self.locator(
+            selector_or_locator=get_by_role_selector(
+                role,
+                checked=checked,
+                disabled=disabled,
+                expanded=expanded,
+                include_hidden=include_hidden,
+                level=level,
+                name=name,
+                pressed=pressed,
+                selected=selected,
+                exact=exact,
+                description=description,
+            ),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
+
+    def frame_locator(self, selector: str) -> "FrameLocator":
+        return FrameLocator(self._frame, self._selector + " >> " + selector)
+
+    def filter(
+        self,
+        has_text: Optional[Union[str, Pattern[str]]],
+        has_not_text: Optional[Union[str, Pattern[str]]],
+        has: Optional["Locator"],
+        has_not: Optional["Locator"],
+        visible: Optional[bool],
+    ) -> "Locator":
+        return Locator(
+            self._frame,
+            self._selector,
+            has_text=has_text,
+            has_not_text=has_not_text,
+            has=has,
+            has_not=has_not,
+            visible=visible,
+        )
+
+    @property
+    def visible(self) -> "Locator":
+        return Locator(self._frame, self._selector, visible=True)
+
+    async def element_handle(
+        self,
+        timeout: Optional[float],
+    ) -> ElementHandle:
+        handle = await self._frame.wait_for_selector(
+            self._selector, strict=True, state="attached", timeout=timeout
+        )
+        assert handle
+        return handle
+
+    async def element_handles(self) -> List[ElementHandle]:
+        return await self._frame.query_selector_all(self._selector)
+
+    @property
+    def content_frame(self) -> "FrameLocator":
+        return FrameLocator(self._frame, self._selector)
+
+    def describe(self, description: str) -> "Locator":
+        return Locator(
+            self._frame,
+            f"{self._selector} >> internal:describe={json_stringify(description)}",
+        )
+
+    @property
+    def description(self) -> Optional[str]:
+        # locatorCustomDescription() in packages/isomorphic/locatorGenerators.ts parses
+        # the selector. Python has no selector parser: it matches the last part.
+        match = re.search(r' >> internal:describe=("(?:[^"\\]|\\.)*")$', self._selector)
+        if not match:
+            return None
+        try:
+            return json.loads(match.group(1)) or None
+        except ValueError:
+            return None
+
+    @property
+    def first(self) -> "Locator":
+        return Locator(self._frame, f"{self._selector} >> nth=0")
+
+    @property
+    def last(self) -> "Locator":
+        return Locator(self._frame, f"{self._selector} >> nth=-1")
+
+    def nth(self, index: int) -> "Locator":
+        return Locator(self._frame, f"{self._selector} >> nth={index}")
+
+    def and_(self, locator: "Locator") -> "Locator":
+        if locator._frame != self._frame:
+            raise Error("Locators must belong to the same frame.")
+        return Locator(
+            self._frame,
+            self._selector + " >> internal:and=" + json_stringify(locator._selector),
+        )
+
+    def or_(self, locator: "Locator") -> "Locator":
+        if locator._frame != self._frame:
+            raise Error("Locators must belong to the same frame.")
+        return Locator(
+            self._frame,
+            self._selector + " >> internal:or=" + json_stringify(locator._selector),
+        )
+
+    async def focus(
+        self,
+        timeout: Optional[float],
+    ) -> None:
+        await self._frame.focus(self._selector, strict=True, timeout=timeout)
+
+    async def blur(self, timeout: Optional[float]) -> None:
+        await self._frame._channel.blur(
+            selector=self._selector, strict=True, timeout=self._frame._timeout(timeout)
+        )
+
+    async def count(
+        self,
+    ) -> int:
+        return await self._frame._query_count(self._selector)
+
+    async def normalize(self) -> "Locator":
+        result = await self._frame._channel.resolveSelector(
+            selector=self._selector, sdkLanguage="python"
+        )
+        locator = Locator(self._frame, result["resolvedSelector"])
+        locator._locator_code = result["locatorCode"]
+        return locator
 
     async def get_attribute(
         self,
@@ -706,6 +714,7 @@ class Locator:
             no_wait_after=no_wait_after,
         )
 
+    @api_call(title="Screenshot")
     async def screenshot(
         self,
         timeout: Optional[float],
@@ -753,14 +762,7 @@ class Locator:
         )
         return result["snapshot"]
 
-    async def normalize(self) -> "Locator":
-        result = await self._frame._channel.resolveSelector(
-            selector=self._selector, sdkLanguage="python"
-        )
-        locator = Locator(self._frame, result["resolvedSelector"])
-        locator._locator_code = result["locatorCode"]
-        return locator
-
+    @api_call(title="Scroll into view")
     async def scroll_into_view_if_needed(
         self,
         timeout: Optional[float],
@@ -792,6 +794,7 @@ class Locator:
             force=force,
         )
 
+    @api_call(title="Select text")
     async def select_text(
         self,
         force: Optional[bool],
@@ -801,6 +804,35 @@ class Locator:
             lambda h, timeout: h.select_text(force=force, timeout=timeout),
             timeout,
         )
+
+    async def set_checked(
+        self,
+        checked: bool,
+        position: Optional[Position],
+        timeout: Optional[float],
+        force: Optional[bool],
+        no_wait_after: Optional[bool],
+        trial: Optional[bool],
+        scroll: Optional[Literal["auto", "none"]],
+    ) -> None:
+        if checked:
+            await self.check(
+                position=position,
+                timeout=timeout,
+                force=force,
+                no_wait_after=no_wait_after,
+                trial=trial,
+                scroll=scroll,
+            )
+        else:
+            await self.uncheck(
+                position=position,
+                timeout=timeout,
+                force=force,
+                no_wait_after=no_wait_after,
+                trial=trial,
+                scroll=scroll,
+            )
 
     async def set_input_files(
         self,
@@ -897,6 +929,14 @@ class Locator:
             scroll=scroll,
         )
 
+    async def all(
+        self,
+    ) -> List["Locator"]:
+        result = []
+        for index in range(await self.count()):
+            result.append(self.nth(index))
+        return result
+
     async def all_inner_texts(
         self,
     ) -> List[str]:
@@ -918,12 +958,12 @@ class Locator:
         timeout: Optional[float],
         state: Optional[Literal["attached", "detached", "hidden", "visible"]],
     ) -> None:
-        await self._frame.wait_for_selector(
-            self._selector,
+        await self._frame._channel.waitForSelector(
+            selector=self._selector,
             strict=True,
-            timeout=timeout,
             state=state,
-            omit_return_value=True,
+            omitReturnValue=True,
+            timeout=self._frame._timeout(timeout),
         )
 
     async def wait_for_function(
@@ -942,35 +982,6 @@ class Locator:
             timeout=self._frame._timeout(timeout),
         )
 
-    async def set_checked(
-        self,
-        checked: bool,
-        position: Optional[Position],
-        timeout: Optional[float],
-        force: Optional[bool],
-        no_wait_after: Optional[bool],
-        trial: Optional[bool],
-        scroll: Optional[Literal["auto", "none"]],
-    ) -> None:
-        if checked:
-            await self.check(
-                position=position,
-                timeout=timeout,
-                force=force,
-                no_wait_after=no_wait_after,
-                trial=trial,
-                scroll=scroll,
-            )
-        else:
-            await self.uncheck(
-                position=position,
-                timeout=timeout,
-                force=force,
-                no_wait_after=no_wait_after,
-                trial=trial,
-                scroll=scroll,
-            )
-
     async def _expect(
         self,
         expression: str,
@@ -979,12 +990,10 @@ class Locator:
     ) -> FrameExpectResult:
         return await self._frame._expect(self._selector, expression, options, title)
 
-    async def highlight(self, style: Optional[str]) -> DisposableStub:
-        await self._frame._highlight(self._selector, style)
-        return DisposableStub(lambda: self.hide_highlight(), self._frame)
-
-    async def hide_highlight(self) -> None:
-        await self._frame._hide_highlight(self._selector)
+    def __str__(self) -> str:
+        if self._locator_code is not None:
+            return self._locator_code
+        return self.__repr__()
 
 
 ANY_FRAME_SELECTOR = "internal:control=any-frame"
@@ -1001,11 +1010,6 @@ class FrameLocator:
         if self._frame_selector == ANY_FRAME_SELECTOR:
             return f"{self._frame_selector} >> {selector}"
         return f"{self._frame_selector} >> internal:control=enter-frame >> {selector}"
-
-    def _nth_selector(self, nth: str) -> str:
-        if self._frame_selector == ANY_FRAME_SELECTOR:
-            raise Error("Selecting the nth frame is not allowed on frame_locator().")
-        return f"{self._frame_selector} >> nth={nth}"
 
     def locator(
         self,
@@ -1024,9 +1028,8 @@ class FrameLocator:
                 has=has,
                 has_not=has_not,
             )
-        selector_or_locator = to_impl(selector_or_locator)
         if selector_or_locator._frame != self._frame:
-            raise ValueError("Locators must belong to the same frame.")
+            raise Error("Locators must belong to the same frame.")
         return Locator(
             self._frame,
             self._child_selector(selector_or_locator._selector),
@@ -1034,6 +1037,17 @@ class FrameLocator:
             has_not_text=has_not_text,
             has=has,
             has_not=has_not,
+        )
+
+    def get_by_test_id(self, test_id: Union[str, Pattern[str]]) -> "Locator":
+        return self.locator(
+            selector_or_locator=get_by_test_id_selector(
+                test_id_attribute_name(), test_id
+            ),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
         )
 
     def get_by_alt_text(
@@ -1063,6 +1077,28 @@ class FrameLocator:
     ) -> "Locator":
         return self.locator(
             selector_or_locator=get_by_placeholder_selector(text, exact=exact),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
+
+    def get_by_text(
+        self, text: Union[str, Pattern[str]], exact: Optional[bool]
+    ) -> "Locator":
+        return self.locator(
+            selector_or_locator=get_by_text_selector(text, exact=exact),
+            has_text=None,
+            has_not_text=None,
+            has=None,
+            has_not=None,
+        )
+
+    def get_by_title(
+        self, text: Union[str, Pattern[str]], exact: Optional[bool]
+    ) -> "Locator":
+        return self.locator(
+            selector_or_locator=get_by_title_selector(text, exact=exact),
             has_text=None,
             has_not_text=None,
             has=None,
@@ -1103,41 +1139,17 @@ class FrameLocator:
             has_not=None,
         )
 
-    def get_by_test_id(self, test_id: Union[str, Pattern[str]]) -> "Locator":
-        return self.locator(
-            selector_or_locator=get_by_test_id_selector(
-                test_id_attribute_name(), test_id
-            ),
-            has_text=None,
-            has_not_text=None,
-            has=None,
-            has_not=None,
-        )
-
-    def get_by_text(
-        self, text: Union[str, Pattern[str]], exact: Optional[bool]
-    ) -> "Locator":
-        return self.locator(
-            selector_or_locator=get_by_text_selector(text, exact=exact),
-            has_text=None,
-            has_not_text=None,
-            has=None,
-            has_not=None,
-        )
-
-    def get_by_title(
-        self, text: Union[str, Pattern[str]], exact: Optional[bool]
-    ) -> "Locator":
-        return self.locator(
-            selector_or_locator=get_by_title_selector(text, exact=exact),
-            has_text=None,
-            has_not_text=None,
-            has=None,
-            has_not=None,
-        )
+    @property
+    def owner(self) -> "Locator":
+        return Locator(self._frame, self._frame_selector)
 
     def frame_locator(self, selector: str) -> "FrameLocator":
         return FrameLocator(self._frame, self._child_selector(selector))
+
+    def _nth_selector(self, nth: str) -> str:
+        if self._frame_selector == ANY_FRAME_SELECTOR:
+            raise Error("Selecting the nth frame is not allowed on frame_locator().")
+        return f"{self._frame_selector} >> nth={nth}"
 
     @property
     def first(self) -> "FrameLocator":
@@ -1146,10 +1158,6 @@ class FrameLocator:
     @property
     def last(self) -> "FrameLocator":
         return FrameLocator(self._frame, self._nth_selector("-1"))
-
-    @property
-    def owner(self) -> "Locator":
-        return Locator(self._frame, self._frame_selector)
 
     def nth(self, index: int) -> "FrameLocator":
         return FrameLocator(self._frame, self._nth_selector(str(index)))
@@ -1165,6 +1173,6 @@ def test_id_attribute_name() -> str:
     return _test_id_attribute_name
 
 
-def set_test_id_attribute_name(attribute_name: str) -> None:
+def set_test_id_attribute(attribute_name: str) -> None:
     global _test_id_attribute_name
     _test_id_attribute_name = attribute_name

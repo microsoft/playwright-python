@@ -38,6 +38,7 @@ from typing import (
     TypeVar,
     Union,
     cast,
+    overload,
 )
 
 from pyee import EventEmitter
@@ -50,13 +51,14 @@ from playwright._impl._errors import (
     Error,
     TargetClosedError,
     parse_error,
-    rewrite_error,
+    rewrite_error_message,
 )
 from playwright._impl._event_context_manager import EventContextManagerImpl
 from playwright._impl._greenlets import EventGreenlet
 from playwright._impl._helper import (
     ParsedMessagePayload,
 )
+from playwright._impl._protocol import ERROR_DETAILS, EXTENDS
 from playwright._impl._protocol_channels import CHANNEL_CLASSES
 from playwright._impl._protocol_check import check_message, is_enabled
 from playwright._impl._transport import Transport
@@ -139,17 +141,22 @@ class ChannelOwner(AsyncIOEventEmitter):
             parent if isinstance(parent, ChannelOwner) else None
         )
         self._objects: Dict[str, "ChannelOwner"] = {}
-        self._channel: Channel = CHANNEL_CLASSES.get(type, Channel)(
-            self._connection, self
-        )
-        self._initializer = initializer
+        self._event_to_subscription_mapping: Dict[str, str] = {}
         self._was_collected = False
 
         self._connection._objects[guid] = self
         if self._parent:
             self._parent._objects[guid] = self
 
-        self._event_to_subscription_mapping: Dict[str, str] = {}
+        self._channel: Channel = CHANNEL_CLASSES.get(type, Channel)(
+            self._connection, self
+        )
+        self._initializer = initializer
+
+    async def _wrap_api_call(
+        self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
+    ) -> Any:
+        return await self._connection.wrap_api_call(cb, is_internal, title)
 
     def _dispose(self, reason: Optional[str]) -> None:
         # Clean up from parent and connection.
@@ -174,30 +181,44 @@ class ChannelOwner(AsyncIOEventEmitter):
     def _update_subscription(self, event: str, enabled: bool) -> None:
         protocol_event = self._event_to_subscription_mapping.get(event)
         if protocol_event:
-            self._connection.wrap_api_call_sync(
-                lambda: self._channel.send_no_reply(
+            try:
+                self._channel.send_no_reply(
                     "updateSubscription",
                     {"event": protocol_event, "enabled": enabled},
-                ),
-                True,
-            )
+                    is_internal=True,
+                )
+            except Exception:
+                pass
 
+    # The overrides of on(), addListener() and prependListener() in channelOwner.ts:
+    # pyee adds every listener, once() too, through _add_event_handler().
     def _add_event_handler(self, event: str, k: Any, v: Any) -> None:
         if not self.listeners(event):
             self._update_subscription(event, True)
         super()._add_event_handler(event, k, v)
 
-    def remove_listener(self, event: str, f: Any) -> None:
-        super().remove_listener(event, f)
+    # The overrides of off() and removeListener() in channelOwner.ts: pyee removes
+    # every listener, a once() listener that fired too, through _remove_listener().
+    def _remove_listener(self, event: str, f: Any) -> None:
+        if f not in self.listeners(event):
+            return
+        super()._remove_listener(event, f)
         if not self.listeners(event):
             self._update_subscription(event, False)
 
 
 class ProtocolCallback:
     def __init__(
-        self, loop: asyncio.AbstractEventLoop, id: str, no_reply: bool = False
+        self,
+        loop: asyncio.AbstractEventLoop,
+        id: str,
+        type: str,
+        method: str,
+        no_reply: bool = False,
     ) -> None:
         self.id = id
+        self.type = type
+        self.method = method
         self.stack_trace: "RawStack"
         self.no_reply = no_reply
         self.future = loop.create_future()
@@ -221,7 +242,21 @@ class ProtocolCallback:
             )
 
 
-class RootChannelOwner(ChannelOwner):
+ChannelOwnerFactory = Callable[[ChannelOwner, str, str, Dict], ChannelOwner]
+
+
+def _declares_error_details(type: str, method: str) -> bool:
+    # maybeFindValidator(type, method, "ErrorDetails") in client/connection.ts: a
+    # derived interface has the commands of its base.
+    interface: Optional[str] = type
+    while interface:
+        if method in ERROR_DETAILS.get(interface, {}):
+            return True
+        interface = EXTENDS.get(interface)
+    return False
+
+
+class Root(ChannelOwner):
     _channel: "RootChannel"
 
     def __init__(self, connection: "Connection") -> None:
@@ -232,11 +267,17 @@ class RootChannelOwner(ChannelOwner):
         return from_channel(result["playwright"])
 
 
+class DummyChannelOwner(ChannelOwner):
+    def __init__(
+        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
+
+
 class Connection(EventEmitter):
     def __init__(
         self,
         dispatcher_fiber: Any,
-        object_factory: Callable[[ChannelOwner, str, str, Dict], ChannelOwner],
         transport: Transport,
         loop: asyncio.AbstractEventLoop,
         local_utils: Optional["LocalUtils"] = None,
@@ -245,12 +286,10 @@ class Connection(EventEmitter):
         self._dispatcher_fiber = dispatcher_fiber
         self._transport = transport
         self._transport.on_message = lambda msg: self.dispatch(msg)
-        # Call ids double as trace call ids, so they must be unique across connections.
-        self._call_id_prefix = "".join(random.choices(string.ascii_lowercase, k=4))
-        self._last_id = 0
+        self._next_call_id = _create_call_id_generator()
         self._objects: Dict[str, ChannelOwner] = {}
         self._callbacks: Dict[str, ProtocolCallback] = {}
-        self._object_factory = object_factory
+        self._object_factories: Dict[str, ChannelOwnerFactory] = {}
         self._is_sync = False
         self._child_ws_connections: List["Connection"] = []
         self._loop = loop
@@ -258,13 +297,24 @@ class Connection(EventEmitter):
         self._error: Optional[BaseException] = None
         self.is_remote = False
         self._init_task: Optional[asyncio.Task] = None
-        self._api_zone: contextvars.ContextVar[Optional[ParsedStackTrace]] = (
+        self._api_zone: contextvars.ContextVar[Optional[ApiZone]] = (
             contextvars.ContextVar("ApiZone", default=None)
         )
         self._local_utils: Optional["LocalUtils"] = local_utils
         self._tracing_count = 0
         self._closed_error: Optional[Exception] = None
         self._check_protocol = is_enabled()
+        # The factories are in their own module: this module can not import the
+        # classes that derive from ChannelOwner.
+        from playwright._impl._object_factory import object_factories
+
+        self.register_object_factories(object_factories)
+
+    def register_object_factories(
+        self, factories: Dict[str, "ChannelOwnerFactory"]
+    ) -> None:
+        for type, factory in factories.items():
+            self._object_factories[type] = factory
 
     @property
     def local_utils(self) -> "LocalUtils":
@@ -280,7 +330,7 @@ class Connection(EventEmitter):
 
     async def run(self) -> None:
         self._loop = asyncio.get_running_loop()
-        self._root_object = RootChannelOwner(self)
+        self._root_object = Root(self)
 
         async def init() -> None:
             try:
@@ -302,18 +352,21 @@ class Connection(EventEmitter):
         self._transport.request_stop()
         self._dispatcher_fiber.switch()
         self._loop.run_until_complete(self._transport.wait_until_stopped())
-        self.cleanup()
+        self.close()
 
     async def stop_async(self) -> None:
         self._transport.request_stop()
         await self._transport.wait_until_stopped()
-        self.cleanup()
+        self.close()
 
-    def cleanup(self, cause: str = None) -> None:
-        self._closed_error = TargetClosedError(cause) if cause else TargetClosedError()
+    def close(self, cause: str = None) -> None:
+        if self._closed_error:
+            return
+        self._closed_error = TargetClosedError(cause)
         if self._init_task and not self._init_task.done():
             self._init_task.cancel()
         for ws_connection in self._child_ws_connections:
+            ws_connection.close(cause)
             ws_connection._transport.dispose()
         for callback in self._callbacks.values():
             # To prevent 'Future exception was never retrieved' we ignore all callbacks that are no_reply.
@@ -323,6 +376,9 @@ class Connection(EventEmitter):
                 continue
             callback.future.set_exception(self._closed_error)
         self._callbacks.clear()
+        # Upstream rejects the initialize call with the other callbacks.
+        if not self.playwright_future.done():
+            self.playwright_future.set_exception(self._closed_error)
         self.emit("close")
 
     def set_is_tracing(self, is_tracing: bool) -> None:
@@ -338,42 +394,36 @@ class Connection(EventEmitter):
         params: Dict,
         timeout: float,
         no_reply: bool = False,
-    ) -> ProtocolCallback:
+    ) -> Optional[ProtocolCallback]:
+        # Fire-and-forget: the server intentionally never replies to __waitInfo__,
+        # so silently drop it after the connection is closed or the object was collected.
+        if method == "__waitInfo__" and (self._closed_error or object._was_collected):
+            return None
         if self._closed_error:
             raise self._closed_error
         if object._was_collected:
             raise Error(
                 "The object has been collected to prevent unbounded heap growth."
             )
-        self._last_id += 1
-        id = f"{self._call_id_prefix}@{self._last_id}"
-        callback = ProtocolCallback(self._loop, id, no_reply=no_reply)
-        task = asyncio.current_task(self._loop)
-        callback.stack_trace = cast(
-            RawStack,
-            getattr(task, "__pw_stack_trace__", None) or _extract_stack(limit=10),
-        )
-        callback.no_reply = no_reply
-        stack_trace_information = cast(ParsedStackTrace, self._api_zone.get())
-        frames = stack_trace_information.get("frames", [])
-        location = (
-            {
-                "file": frames[0]["file"],
-                "line": frames[0]["line"],
-                "column": frames[0]["column"],
-            }
-            if frames
-            else None
-        )
-        metadata: Dict[str, Any] = {
-            "internal": not stack_trace_information["apiName"],
-            "timeout": timeout,
-        }
-        if location:
-            metadata["location"] = location
-        title = stack_trace_information["title"]
-        if title:
-            metadata["title"] = title
+        id = self._next_call_id()
+        # The channel proxy in client/channelOwner.ts reports the first message of an
+        # API call with the title and the location of the call; the other messages,
+        # and the messages of an internal call, are internal.
+        zone = cast(ApiZone, self._api_zone.get())
+        frames: Optional[List[StackFrame]] = None
+        metadata: Dict[str, Any] = {"internal": True, "timeout": timeout}
+        if not zone["internal"] and not zone["reported"]:
+            zone["reported"] = True
+            frames = zone["frames"]
+            metadata = {"internal": False, "timeout": timeout}
+            if zone["title"]:
+                metadata["title"] = zone["title"]
+            if frames:
+                metadata["location"] = {
+                    "file": frames[0]["file"],
+                    "line": frames[0]["line"],
+                    "column": frames[0]["column"],
+                }
         message = {
             "id": id,
             "guid": object._guid,
@@ -389,12 +439,27 @@ class Connection(EventEmitter):
                 metadata,
                 self._type_of_guid,
             )
-        if self._tracing_count > 0 and frames and object._guid != "localUtils":
-            self.local_utils.add_stack_to_tracing_no_reply(id, frames)
+        if (
+            self._tracing_count
+            and frames is not None
+            and object._type != "LocalUtils"
+            and self._local_utils
+        ):
+            self._local_utils.add_stack_to_tracing_no_reply(id, frames)
 
         self._transport.send(message)
+        # Fire-and-forget: the server intentionally never replies to __waitInfo__.
+        if method == "__waitInfo__":
+            return None
+        callback = ProtocolCallback(
+            self._loop, id, object._type, method, no_reply=no_reply
+        )
+        task = asyncio.current_task(self._loop)
+        callback.stack_trace = cast(
+            RawStack,
+            getattr(task, "__pw_stack_trace__", None) or _extract_stack(limit=10),
+        )
         self._callbacks[id] = callback
-
         return callback
 
     def _type_of_guid(self, guid: str) -> Optional[str]:
@@ -434,22 +499,32 @@ class Connection(EventEmitter):
             return
         id = msg.get("id")
         if id:
-            callback = self._callbacks.pop(id)
+            callback = self._callbacks.get(id)
+            if not callback:
+                raise Exception(f"Cannot find command to respond: {id}")
+            del self._callbacks[id]
             if callback.future.cancelled():
                 return
-            # No reply messages are used to e.g. __waitInfo__(after) which returns exceptions on page close.
-            # To prevent 'Future exception was never retrieved' we just ignore such messages.
+            # The caller of a message without a reply ignores its result and its error,
+            # as upstream's .catch(() => {}); so do not set an error that no one retrieves.
             if callback.no_reply:
                 return
             error = msg.get("error")
             if error and not msg.get("result"):
-                parsed_error = parse_error(
-                    error["error"], format_call_log(msg.get("log"))
+                parsed_error = parse_error(error)
+                log = msg.get("log")
+                parsed_error._log = log or []
+                parsed_error = cast(
+                    Error,
+                    rewrite_error_message(
+                        parsed_error, str(parsed_error) + format_call_log(log)
+                    ),
                 )
-                parsed_error._log = msg.get("log")
-                parsed_error._details = self._replace_guids_with_channels(
-                    msg.get("errorDetails")
-                )
+                if _declares_error_details(callback.type, callback.method):
+                    error_details = msg.get("errorDetails")
+                    parsed_error._details = self._replace_guids_with_channels(
+                        error_details if error_details is not None else {}
+                    )
                 parsed_error._stack = _format_stack(callback.stack_trace)
                 callback.future.set_exception(parsed_error)
             else:
@@ -462,9 +537,8 @@ class Connection(EventEmitter):
         params = msg.get("params")
         if method == "__create__":
             assert params
-            parent = self._objects[guid]
             self._create_remote_object(
-                parent, params["type"], params["guid"], params["initializer"]
+                guid, params["type"], params["guid"], params["initializer"]
             )
             return
 
@@ -482,9 +556,9 @@ class Connection(EventEmitter):
 
         if method == "__dispose__":
             assert isinstance(params, dict)
-            self._objects[guid]._dispose(cast(Optional[str], params.get("reason")))
+            object._dispose(cast(Optional[str], params.get("reason")))
             return
-        object = self._objects[guid]
+
         should_replace_guids_with_channels = "jsonPipe@" not in guid
         try:
             if self._is_sync:
@@ -526,10 +600,16 @@ class Connection(EventEmitter):
         self._error = exc
 
     def _create_remote_object(
-        self, parent: ChannelOwner, type: str, guid: str, initializer: Dict
+        self, parent_guid: str, type: str, guid: str, initializer: Dict
     ) -> ChannelOwner:
+        parent = self._objects.get(parent_guid)
+        if not parent:
+            raise Exception(f"Cannot find parent object {parent_guid} to create {guid}")
         initializer = self._replace_guids_with_channels(initializer)
-        return self._object_factory(parent, type, guid, initializer)
+        factory = self._object_factories.get(type)
+        if not factory:
+            raise Exception("Missing type " + type)
+        return factory(parent, type, guid, initializer)
 
     def _replace_channels_with_guids(
         self,
@@ -569,43 +649,48 @@ class Connection(EventEmitter):
     async def wrap_api_call(
         self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
     ) -> Any:
-        if self._api_zone.get():
+        # Port of ChannelOwner._wrapApiCall() in client/channelOwner.ts.
+        outer_zone = self._api_zone.get()
+        if outer_zone:
+            _adopt_title(outer_zone, title)
             return await cb()
         task = asyncio.current_task(self._loop)
-        parsed_st = _attach_api_call_information(
+        zone = _create_api_zone(
             getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
             is_internal,
             title,
         )
-        self._api_zone.set(parsed_st)
+        self._api_zone.set(zone)
         try:
             return await cb()
         except Exception as error:
-            raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+            raise _api_call_error(zone, error) from None
         finally:
             self._api_zone.set(None)
 
     def wrap_api_call_sync(
         self, cb: Callable[[], Any], is_internal: bool = False, title: str = None
     ) -> Any:
-        if self._api_zone.get():
+        outer_zone = self._api_zone.get()
+        if outer_zone:
+            _adopt_title(outer_zone, title)
             return cb()
         task = asyncio.current_task(self._loop)
-        parsed_st = _attach_api_call_information(
+        zone = _create_api_zone(
             getattr(task, "__pw_stack__", None) or _capture_stack_trace(),
             is_internal,
             title,
         )
-        self._api_zone.set(parsed_st)
+        self._api_zone.set(zone)
         try:
             return cb()
         except Exception as error:
-            raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+            raise _api_call_error(zone, error) from None
         finally:
             self._api_zone.set(None)
 
     def wrap_api_call_event(
-        self, cb: Callable[[], EventContextManagerImpl]
+        self, cb: Callable[[], EventContextManagerImpl], title: str = None
     ) -> EventContextManagerImpl:
         """wrap_api_call_sync() for an expect_*() method.
 
@@ -618,10 +703,10 @@ class Connection(EventEmitter):
 
         def inner() -> EventContextManagerImpl:
             nonlocal api_name
-            api_name = cast(ParsedStackTrace, self._api_zone.get())["apiName"] or ""
+            api_name = cast(ApiZone, self._api_zone.get())["apiName"]
             return cb()
 
-        result = self.wrap_api_call_sync(inner)
+        result = self.wrap_api_call_sync(inner, title=title)
         if api_name:
             setattr(result.future, "__pw_api_name__", api_name)
         return result
@@ -632,35 +717,69 @@ def event_future_error(future: asyncio.Future, error: Exception) -> Exception:
     api_name = getattr(future, "__pw_api_name__", None)
     if not api_name:
         return error
-    return rewrite_error(error, f"{api_name}: {error}")
+    return rewrite_error_message(error, f"{api_name}: {error}")
 
 
 ApiCallMethod = TypeVar("ApiCallMethod", bound=Callable[..., Any])
 
 
-def api_call(method: ApiCallMethod) -> ApiCallMethod:
+@overload
+def api_call(method: ApiCallMethod) -> ApiCallMethod: ...
+
+
+@overload
+def api_call(
+    *, title: Optional[str] = None
+) -> Callable[[ApiCallMethod], ApiCallMethod]: ...
+
+
+def api_call(
+    method: Optional[ApiCallMethod] = None, *, title: Optional[str] = None
+) -> Any:
     """Port of the apiCall() decorator in packages/playwright-core/src/client/channelOwner.ts.
 
     For a method that does its work on the client: its errors get the API name
     prefix ("Page.wait_for_url: ..."), as the errors of the protocol calls do.
+    `@api_call(title=...)` titles the call, as `@apiCall({ title })` does.
     """
-    if inspect.iscoroutinefunction(method):
+
+    def decorator(method: ApiCallMethod) -> ApiCallMethod:
+        if inspect.iscoroutinefunction(method):
+
+            @functools.wraps(method)
+            async def async_wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
+                # Like apiCall(), which calls this._wrapApiCall(): a ChannelOwner, or
+                # an object that delegates to its owner (Locator, Mouse, Screencast).
+                return await self._wrap_api_call(
+                    lambda: method(self, *args, **kwargs), title=title
+                )
+
+            return cast(ApiCallMethod, async_wrapper)
 
         @functools.wraps(method)
-        async def async_wrapper(self: "ChannelOwner", *args: Any, **kwargs: Any) -> Any:
-            return await self._connection.wrap_api_call(
-                lambda: method(self, *args, **kwargs)
+        def event_wrapper(self: "ChannelOwner", *args: Any, **kwargs: Any) -> Any:
+            return self._connection.wrap_api_call_event(
+                lambda: method(self, *args, **kwargs), title=title
             )
 
-        return cast(ApiCallMethod, async_wrapper)
+        return cast(ApiCallMethod, event_wrapper)
+
+    if method is None:
+        return decorator
+    return decorator(method)
+
+
+def internal(method: ApiCallMethod) -> ApiCallMethod:
+    """Port of the @internal decorator in client/channelOwner.ts: the method runs in an
+    internal API zone, which is not reported as an API call."""
 
     @functools.wraps(method)
-    def event_wrapper(self: "ChannelOwner", *args: Any, **kwargs: Any) -> Any:
-        return self._connection.wrap_api_call_event(
-            lambda: method(self, *args, **kwargs)
+    async def wrapper(self: Any, *args: Any, **kwargs: Any) -> Any:
+        return await self._wrap_api_call(
+            lambda: method(self, *args, **kwargs), is_internal=True
         )
 
-    return cast(ApiCallMethod, event_wrapper)
+    return cast(ApiCallMethod, wrapper)
 
 
 def from_channel(channel: Channel) -> Any:
@@ -680,8 +799,24 @@ class StackFrame(TypedDict):
 
 class ParsedStackTrace(TypedDict):
     frames: List[StackFrame]
-    apiName: Optional[str]
+    apiName: str
+
+
+def _adopt_title(zone: "ApiZone", title: Optional[str]) -> None:
+    # Python only: a method that waits after it returns, such as wait_for_url() around
+    # expect_navigation(), opens its zone first. Its inner @api_call titles the call,
+    # as the decorated inner call (waitForNavigation()) does upstream.
+    if title and not zone["title"] and not zone["internal"] and not zone["reported"]:
+        zone["title"] = title
+
+
+class ApiZone(TypedDict):
+    # Port of ApiZone in client/channelOwner.ts.
+    apiName: str
+    frames: List[StackFrame]
     title: Optional[str]
+    internal: bool
+    reported: bool
 
 
 # The (file, line, function) of each frame, the outermost first.
@@ -758,24 +893,51 @@ def _capture_stack_trace() -> ParsedStackTrace:
     return {
         "frames": parsed_frames,
         "apiName": api_name,
-        "title": None,
     }
 
 
-def _attach_api_call_information(
-    stack_trace_information: ParsedStackTrace,
-    is_internal: bool,
-    title: Optional[str],
-) -> ParsedStackTrace:
-    if is_internal:
-        stack_trace_information["apiName"] = ""
-    stack_trace_information["title"] = title
-    return stack_trace_information
+def _create_api_zone(
+    stack_trace: ParsedStackTrace, internal: bool, title: Optional[str]
+) -> ApiZone:
+    # The zone that ChannelOwner._wrapApiCall() in client/channelOwner.ts creates.
+    api_name = stack_trace["apiName"]
+    if api_name.startswith("_") or "._" in api_name:
+        api_name = title if title is not None else api_name
+    return {
+        "apiName": api_name,
+        "frames": stack_trace["frames"],
+        "title": title,
+        "internal": internal,
+        "reported": False,
+    }
+
+
+def _api_call_error(zone: ApiZone, error: Exception) -> Exception:
+    # The error of an API call, as ChannelOwner._wrapApiCall() rewrites it.
+    api_name = zone["apiName"]
+    if api_name and "<lambda>" not in api_name:
+        return rewrite_error_message(error, f"{api_name}: {error}")
+    return error
 
 
 def format_call_log(log: Optional[List[str]]) -> str:
-    if not log:
-        return ""
-    if len(list(filter(lambda x: x.strip(), log))) == 0:
+    if not log or not any(log):
         return ""
     return "\nCall log:\n" + "\n".join(log) + "\n"
+
+
+# Port of createCallIdGenerator() in packages/isomorphic/trace/traceUtils.ts: the
+# ordinal is shared, and each connection has its own prefix to avoid id clashes in
+# a trace.
+_last_id_ordinal = 0
+
+
+def _create_call_id_generator() -> Callable[[], str]:
+    prefix = "".join(random.choices(string.ascii_lowercase, k=4))
+
+    def next_call_id() -> str:
+        global _last_id_ordinal
+        _last_id_ordinal += 1
+        return f"{prefix}@{_last_id_ordinal}"
+
+    return next_call_id

@@ -108,6 +108,7 @@ def generate(protocol: Dict[str, Any]) -> str:
     extends: Dict[str, str] = {}
     types: Dict[str, Any] = {}
     commands: Dict[str, Dict[str, Any]] = {}
+    error_details: Dict[str, Dict[str, Any]] = {}
     for name, item in protocol.items():
         if item["type"] == "interface":
             if item.get("extends"):
@@ -117,6 +118,10 @@ def generate(protocol: Dict[str, Any]) -> str:
                 commands[name][method] = converter.properties(
                     (command or {}).get("parameters"), f"{name}.{method}"
                 )
+                if (command or {}).get("errorDetails"):
+                    error_details.setdefault(name, {})[method] = converter.properties(
+                        command["errorDetails"], f"{name}.{method}.errorDetails"
+                    )
         elif item["type"] in ("object", "enum"):
             types[name] = converter.type(item, name)
 
@@ -138,6 +143,9 @@ def generate(protocol: Dict[str, Any]) -> str:
             "",
             "# The parameters of each command, by interface and method.",
             f"COMMANDS: Dict[str, Dict[str, Dict[str, Any]]] = {dump(commands)}",
+            "",
+            "# The error details of the commands that declare them, by interface and method.",
+            f"ERROR_DETAILS: Dict[str, Dict[str, Dict[str, Any]]] = {dump(error_details)}",
             "",
         ]
     )
@@ -245,10 +253,13 @@ class Command:
         name: str,
         params: List[Tuple[str, str]],
         result: Optional[Payload],
+        internal: bool,
     ) -> None:
         self.name = name
         self.params = params
         self.result = result
+        # `internal: true` in the spec: the call is not reported as an API call.
+        self.internal = internal
 
 
 class Interface:
@@ -323,7 +334,9 @@ def generate_types(protocol: Dict[str, Any]) -> Tuple[str, List[Interface], Set[
                     result.type_name,
                     emitter.fields(result.type_name, returns, top_level=True),
                 )
-            interface.commands.append(Command(method, params, result))
+            interface.commands.append(
+                Command(method, params, result, bool(command.get("internal")))
+            )
         for event, event_spec in (item.get("events") or {}).items():
             properties = converter.properties(
                 (event_spec or {}).get("parameters"), f"{name}.{event}"
@@ -412,15 +425,18 @@ def generate_channels(interfaces: List[Interface], type_names: Set[str]) -> str:
                 )
                 + "}"
             )
+            call_args = f'"{command.name}", {params}, timeout'
+            if command.internal:
+                call_args += ", is_internal=True"
             if command.result:
                 returns = f"channels.{command.result.type_name}"
                 body = (
-                    f'        result = await self._call("{command.name}", {params}, timeout)\n'
+                    f"        result = await self._call({call_args})\n"
                     f"        return {payload_dict(command.result, 'result')}"
                 )
             else:
                 returns = "None"
-                body = f'        await self._call("{command.name}", {params}, timeout)'
+                body = f"        await self._call({call_args})"
             methods.append(
                 f"    async def {python_name(command.name)}(\n"
                 f"        self,\n{args}        timeout: float = 0,\n"

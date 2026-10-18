@@ -25,8 +25,19 @@ class FormData:
         self._fields: List[Tuple[str, FormDataValue]] = []
 
     def set(self, name: str, value: FormDataValue) -> "FormData":
-        self._fields = [(n, v) for (n, v) in self._fields if n != name]
-        self._fields.append((name, value))
+        # Like FormData.set() of the WHATWG spec: the first entry with the name takes
+        # the value in place, and the others are removed.
+        fields: List[Tuple[str, FormDataValue]] = []
+        replaced = False
+        for field_name, field_value in self._fields:
+            if field_name != name:
+                fields.append((field_name, field_value))
+            elif not replaced:
+                fields.append((name, value))
+                replaced = True
+        if not replaced:
+            fields.append((name, value))
+        self._fields = fields
         return self
 
     def append(self, name: str, value: FormDataValue) -> "FormData":

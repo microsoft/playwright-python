@@ -20,7 +20,6 @@ from greenlet import GreenletExit, greenlet
 from playwright._impl._connection import Connection
 from playwright._impl._errors import Error
 from playwright._impl._greenlets import MainGreenlet
-from playwright._impl._object_factory import create_remote_object
 from playwright._impl._transport import PipeTransport
 from playwright.sync_api._generated import Playwright as SyncPlaywright
 
@@ -79,10 +78,7 @@ Please use the Async API instead."""
         dispatcher_fiber = MainGreenlet(greenlet_main)
 
         self._connection = Connection(
-            dispatcher_fiber,
-            create_remote_object,
-            PipeTransport(self._loop),
-            self._loop,
+            dispatcher_fiber, PipeTransport(self._loop), self._loop
         )
 
         # Wait until initialize completes (not just Playwright __create__), matching async.

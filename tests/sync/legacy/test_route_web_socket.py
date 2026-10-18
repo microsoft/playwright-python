@@ -166,6 +166,8 @@ def test_should_work_with_server(page: Page, server: Server) -> None:
             ws.send(message)
 
         server.on_message(_server_on_message)
+        # Forward the close of the page through the server side of the route.
+        ws.on_close(lambda code, reason: server.close(code=code, reason=reason))
         server.send("fake")
         nonlocal route
         route = ws
