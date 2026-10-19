@@ -304,26 +304,39 @@ def test_expect_response_should_not_hang_when_predicate_throws(page: Page) -> No
             raise Exception("Oops!")
 
 
-def test_expect_response_should_not_switch_to_stale_greenlet_when_cancelled(
+def test_expect_event_should_not_switch_to_stale_greenlet(
     page: Page, server: Server
 ) -> None:
     # Mimics frameworks like pytest-twisted that run the test body in a separate
     # greenlet which stays alive (suspended) after handing control back.
     main = greenlet.getcurrent()
-    resumed: List[bool] = []
 
-    def body() -> None:
+    def expect_not_resumed(action: Callable[[], None]) -> None:
+        resumed: List[bool] = []
+
+        def body() -> None:
+            action()
+            main.switch()
+            resumed.append(True)
+            main.switch()
+
+        greenlet(body).switch()
+        # Pumps the dispatcher, which runs the done callbacks of the futures.
+        page.goto(server.EMPTY_PAGE)
+        assert resumed == []
+
+    def cancel_wait() -> None:
         with pytest.raises(Exception, match="Oops!"):
             with page.expect_response("**/*"):
                 raise Exception("Oops!")
-        main.switch()
-        resumed.append(True)
-        main.switch()
 
-    greenlet(body).switch()
-    # Pumps the dispatcher, which runs the cancelled future's done callbacks.
-    page.goto(server.EMPTY_PAGE)
-    assert resumed == []
+    def wait_for_done_future() -> None:
+        with page.expect_console_message() as message_info:
+            page.evaluate("console.log('hello')")
+        assert message_info.value.text == "hello"
+
+    expect_not_resumed(cancel_wait)
+    expect_not_resumed(wait_for_done_future)
 
 
 def test_expect_response_should_use_context_timeout(

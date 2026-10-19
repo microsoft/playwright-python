@@ -68,9 +68,13 @@ def wait_for_future(
 ) -> None:
     __tracebackhide__ = True
     g_self = greenlet.getcurrent()
+    waiting = True
 
     def resume(_: "asyncio.Future") -> None:
-        g_self.switch()
+        # asyncio runs the callback in a later loop iteration, also when the future
+        # is done already. By then the wait may be over and this greenlet elsewhere.
+        if waiting:
+            g_self.switch()
 
     # The wait owns the callback that resumes this greenlet, so that it can
     # remove it again when the wait is abandoned. A callback left behind would
@@ -92,6 +96,7 @@ def wait_for_future(
         future.cancel()
         raise
     finally:
+        waiting = False
         # The loop is only running for as long as the dispatcher fiber is alive.
         # Also after a signal handler interrupted it: run_forever() cleared this
         # on its way out, but the dispatcher is going to run the loop again.
