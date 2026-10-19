@@ -1,12 +1,13 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
+# The test assets are copied from upstream byte for byte; the hooks must not change them.
+exclude: ^tests/assets/
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
-        exclude: tests/assets/har-sha1-main-response.txt
       - id: check-yaml
       - id: check-toml
       - id: requirements-txt-fixer

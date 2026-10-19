@@ -12,9 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Optional, TypeVar
+import os
+import re
+from pathlib import Path
+from typing import Optional, Pattern, TypeVar, Union
 
 TARGET_CLOSED_ERROR_MESSAGE = "Target page, context or browser has been closed"
+
+# The context options that @playwright/test applies to every context of the upstream
+# tests (_combinedContextOptions in packages/playwright/src/index.ts). The others
+# there are the defaults of the browser contexts.
+DEFAULT_CONTEXT_OPTIONS = {"locale": "en-US"}
 
 MustType = TypeVar("MustType")
 
@@ -22,6 +30,18 @@ MustType = TypeVar("MustType")
 def must(value: Optional[MustType]) -> MustType:
     assert value
     return value
+
+
+def relative_path(path: Union[str, Path]) -> str:
+    """path.relative(process.cwd(), path) in Node.js.
+
+    Like Node.js, returns the absolute path when the path is on another drive
+    (Windows), where os.path.relpath() raises.
+    """
+    try:
+        return os.path.relpath(path, os.getcwd())
+    except ValueError:
+        return os.path.abspath(path)
 
 
 def chromium_version_less_than(a: str, b: str) -> bool:
@@ -33,3 +53,18 @@ def chromium_version_less_than(a: str, b: str) -> bool:
         if left[i] < right[i]:
             return True
     return False
+
+
+def expected_ssl_error(
+    browser_name: str, platform: str, channel: Optional[str]
+) -> Pattern[str]:
+    """Port of expectedSSLError() in tests/config/utils.ts."""
+    if browser_name == "chromium":
+        return re.compile(r"net::(ERR_CERT_AUTHORITY_INVALID|ERR_CERT_INVALID)")
+    if browser_name == "webkit":
+        if platform == "darwin":
+            return re.compile(r"The certificate for this server is invalid")
+        if platform == "win32" and channel != "webkit-wsl":
+            return re.compile(r"SSL peer certificate or SSH remote key was not OK")
+        return re.compile(r"Unacceptable TLS certificate|Operation was cancelled")
+    return re.compile(r"SSL_ERROR_UNKNOWN")
