@@ -115,7 +115,7 @@ const isAsync = options.flavor === 'async';
 
 const PW_SRC_DIR = process.env.PW_SRC_DIR;
 if (!PW_SRC_DIR)
-  fail('Set PW_SRC_DIR to a microsoft/playwright checkout at the release branch in DRIVER_VERSION.');
+  fail('Set PW_SRC_DIR to a microsoft/playwright checkout at the commit in DRIVER_VERSION (rev=).');
 const { parseApi } = require(path.join(PW_SRC_DIR, 'utils', 'doclint', 'api_parser'));
 const { Type, parseCodeLang } = require(path.join(PW_SRC_DIR, 'utils', 'doclint', 'documentation'));
 const md = require(path.join(PW_SRC_DIR, 'utils', 'markdown'));

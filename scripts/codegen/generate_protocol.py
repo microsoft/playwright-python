@@ -538,7 +538,7 @@ def main() -> None:
     pw_src_dir = os.environ.get("PW_SRC_DIR")
     if not pw_src_dir:
         raise SystemExit(
-            "Set PW_SRC_DIR to a microsoft/playwright checkout at the release branch in DRIVER_VERSION."
+            "Set PW_SRC_DIR to a microsoft/playwright checkout at the commit in DRIVER_VERSION (rev=)."
         )
     protocol = load_protocol(Path(pw_src_dir) / "packages" / "protocol" / "spec")
     text = generate(protocol)

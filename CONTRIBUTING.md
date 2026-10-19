@@ -37,7 +37,7 @@ pip install -r local-requirements.txt
 Build and install drivers:
 
 The driver is assembled from published artifacts — the `playwright-core` npm
-package (version pinned in `DRIVER_VERSION`) and the official Node.js binary
+package (version pinned in `DRIVER_VERSION`, `npm=`) and the official Node.js binary
 (pinned in `NODE_VERSION`). Building a wheel downloads them with `npm pack` and
 plain HTTP, so Node.js/npm must be installed; no git or source build is needed.
 
@@ -77,8 +77,9 @@ For more details look at the [CI configuration](./.github/workflows/ci.yml).
 
 `update_api.sh` generates `playwright/{async,sync}_api/_generated.py` and the
 public TypedDicts in `playwright/_impl/_api_structures.py` from the API docs in
-a separate `microsoft/playwright` checkout on the exact release branch for
-`DRIVER_VERSION` (for example `release-1.64`); point `PW_SRC_DIR` at it. The
+a separate `microsoft/playwright` checkout at the commit in `DRIVER_VERSION`
+(`rev=`, the commit that the `npm=` package is built from); point `PW_SRC_DIR`
+at it. The
 generator is
 `scripts/codegen/generate_api.js`; Python facts that the docs do not contain
 live in `scripts/codegen/python_rules.js`.

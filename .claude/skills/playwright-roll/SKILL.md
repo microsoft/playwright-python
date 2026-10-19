@@ -39,37 +39,37 @@ The upstream documentation source of truth is `docs/src/api/*.md` in the playwri
 
 ### 2. Bump the driver pin, download it, and generate api.json
 
+`DRIVER_VERSION` has two lines: `npm=`, the `playwright-core` npm version
+(a release such as `1.62.0`, a beta, or a nightly such as
+`1.65.0-alpha-2026-10-19`), and `rev=`, the `microsoft/playwright` commit that
+the package is built from. npm records that commit:
+
+```sh
+npm view playwright-core@<version> gitHead
+```
+
 The docs walk and codegen read the upstream docs from a `microsoft/playwright`
 checkout at `$PW_SRC_DIR`. **Use a separate checkout that exists only for
-rolls, on the exact release branch you roll to**: `release-<new>`, the
-`major.minor` of the new `DRIVER_VERSION` (the branch has the release's docs
-plus any cherry-picks). Never point `PW_SRC_DIR` at a checkout that someone
-works in: on `main` or a feature branch the docs differ, and the generator
-silently emits that API instead of the release's.
+rolls, at exactly the `rev=` commit.** Never point `PW_SRC_DIR` at a checkout
+that someone works in: on any other commit the docs differ, and the generator
+silently emits that API instead of the driver's. `./scripts/update_api.sh`
+refuses to run when the checkout is not at `rev=` or has local changes.
 
 ```sh
 export PW_SRC_DIR=../playwright-for-python      # the roll checkout, nothing else
 # First roll on this machine: clone it (no npm install needed).
 git clone https://github.com/microsoft/playwright.git "$PW_SRC_DIR"
-# Every roll: move it to the release branch.
+# Every roll: move it to the new rev.
 git -C "$PW_SRC_DIR" fetch origin
-git -C "$PW_SRC_DIR" checkout release-<new>     # e.g. release-1.62
-git -C "$PW_SRC_DIR" merge --ff-only origin/release-<new>
-```
-
-Check the checkout before you generate, and again before you commit:
-
-```sh
-git -C "$PW_SRC_DIR" rev-parse --abbrev-ref HEAD                  # must print release-<new>
-git -C "$PW_SRC_DIR" status --porcelain                           # must print nothing
-git -C "$PW_SRC_DIR" rev-parse HEAD origin/release-<new>          # both lines must be equal
+git -C "$PW_SRC_DIR" checkout --detach <rev>
 ```
 
 Then bump the pins and assemble the driver:
 
 ```sh
-# Edit DRIVER_VERSION (repo root): the playwright-core npm version for the new
-# release, no "v" prefix, e.g.  1.62.0
+# Edit DRIVER_VERSION (repo root), for example:
+#   npm=1.62.0
+#   rev=<npm view playwright-core@1.62.0 gitHead>
 python scripts/update_node_version.py     # refresh NODE_VERSION to the current LTS
 
 source env/bin/activate
@@ -89,32 +89,18 @@ the walk.
 
 ### 3. Identify the commit range
 
-Use the roll checkout at `$PW_SRC_DIR` (from step 2).
-Bring it up to date and ensure release branches/tags are present before walking
-the range:
+The range is every commit between the old `rev=` (in `DRIVER_VERSION` before the
+bump) and the new one. Save the commit list, oldest first, scoped to
+`docs/src/api/`:
 
 ```sh
-git -C "$PW_SRC_DIR" fetch --tags
-git -C "$PW_SRC_DIR" fetch origin 'release-*:release-*'
+git -C "$PW_SRC_DIR" log <old-rev>..<new-rev> --oneline --reverse -- docs/src/api > /tmp/roll-<new>-commits.md
 ```
 
-There is sometimes no `vX.Y.0` tag for the latest release (the bots cut release branches first and tag later). Anchor on commits, not tags.
-
-The diff range is "every commit on the new release branch since the previous release was cut". Anchor commits:
-
-- **Previous release end**: the `chore: bump version to vX.Y.0-next` commit on `main`. That commit is the first commit *after* the previous release (X.Y-1) was cut. Use its parent (`<sha>~1`) as the lower bound.
-  ```sh
-  git -C "$PW_SRC_DIR" log --all --grep="bump version to v" --oneline | head
-  ```
-- **New release end**: the tip of `release-<new>` (or the matching tag if it exists).
-
-Save the commit list, oldest first, scoped to `docs/src/api/`:
-
-```sh
-git -C "$PW_SRC_DIR" log <prev-anchor>~1..release-<new> --oneline --reverse -- docs/src/api > /tmp/roll-<new>-commits.md
-```
-
-A normal roll yields 50–100 commits. If you see 0 or thousands, the range is wrong.
+If the old `DRIVER_VERSION` has no `rev=` line (rolls before the two-line
+format), take the old commit from npm: `npm view playwright-core@<old version>
+gitHead`. A release-to-release roll yields 50–100 commits; a nightly-to-nightly
+roll a handful. If you see thousands, the range is wrong.
 
 Format the file as a markdown checklist and add the standard preamble (status legend, where to look up `api.json` etc.) — see the file from the 1.58→1.59 roll for the template.
 
@@ -266,7 +252,7 @@ Failure modes and fixes:
 | mypy: incompatible argument type in `_generated.py` | The docs type changed, or `_impl/` declares a narrower type. | Match the type in `_impl/`, or fix the docs with a Python-only declaration (`* langs: python`). |
 | generator: `No Python name for the struct at X.y.z` | A new inline `[Object]` with no name in the docs. | Name it in the docs: `` "Name" <[Object]> ``. |
 | generator: `The struct X has different fields at A and B` | Two places in the docs share one struct name, but their fields differ. | Give one place its own name in the docs. |
-| `_generated.py` gains or loses members that the commit walk never mentioned | `PW_SRC_DIR` is not on `release-<new>` (for example on `main` or a feature branch), or is behind `origin/release-<new>`. | Run the checkout checks from step 2, fix the checkout, regenerate. |
+| `_generated.py` gains or loses members that the commit walk never mentioned | `PW_SRC_DIR` is not at the `rev=` commit, or the range of the walk is wrong. | Check out `rev=` (step 2), regenerate, and recompute the range (step 3). |
 | generator: `Unknown docs type "T" at X.y` | A docs type the type table in `generate_api.js` (`toPy`) does not know. | Add it to `toPy`. |
 | generator: `required parameter z follows an optional one` | The docs order params so that Python would need a default before a non-default. | Fix the docs, for example with a Python-only `### param:` or `### option:`, as `select_option(value)` has. |
 | generator: `the entry "…" no longer matches anything; remove it` | An upstream change made a rules entry unnecessary (or renamed what it points at). | Delete it, or re-key it to the new docs name. |
@@ -300,7 +286,7 @@ For each PORT, port the upstream test that covers it, as an async test and a mat
 
 ### 8. Final verification
 
-Repeat the checkout checks from step 2: the committed `_generated.py` must come from `release-<new>`.
+Check that `$PW_SRC_DIR` is still at the `rev=` commit, with no local changes: the committed `_generated.py` must come from it.
 
 ```sh
 pre-commit run --all-files

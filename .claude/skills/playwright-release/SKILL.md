@@ -31,9 +31,9 @@ gh issue list --repo microsoft/playwright-python --state open \
 If any are open, list them for the user and ask whether to continue. Do not
 close or comment on issues.
 
-Check that the driver is rolled. `DRIVER_VERSION` must be the driver for the
-release: a `1.xx.y` build, or a `1.xx.0-beta-…` build from `release-1.xx`, as the
-user says. If it is not, roll with the `playwright-roll` skill. This is often
+Check that the driver is rolled. `DRIVER_VERSION` (`npm=`) must be the driver
+for the release: a `1.xx.y` build, or a `1.xx.0-beta-…` build from `release-1.xx`,
+as the user says, and `rev=` the commit that it is built from. If it is not, roll with the `playwright-roll` skill. This is often
 already done. The roll commit goes into the release commit PR (step 3). When the
 API roll for 1.xx is already on `main`, that PR only moves `DRIVER_VERSION`.
 

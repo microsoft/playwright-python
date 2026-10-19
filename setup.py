@@ -22,13 +22,25 @@ import zipfile
 from pathlib import Path
 from typing import Dict
 
+
 # The driver is assembled by scripts/build_driver.py from published artifacts:
 # the playwright-core npm package (version pinned in DRIVER_VERSION) and the
 # official Node.js binaries (pinned in NODE_VERSION). DRIVER_VERSION is the
 # single source of truth (also read by CI) and is baked into the staged bundle
 # filenames, so it doubles as the build cache key: a roll changes DRIVER_VERSION,
 # which changes the filenames.
-driver_version = (Path(__file__).parent / "DRIVER_VERSION").read_text().strip()
+# DRIVER_VERSION has two lines: npm=<playwright-core version> and
+# rev=<the microsoft/playwright commit that the package is built from>.
+def read_driver_version() -> str:
+    pins = dict(
+        line.split("=", 1)
+        for line in (Path(__file__).parent / "DRIVER_VERSION").read_text().splitlines()
+        if line.strip()
+    )
+    return pins["npm"].strip()
+
+
+driver_version = read_driver_version()
 
 base_wheel_bundles = [
     {
