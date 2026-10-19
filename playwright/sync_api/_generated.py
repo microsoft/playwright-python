@@ -4530,7 +4530,11 @@ class CDPSession(SyncBase):
         return super().once(event=event, f=f)
 
     def send(
-        self, method: str, params: typing.Optional[typing.Dict] = None
+        self,
+        method: str,
+        params: typing.Optional[typing.Dict] = None,
+        *,
+        timeout: typing.Optional[typing.Union[float, datetime.timedelta]] = None,
     ) -> typing.Dict:
         """CDPSession.send
 
@@ -4540,6 +4544,8 @@ class CDPSession(SyncBase):
             Protocol method name.
         params : Union[Dict, None]
             Optional method parameters.
+        timeout : Union[float, None]
+            Maximum time in milliseconds to wait for the response. Defaults to `0` - no timeout.
 
         Returns
         -------
@@ -4548,7 +4554,11 @@ class CDPSession(SyncBase):
 
         return mapping.from_maybe_impl(
             self._sync(
-                self._impl_obj.send(method=method, params=mapping.to_impl(params))
+                self._impl_obj.send(
+                    method=method,
+                    params=mapping.to_impl(params),
+                    timeout=to_milliseconds(timeout),
+                )
             )
         )
 

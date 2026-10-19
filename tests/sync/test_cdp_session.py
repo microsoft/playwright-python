@@ -14,7 +14,7 @@
 
 import pytest
 
-from playwright.sync_api import Browser, Error, Page
+from playwright.sync_api import Browser, Error, Page, TimeoutError
 from tests.server import Server
 from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
 
@@ -33,6 +33,25 @@ def test_should_work(page: Page) -> None:
     foo = page.evaluate("() => window.foo")
     assert foo == "bar"
     assert events[0]["args"][0]["value"] == "log"
+
+
+@pytest.mark.only_browser("chromium")
+def test_should_respect_timeout_and_signal_options(page: Page) -> None:
+    # The signal option of the upstream test is JavaScript only.
+    client = page.context.new_cdp_session(page)
+    eval_response = client.send(
+        "Runtime.evaluate",
+        {"expression": "1 + 2", "returnByValue": True},
+        timeout=5000,
+    )
+    assert eval_response["result"]["value"] == 3
+    with pytest.raises(TimeoutError) as exc_info:
+        client.send(
+            "Runtime.evaluate",
+            {"expression": "new Promise(() => {})", "awaitPromise": True},
+            timeout=500,
+        )
+    assert "Timeout 500ms exceeded" in exc_info.value.message
 
 
 @pytest.mark.only_browser("chromium")

@@ -84,6 +84,21 @@ def read_pin(name: str) -> str:
     return value
 
 
+def read_driver_version() -> str:
+    # DRIVER_VERSION has two lines: npm=<playwright-core version> and
+    # rev=<the microsoft/playwright commit that the package is built from>.
+    pins = dict(
+        line.split("=", 1)
+        for line in read_pin("DRIVER_VERSION").splitlines()
+        if line.strip()
+    )
+    if "npm" not in pins:
+        raise SystemExit(
+            f"DRIVER_VERSION has no npm= line at {REPO_ROOT / 'DRIVER_VERSION'}"
+        )
+    return pins["npm"].strip()
+
+
 def download(url: str, destination: Path) -> None:
     last_error: Exception = RuntimeError("no attempt made")
     for attempt in range(1, 6):
@@ -219,7 +234,7 @@ def assemble(
 
 
 def build(suffixes: Set[str]) -> None:
-    version = read_pin("DRIVER_VERSION")
+    version = read_driver_version()
     node_version = read_pin("NODE_VERSION")
     DRIVER_DIR.mkdir(exist_ok=True)
 
