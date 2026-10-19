@@ -549,3 +549,28 @@ def test_sync_should_survive_exception_raised_by_signal_handler_while_event_hand
 def test_click_should_accept_timedelta_for_timeout(page: Page) -> None:
     with pytest.raises(TimeoutError, match="Timeout 1ms exceeded"):
         page.click("does-not-exist", timeout=timedelta(milliseconds=1))
+
+
+def test_sync_event_listener_cancelled_future() -> None:
+    import asyncio
+    from unittest.mock import MagicMock
+    from playwright._impl._connection import Channel, Connection
+
+    loop = asyncio.new_event_loop()
+    conn = Connection(MagicMock(), MagicMock(), MagicMock(), loop=loop)
+    conn._is_sync = True
+
+    dummy_obj = MagicMock()
+    dummy_obj._guid = "dummy"
+    dummy_channel = Channel(conn, dummy_obj)
+    dummy_obj._channel = dummy_channel
+    conn._objects["dummy"] = dummy_obj
+
+    fut = loop.create_future()
+    fut.cancel()
+
+    dummy_channel._emitter.on("event", lambda p: fut)
+    conn.dispatch({"guid": "dummy", "method": "event", "params": {}})
+    loop.run_until_complete(asyncio.sleep(0.01))
+    loop.close()
+

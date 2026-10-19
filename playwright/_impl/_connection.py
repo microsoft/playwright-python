@@ -435,6 +435,8 @@ class Connection(EventEmitter):
                     # Event handlers like route/locatorHandlerTriggered require us to perform async work.
                     # In order to report their potential errors to the user, we need to catch it and store it in the connection
                     def _done_callback(future: asyncio.Future) -> None:
+                        if future.cancelled():
+                            return
                         exc = future.exception()
                         if exc:
                             self._on_event_listener_error(exc)
