@@ -19,7 +19,7 @@ import pytest
 
 from playwright.async_api import Error, Page, Request, Route
 from tests.server import Server
-from tests.utils import only_v1, only_v2
+from tests.utils import only_v1
 
 
 async def test_should_work(page: Page, server: Server) -> None:
@@ -347,7 +347,7 @@ async def test_should_chain_fallback_with_dynamic_url(
     assert intercepted == [3, 2, 1]
 
 
-@only_v1
+@only_v1("RO-133")
 async def test_should_amend_json_post_data(server: Server, page: Page) -> None:
     await page.goto(server.EMPTY_PAGE)
     post_data = []
@@ -368,26 +368,3 @@ async def test_should_amend_json_post_data(server: Server, page: Page) -> None:
     )
     assert post_data == ['{"foo": "bar"}']
     assert server_request.post_body == b'{"foo": "bar"}'
-
-
-@only_v2
-async def test_should_amend_json_post_data_v2(server: Server, page: Page) -> None:
-    await page.goto(server.EMPTY_PAGE)
-    post_data = []
-
-    def _handle1(route: Route, request: Request) -> None:
-        post_data.append(route.request.post_data)
-        asyncio.create_task(route.continue_())
-
-    await page.route("**/*", _handle1)
-    await page.route(
-        "**/*",
-        lambda route: asyncio.create_task(route.fallback(post_data={"foo": "bar"})),
-    )
-
-    [server_request, _] = await asyncio.gather(
-        server.wait_for_request("/sleep.zzz"),
-        page.evaluate("() => fetch('/sleep.zzz', { method: 'POST', body: 'birdy' })"),
-    )
-    assert post_data == ['{"foo":"bar"}']
-    assert server_request.post_body == b'{"foo":"bar"}'

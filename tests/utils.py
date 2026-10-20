@@ -26,12 +26,16 @@ TARGET_CLOSED_ERROR_MESSAGE = "Target page, context or browser has been closed"
 # there are the defaults of the browser contexts.
 DEFAULT_CONTEXT_OPTIONS = {"locale": "en-US"}
 
-# PW_IMPL=v2 runs the tests on playwright/_impl_v2. An older test that checks a
-# behavior in which v2 follows upstream and v1 does not has two variants: the v1
-# one, and the v2 one, named <test>_v2.
+# PW_IMPL=v2 runs the tests on playwright/_impl_v2.
 IS_V2 = os.environ.get("PW_IMPL") == "v2"
-only_v1 = pytest.mark.skipif(IS_V2, reason="v1 behavior; see the _v2 variant")
-only_v2 = pytest.mark.skipif(not IS_V2, reason="v2 behavior, as upstream")
+
+
+def only_v1(v2_tests: str) -> pytest.MarkDecorator:
+    """Marks an older test that checks a behavior in which v2 follows upstream and v1
+    does not. v2_tests names the tests of the v2 behavior: the ports of the upstream
+    tests, or the Python-only tests in tests/async/python."""
+    return pytest.mark.skipif(IS_V2, reason=f"v1 behavior; v2 runs {v2_tests}")
+
 
 MustType = TypeVar("MustType")
 

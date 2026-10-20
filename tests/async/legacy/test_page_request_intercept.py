@@ -18,7 +18,7 @@ import pytest
 
 from playwright.async_api import Error, Page, Route, expect
 from tests.server import Server, TestServerRequest
-from tests.utils import only_v1, only_v2
+from tests.utils import only_v1
 
 
 async def test_should_support_timeout_option_in_route_fetch(
@@ -70,7 +70,7 @@ async def test_should_intercept_with_url_override(server: Server, page: Page) ->
     assert "one-style.css" in (await response.body()).decode("utf-8")
 
 
-@only_v1
+@only_v1("RO-146")
 async def test_should_intercept_with_post_data_override(
     server: Server, page: Page
 ) -> None:
@@ -85,23 +85,6 @@ async def test_should_intercept_with_post_data_override(
     request = await request_promise
     assert request.post_body
     assert request.post_body.decode("utf-8") == '{"foo": "bar"}'
-
-
-@only_v2
-async def test_should_intercept_with_post_data_override_v2(
-    server: Server, page: Page
-) -> None:
-    request_promise = asyncio.create_task(server.wait_for_request("/empty.html"))
-
-    async def handle(route: Route) -> None:
-        response = await route.fetch(post_data={"foo": "bar"})
-        await route.fulfill(response=response)
-
-    await page.route("**/*.html", lambda route: handle(route))
-    await page.goto(server.PREFIX + "/empty.html")
-    request = await request_promise
-    assert request.post_body
-    assert request.post_body.decode("utf-8") == '{"foo":"bar"}'
 
 
 async def test_post_data_should_return_empty_string_when_overriding_body_with_empty_string(
