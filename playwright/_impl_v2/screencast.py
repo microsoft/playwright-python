@@ -20,7 +20,6 @@ gets bytes, as it gets a Buffer upstream. The 'screencastFrame' listener is an a
 function, so it runs in a task (see event_emitter.py).
 """
 
-import asyncio
 import base64
 import inspect
 from pathlib import Path
@@ -45,7 +44,7 @@ from playwright._impl_v2.artifact import Artifact
 from playwright._impl_v2.channel_owner import ApiCallOptions, api_call
 from playwright._impl_v2.disposable import DisposableStub
 from playwright._impl_v2.timeout_settings import NO_TIMEOUT
-from playwright._impl_v2.utils.promise import catch, start
+from playwright._impl_v2.utils.tasks import fire_and_forget
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl_v2 import protocol_types as channels
@@ -68,8 +67,8 @@ class Screencast:
         # Python: a sync listener that calls on_frame at once, as the JS async
         # listener does before its first await; the rest runs in a task.
         def on_screencast_frame(event: "channels.PageScreencastFrameEvent") -> Any:
-            def ack() -> "asyncio.Future[Any]":
-                return catch(
+            def ack() -> None:
+                fire_and_forget(
                     self._page._channel.screencastFrameAck(
                         frameId=event["frameId"], timeout=NO_TIMEOUT
                     )
@@ -101,9 +100,9 @@ class Screencast:
                 try:
                     await awaitable
                 finally:
-                    await ack()
+                    ack()
 
-            return start(rest())
+            return rest()
 
         self._page._channel.onScreencastFrame(on_screencast_frame)
 

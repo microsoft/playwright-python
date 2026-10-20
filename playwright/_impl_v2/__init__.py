@@ -20,14 +20,19 @@ the same order. utils/ and isomorphic/ hold the ports of the parts of
 packages/utils and packages/isomorphic that the client uses and that playwright/_impl
 does not have yet; the other pure modules come from playwright/_impl.
 
-What differs from the JS code is marked with a "Python:" comment. The rules:
+The rules of the port are in transform.md, in the root of the repository. What
+differs from the JS code is marked with a "Python:" comment. In short:
 
 - Names are snake_case. Implementation methods take the arguments that the
   generated API passes (snake_case, no defaults), not the JS options object.
-- A channel call sends its message at once and returns a future, as a JS channel
-  call returns a promise (protocol_channels.py, generated).
-- An async function runs when it is awaited, not when it is called. Where the JS code
-  starts a promise and awaits it later, the port starts a task.
+- The structure follows the JS; the timing follows asyncio. `await` is `await`; a
+  promise that is awaited later is a task; `.catch(() => {})` is fire_and_forget()
+  (utils/tasks.py); Promise.all() is asyncio.gather(); Promise.race() is race().
+- A channel call sends its message at once and returns an awaitable, as a JS
+  channel call returns a promise (protocol_channels.py, generated).
+- A JS async function runs up to its first await at the call; a coroutine runs when
+  a task runs it. Where a caller depends on that, the method is a plain def that
+  runs the prefix and returns the awaitable of the rest (the wait_for_*() methods).
 - Python has no AbortSignal: the `signal` options are not ported. Cancelling the task
   that waits for a call aborts the call, as an aborted signal does.
 - There is no sync code here: no greenlet, no sync waits.

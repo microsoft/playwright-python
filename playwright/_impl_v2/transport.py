@@ -16,8 +16,8 @@
 packages/utils/pipeTransport.ts. It runs the driver that playwright/_impl/_driver.py
 finds.
 
-After each message, it waits until the event loop is idle, as Node.js dispatches
-each message in its own macrotask.
+After each message, it waits for the next task (wait_for_next_task()), as Node.js
+dispatches each message in its own macrotask (setImmediate() in pipeTransport.ts).
 """
 
 import asyncio
@@ -31,6 +31,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 from playwright._impl._driver import compute_driver_executable, get_driver_env
 from playwright._impl._errors import Error
+from playwright._impl_v2.utils.tasks import wait_for_next_task
 
 # A message from the driver.
 ParsedMessagePayload = Dict[str, Any]
@@ -54,23 +55,6 @@ def _get_stderr_fileno() -> Optional[int]:
         if not hasattr(sys, "__stderr__") or not sys.__stderr__:
             return None
         return sys.__stderr__.fileno()
-
-
-# The most loop iterations that the transport waits after a message.
-_MAX_IDLE_YIELDS = 100
-
-
-async def _yield_until_idle() -> None:
-    # The Node.js client dispatches each message from the driver in its own macrotask,
-    # so the code that awaits an event runs before the next message is dispatched. In
-    # asyncio, that code resumes through a chain of callbacks (the future, then a task
-    # step for each awaiting coroutine, or the switch to a sync API greenlet). So wait
-    # until the event loop has no other callback ready to run.
-    ready = getattr(asyncio.get_running_loop(), "_ready", None)
-    for _ in range(_MAX_IDLE_YIELDS):
-        await asyncio.sleep(0)
-        if not ready:
-            return
 
 
 class Transport(ABC):
@@ -197,7 +181,9 @@ class PipeTransport(Transport):
                             Exception("Connection closed while reading from the driver")
                         )
                     break
-                await _yield_until_idle()
+                # Python: setImmediate() per message in pipeTransport.ts: the next
+                # message is dispatched in the next task.
+                await wait_for_next_task()
 
             await self._proc.communicate()
         finally:

@@ -40,6 +40,7 @@ from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
+    Awaitable,
     Callable,
     Dict,
     List,
@@ -112,7 +113,7 @@ from playwright._impl_v2.network import (
 )
 from playwright._impl_v2.screencast import Screencast
 from playwright._impl_v2.timeout_settings import NO_TIMEOUT, TimeoutSettings
-from playwright._impl_v2.utils.promise import all_, catch, start
+from playwright._impl_v2.utils.tasks import fire_and_forget
 from playwright._impl_v2.video import Video
 from playwright._impl_v2.waiter import Waiter
 from playwright._impl_v2.web_storage import WebStorage
@@ -340,7 +341,7 @@ class Page(ChannelOwner):
                 self._routes.pop(index)
             handled = await route_handler.handle(route)
             if not self._routes:
-                catch(self._disable_interception())
+                fire_and_forget(self._disable_interception())
             if handled:
                 return
 
@@ -556,7 +557,7 @@ class Page(ChannelOwner):
     def _erase_evaluate_callbacks(self) -> None:
         for evaluate_callback in self._evaluate_callbacks:
             self._bindings.pop(evaluate_callback["name"], None)
-            catch(evaluate_callback["disposable"].dispose())
+            fire_and_forget(evaluate_callback["disposable"].dispose())
         self._evaluate_callbacks = []
 
     async def set_extra_http_headers(self, headers: Dict[str, str]) -> None:
@@ -652,7 +653,7 @@ class Page(ChannelOwner):
         finally:
             if remove:
                 self._locator_handlers.pop(uid, None)
-            catch(
+            fire_and_forget(
                 self._channel.resolveLocatorHandlerNoReply(
                     uid=uid, remove=remove, timeout=NO_TIMEOUT
                 )
@@ -663,9 +664,12 @@ class Page(ChannelOwner):
         for uid, data in list(self._locator_handlers.items()):
             if data["locator"]._equals(locator):
                 self._locator_handlers.pop(uid, None)
-                await catch(
-                    self._channel.unregisterLocatorHandler(uid=uid, timeout=NO_TIMEOUT)
-                )
+                try:
+                    await self._channel.unregisterLocatorHandler(
+                        uid=uid, timeout=NO_TIMEOUT
+                    )
+                except Exception:
+                    pass
 
     async def wait_for_load_state(
         self,
@@ -696,11 +700,13 @@ class Page(ChannelOwner):
         )
 
     @api_call()
-    async def wait_for_request(
+    def wait_for_request(
         self,
         url_or_predicate: URLMatchRequest,
         timeout: Optional[float],
-    ) -> Request:
+    ) -> Awaitable[Request]:
+        # Python: a plain def, so that the listener is registered at the call; see
+        # _wait_for_event().
         async def predicate(request: Request) -> bool:
             if isinstance(url_or_predicate, (str, re.Pattern)):
                 return url_matches(
@@ -717,16 +723,16 @@ class Page(ChannelOwner):
 
         trimmed_url = trim_url(url_or_predicate)
         log_line = f"waiting for request {trimmed_url}" if trimmed_url else None
-        return await self._wait_for_event(
-            Events.Page.Request, predicate, timeout, log_line
-        )
+        return self._wait_for_event(Events.Page.Request, predicate, timeout, log_line)
 
     @api_call()
-    async def wait_for_response(
+    def wait_for_response(
         self,
         url_or_predicate: URLMatchResponse,
         timeout: Optional[float],
-    ) -> Response:
+    ) -> Awaitable[Response]:
+        # Python: a plain def, so that the listener is registered at the call; see
+        # _wait_for_event().
         async def predicate(response: Response) -> bool:
             if isinstance(url_or_predicate, (str, re.Pattern)):
                 return url_matches(
@@ -743,19 +749,18 @@ class Page(ChannelOwner):
 
         trimmed_url = trim_url(url_or_predicate)
         log_line = f"waiting for response {trimmed_url}" if trimmed_url else None
-        return await self._wait_for_event(
-            Events.Page.Response, predicate, timeout, log_line
-        )
+        return self._wait_for_event(Events.Page.Response, predicate, timeout, log_line)
 
     @api_call()
-    async def wait_for_event(
+    def wait_for_event(
         self,
         event: str,
         predicate: Optional[Callable[..., Any]],
         timeout: Optional[float],
-    ) -> Any:
-        # Python: optionsOrPredicate is the predicate and timeout parameters.
-        return await self._wait_for_event(
+    ) -> Awaitable[Any]:
+        # Python: optionsOrPredicate is the predicate and timeout parameters. A plain
+        # def, so that the listener is registered at the call; see _wait_for_event().
+        return self._wait_for_event(
             event, predicate, timeout, f'waiting for event "{event}"'
         )
 
@@ -764,14 +769,16 @@ class Page(ChannelOwner):
             self._close_reason or self._browser_context._effective_close_reason()
         )
 
-    async def _wait_for_event(
+    def _wait_for_event(
         self,
         event: str,
         predicate: Optional[Callable[..., Any]],
         timeout: Optional[float],
         log_line: Optional[str],
-    ) -> Any:
-        # Python: optionsOrPredicate is the predicate and timeout parameters.
+    ) -> Awaitable[Any]:
+        # Python: a plain def. The waiter and its listeners are set up at the call, as
+        # the JS async function sets them up before its first await; the result is
+        # the wait. optionsOrPredicate is the predicate and timeout parameters.
         timeout_options = self._timeout_settings.timeout(timeout)
         waiter = Waiter.create_for_event(self, event)
         if log_line:
@@ -787,9 +794,14 @@ class Page(ChannelOwner):
             waiter.reject_on_event(
                 self, Events.Page.Close, lambda: self._close_error_with_reason()
             )
-        result = await waiter.wait_for_event(self, event, predicate)
-        waiter.dispose()
-        return result
+        wait = waiter.wait_for_event(self, event, predicate)
+
+        async def result() -> Any:
+            result = await wait
+            waiter.dispose()
+            return result
+
+        return result()
 
     async def go_back(
         self,
@@ -973,7 +985,7 @@ class Page(ChannelOwner):
         self._routes = remaining
         if behavior and behavior != "default":
             promises = [route_handler.stop(behavior) for route_handler in removed]
-            await all_(promises)
+            await asyncio.gather(*promises)
         await self._update_interception_patterns()
 
     @internal
@@ -1690,9 +1702,10 @@ class Page(ChannelOwner):
 
     # Python only: the members of the Python API that upstream does not have.
     # The expect_*() methods are context managers around the promises of the
-    # waitFor*() methods. The wait runs in a task, which starts before the action
-    # in the with block makes the event happen; the call that starts it is the API
-    # call, so its stack names the expect_*() method.
+    # waitFor*() methods. The wait_for_*() methods are plain defs, so their
+    # listeners are registered at the call, before the with block runs; the wait
+    # runs in a task. The call that starts it is the API call, so its stack names
+    # the expect_*() method.
 
     def expect_navigation(
         self,
@@ -1710,7 +1723,7 @@ class Page(ChannelOwner):
         timeout: Optional[float],
     ) -> EventContextManagerImpl[Request]:
         return EventContextManagerImpl(
-            start(
+            asyncio.ensure_future(
                 self.wait_for_request(
                     url_or_predicate=url_or_predicate, timeout=timeout
                 )
@@ -1723,7 +1736,7 @@ class Page(ChannelOwner):
         timeout: Optional[float],
     ) -> EventContextManagerImpl[Response]:
         return EventContextManagerImpl(
-            start(
+            asyncio.ensure_future(
                 self.wait_for_response(
                     url_or_predicate=url_or_predicate, timeout=timeout
                 )
@@ -1737,7 +1750,7 @@ class Page(ChannelOwner):
         timeout: Optional[float],
     ) -> EventContextManagerImpl:
         return EventContextManagerImpl(
-            start(
+            asyncio.ensure_future(
                 self.wait_for_event(event=event, predicate=predicate, timeout=timeout)
             )
         )
@@ -1842,13 +1855,15 @@ class BindingCall(ChannelOwner):
             if inspect.isawaitable(result):
                 result = await result
             # Python: _to_impl() turns the API objects of the result into impl objects.
-            catch(
+            fire_and_forget(
                 self._channel.resolve(
                     result=serialize_argument(_to_impl(result)), timeout=NO_TIMEOUT
                 )
             )
         except Exception as e:
-            catch(self._channel.reject(error=serialize_error(e), timeout=NO_TIMEOUT))
+            fire_and_forget(
+                self._channel.reject(error=serialize_error(e), timeout=NO_TIMEOUT)
+            )
 
 
 def trim_url(param: Any) -> Optional[str]:

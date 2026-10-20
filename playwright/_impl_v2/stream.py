@@ -27,7 +27,7 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from playwright._impl_v2.channel_owner import ChannelOwner, from_channel
 from playwright._impl_v2.timeout_settings import NO_TIMEOUT
-from playwright._impl_v2.utils.promise import catch
+from playwright._impl_v2.utils.tasks import fire_and_forget
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl_v2.protocol_channels import StreamChannel
@@ -71,7 +71,7 @@ class ReadableStreamImpl:
 
     def _destroy(self) -> None:
         # Stream might be destroyed after the connection was closed.
-        catch(self._channel.close(timeout=NO_TIMEOUT), lambda e: None)
+        fire_and_forget(self._channel.close(timeout=NO_TIMEOUT))
 
     # Python only: the parts of Readable that the client uses.
 

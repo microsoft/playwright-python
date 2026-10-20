@@ -46,13 +46,13 @@ from playwright._impl_v2.protocol.validator import (
 )
 from playwright._impl_v2.utils.debug import is_under_test
 from playwright._impl_v2.utils.debug_logger import debug_logger
-from playwright._impl_v2.utils.promise import ignore_unhandled, run_now, then
 from playwright._impl_v2.utils.stack_trace import (
     StackFrame,
     rewrite_error_message,
     show_internal_stack_frames,
     stringify_stack_frames,
 )
+from playwright._impl_v2.utils.tasks import failed, fire_and_forget
 from playwright._impl_v2.utils.zones import current_zone
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -114,7 +114,7 @@ class Channel(EventEmitter):
         timeout: float,
         mapper: Optional[Callable[[Any], Any]],
         is_internal: bool = False,
-    ) -> "asyncio.Future[Any]":
+    ) -> Awaitable[Any]:
         owner = self._object
 
         validator = maybe_find_validator(owner._type, method, "Params")
@@ -141,12 +141,15 @@ class Channel(EventEmitter):
                 owner, method, validated_params, {"internal": True, "timeout": timeout}
             )
 
-        result = owner._wrap_api_call(func, ApiCallOptions(internal=is_internal))
-        # Python: the future of this call is made for this call only, so that a
-        # cancel of the caller aborts the call.
-        if mapper:
-            return then(result, mapper, owns_source=True)
-        return then(result, lambda value: value, owns_source=True)
+        # Python: a channel call never raises at the call; the awaitable raises, as a
+        # rejected promise does.
+        try:
+            result = owner._wrap_api_call(func, ApiCallOptions(internal=is_internal))
+        except Exception as e:
+            return failed(e)
+        if mapper is None:
+            return result
+        return _mapped(result, mapper)
 
     # Python: the generated on<Event> and off<Event> methods register here. A handler
     # can be registered more than once, as on an EventEmitter; each off<Event> call
@@ -213,7 +216,7 @@ class ChannelOwner(EventEmitter):
         protocol_event = self._event_to_subscription_mapping.get(str(event))
         if protocol_event:
             # Python: .catch(() => {}).
-            ignore_unhandled(
+            fire_and_forget(
                 self._channel.updateSubscription(event=protocol_event, enabled=enabled)
             )
 
@@ -304,7 +307,7 @@ class ChannelOwner(EventEmitter):
         logger = self._logger
         existing_api_zone: Optional[ApiZone] = current_zone().data("apiZone")
         if existing_api_zone:
-            return run_now(lambda: func(existing_api_zone))
+            return func(existing_api_zone)
 
         stack_trace = capture_library_stack_trace()
         api_name = stack_trace["apiName"]
@@ -319,7 +322,7 @@ class ChannelOwner(EventEmitter):
             internal=options.internal if options else False,
         )
         zone = current_zone().with_("apiZone", api_zone)
-        awaitable = zone.run(lambda: run_now(lambda: func(api_zone)))
+        awaitable = zone.run(lambda: func(api_zone))
 
         async def finish() -> R:
             try:
@@ -365,6 +368,11 @@ class ChannelOwner(EventEmitter):
     def __repr__(self) -> str:
         # Python: toJSON() keeps printers off the object graph; repr() does the same.
         return f"<{type(self).__name__} type={self._type} guid={self._guid}>"
+
+
+async def _mapped(awaitable: Awaitable[Any], mapper: Callable[[Any], Any]) -> Any:
+    # Python: the result of a channel call, mapped by the generated channel method.
+    return mapper(await awaitable)
 
 
 def api_call(

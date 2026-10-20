@@ -24,6 +24,7 @@ only (langs: js in the docs). serialize_argument_with_callbacks() is ported, but
 call passes the option, so nothing calls it.
 """
 
+import asyncio
 from typing import TYPE_CHECKING, Any, Awaitable, Callable, Dict, List, Optional
 
 from playwright._impl._errors import Error
@@ -41,7 +42,6 @@ from playwright._impl_v2.protocol.serializers import (
 )
 from playwright._impl_v2.timeout_settings import NO_TIMEOUT
 from playwright._impl_v2.utils.crypto import create_guid
-from playwright._impl_v2.utils.promise import all_, start
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl_v2 import protocol_types as channels
@@ -182,14 +182,14 @@ async def serialize_argument_with_callbacks(
             if not page:
                 raise Error("Passing a function is not supported as an argument here")
             name = K_FUNCTION_BINDING_PREFIX + create_guid()
-            # Python: start() runs the coroutine as a task, as the JS promise runs.
+            # Python: the coroutine runs as a task, as the JS promise runs.
             expose_promises.append(
-                start(page._expose_evaluate_callback(name, callback))
+                asyncio.ensure_future(page._expose_evaluate_callback(name, callback))
             )
             return name
 
         serialized = serialize_argument(arg, register_callback)
-        await all_(expose_promises)
+        await asyncio.gather(*expose_promises)
         return serialized
 
     return await owner._wrap_api_call(lambda _: inner(), ApiCallOptions(internal=True))

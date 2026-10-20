@@ -423,12 +423,12 @@ def generate_channels(
             if eager:
                 # Like a call on the channel proxy in client/channelOwner.ts: the
                 # message goes out when the method is called, and the method returns
-                # a future of the result.
+                # an awaitable of the result.
                 if command.result:
-                    returns = f"asyncio.Future[channels.{command.result.type_name}]"
+                    returns = f"Awaitable[channels.{command.result.type_name}]"
                     mapper = f"lambda result: {payload_dict(command.result, 'result')}"
                 else:
-                    returns = "asyncio.Future[None]"
+                    returns = "Awaitable[None]"
                     mapper = "None"
                 eager_args = f'"{command.name}", {params}, timeout, {mapper}'
                 if command.internal:
@@ -478,7 +478,15 @@ def generate_channels(
     code = "\n\n\n".join(blocks)
     typing_names = ["TYPE_CHECKING", "Dict", "Type"] + [
         name
-        for name in ["Any", "Callable", "List", "Literal", "Optional", "Sequence"]
+        for name in [
+            "Any",
+            "Awaitable",
+            "Callable",
+            "List",
+            "Literal",
+            "Optional",
+            "Sequence",
+        ]
         if re.search(rf"\b{name}\[|\b{name}\b(?!\[)", code)
     ]
     channel_module = (
@@ -490,7 +498,6 @@ def generate_channels(
             CHANNELS_V2_DOCSTRING if eager else CHANNELS_DOCSTRING,
             "from __future__ import annotations",
             "",
-            *(["import asyncio", ""] if eager else []),
             f"from typing import {', '.join(sorted(typing_names))}",
             "",
             f"from {channel_module} import Channel",
@@ -715,7 +722,7 @@ CHANNELS_V2_DOCSTRING = '''"""Typed channels for _impl_v2, generated from packag
 Like upstream's channels in packages/protocol/src/channels.d.ts: each command is
 a method with the protocol name and parameters, and each event has on<Event> and
 off<Event> methods. As on the channel proxy in client/channelOwner.ts, calling a
-command sends its message at once; the method returns a future of the result.
+command sends its message at once; the method returns an awaitable of the result.
 Every parameter must be passed; an absent optional parameter is None. The result
 and the event payloads have every top-level field; a field that the driver left
 out is None. `timeout` is the timeout of the message, in milliseconds; 0 means no

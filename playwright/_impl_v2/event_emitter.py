@@ -28,7 +28,7 @@ import sys
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
 from playwright._impl_v2.utils.debug import is_under_test
-from playwright._impl_v2.utils.promise import all_, resolved, start, then
+from playwright._impl_v2.utils.tasks import completed
 
 EventType = str
 Listener = Callable[..., Any]
@@ -243,16 +243,17 @@ class EventEmitter:
             errors: List[BaseException] = []
             self._rejection_handler = lambda error: errors.append(error)
 
-            def check(_: Any) -> None:
+            async def wait() -> None:
+                await self._wait_for(type)
                 if errors:
                     raise errors[0]
 
-            return then(self._wait_for(type), check, owns_source=False)
+            return wait()
 
         if behavior == "ignoreErrors":
             self._rejection_handler = lambda error: None
 
-        return resolved(None)
+        return completed(None)
 
     def _remove_all_listeners(self, type: Optional[EventType] = None) -> None:
         events = self._events
@@ -318,7 +319,7 @@ class EventEmitter:
         else:
             for pending in self._pending_handlers.values():
                 promises.extend(pending)
-        return start(all_(promises))
+        return asyncio.gather(*promises)
 
     def _listeners(
         self, target: "EventEmitter", type: EventType, unwrap: bool

@@ -24,7 +24,7 @@ from typing import TYPE_CHECKING, Dict, Literal, Optional, cast
 from playwright._impl._errors import Error
 from playwright._impl_v2.isomorphic.url_match import URLMatch
 from playwright._impl_v2.utils.debug_logger import debug_logger
-from playwright._impl_v2.utils.promise import catch
+from playwright._impl_v2.utils.tasks import fire_and_forget
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl_v2.browser_context import BrowserContext
@@ -158,4 +158,4 @@ class HarRouter:
     def dispose(self) -> None:
         # Python: har_close() is an async def, so the message goes out when its task
         # runs, not at once.
-        catch(self._local_utils.har_close({"harId": self._har_id}))
+        fire_and_forget(self._local_utils.har_close({"harId": self._har_id}))

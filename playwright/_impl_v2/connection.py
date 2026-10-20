@@ -53,8 +53,8 @@ from playwright._impl_v2.protocol.validator import (
 from playwright._impl_v2.timeout_settings import NO_TIMEOUT
 from playwright._impl_v2.utils.debug import is_under_test
 from playwright._impl_v2.utils.debug_logger import debug_logger
-from playwright._impl_v2.utils.promise import ignore_unhandled, resolved
 from playwright._impl_v2.utils.stack_trace import rewrite_error_message
+from playwright._impl_v2.utils.tasks import completed, fire_and_forget
 from playwright._impl_v2.utils.zones import empty_zone
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -187,7 +187,7 @@ class Connection(EventEmitter):
         # Fire-and-forget: server intentionally never replies to __waitInfo__,
         # so silently drop it after the connection is closed or the object was collected.
         if method == "__waitInfo__" and (self._closed_error or object._was_collected):
-            return resolved(None)
+            return completed(None)
         if self._closed_error:
             raise self._closed_error
         if object._was_collected:
@@ -224,7 +224,7 @@ class Connection(EventEmitter):
         )
         if self._tracing_count and frames is not None and type != "LocalUtils":
             if self._local_utils:
-                ignore_unhandled(
+                fire_and_forget(
                     self._local_utils.add_stack_to_tracing_no_reply(
                         {"callData": {"stack": frames or [], "id": id}}
                     )
@@ -236,7 +236,7 @@ class Connection(EventEmitter):
         empty_zone.run(lambda: self.onmessage({**message, "metadata": metadata}))
         # Fire-and-forget: server intentionally never replies to __waitInfo__.
         if method == "__waitInfo__":
-            return resolved(None)
+            return completed(None)
         future = self._loop.create_future()
         self._callbacks[id] = _Callback(future, options.get("title"), type, method)
 

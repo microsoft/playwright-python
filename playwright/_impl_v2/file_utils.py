@@ -23,8 +23,6 @@ import os
 from pathlib import Path
 from typing import Union
 
-from playwright._impl_v2.utils.promise import catch
-
 # Keep in sync with the server.
 file_upload_size_limit = 50 * 1024 * 1024
 
@@ -35,4 +33,7 @@ async def mkdir_if_needed(file_path: Union[str, Path]) -> None:
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
 
     # This will harmlessly throw on windows if the dirname is the root directory.
-    await catch(asyncio.get_running_loop().run_in_executor(None, mkdir))
+    try:
+        await asyncio.get_running_loop().run_in_executor(None, mkdir)
+    except Exception:
+        pass

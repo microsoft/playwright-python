@@ -27,7 +27,6 @@ from typing import TYPE_CHECKING, Any, Awaitable, Callable, List, Optional
 from playwright._impl_v2.channel_owner import ChannelOwner, from_channel
 from playwright._impl_v2.errors import is_target_closed_error
 from playwright._impl_v2.timeout_settings import NO_TIMEOUT
-from playwright._impl_v2.utils.promise import all_
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl_v2.protocol_channels import DisposableChannel
@@ -93,4 +92,4 @@ class DisposableStub(Disposable):
 async def dispose_all(disposables: List[Disposable]) -> None:
     copy = list(disposables)
     disposables.clear()
-    await all_([d.dispose() for d in copy])
+    await asyncio.gather(*[d.dispose() for d in copy])

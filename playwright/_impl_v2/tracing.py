@@ -21,6 +21,7 @@ JavaScript only. A path can be a pathlib.Path, and a regular expression is a
 re.Pattern, whose flags are sent in the JS letters.
 """
 
+import asyncio
 import re
 from pathlib import Path
 from typing import (
@@ -49,7 +50,6 @@ from playwright._impl_v2.channel_owner import (
 from playwright._impl_v2.disposable import DisposableStub
 from playwright._impl_v2.isomorphic.string_utils import escape_regex_flags
 from playwright._impl_v2.timeout_settings import NO_TIMEOUT
-from playwright._impl_v2.utils.promise import all_, catch
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl_v2 import protocol_types as channels
@@ -170,7 +170,11 @@ class Tracing(ChannelOwner):
 
     @api_call()
     async def stop(self, path: Optional[Union[str, Path]]) -> None:
-        error = await catch(self._do_stop_chunk(path), lambda e: e)
+        try:
+            await self._do_stop_chunk(path)
+            error: Optional[Exception] = None
+        except Exception as e:
+            error = e
         await self._channel.tracingStop(timeout=NO_TIMEOUT)
         if error:
             raise error
@@ -296,7 +300,9 @@ class Tracing(ChannelOwner):
 
     @internal
     async def _export_all_hars(self) -> None:
-        await all_([self._export_har(har_id) for har_id in list(self._har_recorders)])
+        await asyncio.gather(
+            *[self._export_har(har_id) for har_id in list(self._har_recorders)]
+        )
 
     async def _do_stop_chunk(self, file_path: Optional[Union[str, Path]]) -> None:
         self._reset_stack_counter()
@@ -313,7 +319,10 @@ class Tracing(ChannelOwner):
             if stacks_id:
                 local_utils = self._connection.local_utils()
                 if local_utils:
-                    await catch(local_utils.trace_discarded({"stacksId": stacks_id}))
+                    try:
+                        await local_utils.trace_discarded({"stacksId": stacks_id})
+                    except Exception:
+                        pass
             raise
 
     async def _save_chunk(
@@ -370,7 +379,10 @@ class Tracing(ChannelOwner):
             await artifact.save_as(path=file_path)
         except Exception:
             # Delete the artifact best-effort, the save error is the one to surface.
-            await catch(artifact.delete())
+            try:
+                await artifact.delete()
+            except Exception:
+                pass
             raise
         await artifact.delete()
 

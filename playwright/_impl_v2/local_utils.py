@@ -18,8 +18,7 @@ Python: the methods take the params object of the protocol command, as upstream
 does, and spread it into the typed channel call.
 """
 
-import asyncio
-from typing import TYPE_CHECKING, Any, Dict
+from typing import TYPE_CHECKING, Any, Awaitable, Dict
 
 from playwright._impl_v2.channel_owner import ChannelOwner
 from playwright._impl_v2.timeout_settings import NO_TIMEOUT
@@ -102,9 +101,7 @@ class LocalUtils(ChannelOwner):
             stacksId=params["stacksId"], timeout=NO_TIMEOUT
         )
 
-    def add_stack_to_tracing_no_reply(
-        self, params: Dict[str, Any]
-    ) -> "asyncio.Future[None]":
+    def add_stack_to_tracing_no_reply(self, params: Dict[str, Any]) -> Awaitable[None]:
         # Python: not an async def, so that the message goes out at once, as the
         # caller in connection.ts does not await it.
         return self._channel.addStackToTracingNoReply(

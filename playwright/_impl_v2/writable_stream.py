@@ -27,7 +27,6 @@ from typing import TYPE_CHECKING, Any, Union
 
 from playwright._impl_v2.channel_owner import ChannelOwner, from_channel
 from playwright._impl_v2.timeout_settings import NO_TIMEOUT
-from playwright._impl_v2.utils.promise import catch
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl_v2.protocol_channels import WritableStreamChannel
@@ -61,25 +60,24 @@ class WritableStreamImpl:
         self._channel = channel
 
     async def _write(self, chunk: Union[bytes, str]) -> None:
-        error = await catch(
-            self._channel.write(
+        try:
+            await self._channel.write(
                 # Python: the binary is base64 on the channel.
                 binary=base64.b64encode(
                     chunk.encode() if isinstance(chunk, str) else chunk
                 ).decode(),
                 timeout=NO_TIMEOUT,
-            ),
-            lambda e: e,
-        )
-        # Python: callback(error) raises the error.
-        if error:
+            )
+        except Exception as error:
+            # Python: callback(error) raises the error.
             raise error
 
     async def _final(self) -> None:
         # Stream might be destroyed after the connection was closed.
-        error = await catch(self._channel.close(timeout=NO_TIMEOUT), lambda e: e)
-        # Python: callback(error) raises the error.
-        if error:
+        try:
+            await self._channel.close(timeout=NO_TIMEOUT)
+        except Exception as error:
+            # Python: callback(error) raises the error.
             raise error
 
 

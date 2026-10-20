@@ -34,7 +34,7 @@ from typing import (
 )
 
 from playwright._impl._errors import Error
-from playwright._impl_v2.utils.promise import race
+from playwright._impl_v2.utils.tasks import race
 
 T = TypeVar("T")
 

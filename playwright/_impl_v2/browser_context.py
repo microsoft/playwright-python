@@ -39,6 +39,7 @@ from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
+    Awaitable,
     Callable,
     Dict,
     List,
@@ -87,7 +88,7 @@ from playwright._impl_v2.isomorphic.url_match import URLMatch, url_matches_equal
 from playwright._impl_v2.page import BindingCall, Page
 from playwright._impl_v2.timeout_settings import NO_TIMEOUT, TimeoutSettings
 from playwright._impl_v2.tracing import Tracing
-from playwright._impl_v2.utils.promise import all_, catch, start
+from playwright._impl_v2.utils.tasks import fire_and_forget
 from playwright._impl_v2.utils.whatwg_url import parse_url
 from playwright._impl_v2.waiter import Waiter
 from playwright._impl_v2.web_error import WebError
@@ -230,9 +231,9 @@ class BrowserContext(ChannelOwner):
                 # a) removing "dialog" listener subscription (client->server)
                 # b) actual "dialog" event (server->client)
                 if dialog_object.type == "beforeunload":
-                    catch(dialog.accept(promptText=None, timeout=NO_TIMEOUT))
+                    fire_and_forget(dialog.accept(promptText=None, timeout=NO_TIMEOUT))
                 else:
-                    catch(dialog.dismiss(timeout=NO_TIMEOUT))
+                    fire_and_forget(dialog.dismiss(timeout=NO_TIMEOUT))
 
         self._channel.onDialog(on_dialog)
 
@@ -402,12 +403,15 @@ class BrowserContext(ChannelOwner):
                 del self._routes[index]
             handled = await route_handler.handle(route)
             if not self._routes:
-                catch(self._disable_interception())
+                fire_and_forget(self._disable_interception())
             if handled:
                 return
         # If the page is closed or unrouteAll() was called without waiting and interception disabled,
         # the method will throw an error - silence it.
-        await catch(route._inner_continue(is_fallback=True))
+        try:
+            await route._inner_continue(is_fallback=True)
+        except Exception:
+            pass
 
     async def _on_web_socket_route(
         self, web_socket_route: network.WebSocketRoute
@@ -672,7 +676,7 @@ class BrowserContext(ChannelOwner):
         self._routes = remaining
         if behavior and behavior != "default":
             promises = [route_handler.stop(behavior) for route_handler in removed]
-            await all_(promises)
+            await asyncio.gather(*promises)
         await self._update_interception_patterns()
 
     @internal
@@ -699,13 +703,15 @@ class BrowserContext(ChannelOwner):
         )
 
     @api_call()
-    async def wait_for_event(
+    def wait_for_event(
         self,
         event: str,
         predicate: Optional[Callable[..., Any]],
         timeout: Optional[float],
-    ) -> Any:
-        # Python: optionsOrPredicate is the predicate and timeout parameters, and
+    ) -> Awaitable[Any]:
+        # Python: a plain def. The waiter and its listeners are set up at the call, as
+        # the JS async function sets them up before its first await; the result is
+        # the wait. optionsOrPredicate is the predicate and timeout parameters, and
         # timeout() returns the timeout itself.
         timeout_options = self._timeout_settings.timeout(timeout)
         waiter = Waiter.create_for_event(self, event)
@@ -719,9 +725,14 @@ class BrowserContext(ChannelOwner):
                 Events.BrowserContext.Close,
                 lambda: TargetClosedError(self._effective_close_reason()),
             )
-        result = await waiter.wait_for_event(self, event, predicate)
-        waiter.dispose()
-        return result
+        wait = waiter.wait_for_event(self, event, predicate)
+
+        async def result() -> Any:
+            result = await wait
+            waiter.dispose()
+            return result
+
+        return result()
 
     async def storage_state(
         self,
@@ -795,7 +806,11 @@ class BrowserContext(ChannelOwner):
         self._closing_status = "closing"
         await self.request.dispose(reason=reason)
         await self._instrumentation.run_before_close_browser_context(self)
-        har_error = await catch(self.tracing._export_all_hars(), lambda e: e)
+        try:
+            await self.tracing._export_all_hars()
+            har_error: Optional[Exception] = None
+        except Exception as e:
+            har_error = e
         await self._channel.close(reason=reason, timeout=NO_TIMEOUT)
         await self._closed_promise
         if har_error:
@@ -842,10 +857,11 @@ class BrowserContext(ChannelOwner):
         predicate: Optional[Callable[..., Any]],
         timeout: Optional[float],
     ) -> EventContextManagerImpl:
-        # Python: waitForEvent() as a context manager. The wait runs in a task, which
-        # starts before the action in the with block makes the event happen.
+        # Python only: waitForEvent() as a context manager. wait_for_event() is a plain
+        # def, so its listeners are registered here, before the with block runs; the
+        # wait runs in a task.
         return EventContextManagerImpl(
-            start(
+            asyncio.ensure_future(
                 self.wait_for_event(event=event, predicate=predicate, timeout=timeout)
             )
         )
@@ -1031,7 +1047,7 @@ async def to_client_certificates_protocol(
 
     return cast(
         List["channels.BrowserNewContextParamsClientCertificates"],
-        await all_([to_protocol(cert) for cert in certs]),
+        await asyncio.gather(*[to_protocol(cert) for cert in certs]),
     )
 
 

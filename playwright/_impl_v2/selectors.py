@@ -28,7 +28,7 @@ from playwright._impl._errors import Error
 from playwright._impl_v2.client_helper import evaluation_script
 from playwright._impl_v2.locator import set_test_id_attribute
 from playwright._impl_v2.timeout_settings import NO_TIMEOUT
-from playwright._impl_v2.utils.promise import catch
+from playwright._impl_v2.utils.tasks import fire_and_forget
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl_v2 import protocol_types as channels
@@ -79,7 +79,7 @@ class Selectors:
         set_test_id_attribute(attribute_name)
         for context in self._contexts_for_selectors:
             context._options["testIdAttributeName"] = attribute_name
-            catch(
+            fire_and_forget(
                 context._channel.setTestIdAttributeName(
                     testIdAttributeName=attribute_name, timeout=NO_TIMEOUT
                 )

@@ -20,7 +20,8 @@ function is JavaScript source, never a function, so assertMaxArguments() is not
 ported: the signature takes one argument.
 """
 
-from typing import TYPE_CHECKING, Any, Callable, Optional
+import asyncio
+from typing import TYPE_CHECKING, Any, Awaitable, Callable, Optional
 
 from playwright._impl_v2.channel_owner import ChannelOwner, api_call, from_channel
 from playwright._impl_v2.console_message import ConsoleMessage
@@ -31,7 +32,6 @@ from playwright._impl_v2.isomorphic.manual_promise import LongStandingScope
 from playwright._impl_v2.isomorphic.string_utils import js_string
 from playwright._impl_v2.js_handle import JSHandle, parse_result, serialize_argument
 from playwright._impl_v2.timeout_settings import NO_TIMEOUT, TimeoutSettings
-from playwright._impl_v2.utils.promise import start
 from playwright._impl_v2.waiter import Waiter
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -128,13 +128,15 @@ class Worker(ChannelOwner):
         return JSHandle.from_(result["handle"])
 
     @api_call()
-    async def wait_for_event(
+    def wait_for_event(
         self,
         event: str,
         predicate: Optional[Callable[..., Any]],
         timeout: Optional[float],
-    ) -> Any:
-        # Python: optionsOrPredicate is the predicate and timeout parameters.
+    ) -> Awaitable[Any]:
+        # Python: a plain def. The waiter and its listeners are set up at the call, as
+        # the JS async function sets them up before its first await; the result is
+        # the wait. optionsOrPredicate is the predicate and timeout parameters.
         timeout_settings = (
             self._page._timeout_settings
             if self._page
@@ -153,9 +155,14 @@ class Worker(ChannelOwner):
             waiter.reject_on_event(
                 self, Events.Worker.Close, lambda: self._close_error_with_reason()
             )
-        result = await waiter.wait_for_event(self, event, predicate)
-        waiter.dispose()
-        return result
+        wait = waiter.wait_for_event(self, event, predicate)
+
+        async def result() -> Any:
+            result = await wait
+            waiter.dispose()
+            return result
+
+        return result()
 
     async def _disconnect(self, reason: Optional[str]) -> None:
         # Python: options is the reason parameter.
@@ -175,10 +182,11 @@ class Worker(ChannelOwner):
         predicate: Optional[Callable[..., Any]],
         timeout: Optional[float],
     ) -> EventContextManagerImpl:
-        # Python: waitForEvent() as a context manager. The wait runs in a task, which
-        # starts before the action in the with block makes the event happen.
+        # Python only: waitForEvent() as a context manager. wait_for_event() is a plain
+        # def, so its listeners are registered here, before the with block runs; the
+        # wait runs in a task.
         return EventContextManagerImpl(
-            start(
+            asyncio.ensure_future(
                 self.wait_for_event(event=event, predicate=predicate, timeout=timeout)
             )
         )

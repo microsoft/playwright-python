@@ -78,8 +78,8 @@ from playwright._impl_v2.isomorphic.url_match import (
     url_matches,
 )
 from playwright._impl_v2.timeout_settings import NO_TIMEOUT
-from playwright._impl_v2.utils.promise import all_, catch, resolved, start, then
 from playwright._impl_v2.utils.stack_trace import rewrite_error_message
+from playwright._impl_v2.utils.tasks import completed, fire_and_forget
 from playwright._impl_v2.utils.zones import Zone, current_zone
 from playwright._impl_v2.waiter import Waiter
 
@@ -271,10 +271,13 @@ class Request(ChannelOwner):
             )
 
         if not self._actual_headers_promise:
-            self._actual_headers_promise = then(
-                self._channel.rawRequestHeaders(timeout=NO_TIMEOUT),
-                lambda result: RawHeaders(result["headers"]),
-            )
+            # Python: the async IIFE runs as a task; the channel call sends at once.
+            reply = self._channel.rawRequestHeaders(timeout=NO_TIMEOUT)
+
+            async def raw_headers() -> RawHeaders:
+                return RawHeaders((await reply)["headers"])
+
+            self._actual_headers_promise = asyncio.ensure_future(raw_headers())
         # Python: shield(), so that a cancelled caller does not cancel the promise
         # that the other callers share.
         return await asyncio.shield(self._actual_headers_promise)
@@ -446,7 +449,7 @@ class Route(ChannelOwner):
     def request(self) -> Request:
         return Request.from_(self._initializer["request"])
 
-    async def _race_with_target_close(self, promise: "asyncio.Future[Any]") -> None:
+    async def _race_with_target_close(self, promise: Awaitable[Any]) -> None:
         # When page closes or crashes, we catch any potential rejects from this Route.
         # Note that page could be missing when routing popup's initial request that
         # does not have a Page initialized just yet.
@@ -719,7 +722,7 @@ class WebSocketRoute(ChannelOwner):
                     base64.b64decode(message) if is_base64 else message
                 )
             elif self._connected:
-                catch(
+                fire_and_forget(
                     self._channel.sendToServer(
                         message=message, isBase64=is_base64, timeout=NO_TIMEOUT
                     )
@@ -737,7 +740,7 @@ class WebSocketRoute(ChannelOwner):
                     base64.b64decode(message) if is_base64 else message
                 )
             else:
-                catch(
+                fire_and_forget(
                     self._channel.sendToPage(
                         message=message, isBase64=is_base64, timeout=NO_TIMEOUT
                     )
@@ -751,7 +754,7 @@ class WebSocketRoute(ChannelOwner):
             if self._on_page_close:
                 return self._on_page_close(code, reason)
             else:
-                catch(
+                fire_and_forget(
                     self._channel.closeServer(
                         code=code, reason=reason, wasClean=was_clean, timeout=NO_TIMEOUT
                     )
@@ -765,7 +768,7 @@ class WebSocketRoute(ChannelOwner):
             if self._on_server_close:
                 return self._on_server_close(code, reason)
             else:
-                catch(
+                fire_and_forget(
                     self._channel.closePage(
                         code=code, reason=reason, wasClean=was_clean, timeout=NO_TIMEOUT
                     )
@@ -783,28 +786,29 @@ class WebSocketRoute(ChannelOwner):
         return list(self._initializer["protocols"])
 
     async def close(self, code: Optional[int], reason: Optional[str]) -> None:
-        await catch(
-            self._channel.closePage(
+        try:
+            await self._channel.closePage(
                 code=code, reason=reason, wasClean=True, timeout=NO_TIMEOUT
             )
-        )
+        except Exception:
+            pass
 
     def connect_to_server(self) -> "_WebSocketRouteServer":
         if self._connected:
             raise Error("Already connected to the server")
         self._connected = True
-        catch(self._channel.connect(timeout=NO_TIMEOUT))
+        fire_and_forget(self._channel.connect(timeout=NO_TIMEOUT))
         return self._server
 
     def send(self, message: Union[str, bytes]) -> None:
         if isinstance(message, str):
-            catch(
+            fire_and_forget(
                 self._channel.sendToPage(
                     message=message, isBase64=False, timeout=NO_TIMEOUT
                 )
             )
         else:
-            catch(
+            fire_and_forget(
                 self._channel.sendToPage(
                     message=base64.b64encode(message).decode(),
                     isBase64=True,
@@ -825,7 +829,10 @@ class WebSocketRoute(ChannelOwner):
             return
         # Ensure that websocket is "open" and can send messages without an actual server connection.
         # If this happens after the page has been closed, ignore the error.
-        await catch(self._channel.ensureOpened(timeout=NO_TIMEOUT))
+        try:
+            await self._channel.ensureOpened(timeout=NO_TIMEOUT)
+        except Exception:
+            pass
 
 
 class _WebSocketRouteServer:
@@ -863,21 +870,22 @@ class _WebSocketRouteServer:
         return list(self._route._initializer["protocols"])
 
     async def close(self, code: Optional[int], reason: Optional[str]) -> None:
-        await catch(
-            self._route._channel.closeServer(
+        try:
+            await self._route._channel.closeServer(
                 code=code, reason=reason, wasClean=True, timeout=NO_TIMEOUT
             )
-        )
+        except Exception:
+            pass
 
     def send(self, message: Union[str, bytes]) -> None:
         if isinstance(message, str):
-            catch(
+            fire_and_forget(
                 self._route._channel.sendToServer(
                     message=message, isBase64=False, timeout=NO_TIMEOUT
                 )
             )
         else:
-            catch(
+            fire_and_forget(
                 self._route._channel.sendToServer(
                     message=base64.b64encode(message).decode(),
                     isBase64=True,
@@ -1001,12 +1009,13 @@ class Response(ChannelOwner):
 
     async def _actual_headers(self) -> "RawHeaders":
         if not self._actual_headers_promise:
-            # Python: the async IIFE; then() sends the message at once, as the IIFE
-            # does before its first await.
-            self._actual_headers_promise = then(
-                self._channel.rawResponseHeaders(timeout=NO_TIMEOUT),
-                lambda result: RawHeaders(result["headers"]),
-            )
+            # Python: the async IIFE runs as a task; the channel call sends at once.
+            reply = self._channel.rawResponseHeaders(timeout=NO_TIMEOUT)
+
+            async def raw_headers() -> RawHeaders:
+                return RawHeaders((await reply)["headers"])
+
+            self._actual_headers_promise = asyncio.ensure_future(raw_headers())
         # Python: shield(), so that a cancelled caller does not cancel the promise
         # that the other callers share.
         return await asyncio.shield(self._actual_headers_promise)
@@ -1126,14 +1135,16 @@ class WebSocket(ChannelOwner):
         return self._is_closed
 
     @api_call()
-    async def wait_for_event(
+    def wait_for_event(
         self,
         event: str,
         predicate: Optional[Callable[[Any], Any]],
         timeout: Optional[float],
-    ) -> Any:
-        # Python: optionsOrPredicate is the predicate and timeout parameters, and the
-        # timeout settings return the timeout itself.
+    ) -> Awaitable[Any]:
+        # Python: a plain def. The waiter and its listeners are set up at the call, as
+        # the JS async function sets them up before its first await; the result is
+        # the wait. optionsOrPredicate is the predicate and timeout parameters, and
+        # the timeout settings return the timeout itself.
         timeout_options = self._page._timeout_settings.timeout(timeout)
         waiter = Waiter.create_for_event(self, event)
         waiter.reject_on_timeout(
@@ -1149,9 +1160,14 @@ class WebSocket(ChannelOwner):
             Events.Page.Close,
             lambda: self._page._close_error_with_reason(),
         )
-        result = await waiter.wait_for_event(self, event, predicate)
-        waiter.dispose()
-        return result
+        wait = waiter.wait_for_event(self, event, predicate)
+
+        async def result() -> Any:
+            result = await wait
+            waiter.dispose()
+            return result
+
+        return result()
 
     # Python only: the members of the Python API that upstream does not have.
 
@@ -1164,10 +1180,11 @@ class WebSocket(ChannelOwner):
         predicate: Optional[Callable[[Any], Any]],
         timeout: Optional[float],
     ) -> EventContextManagerImpl:
-        # waitForEvent() as a context manager. The wait runs in a task, which starts
-        # before the action in the with block makes the event happen.
+        # Python only: waitForEvent() as a context manager. wait_for_event() is a plain
+        # def, so its listeners are registered here, before the with block runs; the
+        # wait runs in a task.
         return EventContextManagerImpl(
-            start(
+            asyncio.ensure_future(
                 self.wait_for_event(event=event, predicate=predicate, timeout=timeout)
             )
         )
@@ -1265,19 +1282,26 @@ class RouteHandler:
             handler_invocation.complete.resolve()
             self._active_invocations.discard(handler_invocation)
 
-    async def stop(self, behavior: Literal["wait", "ignoreErrors"]) -> None:
+    def stop(self, behavior: Literal["wait", "ignoreErrors"]) -> Awaitable[None]:
+        # Python: a plain def. The flag is set at the call, as the JS async function
+        # sets it before its first await; the result is the wait for the invocations.
         # When a handler is manually unrouted or its page/context is closed we either
         # - wait for the current handler invocations to finish
         # - or do not wait, if the user opted out of it, but swallow all exceptions
         #   that happen after the unroute/close.
         if behavior == "ignoreErrors":
             self._ignore_exception = True
+            return completed(None)
         else:
             promises = []
             for activation in self._active_invocations:
                 if not activation.route._did_throw:
                     promises.append(activation.complete)
-            await all_(promises)
+
+            async def wait() -> None:
+                await asyncio.gather(*promises)
+
+            return wait()
 
     async def _handle_internal(self, route: Route) -> bool:
         self.handled_count += 1
@@ -1287,12 +1311,10 @@ class RouteHandler:
         # Python: the handler may return an awaitable, as a JS handler returns a
         # promise; Promise.all() takes a value too.
         result = handler(route, route.request)
-        [handled, _] = await all_(
-            [
-                handled_promise,
-                result if inspect.isawaitable(result) else resolved(result),
-            ]
-        )
+        if inspect.isawaitable(result):
+            handled, _ = await asyncio.gather(handled_promise, result)
+        else:
+            handled = await handled_promise
         return handled
 
     def will_expire(self) -> bool:

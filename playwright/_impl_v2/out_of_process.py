@@ -15,9 +15,9 @@
 """Port of packages/playwright-core/src/outofprocess.ts.
 
 Python: the driver is the bundled Node.js driver, run by the PipeTransport of
-playwright/_impl/_transport.py. The transport reads the messages in a task and
-waits until the event loop is idle after each one, as Node.js dispatches each
-message in its own macrotask.
+playwright/_impl_v2/transport.py. The transport reads the messages in a task and
+waits for the next task after each one, as Node.js dispatches each message in its
+own macrotask.
 """
 
 import asyncio
@@ -27,7 +27,6 @@ from playwright._impl_v2.connection import Connection
 from playwright._impl_v2.event_emitter import report_unhandled_error
 from playwright._impl_v2.playwright import Playwright
 from playwright._impl_v2.transport import PipeTransport
-from playwright._impl_v2.utils.promise import retrieve
 
 
 async def start() -> Tuple[Playwright, "PlaywrightClient"]:
@@ -61,7 +60,10 @@ class PlaywrightClient:
         reader = asyncio.ensure_future(self._transport.run())
 
         def on_close(reader: "asyncio.Future[None]") -> None:
-            retrieve(reader)
+            # Python: reads the error of the reader, so that asyncio does not log it
+            # as never retrieved.
+            if not reader.cancelled():
+                reader.exception()
             if not self._close_promise.done():
                 self._close_promise.set_result(None)
             # Python: the calls in flight fail when the driver goes away; upstream

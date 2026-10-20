@@ -50,13 +50,7 @@ from playwright._impl_v2.internal_structures import HeadersArray
 from playwright._impl_v2.isomorphic.string_utils import js_string
 from playwright._impl_v2.isomorphic.time import monotonic_time
 from playwright._impl_v2.timeout_settings import NO_TIMEOUT
-from playwright._impl_v2.utils.promise import (
-    catch,
-    clear_timeout,
-    race,
-    set_timeout,
-    then,
-)
+from playwright._impl_v2.utils.tasks import call_in_next_task, fire_and_forget
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl_v2.local_utils import LocalUtils
@@ -94,7 +88,9 @@ async def connect_to_browser(
             for page in context.pages:
                 page._on_close()
             context._on_close()
-        set_timeout(lambda: browser._did_close() if browser else None, 0)
+        # Python: setTimeout(..., 0) runs the callback in the next task; see
+        # call_in_next_task().
+        call_in_next_task(lambda: browser._did_close() if browser else None)
 
     connection.on("close", on_close)
 
@@ -152,7 +148,13 @@ async def connect_to_endpoint(
     # Python: onmessage returns nothing; upstream it returns the promise, which
     # nobody uses.
     def onmessage(message: Dict[str, Any]) -> None:
-        catch(transport.send(message), lambda _: on_transport_closed())
+        async def send() -> None:
+            try:
+                await transport.send(message)
+            except Exception:
+                on_transport_closed()
+
+        fire_and_forget(send())
 
     connection.onmessage = onmessage
 
@@ -163,7 +165,7 @@ async def connect_to_endpoint(
         except Exception as e:
             # Python: String(e) is the name and the message of the error.
             close_error = f"{e.name if isinstance(e, Error) else type(e).__name__}: {e}"
-            catch(transport.close())
+            fire_and_forget(transport.close())
 
     transport.on_message(on_message)
     return connection
@@ -201,7 +203,7 @@ class JsonPipeTransport:
         self._pipe = pipe
         return connect_headers
 
-    def send(self, message: Any) -> "asyncio.Future[None]":
+    def send(self, message: Any) -> Awaitable[None]:
         # Python: not an async def, so that the message goes out at once.
         assert self._pipe  # this._pipe!
         return self._pipe.send(message=message, timeout=NO_TIMEOUT)
@@ -214,10 +216,18 @@ class JsonPipeTransport:
         assert self._pipe  # this._pipe!
         self._pipe.onClosed(lambda event: callback(event["reason"]))
 
-    def close(self) -> "asyncio.Future[None]":
+    def close(self) -> Awaitable[None]:
         # Python: not an async def, so that the message goes out at once.
         assert self._pipe  # this._pipe!
-        return catch(self._pipe.close(timeout=NO_TIMEOUT))
+        awaitable = self._pipe.close(timeout=NO_TIMEOUT)
+
+        async def ignore_errors() -> None:
+            try:
+                await awaitable
+            except Exception:
+                pass
+
+        return ignore_errors()
 
 
 # Not ported: WebSocketTransport, the transport of the client in a web page
@@ -228,24 +238,13 @@ class JsonPipeTransport:
 async def race_against_deadline(
     cb: Callable[[], Awaitable[T]], deadline: float
 ) -> Dict[str, Any]:
-    timer: Optional[asyncio.TimerHandle] = None
-    timed_out: "asyncio.Future[Dict[str, Any]]" = (
-        asyncio.get_running_loop().create_future()
-    )
-
-    def resolve() -> None:
-        if not timed_out.done():
-            timed_out.set_result({"timedOut": True})
-
-    if deadline:
-        timer = set_timeout(resolve, max(0, deadline - monotonic_time()))
-    try:
-        # Note: not including "await" here truncates the async stack inside cb(), so always include it.
-        return await race(
-            [
-                then(cb(), lambda result: {"result": result, "timedOut": False}),
-                timed_out,
-            ]
-        )
-    finally:
-        clear_timeout(timer)
+    # Python: the call runs as a task; asyncio.wait() with a timeout is the race
+    # against the timer. The call runs on after a timeout, as in JS.
+    task = asyncio.ensure_future(cb())
+    timeout = max(0, deadline - monotonic_time()) / 1000 if deadline else None
+    # Note: not including "await" here truncates the async stack inside cb(), so always include it.
+    done, _ = await asyncio.wait({task}, timeout=timeout)
+    if task in done:
+        return {"result": await task, "timedOut": False}
+    task.add_done_callback(lambda f: f.cancelled() or f.exception())
+    return {"timedOut": True}

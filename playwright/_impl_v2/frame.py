@@ -33,6 +33,7 @@ from pathlib import Path
 from typing import (
     TYPE_CHECKING,
     Any,
+    Awaitable,
     Dict,
     List,
     Literal,
@@ -92,7 +93,7 @@ from playwright._impl_v2.locator import (
 )
 from playwright._impl_v2.timeout_settings import NO_TIMEOUT, TimeoutSettings
 from playwright._impl_v2.types import LIFECYCLE_EVENTS
-from playwright._impl_v2.utils.promise import rejected, start
+from playwright._impl_v2.utils.tasks import failed
 from playwright._impl_v2.waiter import Waiter
 from playwright._impl_v2.web_mcp import WebMCP
 
@@ -248,13 +249,15 @@ class Frame(ChannelOwner):
         return waiter
 
     @api_call(title="Wait for navigation")
-    async def wait_for_navigation(
+    def wait_for_navigation(
         self,
         url: Optional[URLMatch],
         wait_until: Optional[LifecycleEvent],
         timeout: Optional[float],
-    ) -> Optional["network.Response"]:
-        # Python: the message names the Python option, wait_until.
+    ) -> Awaitable[Optional["network.Response"]]:
+        # Python: a plain def. The waiter and its listeners are set up at the call, as
+        # the JS async function sets them up before its first await; the result is
+        # the wait. The message names the Python option, wait_until.
         wait_until = verify_load_state(
             "wait_until", "load" if wait_until is None else wait_until
         )
@@ -274,37 +277,44 @@ class Frame(ChannelOwner):
                 url,
             )
 
-        navigated_event: "channels.FrameNavigatedEvent" = await waiter.wait_for_event(
+        wait = waiter.wait_for_event(
             self._event_emitter, "navigated", navigated_predicate
         )
-        if navigated_event["error"]:
-            e = Error(navigated_event["error"])
-            e._stack = ""
-            await waiter.wait_for_promise(rejected(e))
 
-        if wait_until not in self._load_states:
+        async def rest() -> Optional["network.Response"]:
+            navigated_event: "channels.FrameNavigatedEvent" = await wait
+            if navigated_event["error"]:
+                e = Error(navigated_event["error"])
+                e._stack = ""
+                await waiter.wait_for_promise(failed(e))
 
-            def loadstate_predicate(s: str) -> bool:
-                waiter.log(f'  "{s}" event fired')
-                return s == wait_until
+            if wait_until not in self._load_states:
 
-            await waiter.wait_for_event(
-                self._event_emitter, "loadstate", loadstate_predicate
+                def loadstate_predicate(s: str) -> bool:
+                    waiter.log(f'  "{s}" event fired')
+                    return s == wait_until
+
+                await waiter.wait_for_event(
+                    self._event_emitter, "loadstate", loadstate_predicate
+                )
+
+            new_document = navigated_event["newDocument"]
+            request = (
+                network.Request.from_nullable(new_document.get("request"))
+                if new_document
+                else None
             )
+            response = (
+                await waiter.wait_for_promise(
+                    request._final_request()._internal_response()
+                )
+                if request
+                else None
+            )
+            waiter.dispose()
+            return response
 
-        new_document = navigated_event["newDocument"]
-        request = (
-            network.Request.from_nullable(new_document.get("request"))
-            if new_document
-            else None
-        )
-        response = (
-            await waiter.wait_for_promise(request._final_request()._internal_response())
-            if request
-            else None
-        )
-        waiter.dispose()
-        return response
+        return rest()
 
     @api_call(title="Wait for load state")
     async def wait_for_load_state(
@@ -1292,12 +1302,11 @@ class Frame(ChannelOwner):
         wait_until: Optional[LifecycleEvent],
         timeout: Optional[float],
     ) -> "EventContextManagerImpl[network.Response]":
-        # Python: waitForNavigation() as a context manager. The wait starts as a task,
-        # as the promise of waitForNavigation() that JS awaits with the action that
-        # navigates. Its synchronous part (the waiter and its listeners) runs at the
-        # next turn of the event loop, before the driver's next message is dispatched.
+        # Python only: waitForNavigation() as a context manager. wait_for_navigation()
+        # is a plain def, so the waiter and its listeners are set up here, before the
+        # with block runs; the wait runs in a task.
         return EventContextManagerImpl(
-            start(
+            asyncio.ensure_future(
                 self.wait_for_navigation(
                     url=url, wait_until=wait_until, timeout=timeout
                 )
