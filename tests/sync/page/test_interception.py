@@ -19,7 +19,7 @@ from typing import Callable, Dict, Pattern
 
 import pytest
 
-from playwright._impl_v2.isomorphic.url_match import glob_to_regex_pattern, url_matches
+from playwright._impl.isomorphic.url_match import glob_to_regex_pattern, url_matches
 from playwright.sync_api import Error, Page, Request, Route, expect
 from tests.server import Server, TestServerRequest
 

@@ -13,10 +13,7 @@
 # limitations under the License.
 
 
-"""Python only: tests of v2 (playwright/_impl_v2) that no upstream test covers.
-
-The v1 tests of the same behaviors are in tests/async/legacy, marked @only_v1.
-"""
+"""Python only: tests of behaviors that no upstream test covers."""
 
 from pathlib import Path
 from typing import Callable
@@ -74,3 +71,39 @@ async def test_prevent_getting_video_path(
         == "Path is not available when connecting remotely. Use save_as() to save a local copy."
     )
     remote_server.kill()
+
+
+async def test_connect_to_closed_server_without_hangs(
+    browser_type: BrowserType, launch_server: Callable[[], RemoteServer]
+) -> None:
+    remote_server = launch_server()
+    remote_server.kill()
+    with pytest.raises(Error) as exc:
+        await browser_type.connect(remote_server.ws_endpoint)
+    assert "WebSocket error: " in exc.value.message
+
+
+async def test_should_record_trace_with_relative_trace_path(
+    launch_server: Callable[[], RemoteServer],
+    server: Server,
+    browser_type: BrowserType,
+) -> None:
+    remote = launch_server()
+    browser = await browser_type.connect(remote.ws_endpoint)
+    context = await browser.new_context()
+    page = await context.new_page()
+
+    await context.tracing.start(sources=True)
+    await page.goto(server.EMPTY_PAGE)
+    await page.set_content("<button>Click</button>")
+    await page.click("'Click'")
+    try:
+        await context.tracing.stop(path="trace1.zip")
+
+        await context.close()
+        await browser.close()
+
+        # make sure trace1.zip exists
+        assert Path("trace1.zip").exists()
+    finally:
+        Path("trace1.zip").unlink()

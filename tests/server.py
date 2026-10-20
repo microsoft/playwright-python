@@ -50,9 +50,7 @@ from twisted.internet.error import CannotListenError
 from twisted.internet.selectreactor import SelectReactor
 from twisted.web import http
 
-from playwright._impl._path_utils import get_file_dirname
-
-_dirname = get_file_dirname()
+_dirname = pathlib.Path(__file__).parent.absolute()
 reactor = cast(SelectReactor, _twisted_reactor)
 
 

@@ -324,16 +324,12 @@ def redirect_port_forwarding_for_test(
     if not port:
         yield
         return
-    local_utils: Any = browser_type._impl_obj._connection.local_utils
-    # playwright/_impl_v2 has local_utils() as upstream does; playwright/_impl has a
-    # property.
-    if callable(local_utils):
-        local_utils = local_utils()
+    local_utils: Any = browser_type._impl_obj._connection.local_utils()
     channel: Any = local_utils._channel
     original = channel.connect
 
     def connect(**kwargs: Any) -> Any:
-        # The awaitable of the call: a coroutine in _impl, a future in _impl_v2.
+        # The awaitable of the call, as the channel method returns it.
         return original(**{**kwargs, "socksProxyRedirectPortForTest": port})
 
     setattr(channel, "connect", connect)

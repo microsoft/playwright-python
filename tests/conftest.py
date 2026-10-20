@@ -29,12 +29,11 @@ from pixelmatch import pixelmatch
 from pixelmatch.contrib.PIL import from_PIL_to_raw_data
 
 import playwright
-from playwright._impl._path_utils import get_file_dirname
 from playwright._impl._protocol_check import take_violations
 
 from .server import Server, test_server
 
-_dirname = get_file_dirname()
+_dirname = Path(__file__).parent.absolute()
 
 # Check each message that the client sends against the protocol spec.
 os.environ.setdefault("PW_CHECK_PROTOCOL", "1")
@@ -49,36 +48,6 @@ os.environ.setdefault(
 def pytest_configure(config: pytest.Config) -> None:
     if os.environ.get("CI"):
         config.option.reruns = 3
-
-
-# The two implementations of the client run different tests:
-# - playwright/_impl (v1, the default) runs the older tests: tests/{async,sync}/legacy
-#   and the tests outside of tests/async and tests/sync.
-# - PW_IMPL=v2 runs playwright/_impl_v2 on all of tests/async and tests/sync: the
-#   older tests, the ports of the upstream tests in page/ and library/, and the
-#   Python-only tests of v2 in python/.
-_TESTS_DIR = Path(__file__).parent
-_NOT_V1 = {"page", "library", "python"}
-
-
-def pytest_ignore_collect(
-    collection_path: Path, config: pytest.Config
-) -> Optional[bool]:
-    try:
-        parts = collection_path.relative_to(_TESTS_DIR).parts
-    except ValueError:
-        return None
-    if not parts:
-        return None
-    if os.environ.get("PW_IMPL") == "v2":
-        if parts[0] not in ("async", "sync") and (
-            collection_path.is_dir() or parts[0].startswith("test_")
-        ):
-            return True
-        return None
-    if len(parts) >= 2 and parts[0] in ("async", "sync") and parts[1] in _NOT_V1:
-        return True
-    return None
 
 
 def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:

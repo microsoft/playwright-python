@@ -49,6 +49,9 @@ packages = [
     "playwright.sync_api",
     "playwright._impl",
     "playwright._impl.__pyinstaller",
+    "playwright._impl.isomorphic",
+    "playwright._impl.protocol",
+    "playwright._impl.utils",
 ]
 include-package-data = true
 

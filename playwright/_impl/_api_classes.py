@@ -14,55 +14,49 @@
 
 # The implementation of every class in the generated API. The generated API
 # imports them from here, so the generator does not need to know which module
-# holds each class.
+# holds each class. The expect() matchers are not part of the JS client; the
+# Python ones are in assertions.py.
 
-import os
-from typing import TYPE_CHECKING
-
-from playwright._impl._assertions import (
+from playwright._impl.assertions import (
     APIResponseAssertions,
     LocatorAssertions,
     PageAssertions,
 )
-from playwright._impl._browser import Browser
-from playwright._impl._browser_context import BrowserContext
-from playwright._impl._browser_type import BrowserType
-from playwright._impl._cdp_session import CDPSession
-from playwright._impl._clock import Clock
-from playwright._impl._console_message import ConsoleMessage
-from playwright._impl._credentials import Credentials
-from playwright._impl._debugger import Debugger
-from playwright._impl._dialog import Dialog
-from playwright._impl._disposable import Disposable
-from playwright._impl._download import Download
-from playwright._impl._element_handle import ElementHandle
-from playwright._impl._fetch import APIRequest, APIRequestContext, APIResponse
-from playwright._impl._file_chooser import FileChooser
-from playwright._impl._frame import Frame
-from playwright._impl._input import Keyboard, Mouse, Touchscreen
-from playwright._impl._js_handle import JSHandle
-from playwright._impl._locator import FrameLocator, Locator
-from playwright._impl._network import (
+from playwright._impl.browser import Browser
+from playwright._impl.browser_context import BrowserContext
+from playwright._impl.browser_type import BrowserType
+from playwright._impl.cdp_session import CDPSession
+from playwright._impl.clock import Clock
+from playwright._impl.console_message import ConsoleMessage
+from playwright._impl.credentials import Credentials
+from playwright._impl.debugger import Debugger
+from playwright._impl.dialog import Dialog
+from playwright._impl.disposable import Disposable
+from playwright._impl.download import Download
+from playwright._impl.element_handle import ElementHandle
+from playwright._impl.fetch import APIRequest, APIRequestContext, APIResponse
+from playwright._impl.file_chooser import FileChooser
+from playwright._impl.frame import Frame
+from playwright._impl.input import Keyboard, Mouse, Touchscreen
+from playwright._impl.js_handle import JSHandle
+from playwright._impl.locator import FrameLocator, Locator
+from playwright._impl.network import (
     Request,
     Response,
     Route,
     WebSocket,
     WebSocketRoute,
 )
-from playwright._impl._page import Page, Worker
-from playwright._impl._playwright import Playwright
-from playwright._impl._screencast import Screencast
-from playwright._impl._selectors import Selectors
-from playwright._impl._tracing import Tracing
-from playwright._impl._video import Video
-from playwright._impl._web_error import WebError
-from playwright._impl._web_mcp import WebMCP
-from playwright._impl._web_storage import WebStorage
-
-# PW_IMPL=v2 switches the async API to playwright/_impl_v2, the line-by-line port of
-# the JS client. It has no sync API.
-if not TYPE_CHECKING and os.environ.get("PW_IMPL") == "v2":  # pragma: no cover
-    from playwright._impl_v2.api_classes import *  # noqa: F401,F403
+from playwright._impl.page import Page
+from playwright._impl.playwright import Playwright
+from playwright._impl.screencast import Screencast
+from playwright._impl.selectors import Selectors
+from playwright._impl.tracing import Tracing
+from playwright._impl.video import Video
+from playwright._impl.web_error import WebError
+from playwright._impl.web_mcp import WebMCP
+from playwright._impl.web_storage import WebStorage
+from playwright._impl.worker import Worker
 
 __all__ = [
     "APIRequest",

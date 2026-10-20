@@ -1,6 +1,6 @@
 # How to port the JavaScript client to Python
 
-These rules say how to write `playwright/_impl_v2` from `packages/playwright-core/src/client`
+These rules say how to write `playwright/_impl` from `packages/playwright-core/src/client`
 in `microsoft/playwright`. Use them at each roll, for every new or changed line of the
 client.
 
@@ -12,7 +12,7 @@ patterns in this document.
 Each rule shows the JavaScript form, then the Python form. When a rule changes the behavior,
 the rule says why. "Mark it" means: add a `# Python:` comment at that line (see section 11).
 
-The low-level helpers that these rules use are in `playwright/_impl_v2/utils/tasks.py`:
+The low-level helpers that these rules use are in `playwright/_impl/utils/tasks.py`:
 `fire_and_forget()`, `race()`, `completed()`, `failed()`, `wait_for_next_task()` and
 `call_in_next_task()`.
 
@@ -385,14 +385,14 @@ order explicit at the site (1.4, 1.10).
   JavaScript and false in Python. Mark it. `if (x)` on a string or a number is `if x`.
 - `x || y` on an object is `x if x is not None else y`. On a string or a number it is
   `x or y`.
-- A value that goes to the page (an evaluate argument) and is `None` is `undefined`, as in
-  `playwright/_impl`.
+- A value that goes to the page (an evaluate argument) and is `None` is `undefined`, as the
+  Python client has always sent it.
 
 ## 5. Errors
 
 - `throw new Error(message)` is `raise Error(message)`. The classes are the public ones
   of `playwright/_impl/_errors.py`: `Error`, `TimeoutError`, `TargetClosedError`. Import
-  them from `playwright/_impl_v2/errors.py`.
+  them from `playwright/_impl/errors.py`.
 - `assert(condition, message)` from `@isomorphic/assert` is
   `if not condition: raise Error(message)`. Never use the `assert` statement: it is
   removed by `python -O`, and it raises the wrong class.
@@ -511,9 +511,9 @@ a whole module deviates in the same way, say it once in the module docstring.
 
 ## 13. The sync API
 
-The sync API is not a port: it is the same mechanism as in `playwright/_impl`, in
+The sync API is not a port. It runs on greenlets, in
 `playwright/sync_api/_context_manager.py`, `playwright/_impl/_sync_base.py` and
-`playwright/_impl/_greenlets.py`, which the two implementations share.
+`playwright/_impl/_greenlets.py`.
 
 - The dispatcher fiber is a greenlet that runs the event loop. The user code runs in the
   main greenlet. A sync call creates a task for the coroutine and switches to the
@@ -543,6 +543,6 @@ The sync API is not a port: it is the same mechanism as in `playwright/_impl`, i
    ported.
 2. For each hunk, find the Python line and apply the rules. Keep the order.
 3. Regenerate the protocol files with `./scripts/update_api.sh`.
-4. Run `mypy playwright` and `./test-v2.sh`.
+4. Run `pre-commit run --all-files` and `./test.sh`.
 5. Read every `# Python:` mark in the changed members again. Remove a mark whose reason
    is gone. Add one for each new deviation.
