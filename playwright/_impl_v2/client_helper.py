@@ -23,7 +23,7 @@ import asyncio
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Union
 
-from playwright._impl._errors import Error
+from playwright._impl_v2.errors import Error
 from playwright._impl_v2.isomorphic.string_utils import js_string
 
 if TYPE_CHECKING:  # pragma: no cover

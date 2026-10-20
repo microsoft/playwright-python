@@ -42,9 +42,9 @@ from typing import (
     cast,
 )
 
-from playwright._impl._errors import Error
 from playwright._impl_v2.browser import Browser
 from playwright._impl_v2.connection import Connection
+from playwright._impl_v2.errors import Error
 from playwright._impl_v2.events import Events
 from playwright._impl_v2.internal_structures import HeadersArray
 from playwright._impl_v2.isomorphic.string_utils import js_string

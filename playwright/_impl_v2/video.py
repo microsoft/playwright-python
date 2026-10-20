@@ -23,7 +23,7 @@ import pathlib
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional, Union
 
-from playwright._impl._errors import Error
+from playwright._impl_v2.errors import Error
 from playwright._impl_v2.event_emitter import EventEmitter
 
 if TYPE_CHECKING:  # pragma: no cover

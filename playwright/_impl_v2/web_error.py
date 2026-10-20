@@ -21,7 +21,7 @@ The object keeps the event loop, as the generated API reads the loop of each obj
 import asyncio
 from typing import TYPE_CHECKING, Optional
 
-from playwright._impl._errors import Error
+from playwright._impl_v2.errors import Error
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl_v2 import protocol_types as channels

@@ -53,14 +53,13 @@ from playwright._impl._api_structures import (
     SecurityDetails,
     SetCookieParam,
 )
-from playwright._impl._errors import Error
 from playwright._impl_v2.channel_owner import (
     ChannelOwner,
     api_call,
     from_channel,
     internal,
 )
-from playwright._impl_v2.errors import is_target_closed_error
+from playwright._impl_v2.errors import Error, is_target_closed_error
 from playwright._impl_v2.event_context_manager import EventContextManagerImpl
 from playwright._impl_v2.events import Events
 from playwright._impl_v2.internal_structures import Headers, HeadersArray

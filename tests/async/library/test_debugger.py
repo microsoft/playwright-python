@@ -21,8 +21,9 @@ asyncio task reports the asyncio frame as its location, not the test file.
 """
 
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 
+from playwright._impl_v2.channel_owner import ApiCallOptions
 from playwright.async_api import BrowserContext, DebuggerPausedDetails
 from tests.server import Server
 
@@ -141,7 +142,11 @@ async def test_DB_007_should_not_pause_at_internal_api_calls(
     await dbg.request_pause()
     # The internal call must not trip the pause, and must not consume the arming.
     # Port of `page._wrapApiCall(() => page.click('button'), { internal: true })`.
-    await page._impl_obj._connection.wrap_api_call(lambda: page.click("button"), True)
+    # Python: _impl_obj is typed as the v1 Page; under PW_IMPL=v2 it is the v2 one.
+    impl: Any = page._impl_obj
+    await impl._wrap_api_call(
+        lambda _: page.click("button"), ApiCallOptions(internal=True)
+    )
     assert dbg.paused_details is None
 
     # The next normal call still pauses.

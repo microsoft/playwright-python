@@ -32,7 +32,7 @@ from playwright.async_api import (
     expect,
 )
 from tests.server import Server, TestServerRequest
-from tests.utils import must
+from tests.utils import must, only_v1, only_v2
 
 
 async def test_page_route_should_intercept(page: Page, server: Server) -> None:
@@ -830,6 +830,7 @@ async def test_request_fulfill_should_work_with_file_path(
     assert_to_be_golden(await img.screenshot(), "mock-binary-response.png")
 
 
+@only_v1
 async def test_request_fulfill_should_stringify_intercepted_request_response_headers(
     page: Page, server: Server
 ) -> None:
@@ -845,6 +846,25 @@ async def test_request_fulfill_should_stringify_intercepted_request_response_hea
     assert response.status == 200
     headers = response.headers
     assert headers["foo"] == "True"
+    assert await page.evaluate("() => document.body.textContent") == "Yo, page!"
+
+
+@only_v2
+async def test_request_fulfill_should_stringify_intercepted_request_response_headers_v2(
+    page: Page, server: Server
+) -> None:
+    await page.route(
+        "**/*",
+        lambda route: route.fulfill(
+            status=200, headers={"foo": True}, body="Yo, page!"  # type: ignore
+        ),
+    )
+
+    response = await page.goto(server.EMPTY_PAGE)
+    assert response
+    assert response.status == 200
+    headers = response.headers
+    assert headers["foo"] == "true"
     assert await page.evaluate("() => document.body.textContent") == "Yo, page!"
 
 

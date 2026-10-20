@@ -14,26 +14,25 @@
 
 """Port of packages/playwright-core/src/client/errors.ts.
 
-Python: the error classes are the public ones in playwright/_impl/_errors.py, so that
-the API exports one set of classes for both implementations. PlaywrightError is
-playwright's Error class.
+Python: the error classes are the public classes of playwright/_impl/_errors.py, so
+that the API exports one set of classes for both implementations and
+`type(error) is TimeoutError` holds. Error is the JS Error class that the client
+throws (`throw new Error(...)`); PlaywrightError is upstream's PlaywrightError, the
+same class here.
 """
 
 import errno
+import re
 import traceback
 from typing import TYPE_CHECKING, Any, Optional
 
-from playwright._impl._errors import Error as PlaywrightError
-from playwright._impl._errors import (
-    TargetClosedError,
-    TimeoutError,
-    patch_error_message,
-)
+from playwright._impl import _errors as api_errors
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl_v2 import protocol_types as channels
 
 __all__ = [
+    "Error",
     "PlaywrightError",
     "TimeoutError",
     "TargetClosedError",
@@ -41,7 +40,14 @@ __all__ = [
     "is_target_closed_error",
     "serialize_error",
     "parse_error",
+    "patch_error_message",
 ]
+
+PlaywrightError = api_errors.Error
+# Python: `new Error(message)` in the client.
+Error = api_errors.Error
+TimeoutError = api_errors.TimeoutError
+TargetClosedError = api_errors.TargetClosedError
 
 
 # mirrors https://github.com/nodejs/node/blob/4e7c07dfe2b253393702545c0ffe2712b21fd3dd/lib/internal/errors.js#L976-L988
@@ -58,7 +64,7 @@ def is_target_closed_error(error: BaseException) -> bool:
 def serialize_error(e: Any) -> "channels.SerializedError":
     # Python: only exceptions are raised, so there is no "value" form. The message
     # and the code of an OSError are systemErrorMessage() and systemErrorCode().
-    name = e.name if isinstance(e, PlaywrightError) else type(e).__name__
+    name = (e.name or "Error") if isinstance(e, api_errors.Error) else type(e).__name__
     error: Any = {
         "message": str(e),
         "stack": "".join(traceback.format_exception(type(e), e, e.__traceback__)),
@@ -99,8 +105,22 @@ def parse_error(error: "channels.SerializedError") -> PlaywrightError:
         e = AbortError(message)
     else:
         e = PlaywrightError(message)
-        e._name = serialized.get("name") or ""
+    # Python: the name of each error is set here, as `new TimeoutError()` sets it in JS.
+    e._name = serialized.get("name") or ""
     e._stack = serialized.get("stack") or ""
     if serialized.get("code") is not None:
         setattr(e, "code", serialized.get("code"))
     return e
+
+
+def patch_error_message(message: str) -> str:
+    # Python: the messages name the Python options.
+    from playwright._impl_v2.isomorphic.string_utils import to_snake_case
+
+    match = re.match(r"(\w+)(: expected .*)", message)
+    if match:
+        message = to_snake_case(match.group(1)) + match.group(2)
+    message = message.replace(
+        "Pass { acceptDownloads: true }", "Pass 'accept_downloads=True'"
+    )
+    return message

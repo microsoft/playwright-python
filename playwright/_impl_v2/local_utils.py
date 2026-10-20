@@ -44,7 +44,7 @@ class LocalUtils(ChannelOwner):
         super().__init__(parent, type, guid, initializer)
         self.devices: Devices = {}
         for device in initializer["deviceDescriptors"]:
-            self.devices[device["name"]] = dict(device["descriptor"])
+            self.devices[device["name"]] = _python_descriptor(device["descriptor"])
 
     async def zip(self, params: Dict[str, Any]) -> None:
         return await self._channel.zip(
@@ -107,3 +107,20 @@ class LocalUtils(ChannelOwner):
         return self._channel.addStackToTracingNoReply(
             callData=params["callData"], timeout=NO_TIMEOUT
         )
+
+
+def _python_descriptor(descriptor: Any) -> DeviceDescriptor:
+    # Python: a descriptor is spread into the keyword arguments of new_context(), so
+    # it has the Python option names.
+    result = {
+        "user_agent": descriptor["userAgent"],
+        "viewport": descriptor["viewport"],
+        "device_scale_factor": descriptor["deviceScaleFactor"],
+        "is_mobile": descriptor["isMobile"],
+        "has_touch": descriptor["hasTouch"],
+        "default_browser_type": descriptor["defaultBrowserType"],
+    }
+    # "screen" is optional in the protocol.
+    if descriptor.get("screen"):
+        result["screen"] = descriptor["screen"]
+    return result

@@ -12,14 +12,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Python only: the expect() matchers of the Python API, on top of Frame._expect()
+and Locator._expect(), the counterpart of packages/playwright/src/matchers.
+"""
+
 import collections.abc
 import re
-from contextlib import contextmanager
-from typing import Any, Iterator, List, Literal, Optional, Pattern, Sequence, Union
+from typing import Any, List, Literal, Optional, Pattern, Sequence, Union
 from urllib.parse import urljoin
 
-from playwright._impl._errors import Error
+from playwright._impl import _assertions as v1_assertions
 from playwright._impl_v2.connection import format_call_log
+from playwright._impl_v2.errors import Error
 from playwright._impl_v2.fetch import APIResponse
 from playwright._impl_v2.internal_structures import (
     AriaRole,
@@ -32,32 +36,9 @@ from playwright._impl_v2.isomorphic.string_utils import escape_regex_flags
 from playwright._impl_v2.locator import Locator
 from playwright._impl_v2.page import Page
 
-_soft_errors: Optional[List[AssertionError]] = None
-
-
-@contextmanager
-def _soft_scope() -> Iterator[List[AssertionError]]:
-    global _soft_errors
-    assert _soft_errors is None, "nested soft assertion scopes are not supported"
-    _soft_errors = []
-    try:
-        yield _soft_errors
-    finally:
-        _soft_errors = None
-
-
-def _record_soft_or_raise(error: AssertionError, is_soft: bool) -> None:
-    __tracebackhide__ = True
-    if is_soft:
-        if _soft_errors is None:
-            raise RuntimeError(
-                "expect.soft(...) requires pytest-playwright>=0.7.3 "
-                "(or pytest-playwright-asyncio>=0.7.3). Upgrade the plugin, "
-                "or use a regular expect(...) assertion."
-            )
-        _soft_errors.append(error)
-        return
-    raise error
+# The soft assertions of a test are collected in playwright/_impl/_assertions.py,
+# where pytest-playwright opens the scope of each test (_soft_scope()).
+_record_soft_or_raise = v1_assertions._record_soft_or_raise
 
 
 # Port of the checks in toContainClass() in packages/playwright/src/matchers/matchers.ts.

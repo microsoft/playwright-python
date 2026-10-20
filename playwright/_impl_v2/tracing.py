@@ -39,7 +39,6 @@ from typing import (
 )
 
 from playwright._impl._api_structures import Location
-from playwright._impl._errors import Error
 from playwright._impl_v2.artifact import Artifact
 from playwright._impl_v2.channel_owner import (
     ChannelOwner,
@@ -48,6 +47,7 @@ from playwright._impl_v2.channel_owner import (
     internal,
 )
 from playwright._impl_v2.disposable import DisposableStub
+from playwright._impl_v2.errors import Error
 from playwright._impl_v2.isomorphic.string_utils import escape_regex_flags
 from playwright._impl_v2.timeout_settings import NO_TIMEOUT
 

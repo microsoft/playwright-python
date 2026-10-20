@@ -36,8 +36,8 @@ from typing import (
     Union,
 )
 
-from playwright._impl._errors import Error
 from playwright._impl_v2.client_stack_trace import capture_library_stack_trace
+from playwright._impl_v2.errors import Error, patch_error_message
 from playwright._impl_v2.event_emitter import EventEmitter
 from playwright._impl_v2.protocol.validator import (
     ValidationError,
@@ -107,6 +107,9 @@ class Channel(EventEmitter):
         # (event, handler) -> the listeners registered for it, in order.
         self._event_listeners: Dict[Tuple[str, Any], List[Listener]] = {}
 
+    def _report_unhandled_error(self, error: BaseException) -> None:
+        self._object._connection._on_event_listener_error(error)
+
     def _call(
         self,
         method: str,
@@ -121,7 +124,13 @@ class Channel(EventEmitter):
         assert validator
 
         def func(api_zone: ApiZone) -> Awaitable[Any]:
-            validated_params = validator(params, "", owner._validator_to_wire_context())
+            try:
+                validated_params = validator(
+                    params, "", owner._validator_to_wire_context()
+                )
+            except ValidationError as e:
+                # Python: the messages name the Python options.
+                raise ValidationError(patch_error_message(e.message)) from None
             if not api_zone.internal and not api_zone.reported:
                 # Reporting/tracing/logging this api call for the first time.
                 api_zone.reported = True
@@ -209,6 +218,9 @@ class ChannelOwner(EventEmitter):
         self._channel: Any = self._create_channel()
         self._initializer = initializer
 
+    def _report_unhandled_error(self, error: BaseException) -> None:
+        self._connection._on_event_listener_error(error)
+
     def _set_event_to_subscription_mapping(self, mapping: Dict[str, str]) -> None:
         self._event_to_subscription_mapping = mapping
 
@@ -220,34 +232,34 @@ class ChannelOwner(EventEmitter):
                 self._channel.updateSubscription(event=protocol_event, enabled=enabled)
             )
 
-    def on(self, event: str, listener: Listener) -> "ChannelOwner":
-        if not self.listener_count(event):
-            self._update_subscription(event, True)
-        super().on(event, listener)
+    def on(self, type: str, listener: Listener) -> "ChannelOwner":
+        if not self.listener_count(type):
+            self._update_subscription(type, True)
+        super().on(type, listener)
         return self
 
-    def add_listener(self, event: str, listener: Listener) -> "ChannelOwner":
-        if not self.listener_count(event):
-            self._update_subscription(event, True)
-        super().add_listener(event, listener)
+    def add_listener(self, type: str, listener: Listener) -> "ChannelOwner":
+        if not self.listener_count(type):
+            self._update_subscription(type, True)
+        super().add_listener(type, listener)
         return self
 
-    def prepend_listener(self, event: str, listener: Listener) -> "ChannelOwner":
-        if not self.listener_count(event):
-            self._update_subscription(event, True)
-        super().prepend_listener(event, listener)
+    def prepend_listener(self, type: str, listener: Listener) -> "ChannelOwner":
+        if not self.listener_count(type):
+            self._update_subscription(type, True)
+        super().prepend_listener(type, listener)
         return self
 
-    def off(self, event: str, listener: Listener) -> "ChannelOwner":
-        super().off(event, listener)
-        if not self.listener_count(event):
-            self._update_subscription(event, False)
+    def off(self, type: str, listener: Listener) -> "ChannelOwner":
+        super().off(type, listener)
+        if not self.listener_count(type):
+            self._update_subscription(type, False)
         return self
 
-    def remove_listener(self, event: str, listener: Listener) -> "ChannelOwner":
-        super().remove_listener(event, listener)
-        if not self.listener_count(event):
-            self._update_subscription(event, False)
+    def remove_listener(self, type: str, listener: Listener) -> "ChannelOwner":
+        super().remove_listener(type, listener)
+        if not self.listener_count(type):
+            self._update_subscription(type, False)
         return self
 
     def _adopt(self, child: "ChannelOwner") -> None:

@@ -46,7 +46,6 @@ from typing import (
 )
 
 from playwright._impl._api_structures import DropPayload, FilePayload, Position
-from playwright._impl._errors import Error
 from playwright._impl_v2 import network
 from playwright._impl_v2.channel_owner import (
     ApiCallOptions,
@@ -60,6 +59,7 @@ from playwright._impl_v2.element_handle import (
     convert_input_files,
     convert_select_option_values,
 )
+from playwright._impl_v2.errors import Error
 from playwright._impl_v2.event_context_manager import EventContextManagerImpl
 from playwright._impl_v2.event_emitter import EventEmitter
 from playwright._impl_v2.events import Events

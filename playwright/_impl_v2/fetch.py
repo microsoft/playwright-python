@@ -63,7 +63,6 @@ from playwright._impl._api_structures import (
     SetCookieParam,
     StorageState,
 )
-from playwright._impl._errors import Error
 from playwright._impl._form_data import FormData
 from playwright._impl_v2.channel_owner import (
     ApiCallOptions,
@@ -72,7 +71,7 @@ from playwright._impl_v2.channel_owner import (
     from_channel,
     internal,
 )
-from playwright._impl_v2.errors import TargetClosedError, is_target_closed_error
+from playwright._impl_v2.errors import Error, TargetClosedError, is_target_closed_error
 from playwright._impl_v2.file_utils import mkdir_if_needed
 from playwright._impl_v2.internal_structures import Headers, HeadersArray, NameValue
 from playwright._impl_v2.isomorphic.headers import headers_object_to_array

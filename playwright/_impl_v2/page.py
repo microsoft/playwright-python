@@ -59,7 +59,6 @@ from playwright._impl._api_structures import (
     Position,
     ViewportSize,
 )
-from playwright._impl._errors import Error
 from playwright._impl_v2.artifact import Artifact
 from playwright._impl_v2.channel_owner import (
     ChannelOwner,
@@ -76,6 +75,7 @@ from playwright._impl_v2.element_handle import (
     determine_screenshot_type,
 )
 from playwright._impl_v2.errors import (
+    Error,
     TargetClosedError,
     is_target_closed_error,
     parse_error,

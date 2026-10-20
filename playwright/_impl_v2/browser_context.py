@@ -59,7 +59,6 @@ from playwright._impl._api_structures import (
     SetCookieParam,
     StorageState,
 )
-from playwright._impl._errors import Error
 from playwright._impl_v2 import network
 from playwright._impl_v2.cdp_session import CDPSession
 from playwright._impl_v2.channel_owner import (
@@ -75,7 +74,7 @@ from playwright._impl_v2.credentials import Credentials
 from playwright._impl_v2.debugger import Debugger
 from playwright._impl_v2.dialog import Dialog
 from playwright._impl_v2.disposable import DisposableObject, DisposableStub
-from playwright._impl_v2.errors import TargetClosedError, parse_error
+from playwright._impl_v2.errors import Error, TargetClosedError, parse_error
 from playwright._impl_v2.event_context_manager import EventContextManagerImpl
 from playwright._impl_v2.events import Events
 from playwright._impl_v2.fetch import APIRequestContext

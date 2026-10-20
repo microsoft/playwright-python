@@ -47,9 +47,9 @@ from playwright._impl._api_structures import (
     FloatRect,
     Position,
 )
-from playwright._impl._errors import Error
 from playwright._impl_v2.channel_owner import ApiCallOptions, ApiZone, api_call
 from playwright._impl_v2.disposable import DisposableStub
+from playwright._impl_v2.errors import Error
 from playwright._impl_v2.internal_structures import (
     AriaRole,
     FrameExpectOptions,

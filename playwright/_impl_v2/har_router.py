@@ -21,7 +21,7 @@ and the body are base64 strings on the wire. [Symbol.asyncDispose]() is not port
 import base64
 from typing import TYPE_CHECKING, Dict, Literal, Optional, cast
 
-from playwright._impl._errors import Error
+from playwright._impl_v2.errors import Error
 from playwright._impl_v2.isomorphic.url_match import URLMatch
 from playwright._impl_v2.utils.debug_logger import debug_logger
 from playwright._impl_v2.utils.tasks import fire_and_forget

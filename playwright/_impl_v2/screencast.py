@@ -39,10 +39,10 @@ from playwright._impl._api_structures import (
     ScreencastFrame,
     ScreencastSize,
 )
-from playwright._impl._errors import Error
 from playwright._impl_v2.artifact import Artifact
 from playwright._impl_v2.channel_owner import ApiCallOptions, api_call
 from playwright._impl_v2.disposable import DisposableStub
+from playwright._impl_v2.errors import Error
 from playwright._impl_v2.timeout_settings import NO_TIMEOUT
 from playwright._impl_v2.utils.tasks import fire_and_forget
 

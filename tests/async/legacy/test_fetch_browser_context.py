@@ -31,7 +31,7 @@ from playwright.async_api import (
     Page,
 )
 from tests.server import HTTPServer, Server, TestServerRequest
-from tests.utils import must
+from tests.utils import must, only_v1, only_v2
 
 
 async def test_get_should_work(context: BrowserContext, server: Server) -> None:
@@ -280,6 +280,7 @@ async def test_support_http_credentials_send_immediately_for_browser_new_page(
     await page.close()
 
 
+@only_v1
 @pytest.mark.parametrize("method", ["delete", "patch", "post", "put"])
 async def test_should_support_post_data(
     context: BrowserContext, method: str, server: Server
@@ -302,6 +303,36 @@ async def test_should_support_post_data(
     await support_post_data(["my", "request"], json.dumps(["my", "request"]).encode())
     await support_post_data({"my": "request"}, json.dumps({"my": "request"}).encode())
     with pytest.raises(Error, match="Unsupported 'data' type: <class 'function'>"):
+        await support_post_data(lambda: None, None)
+
+
+@only_v2
+@pytest.mark.parametrize("method", ["delete", "patch", "post", "put"])
+async def test_should_support_post_data_v2(
+    context: BrowserContext, method: str, server: Server
+) -> None:
+    async def support_post_data(fetch_data: Any, request_post_data: Any) -> None:
+        [request, response] = await asyncio.gather(
+            server.wait_for_request("/simple.json"),
+            getattr(context.request, method)(
+                server.PREFIX + "/simple.json", data=fetch_data
+            ),
+        )
+        assert request.method.decode() == method.upper()
+        assert request.post_body == request_post_data
+        assert response.status == 200
+        assert response.url == server.PREFIX + "/simple.json"
+        assert request.getHeader("Content-Length") == str(len(must(request.post_body)))
+
+    await support_post_data("My request", "My request".encode())
+    await support_post_data(b"My request", "My request".encode())
+    await support_post_data(
+        ["my", "request"], json.dumps(["my", "request"], separators=(",", ":")).encode()
+    )
+    await support_post_data(
+        {"my": "request"}, json.dumps({"my": "request"}, separators=(",", ":")).encode()
+    )
+    with pytest.raises(Error, match="Unexpected 'data' type"):
         await support_post_data(lambda: None, None)
 
 
@@ -330,6 +361,7 @@ async def test_should_support_application_x_www_form_urlencoded(
     assert params[b"file"] == [b"f.js"]
 
 
+@only_v1
 async def test_should_support_multipart_form_data(
     context: BrowserContext, server: Server
 ) -> None:
@@ -362,6 +394,42 @@ async def test_should_support_multipart_form_data(
     assert request.args[b"lastName"] == [b"Doe"]
     assert request.args[b"score"] == [b"42.5"]
     assert request.args[b"active"] == [b"True"]
+    assert request.args[b"file"][0] == file["buffer"]
+
+
+@only_v2
+async def test_should_support_multipart_form_data_v2(
+    context: BrowserContext, server: Server
+) -> None:
+    file: FilePayload = {
+        "name": "f.js",
+        "mimeType": "text/javascript",
+        "buffer": b"var x = 10;\r\n;console.log(x);",
+    }
+    [request, _] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        context.request.post(
+            server.PREFIX + "/empty.html",
+            multipart={
+                "firstName": "John",
+                "lastName": "Doe",
+                "score": 42.5,
+                "active": True,
+                "file": file,
+            },
+        ),
+    )
+    assert request.method == b"POST"
+    assert cast(str, request.getHeader("Content-Type")).startswith(
+        "multipart/form-data; "
+    )
+    assert must(request.getHeader("Content-Length")) == str(
+        len(must(request.post_body))
+    )
+    assert request.args[b"firstName"] == [b"John"]
+    assert request.args[b"lastName"] == [b"Doe"]
+    assert request.args[b"score"] == [b"42.5"]
+    assert request.args[b"active"] == [b"true"]
     assert request.args[b"file"][0] == file["buffer"]
 
 
@@ -424,6 +492,7 @@ async def test_should_support_form_data_set_overwrites_previous_values(
     assert params[b"age"] == [b"30"]
 
 
+@only_v1
 async def test_should_reject_file_value_in_form(
     context: BrowserContext, server: Server, tmp_path: Path
 ) -> None:
@@ -432,6 +501,18 @@ async def test_should_reject_file_value_in_form(
     form = FormData()
     form.set("attachment", file)
     with pytest.raises(Error, match="Use 'multipart' for file uploads"):
+        await context.request.post(server.EMPTY_PAGE, form=form)
+
+
+@only_v2
+async def test_should_reject_file_value_in_form_v2(
+    context: BrowserContext, server: Server, tmp_path: Path
+) -> None:
+    file = tmp_path / "f.txt"
+    file.write_bytes(b"hello")
+    form = FormData()
+    form.set("attachment", file)
+    with pytest.raises(Error, match="Please use options.multipart instead"):
         await context.request.post(server.EMPTY_PAGE, form=form)
 
 

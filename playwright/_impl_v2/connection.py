@@ -21,6 +21,8 @@ against the protocol spec, for the tests.
 
 import asyncio
 import json
+import sys
+import traceback
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -33,7 +35,6 @@ from typing import (
     cast,
 )
 
-from playwright._impl._errors import Error
 from playwright._impl._protocol_check import check_message
 from playwright._impl._protocol_check import is_enabled as is_protocol_check_enabled
 from playwright._impl_v2.channel_owner import ChannelOwner
@@ -41,7 +42,12 @@ from playwright._impl_v2.client_instrumentation import (
     ClientInstrumentation,
     create_instrumentation,
 )
-from playwright._impl_v2.errors import PlaywrightError, TargetClosedError, parse_error
+from playwright._impl_v2.errors import (
+    Error,
+    PlaywrightError,
+    TargetClosedError,
+    parse_error,
+)
 from playwright._impl_v2.event_emitter import EventEmitter
 from playwright._impl_v2.isomorphic.trace_utils import create_call_id_generator
 from playwright._impl_v2.protocol.validator import (
@@ -126,6 +132,8 @@ class Connection(EventEmitter):
         self._next_call_id = create_call_id_generator()
         self._callbacks: Dict[str, _Callback] = {}
         self._closed_error: Optional[Exception] = None
+        # Python: an error of an event listener, that the next API call raises.
+        self._error: Optional[BaseException] = None
         self._is_remote = False
         self._raw_buffers = False
         # Some connections allow resolving in-process dispatchers.
@@ -194,6 +202,12 @@ class Connection(EventEmitter):
             raise Error(
                 "The object has been collected to prevent unbounded heap growth."
             )
+        # Python: the next API call raises the error of an event listener, as the
+        # Python client always has; an unhandled rejection crashes Node.js.
+        if self._error and method != "__waitInfo__":
+            error = self._error
+            self._error = None
+            raise error
 
         # Python: there is no AbortSignal; see the cancellation below.
 
@@ -256,6 +270,14 @@ class Connection(EventEmitter):
 
         future.add_done_callback(on_done)
         return future
+
+    def _on_event_listener_error(self, error: BaseException) -> None:
+        # Python: see send_message_to_server().
+        print("Error occurred in event listener", file=sys.stderr)
+        traceback.print_exception(
+            type(error), error, error.__traceback__, file=sys.stderr
+        )
+        self._error = error
 
     def _type_of_guid(self, guid: str) -> Optional[str]:
         # Python: for the protocol check.

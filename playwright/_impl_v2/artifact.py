@@ -25,8 +25,8 @@ import asyncio
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional, Union
 
-from playwright._impl._errors import Error, patch_error_message
 from playwright._impl_v2.channel_owner import ChannelOwner, from_channel
+from playwright._impl_v2.errors import Error, patch_error_message
 from playwright._impl_v2.file_utils import mkdir_if_needed
 from playwright._impl_v2.stream import ReadableStreamImpl, Stream
 from playwright._impl_v2.timeout_settings import NO_TIMEOUT

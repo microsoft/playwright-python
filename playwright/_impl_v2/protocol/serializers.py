@@ -31,7 +31,7 @@ import traceback
 from typing import Any, Callable, Dict, List, Optional, Pattern, Union
 from urllib.parse import ParseResult, urlparse, urlunparse
 
-from playwright._impl._errors import Error
+from playwright._impl_v2.errors import Error
 from playwright._impl_v2.isomorphic.string_utils import (
     escape_regex_flags,
     js_string,

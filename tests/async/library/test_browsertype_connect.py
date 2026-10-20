@@ -490,9 +490,8 @@ async def test_BT_046_should_send_extra_headers_with_connect_request(
     kind: str,
     connect: Callable[..., Awaitable[Browser]],
     server: Server,
-    server_web_sockets: List[WebSocketProtocol],
 ) -> None:
-    server.once_web_socket_connection(server_web_sockets.append)
+    request_future = server.wait_for_web_socket_connection_request()
     with suppress(Error):
         await connect(
             f"ws://localhost:{server.PORT}/ws",
@@ -502,9 +501,9 @@ async def test_BT_046_should_send_extra_headers_with_connect_request(
             },
             timeout=100,
         )
-    request = server_web_sockets[0].http_headers
-    assert request["user-agent"] == "Playwright"
-    assert request["foo"] == "bar"
+    request = await request_future
+    assert request.headers["user-agent"] == "Playwright"
+    assert request.headers["foo"] == "bar"
 
 
 @pytest.mark.parametrize("kind", KINDS)
