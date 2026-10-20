@@ -39,7 +39,7 @@ jobs:
 
   build:
     name: Build
-    timeout-minutes: 45
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
@@ -114,52 +114,20 @@ jobs:
       run: pytest tests/test_installation.py --browser=${{ matrix.browser }}
     - name: Test Sync API
       if: matrix.os != 'ubuntu-latest'
-      run: pytest tests/sync --browser=${{ matrix.browser }} --timeout 90
+      run: pytest tests/sync --browser=${{ matrix.browser }} --timeout 90 --timeout-method thread -n auto
     - name: Test Sync API
       if: matrix.os == 'ubuntu-latest'
-      run: xvfb-run pytest tests/sync --browser=${{ matrix.browser }} --timeout 90
-    - name: Test Async API
-      if: matrix.os != 'ubuntu-latest'
-      run: pytest tests/async --browser=${{ matrix.browser }} --timeout 90
-    - name: Test Async API
-      if: matrix.os == 'ubuntu-latest'
-      run: xvfb-run pytest tests/async --browser=${{ matrix.browser }} --timeout 90
-
-  build-v2:
-    # playwright/_impl_v2, the line-by-line port of the JS client, behind PW_IMPL=v2.
-    # It runs all of tests/sync and tests/async: the older tests, the ports of the
-    # upstream tests and the Python-only tests of v2.
-    name: Build (v2)
-    timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      matrix:
-        browser: [chromium, firefox, webkit]
-    runs-on: ubuntu-22.04
-    env:
-      PW_IMPL: v2
-    steps:
-    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-    - name: Set up Python
-      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-      with:
-        python-version: '3.12'
-    - name: Install dependencies & browsers
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r local-requirements.txt
-        pip install -r requirements.txt
-        pip install -e .
-        python -m build --wheel
-        python -m playwright install --with-deps ${{ matrix.browser }}
-    - name: Test Sync API
       run: xvfb-run pytest tests/sync --browser=${{ matrix.browser }} --timeout 90 --timeout-method thread -n auto
     - name: Test Async API
+      if: matrix.os != 'ubuntu-latest'
+      run: pytest tests/async --browser=${{ matrix.browser }} --timeout 90 --timeout-method thread -n auto
+    - name: Test Async API
+      if: matrix.os == 'ubuntu-latest'
       run: xvfb-run pytest tests/async --browser=${{ matrix.browser }} --timeout 90 --timeout-method thread -n auto
 
   test-stable:
     name: Stable
-    timeout-minutes: 45
+    timeout-minutes: 90
     strategy:
       fail-fast: false
       matrix:
@@ -189,16 +157,16 @@ jobs:
       run: pytest tests/common --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
     - name: Test Sync API
       if: matrix.os != 'ubuntu-latest'
-      run: pytest tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
+      run: pytest tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90 --timeout-method thread -n auto
     - name: Test Sync API
       if: matrix.os == 'ubuntu-latest'
-      run: xvfb-run pytest tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
+      run: xvfb-run pytest tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90 --timeout-method thread -n auto
     - name: Test Async API
       if: matrix.os != 'ubuntu-latest'
-      run: pytest tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
+      run: pytest tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90 --timeout-method thread -n auto
     - name: Test Async API
       if: matrix.os == 'ubuntu-latest'
-      run: xvfb-run pytest tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
+      run: xvfb-run pytest tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90 --timeout-method thread -n auto
 
   test_examples:
     name: Examples

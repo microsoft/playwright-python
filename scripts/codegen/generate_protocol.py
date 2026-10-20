@@ -15,12 +15,13 @@
 # Generates from the protocol spec (packages/protocol/spec/*.yml in
 # microsoft/playwright):
 # - playwright/_impl/_protocol.py: the tables that _protocol_check.py uses;
-# - playwright/_impl/_protocol_types.py: the TypedDicts of the messages;
-# - playwright/_impl/_protocol_channels.py: a typed channel class per interface.
+# - playwright/_impl/protocol_types.py: the TypedDicts of the messages;
+# - playwright/_impl/protocol_channels.py: a typed channel class per interface;
+# - playwright/_impl/protocol/validator.py: the port of validator.ts.
 #
 # Usage:
 #   PW_SRC_DIR=<microsoft/playwright checkout> python scripts/codegen/generate_protocol.py \
-#       --out <file> --types-out <file> --channels-out <file>
+#       --out <file> --types-out <file> --channels-out <file> --validator-out <file>
 #
 # The spec is loaded the same way as utils/protocol_spec.js does it. The output
 # is not formatted; run black on it.
@@ -363,8 +364,8 @@ def generate_types(protocol: Dict[str, Any]) -> Tuple[str, List[Interface], Set[
             "if TYPE_CHECKING:",
             "    from typing_extensions import NotRequired",
             "",
-            "    from playwright._impl._channel import Channel",
-            "    from playwright._impl._protocol_channels import (",
+            "    from playwright._impl.channel_owner import Channel",
+            "    from playwright._impl.protocol_channels import (",
             *[f"        {channel}," for channel in used_channels],
             "    )",
             "",
@@ -376,7 +377,7 @@ def generate_types(protocol: Dict[str, Any]) -> Tuple[str, List[Interface], Set[
 
 
 def qualify(type_text: str, type_names: Set[str]) -> str:
-    """Prefixes the names from _protocol_types.py with `channels.`."""
+    """Prefixes the names from protocol_types.py with `channels.`."""
 
     def prefix(match: "re.Match[str]") -> str:
         name = match.group(0)
@@ -400,9 +401,7 @@ def payload_dict(payload: Payload, source: str) -> str:
     return "{" + ", ".join(items) + "}"
 
 
-def generate_channels(
-    interfaces: List[Interface], type_names: Set[str], eager: bool = False
-) -> str:
+def generate_channels(interfaces: List[Interface], type_names: Set[str]) -> str:
     blocks: List[str] = []
     for interface in interfaces:
         base = f"{interface.extends}Channel" if interface.extends else "Channel"
@@ -419,40 +418,23 @@ def generate_channels(
                 )
                 + "}"
             )
-            call_args = f'"{command.name}", {params}, timeout'
-            if eager:
-                # Like a call on the channel proxy in client/channelOwner.ts: the
-                # message goes out when the method is called, and the method returns
-                # an awaitable of the result.
-                if command.result:
-                    returns = f"Awaitable[channels.{command.result.type_name}]"
-                    mapper = f"lambda result: {payload_dict(command.result, 'result')}"
-                else:
-                    returns = "Awaitable[None]"
-                    mapper = "None"
-                eager_args = f'"{command.name}", {params}, timeout, {mapper}'
-                if command.internal:
-                    eager_args += ", is_internal=True"
-                methods.append(
-                    f"    def {python_name(command.name)}(\n"
-                    f"        self,\n{args}        timeout: float = 0,\n"
-                    f"    ) -> {returns}:\n"
-                    f"        return self._call({eager_args})"
-                )
-                continue
+            # Like a call on the channel proxy in client/channelOwner.ts: the
+            # message goes out when the method is called, and the method returns
+            # an awaitable of the result.
             if command.result:
-                returns = f"channels.{command.result.type_name}"
-                body = (
-                    f"        result = await self._call({call_args})\n"
-                    f"        return {payload_dict(command.result, 'result')}"
-                )
+                returns = f"Awaitable[channels.{command.result.type_name}]"
+                mapper = f"lambda result: {payload_dict(command.result, 'result')}"
             else:
-                returns = "None"
-                body = f"        await self._call({call_args})"
+                returns = "Awaitable[None]"
+                mapper = "None"
+            call_args = f'"{command.name}", {params}, timeout, {mapper}'
+            if command.internal:
+                call_args += ", is_internal=True"
             methods.append(
-                f"    async def {python_name(command.name)}(\n"
+                f"    def {python_name(command.name)}(\n"
                 f"        self,\n{args}        timeout: float = 0,\n"
-                f"    ) -> {returns}:\n{body}"
+                f"    ) -> {returns}:\n"
+                f"        return self._call({call_args})"
             )
         for event, payload in interface.events:
             if payload:
@@ -489,25 +471,18 @@ def generate_channels(
         ]
         if re.search(rf"\b{name}\[|\b{name}\b(?!\[)", code)
     ]
-    channel_module = (
-        "playwright._impl_v2.channel_owner" if eager else "playwright._impl._channel"
-    )
     return "\n".join(
         [
             LICENSE,
-            CHANNELS_V2_DOCSTRING if eager else CHANNELS_DOCSTRING,
+            CHANNELS_DOCSTRING,
             "from __future__ import annotations",
             "",
             f"from typing import {', '.join(sorted(typing_names))}",
             "",
-            f"from {channel_module} import Channel",
+            "from playwright._impl.channel_owner import Channel",
             "",
             "if TYPE_CHECKING:",
-            (
-                "    from playwright._impl_v2 import protocol_types as channels"
-                if eager
-                else "    from playwright._impl import _protocol_types as channels"
-            ),
+            "    from playwright._impl import protocol_types as channels",
             "",
             "",
             code,
@@ -665,7 +640,7 @@ def generate_validator(protocol: Dict[str, Any]) -> str:
         [
             LICENSE,
             VALIDATOR_DOCSTRING,
-            "from playwright._impl_v2.protocol.validator_primitives import (  # noqa: F401",
+            "from playwright._impl.protocol.validator_primitives import (  # noqa: F401",
             "    ValidationError,",
             "    Validator,",
             "    ValidatorContext,",
@@ -695,7 +670,7 @@ def generate_validator(protocol: Dict[str, Any]) -> str:
     )
 
 
-VALIDATOR_DOCSTRING = '''"""Port of packages/protocol/src/validator.ts for _impl_v2.
+VALIDATOR_DOCSTRING = '''"""Port of packages/protocol/src/validator.ts.
 
 Generated by scripts/codegen/generate_protocol.py from packages/protocol/spec, as
 upstream's utils/generate_channels.js generates validator.ts. Do not edit.
@@ -704,20 +679,6 @@ upstream's utils/generate_channels.js generates validator.ts. Do not edit.
 
 
 CHANNELS_DOCSTRING = '''"""Typed channels for the protocol interfaces, generated from packages/protocol/spec.
-
-Like upstream's channels in packages/protocol/src/channels.d.ts: each command is
-an async method with the protocol name and parameters, and each event has
-on<Event> and off<Event> methods. Every parameter must be passed; an absent
-optional parameter is None. The result and the event payloads have every
-top-level field; a field that the driver left out is None. `timeout` is the
-timeout of the message, in milliseconds; 0 means no timeout.
-
-Generated by scripts/codegen/generate_protocol.py. Do not edit.
-"""
-'''
-
-
-CHANNELS_V2_DOCSTRING = '''"""Typed channels for _impl_v2, generated from packages/protocol/spec.
 
 Like upstream's channels in packages/protocol/src/channels.d.ts: each command is
 a method with the protocol name and parameters, and each event has on<Event> and
@@ -737,7 +698,7 @@ TYPES_DOCSTRING = '''"""Types of the protocol messages, generated from packages/
 
 The names follow upstream's utils/generate_channels.js: <Interface>Initializer,
 <Interface><Method>Result and <Interface><Event>Event. The parameters of each
-command are the arguments of its method in _protocol_channels.py. An object that
+command are the arguments of its method in protocol_channels.py. An object that
 the spec writes inline is named after its owner and field, for example
 PageInitializerViewportSize or BrowserNewContextParamsProxy. A reference to
 another protocol object has the type <Interface>Channel.
@@ -774,9 +735,7 @@ def main() -> None:
     parser.add_argument("--out", required=True)
     parser.add_argument("--types-out", required=True)
     parser.add_argument("--channels-out", required=True)
-    parser.add_argument("--channels-v2-out")
-    parser.add_argument("--types-v2-out")
-    parser.add_argument("--validator-v2-out")
+    parser.add_argument("--validator-out", required=True)
     args = parser.parse_args()
     pw_src_dir = os.environ.get("PW_SRC_DIR")
     if not pw_src_dir:
@@ -787,6 +746,7 @@ def main() -> None:
     text = generate(protocol)
     types_text, interfaces, type_names = generate_types(protocol)
     channels_text = generate_channels(interfaces, type_names)
+    validator_text = generate_validator(protocol)
     if errors:
         for error in errors:
             print(error, file=sys.stderr)
@@ -794,25 +754,7 @@ def main() -> None:
     Path(args.out).write_text(text, encoding="utf-8")
     Path(args.types_out).write_text(types_text, encoding="utf-8")
     Path(args.channels_out).write_text(channels_text, encoding="utf-8")
-    if args.validator_v2_out:
-        Path(args.validator_v2_out).write_text(
-            generate_validator(protocol), encoding="utf-8"
-        )
-    if args.types_v2_out:
-        Path(args.types_v2_out).write_text(
-            types_text.replace(
-                "    from playwright._impl._channel import Channel",
-                "    from playwright._impl_v2.channel_owner import Channel",
-            ).replace(
-                "    from playwright._impl._protocol_channels import (",
-                "    from playwright._impl_v2.protocol_channels import (",
-            ),
-            encoding="utf-8",
-        )
-    if args.channels_v2_out:
-        Path(args.channels_v2_out).write_text(
-            generate_channels(interfaces, type_names, eager=True), encoding="utf-8"
-        )
+    Path(args.validator_out).write_text(validator_text, encoding="utf-8")
 
 
 if __name__ == "__main__":

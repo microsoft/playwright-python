@@ -1,0 +1,1148 @@
+# Copyright (c) Microsoft Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""Python only: the expect() matchers of the Python API, on top of Frame._expect()
+and Locator._expect(), the counterpart of packages/playwright/src/matchers.
+"""
+
+import collections.abc
+import re
+from typing import Any, List, Literal, Optional, Pattern, Sequence, Union
+from urllib.parse import urljoin
+
+from playwright._impl._assertions import _record_soft_or_raise
+from playwright._impl.connection import format_call_log
+from playwright._impl.errors import Error
+from playwright._impl.fetch import APIResponse
+from playwright._impl.internal_structures import (
+    AriaRole,
+    ExpectedTextValue,
+    FrameExpectOptions,
+    FrameExpectResult,
+)
+from playwright._impl.isomorphic.mime_type import is_textual_mime_type
+from playwright._impl.isomorphic.string_utils import escape_regex_flags
+from playwright._impl.locator import Locator
+from playwright._impl.page import Page
+
+
+# Port of the checks in toContainClass() in packages/playwright/src/matchers/matchers.ts.
+def _check_contain_class_expected(expected: Any) -> None:
+    if isinstance(expected, collections.abc.Sequence) and not isinstance(expected, str):
+        if any(isinstance(e, re.Pattern) for e in expected):
+            raise Error(
+                '"expected" argument in to_contain_class cannot contain RegExp values'
+            )
+    elif isinstance(expected, re.Pattern):
+        raise Error('"expected" argument in to_contain_class cannot be a RegExp value')
+
+
+class AssertionsBase:
+    def __init__(
+        self,
+        locator: Locator,
+        timeout: float = None,
+        is_not: bool = False,
+        message: Optional[str] = None,
+        is_soft: bool = False,
+    ) -> None:
+        self._actual_locator = locator
+        # Python: the generated API reads the event loop and the dispatcher fiber of
+        # each object.
+        self._loop = locator._loop
+        self._dispatcher_fiber = locator._dispatcher_fiber
+        self._timeout = timeout
+        self._is_not = is_not
+        self._custom_message = message
+        self._is_soft = is_soft
+
+    async def _call_expect(
+        self, expression: str, expect_options: FrameExpectOptions, title: Optional[str]
+    ) -> FrameExpectResult:
+        raise NotImplementedError(
+            "_call_expect must be implemented in a derived class."
+        )
+
+    async def _expect_impl(
+        self,
+        expression: str,
+        expect_options: FrameExpectOptions,
+        expected: Any,
+        message: str,
+        title: str = None,
+    ) -> None:
+        __tracebackhide__ = True
+        expect_options["isNot"] = self._is_not
+        if expect_options.get("timeout") is None:
+            expect_options["timeout"] = self._timeout or 5_000
+        if expect_options["isNot"]:
+            message = message.replace("expected to", "expected not to")
+            if title:
+                title = title.replace('"to_', '"not_to_')
+        if "useInnerText" in expect_options and expect_options["useInnerText"] is None:
+            del expect_options["useInnerText"]
+        result = await self._call_expect(expression, expect_options, title)
+        if result["matches"] == self._is_not:
+            received = result.get("received") or {}
+            aria_snapshot = None
+            if isinstance(received, dict):
+                aria_snapshot = received.get("ariaSnapshot")
+                # Frame._expect() has already parsed the received value.
+                actual = received.get("value")
+            else:
+                actual = received
+            if expression == "to.match.aria" and isinstance(actual, dict):
+                # The driver sends {raw, regex}; toMatchAriaSnapshot() in
+                # matchers/toMatchAriaSnapshot.ts prints the raw snapshot.
+                actual = actual.get("raw")
+            if self._custom_message:
+                out_message = self._custom_message
+                if expected is not None:
+                    out_message += f"\nExpected value: '{expected or '<None>'}'"
+            else:
+                out_message = (
+                    f"{message} '{expected}'" if expected is not None else f"{message}"
+                )
+            error_message = result.get("errorMessage")
+            error_message = f"\n{error_message}" if error_message else ""
+            aria_snapshot_message = (
+                f"\nAria snapshot:\n{aria_snapshot}" if aria_snapshot else ""
+            )
+            _record_soft_or_raise(
+                AssertionError(
+                    f"{out_message}\nActual value: {actual}{error_message} {format_call_log(result.get('log'))}{aria_snapshot_message}"
+                ),
+                self._is_soft,
+            )
+
+
+class PageAssertions(AssertionsBase):
+    def __init__(
+        self,
+        page: Page,
+        timeout: float = None,
+        is_not: bool = False,
+        message: Optional[str] = None,
+        is_soft: bool = False,
+    ) -> None:
+        locator = page.locator(
+            selector=":root", has_text=None, has_not_text=None, has=None, has_not=None
+        )
+        super().__init__(locator, timeout, is_not, message, is_soft)
+        self._actual_page = page
+
+    async def _call_expect(
+        self, expression: str, expect_options: FrameExpectOptions, title: Optional[str]
+    ) -> FrameExpectResult:
+        __tracebackhide__ = True
+        return await self._actual_page.main_frame._expect(
+            None, expression, expect_options, title
+        )
+
+    @property
+    def _not(self) -> "PageAssertions":
+        return PageAssertions(
+            self._actual_page,
+            self._timeout,
+            not self._is_not,
+            self._custom_message,
+            self._is_soft,
+        )
+
+    async def to_have_title(
+        self, title_or_reg_exp: Union[Pattern[str], str], timeout: Optional[float]
+    ) -> None:
+        __tracebackhide__ = True
+        expected_values = to_expected_text_values(
+            [title_or_reg_exp], normalize_white_space=True
+        )
+        await self._expect_impl(
+            "to.have.title",
+            FrameExpectOptions(expectedText=expected_values, timeout=timeout),
+            title_or_reg_exp,
+            "Page title expected to be",
+            'Expect "to_have_title"',
+        )
+
+    async def not_to_have_title(
+        self, title_or_reg_exp: Union[Pattern[str], str], timeout: Optional[float]
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_have_title(
+            title_or_reg_exp=title_or_reg_exp, timeout=timeout
+        )
+
+    async def to_have_url(
+        self,
+        url_or_reg_exp: Union[str, Pattern[str]],
+        timeout: Optional[float],
+        ignore_case: Optional[bool],
+    ) -> None:
+        __tracebackhide__ = True
+        base_url = self._actual_page.context._options.get("baseURL")
+        if isinstance(url_or_reg_exp, str) and base_url:
+            url_or_reg_exp = urljoin(base_url, url_or_reg_exp)
+        expected_text = to_expected_text_values(
+            [url_or_reg_exp], ignore_case=ignore_case
+        )
+        await self._expect_impl(
+            "to.have.url",
+            FrameExpectOptions(expectedText=expected_text, timeout=timeout),
+            url_or_reg_exp,
+            "Page URL expected to be",
+            'Expect "to_have_url"',
+        )
+
+    async def not_to_have_url(
+        self,
+        url_or_reg_exp: Union[Pattern[str], str],
+        timeout: Optional[float],
+        ignore_case: Optional[bool],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_have_url(
+            url_or_reg_exp=url_or_reg_exp, timeout=timeout, ignore_case=ignore_case
+        )
+
+    async def to_match_aria_snapshot(
+        self, expected: str, timeout: Optional[float]
+    ) -> None:
+        __tracebackhide__ = True
+        await self._expect_impl(
+            "to.match.aria",
+            FrameExpectOptions(expectedValue=expected, timeout=timeout),
+            expected,
+            "Page expected to match Aria snapshot",
+            'Expect "to_match_aria_snapshot"',
+        )
+
+    async def not_to_match_aria_snapshot(
+        self, expected: str, timeout: Optional[float]
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_match_aria_snapshot(expected=expected, timeout=timeout)
+
+
+class LocatorAssertions(AssertionsBase):
+    def __init__(
+        self,
+        locator: Locator,
+        timeout: float = None,
+        is_not: bool = False,
+        message: Optional[str] = None,
+        is_soft: bool = False,
+    ) -> None:
+        super().__init__(locator, timeout, is_not, message, is_soft)
+        self._actual_locator = locator
+
+    async def _call_expect(
+        self, expression: str, expect_options: FrameExpectOptions, title: Optional[str]
+    ) -> FrameExpectResult:
+        __tracebackhide__ = True
+        return await self._actual_locator._expect(expression, expect_options, title)
+
+    @property
+    def _not(self) -> "LocatorAssertions":
+        return LocatorAssertions(
+            self._actual_locator,
+            self._timeout,
+            not self._is_not,
+            self._custom_message,
+            self._is_soft,
+        )
+
+    async def to_contain_text(
+        self,
+        expected: Union[
+            Sequence[str],
+            Sequence[Pattern[str]],
+            Sequence[Union[Pattern[str], str]],
+            Pattern[str],
+            str,
+        ],
+        use_inner_text: Optional[bool],
+        timeout: Optional[float],
+        ignore_case: Optional[bool],
+    ) -> None:
+        __tracebackhide__ = True
+        if isinstance(expected, collections.abc.Sequence) and not isinstance(
+            expected, str
+        ):
+            expected_text = to_expected_text_values(
+                expected,
+                match_substring=True,
+                normalize_white_space=True,
+                ignore_case=ignore_case,
+            )
+            await self._expect_impl(
+                "to.contain.text.array",
+                FrameExpectOptions(
+                    expectedText=expected_text,
+                    useInnerText=use_inner_text,
+                    timeout=timeout,
+                ),
+                expected,
+                "Locator expected to contain text",
+                'Expect "to_contain_text"',
+            )
+        else:
+            expected_text = to_expected_text_values(
+                [expected],
+                match_substring=True,
+                normalize_white_space=True,
+                ignore_case=ignore_case,
+            )
+            await self._expect_impl(
+                "to.have.text",
+                FrameExpectOptions(
+                    expectedText=expected_text,
+                    useInnerText=use_inner_text,
+                    timeout=timeout,
+                ),
+                expected,
+                "Locator expected to contain text",
+                'Expect "to_contain_text"',
+            )
+
+    async def not_to_contain_text(
+        self,
+        expected: Union[
+            Sequence[str],
+            Sequence[Pattern[str]],
+            Sequence[Union[Pattern[str], str]],
+            Pattern[str],
+            str,
+        ],
+        use_inner_text: Optional[bool],
+        timeout: Optional[float],
+        ignore_case: Optional[bool],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_contain_text(
+            expected=expected,
+            use_inner_text=use_inner_text,
+            timeout=timeout,
+            ignore_case=ignore_case,
+        )
+
+    async def to_have_attribute(
+        self,
+        name: str,
+        value: Optional[Union[Pattern[str], str]],
+        ignore_case: Optional[bool],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        if value is None:
+            await self._expect_impl(
+                "to.have.attribute",
+                FrameExpectOptions(expressionArg=name, timeout=timeout),
+                None,
+                "Locator expected to have attribute",
+                'Expect "to_have_attribute"',
+            )
+            return
+        expected_text = to_expected_text_values([value], ignore_case=ignore_case)
+        await self._expect_impl(
+            "to.have.attribute.value",
+            FrameExpectOptions(
+                expressionArg=name, expectedText=expected_text, timeout=timeout
+            ),
+            value,
+            "Locator expected to have attribute",
+            'Expect "to_have_attribute"',
+        )
+
+    async def not_to_have_attribute(
+        self,
+        name: str,
+        value: Optional[Union[Pattern[str], str]],
+        ignore_case: Optional[bool],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_have_attribute(
+            name=name, value=value, ignore_case=ignore_case, timeout=timeout
+        )
+
+    async def to_have_class(
+        self,
+        expected: Union[
+            Sequence[str],
+            Sequence[Pattern[str]],
+            Sequence[Union[Pattern[str], str]],
+            Pattern[str],
+            str,
+        ],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        if isinstance(expected, collections.abc.Sequence) and not isinstance(
+            expected, str
+        ):
+            expected_text = to_expected_text_values(expected)
+            await self._expect_impl(
+                "to.have.class.array",
+                FrameExpectOptions(expectedText=expected_text, timeout=timeout),
+                expected,
+                "Locator expected to have class",
+                'Expect "to_have_class"',
+            )
+        else:
+            expected_text = to_expected_text_values([expected])
+            await self._expect_impl(
+                "to.have.class",
+                FrameExpectOptions(expectedText=expected_text, timeout=timeout),
+                expected,
+                "Locator expected to have class",
+                'Expect "to_have_class"',
+            )
+
+    async def not_to_have_class(
+        self,
+        expected: Union[
+            Sequence[str],
+            Sequence[Pattern[str]],
+            Sequence[Union[Pattern[str], str]],
+            Pattern[str],
+            str,
+        ],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_have_class(expected=expected, timeout=timeout)
+
+    async def to_contain_class(
+        self,
+        expected: Union[
+            Sequence[str],
+            str,
+        ],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        _check_contain_class_expected(expected)
+        if isinstance(expected, collections.abc.Sequence) and not isinstance(
+            expected, str
+        ):
+            expected_text = to_expected_text_values(expected)
+            await self._expect_impl(
+                "to.contain.class.array",
+                FrameExpectOptions(expectedText=expected_text, timeout=timeout),
+                expected,
+                "Locator expected to contain class names",
+                'Expect "to_contain_class"',
+            )
+        else:
+            expected_text = to_expected_text_values([expected])
+            await self._expect_impl(
+                "to.contain.class",
+                FrameExpectOptions(expectedText=expected_text, timeout=timeout),
+                expected,
+                "Locator expected to contain class",
+                'Expect "to_contain_class"',
+            )
+
+    async def not_to_contain_class(
+        self,
+        expected: Union[
+            Sequence[str],
+            str,
+        ],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_contain_class(expected=expected, timeout=timeout)
+
+    async def to_have_count(
+        self,
+        count: int,
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._expect_impl(
+            "to.have.count",
+            FrameExpectOptions(expectedNumber=count, timeout=timeout),
+            count,
+            "Locator expected to have count",
+            'Expect "to_have_count"',
+        )
+
+    async def not_to_have_count(
+        self,
+        count: int,
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_have_count(count=count, timeout=timeout)
+
+    async def to_have_css(
+        self,
+        name: str,
+        value: Union[str, Pattern[str]],
+        timeout: Optional[float],
+        pseudo: Optional[Literal["after", "before"]],
+    ) -> None:
+        __tracebackhide__ = True
+        expected_text = to_expected_text_values([value])
+        await self._expect_impl(
+            "to.have.css",
+            FrameExpectOptions(
+                expressionArg=name,
+                expectedText=expected_text,
+                timeout=timeout,
+                pseudo=pseudo,
+            ),
+            value,
+            "Locator expected to have CSS",
+            'Expect "to_have_css"',
+        )
+
+    async def not_to_have_css(
+        self,
+        name: str,
+        value: Union[str, Pattern[str]],
+        timeout: Optional[float],
+        pseudo: Optional[Literal["after", "before"]],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_have_css(
+            name=name, value=value, timeout=timeout, pseudo=pseudo
+        )
+
+    async def to_have_id(
+        self,
+        id: Union[str, Pattern[str]],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        expected_text = to_expected_text_values([id])
+        await self._expect_impl(
+            "to.have.id",
+            FrameExpectOptions(expectedText=expected_text, timeout=timeout),
+            id,
+            "Locator expected to have ID",
+            'Expect "to_have_id"',
+        )
+
+    async def not_to_have_id(
+        self,
+        id: Union[str, Pattern[str]],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_have_id(id=id, timeout=timeout)
+
+    async def to_have_js_property(
+        self,
+        name: str,
+        value: Any,
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._expect_impl(
+            "to.have.property",
+            FrameExpectOptions(
+                expressionArg=name, expectedValue=value, timeout=timeout
+            ),
+            value,
+            "Locator expected to have JS Property",
+            'Expect "to_have_property"',
+        )
+
+    async def not_to_have_js_property(
+        self,
+        name: str,
+        value: Any,
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_have_js_property(name=name, value=value, timeout=timeout)
+
+    async def to_have_value(
+        self,
+        value: Union[str, Pattern[str]],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        expected_text = to_expected_text_values([value])
+        await self._expect_impl(
+            "to.have.value",
+            FrameExpectOptions(expectedText=expected_text, timeout=timeout),
+            value,
+            "Locator expected to have Value",
+            'Expect "to_have_value"',
+        )
+
+    async def not_to_have_value(
+        self,
+        value: Union[str, Pattern[str]],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_have_value(value=value, timeout=timeout)
+
+    async def to_have_values(
+        self,
+        values: Union[
+            Sequence[str], Sequence[Pattern[str]], Sequence[Union[Pattern[str], str]]
+        ],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        expected_text = to_expected_text_values(values)
+        await self._expect_impl(
+            "to.have.values",
+            FrameExpectOptions(expectedText=expected_text, timeout=timeout),
+            values,
+            "Locator expected to have Values",
+            'Expect "to_have_values"',
+        )
+
+    async def not_to_have_values(
+        self,
+        values: Union[
+            Sequence[str], Sequence[Pattern[str]], Sequence[Union[Pattern[str], str]]
+        ],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_have_values(values=values, timeout=timeout)
+
+    async def to_have_text(
+        self,
+        expected: Union[
+            Sequence[str],
+            Sequence[Pattern[str]],
+            Sequence[Union[Pattern[str], str]],
+            Pattern[str],
+            str,
+        ],
+        use_inner_text: Optional[bool],
+        timeout: Optional[float],
+        ignore_case: Optional[bool],
+    ) -> None:
+        __tracebackhide__ = True
+        if isinstance(expected, collections.abc.Sequence) and not isinstance(
+            expected, str
+        ):
+            expected_text = to_expected_text_values(
+                expected,
+                normalize_white_space=True,
+                ignore_case=ignore_case,
+            )
+            await self._expect_impl(
+                "to.have.text.array",
+                FrameExpectOptions(
+                    expectedText=expected_text,
+                    useInnerText=use_inner_text,
+                    timeout=timeout,
+                ),
+                expected,
+                "Locator expected to have text",
+                'Expect "to_have_text"',
+            )
+        else:
+            expected_text = to_expected_text_values(
+                [expected], normalize_white_space=True, ignore_case=ignore_case
+            )
+            await self._expect_impl(
+                "to.have.text",
+                FrameExpectOptions(
+                    expectedText=expected_text,
+                    useInnerText=use_inner_text,
+                    timeout=timeout,
+                ),
+                expected,
+                "Locator expected to have text",
+                'Expect "to_have_text"',
+            )
+
+    async def not_to_have_text(
+        self,
+        expected: Union[
+            Sequence[str],
+            Sequence[Pattern[str]],
+            Sequence[Union[Pattern[str], str]],
+            Pattern[str],
+            str,
+        ],
+        use_inner_text: Optional[bool],
+        timeout: Optional[float],
+        ignore_case: Optional[bool],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_have_text(
+            expected=expected,
+            use_inner_text=use_inner_text,
+            timeout=timeout,
+            ignore_case=ignore_case,
+        )
+
+    async def to_be_attached(
+        self,
+        attached: Optional[bool],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        if attached is None:
+            attached = True
+        attached_string = "attached" if attached else "detached"
+        await self._expect_impl(
+            ("to.be.attached" if attached else "to.be.detached"),
+            FrameExpectOptions(timeout=timeout),
+            None,
+            f"Locator expected to be {attached_string}",
+            'Expect "to_be_attached"',
+        )
+
+    async def to_be_checked(
+        self,
+        timeout: Optional[float],
+        checked: Optional[bool],
+        indeterminate: Optional[bool],
+    ) -> None:
+        __tracebackhide__ = True
+        expected_value = {}
+        if indeterminate is not None:
+            expected_value["indeterminate"] = indeterminate
+        if checked is not None:
+            expected_value["checked"] = checked
+        checked_string: str
+        if indeterminate:
+            checked_string = "indeterminate"
+        else:
+            checked_string = "unchecked" if checked is False else "checked"
+        await self._expect_impl(
+            "to.be.checked",
+            FrameExpectOptions(timeout=timeout, expectedValue=expected_value),
+            None,
+            f"Locator expected to be {checked_string}",
+            'Expect "to_be_checked"',
+        )
+
+    async def not_to_be_attached(
+        self,
+        attached: Optional[bool],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_be_attached(attached=attached, timeout=timeout)
+
+    async def not_to_be_checked(
+        self,
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_be_checked(timeout=timeout, checked=None, indeterminate=None)
+
+    async def to_be_disabled(
+        self,
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._expect_impl(
+            "to.be.disabled",
+            FrameExpectOptions(timeout=timeout),
+            None,
+            "Locator expected to be disabled",
+            'Expect "to_be_disabled"',
+        )
+
+    async def not_to_be_disabled(
+        self,
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_be_disabled(timeout=timeout)
+
+    async def to_be_editable(
+        self,
+        editable: Optional[bool],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        if editable is None:
+            editable = True
+        editable_string = "editable" if editable else "readonly"
+        await self._expect_impl(
+            "to.be.editable" if editable else "to.be.readonly",
+            FrameExpectOptions(timeout=timeout),
+            None,
+            f"Locator expected to be {editable_string}",
+            'Expect "to_be_editable"',
+        )
+
+    async def not_to_be_editable(
+        self,
+        editable: Optional[bool],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_be_editable(editable=editable, timeout=timeout)
+
+    async def to_be_empty(
+        self,
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._expect_impl(
+            "to.be.empty",
+            FrameExpectOptions(timeout=timeout),
+            None,
+            "Locator expected to be empty",
+            'Expect "to_be_empty"',
+        )
+
+    async def not_to_be_empty(
+        self,
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_be_empty(timeout=timeout)
+
+    async def to_be_enabled(
+        self,
+        enabled: Optional[bool],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        if enabled is None:
+            enabled = True
+        enabled_string = "enabled" if enabled else "disabled"
+        await self._expect_impl(
+            "to.be.enabled" if enabled else "to.be.disabled",
+            FrameExpectOptions(timeout=timeout),
+            None,
+            f"Locator expected to be {enabled_string}",
+            'Expect "to_be_enabled"',
+        )
+
+    async def not_to_be_enabled(
+        self,
+        enabled: Optional[bool],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_be_enabled(enabled=enabled, timeout=timeout)
+
+    async def to_be_hidden(
+        self,
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._expect_impl(
+            "to.be.hidden",
+            FrameExpectOptions(timeout=timeout),
+            None,
+            "Locator expected to be hidden",
+            'Expect "to_be_hidden"',
+        )
+
+    async def not_to_be_hidden(
+        self,
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_be_hidden(timeout=timeout)
+
+    async def to_be_visible(
+        self,
+        visible: Optional[bool],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        if visible is None:
+            visible = True
+        visible_string = "visible" if visible else "hidden"
+        await self._expect_impl(
+            "to.be.visible" if visible else "to.be.hidden",
+            FrameExpectOptions(timeout=timeout),
+            None,
+            f"Locator expected to be {visible_string}",
+            'Expect "to_be_visible"',
+        )
+
+    async def not_to_be_visible(
+        self,
+        visible: Optional[bool],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_be_visible(visible=visible, timeout=timeout)
+
+    async def to_be_focused(
+        self,
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._expect_impl(
+            "to.be.focused",
+            FrameExpectOptions(timeout=timeout),
+            None,
+            "Locator expected to be focused",
+            'Expect "to_be_focused"',
+        )
+
+    async def not_to_be_focused(
+        self,
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_be_focused(timeout=timeout)
+
+    async def to_be_in_viewport(
+        self,
+        ratio: Optional[float],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._expect_impl(
+            "to.be.in.viewport",
+            FrameExpectOptions(timeout=timeout, expectedNumber=ratio),
+            None,
+            "Locator expected to be in viewport",
+            'Expect "to_be_in_viewport"',
+        )
+
+    async def not_to_be_in_viewport(
+        self, ratio: Optional[float], timeout: Optional[float]
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_be_in_viewport(ratio=ratio, timeout=timeout)
+
+    async def to_have_accessible_description(
+        self,
+        description: Union[str, Pattern[str]],
+        ignore_case: Optional[bool],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        expected_values = to_expected_text_values(
+            [description], ignore_case=ignore_case, normalize_white_space=True
+        )
+        await self._expect_impl(
+            "to.have.accessible.description",
+            FrameExpectOptions(expectedText=expected_values, timeout=timeout),
+            None,
+            "Locator expected to have accessible description",
+            'Expect "to_have_accessible_description"',
+        )
+
+    async def not_to_have_accessible_description(
+        self,
+        description: Union[str, Pattern[str]],
+        ignore_case: Optional[bool],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_have_accessible_description(
+            description=description, ignore_case=ignore_case, timeout=timeout
+        )
+
+    async def to_have_accessible_name(
+        self,
+        name: Union[str, Pattern[str]],
+        ignore_case: Optional[bool],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        expected_values = to_expected_text_values(
+            [name], ignore_case=ignore_case, normalize_white_space=True
+        )
+        await self._expect_impl(
+            "to.have.accessible.name",
+            FrameExpectOptions(expectedText=expected_values, timeout=timeout),
+            None,
+            "Locator expected to have accessible name",
+            'Expect "to_have_accessible_name"',
+        )
+
+    async def not_to_have_accessible_name(
+        self,
+        name: Union[str, Pattern[str]],
+        ignore_case: Optional[bool],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_have_accessible_name(
+            name=name, ignore_case=ignore_case, timeout=timeout
+        )
+
+    async def to_have_role(self, role: AriaRole, timeout: Optional[float]) -> None:
+        __tracebackhide__ = True
+        if isinstance(role, Pattern):
+            raise Error('"role" argument in to_have_role must be a string')
+        expected_values = to_expected_text_values([role])
+        await self._expect_impl(
+            "to.have.role",
+            FrameExpectOptions(expectedText=expected_values, timeout=timeout),
+            None,
+            "Locator expected to have accessible role",
+            'Expect "to_have_role"',
+        )
+
+    async def to_have_accessible_error_message(
+        self,
+        error_message: Union[str, Pattern[str]],
+        ignore_case: Optional[bool],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        expected_values = to_expected_text_values(
+            [error_message], ignore_case=ignore_case, normalize_white_space=True
+        )
+        await self._expect_impl(
+            "to.have.accessible.error.message",
+            FrameExpectOptions(expectedText=expected_values, timeout=timeout),
+            None,
+            "Locator expected to have accessible error message",
+            'Expect "to_have_accessible_error_message"',
+        )
+
+    async def not_to_have_accessible_error_message(
+        self,
+        error_message: Union[str, Pattern[str]],
+        ignore_case: Optional[bool],
+        timeout: Optional[float],
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_have_accessible_error_message(
+            error_message=error_message, ignore_case=ignore_case, timeout=timeout
+        )
+
+    async def not_to_have_role(self, role: AriaRole, timeout: Optional[float]) -> None:
+        __tracebackhide__ = True
+        await self._not.to_have_role(role=role, timeout=timeout)
+
+    async def to_match_aria_snapshot(
+        self, expected: str, timeout: Optional[float]
+    ) -> None:
+        __tracebackhide__ = True
+        await self._expect_impl(
+            "to.match.aria",
+            FrameExpectOptions(expectedValue=expected, timeout=timeout),
+            expected,
+            "Locator expected to match Aria snapshot",
+            'Expect "to_match_aria_snapshot"',
+        )
+
+    async def not_to_match_aria_snapshot(
+        self, expected: str, timeout: Optional[float]
+    ) -> None:
+        __tracebackhide__ = True
+        await self._not.to_match_aria_snapshot(expected=expected, timeout=timeout)
+
+
+class APIResponseAssertions:
+    def __init__(
+        self,
+        response: APIResponse,
+        timeout: float = None,
+        is_not: bool = False,
+        message: Optional[str] = None,
+        is_soft: bool = False,
+    ) -> None:
+        # Python: the generated API reads the event loop and the dispatcher fiber of
+        # each object.
+        self._loop = response._loop
+        self._dispatcher_fiber = response._dispatcher_fiber
+        self._timeout = timeout
+        self._is_not = is_not
+        self._actual = response
+        self._custom_message = message
+        self._is_soft = is_soft
+
+    @property
+    def _not(self) -> "APIResponseAssertions":
+        return APIResponseAssertions(
+            self._actual,
+            self._timeout,
+            not self._is_not,
+            self._custom_message,
+            self._is_soft,
+        )
+
+    async def to_be_ok(
+        self,
+    ) -> None:
+        __tracebackhide__ = True
+        if self._is_not is not self._actual.ok:
+            return
+        message = f"Response status expected to be within [200..299] range, was '{self._actual.status}'"
+        if self._is_not:
+            message = message.replace("expected to", "expected not to")
+        out_message = self._custom_message or message
+        out_message += format_call_log(await self._actual._fetch_log())
+
+        content_type = self._actual.headers.get("content-type")
+        is_text_encoding = content_type and is_textual_mime_type(content_type)
+        text = await self._actual.text() if is_text_encoding else None
+        if text is not None:
+            out_message += f"\n Response Text:\n{text[:1000]}"
+
+        _record_soft_or_raise(AssertionError(out_message), self._is_soft)
+
+    async def not_to_be_ok(self) -> None:
+        __tracebackhide__ = True
+        await self._not.to_be_ok()
+
+
+def expected_regex(
+    pattern: Pattern[str],
+    match_substring: bool,
+    normalize_white_space: bool,
+    ignore_case: Optional[bool] = None,
+) -> ExpectedTextValue:
+    expected = ExpectedTextValue(
+        regexSource=pattern.pattern,
+        regexFlags=escape_regex_flags(pattern),
+        matchSubstring=match_substring,
+        normalizeWhiteSpace=normalize_white_space,
+    )
+    if ignore_case is not None:
+        expected["ignoreCase"] = ignore_case
+    return expected
+
+
+def to_expected_text_values(
+    items: Union[
+        Sequence[Pattern[str]], Sequence[str], Sequence[Union[str, Pattern[str]]]
+    ],
+    match_substring: bool = False,
+    normalize_white_space: bool = False,
+    ignore_case: Optional[bool] = None,
+) -> Sequence[ExpectedTextValue]:
+    out: List[ExpectedTextValue] = []
+    if not isinstance(items, (list, tuple)):
+        raise Error("Expected a list or tuple of strings or patterns")
+    for item in items:
+        if isinstance(item, str):
+            o = ExpectedTextValue(
+                string=item,
+                matchSubstring=match_substring,
+                normalizeWhiteSpace=normalize_white_space,
+            )
+            if ignore_case is not None:
+                o["ignoreCase"] = ignore_case
+            out.append(o)
+        elif isinstance(item, Pattern):
+            out.append(
+                expected_regex(
+                    item, match_substring, normalize_white_space, ignore_case
+                )
+            )
+        else:
+            raise Error("value must be a string or regular expression")
+    return out

@@ -17,25 +17,12 @@ import re
 from pathlib import Path
 from typing import Optional, Pattern, TypeVar, Union
 
-import pytest
-
 TARGET_CLOSED_ERROR_MESSAGE = "Target page, context or browser has been closed"
 
 # The context options that @playwright/test applies to every context of the upstream
 # tests (_combinedContextOptions in packages/playwright/src/index.ts). The others
 # there are the defaults of the browser contexts.
 DEFAULT_CONTEXT_OPTIONS = {"locale": "en-US"}
-
-# PW_IMPL=v2 runs the tests on playwright/_impl_v2.
-IS_V2 = os.environ.get("PW_IMPL") == "v2"
-
-
-def only_v1(v2_tests: str) -> pytest.MarkDecorator:
-    """Marks an older test that checks a behavior in which v2 follows upstream and v1
-    does not. v2_tests names the tests of the v2 behavior: the ports of the upstream
-    tests, or the Python-only tests in tests/async/python."""
-    return pytest.mark.skipif(IS_V2, reason=f"v1 behavior; v2 runs {v2_tests}")
-
 
 MustType = TypeVar("MustType")
 

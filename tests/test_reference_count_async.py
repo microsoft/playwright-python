@@ -21,6 +21,7 @@ from typing import Any
 import objgraph
 import pytest
 
+from playwright._impl.connection import _Callback
 from playwright.async_api import async_playwright
 from tests.server import Server
 
@@ -91,22 +92,15 @@ async def test_tracing_should_not_leak_protocol_callbacks(browser_name: str) -> 
     """
     Regression test for https://github.com/microsoft/playwright-python/issues/2977
 
-    This test ensures that ProtocolCallback objects don't accumulate when tracing is enabled.
+    This test ensures that the callbacks of the protocol calls don't accumulate when tracing is enabled.
     The memory leak occurred because no_reply callbacks were created with circular references
     but never cleaned up.
     """
 
     def count_protocol_callbacks() -> int:
-        """Count ProtocolCallback objects in memory."""
+        """Count the callbacks of the protocol calls in memory."""
         gc.collect()
-        count = 0
-        for obj in gc.get_objects():
-            if (
-                hasattr(obj, "__class__")
-                and obj.__class__.__name__ == "ProtocolCallback"
-            ):
-                count += 1
-        return count
+        return sum(1 for obj in gc.get_objects() if isinstance(obj, _Callback))
 
     with tempfile.TemporaryDirectory() as temp_dir:
         trace_file = os.path.join(temp_dir, "test_trace.zip")

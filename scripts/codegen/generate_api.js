@@ -149,7 +149,7 @@ function byName(a, b) {
 
 /** @param {string} name */
 function toSnakeCase(name) {
-  // Same as playwright._impl._helper.to_snake_case.
+  // Same as to_snake_case() in playwright/_impl/isomorphic/string_utils.py.
   return name.replace(/((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))/g, '_$1').toLowerCase();
 }
 

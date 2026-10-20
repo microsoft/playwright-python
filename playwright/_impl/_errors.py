@@ -12,23 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Port of packages/playwright-core/src/client/errors.ts."""
+"""The public error classes of the API: Error, TimeoutError and TargetClosedError.
 
-# These are types that we use in the API. They are public and are a part of the
-# stable API.
+The generated API and the playwright.async_api and playwright.sync_api packages
+export them from here. The client raises them through errors.py, the port of
+packages/playwright-core/src/client/errors.ts.
+"""
 
-
-import re
-import traceback
-from types import TracebackType
-from typing import TYPE_CHECKING, Any, List, Optional
-
-if TYPE_CHECKING:  # pragma: no cover
-    from playwright._impl import _protocol_types as channels
-
-
-def is_target_closed_error(error: Exception) -> bool:
-    return isinstance(error, TargetClosedError)
+from typing import Any, List, Optional
 
 
 class Error(Exception):
@@ -60,58 +51,3 @@ class TimeoutError(Error):
 class TargetClosedError(Error):
     def __init__(self, message: str = None) -> None:
         super().__init__(message or "Target page, context or browser has been closed")
-
-
-def rewrite_error(error: Exception, message: str) -> Exception:
-    rewritten_exc = type(error)(message)
-    if isinstance(rewritten_exc, Error) and isinstance(error, Error):
-        rewritten_exc._name = error.name
-        rewritten_exc._stack = error.stack
-        rewritten_exc._details = error._details
-        rewritten_exc._log = error._log
-    return rewritten_exc
-
-
-def serialize_error(
-    ex: Exception, tb: Optional[TracebackType]
-) -> "channels.SerializedErrorError":
-    return {
-        "message": str(ex),
-        "name": "Error",
-        "stack": "".join(traceback.format_tb(tb)),
-    }
-
-
-def parse_error(
-    error: "channels.SerializedErrorError", log: Optional[str] = None
-) -> Error:
-    base_error_class = Error
-    if error.get("name") == "TimeoutError":
-        base_error_class = TimeoutError
-    if error.get("name") == "TargetClosedError":
-        base_error_class = TargetClosedError
-    if not log:
-        log = ""
-    exc = base_error_class(patch_error_message(error["message"]) + log)
-    exc._name = error["name"]
-    exc._stack = error.get("stack")
-    return exc
-
-
-def patch_error_message(message: str) -> str:
-    match = re.match(r"(\w+)(: expected .*)", message)
-    if match:
-        message = to_snake_case(match.group(1)) + match.group(2)
-    message = message.replace(
-        "Pass { acceptDownloads: true }", "Pass 'accept_downloads=True'"
-    )
-    return message
-
-
-# Upstream: toSnakeCase() in packages/isomorphic/stringUtils.ts. It is here, not
-# in _str_utils.py, because _str_utils.py imports this module.
-to_snake_case_regex = re.compile("((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))")
-
-
-def to_snake_case(name: str) -> str:
-    return to_snake_case_regex.sub(r"_\1", name).lower()

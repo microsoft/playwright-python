@@ -63,7 +63,7 @@ class ImplToApiMapping:
             for item in obj:
                 a.append(self.from_maybe_impl(item, visited))
             return a
-        # An impl object can name the impl class whose API wraps it (playwright/_impl_v2).
+        # An impl object can name the impl class whose API wraps it (_api_impl_class).
         api_class = self._mapping.get(getattr(obj, "_api_impl_class", type(obj)))
         if api_class:
             api_instance = getattr(obj, API_ATTR, None)

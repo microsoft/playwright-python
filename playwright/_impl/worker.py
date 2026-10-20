@@ -1,0 +1,195 @@
+# Copyright (c) Microsoft Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""Port of packages/playwright-core/src/client/worker.ts.
+
+Python: url is a property, as the generated API reads it. The Python API calls
+expect_event(), a context manager around the promise of waitForEvent(). A page
+function is JavaScript source, never a function, so assertMaxArguments() is not
+ported: the signature takes one argument.
+"""
+
+import asyncio
+from typing import TYPE_CHECKING, Any, Awaitable, Callable, Optional
+
+from playwright._impl.channel_owner import ChannelOwner, api_call, from_channel
+from playwright._impl.console_message import ConsoleMessage
+from playwright._impl.errors import TargetClosedError, is_target_closed_error
+from playwright._impl.event_context_manager import EventContextManagerImpl
+from playwright._impl.events import Events
+from playwright._impl.isomorphic.manual_promise import LongStandingScope
+from playwright._impl.isomorphic.string_utils import js_string
+from playwright._impl.js_handle import JSHandle, parse_result, serialize_argument
+from playwright._impl.timeout_settings import NO_TIMEOUT, TimeoutSettings
+from playwright._impl.waiter import Waiter
+
+if TYPE_CHECKING:  # pragma: no cover
+    from playwright._impl import protocol_types as channels
+    from playwright._impl.browser_context import BrowserContext
+    from playwright._impl.page import Page
+    from playwright._impl.protocol_channels import WorkerChannel
+
+
+class Worker(ChannelOwner):
+    _channel: "WorkerChannel"
+
+    @staticmethod
+    def from_nullable(worker: Optional["WorkerChannel"]) -> Optional["Worker"]:
+        return Worker.from_(worker) if worker else None
+
+    @staticmethod
+    def from_(worker: "WorkerChannel") -> "Worker":
+        return from_channel(worker)
+
+    def __init__(
+        self,
+        parent: ChannelOwner,
+        type: str,
+        guid: str,
+        initializer: "channels.WorkerInitializer",
+    ) -> None:
+        super().__init__(parent, type, guid, initializer)
+        self._page: Optional["Page"] = None  # Set for web workers.
+        self._context: Optional["BrowserContext"] = None  # Set for service workers.
+        self._closed_scope = LongStandingScope()
+        self._close_reason: Optional[str] = None
+
+        self._set_event_to_subscription_mapping(
+            {
+                Events.Worker.Console: "console",
+            }
+        )
+        # Note: we only receive console events here for workers from "chromium._connectToWorker".
+        self._channel.onConsole(
+            lambda event: self.emit(
+                Events.Worker.Console, ConsoleMessage(event, None, self, self)
+            )
+        )
+
+        def on_close() -> None:
+            if self._page:
+                # Python: Set.delete() on the ordered set of the page.
+                self._page._workers.pop(self, None)
+            if self._context:
+                # Python: Set.delete() on the ordered set of the context.
+                self._context._service_workers.pop(self, None)
+            self.emit(Events.Worker.Close, self)
+
+        self._channel.onClose(on_close)
+        self.once(
+            Events.Worker.Close,
+            lambda _: self._closed_scope.close(self._close_error_with_reason()),
+        )
+
+    def _close_error_with_reason(self) -> TargetClosedError:
+        if self._close_reason:
+            return TargetClosedError(self._close_reason)
+        return (
+            self._page and self._page._close_error_with_reason()
+        ) or TargetClosedError()
+
+    @property
+    def url(self) -> str:
+        return self._initializer["url"]
+
+    async def evaluate(self, expression: str, arg: Any) -> Any:
+        # Not ported: assertMaxArguments(arguments.length, 2).
+        result = await self._channel.evaluateExpression(
+            expression=expression,
+            # Python: the expression is a string, which can be a function. JS passes
+            # typeof pageFunction === 'function', which is false for a string; None
+            # lets the server detect a function, as the Python API documents.
+            isFunction=None,
+            arg=serialize_argument(arg),
+            timeout=NO_TIMEOUT,
+        )
+        return parse_result(result["value"])
+
+    async def evaluate_handle(self, expression: str, arg: Any) -> JSHandle:
+        # Not ported: assertMaxArguments(arguments.length, 2).
+        result = await self._channel.evaluateExpressionHandle(
+            expression=expression,
+            # Python: see evaluate().
+            isFunction=None,
+            arg=serialize_argument(arg),
+            timeout=NO_TIMEOUT,
+        )
+        return JSHandle.from_(result["handle"])
+
+    @api_call()
+    def wait_for_event(
+        self,
+        event: str,
+        predicate: Optional[Callable[..., Any]],
+        timeout: Optional[float],
+    ) -> Awaitable[Any]:
+        # Python: a plain def. The waiter and its listeners are set up at the call, as
+        # the JS async function sets them up before its first await; the result is
+        # the wait. optionsOrPredicate is the predicate and timeout parameters.
+        timeout_settings = (
+            self._page._timeout_settings
+            if self._page
+            else (
+                self._context._timeout_settings if self._context else TimeoutSettings()
+            )
+        )
+        timeout_options = timeout_settings.timeout(timeout)
+        waiter = Waiter.create_for_event(self, event)
+        waiter.reject_on_timeout(
+            timeout_options,
+            # Python: String(number) of JS, so that 30000.0 prints 30000.
+            f'Timeout {js_string(timeout_options)}ms exceeded while waiting for event "{event}"',
+        )
+        if event != Events.Worker.Close:
+            waiter.reject_on_event(
+                self, Events.Worker.Close, lambda: self._close_error_with_reason()
+            )
+        wait = waiter.wait_for_event(self, event, predicate)
+
+        async def result() -> Any:
+            result = await wait
+            waiter.dispose()
+            return result
+
+        return result()
+
+    async def _disconnect(self, reason: Optional[str]) -> None:
+        # Python: options is the reason parameter.
+        self._close_reason = reason
+        try:
+            await self._channel.disconnect(reason=reason, timeout=NO_TIMEOUT)
+        except Exception as e:
+            if is_target_closed_error(e):
+                return
+            raise
+
+    # Python only: the members of the Python API that upstream does not have.
+
+    def expect_event(
+        self,
+        event: str,
+        predicate: Optional[Callable[..., Any]],
+        timeout: Optional[float],
+    ) -> EventContextManagerImpl:
+        # Python only: waitForEvent() as a context manager. wait_for_event() is a plain
+        # def, so its listeners are registered here, before the with block runs; the
+        # wait runs in a task.
+        return EventContextManagerImpl(
+            asyncio.ensure_future(
+                self.wait_for_event(event=event, predicate=predicate, timeout=timeout)
+            )
+        )
+
+    def __repr__(self) -> str:
+        return f"<Worker url={self.url!r}>"

@@ -3,7 +3,8 @@
 # Generates the public API (playwright/{async,sync}_api/_generated.py) and its
 # TypedDicts (playwright/_impl/_api_structures.py) from the Playwright API docs
 # (docs/src/api) in a microsoft/playwright checkout, pointed to by PW_SRC_DIR,
-# and the protocol tables (playwright/_impl/_protocol.py) from its protocol spec
+# and the protocol files of playwright/_impl (_protocol.py, protocol_types.py,
+# protocol_channels.py, protocol/validator.py) from its protocol spec
 # (packages/protocol/spec).
 # Use a separate checkout on the exact release branch for the version in
 # DRIVER_VERSION (for example release-1.64). The generator is
@@ -34,9 +35,10 @@ update_api structs playwright/_impl/_api_structures.py
 update_api sync
 update_api async
 
-echo "Generating playwright/_impl/_protocol.py, _protocol_types.py, _protocol_channels.py and the playwright/_impl_v2 protocol files"
-if python scripts/codegen/generate_protocol.py --out playwright/_impl/_protocol.py --types-out playwright/_impl/_protocol_types.py --channels-out playwright/_impl/_protocol_channels.py --channels-v2-out playwright/_impl_v2/protocol_channels.py --types-v2-out playwright/_impl_v2/protocol_types.py --validator-v2-out playwright/_impl_v2/protocol/validator.py; then
-    pre-commit run --files playwright/_impl/_protocol.py playwright/_impl/_protocol_types.py playwright/_impl/_protocol_channels.py playwright/_impl_v2/protocol_channels.py playwright/_impl_v2/protocol_types.py playwright/_impl_v2/protocol/validator.py
+protocol_files="playwright/_impl/_protocol.py playwright/_impl/protocol_types.py playwright/_impl/protocol_channels.py playwright/_impl/protocol/validator.py"
+echo "Generating $protocol_files"
+if python scripts/codegen/generate_protocol.py --out playwright/_impl/_protocol.py --types-out playwright/_impl/protocol_types.py --channels-out playwright/_impl/protocol_channels.py --validator-out playwright/_impl/protocol/validator.py; then
+    pre-commit run --files $protocol_files
 else
     echo "Exited due to errors"
     exit 1
