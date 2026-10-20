@@ -8,7 +8,6 @@
 ```
 python -m pip install --upgrade pip
 pip install -r local-requirements.txt
-pre-commit install
 pip install -e .
 ```
 * change the driver pin in `DRIVER_VERSION`: `npm=` the `playwright-core` npm version (e.g. `1.61.0`) and `rev=` the commit it is built from (`npm view playwright-core@<version> gitHead`); refresh `NODE_VERSION`: `python scripts/update_node_version.py`

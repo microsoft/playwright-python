@@ -127,8 +127,8 @@ jobs:
 
   build-v2:
     # playwright/_impl_v2, the line-by-line port of the JS client, behind PW_IMPL=v2.
-    # It has only the async API, and runs all of tests/async: the older tests, the
-    # ports of the upstream tests and the Python-only tests of v2.
+    # It runs all of tests/sync and tests/async: the older tests, the ports of the
+    # upstream tests and the Python-only tests of v2.
     name: Build (v2)
     timeout-minutes: 45
     strategy:
@@ -152,6 +152,8 @@ jobs:
         pip install -e .
         python -m build --wheel
         python -m playwright install --with-deps ${{ matrix.browser }}
+    - name: Test Sync API
+      run: xvfb-run pytest tests/sync --browser=${{ matrix.browser }} --timeout 90 --timeout-method thread -n auto
     - name: Test Async API
       run: xvfb-run pytest tests/async --browser=${{ matrix.browser }} --timeout 90 --timeout-method thread -n auto
 

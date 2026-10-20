@@ -54,7 +54,7 @@ class Playwright(ChannelOwner):
         self.webkit._playwright = self
         local_utils = self._connection.local_utils()
         self.devices: Dict[str, Any] = local_utils.devices if local_utils else {}
-        self.selectors = Selectors()
+        self.selectors = Selectors(self)
 
         # Instrumentation.
         self._default_launch_options: Optional[Dict[str, Any]] = None

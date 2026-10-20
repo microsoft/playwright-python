@@ -29,7 +29,7 @@ from playwright.sync_api import (
     Page,
 )
 from tests.server import HTTPServer, Server
-from tests.utils import must
+from tests.utils import must, only_v1
 
 
 def test_get_should_work(context: BrowserContext, server: Server) -> None:
@@ -205,6 +205,7 @@ def test_should_not_add_context_cookie_if_cookie_header_passed_as_parameter(
     assert server_req.value.getHeader("Cookie") == "foo=bar"
 
 
+@only_v1("FE-124 to FE-129")
 @pytest.mark.parametrize("method", ["delete", "patch", "post", "put"])
 def test_should_support_post_data(
     context: BrowserContext, method: str, server: Server
@@ -255,6 +256,7 @@ def test_should_support_application_x_www_form_urlencoded(
     assert params[b"file"] == [b"f.js"]
 
 
+@only_v1("FE-158")
 def test_should_support_multipart_form_data(
     context: BrowserContext, server: Server
 ) -> None:
@@ -324,6 +326,7 @@ def test_should_support_form_data_with_repeated_keys(
     assert params[b"email"] == [b"john@example.com"]
 
 
+@only_v1("tests/async/python/test_fetch_browser_context.py")
 def test_should_reject_file_value_in_form(
     context: BrowserContext, server: Server, tmp_path: Path
 ) -> None:

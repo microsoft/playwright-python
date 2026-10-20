@@ -21,8 +21,7 @@ against the protocol spec, for the tests.
 
 import asyncio
 import json
-import sys
-import traceback
+import logging
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -35,6 +34,7 @@ from typing import (
     cast,
 )
 
+from playwright._impl._greenlets import EventGreenlet
 from playwright._impl._protocol_check import check_message
 from playwright._impl._protocol_check import is_enabled as is_protocol_check_enabled
 from playwright._impl_v2.channel_owner import ChannelOwner
@@ -116,6 +116,9 @@ class _Callback:
             self.future.set_exception(error)
 
 
+_logger = logging.getLogger("playwright")
+
+
 class Connection(EventEmitter):
     def __init__(
         self,
@@ -123,10 +126,14 @@ class Connection(EventEmitter):
         local_utils: Optional["LocalUtils"] = None,
         instrumentation: Optional[ClientInstrumentation] = None,
         headers: Optional[List[Dict[str, str]]] = None,
+        dispatcher_fiber: Any = None,
     ) -> None:
         super().__init__()
-        # Python: the event loop that this connection and its objects run in.
+        # Python: the event loop that this connection and its objects run in, and
+        # under the sync API the greenlet that runs the loop (None under the async
+        # API), see playwright/sync_api/_context_manager.py.
         self._loop = loop
+        self._dispatcher_fiber = dispatcher_fiber
         self._objects: Dict[str, ChannelOwner] = {}
         self.onmessage: Callable[[Dict[str, Any]], None] = lambda message: None
         self._next_call_id = create_call_id_generator()
@@ -272,11 +279,11 @@ class Connection(EventEmitter):
         return future
 
     def _on_event_listener_error(self, error: BaseException) -> None:
-        # Python: see send_message_to_server().
-        print("Error occurred in event listener", file=sys.stderr)
-        traceback.print_exception(
-            type(error), error, error.__traceback__, file=sys.stderr
-        )
+        # Python: see send_message_to_server(). The error is logged, not printed:
+        # a script without logging configuration still gets it on stderr, from the
+        # last-resort handler of logging, and a test runner keeps it in the log of
+        # the test.
+        _logger.error("Error occurred in event listener", exc_info=error)
         self._error = error
 
     def _type_of_guid(self, guid: str) -> Optional[str]:
@@ -353,9 +360,17 @@ class Connection(EventEmitter):
             return
 
         validator = find_validator(object._type, method or "", "Event")
-        object._channel.emit(
-            method, validator(params, "", self._validator_from_wire_context())
-        )
+        params = validator(params, "", self._validator_from_wire_context())
+        if not self._dispatcher_fiber:
+            object._channel.emit(method, params)
+            return
+        # Python: under the sync API, a listener may block in a sync call. Each
+        # listener runs in its own greenlet, so that it can switch to the dispatcher
+        # fiber then, and the loop goes on with the next listener. The greenlet
+        # resumes when the sync call completes.
+        channel = object._channel
+        for listener in channel.raw_listeners(method):
+            EventGreenlet(channel._call_handler).switch(method, listener, (params,))
 
     def close(self, cause: Optional[str] = None) -> None:
         if self._closed_error:

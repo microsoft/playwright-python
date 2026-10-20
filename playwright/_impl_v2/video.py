@@ -15,8 +15,8 @@
 """Port of packages/playwright-core/src/client/video.ts.
 
 Python: path() returns a pathlib.Path, and the message of the remote path error
-names save_as(). The check of the sync API in save_as() (the page must be closed
-first) is not ported: there is no sync code here.
+names save_as(). Under the sync API, save_as() checks that the page is closed: the
+video is complete only then, and a sync call can not wait for a close.
 """
 
 import pathlib
@@ -29,17 +29,26 @@ from playwright._impl_v2.event_emitter import EventEmitter
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl_v2.artifact import Artifact
     from playwright._impl_v2.connection import Connection
+    from playwright._impl_v2.page import Page
 
 
 class Video(EventEmitter):
     def __init__(
-        self, connection: "Connection", artifact: Optional["Artifact"]
+        self, connection: "Connection", artifact: Optional["Artifact"], page: "Page"
     ) -> None:
         super().__init__()
         self._is_remote = connection.is_remote()
         self._artifact = artifact
-        # Python: the generated API reads the event loop of each object.
+        # Python: the page, for the check of the sync API in save_as().
+        self._page = page
+        # Python: the generated API reads the event loop and the dispatcher fiber of
+        # each object.
         self._loop = connection._loop
+        self._dispatcher_fiber = connection._dispatcher_fiber
+
+    # Python only: __repr__().
+    def __repr__(self) -> str:
+        return f"<Video page={self._page}>"
 
     async def path(self) -> pathlib.Path:
         if self._is_remote:
@@ -53,6 +62,11 @@ class Video(EventEmitter):
         return pathlib.Path(self._artifact._initializer["absolutePath"])
 
     async def save_as(self, path: Union[str, Path]) -> None:
+        # Python: under the sync API, the page must be closed first.
+        if self._dispatcher_fiber and not self._page._closed:
+            raise Error(
+                "Page is not yet closed. Close the page prior to calling save_as"
+            )
         if not self._artifact:
             raise Error("Video recording has not been started.")
         return await self._artifact.save_as(path=path)

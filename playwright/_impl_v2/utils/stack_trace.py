@@ -53,10 +53,22 @@ def capture_raw_stack() -> RawStack:
     frame: Optional[FrameType] = sys._getframe(1)
     while frame and len(stack) < 50:
         if frame.f_code is _EVENT_LOOP_CALLBACK_CODE:
-            break
+            # Python: under the sync API the call runs in a task of the dispatcher
+            # fiber, and the frames of the user code are in the greenlet of the
+            # sync call, suspended; the task points to them (_sync_base.py).
+            frame = _sync_caller_frame()
+            continue
         stack.append(frame)
         frame = frame.f_back
     return stack
+
+
+def _sync_caller_frame() -> Optional[FrameType]:
+    try:
+        task = asyncio.current_task()
+    except RuntimeError:
+        return None
+    return getattr(task, "__pw_caller_frame__", None)
 
 
 def rewrite_error_message(e: Exception, new_message: str) -> Exception:

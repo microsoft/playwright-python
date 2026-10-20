@@ -22,6 +22,7 @@ import pytest
 
 from playwright.sync_api import APIResponse, Error, Playwright, StorageState
 from tests.server import Server, TestServerRequest
+from tests.utils import only_v1
 
 
 @pytest.mark.parametrize(
@@ -325,6 +326,7 @@ def test_should_throw_an_error_when_max_redirects_is_less_than_0(
         assert "'max_redirects' must be greater than or equal to '0'" in str(exc_info)
 
 
+@only_v1("FE-033")
 def test_should_serialize_null_values_in_json(
     playwright: Playwright, server: Server
 ) -> None:

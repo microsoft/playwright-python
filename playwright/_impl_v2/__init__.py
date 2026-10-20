@@ -37,5 +37,9 @@ differs from the JS code is marked with a "Python:" comment. In short:
   runs the prefix and returns the awaitable of the rest (the wait_for_*() methods).
 - Python has no AbortSignal: the `signal` options are not ported. Cancelling the task
   that waits for a call aborts the call, as an aborted signal does.
-- There is no sync code here: no greenlet, no sync waits.
+- The sync API is the one of playwright/_impl (playwright/sync_api/_context_manager.py,
+  playwright/_impl/_sync_base.py, playwright/_impl/_greenlets.py): a greenlet runs the
+  event loop, and a sync call switches to it. Each object carries `_loop` and
+  `_dispatcher_fiber` for the generated API; a user callback that may block runs in a
+  greenlet of its own (transform.md, section 13).
 """

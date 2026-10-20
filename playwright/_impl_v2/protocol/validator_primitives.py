@@ -149,7 +149,10 @@ def t_binary(arg: Any, path: str, context: ValidatorContext) -> Any:
             raise ValidationError(f"{path}: expected Buffer, got {_typeof(arg)}")
         return base64.b64encode(arg).decode()
     if context.binary == "buffer":
-        if not isinstance(arg, (bytes, bytearray)) and not isinstance(arg, object):
+        # Python: `arg instanceof Object` is false for a primitive.
+        if not isinstance(arg, (bytes, bytearray)) and isinstance(
+            arg, (str, int, float, type(None))
+        ):
             raise ValidationError(f"{path}: expected Buffer, got {_typeof(arg)}")
         return arg
     raise ValidationError(f'Unsupported binary behavior "{context.binary}"')

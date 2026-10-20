@@ -59,6 +59,11 @@ from playwright._impl._api_structures import (
     Position,
     ViewportSize,
 )
+from playwright._impl._greenlets import (
+    BindingGreenlet,
+    LocatorHandlerGreenlet,
+    run_in_greenlet,
+)
 from playwright._impl_v2.artifact import Artifact
 from playwright._impl_v2.channel_owner import (
     ChannelOwner,
@@ -223,6 +228,7 @@ class Page(ChannelOwner):
         self._video = Video(
             self._connection,
             Artifact.from_(initializer["video"]) if initializer.get("video") else None,
+            self,
         )
         self.screencast = Screencast(self)
 
@@ -643,10 +649,18 @@ class Page(ChannelOwner):
             if handler and handler["times"] != 0:
                 if handler["times"] is not None:
                     handler["times"] -= 1
-                # Python: the handler may return an awaitable, as a JS handler
-                # returns a promise. The generated API passes it the arguments that
-                # it takes, so a handler without arguments works too.
-                result = handler["handler"](handler["locator"])
+                # Python: under the sync API the handler may block in a sync call,
+                # so it runs in its own greenlet, as an event listener does. The
+                # handler may return an awaitable, as a JS handler returns a
+                # promise. The generated API passes it the arguments that it takes,
+                # so a handler without arguments works too.
+                if self._dispatcher_fiber:
+                    result = await run_in_greenlet(
+                        LocatorHandlerGreenlet,
+                        lambda: handler["handler"](handler["locator"]),
+                    )
+                else:
+                    result = handler["handler"](handler["locator"])
                 if inspect.isawaitable(result):
                     await result
             remove = handler is not None and handler["times"] == 0
@@ -707,19 +721,20 @@ class Page(ChannelOwner):
     ) -> Awaitable[Request]:
         # Python: a plain def, so that the listener is registered at the call; see
         # _wait_for_event().
-        async def predicate(request: Request) -> bool:
+        # Python: the predicate is a plain def too: the JS async function calls the
+        # user predicate before its first await, in the listener. Under the sync
+        # API the listener runs in the greenlet of the event, where the user
+        # predicate may block; a task would spin (transform.md, 13). The result may
+        # be an awaitable, as a JS predicate returns a promise; the listener awaits
+        # it then.
+        def predicate(request: Request) -> Any:
             if isinstance(url_or_predicate, (str, re.Pattern)):
                 return url_matches(
                     self._browser_context._options.get("baseURL"),
                     request.url,
                     url_or_predicate,
                 )
-            # Python: the predicate may return an awaitable, as a JS predicate
-            # returns a promise.
-            result = url_or_predicate(request)
-            if inspect.isawaitable(result):
-                result = await result
-            return result
+            return url_or_predicate(request)
 
         trimmed_url = trim_url(url_or_predicate)
         log_line = f"waiting for request {trimmed_url}" if trimmed_url else None
@@ -733,19 +748,20 @@ class Page(ChannelOwner):
     ) -> Awaitable[Response]:
         # Python: a plain def, so that the listener is registered at the call; see
         # _wait_for_event().
-        async def predicate(response: Response) -> bool:
+        # Python: the predicate is a plain def too: the JS async function calls the
+        # user predicate before its first await, in the listener. Under the sync
+        # API the listener runs in the greenlet of the event, where the user
+        # predicate may block; a task would spin (transform.md, 13). The result may
+        # be an awaitable, as a JS predicate returns a promise; the listener awaits
+        # it then.
+        def predicate(response: Response) -> Any:
             if isinstance(url_or_predicate, (str, re.Pattern)):
                 return url_matches(
                     self._browser_context._options.get("baseURL"),
                     response.url,
                     url_or_predicate,
                 )
-            # Python: the predicate may return an awaitable, as a JS predicate
-            # returns a promise.
-            result = url_or_predicate(response)
-            if inspect.isawaitable(result):
-                result = await result
-            return result
+            return url_or_predicate(response)
 
         trimmed_url = trim_url(url_or_predicate)
         log_line = f"waiting for response {trimmed_url}" if trimmed_url else None
@@ -906,7 +922,7 @@ class Page(ChannelOwner):
             ),
         )
         await self._update_interception_patterns()
-        return DisposableStub(lambda: self.unroute(url=url, handler=handler))
+        return DisposableStub(lambda: self.unroute(url=url, handler=handler), self)
 
     async def route_from_har(
         self,
@@ -1227,7 +1243,7 @@ class Page(ChannelOwner):
         messages = (
             await self._channel.consoleMessages(filter=filter, timeout=NO_TIMEOUT)
         )["messages"]
-        return [ConsoleMessage(message, self, None) for message in messages]
+        return [ConsoleMessage(message, self, None, self) for message in messages]
 
     async def clear_page_errors(self) -> None:
         await self._channel.clearPageErrors(timeout=NO_TIMEOUT)
@@ -1847,11 +1863,16 @@ class BindingCall(ChannelOwner):
                 "page": page,
                 "frame": frame,
             }
-            # Python: the callback may return an awaitable, as a JS callback returns
-            # a promise.
-            result = func(
-                source, *[parse_result(arg) for arg in self._initializer["args"]]
-            )
+            args = [parse_result(arg) for arg in self._initializer["args"]]
+            # Python: under the sync API the callback may block in a sync call, so
+            # it runs in its own greenlet, as an event listener does. The callback
+            # may return an awaitable, as a JS callback returns a promise.
+            if self._dispatcher_fiber:
+                result = await run_in_greenlet(
+                    BindingGreenlet, lambda: func(source, *args)
+                )
+            else:
+                result = func(source, *args)
             if inspect.isawaitable(result):
                 result = await result
             # Python: _to_impl() turns the API objects of the result into impl objects.

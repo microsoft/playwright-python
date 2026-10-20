@@ -53,13 +53,13 @@ class ClientInstrumentation:
         self._listeners.clear()
 
     def _on(self, name: str, *params: Any) -> None:
-        for listener in list(self._listeners):
+        for listener in self._listeners:
             method = getattr(listener, name, None)
             if method:
                 method(*params)
 
     async def _run(self, name: str, *params: Any) -> None:
-        for listener in list(self._listeners):
+        for listener in self._listeners:
             method = getattr(listener, name, None)
             if method:
                 await method(*params)

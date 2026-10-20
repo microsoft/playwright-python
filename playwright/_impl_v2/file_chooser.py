@@ -36,8 +36,10 @@ class FileChooser:
         self._page = page
         self._element_handle = element_handle
         self._is_multiple = is_multiple
-        # Python: the generated API reads the event loop of each object.
+        # Python: the generated API reads the event loop and the dispatcher fiber of
+        # each object.
         self._loop = page._loop
+        self._dispatcher_fiber = page._dispatcher_fiber
 
     @property
     def element(self) -> "ElementHandle":

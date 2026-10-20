@@ -121,7 +121,7 @@ class Tracing(ChannelOwner):
             )
         )["traceName"]
         await self._start_collecting_stacks(trace_name, self._is_live)
-        return DisposableStub(lambda: self.stop(path=None))
+        return DisposableStub(lambda: self.stop(path=None), self)
 
     @api_call()
     async def start_chunk(
@@ -133,7 +133,7 @@ class Tracing(ChannelOwner):
             )
         )["traceName"]
         await self._start_collecting_stacks(trace_name, self._is_live)
-        return DisposableStub(lambda: self.stop_chunk(path=None))
+        return DisposableStub(lambda: self.stop_chunk(path=None), self)
 
     async def group(self, name: str, location: Optional[Location]) -> DisposableStub:
         if location:
@@ -145,7 +145,7 @@ class Tracing(ChannelOwner):
             ),
             timeout=NO_TIMEOUT,
         )
-        return DisposableStub(lambda: self.group_end())
+        return DisposableStub(lambda: self.group_end(), self)
 
     async def group_end(self) -> None:
         await self._channel.tracingGroupEnd(timeout=NO_TIMEOUT)
@@ -201,7 +201,7 @@ class Tracing(ChannelOwner):
             update_content=content if content is not None else default_content,
             update_mode=mode if mode is not None else "full",
         )
-        return DisposableStub(lambda: self.stop_har())
+        return DisposableStub(lambda: self.stop_har(), self)
 
     @api_call()
     async def stop_har(self) -> None:

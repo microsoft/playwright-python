@@ -20,8 +20,10 @@ resumes from the test body. The sync API blocks in the action, so here a
 """
 
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 
+from playwright._impl_v2.channel_owner import ApiCallOptions
+from playwright._impl_v2.utils.tasks import completed
 from playwright.sync_api import BrowserContext, DebuggerPausedDetails
 from tests.server import Server
 
@@ -138,7 +140,15 @@ def test_DB_007_should_not_pause_at_internal_api_calls(
     dbg.request_pause()
     # The internal call must not trip the pause, and must not consume the arming.
     # Port of `page._wrapApiCall(() => page.click('button'), { internal: true })`.
-    page._impl_obj._connection.wrap_api_call_sync(lambda: page.click("button"), True)
+    # Python: _impl_obj is typed as the v1 Page; under PW_IMPL=v2 it is the v2 one.
+    # The sync click runs inside the zone of the call, and _sync() runs the rest.
+    impl: Any = page._impl_obj
+
+    def click(_: Any) -> Any:
+        page.click("button")
+        return completed(None)
+
+    page._sync(impl._wrap_api_call(click, ApiCallOptions(internal=True)))
     assert dbg.paused_details is None
 
     # The next normal call still pauses.

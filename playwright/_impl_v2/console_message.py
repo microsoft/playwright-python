@@ -20,7 +20,6 @@ counterpart. The object keeps the event loop, as the generated API reads the loo
 of each object.
 """
 
-import asyncio
 from typing import TYPE_CHECKING, List, Literal, Optional, Union, cast
 
 from playwright._impl._api_structures import SourceLocation
@@ -28,6 +27,7 @@ from playwright._impl_v2.js_handle import JSHandle
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl_v2 import protocol_types as channels
+    from playwright._impl_v2.channel_owner import ChannelOwner
     from playwright._impl_v2.page import Page
     from playwright._impl_v2.worker import Worker
 
@@ -69,14 +69,17 @@ class ConsoleMessage:
         event: ConsoleMessageEvent,
         page: Optional["Page"],
         worker: Optional["Worker"],
+        parent: "ChannelOwner",
     ) -> None:
         self._page = page
         self._worker = worker
         self._event = event
         # Not ported: the util.inspect.custom hook. Python: __str__() below.
-        # Python: the generated API reads the event loop of each object. A console
-        # message is created in an event or in an API call, so the loop is running.
-        self._loop = asyncio.get_running_loop()
+        # Python: the generated API reads the event loop and the dispatcher fiber of
+        # each object. The parent is the page, worker or context that creates the
+        # message; the page and the worker may be None.
+        self._loop = parent._loop
+        self._dispatcher_fiber = parent._dispatcher_fiber
 
     @property
     def worker(self) -> Optional["Worker"]:

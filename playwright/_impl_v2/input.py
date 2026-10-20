@@ -37,8 +37,10 @@ MouseButton = Literal["left", "middle", "right"]
 class Keyboard:
     def __init__(self, page: "Page") -> None:
         self._page = page
-        # Python: the generated API reads the event loop of each object.
+        # Python: the generated API reads the event loop and the dispatcher fiber of
+        # each object.
         self._loop = page._loop
+        self._dispatcher_fiber = page._dispatcher_fiber
 
     async def down(self, key: str) -> None:
         await self._page._channel.keyboardDown(key=key, timeout=NO_TIMEOUT)
@@ -63,8 +65,10 @@ class Keyboard:
 class Mouse:
     def __init__(self, page: "Page") -> None:
         self._page = page
-        # Python: the generated API reads the event loop of each object.
+        # Python: the generated API reads the event loop and the dispatcher fiber of
+        # each object.
         self._loop = page._loop
+        self._dispatcher_fiber = page._dispatcher_fiber
 
     def _wrap_api_call(
         self,
@@ -128,8 +132,10 @@ class Mouse:
 class Touchscreen:
     def __init__(self, page: "Page") -> None:
         self._page = page
-        # Python: the generated API reads the event loop of each object.
+        # Python: the generated API reads the event loop and the dispatcher fiber of
+        # each object.
         self._loop = page._loop
+        self._dispatcher_fiber = page._dispatcher_fiber
 
     async def tap(self, x: float, y: float) -> None:
         await self._page._channel.touchscreenTap(x=x, y=y, timeout=NO_TIMEOUT)

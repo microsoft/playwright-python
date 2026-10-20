@@ -31,8 +31,10 @@ if TYPE_CHECKING:  # pragma: no cover
 class Clock:
     def __init__(self, browser_context: "BrowserContext") -> None:
         self._browser_context = browser_context
-        # Python: the generated API reads the event loop of each object.
+        # Python: the generated API reads the event loop and the dispatcher fiber of
+        # each object.
         self._loop = browser_context._loop
+        self._dispatcher_fiber = browser_context._dispatcher_fiber
 
     async def install(
         self, time: Optional[Union[float, str, datetime.datetime]]

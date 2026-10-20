@@ -64,10 +64,9 @@ Checking for typing errors
 mypy playwright
 ```
 
-Format the code
+Lint and format the code (what the Lint job of CI runs; the checks are not a git hook)
 
 ```sh
-pre-commit install
 pre-commit run --all-files
 ```
 

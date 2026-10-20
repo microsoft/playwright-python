@@ -13,7 +13,7 @@
 # limitations under the License.
 import asyncio
 import os
-from typing import Tuple
+from typing import Any, Callable, Tuple, Type
 
 import greenlet
 
@@ -52,8 +52,39 @@ class EventGreenlet(greenlet.greenlet):
         return "<EventGreenlet>"
 
 
+class BindingGreenlet(greenlet.greenlet):
+    def __str__(self) -> str:
+        return "<BindingGreenlet>"
+
+
+class WebSocketRouteGreenlet(greenlet.greenlet):
+    def __str__(self) -> str:
+        return "<WebSocketRouteGreenlet>"
+
+
 def connection_closed_error() -> TargetClosedError:
     return TargetClosedError("Playwright connection closed")
+
+
+def run_in_greenlet(
+    greenlet_class: Type[greenlet.greenlet], func: Callable[[], Any]
+) -> "asyncio.Future[Any]":
+    """Runs a callback of the sync API in its own greenlet.
+
+    The callback may block in a sync call. In its own greenlet it switches to the
+    dispatcher fiber then, and the event loop goes on. The future settles with the
+    result of the callback when it returns, or with its error.
+    """
+    future: "asyncio.Future[Any]" = asyncio.get_running_loop().create_future()
+
+    def body() -> None:
+        try:
+            future.set_result(func())
+        except Exception as e:
+            future.set_exception(e)
+
+    greenlet_class(body).switch()
+    return future
 
 
 def wait_for_future(

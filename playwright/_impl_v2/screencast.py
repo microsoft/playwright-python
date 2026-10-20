@@ -61,8 +61,10 @@ class Screencast:
         self._save_path: Optional[Union[str, Path]] = None
         self._on_frame: Optional[Callable[[ScreencastFrame], Any]] = None
         self._artifact: Optional[Artifact] = None
-        # Python: the generated API reads the event loop of each object.
+        # Python: the generated API reads the event loop and the dispatcher fiber of
+        # each object.
         self._loop = page._loop
+        self._dispatcher_fiber = page._dispatcher_fiber
 
         # Python: a sync listener that calls on_frame at once, as the JS async
         # listener does before its first await; the rest runs in a task.
@@ -138,7 +140,7 @@ class Screencast:
         if result["artifact"]:
             self._artifact = Artifact.from_(result["artifact"])
             self._save_path = path
-        return DisposableStub(lambda: self.stop())
+        return DisposableStub(lambda: self.stop(), self)
 
     @api_call()
     async def stop(self) -> None:
@@ -172,7 +174,8 @@ class Screencast:
             timeout=NO_TIMEOUT,
         )
         return DisposableStub(
-            lambda: self._page._channel.screencastHideActions(timeout=NO_TIMEOUT)
+            lambda: self._page._channel.screencastHideActions(timeout=NO_TIMEOUT),
+            self,
         )
 
     async def hide_actions(self) -> None:
@@ -189,7 +192,8 @@ class Screencast:
         return DisposableStub(
             lambda: self._page._channel.screencastRemoveOverlay(
                 id=id, timeout=NO_TIMEOUT
-            )
+            ),
+            self,
         )
 
     async def show_chapter(

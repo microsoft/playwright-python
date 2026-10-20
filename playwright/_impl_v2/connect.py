@@ -128,12 +128,14 @@ async def connect_to_endpoint(
     assert local_utils
     transport: Transport = JsonPipeTransport(local_utils)
     connect_headers = await transport.connect(params, timeout)
-    # Python: the connection runs in the event loop of its parent.
+    # Python: the connection runs in the event loop, and under the sync API in the
+    # dispatcher fiber, of its parent.
     connection = Connection(
         parent_connection._loop,
         local_utils,
         parent_connection._instrumentation,
         cast(List[Dict[str, str]], connect_headers),
+        parent_connection._dispatcher_fiber,
     )
     connection.mark_as_remote()
     connection.on("close", lambda: transport.close())

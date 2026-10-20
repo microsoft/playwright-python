@@ -31,8 +31,10 @@ if TYPE_CHECKING:  # pragma: no cover
 class WebMCP:
     def __init__(self, frame: "Frame") -> None:
         self._frame = frame
-        # Python: the generated API reads the event loop of each object.
+        # Python: the generated API reads the event loop and the dispatcher fiber of
+        # each object.
         self._loop = frame._loop
+        self._dispatcher_fiber = frame._dispatcher_fiber
 
     async def tools(self, timeout: Optional[float]) -> List[WebMCPTool]:
         tools = (

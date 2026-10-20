@@ -18,6 +18,7 @@ import pytest
 
 from playwright.sync_api import Error, Page, Request, Route
 from tests.server import Server
+from tests.utils import only_v1
 
 
 def _append_with_return_value(values: List, value: Any) -> Any:
@@ -329,6 +330,7 @@ def test_should_chain_fallback_with_dynamic_url(server: Server, page: Page) -> N
     assert intercepted == [3, 2, 1]
 
 
+@only_v1("RO-133")
 def test_should_amend_json_post_data(server: Server, page: Page) -> None:
     page.goto(server.EMPTY_PAGE)
     post_data = []

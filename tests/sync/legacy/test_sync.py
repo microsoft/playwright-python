@@ -403,14 +403,16 @@ def test_should_not_orphan_callback_on_non_serializable_params(
     script.write_text(
         textwrap.dedent(
             f"""
-            from playwright.sync_api import sync_playwright
+            from playwright.sync_api import Error, sync_playwright
 
             with sync_playwright() as p:
                 browser = p[{browser_name!r}].launch(**{launch_arguments!r})
                 page = browser.new_page()
+                # v1 raises the TypeError of the JSON serialization, v2 the Error
+                # of the protocol validation.
                 try:
                     page.locator("asdf").highlight(style=object())
-                except TypeError:
+                except (TypeError, Error):
                     pass
                 browser.close()
             """
@@ -453,9 +455,15 @@ def test_sync_calls_should_raise_after_driver_exit(
                 page = browser.new_page()
                 route = page.route("**/*", lambda route: route.continue_())
 
+                # The driver process. p.stop is bound to the context manager, which
+                # owns the transport in v1 (the connection) and in v2 (the client).
+                context_manager = p.stop.__self__
+                client = getattr(context_manager, "_v2_client", None)
+                transport = client._transport if client else context_manager._connection._transport
+
                 def expect_event():
                     with page.expect_event("console", timeout=0):
-                        p._impl_obj._connection._transport._proc.kill()
+                        transport._proc.kill()
 
                 def dispose_route():
                     with route:

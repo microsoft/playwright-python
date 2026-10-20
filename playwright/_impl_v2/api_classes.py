@@ -15,7 +15,7 @@
 """Python only: the v2 class of each class in the generated API.
 
 playwright/_impl/_api_classes.py takes these when PW_IMPL=v2 is set. The expect()
-matchers are not part of the client; they stay in playwright/_impl/_assertions.py.
+matchers are not part of the JS client; the Python ones are in assertions.py.
 """
 
 from playwright._impl_v2.assertions import (
