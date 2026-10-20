@@ -24,11 +24,11 @@ import playwright._impl._api_structures
 import playwright._impl._errors
 import playwright._impl._form_data
 import playwright.async_api._generated
-from playwright._impl._assertions import (
+from playwright._impl._api_classes import (
     APIResponseAssertions as APIResponseAssertionsImpl,
 )
-from playwright._impl._assertions import LocatorAssertions as LocatorAssertionsImpl
-from playwright._impl._assertions import PageAssertions as PageAssertionsImpl
+from playwright._impl._api_classes import LocatorAssertions as LocatorAssertionsImpl
+from playwright._impl._api_classes import PageAssertions as PageAssertionsImpl
 from playwright.async_api._context_manager import PlaywrightContextManager
 from playwright.async_api._generated import (
     APIRequest,

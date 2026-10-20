@@ -15,7 +15,16 @@
 import asyncio
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any, AsyncGenerator, Awaitable, Callable, Dict, Generator
+from typing import (
+    Any,
+    AsyncGenerator,
+    Awaitable,
+    Callable,
+    Dict,
+    Generator,
+    List,
+    Tuple,
+)
 
 import pytest
 
@@ -24,6 +33,7 @@ from playwright.async_api import (
     Browser,
     BrowserContext,
     BrowserType,
+    Error,
     FrameLocator,
     Locator,
     Page,
@@ -32,6 +42,7 @@ from playwright.async_api import (
     async_playwright,
 )
 from tests.server import HTTPServer
+from tests.utils import DEFAULT_CONTEXT_OPTIONS
 
 from .utils import Utils
 from .utils import utils as utils_object
@@ -96,7 +107,7 @@ async def context_factory(
     contexts = []
 
     async def launch(**kwargs: Any) -> BrowserContext:
-        context = await browser.new_context(**kwargs)
+        context = await browser.new_context(**{**DEFAULT_CONTEXT_OPTIONS, **kwargs})
         contexts.append(context)
         return context
 
@@ -106,16 +117,35 @@ async def context_factory(
 
 
 @pytest.fixture(scope="session")
-def default_same_site_cookie_value(browser_name: str, is_linux: bool) -> str:
-    if browser_name == "chromium":
-        return "Lax"
-    if browser_name == "firefox":
-        return "None"
-    if browser_name == "webkit" and is_linux:
-        return "Lax"
-    if browser_name == "webkit" and not is_linux:
-        return "None"
-    raise Exception(f"Invalid browser_name: {browser_name}")
+def browser_major_version(browser_version: str) -> int:
+    return int(browser_version.split(".")[0])
+
+
+@pytest.fixture
+async def launch_persistent(
+    browser_type: BrowserType,
+    launch_arguments: Dict,
+    create_user_data_dir: Callable[[], Path],
+) -> AsyncGenerator[Callable[..., Awaitable[Tuple[BrowserContext, Page]]], None]:
+    """Launches one persistent context and returns it with its first page.
+
+    Port of launchPersistent in tests/config/browserTest.ts.
+    """
+    contexts: List[BrowserContext] = []
+
+    async def launch(**kwargs: Any) -> Tuple[BrowserContext, Page]:
+        if contexts:
+            raise Exception("can only launch one persistent context")
+        context = await browser_type.launch_persistent_context(
+            create_user_data_dir(),
+            **{**launch_arguments, **DEFAULT_CONTEXT_OPTIONS, **kwargs},
+        )
+        contexts.append(context)
+        return context, context.pages[0]
+
+    yield launch
+    for context in contexts:
+        await context.close()
 
 
 @pytest.fixture
@@ -130,6 +160,30 @@ async def context(
 @pytest.fixture
 async def page(context: BrowserContext) -> Page:
     return await context.new_page()
+
+
+@pytest.fixture(autouse=True)
+async def close_leaked_contexts(
+    request: pytest.FixtureRequest,
+) -> AsyncGenerator[None, None]:
+    """Closes the contexts that a test left open in the shared browser.
+
+    Some tests count browser.contexts; a context that an earlier test did not close
+    would make them depend on the test order.
+    """
+    browser = (
+        request.getfixturevalue("browser")
+        if "browser" in request.fixturenames
+        else None
+    )
+    yield
+    if browser is None:
+        return
+    for context in browser.contexts:
+        try:
+            await context.close()
+        except Error:
+            pass
 
 
 @pytest.fixture(scope="session")

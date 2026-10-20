@@ -1,0 +1,100 @@
+# Copyright (c) Microsoft Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""Port of packages/playwright-core/src/client/events.ts."""
+
+
+class Events:
+    class AndroidDevice:
+        WebView = "webview"
+        Close = "close"
+
+    class AndroidSocket:
+        Data = "data"
+        Close = "close"
+
+    class AndroidWebView:
+        Close = "close"
+
+    class Browser:
+        Context = "context"
+        Disconnected = "disconnected"
+
+    class Debugger:
+        PausedStateChanged = "pausedstatechanged"
+        ApiCallsUpdated = "apicallsupdated"
+
+    class BrowserContext:
+        Console = "console"
+        Close = "close"
+        Dialog = "dialog"
+        DialogClosed = "dialogclosed"
+        Download = "download"
+        FrameAttached = "frameattached"
+        FrameDetached = "framedetached"
+        FrameNavigated = "framenavigated"
+        Page = "page"
+        PageClose = "pageclose"
+        PageLoad = "pageload"
+        # Can't use just 'error' due to node.js special treatment of error events.
+        # @see https://nodejs.org/api/events.html#events_error_events
+        WebError = "weberror"
+        BackgroundPage = "backgroundpage"  # Deprecated in v1.56, never emitted anymore.
+        ServiceWorker = "serviceworker"
+        Request = "request"
+        Response = "response"
+        RequestFailed = "requestfailed"
+        RequestFinished = "requestfinished"
+
+    class BrowserServer:
+        Close = "close"
+
+    class Page:
+        Close = "close"
+        Crash = "crash"
+        Console = "console"
+        Dialog = "dialog"
+        DialogClosed = "dialogclosed"
+        Download = "download"
+        FileChooser = "filechooser"
+        DOMContentLoaded = "domcontentloaded"
+        # Can't use just 'error' due to node.js special treatment of error events.
+        # @see https://nodejs.org/api/events.html#events_error_events
+        PageError = "pageerror"
+        Request = "request"
+        Response = "response"
+        RequestFailed = "requestfailed"
+        RequestFinished = "requestfinished"
+        FrameAttached = "frameattached"
+        FrameDetached = "framedetached"
+        FrameNavigated = "framenavigated"
+        Load = "load"
+        Popup = "popup"
+        WebSocket = "websocket"
+        Worker = "worker"
+
+    class WebSocket:
+        Close = "close"
+        Error = "socketerror"
+        FrameReceived = "framereceived"
+        FrameSent = "framesent"
+
+    class Worker:
+        Close = "close"
+        Console = "console"
+
+    class ElectronApplication:
+        Close = "close"
+        Console = "console"
+        Window = "window"

@@ -16,7 +16,7 @@
 import asyncio
 from contextlib import contextmanager
 from pathlib import Path
-from typing import Any, Callable, Dict, Generator, List
+from typing import Any, Callable, Dict, Generator, List, Tuple
 
 import pytest
 from greenlet import greenlet
@@ -26,6 +26,7 @@ from playwright.sync_api import (
     Browser,
     BrowserContext,
     BrowserType,
+    Error,
     FrameLocator,
     Locator,
     Page,
@@ -34,6 +35,7 @@ from playwright.sync_api import (
     sync_playwright,
 )
 from tests.server import HTTPServer
+from tests.utils import DEFAULT_CONTEXT_OPTIONS
 
 from .utils import Utils
 from .utils import utils as utils_object
@@ -66,6 +68,22 @@ def browser_type(
 
 
 @pytest.fixture(scope="session")
+def browser_factory(
+    launch_arguments: Dict, browser_type: BrowserType
+) -> Generator[Callable[..., Browser], None, None]:
+    browsers: List[Browser] = []
+
+    def launch(**kwargs: Any) -> Browser:
+        browser = browser_type.launch(**launch_arguments, **kwargs)
+        browsers.append(browser)
+        return browser
+
+    yield launch
+    for browser in browsers:
+        browser.close()
+
+
+@pytest.fixture(scope="session")
 def browser(
     browser_type: BrowserType, launch_arguments: Dict
 ) -> Generator[Browser, None, None]:
@@ -74,9 +92,64 @@ def browser(
     browser.close()
 
 
+@pytest.fixture(scope="session")
+def browser_version(browser: Browser) -> str:
+    return browser.version
+
+
+@pytest.fixture(scope="session")
+def browser_major_version(browser_version: str) -> int:
+    return int(browser_version.split(".")[0])
+
+
 @pytest.fixture
-def context(browser: Browser) -> Generator[BrowserContext, None, None]:
-    context = browser.new_context()
+def context_factory(
+    browser: Browser,
+) -> Generator[Callable[..., BrowserContext], None, None]:
+    contexts: List[BrowserContext] = []
+
+    def launch(**kwargs: Any) -> BrowserContext:
+        context = browser.new_context(**{**DEFAULT_CONTEXT_OPTIONS, **kwargs})
+        contexts.append(context)
+        return context
+
+    yield launch
+    for context in contexts:
+        context.close()
+
+
+@pytest.fixture
+def launch_persistent(
+    browser_type: BrowserType,
+    launch_arguments: Dict,
+    create_user_data_dir: Callable[[], Path],
+) -> Generator[Callable[..., Tuple[BrowserContext, Page]], None, None]:
+    """Launches one persistent context and returns it with its first page.
+
+    Port of launchPersistent in tests/config/browserTest.ts.
+    """
+    contexts: List[BrowserContext] = []
+
+    def launch(**kwargs: Any) -> Tuple[BrowserContext, Page]:
+        if contexts:
+            raise Exception("can only launch one persistent context")
+        context = browser_type.launch_persistent_context(
+            create_user_data_dir(),
+            **{**launch_arguments, **DEFAULT_CONTEXT_OPTIONS, **kwargs},
+        )
+        contexts.append(context)
+        return context, context.pages[0]
+
+    yield launch
+    for context in contexts:
+        context.close()
+
+
+@pytest.fixture
+def context(
+    context_factory: Callable[..., BrowserContext],
+) -> Generator[BrowserContext, None, None]:
+    context = context_factory()
     yield context
     context.close()
 
@@ -84,6 +157,30 @@ def context(browser: Browser) -> Generator[BrowserContext, None, None]:
 @pytest.fixture
 def page(context: BrowserContext) -> Page:
     return context.new_page()
+
+
+@pytest.fixture(autouse=True)
+def close_leaked_contexts(
+    request: pytest.FixtureRequest,
+) -> Generator[None, None, None]:
+    """Closes the contexts that a test left open in the shared browser.
+
+    Some tests count browser.contexts; a context that an earlier test did not close
+    would make them depend on the test order.
+    """
+    browser = (
+        request.getfixturevalue("browser")
+        if "browser" in request.fixturenames
+        else None
+    )
+    yield
+    if browser is None:
+        return
+    for context in browser.contexts:
+        try:
+            context.close()
+        except Error:
+            pass
 
 
 @pytest.fixture(scope="session")
@@ -95,23 +192,24 @@ def selectors(playwright: Playwright) -> Selectors:
 def sync_gather(playwright: Playwright) -> Generator[Callable, None, None]:
     def _sync_gather_impl(*actions: Callable) -> List[Any]:
         g_self = greenlet.getcurrent()
-        results: Dict[Callable, Any] = {}
+        # Keyed by position: the same callable may be passed more than once.
+        results: Dict[int, Any] = {}
         exceptions: List[Exception] = []
 
-        def action_wrapper(action: Callable) -> Callable:
+        def action_wrapper(index: int, action: Callable) -> Callable:
             def body() -> Any:
                 try:
-                    results[action] = action()
+                    results[index] = action()
                 except Exception as e:
-                    results[action] = e
+                    results[index] = e
                     exceptions.append(e)
                 g_self.switch()
 
             return body
 
         async def task() -> None:
-            for action in actions:
-                g = greenlet(action_wrapper(action))
+            for index, action in enumerate(actions):
+                g = greenlet(action_wrapper(index, action))
                 g.switch()
 
         asyncio.create_task(task())
@@ -122,7 +220,7 @@ def sync_gather(playwright: Playwright) -> Generator[Callable, None, None]:
         if exceptions:
             raise exceptions[0]
 
-        return list(map(lambda action: results[action], actions))
+        return [results[index] for index in range(len(actions))]
 
     yield _sync_gather_impl
 

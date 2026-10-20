@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import asyncio
+import os
 from typing import Any
 
 from playwright._impl._connection import Connection
@@ -27,6 +28,8 @@ class PlaywrightContextManager:
         self._exit_was_called = False
 
     async def __aenter__(self) -> AsyncPlaywright:
+        if os.environ.get("PW_IMPL") == "v2":  # pragma: no cover
+            return await self._enter_v2()
         loop = asyncio.get_running_loop()
         self._connection = Connection(
             None,
@@ -54,4 +57,16 @@ class PlaywrightContextManager:
         if self._exit_was_called:
             return
         self._exit_was_called = True
+        if os.environ.get("PW_IMPL") == "v2":  # pragma: no cover
+            await self._v2_client.stop()
+            return
         await self._connection.stop_async()
+
+    async def _enter_v2(self) -> AsyncPlaywright:
+        # PW_IMPL=v2: playwright/_impl_v2, the line-by-line port of the JS client.
+        from playwright._impl_v2.out_of_process import start
+
+        impl, self._v2_client = await start()
+        playwright = AsyncPlaywright(impl)  # type: ignore[arg-type]
+        playwright.stop = self.__aexit__  # type: ignore
+        return playwright

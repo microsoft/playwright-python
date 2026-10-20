@@ -16,6 +16,9 @@
 # imports them from here, so the generator does not need to know which module
 # holds each class.
 
+import os
+from typing import TYPE_CHECKING
+
 from playwright._impl._assertions import (
     APIResponseAssertions,
     LocatorAssertions,
@@ -55,6 +58,11 @@ from playwright._impl._video import Video
 from playwright._impl._web_error import WebError
 from playwright._impl._web_mcp import WebMCP
 from playwright._impl._web_storage import WebStorage
+
+# PW_IMPL=v2 switches the async API to playwright/_impl_v2, the line-by-line port of
+# the JS client. It has no sync API.
+if not TYPE_CHECKING and os.environ.get("PW_IMPL") == "v2":  # pragma: no cover
+    from playwright._impl_v2.api_classes import *  # noqa: F401,F403
 
 __all__ = [
     "APIRequest",

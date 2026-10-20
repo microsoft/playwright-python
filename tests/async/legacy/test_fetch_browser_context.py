@@ -1,0 +1,582 @@
+# Copyright (c) Microsoft Corporation.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import asyncio
+import base64
+import json
+import time
+from pathlib import Path
+from typing import Any, Callable, cast
+from urllib.parse import parse_qs
+
+import pytest
+
+from playwright.async_api import (
+    Browser,
+    BrowserContext,
+    Error,
+    FilePayload,
+    FormData,
+    Page,
+)
+from tests.server import HTTPServer, Server, TestServerRequest
+from tests.utils import must, only_v1
+
+
+async def test_get_should_work(context: BrowserContext, server: Server) -> None:
+    response = await context.request.get(server.PREFIX + "/simple.json")
+    assert response.url == server.PREFIX + "/simple.json"
+    assert response.status == 200
+    assert response.status_text == "OK"
+    assert response.ok is True
+    assert response.headers["content-type"] == "application/json; charset=utf-8"
+    assert {
+        "name": "Content-Type",
+        "value": "application/json; charset=utf-8",
+    } in response.headers_array
+    assert await response.text() == '{"foo": "bar"}\n'
+
+
+async def test_fetch_should_work(context: BrowserContext, server: Server) -> None:
+    response = await context.request.fetch(server.PREFIX + "/simple.json")
+    assert response.url == server.PREFIX + "/simple.json"
+    assert response.status == 200
+    assert response.status_text == "OK"
+    assert response.ok is True
+    assert response.headers["content-type"] == "application/json; charset=utf-8"
+    assert {
+        "name": "Content-Type",
+        "value": "application/json; charset=utf-8",
+    } in response.headers_array
+    assert await response.text() == '{"foo": "bar"}\n'
+
+
+async def test_should_return_timing(context: BrowserContext) -> None:
+    fresh_server = HTTPServer()
+    fresh_server.start()
+    try:
+        response = await context.request.get(fresh_server.EMPTY_PAGE)
+        timing = response.timing
+        assert abs(timing["startTime"] - time.time() * 1000) < 10000
+        assert timing["domainLookupStart"] == 0
+        assert timing["domainLookupEnd"] >= timing["domainLookupStart"]
+        assert timing["connectStart"] == timing["domainLookupEnd"]
+        assert timing["secureConnectionStart"] == -1
+        assert timing["connectEnd"] >= timing["connectStart"]
+        assert timing["requestStart"] == timing["connectEnd"]
+        assert timing["responseStart"] >= timing["requestStart"]
+        assert timing["responseEnd"] >= timing["responseStart"]
+        assert timing["responseEnd"] < 60000
+    finally:
+        fresh_server.stop()
+
+
+async def test_should_throw_on_network_error(
+    context: BrowserContext, server: Server
+) -> None:
+    server.set_route("/test", lambda request: request.loseConnection())
+    with pytest.raises(Error, match="socket hang up"):
+        await context.request.fetch(server.PREFIX + "/test")
+
+
+async def test_should_add_session_cookies_to_request(
+    context: BrowserContext, server: Server
+) -> None:
+    await context.add_cookies(
+        [
+            {
+                "name": "username",
+                "value": "John Doe",
+                "url": server.EMPTY_PAGE,
+                "expires": -1,
+                "httpOnly": False,
+                "secure": False,
+                "sameSite": "Lax",
+            }
+        ]
+    )
+    [server_req, response] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        context.request.get(server.EMPTY_PAGE),
+    )
+    assert server_req.getHeader("Cookie") == "username=John Doe"
+
+
+@pytest.mark.parametrize(
+    "method", ["fetch", "delete", "get", "head", "patch", "post", "put"]
+)
+async def test_should_support_query_params(
+    context: BrowserContext, server: Server, method: str
+) -> None:
+    expected_params = {"p1": "v1", "парам2": "знач2"}
+    [server_req, _] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        getattr(context.request, method)(
+            server.EMPTY_PAGE + "?p1=foo", params=expected_params
+        ),
+    )
+    assert list(map(lambda x: x.decode(), server_req.args["p1".encode()])) == [
+        "foo",
+        "v1",
+    ]
+    assert server_req.args["парам2".encode()][0].decode() == "знач2"
+
+
+@pytest.mark.parametrize(
+    "method", ["fetch", "delete", "get", "head", "patch", "post", "put"]
+)
+async def test_should_support_params_passed_as_object(
+    context: BrowserContext, server: Server, method: str
+) -> None:
+    params = {
+        "param1": "value1",
+        "парам2": "знач2",
+    }
+    [server_req, _] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        getattr(context.request, method)(server.EMPTY_PAGE, params=params),
+    )
+    assert server_req.args["param1".encode()][0].decode() == "value1"
+    assert len(server_req.args["param1".encode()]) == 1
+    assert server_req.args["парам2".encode()][0].decode() == "знач2"
+
+
+@pytest.mark.parametrize(
+    "method", ["fetch", "delete", "get", "head", "patch", "post", "put"]
+)
+async def test_should_support_params_passed_as_strings(
+    context: BrowserContext, server: Server, method: str
+) -> None:
+    params = "?param1=value1&param1=value2&парам2=знач2"
+    [server_req, _] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        getattr(context.request, method)(server.EMPTY_PAGE, params=params),
+    )
+    assert list(map(lambda x: x.decode(), server_req.args["param1".encode()])) == [
+        "value1",
+        "value2",
+    ]
+    assert len(server_req.args["param1".encode()]) == 2
+    assert server_req.args["парам2".encode()][0].decode() == "знач2"
+
+
+@pytest.mark.parametrize(
+    "method", ["fetch", "delete", "get", "head", "patch", "post", "put"]
+)
+async def test_should_support_fail_on_status_code(
+    context: BrowserContext, server: Server, method: str
+) -> None:
+    with pytest.raises(Error, match="404 Not Found"):
+        await getattr(context.request, method)(
+            server.PREFIX + "/this-does-clearly-not-exist.html",
+            fail_on_status_code=True,
+        )
+
+
+@pytest.mark.parametrize(
+    "method", ["fetch", "delete", "get", "head", "patch", "post", "put"]
+)
+async def test_should_support_ignore_https_errors_option(
+    context: BrowserContext, https_server: Server, method: str
+) -> None:
+    response = await getattr(context.request, method)(
+        https_server.EMPTY_PAGE, ignore_https_errors=True
+    )
+    assert response.ok
+    assert response.status == 200
+
+
+async def test_should_not_add_context_cookie_if_cookie_header_passed_as_parameter(
+    context: BrowserContext, server: Server
+) -> None:
+    await context.add_cookies(
+        [
+            {
+                "name": "username",
+                "value": "John Doe",
+                "url": server.EMPTY_PAGE,
+                "expires": -1,
+                "httpOnly": False,
+                "secure": False,
+                "sameSite": "Lax",
+            }
+        ]
+    )
+    [server_req, _] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        context.request.get(server.EMPTY_PAGE, headers={"Cookie": "foo=bar"}),
+    )
+    assert server_req.getHeader("Cookie") == "foo=bar"
+
+
+async def test_should_support_http_credentials_send_immediately_for_browser_context(
+    context_factory: "Callable[..., asyncio.Future[BrowserContext]]", server: Server
+) -> None:
+    context = await context_factory(
+        http_credentials={
+            "username": "user",
+            "password": "pass",
+            "origin": server.PREFIX.upper(),
+            "send": "always",
+        }
+    )
+    # First request
+    server_request, response = await asyncio.gather(
+        server.wait_for_request("/empty.html"), context.request.get(server.EMPTY_PAGE)
+    )
+    expected_auth = "Basic " + base64.b64encode(b"user:pass").decode()
+    assert server_request.getHeader("authorization") == expected_auth
+    assert response.status == 200
+
+    # Second request
+    server_request, response = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        context.request.get(server.CROSS_PROCESS_PREFIX + "/empty.html"),
+    )
+    # Not sent to another origin.
+    assert server_request.getHeader("authorization") is None
+    assert response.status == 200
+
+
+async def test_support_http_credentials_send_immediately_for_browser_new_page(
+    server: Server, browser: Browser
+) -> None:
+    page = await browser.new_page(
+        http_credentials={
+            "username": "user",
+            "password": "pass",
+            "origin": server.PREFIX.upper(),
+            "send": "always",
+        }
+    )
+    server_request, response = await asyncio.gather(
+        server.wait_for_request("/empty.html"), page.request.get(server.EMPTY_PAGE)
+    )
+    assert (
+        server_request.getHeader("authorization")
+        == "Basic " + base64.b64encode(b"user:pass").decode()
+    )
+    assert response.status == 200
+
+    server_request, response = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        page.request.get(server.CROSS_PROCESS_PREFIX + "/empty.html"),
+    )
+    # Not sent to another origin.
+    assert server_request.getHeader("authorization") is None
+    assert response.status == 200
+
+    await page.close()
+
+
+@only_v1("FE-124 to FE-129")
+@pytest.mark.parametrize("method", ["delete", "patch", "post", "put"])
+async def test_should_support_post_data(
+    context: BrowserContext, method: str, server: Server
+) -> None:
+    async def support_post_data(fetch_data: Any, request_post_data: Any) -> None:
+        [request, response] = await asyncio.gather(
+            server.wait_for_request("/simple.json"),
+            getattr(context.request, method)(
+                server.PREFIX + "/simple.json", data=fetch_data
+            ),
+        )
+        assert request.method.decode() == method.upper()
+        assert request.post_body == request_post_data
+        assert response.status == 200
+        assert response.url == server.PREFIX + "/simple.json"
+        assert request.getHeader("Content-Length") == str(len(must(request.post_body)))
+
+    await support_post_data("My request", "My request".encode())
+    await support_post_data(b"My request", "My request".encode())
+    await support_post_data(["my", "request"], json.dumps(["my", "request"]).encode())
+    await support_post_data({"my": "request"}, json.dumps({"my": "request"}).encode())
+    with pytest.raises(Error, match="Unsupported 'data' type: <class 'function'>"):
+        await support_post_data(lambda: None, None)
+
+
+async def test_should_support_application_x_www_form_urlencoded(
+    context: BrowserContext, server: Server
+) -> None:
+    [request, response] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        context.request.post(
+            server.PREFIX + "/empty.html",
+            form={
+                "firstName": "John",
+                "lastName": "Doe",
+                "file": "f.js",
+            },
+        ),
+    )
+    assert request.method == b"POST"
+    assert request.getHeader("Content-Type") == "application/x-www-form-urlencoded"
+    assert request.post_body
+    body = request.post_body.decode()
+    assert request.getHeader("Content-Length") == str(len(body))
+    params = parse_qs(request.post_body)
+    assert params[b"firstName"] == [b"John"]
+    assert params[b"lastName"] == [b"Doe"]
+    assert params[b"file"] == [b"f.js"]
+
+
+@only_v1("FE-158")
+async def test_should_support_multipart_form_data(
+    context: BrowserContext, server: Server
+) -> None:
+    file: FilePayload = {
+        "name": "f.js",
+        "mimeType": "text/javascript",
+        "buffer": b"var x = 10;\r\n;console.log(x);",
+    }
+    [request, _] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        context.request.post(
+            server.PREFIX + "/empty.html",
+            multipart={
+                "firstName": "John",
+                "lastName": "Doe",
+                "score": 42.5,
+                "active": True,
+                "file": file,
+            },
+        ),
+    )
+    assert request.method == b"POST"
+    assert cast(str, request.getHeader("Content-Type")).startswith(
+        "multipart/form-data; "
+    )
+    assert must(request.getHeader("Content-Length")) == str(
+        len(must(request.post_body))
+    )
+    assert request.args[b"firstName"] == [b"John"]
+    assert request.args[b"lastName"] == [b"Doe"]
+    assert request.args[b"score"] == [b"42.5"]
+    assert request.args[b"active"] == [b"True"]
+    assert request.args[b"file"][0] == file["buffer"]
+
+
+async def test_should_send_empty_form(context: BrowserContext, server: Server) -> None:
+    [request, _] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        context.request.post(server.EMPTY_PAGE, form={}),
+    )
+    assert request.getHeader("Content-Type") == "application/x-www-form-urlencoded"
+    assert request.getHeader("Content-Length") == "0"
+
+
+async def test_should_send_empty_multipart(
+    context: BrowserContext, server: Server
+) -> None:
+    # The test server rejects an empty multipart body in POST requests before handling them.
+    [request, _] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        context.request.put(server.EMPTY_PAGE, multipart={}),
+    )
+    assert cast(str, request.getHeader("Content-Type")).startswith(
+        "multipart/form-data; "
+    )
+    assert must(request.getHeader("Content-Length")) == str(
+        len(must(request.post_body))
+    )
+
+
+async def test_should_support_form_data_with_repeated_keys(
+    context: BrowserContext, server: Server
+) -> None:
+    form = FormData()
+    form.append("name", "John")
+    form.append("name", "Doe")
+    form.set("email", "john@example.com")
+    [request, _] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        context.request.post(server.EMPTY_PAGE, form=form),
+    )
+    assert request.getHeader("Content-Type") == "application/x-www-form-urlencoded"
+    params = parse_qs(must(request.post_body))
+    assert params[b"name"] == [b"John", b"Doe"]
+    assert params[b"email"] == [b"john@example.com"]
+
+
+async def test_should_support_form_data_set_overwrites_previous_values(
+    context: BrowserContext, server: Server
+) -> None:
+    form = FormData()
+    form.append("name", "first")
+    form.append("name", "second")
+    form.set("name", "final")
+    form.set("age", 30)
+    [request, _] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        context.request.post(server.EMPTY_PAGE, form=form),
+    )
+    params = parse_qs(must(request.post_body))
+    assert params[b"name"] == [b"final"]
+    assert params[b"age"] == [b"30"]
+
+
+@only_v1("tests/async/python/test_fetch_browser_context.py")
+async def test_should_reject_file_value_in_form(
+    context: BrowserContext, server: Server, tmp_path: Path
+) -> None:
+    file = tmp_path / "f.txt"
+    file.write_bytes(b"hello")
+    form = FormData()
+    form.set("attachment", file)
+    with pytest.raises(Error, match="Use 'multipart' for file uploads"):
+        await context.request.post(server.EMPTY_PAGE, form=form)
+
+
+async def test_should_support_multipart_form_data_with_multiple_files_in_one_field(
+    context: BrowserContext, server: Server
+) -> None:
+    file1: FilePayload = {
+        "name": "f1.txt",
+        "mimeType": "text/plain",
+        "buffer": b"file 1 content",
+    }
+    file2: FilePayload = {
+        "name": "f2.txt",
+        "mimeType": "text/plain",
+        "buffer": b"file 2 content",
+    }
+    form = FormData()
+    form.append("files", file1)
+    form.append("files", file2)
+    form.set("user", "alice")
+    [request, _] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        context.request.post(server.EMPTY_PAGE, multipart=form),
+    )
+    assert cast(str, request.getHeader("Content-Type")).startswith(
+        "multipart/form-data; "
+    )
+    assert request.args[b"user"] == [b"alice"]
+    assert request.args[b"files"] == [file1["buffer"], file2["buffer"]]
+
+
+async def test_should_support_multipart_form_data_with_path_value(
+    context: BrowserContext, server: Server, tmp_path: Path
+) -> None:
+    file = tmp_path / "data.csv"
+    file.write_bytes(b"a,b,c\n1,2,3\n")
+    form = FormData()
+    form.set("attachment", file)
+    [request, _] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        context.request.post(server.EMPTY_PAGE, multipart=form),
+    )
+    assert cast(str, request.getHeader("Content-Type")).startswith(
+        "multipart/form-data; "
+    )
+    assert request.args[b"attachment"] == [b"a,b,c\n1,2,3\n"]
+
+
+async def test_should_add_default_headers(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    [request, response] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        context.request.get(server.EMPTY_PAGE),
+    )
+    assert request.getHeader("Accept") == "*/*"
+    assert request.getHeader("Accept-Encoding") == "gzip,deflate,br"
+    assert request.getHeader("User-Agent") == await page.evaluate(
+        "() => navigator.userAgent"
+    )
+
+
+async def test_should_work_after_context_dispose(
+    context: BrowserContext, server: Server
+) -> None:
+    await context.close(reason="Test ended.")
+    with pytest.raises(Error, match="Test ended."):
+        await context.request.get(server.EMPTY_PAGE)
+
+
+async def test_should_retry_ECONNRESET(context: BrowserContext, server: Server) -> None:
+    request_count = 0
+
+    def _handle_request(req: TestServerRequest) -> None:
+        nonlocal request_count
+        request_count += 1
+        if request_count <= 3:
+            assert req.transport
+            req.transport.abortConnection()
+            return
+        req.setHeader("content-type", "text/plain")
+        req.write(b"Hello!")
+        req.finish()
+
+    server.set_route("/test", _handle_request)
+    response = await context.request.fetch(server.PREFIX + "/test", max_retries=3)
+    assert response.status == 200
+    assert await response.text() == "Hello!"
+    assert request_count == 4
+
+
+async def test_page_request_add_cookies_should_add_cookies_to_the_browser_context(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    await page.request.add_cookies(
+        [
+            {"name": "a", "value": "b", "url": server.EMPTY_PAGE},
+            {
+                "name": "c",
+                "value": "d",
+                "domain": "localhost",
+                "path": "/",
+                "expires": time.time() + 3600,
+            },
+        ]
+    )
+    assert sorted(c["name"] for c in await context.cookies()) == ["a", "c"]
+    server_request, _ = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        context.request.get(server.EMPTY_PAGE),
+    )
+    cookie_header = server_request.getHeader("cookie")
+    assert cookie_header
+    assert sorted(s.strip() for s in cookie_header.split(";")) == ["a=b", "c=d"]
+
+
+async def test_page_request_cookies_should_return_browser_context_cookies(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    await context.add_cookies(
+        [
+            {"name": "a", "value": "b", "url": server.EMPTY_PAGE},
+            {"name": "c", "value": "d", "domain": "example.com", "path": "/"},
+        ]
+    )
+    assert sorted(c["name"] for c in await page.request.cookies()) == ["a", "c"]
+    assert [c["name"] for c in await page.request.cookies(server.EMPTY_PAGE)] == ["a"]
+    assert await page.request.cookies(server.EMPTY_PAGE) == await context.cookies(
+        server.EMPTY_PAGE
+    )
+
+
+async def test_page_request_clear_cookies_should_clear_browser_context_cookies(
+    context: BrowserContext, page: Page, server: Server
+) -> None:
+    await context.add_cookies(
+        [
+            {"name": "a", "value": "b", "url": server.EMPTY_PAGE},
+            {"name": "c", "value": "d", "url": server.EMPTY_PAGE},
+        ]
+    )
+    await page.request.clear_cookies(name="a")
+    assert [c["name"] for c in await context.cookies()] == ["c"]
+    await page.request.clear_cookies()
+    assert await context.cookies() == []

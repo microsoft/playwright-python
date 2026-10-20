@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import re
-from typing import Any, List, cast
+from typing import Any, List, Union, cast
 
 from playwright.sync_api import Error, Frame, Page, Selectors, ViewportSize
 
@@ -54,6 +54,13 @@ class Utils:
         for child in sorted_frames:
             result = result + utils.dump_frames(child, "    " + indentation)
         return result
+
+    def rafraf(self, target: Union[Page, Frame], count: int = 1) -> None:
+        """Waits for two animation frames, count times. Port of rafraf() in tests/config/utils.ts."""
+        for _ in range(count):
+            target.evaluate(
+                "() => new Promise(f => window.builtins.requestAnimationFrame(() => window.builtins.requestAnimationFrame(f)))"
+            )
 
     def verify_viewport(self, page: Page, width: int, height: int) -> None:
         assert cast(ViewportSize, page.viewport_size)["width"] == width
