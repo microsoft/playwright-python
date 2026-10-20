@@ -82,7 +82,7 @@ git -C "$PW_SRC_DIR" commit -am "docs: release notes for v1.xx Python"
 git -C "$PW_SRC_DIR" push <fork-remote> release-notes-1.xx-python
 gh pr create --repo microsoft/playwright --head <login>:release-notes-1.xx-python \
   --title "docs: release notes for v1.xx Python" \
-  --body "- Add Python-specific changes to the \`Version 1.xx\` Python release notes"
+  --body "- Update the \`Version 1.xx\` Python release notes with upstream and Python-specific changes"
 ```
 
 After the PR merges, it needs a cherry-pick to `release-1.xx` (the
