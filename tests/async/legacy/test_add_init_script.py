@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Optional
 
 from playwright.async_api import BrowserContext, Error, Page
-from tests.utils import only_v1, only_v2
+from tests.utils import only_v1
 
 
 async def test_add_init_script_evaluate_before_anything_else_on_the_page(
@@ -39,7 +39,7 @@ async def test_add_init_script_work_with_content(page: Page) -> None:
     assert await page.evaluate("window.result") == 123
 
 
-@only_v1
+@only_v1("IS-004")
 async def test_add_init_script_throw_without_path_and_content(page: Page) -> None:
     error: Optional[Error] = None
     try:
@@ -48,17 +48,6 @@ async def test_add_init_script_throw_without_path_and_content(page: Page) -> Non
         error = e
     assert error
     assert error.message == "Either path or script parameter must be specified"
-
-
-@only_v2
-async def test_add_init_script_throw_without_path_and_content_v2(page: Page) -> None:
-    error: Optional[Error] = None
-    try:
-        await page.add_init_script({"foo": "bar"})  # type: ignore
-    except Error as e:
-        error = e
-    assert error
-    assert error.message == "Either path or script parameter must be present"
 
 
 async def test_add_init_script_work_with_browser_context_scripts(

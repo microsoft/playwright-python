@@ -55,10 +55,11 @@ def pytest_configure(config: pytest.Config) -> None:
 # - playwright/_impl (v1, the default) runs the older tests: tests/{async,sync}/legacy
 #   and the tests outside of tests/async and tests/sync.
 # - PW_IMPL=v2 runs playwright/_impl_v2, which has only the async API, on all of
-#   tests/async: the older tests and the ports of the upstream tests in
-#   tests/async/page and tests/async/library.
+#   tests/async: the older tests, the ports of the upstream tests in
+#   tests/async/page and tests/async/library, and the Python-only tests of v2 in
+#   tests/async/python.
 _TESTS_DIR = Path(__file__).parent
-_UPSTREAM_PORTS = {"page", "library"}
+_NOT_V1 = {"page", "library", "python"}
 
 
 def pytest_ignore_collect(
@@ -76,11 +77,7 @@ def pytest_ignore_collect(
         ):
             return True
         return None
-    if (
-        len(parts) >= 2
-        and parts[0] in ("async", "sync")
-        and parts[1] in _UPSTREAM_PORTS
-    ):
+    if len(parts) >= 2 and parts[0] in ("async", "sync") and parts[1] in _NOT_V1:
         return True
     return None
 

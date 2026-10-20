@@ -433,6 +433,25 @@ def test_ST_010_should_handle_malformed_file(
     ) in str(exc_info.value)
 
 
+@pytest.mark.xfail(
+    reason="driver: it replaces lone surrogates with U+FFFD in the messages to the "
+    "clients other than JavaScript (toWellFormed() in cli/driver.ts)",
+    strict=True,
+)
+def test_ST_011_should_serialize_storage_state_with_lone_surrogates(
+    page: Page, context: BrowserContext, server: Server
+) -> None:
+    # https://github.com/microsoft/playwright-dotnet/issues/2819
+    page.goto(server.EMPTY_PAGE)
+    page.evaluate(
+        "() => window.localStorage.setItem('foo', String.fromCharCode(55934))"
+    )
+    storage_state = context.storage_state()
+    value = storage_state["origins"][0]["localStorage"][0]["value"]
+    # Compare the code points: a lone surrogate in the report crashes pytest-xdist.
+    assert [ord(c) for c in value] == [55934]
+
+
 def test_ST_012_should_work_when_service_worker_is_intefering(
     page: Page, context: BrowserContext, server: Server
 ) -> None:

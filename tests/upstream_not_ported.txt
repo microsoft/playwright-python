@@ -64,8 +64,6 @@ FE-185      passes __testHookLookup, a JS function, as a request option, and ass
 FE-186      passes __testHookLookup, a JS function, as a request option, and asserts that it was called; only an in-process server can receive it. A proxy can not stand in: the test checks the direct Happy Eyeballs connection through unreachable addresses.
 FE-187      passes __testHookLookup, a JS function, as a request option, and asserts that it was called; only an in-process server can receive it. A proxy can not stand in: the test checks the direct Happy Eyeballs connection through unreachable addresses.
 library/browsercontext-reuse        uses the private context-reuse mode of the JS client (browser._newContextForReuse() / _disconnectFromReusedContext() and browserType._instrumentation, used by @playwright/test); the Python Browser has no such methods, only the raw newContextForReuse/disconnectFromReusedContext channel commands, without the client-side bookkeeping (closing the old Page/BrowserContext objects, marking the context for reuse).
-# library/browsercontext-storage-state
-ST-011      The driver replaces lone surrogates with U+FFFD in the messages to clients other than JavaScript (toWellFormed() in packages/playwright-core/src/cli/driver.ts), so a Python client never receives the lone surrogate.
 # library/browsercontext-route
 RO-185      URLPattern is not in the Python API: route() takes a str glob, a re.Pattern or a predicate, so there is no URLPattern ignoreCase option to test.
 # library/browsertype-connect

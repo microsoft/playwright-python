@@ -32,7 +32,7 @@ from playwright.async_api import (
     expect,
 )
 from tests.server import Server
-from tests.utils import only_v1, only_v2
+from tests.utils import only_v1
 
 from ..conftest import TraceViewerPage
 
@@ -267,7 +267,7 @@ async def test_should_collect_two_traces(
         )
 
 
-@only_v1
+@only_v1("tests/async/python/test_tracing.py")
 async def test_should_work_with_playwright_context_managers(
     context: BrowserContext,
     page: Page,
@@ -302,42 +302,7 @@ async def test_should_work_with_playwright_context_managers(
         )
 
 
-@only_v2
-async def test_should_work_with_playwright_context_managers_v2(
-    context: BrowserContext,
-    page: Page,
-    server: Server,
-    tmp_path: Path,
-    show_trace_viewer: Callable[[Path], AsyncContextManager[TraceViewerPage]],
-) -> None:
-    await context.tracing.start(screenshots=True, snapshots=True)
-    await page.goto(server.EMPTY_PAGE)
-    await page.set_content("<button>Click</button>")
-    async with page.expect_console_message() as message_info:
-        await page.evaluate('() => console.log("hello")')
-        await page.click('"Click"')
-    assert (await message_info.value).text == "hello"
-
-    async with page.expect_popup():
-        await page.evaluate("window._popup = window.open(document.location.href)")
-    trace_file_path = tmp_path / "trace.zip"
-    await context.tracing.stop(path=trace_file_path)
-
-    async with show_trace_viewer(trace_file_path) as trace_viewer:
-        await expect(trace_viewer.action_titles).to_have_text(
-            [
-                re.compile(r"Navigate.*/empty\.html"),
-                re.compile(r"Set content"),
-                re.compile(r'Wait for event "console"'),
-                re.compile(r"Evaluate"),
-                re.compile(r"Click"),
-                re.compile(r'Wait for event "popup"'),
-                re.compile(r"Evaluate"),
-            ]
-        )
-
-
-@only_v1
+@only_v1("tests/async/python/test_tracing.py")
 async def test_should_display_wait_for_load_state_even_if_did_not_wait_for_it(
     context: BrowserContext,
     page: Page,
@@ -360,33 +325,6 @@ async def test_should_display_wait_for_load_state_even_if_did_not_wait_for_it(
                 re.compile(r"Navigate.*/empty\.html"),
                 re.compile(r'Wait for event "frame\.wait_for_load_state"'),
                 re.compile(r'Wait for event "frame\.wait_for_load_state"'),
-            ]
-        )
-
-
-@only_v2
-async def test_should_display_wait_for_load_state_even_if_did_not_wait_for_it_v2(
-    context: BrowserContext,
-    page: Page,
-    server: Server,
-    tmp_path: Path,
-    show_trace_viewer: Callable[[Path], AsyncContextManager[TraceViewerPage]],
-) -> None:
-    await context.tracing.start(screenshots=True, snapshots=True)
-
-    await page.goto(server.EMPTY_PAGE)
-    await page.wait_for_load_state("load")
-    await page.wait_for_load_state("load")
-
-    trace_file_path = tmp_path / "trace.zip"
-    await context.tracing.stop(path=trace_file_path)
-
-    async with show_trace_viewer(trace_file_path) as trace_viewer:
-        await expect(trace_viewer.action_titles).to_have_text(
-            [
-                re.compile(r"Navigate.*/empty\.html"),
-                re.compile(r"Wait for load state"),
-                re.compile(r"Wait for load state"),
             ]
         )
 
