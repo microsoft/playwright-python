@@ -53,14 +53,13 @@ from playwright._impl._api_structures import (
     SecurityDetails,
     SetCookieParam,
 )
-from playwright._impl._errors import Error
 from playwright._impl_v2.channel_owner import (
     ChannelOwner,
     api_call,
     from_channel,
     internal,
 )
-from playwright._impl_v2.errors import is_target_closed_error
+from playwright._impl_v2.errors import Error, is_target_closed_error
 from playwright._impl_v2.event_context_manager import EventContextManagerImpl
 from playwright._impl_v2.events import Events
 from playwright._impl_v2.internal_structures import Headers, HeadersArray
@@ -78,7 +77,13 @@ from playwright._impl_v2.isomorphic.url_match import (
     url_matches,
 )
 from playwright._impl_v2.timeout_settings import NO_TIMEOUT
-from playwright._impl_v2.utils.promise import all_, catch, resolved, start, then
+from playwright._impl_v2.utils.promise import (
+    all_,
+    catch,
+    resolved,
+    start_eager,
+    then,
+)
 from playwright._impl_v2.utils.stack_trace import rewrite_error_message
 from playwright._impl_v2.utils.zones import Zone, current_zone
 from playwright._impl_v2.waiter import Waiter
@@ -1167,7 +1172,7 @@ class WebSocket(ChannelOwner):
         # waitForEvent() as a context manager. The wait runs in a task, which starts
         # before the action in the with block makes the event happen.
         return EventContextManagerImpl(
-            start(
+            start_eager(
                 self.wait_for_event(event=event, predicate=predicate, timeout=timeout)
             )
         )

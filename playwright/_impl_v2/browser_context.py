@@ -58,7 +58,6 @@ from playwright._impl._api_structures import (
     SetCookieParam,
     StorageState,
 )
-from playwright._impl._errors import Error
 from playwright._impl_v2 import network
 from playwright._impl_v2.cdp_session import CDPSession
 from playwright._impl_v2.channel_owner import (
@@ -74,7 +73,7 @@ from playwright._impl_v2.credentials import Credentials
 from playwright._impl_v2.debugger import Debugger
 from playwright._impl_v2.dialog import Dialog
 from playwright._impl_v2.disposable import DisposableObject, DisposableStub
-from playwright._impl_v2.errors import TargetClosedError, parse_error
+from playwright._impl_v2.errors import Error, TargetClosedError, parse_error
 from playwright._impl_v2.event_context_manager import EventContextManagerImpl
 from playwright._impl_v2.events import Events
 from playwright._impl_v2.fetch import APIRequestContext
@@ -87,7 +86,7 @@ from playwright._impl_v2.isomorphic.url_match import URLMatch, url_matches_equal
 from playwright._impl_v2.page import BindingCall, Page
 from playwright._impl_v2.timeout_settings import NO_TIMEOUT, TimeoutSettings
 from playwright._impl_v2.tracing import Tracing
-from playwright._impl_v2.utils.promise import all_, catch, start
+from playwright._impl_v2.utils.promise import all_, catch, start_eager
 from playwright._impl_v2.utils.whatwg_url import parse_url
 from playwright._impl_v2.waiter import Waiter
 from playwright._impl_v2.web_error import WebError
@@ -845,7 +844,7 @@ class BrowserContext(ChannelOwner):
         # Python: waitForEvent() as a context manager. The wait runs in a task, which
         # starts before the action in the with block makes the event happen.
         return EventContextManagerImpl(
-            start(
+            start_eager(
                 self.wait_for_event(event=event, predicate=predicate, timeout=timeout)
             )
         )

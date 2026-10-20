@@ -33,7 +33,7 @@ from typing import (
     cast,
 )
 
-from playwright._impl._errors import Error
+from playwright._impl_v2.errors import Error
 from playwright._impl_v2.utils.promise import race
 
 T = TypeVar("T")
@@ -150,7 +150,7 @@ class _Frames:
 def clone_error(error: Exception, frames: _Frames) -> Exception:
     # Python: like `new Error()`, the clone is a plain Error with the name and the
     # message of the error.
-    name = error.name if isinstance(error, Error) else type(error).__name__
+    name = (error.name or "Error") if isinstance(error, Error) else type(error).__name__
     message = error.message if isinstance(error, Error) else str(error)
     clone = Error(message)
     clone._name = name

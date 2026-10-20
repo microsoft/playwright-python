@@ -30,7 +30,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from playwright._impl._driver import compute_driver_executable, get_driver_env
-from playwright._impl._errors import Error
+from playwright._impl_v2.errors import Error
 
 # A message from the driver.
 ParsedMessagePayload = Dict[str, Any]

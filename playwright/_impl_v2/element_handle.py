@@ -48,8 +48,8 @@ from typing import (
 )
 
 from playwright._impl._api_structures import FilePayload, FloatRect, Position
-from playwright._impl._errors import Error
 from playwright._impl_v2.channel_owner import ApiCallOptions, ChannelOwner, from_channel
+from playwright._impl_v2.errors import Error
 from playwright._impl_v2.file_utils import file_upload_size_limit, mkdir_if_needed
 from playwright._impl_v2.isomorphic.mime_type import get_mime_type_for_path
 from playwright._impl_v2.js_handle import (
@@ -704,7 +704,7 @@ async def convert_input_files(
         "payloads": [
             {
                 "name": item["name"],
-                "mimeType": item.get("mimeType"),
+                "mimeType": item["mimeType"],
                 "buffer": base64.b64encode(item["buffer"]).decode(),
             }
             for item in payloads

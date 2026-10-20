@@ -31,7 +31,7 @@ from playwright._impl_v2.isomorphic.manual_promise import LongStandingScope
 from playwright._impl_v2.isomorphic.string_utils import js_string
 from playwright._impl_v2.js_handle import JSHandle, parse_result, serialize_argument
 from playwright._impl_v2.timeout_settings import NO_TIMEOUT, TimeoutSettings
-from playwright._impl_v2.utils.promise import start
+from playwright._impl_v2.utils.promise import start_eager
 from playwright._impl_v2.waiter import Waiter
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -178,7 +178,7 @@ class Worker(ChannelOwner):
         # Python: waitForEvent() as a context manager. The wait runs in a task, which
         # starts before the action in the with block makes the event happen.
         return EventContextManagerImpl(
-            start(
+            start_eager(
                 self.wait_for_event(event=event, predicate=predicate, timeout=timeout)
             )
         )

@@ -24,8 +24,8 @@ import asyncio
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Set, Union
 
-from playwright._impl._errors import Error
 from playwright._impl_v2.client_helper import evaluation_script
+from playwright._impl_v2.errors import Error
 from playwright._impl_v2.locator import set_test_id_attribute
 from playwright._impl_v2.timeout_settings import NO_TIMEOUT
 from playwright._impl_v2.utils.promise import catch

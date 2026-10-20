@@ -42,15 +42,16 @@ from typing import (
     cast,
 )
 
-from playwright._impl._errors import Error
 from playwright._impl_v2.browser import Browser
 from playwright._impl_v2.connection import Connection
+from playwright._impl_v2.errors import Error
 from playwright._impl_v2.events import Events
 from playwright._impl_v2.internal_structures import HeadersArray
 from playwright._impl_v2.isomorphic.string_utils import js_string
 from playwright._impl_v2.isomorphic.time import monotonic_time
 from playwright._impl_v2.timeout_settings import NO_TIMEOUT
 from playwright._impl_v2.utils.promise import (
+    Timer,
     catch,
     clear_timeout,
     race,
@@ -228,7 +229,7 @@ class JsonPipeTransport:
 async def race_against_deadline(
     cb: Callable[[], Awaitable[T]], deadline: float
 ) -> Dict[str, Any]:
-    timer: Optional[asyncio.TimerHandle] = None
+    timer: Optional[Timer] = None
     timed_out: "asyncio.Future[Dict[str, Any]]" = (
         asyncio.get_running_loop().create_future()
     )

@@ -14,8 +14,10 @@
 
 """Port of packages/playwright-core/src/client/clientStackTrace.ts."""
 
+import os
 from typing import List, Optional, TypedDict
 
+import playwright
 import playwright._impl._impl_to_api_mapping
 from playwright._impl_v2.utils.stack_trace import (
     StackFrame,
@@ -33,6 +35,11 @@ class LibraryStackTrace(TypedDict):
 
 # Python: the glue that maps the impl objects of an event to the API objects.
 _MAPPING_FILE = playwright._impl._impl_to_api_mapping.__file__
+# Python: the generated API, which the user code calls.
+_GENERATED_API_FILES = {
+    os.path.join(os.path.dirname(playwright.__file__), flavor, "_generated.py")
+    for flavor in ("async_api", "sync_api")
+}
 
 
 def capture_library_stack_trace() -> LibraryStackTrace:
@@ -63,6 +70,16 @@ def capture_library_stack_trace() -> LibraryStackTrace:
                 frame_function_name(parsed_frames[i])
             )
             break
+
+    # Python: a coroutine of the API that runs in a task of its own (create_task(),
+    # gather()) has no frame of the code that called it, because it starts when the
+    # event loop runs it; a JS async function starts at once, in the caller's stack.
+    # Then the outermost frame of the generated API names the call.
+    if not api_name:
+        for raw in reversed(parsed_frames):
+            if raw.f_code.co_filename in _GENERATED_API_FILES:
+                api_name = normalize_api_name(frame_function_name(raw))
+                break
 
     # This is for the inspector so that it did not include the test runner stack frames.
     frames: List[StackFrame] = [

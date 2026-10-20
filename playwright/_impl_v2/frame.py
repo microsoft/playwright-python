@@ -45,7 +45,6 @@ from typing import (
 )
 
 from playwright._impl._api_structures import DropPayload, FilePayload, Position
-from playwright._impl._errors import Error
 from playwright._impl_v2 import network
 from playwright._impl_v2.channel_owner import (
     ApiCallOptions,
@@ -59,6 +58,7 @@ from playwright._impl_v2.element_handle import (
     convert_input_files,
     convert_select_option_values,
 )
+from playwright._impl_v2.errors import Error
 from playwright._impl_v2.event_context_manager import EventContextManagerImpl
 from playwright._impl_v2.event_emitter import EventEmitter
 from playwright._impl_v2.events import Events
@@ -92,7 +92,7 @@ from playwright._impl_v2.locator import (
 )
 from playwright._impl_v2.timeout_settings import NO_TIMEOUT, TimeoutSettings
 from playwright._impl_v2.types import LIFECYCLE_EVENTS
-from playwright._impl_v2.utils.promise import rejected, start
+from playwright._impl_v2.utils.promise import rejected, start_eager
 from playwright._impl_v2.waiter import Waiter
 from playwright._impl_v2.web_mcp import WebMCP
 
@@ -1297,7 +1297,7 @@ class Frame(ChannelOwner):
         # navigates. Its synchronous part (the waiter and its listeners) runs at the
         # next turn of the event loop, before the driver's next message is dispatched.
         return EventContextManagerImpl(
-            start(
+            start_eager(
                 self.wait_for_navigation(
                     url=url, wait_until=wait_until, timeout=timeout
                 )

@@ -23,6 +23,7 @@ from twisted.web import http
 
 from playwright.async_api import Browser, Error, Page, Request, Response, Route
 from tests.server import Server, TestServerRequest
+from tests.utils import only_v1, only_v2
 
 from ..utils import Utils
 
@@ -880,6 +881,7 @@ async def test_set_extra_http_headers_should_override_extra_headers_from_browser
     assert request.getHeader("bar") == "foO"
 
 
+@only_v1
 @pytest.mark.skip_protocol_check
 async def test_set_extra_http_headers_should_throw_for_non_string_header_values(
     page: Page,
@@ -893,6 +895,22 @@ async def test_set_extra_http_headers_should_throw_for_non_string_header_values(
     assert (
         error.message
         == "Page.set_extra_http_headers: headers[0].value: expected string, got number"
+    )
+
+
+@only_v2
+async def test_set_extra_http_headers_should_throw_for_non_string_header_values_v2(
+    page: Page,
+) -> None:
+    error: Optional[Error] = None
+    try:
+        await page.set_extra_http_headers({"foo": 1})  # type: ignore
+    except Error as exc:
+        error = exc
+    assert error
+    assert (
+        'Expected value of header "foo" to be String, but "number" is found.'
+        in error.message
     )
 
 

@@ -21,7 +21,7 @@ channel (the "base64" mode); the JS modes are kept for completeness.
 import base64
 from typing import Any, Callable, Dict, List, Literal, Optional, Sequence, Union
 
-from playwright._impl._errors import Error
+from playwright._impl_v2.errors import Error
 
 
 class ValidationError(Error):
@@ -30,18 +30,30 @@ class ValidationError(Error):
     pass
 
 
+BinaryMode = Literal["toBase64", "fromBase64", "buffer", "base64"]
+
+
 class ValidatorContext:
     def __init__(
         self,
         t_channel_impl: Callable[
             [Union[Literal["*"], List[str]], Any, str, "ValidatorContext"], Any
         ],
-        binary: Literal["toBase64", "fromBase64", "buffer", "base64"],
+        binary: BinaryMode,
         is_under_test: Callable[[], bool],
     ) -> None:
         self.t_channel_impl = t_channel_impl
-        self.binary = binary
+        self.binary: BinaryMode = binary
         self.is_under_test = is_under_test
+        # Python: whether the value is inside an array; see t_optional().
+        self.in_array = False
+
+    def _array_items(self) -> "ValidatorContext":
+        if self.in_array:
+            return self
+        context = ValidatorContext(self.t_channel_impl, self.binary, self.is_under_test)
+        context.in_array = True
+        return context
 
 
 Validator = Callable[[Any, str, ValidatorContext], Any]
@@ -153,10 +165,18 @@ def t_any(arg: Any, path: str, context: ValidatorContext) -> Any:
     return arg
 
 
+# Python: None is undefined, and also JSON null. In the items of an array, a JSON
+# value that is there with None is null, as it is data (an IndexedDB value in a
+# storage state); everywhere else, None is an absent option.
+_NULL = object()
+
+
 def t_optional(v: Validator) -> Validator:
+    keeps_null = v is t_any
+
     def validator(arg: Any, path: str, context: ValidatorContext) -> Any:
         if arg is None:
-            return arg
+            return _NULL if keeps_null and context.in_array else arg
         return v(arg, path, context)
 
     return validator
@@ -167,9 +187,11 @@ def t_array(v: Validator) -> Validator:
         # Python: a tuple is an array too.
         if not isinstance(arg, (list, tuple)):
             raise ValidationError(f"{path}: expected array, got {_typeof(arg)}")
-        return [
-            v(x, path + "[" + str(index) + "]", context) for index, x in enumerate(arg)
+        items = context._array_items()
+        result = [
+            v(x, path + "[" + str(index) + "]", items) for index, x in enumerate(arg)
         ]
+        return [None if x is _NULL else x for x in result]
 
     return validator
 
@@ -181,7 +203,12 @@ def t_object(s: Dict[str, Validator]) -> Validator:
         result: Dict[str, Any] = {}
         for key, v in s.items():
             value = v(arg.get(key), path + "." + key if path else key, context)
-            if value is not None:
+            if value is _NULL:
+                # Python: a key that is there with None is null; a key that is not
+                # there is undefined.
+                if key in arg:
+                    result[key] = None
+            elif value is not None:
                 result[key] = value
         if context.is_under_test():
             for key, value in arg.items():

@@ -16,9 +16,11 @@
 
 Each module is the port of the client file with the same name in snake_case
 (page.ts is page.py, browserContext.ts is browser_context.py), with the members in
-the same order. utils/ and isomorphic/ hold the ports of the parts of
-packages/utils and packages/isomorphic that the client uses and that playwright/_impl
-does not have yet; the other pure modules come from playwright/_impl.
+the same order. isomorphic/, protocol/ and utils/ hold the ports of the parts of
+packages/isomorphic, packages/protocol and packages/utils that the client uses.
+From playwright/_impl, v2 uses only what the two implementations must share: the
+public error classes and FormData, the generated API types, the driver location and
+the protocol check of the tests.
 
 What differs from the JS code is marked with a "Python:" comment. The rules:
 

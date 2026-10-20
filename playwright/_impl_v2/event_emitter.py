@@ -104,9 +104,13 @@ class EventEmitter:
                 self._rejection_handler(e)
             else:
                 # Python: the counterpart of an unhandled rejection.
-                report_unhandled_error(e)
+                self._report_unhandled_error(e)
 
         future.add_done_callback(on_done)
+
+    def _report_unhandled_error(self, error: BaseException) -> None:
+        # Python: an unhandled rejection crashes Node.js; see report_unhandled_error().
+        report_unhandled_error(error)
 
     def add_listener(self, type: EventType, listener: Listener) -> "EventEmitter":
         return self._add_listener(type, listener, False)

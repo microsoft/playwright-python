@@ -22,7 +22,7 @@ import json
 import re
 from typing import TYPE_CHECKING, Callable, Dict, Optional, Pattern, Tuple, Union
 
-from playwright._impl._errors import Error
+from playwright._impl_v2.errors import Error
 from playwright._impl_v2.isomorphic.string_utils import escape_regex_flags
 from playwright._impl_v2.utils.whatwg_url import parse_url
 

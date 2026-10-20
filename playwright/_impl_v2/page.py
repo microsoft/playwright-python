@@ -58,7 +58,6 @@ from playwright._impl._api_structures import (
     Position,
     ViewportSize,
 )
-from playwright._impl._errors import Error
 from playwright._impl_v2.artifact import Artifact
 from playwright._impl_v2.channel_owner import (
     ChannelOwner,
@@ -75,6 +74,7 @@ from playwright._impl_v2.element_handle import (
     determine_screenshot_type,
 )
 from playwright._impl_v2.errors import (
+    Error,
     TargetClosedError,
     is_target_closed_error,
     parse_error,
@@ -112,7 +112,7 @@ from playwright._impl_v2.network import (
 )
 from playwright._impl_v2.screencast import Screencast
 from playwright._impl_v2.timeout_settings import NO_TIMEOUT, TimeoutSettings
-from playwright._impl_v2.utils.promise import all_, catch, start
+from playwright._impl_v2.utils.promise import all_, catch, start_eager
 from playwright._impl_v2.video import Video
 from playwright._impl_v2.waiter import Waiter
 from playwright._impl_v2.web_storage import WebStorage
@@ -1710,7 +1710,7 @@ class Page(ChannelOwner):
         timeout: Optional[float],
     ) -> EventContextManagerImpl[Request]:
         return EventContextManagerImpl(
-            start(
+            start_eager(
                 self.wait_for_request(
                     url_or_predicate=url_or_predicate, timeout=timeout
                 )
@@ -1723,7 +1723,7 @@ class Page(ChannelOwner):
         timeout: Optional[float],
     ) -> EventContextManagerImpl[Response]:
         return EventContextManagerImpl(
-            start(
+            start_eager(
                 self.wait_for_response(
                     url_or_predicate=url_or_predicate, timeout=timeout
                 )
@@ -1737,7 +1737,7 @@ class Page(ChannelOwner):
         timeout: Optional[float],
     ) -> EventContextManagerImpl:
         return EventContextManagerImpl(
-            start(
+            start_eager(
                 self.wait_for_event(event=event, predicate=predicate, timeout=timeout)
             )
         )

@@ -26,7 +26,7 @@ from playwright.async_api import (
     Playwright,
 )
 from tests.server import Server
-from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
+from tests.utils import TARGET_CLOSED_ERROR_MESSAGE, only_v1, only_v2
 
 from ..utils import Utils
 
@@ -429,6 +429,7 @@ async def test_expose_function_should_work(context: BrowserContext) -> None:
     assert result == {"mul": 36, "add": 13, "sub": 5}
 
 
+@only_v1
 async def test_expose_function_should_throw_for_duplicate_registrations(
     context: BrowserContext, server: Server
 ) -> None:
@@ -450,6 +451,34 @@ async def test_expose_function_should_throw_for_duplicate_registrations(
     assert (
         exc_info.value.message
         == 'Function "baz" has been already registered in one of the pages'
+    )
+
+
+@only_v2
+async def test_expose_function_should_throw_for_duplicate_registrations_v2(
+    context: BrowserContext, server: Server
+) -> None:
+    await context.expose_function("foo", lambda: None)
+    await context.expose_function("bar", lambda: None)
+    with pytest.raises(Error) as exc_info:
+        await context.expose_function("foo", lambda: None)
+    assert (
+        exc_info.value.message
+        == 'BrowserContext.expose_function: Function "foo" has been already registered'
+    )
+    page = await context.new_page()
+    with pytest.raises(Error) as exc_info:
+        await page.expose_function("foo", lambda: None)
+    assert (
+        exc_info.value.message
+        == 'Page.expose_function: Function "foo" has been already registered in the browser context'
+    )
+    await page.expose_function("baz", lambda: None)
+    with pytest.raises(Error) as exc_info:
+        await context.expose_function("baz", lambda: None)
+    assert (
+        exc_info.value.message
+        == 'BrowserContext.expose_function: Function "baz" has been already registered in one of the pages'
     )
 
 

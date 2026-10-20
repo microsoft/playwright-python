@@ -24,7 +24,6 @@ import asyncio
 from typing import Any, Tuple
 
 from playwright._impl_v2.connection import Connection
-from playwright._impl_v2.event_emitter import report_unhandled_error
 from playwright._impl_v2.playwright import Playwright
 from playwright._impl_v2.transport import PipeTransport
 from playwright._impl_v2.utils.promise import retrieve
@@ -46,12 +45,12 @@ class PlaywrightClient:
         connection.onmessage = lambda message: transport.send(message)
 
         def on_message(message: Any) -> None:
-            # Python: an exception in a listener crashes Node.js; here the event loop
-            # reports it, and the transport goes on.
+            # Python: an exception in a listener crashes Node.js; here the next API
+            # call raises it, and the transport goes on.
             try:
                 connection.dispatch(message)
             except Exception as error:
-                report_unhandled_error(error)
+                connection._on_event_listener_error(error)
 
         transport.on_message = on_message
         self._playwright = asyncio.ensure_future(self._run(connection))

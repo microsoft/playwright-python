@@ -16,6 +16,7 @@ import pytest
 
 from playwright.async_api import Error, Page, TimeoutError
 from tests.server import Server
+from tests.utils import only_v1, only_v2
 
 
 async def test_select_option_should_select_single_option(
@@ -205,6 +206,7 @@ async def test_select_option_should_return_on_no_values(
     assert result == []
 
 
+@only_v1
 @pytest.mark.skip_protocol_check
 async def test_select_option_should_not_allow_null_items(
     page: Page, server: Server
@@ -214,6 +216,18 @@ async def test_select_option_should_not_allow_null_items(
     with pytest.raises(Error) as exc_info:
         await page.select_option("select", ["blue", None, "black", "magenta"])  # type: ignore
     assert "expected string, got object" in exc_info.value.message
+
+
+@only_v2
+@pytest.mark.skip_protocol_check
+async def test_select_option_should_not_allow_null_items_v2(
+    page: Page, server: Server
+) -> None:
+    await page.goto(server.PREFIX + "/input/select.html")
+    await page.evaluate("makeMultiple()")
+    with pytest.raises(Error) as exc_info:
+        await page.select_option("select", ["blue", None, "black", "magenta"])  # type: ignore
+    assert "options[1]: expected object, got null" in exc_info.value.message
 
 
 async def test_select_option_should_unselect_with_null(

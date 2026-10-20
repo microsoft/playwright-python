@@ -50,7 +50,6 @@ from playwright._impl._api_structures import (
     ScreenSize,
     ViewportSize,
 )
-from playwright._impl._errors import Error
 from playwright._impl_v2.browser import Browser
 from playwright._impl_v2.browser_context import (
     BrowserContext,
@@ -60,6 +59,7 @@ from playwright._impl_v2.browser_context import (
 from playwright._impl_v2.channel_owner import ChannelOwner, api_call, from_channel
 from playwright._impl_v2.client_helper import env_object_to_array
 from playwright._impl_v2.connect import connect_to_browser
+from playwright._impl_v2.errors import Error
 from playwright._impl_v2.isomorphic.headers import headers_object_to_array
 from playwright._impl_v2.timeout_settings import TimeoutSettings
 from playwright._impl_v2.worker import Worker

@@ -26,14 +26,13 @@ call passes the option, so nothing calls it.
 
 from typing import TYPE_CHECKING, Any, Awaitable, Callable, Dict, List, Optional
 
-from playwright._impl._errors import Error
 from playwright._impl_v2.channel_owner import (
     ApiCallOptions,
     Channel,
     ChannelOwner,
     from_channel,
 )
-from playwright._impl_v2.errors import is_target_closed_error
+from playwright._impl_v2.errors import Error, is_target_closed_error
 from playwright._impl_v2.protocol.serializers import (
     HandleOrValue,
     parse_serialized_value,

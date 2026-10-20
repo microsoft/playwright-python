@@ -19,7 +19,7 @@ import math
 import re
 from typing import Any, Pattern, Union
 
-from playwright._impl._errors import Error
+from playwright._impl_v2.errors import Error
 
 
 def escape_regex_flags(pattern: Pattern) -> str:

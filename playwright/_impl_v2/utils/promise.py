@@ -23,8 +23,22 @@ JS code handles is not logged as "never retrieved".
 """
 
 import asyncio
+import contextvars
 import inspect
-from typing import Any, Awaitable, Callable, List, Optional, Sequence, TypeVar
+import sys
+import types
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Coroutine,
+    Generator,
+    List,
+    Optional,
+    Sequence,
+    TypeVar,
+    cast,
+)
 
 T = TypeVar("T")
 
@@ -63,6 +77,55 @@ def run_now(func: Callable[[], Awaitable[T]]) -> Awaitable[T]:
 def start(awaitable: Awaitable[T]) -> "asyncio.Future[T]":
     """A promise: starts a coroutine as a task, keeps a future as it is."""
     return asyncio.ensure_future(awaitable)
+
+
+def start_eager(awaitable: Awaitable[T]) -> "asyncio.Future[T]":
+    """The promise of a JS async function: its body runs at once, up to the first
+    await, and the rest runs in a task.
+
+    The first step runs in a copy of the current context, which the task then has,
+    as an eager task (Python 3.12) has its own context from the start.
+    """
+    if not inspect.iscoroutine(awaitable):
+        return asyncio.ensure_future(awaitable)
+    coro = awaitable
+    if sys.version_info >= (3, 12):
+        return asyncio.Task(coro, loop=_loop(), eager_start=True)
+    context = contextvars.copy_context()
+    try:
+        first = context.run(coro.send, None)
+    except StopIteration as stop:
+        return resolved(stop.value)
+    except BaseException as error:
+        return rejected(error)
+
+    async def rest() -> T:
+        return await cast(Awaitable[T], _resume(coro, first))
+
+    return context.run(asyncio.ensure_future, rest())
+
+
+@types.coroutine
+def _resume(coro: Coroutine[Any, Any, T], first: Any) -> Generator[Any, Any, T]:
+    # Drives a coroutine that has run its first step: the task waits for what the
+    # coroutine waits for, and sends or throws the outcome into it.
+    value = first
+    while True:
+        try:
+            sent = yield value
+        except GeneratorExit:
+            coro.close()
+            raise
+        except BaseException as error:
+            try:
+                value = coro.throw(error)
+            except StopIteration as stop:
+                return stop.value
+            continue
+        try:
+            value = coro.send(sent)
+        except StopIteration as stop:
+            return stop.value
 
 
 def retrieve(future: "asyncio.Future[Any]") -> None:
@@ -235,11 +298,58 @@ async def all_(awaitables: Sequence[Awaitable[Any]]) -> List[Any]:
         raise
 
 
-def set_timeout(callback: Callable[[], Any], timeout: float) -> asyncio.TimerHandle:
-    """setTimeout(callback, timeout): timeout in milliseconds."""
-    return _loop().call_later(timeout / 1000, callback)
+_MAX_IDLE_YIELDS = 100
 
 
-def clear_timeout(handle: Optional[asyncio.TimerHandle]) -> None:
+async def when_idle() -> None:
+    """Waits until the event loop has no other callback ready to run.
+
+    In JS, the reactions of the promises (microtasks) all run before the next timer
+    or I/O callback (macrotask). asyncio has one queue: a future reaction, then each
+    task step that it resumes, is a callback of its own. So a macrotask waits until
+    no callback is ready, as the transport does after each message.
+    """
+    ready = getattr(asyncio.get_running_loop(), "_ready", None)
+    for _ in range(_MAX_IDLE_YIELDS):
+        await asyncio.sleep(0)
+        if not ready:
+            return
+
+
+class Timer:
+    """The handle that setTimeout() returns."""
+
+    def __init__(self, callback: Callable[[], Any], timeout: float) -> None:
+        self._callback = callback
+        self._task: Optional["asyncio.Future[None]"] = None
+        self._handle: Optional[asyncio.TimerHandle] = _loop().call_later(
+            timeout / 1000, self._fire
+        )
+
+    def _fire(self) -> None:
+        self._handle = None
+
+        async def run() -> None:
+            await when_idle()
+            self._task = None
+            self._callback()
+
+        self._task = asyncio.ensure_future(run())
+
+    def cancel(self) -> None:
+        if self._handle:
+            self._handle.cancel()
+            self._handle = None
+        if self._task:
+            self._task.cancel()
+            self._task = None
+
+
+def set_timeout(callback: Callable[[], Any], timeout: float) -> Timer:
+    """setTimeout(callback, timeout): timeout in milliseconds, run as a macrotask."""
+    return Timer(callback, timeout)
+
+
+def clear_timeout(handle: Optional[Timer]) -> None:
     if handle:
         handle.cancel()

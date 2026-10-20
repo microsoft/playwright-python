@@ -25,6 +25,7 @@ import pytest
 
 from playwright.async_api import APIResponse, Error, Playwright, StorageState
 from tests.server import Server, TestServerRequest
+from tests.utils import only_v1, only_v2
 
 
 @pytest.mark.parametrize(
@@ -338,6 +339,7 @@ serialization_data = [
 ]
 
 
+@only_v1
 @pytest.mark.parametrize("serialization", serialization_data)
 async def test_should_json_stringify_body_when_content_type_is_application_json(
     playwright: Playwright, server: Server, serialization: Any
@@ -354,6 +356,26 @@ async def test_should_json_stringify_body_when_content_type_is_application_json(
     body = req.post_body
     assert body
     assert body.decode() == json.dumps(serialization)
+    await request.dispose()
+
+
+@only_v2
+@pytest.mark.parametrize("serialization", serialization_data)
+async def test_should_json_stringify_body_when_content_type_is_application_json_v2(
+    playwright: Playwright, server: Server, serialization: Any
+) -> None:
+    request = await playwright.request.new_context()
+    [req, _] = await asyncio.gather(
+        server.wait_for_request("/empty.html"),
+        request.post(
+            server.EMPTY_PAGE,
+            headers={"content-type": "application/json"},
+            data=serialization,
+        ),
+    )
+    body = req.post_body
+    assert body
+    assert body.decode() == json.dumps(serialization, separators=(",", ":"))
     await request.dispose()
 
 
@@ -485,6 +507,7 @@ async def test_should_throw_an_error_when_max_redirects_is_less_than_0(
         assert "'max_redirects' must be greater than or equal to '0'" in str(exc_info)
 
 
+@only_v1
 async def test_should_serialize_request_data(
     playwright: Playwright, server: Server
 ) -> None:
@@ -492,6 +515,25 @@ async def test_should_serialize_request_data(
     server.set_route("/echo", lambda req: (req.write(req.post_body), req.finish()))
     for data, expected in [
         ({"foo": None}, '{"foo": null}'),
+        ([], "[]"),
+        ({}, "{}"),
+        ("", ""),
+        (1.5, "1.5"),
+    ]:
+        response = await request.post(server.PREFIX + "/echo", data=data)
+        assert response.status == 200
+        assert await response.text() == expected
+    await request.dispose()
+
+
+@only_v2
+async def test_should_serialize_request_data_v2(
+    playwright: Playwright, server: Server
+) -> None:
+    request = await playwright.request.new_context()
+    server.set_route("/echo", lambda req: (req.write(req.post_body), req.finish()))
+    for data, expected in [
+        ({"foo": None}, '{"foo":null}'),
         ([], "[]"),
         ({}, "{}"),
         ("", ""),

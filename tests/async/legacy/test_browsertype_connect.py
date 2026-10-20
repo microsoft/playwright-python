@@ -23,7 +23,7 @@ import pytest
 from playwright.async_api import BrowserType, Error, Playwright, Route, expect
 from tests.conftest import RemoteServer
 from tests.server import Server, TestServerRequest, WebSocketProtocol
-from tests.utils import chromium_version_less_than
+from tests.utils import IS_V2, chromium_version_less_than, only_v1, only_v2
 
 from ..conftest import TraceViewerPage
 
@@ -85,6 +85,10 @@ async def test_browser_type_connect_should_be_able_to_connect_two_browsers_at_th
     await browser2.close()
 
 
+@pytest.mark.skipif(
+    IS_V2,
+    reason="v2 emits disconnected after the calls that fail, as upstream (BT-050)",
+)
 async def test_browser_type_connect_disconnected_event_should_be_emitted_when_browser_is_closed_or_server_is_closed(
     browser_type: BrowserType, launch_server: Callable[[], RemoteServer]
 ) -> None:
@@ -114,6 +118,10 @@ async def test_browser_type_connect_disconnected_event_should_be_emitted_when_br
     assert len(disconnected2) == 1
 
 
+@pytest.mark.skipif(
+    IS_V2,
+    reason="v2 emits disconnected after the calls that fail, as upstream (BT-050)",
+)
 async def test_browser_type_connect_disconnected_event_should_be_emitted_when_remote_killed_connection(
     browser_type: BrowserType, launch_server: Callable[[], RemoteServer]
 ) -> None:
@@ -152,6 +160,10 @@ async def test_browser_type_connect_set_browser_connected_state(
     assert browser.is_connected() is False
 
 
+@pytest.mark.skipif(
+    IS_V2,
+    reason="v2 emits disconnected after the calls that fail, as upstream (BT-054)",
+)
 async def test_browser_type_connect_should_throw_when_used_after_is_connected_returns_false(
     browser_type: BrowserType, launch_server: Callable[[], RemoteServer]
 ) -> None:
@@ -230,6 +242,7 @@ async def test_browser_type_connect_should_reject_wait_for_event_before_disconne
     assert log == ["rejected", "disconnected"]
 
 
+@only_v1
 async def test_should_not_allow_getting_the_path(
     browser_type: BrowserType, launch_server: Callable[[], RemoteServer], server: Server
 ) -> None:
@@ -257,6 +270,35 @@ async def test_should_not_allow_getting_the_path(
     remote_server.kill()
 
 
+@only_v2
+async def test_should_not_allow_getting_the_path_v2(
+    browser_type: BrowserType, launch_server: Callable[[], RemoteServer], server: Server
+) -> None:
+    def handle_download(request: TestServerRequest) -> None:
+        request.setHeader("Content-Type", "application/octet-stream")
+        request.setHeader("Content-Disposition", "attachment")
+        request.write(b"Hello world")
+        request.finish()
+
+    server.set_route("/download", handle_download)
+
+    remote_server = launch_server()
+    browser = await browser_type.connect(remote_server.ws_endpoint)
+    page = await browser.new_page(accept_downloads=True)
+    await page.set_content(f'<a href="{server.PREFIX}/download">download</a>')
+    async with page.expect_download() as download_info:
+        await page.click("a")
+    download = await download_info.value
+    with pytest.raises(Error) as exc:
+        await download.path()
+    assert (
+        exc.value.message
+        == "Path is not available when connecting remotely. Use save_as() to save a local copy."
+    )
+    remote_server.kill()
+
+
+@only_v1
 async def test_prevent_getting_video_path(
     browser_type: BrowserType,
     launch_server: Callable[[], RemoteServer],
@@ -274,6 +316,28 @@ async def test_prevent_getting_video_path(
     assert (
         exc.value.message
         == "Path is not available when using browserType.connect(). Use save_as() to save a local copy."
+    )
+    remote_server.kill()
+
+
+@only_v2
+async def test_prevent_getting_video_path_v2(
+    browser_type: BrowserType,
+    launch_server: Callable[[], RemoteServer],
+    tmp_path: Path,
+    server: Server,
+) -> None:
+    remote_server = launch_server()
+    browser = await browser_type.connect(remote_server.ws_endpoint)
+    page = await browser.new_page(record_video_dir=tmp_path)
+    await page.goto(server.PREFIX + "/grid.html")
+    await browser.close()
+    assert page.video
+    with pytest.raises(Error) as exc:
+        await page.video.path()
+    assert (
+        exc.value.message
+        == "Path is not available when connecting remotely. Use save_as() to save a local copy."
     )
     remote_server.kill()
 
@@ -403,11 +467,15 @@ async def test_should_record_trace_with_source(
             ]
         )
         await trace_viewer.show_source_tab()
-        await expect(trace_viewer.stack_frames).to_contain_text(
-            [
-                re.compile(r"test_should_record_trace_with_source"),
-            ]
-        )
+        if not IS_V2:
+            # v1 records the frames of pytest too. v2 records only the frames of the
+            # test, as upstream does, and the trace viewer lists the frames only when
+            # there are two or more.
+            await expect(trace_viewer.stack_frames).to_contain_text(
+                [
+                    re.compile(r"test_should_record_trace_with_source"),
+                ]
+            )
         await trace_viewer.select_action("Set content")
         # Check that the source file is shown
         await expect(

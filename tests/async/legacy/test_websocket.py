@@ -19,6 +19,7 @@ import pytest
 
 from playwright.async_api import Error, Page, WebSocket
 from tests.server import Server, WebSocketProtocol
+from tests.utils import only_v1, only_v2
 
 
 async def test_should_work(page: Page, server: Server) -> None:
@@ -150,6 +151,7 @@ async def test_should_emit_binary_frame_events(page: Page, server: Server) -> No
     assert received == ["incoming", b"\x04\x02"]
 
 
+@only_v1
 async def test_should_reject_wait_for_event_on_close_and_error(
     page: Page, server: Server
 ) -> None:
@@ -167,6 +169,26 @@ async def test_should_reject_wait_for_event_on_close_and_error(
         async with ws.expect_event("framesent"):
             await page.evaluate("window.ws.close()")
     assert exc_info.value.message == "Socket closed"
+
+
+@only_v2
+async def test_should_reject_wait_for_event_on_close_and_error_v2(
+    page: Page, server: Server
+) -> None:
+    server.send_on_web_socket_connection(b"incoming")
+    async with page.expect_event("websocket") as ws_info:
+        await page.evaluate(
+            """port => {
+            window.ws = new WebSocket('ws://localhost:' + port + '/ws');
+        }""",
+            server.PORT,
+        )
+    ws = await ws_info.value
+    await ws.wait_for_event("framereceived")
+    with pytest.raises(Error) as exc_info:
+        async with ws.expect_event("framesent"):
+            await page.evaluate("window.ws.close()")
+    assert exc_info.value.message == "WebSocket.expect_event: Socket closed"
 
 
 async def test_should_emit_error_event(
