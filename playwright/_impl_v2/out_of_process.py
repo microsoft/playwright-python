@@ -35,10 +35,12 @@ async def start() -> Tuple[Playwright, "PlaywrightClient"]:
 
 
 class PlaywrightClient:
-    def __init__(self) -> None:
+    def __init__(self, dispatcher_fiber: Any = None) -> None:
+        # Python: the sync API passes the greenlet that runs the loop, see
+        # playwright/sync_api/_context_manager.py.
         loop = asyncio.get_running_loop()
         self._close_promise: "asyncio.Future[None]" = loop.create_future()
-        connection = Connection(loop)
+        connection = Connection(loop, dispatcher_fiber=dispatcher_fiber)
         self._transport = transport = PipeTransport(loop)
         self._connection = connection
         connection.onmessage = lambda message: transport.send(message)
@@ -55,7 +57,12 @@ class PlaywrightClient:
         self._playwright = asyncio.ensure_future(self._run(connection))
 
     async def _run(self, connection: Connection) -> Playwright:
-        await self._transport.connect()
+        try:
+            await self._transport.connect()
+        except Exception:
+            # Python: the driver did not start, so stop() has nothing to wait for.
+            self._close_promise.set_result(None)
+            raise
         reader = asyncio.ensure_future(self._transport.run())
 
         def on_close(reader: "asyncio.Future[None]") -> None:
@@ -80,5 +87,6 @@ class PlaywrightClient:
         return next(iter(done)).result()
 
     async def stop(self) -> None:
-        self._transport.request_stop()
+        if not self._close_promise.done():
+            self._transport.request_stop()
         await self._close_promise

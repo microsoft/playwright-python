@@ -20,7 +20,6 @@ options object is separate parameters. A set does not keep the insertion order o
 JS Set; nothing depends on that order.
 """
 
-import asyncio
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Mapping, Optional, Set, Union
 
@@ -33,16 +32,18 @@ from playwright._impl_v2.utils.tasks import fire_and_forget
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl_v2 import protocol_types as channels
     from playwright._impl_v2.browser_context import BrowserContext
+    from playwright._impl_v2.playwright import Playwright
 
 
 class Selectors:
-    def __init__(self) -> None:
+    def __init__(self, playwright: "Playwright") -> None:
         self._selector_engines: List["channels.SelectorEngine"] = []
         self._test_id_attribute_name: Optional[str] = None
         self._contexts_for_selectors: Set["BrowserContext"] = set()
-        # Python: the generated API reads the event loop of each object. Playwright
-        # creates Selectors in the loop of the connection.
-        self._loop = asyncio.get_event_loop()
+        # Python: the generated API reads the event loop and the dispatcher fiber of
+        # each object. Playwright creates the selectors.
+        self._loop = playwright._loop
+        self._dispatcher_fiber = playwright._dispatcher_fiber
 
     async def register(
         self,

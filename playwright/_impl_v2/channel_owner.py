@@ -151,7 +151,9 @@ class Channel(EventEmitter):
             )
 
         # Python: a channel call never raises at the call; the awaitable raises, as a
-        # rejected promise does.
+        # rejected promise does. A validation error is raised as it is, without the
+        # API name in front of it (upstream adds it): the message names the Python
+        # option, which is enough.
         try:
             result = owner._wrap_api_call(func, ApiCallOptions(internal=is_internal))
         except Exception as e:
@@ -195,8 +197,11 @@ class ChannelOwner(EventEmitter):
         super().__init__()
         self.set_max_listeners(0)
         self._connection = connection
-        # Python: the generated API reads the event loop of each object.
+        # Python: the generated API reads the event loop and the dispatcher fiber of
+        # each object: the greenlet that runs the loop under the sync API, None under
+        # the async API (playwright/sync_api/_context_manager.py).
         self._loop: asyncio.AbstractEventLoop = connection._loop
+        self._dispatcher_fiber: Any = connection._dispatcher_fiber
         self._type = type
         self._guid = guid
         self._parent: Optional[ChannelOwner] = (
@@ -334,6 +339,9 @@ class ChannelOwner(EventEmitter):
             internal=options.internal if options else False,
         )
         zone = current_zone().with_("apiZone", api_zone)
+        # Python: func runs now, up to its first await. An error that it raises here
+        # is raised as it is, without the API name and the logging below; upstream
+        # has it as a rejected promise, which the catch below decorates.
         awaitable = zone.run(lambda: func(api_zone))
 
         async def finish() -> R:

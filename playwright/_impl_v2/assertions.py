@@ -62,9 +62,10 @@ class AssertionsBase:
         is_soft: bool = False,
     ) -> None:
         self._actual_locator = locator
+        # Python: the generated API reads the event loop and the dispatcher fiber of
+        # each object.
         self._loop = locator._loop
-        # The sync API reads it; playwright/_impl_v2 (async only) has none.
-        self._dispatcher_fiber = getattr(locator, "_dispatcher_fiber", None)
+        self._dispatcher_fiber = locator._dispatcher_fiber
         self._timeout = timeout
         self._is_not = is_not
         self._custom_message = message
@@ -1057,9 +1058,10 @@ class APIResponseAssertions:
         message: Optional[str] = None,
         is_soft: bool = False,
     ) -> None:
+        # Python: the generated API reads the event loop and the dispatcher fiber of
+        # each object.
         self._loop = response._loop
-        # The sync API reads it; playwright/_impl_v2 (async only) has none.
-        self._dispatcher_fiber = getattr(response, "_dispatcher_fiber", None)
+        self._dispatcher_fiber = response._dispatcher_fiber
         self._timeout = timeout
         self._is_not = is_not
         self._actual = response

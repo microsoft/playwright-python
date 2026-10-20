@@ -31,8 +31,10 @@ class WebStorage:
     def __init__(self, page: "Page", kind: Literal["local", "session"]) -> None:
         self._page = page
         self._kind: Literal["local", "session"] = kind
-        # Python: the generated API reads the event loop of each object.
+        # Python: the generated API reads the event loop and the dispatcher fiber of
+        # each object.
         self._loop = page._loop
+        self._dispatcher_fiber = page._dispatcher_fiber
 
     async def items(self) -> List[WebStorageItem]:
         items = (

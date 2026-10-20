@@ -187,7 +187,7 @@ class BrowserContext(ChannelOwner):
         def on_console(event: "channels.BrowserContextConsoleEvent") -> None:
             worker = Worker.from_nullable(event["worker"])
             page = Page.from_nullable(event["page"])
-            console_message = ConsoleMessage(event, page, worker)
+            console_message = ConsoleMessage(event, page, worker, self)
             if worker:
                 worker.emit(Events.Worker.Console, console_message)
             if page:
@@ -208,7 +208,7 @@ class BrowserContext(ChannelOwner):
             parsed_error = parse_error(event["error"])
             self.emit(
                 Events.BrowserContext.WebError,
-                WebError(page_object, parsed_error, event["location"]),
+                WebError(page_object, parsed_error, event["location"], self),
             )
             if page_object:
                 page_object.emit(Events.Page.PageError, parsed_error)
@@ -590,7 +590,7 @@ class BrowserContext(ChannelOwner):
             ),
         )
         await self._update_interception_patterns()
-        return DisposableStub(lambda: self.unroute(url=url, handler=handler))
+        return DisposableStub(lambda: self.unroute(url=url, handler=handler), self)
 
     @api_call(title="Route WebSockets")
     async def route_web_socket(

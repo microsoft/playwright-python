@@ -100,6 +100,16 @@ class TestServerRequest(http.Request):
         kwargs["parsePOSTFormSubmission"] = False
         super().__init__(*args, **kwargs)
 
+    def finish(self) -> Any:
+        # Like res.end() in Node.js, which does nothing after the client went away;
+        # Twisted raises "Request.finish called on a request after its connection
+        # was lost". Typed Any, as mypy sees the methods of Twisted: the tests call
+        # it in a tuple, `lambda r: (r.write(...), r.finish())`, which mypy rejects
+        # for a function that returns None.
+        if self._disconnected or self.channel is None or not self.channel.transport:
+            return
+        super().finish()
+
     def _parse_form(self) -> None:
         """Adds the fields of a POSTed form to self.args, ignoring a malformed body."""
         if self.method != b"POST" or not self.post_body or self.args is None:

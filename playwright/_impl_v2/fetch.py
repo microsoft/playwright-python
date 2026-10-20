@@ -101,8 +101,10 @@ class APIRequest:
     def __init__(self, playwright: "Playwright") -> None:
         self._playwright = playwright
         self._contexts: Set["APIRequestContext"] = set()
-        # Python: the generated API reads the event loop of each object.
+        # Python: the generated API reads the event loop and the dispatcher fiber of
+        # each object.
         self._loop = playwright._loop
+        self._dispatcher_fiber = playwright._dispatcher_fiber
 
     async def new_context(
         self,
@@ -660,8 +662,10 @@ class APIResponse:
         self._initializer = initializer
         self._headers = RawHeaders(self._initializer["headers"])
         self._api_name = "APIResponse"
-        # Python: the generated API reads the event loop of each object.
+        # Python: the generated API reads the event loop and the dispatcher fiber of
+        # each object.
         self._loop = context._loop
+        self._dispatcher_fiber = context._dispatcher_fiber
 
         # Not ported: the inspect.custom hook of Node's util.inspect().
 

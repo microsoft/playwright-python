@@ -53,6 +53,11 @@ from playwright._impl._api_structures import (
     SecurityDetails,
     SetCookieParam,
 )
+from playwright._impl._greenlets import (
+    RouteGreenlet,
+    WebSocketRouteGreenlet,
+    run_in_greenlet,
+)
 from playwright._impl_v2.channel_owner import (
     ChannelOwner,
     api_call,
@@ -843,8 +848,10 @@ class _WebSocketRouteServer:
 
     def __init__(self, route: WebSocketRoute) -> None:
         self._route = route
-        # Python: the generated API reads the event loop of each object.
+        # Python: the generated API reads the event loop and the dispatcher fiber of
+        # each object.
         self._loop = route._loop
+        self._dispatcher_fiber = route._dispatcher_fiber
 
     @property
     def _api_impl_class(self) -> type:
@@ -933,9 +940,15 @@ class WebSocketRouteHandler:
 
     async def handle(self, web_socket_route: WebSocketRoute) -> None:
         handler = self.handler
-        # Python: the handler may return an awaitable, as a JS handler returns a
-        # promise.
-        result = handler(web_socket_route)
+        # Python: under the sync API the handler may block in a sync call, so it
+        # runs in its own greenlet, as an event listener does. The handler may
+        # return an awaitable, as a JS handler returns a promise.
+        if web_socket_route._dispatcher_fiber:
+            result = await run_in_greenlet(
+                WebSocketRouteGreenlet, lambda: handler(web_socket_route)
+            )
+        else:
+            result = handler(web_socket_route)
         if inspect.isawaitable(result):
             await result
         await web_socket_route._after_handle()
@@ -1271,10 +1284,12 @@ class RouteHandler:
             if is_target_closed_error(e):
                 # We are failing in the handler because the target close closed.
                 # Give user a hint!
-                # Python: the hint names the Python method and option.
+                # Python: the hint names the Python method and option, without
+                # `await` under the sync API.
+                await_prefix = "" if route._dispatcher_fiber else "await "
                 e = rewrite_error_message(
                     e,
-                    f"\"{cast(Error, e).message}\" while running route callback.\nConsider awaiting `await page.unroute_all(behavior='ignoreErrors')`\nbefore the end of the test to ignore remaining routes in flight.",
+                    f"\"{cast(Error, e).message}\" while running route callback.\nConsider awaiting `{await_prefix}page.unroute_all(behavior='ignoreErrors')`\nbefore the end of the test to ignore remaining routes in flight.",
                 )
             raise e
         finally:
@@ -1307,9 +1322,16 @@ class RouteHandler:
         handled_promise = route._start_handling()
         # Extract handler into a variable to avoid [RouteHandler.handler] in the stack.
         handler = self.handler
-        # Python: the handler may return an awaitable, as a JS handler returns a
-        # promise; Promise.all() takes a value too.
-        result = handler(route, route.request)
+        # Python: under the sync API the handler may block in a sync call, so it
+        # runs in its own greenlet, as an event listener does. The handler may
+        # return an awaitable, as a JS handler returns a promise (an internal
+        # handler does, the HAR router); Promise.all() takes a value too.
+        if route._dispatcher_fiber:
+            result = await run_in_greenlet(
+                RouteGreenlet, lambda: handler(route, route.request)
+            )
+        else:
+            result = handler(route, route.request)
         if inspect.isawaitable(result):
             handled, _ = await asyncio.gather(handled_promise, result)
         else:

@@ -22,6 +22,7 @@ import pytest
 from playwright.sync_api import BrowserType, Error, Playwright, Route
 from tests.conftest import RemoteServer
 from tests.server import Server
+from tests.utils import only_v1
 
 
 def test_browser_type_connect_slow_mo(
@@ -81,6 +82,7 @@ def test_browser_type_connect_should_be_able_to_connect_two_browsers_at_the_same
     browser2.close()
 
 
+@only_v1("BT-050")
 def test_browser_type_connect_disconnected_event_should_be_emitted_when_browser_is_closed_or_server_is_closed(
     browser_type: BrowserType, launch_server: Callable[[], RemoteServer]
 ) -> None:
@@ -131,6 +133,7 @@ def test_browser_type_connect_set_browser_connected_state(
     assert browser.is_connected() is False
 
 
+@only_v1("BT-054")
 def test_browser_type_connect_should_throw_when_used_after_is_connected_returns_false(
     browser_type: BrowserType, launch_server: Callable[[], RemoteServer]
 ) -> None:
@@ -167,6 +170,7 @@ def test_browser_type_connect_should_forward_close_events_to_pages(
     assert events == ["page::close", "context::close", "browser::disconnected"]
 
 
+@only_v1("BT-050")
 def test_browser_type_connect_should_forward_close_events_on_remote_kill(
     browser_type: BrowserType, launch_server: Callable[[], RemoteServer]
 ) -> None:

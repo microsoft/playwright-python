@@ -239,6 +239,8 @@ async def test_BT_034_should_connect_over_wss(
 
     # https://stackoverflow.com/a/21961005/552185
     monkeypatch.setenv("NODE_TLS_REJECT_UNAUTHORIZED", "0")
+    # suppressCertificateWarning()
+    monkeypatch.setenv("NODE_NO_WARNINGS", "1")
 
     https_server.once_web_socket_connection(
         lambda ws: forward_web_socket(ws, remote_server.ws_endpoint)

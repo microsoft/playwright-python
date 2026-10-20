@@ -32,6 +32,7 @@ from playwright.sync_api import (
     expect,
 )
 from tests.server import Server
+from tests.utils import only_v1
 
 from ..conftest import TraceViewerPage
 
@@ -269,6 +270,7 @@ def test_should_collect_two_traces(
         )
 
 
+@only_v1("tests/async/python/test_tracing.py")
 def test_should_work_with_playwright_context_managers(
     context: BrowserContext,
     page: Page,
@@ -303,6 +305,7 @@ def test_should_work_with_playwright_context_managers(
         )
 
 
+@only_v1("tests/async/python/test_tracing.py")
 def test_should_display_wait_for_load_state_even_if_did_not_wait_for_it(
     context: BrowserContext,
     page: Page,

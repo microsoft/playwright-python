@@ -247,8 +247,12 @@ class EventEmitter:
             errors: List[BaseException] = []
             self._rejection_handler = lambda error: errors.append(error)
 
+            # Python: the pending handlers are taken now, as _waitFor() takes them
+            # before its first await.
+            pending = self._wait_for(type)
+
             async def wait() -> None:
-                await self._wait_for(type)
+                await pending
                 if errors:
                     raise errors[0]
 

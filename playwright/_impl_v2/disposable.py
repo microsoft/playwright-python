@@ -68,11 +68,12 @@ class DisposableObject(ChannelOwner, Disposable):
 
 
 class DisposableStub(Disposable):
-    def __init__(self, dispose: Callable[[], Awaitable[Any]]) -> None:
+    def __init__(self, dispose: Callable[[], Awaitable[Any]], parent: Any) -> None:
         self._dispose: Optional[Callable[[], Awaitable[Any]]] = dispose
-        # Python: the generated API reads the event loop of each object. A stub is
-        # created in an API call, so the loop is running.
-        self._loop = asyncio.get_running_loop()
+        # Python: the generated API reads the event loop and the dispatcher fiber of
+        # each object. The parent is the object that creates the stub.
+        self._loop = parent._loop
+        self._dispatcher_fiber = parent._dispatcher_fiber
 
     # Not ported: [Symbol.asyncDispose](). Python: Disposable.close().
 

@@ -101,8 +101,10 @@ class Locator:
         self._frame = frame
         self._selector = selector
         self._api_name = "Locator"
-        # Python: the generated API reads the event loop of each object.
+        # Python: the generated API reads the event loop and the dispatcher fiber of
+        # each object.
         self._loop = frame._loop
+        self._dispatcher_fiber = frame._dispatcher_fiber
         # Python: the Python code of this locator, known only for a normalized
         # locator. See normalize().
         self._locator_code: Optional[str] = None
@@ -373,7 +375,7 @@ class Locator:
         # Not ported: the object form of style, and cssObjectToString(), are
         # JavaScript only. The Python API takes a string.
         await self._frame._highlight(self._selector, style=style)
-        return DisposableStub(lambda: self.hide_highlight())
+        return DisposableStub(lambda: self.hide_highlight(), self)
 
     async def hide_highlight(self) -> None:
         await self._frame._hide_highlight(self._selector)
@@ -991,8 +993,10 @@ class FrameLocator:
     def __init__(self, frame: "Frame", selector: str) -> None:
         self._frame = frame
         self._frame_selector = selector
-        # Python: the generated API reads the event loop of each object.
+        # Python: the generated API reads the event loop and the dispatcher fiber of
+        # each object.
         self._loop = frame._loop
+        self._dispatcher_fiber = frame._dispatcher_fiber
 
     def _child_selector(self, selector: str) -> str:
         if self._frame_selector == ANY_FRAME_SELECTOR:

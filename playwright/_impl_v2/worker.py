@@ -73,7 +73,7 @@ class Worker(ChannelOwner):
         # Note: we only receive console events here for workers from "chromium._connectToWorker".
         self._channel.onConsole(
             lambda event: self.emit(
-                Events.Worker.Console, ConsoleMessage(event, None, self)
+                Events.Worker.Console, ConsoleMessage(event, None, self, self)
             )
         )
 

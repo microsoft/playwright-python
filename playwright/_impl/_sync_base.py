@@ -13,6 +13,8 @@
 # limitations under the License.
 
 import asyncio
+import os
+import sys
 import traceback
 from contextlib import AbstractContextManager
 from types import TracebackType
@@ -35,6 +37,9 @@ from playwright._impl._greenlets import connection_closed_error, wait_for_future
 from playwright._impl._impl_to_api_mapping import ImplToApiMapping, ImplWrapper
 
 mapping = ImplToApiMapping()
+
+# PW_IMPL=v2: playwright/_impl_v2 reads the stack of a sync call from its frames.
+_IS_V2 = os.environ.get("PW_IMPL") == "v2"
 
 
 T = TypeVar("T")
@@ -104,8 +109,14 @@ class SyncBase(ImplWrapper):
             raise connection_closed_error()
 
         task: asyncio.tasks.Task[Any] = self._loop.create_task(coro)
-        setattr(task, "__pw_stack__", _capture_stack_trace())
-        setattr(task, "__pw_stack_trace__", traceback.extract_stack(limit=10))
+        # The task runs in the dispatcher fiber, where the stack of this call is not
+        # visible. The implementation reads it from the task: v2 walks the frames of
+        # the caller (capture_raw_stack()), v1 takes the parsed stack.
+        if _IS_V2:
+            setattr(task, "__pw_caller_frame__", sys._getframe(1))
+        else:
+            setattr(task, "__pw_stack__", _capture_stack_trace())
+            setattr(task, "__pw_stack_trace__", traceback.extract_stack(limit=10))
 
         wait_for_future(self._loop, self._dispatcher_fiber, task)
         return task.result()

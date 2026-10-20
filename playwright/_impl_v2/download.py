@@ -36,8 +36,10 @@ class Download:
         self._url = url
         self._suggested_filename = suggested_filename
         self._artifact = artifact
-        # Python: the generated API reads the event loop of each object.
+        # Python: the generated API reads the event loop and the dispatcher fiber of
+        # each object.
         self._loop = page._loop
+        self._dispatcher_fiber = page._dispatcher_fiber
 
     @property
     def page(self) -> "Page":

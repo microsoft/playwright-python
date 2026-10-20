@@ -17,6 +17,7 @@ from pathlib import Path
 import pytest
 
 from playwright.sync_api import BrowserContext, Error, Page
+from tests.utils import only_v1
 
 
 def test_add_init_script_evaluate_before_anything_else_on_the_page(page: Page) -> None:
@@ -37,6 +38,7 @@ def test_add_init_script_work_with_content(page: Page) -> None:
     assert page.evaluate("window.result") == 123
 
 
+@only_v1("IS-004")
 def test_add_init_script_throw_without_path_and_content(page: Page) -> None:
     with pytest.raises(
         Error, match="Either path or script parameter must be specified"

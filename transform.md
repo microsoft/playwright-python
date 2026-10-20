@@ -509,7 +509,34 @@ a whole module deviates in the same way, say it once in the module docstring.
 - `android.ts`, `electron.ts`, `coverage.ts`: `langs: js`.
 - `channels.d.ts`: the generator writes `protocol_channels.py` and `protocol_types.py`.
 
-## 13. At each roll
+## 13. The sync API
+
+The sync API is not a port: it is the same mechanism as in `playwright/_impl`, in
+`playwright/sync_api/_context_manager.py`, `playwright/_impl/_sync_base.py` and
+`playwright/_impl/_greenlets.py`, which the two implementations share.
+
+- The dispatcher fiber is a greenlet that runs the event loop. The user code runs in the
+  main greenlet. A sync call creates a task for the coroutine and switches to the
+  dispatcher fiber until the task is done (`wait_for_future()`); between sync calls the
+  loop is paused inside the callback that resumed the user code.
+- Every object that the generated API wraps carries `_loop` and `_dispatcher_fiber`,
+  next to each other. The fiber is `None` under the async API. A `ChannelOwner` takes
+  them from the connection; a plain class takes them from the object that creates it,
+  which is a parameter where upstream has none (mark it).
+- A user callback that may block in a sync call runs in a greenlet of its own, so that
+  it can switch to the dispatcher fiber: the connection runs each channel listener in an
+  `EventGreenlet` (`Connection.dispatch()`); a callback that a task calls and awaits
+  runs through `run_in_greenlet()`: a route handler (`RouteGreenlet`), a WebSocket route
+  handler (`WebSocketRouteGreenlet`), a binding (`BindingGreenlet`) and a locator handler
+  (`LocatorHandlerGreenlet`). A callback that runs in the dispatcher fiber itself would
+  spin in `wait_for_future()`: a switch to the current greenlet returns at once.
+- A predicate is called in the listener of the event, which runs in the greenlet of the
+  event. A wrapper around a user predicate is a plain def that returns the user's result
+  (`wait_for_response()`): an `async def` wrapper would call the predicate in a task.
+- Test with `_dispatcher_fiber`, not with a flag: `if route._dispatcher_fiber:`.
+- The async API is the port; the sync branch is always the `# Python:` marked one.
+
+## 14. At each roll
 
 1. List the upstream commits of the range for `packages/playwright-core/src/client`,
    `packages/isomorphic`, `packages/protocol` and the parts of `packages/utils` that are

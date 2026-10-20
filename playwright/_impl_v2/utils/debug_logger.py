@@ -19,28 +19,44 @@ same variable and prints to stderr, without colors.
 """
 
 import os
+import re
 import sys
-from typing import Set
+from typing import List, Pattern
 
 LogName = str
 
 
 class DebugLogger:
     def __init__(self) -> None:
-        self._enabled: Set[str] = set()
-        for name in (os.environ.get("DEBUG") or "").split(","):
-            name = name.strip()
-            if name == "pw:*":
-                self._enabled.update({"api", "channel"})
-            elif name.startswith("pw:"):
-                self._enabled.add(name[3:])
+        # Python: the names of the `debug` npm package, which debugLogger.ts uses:
+        # DEBUG is a list of names, split on commas and spaces; `*` in a name
+        # matches anything; a name that starts with `-` turns its matches off.
+        self._names: List[Pattern[str]] = []
+        self._skips: List[Pattern[str]] = []
+        for name in re.split(r"[\s,]+", (os.environ.get("DEBUG") or "").strip()):
+            if not name:
+                continue
+            if name.startswith("-"):
+                self._skips.append(_template(name[1:]))
+            else:
+                self._names.append(_template(name))
 
     def log(self, name: LogName, message: object) -> None:
         if self.is_enabled(name):
             print(f"pw:{name} {message}", file=sys.stderr)
 
     def is_enabled(self, name: LogName) -> bool:
-        return name in self._enabled
+        full_name = "pw:" + name
+        if any(skip.match(full_name) for skip in self._skips):
+            return False
+        return any(enabled.match(full_name) for enabled in self._names)
+
+
+def _template(name: str) -> Pattern[str]:
+    # matchesTemplate() of the `debug` package: `*` matches any text.
+    return re.compile(
+        "^" + ".*".join(re.escape(part) for part in name.split("*")) + "$"
+    )
 
 
 debug_logger = DebugLogger()

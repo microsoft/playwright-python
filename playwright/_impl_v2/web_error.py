@@ -18,13 +18,13 @@ Python: page, error and location are properties, as the generated API reads them
 The object keeps the event loop, as the generated API reads the loop of each object.
 """
 
-import asyncio
 from typing import TYPE_CHECKING, Optional
 
 from playwright._impl_v2.errors import Error
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl_v2 import protocol_types as channels
+    from playwright._impl_v2.browser_context import BrowserContext
     from playwright._impl_v2.page import Page
 
     WebErrorLocation = channels.BrowserContextPageErrorEventLocation
@@ -36,13 +36,15 @@ class WebError:
         page: Optional["Page"],
         error: Error,
         location: "WebErrorLocation",
+        context: "BrowserContext",
     ) -> None:
         self._page = page
         self._error = error
         self._location = location
-        # Python: the generated API reads the event loop of each object. A web error
-        # is created in an event of the connection, so the loop is running.
-        self._loop = asyncio.get_running_loop()
+        # Python: the generated API reads the event loop and the dispatcher fiber of
+        # each object. The context creates the web error; the page may be None.
+        self._loop = context._loop
+        self._dispatcher_fiber = context._dispatcher_fiber
 
     @property
     def page(self) -> Optional["Page"]:
