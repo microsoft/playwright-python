@@ -21,6 +21,7 @@ static file server over TLS with a given key and certificate.
 
 import functools
 import socket
+import socketserver
 import ssl
 import threading
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -42,6 +43,13 @@ class _TLSServer(ThreadingHTTPServer):
             ("127.0.0.1", 0),
             functools.partial(_QuietHandler, directory=str(directory)),
         )
+
+    def server_bind(self) -> None:
+        # Not the server_bind() of HTTPServer, which looks up the name of the host
+        # (socket.getfqdn): a reverse lookup that can hang on a CI runner.
+        socketserver.TCPServer.server_bind(self)
+        self.server_name = "localhost"
+        self.server_port = self.socket.getsockname()[1]
 
     def get_request(self) -> Tuple[socket.socket, Any]:
         sock, address = self.socket.accept()

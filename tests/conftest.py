@@ -23,7 +23,17 @@ import tempfile
 import threading
 import traceback
 from pathlib import Path
-from typing import Any, Callable, Dict, Generator, List, Optional, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    cast,
+)
 
 import greenlet
 import pytest
@@ -103,10 +113,37 @@ def pytest_timeout_cancel_timer(item: pytest.Item) -> Optional[bool]:
     return True
 
 
+_REPO = _dirname.parent
+
+# The waits that every run has, which say nothing about a hang: the reader of the
+# driver's pipe, and the main task of the sync API's event loop.
+_IDLE_COROUTINES = (
+    "PipeTransport.run",
+    "PlaywrightContextManager.__enter__.<locals>.main",
+)
+
+
+def _own_frames(frames: Iterable[Tuple[Any, int]]) -> List[str]:
+    """The frames of this repository, formatted: the test and the client. The
+    frames of pytest, asyncio and the other packages around them are left out."""
+    summary = traceback.StackSummary.extract(frames)
+    own = [
+        f
+        for f in summary
+        if f.filename.startswith(str(_REPO))
+        and f"{os.sep}env{os.sep}" not in f.filename
+        and not f.filename.endswith(f"tests{os.sep}server.py")
+    ]
+    return summary.__class__.from_list(own).format()
+
+
 def _dump_stacks_and_exit(item: pytest.Item, settings: pytest_timeout.Settings) -> None:
-    """Writes the stacks of the process to its standard error and ends the
-    process, as the thread method of pytest-timeout does; xdist replaces the
-    worker."""
+    """Writes to the standard error where the process waits, and ends the process,
+    as the thread method of pytest-timeout does; xdist replaces the worker.
+
+    Each thread, each greenlet that waits for the event loop under the sync API,
+    and each pending task of the event loop gets its frames in this repository.
+    One without any, such as the idle event loop, is left out."""
     try:
         capman = cast(
             Optional[CaptureManager],
@@ -121,6 +158,12 @@ def _dump_stacks_and_exit(item: pytest.Item, settings: pytest_timeout.Settings) 
 
         def title(text: str, sep: str = "~") -> None:
             stderr.write(f"\n{sep * 10} {text} {sep * 10}\n")
+
+        def write(name: str, frames: Iterable[Tuple[Any, int]]) -> None:
+            lines = _own_frames(frames)
+            if lines:
+                title(name)
+                stderr.write("".join(lines))
 
         title(f"Timeout ({settings.timeout}s): {item.nodeid}", "+")
         if captured_stdout:
@@ -137,15 +180,22 @@ def _dump_stacks_and_exit(item: pytest.Item, settings: pytest_timeout.Settings) 
                 (t.name for t in threading.enumerate() if t.ident == thread_ident),
                 "<unknown>",
             )
-            title(f"Stack of {thread_name} ({thread_ident})")
-            stderr.write("".join(traceback.format_stack(frame)))
+            # walk_stack() yields the innermost frame first.
+            write(f"Thread {thread_name}", reversed(list(traceback.walk_stack(frame))))
         for obj in gc.get_objects():
             if isinstance(obj, greenlet.greenlet) and obj.gr_frame is not None:
-                title(f"Stack of {obj!r}, switched away")
-                stderr.write("".join(traceback.format_stack(obj.gr_frame)))
+                write(
+                    f"{type(obj).__name__}, waiting for the event loop",
+                    reversed(list(traceback.walk_stack(obj.gr_frame))),
+                )
             elif isinstance(obj, asyncio.Task) and not obj.done():
-                title(f"Stack of {obj!r}")
-                obj.print_stack(file=stderr)
+                coroutine = obj.get_coro()
+                name = getattr(coroutine, "__qualname__", repr(coroutine))
+                if name in _IDLE_COROUTINES:
+                    continue
+                # Python: the frames of the task, from the coroutine out to the
+                # awaited one, as Task.print_stack() prints them.
+                write(f"Task {name}", ((f, f.f_lineno) for f in obj.get_stack()))
         title("Timeout", "+")
     except Exception:
         traceback.print_exc()

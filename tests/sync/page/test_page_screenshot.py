@@ -652,6 +652,7 @@ def test_SS_038_page_screenshot_should_work_with_array_deleted(
 
 
 @pytest.mark.usefixtures("skip_firefox_headed")
+@pytest.mark.slow
 def test_SS_039_page_screenshot_should_take_full_page_screenshots_during_navigation(
     page: Page, server: Server, sync_gather: Callable[..., List[Any]]
 ) -> None:

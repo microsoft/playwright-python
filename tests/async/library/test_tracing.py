@@ -1145,23 +1145,30 @@ async def test_TR_039_should_not_flush_console_events(
     page = await context.new_page()
     test_id = "TR-039"
     await context.tracing.start(name=test_id)
+    promise: "asyncio.Future[None]" = page._loop.create_future()
     counter = 0
 
-    def predicate(_: Any) -> bool:
+    def on_console(_: Any) -> None:
         nonlocal counter
         counter += 1
-        return counter == 100
+        if counter == 100:
+            promise.set_result(None)
 
-    async with page.expect_event("console", predicate=predicate):
-        await page.evaluate(
-            """() => {
+    # Python: a listener and a future, as upstream: expect_event() would be an
+    # action of its own in the trace, which flushes the console events.
+    page.on("console", on_console)
+
+    await page.evaluate(
+        """() => {
     window.builtins.setTimeout(() => {
       for (let i = 0; i < 100; ++i)
         console.log('hello ' + i);
     }, 10);
     return 31415926;
   }"""
-        )
+    )
+
+    await promise
 
     def read_trace() -> str:
         trace_name = next(
