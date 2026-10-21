@@ -34,6 +34,7 @@ from typing import (
     Tuple,
     TypeVar,
     Union,
+    cast,
 )
 
 from playwright._impl.client_stack_trace import capture_library_stack_trace
@@ -220,7 +221,7 @@ class ChannelOwner(EventEmitter):
             self._parent._objects[guid] = self
             self._logger = self._parent._logger
 
-        self._channel: Any = self._create_channel()
+        self._channel: Channel = self._create_channel()
         self._initializer = initializer
 
     def _report_unhandled_error(self, error: BaseException) -> None:
@@ -234,7 +235,9 @@ class ChannelOwner(EventEmitter):
         if protocol_event:
             # Python: .catch(() => {}).
             fire_and_forget(
-                self._channel.updateSubscription(event=protocol_event, enabled=enabled)
+                cast(Any, self._channel).updateSubscription(
+                    event=protocol_event, enabled=enabled
+                )
             )
 
     def on(self, type: str, listener: Listener) -> "ChannelOwner":

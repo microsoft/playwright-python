@@ -6,8 +6,9 @@ description: Prepare a Playwright Python release. Checks open bugs, adds Python-
 # Preparing a Playwright Python release
 
 In this skill, `1.xx` is the release (for example `1.64`), and `v1.xx.0` is its tag.
-`$PW_SRC_DIR` is the roll checkout of `microsoft/playwright` (see the
-`playwright-roll` skill, step 2).
+`.upstream/` is the checkout of `microsoft/playwright` at the commit in
+`DRIVER_VERSION` (`python scripts/upstream.py checkout`). Only read from it: do not
+commit or switch branches there.
 
 Remotes: find the remote for `microsoft/playwright-python` with `git remote -v`.
 The commands below call it `upstream`.
@@ -31,24 +32,35 @@ gh issue list --repo microsoft/playwright-python --state open \
 If any are open, list them for the user and ask whether to continue. Do not
 close or comment on issues.
 
-Check that the driver is rolled. `DRIVER_VERSION` (`npm=`) must be the driver
-for the release: a `1.xx.y` build, or a `1.xx.0-beta-…` build from `release-1.xx`,
-as the user says, and `rev=` the commit that it is built from. If it is not, roll with the `playwright-roll` skill. This is often
-already done. The roll commit goes into the release commit PR (step 3). When the
-API roll for 1.xx is already on `main`, that PR only moves `DRIVER_VERSION`.
+Check that the driver is rolled. `DRIVER_VERSION` must be a commit of
+`release-1.xx`: the tag `v1.xx.y`, or the tip of the branch, as the user says. The
+driver reports the version of `playwright-core` at that commit, so it must be
+`1.xx.y`:
+
+```sh
+python scripts/upstream.py checkout
+git -C .upstream fetch origin release-1.xx
+git -C .upstream merge-base --is-ancestor "$(cat DRIVER_VERSION)" FETCH_HEAD && echo "on release-1.xx"
+git -C .upstream show "$(cat DRIVER_VERSION)":packages/playwright-core/package.json | grep '"version"'
+```
+
+If it is not, roll with the `playwright-roll` skill (`python scripts/upstream.py pin v1.xx.y`,
+or `pin release-1.xx`). This is often already done. The roll commit goes into the
+release commit PR (step 3). When the API roll for 1.xx is already on `main`, that PR
+only moves `DRIVER_VERSION`.
 
 ## 2. Release notes (microsoft/playwright)
 
 The Python notes in `docs/src/release-notes-python.md` are written in
 `microsoft/playwright` together with the Node.js notes. The
 `playwright-release-notes` skill there
-(`$PW_SRC_DIR/.claude/skills/playwright-release-notes/SKILL.md`) covers that,
+(`.claude/skills/playwright-release-notes/SKILL.md` on `main`) covers that,
 including the Python code style. Check that the `## Version 1.xx` section is on the
 release branch:
 
 ```sh
-git -C "$PW_SRC_DIR" fetch origin release-1.xx
-git -C "$PW_SRC_DIR" show FETCH_HEAD:docs/src/release-notes-python.md | grep -n '^## Version 1.xx$'
+git -C .upstream fetch origin release-1.xx
+git -C .upstream show FETCH_HEAD:docs/src/release-notes-python.md | grep -n '^## Version 1.xx$'
 ```
 
 If it is missing, tell the user: it should have landed with the Node.js notes.
@@ -66,11 +78,13 @@ different exception type. Leave out minor bug fixes, internal changes, and anyth
 the notes already cover. If nothing is significant, go to step 3. Otherwise list
 the changes for the user and ask whether to add them to the notes.
 
-To add them, write them in the roll checkout, on a branch from `origin/main`:
+To add them, write them in a worktree of `.upstream/` next to this repository, on a
+branch from `origin/main`. `.upstream/` itself stays at the pin.
 
 ```sh
-git -C "$PW_SRC_DIR" fetch origin main
-git -C "$PW_SRC_DIR" checkout -b release-notes-1.xx-python origin/main
+notes="$(dirname "$PWD")/playwright-release-notes-1.xx"
+git -C .upstream fetch origin main
+git -C .upstream worktree add -b release-notes-1.xx-python "$notes" origin/main
 ```
 
 Commit, push to the user's fork of `microsoft/playwright`, and open the PR. If
@@ -78,8 +92,8 @@ the checkout has no remote for the fork, add one. `gh api user --jq .login`
 gives the user's login.
 
 ```sh
-git -C "$PW_SRC_DIR" commit -am "docs: release notes for v1.xx Python"
-git -C "$PW_SRC_DIR" push <fork-remote> release-notes-1.xx-python
+git -C "$notes" commit -am "docs: release notes for v1.xx Python"
+git -C "$notes" push <fork-remote> release-notes-1.xx-python
 gh pr create --repo microsoft/playwright --head <login>:release-notes-1.xx-python \
   --title "docs: release notes for v1.xx Python" \
   --body "- Update the \`Version 1.xx\` Python release notes with upstream and Python-specific changes"
@@ -88,12 +102,10 @@ gh pr create --repo microsoft/playwright --head <login>:release-notes-1.xx-pytho
 After the PR merges, it needs a cherry-pick to `release-1.xx` (the
 `playwright-cherry-pick` skill in `microsoft/playwright`).
 
-Then put the roll checkout back on the release branch. `./scripts/update_api.sh`
-reads the docs from it. Run the checkout checks from step 2 of the
-`playwright-roll` skill.
+Then remove the worktree:
 
 ```sh
-git -C "$PW_SRC_DIR" checkout release-1.xx
+git -C .upstream worktree remove "$notes"
 ```
 
 ## 3. Release commit (playwright-python)
@@ -101,7 +113,8 @@ git -C "$PW_SRC_DIR" checkout release-1.xx
 Open a PR from the branch with the roll commit:
 
 - Title: `chore: roll Playwright to v1.xx.y`, where `v1.xx.y` is the Python
-  release version, even when `DRIVER_VERSION` is a beta build.
+  release version, even when `DRIVER_VERSION` is the tip of `release-1.xx` and not
+  a tag.
 - Description: the Python release notes, in GitHub markdown (see below).
   The user copies this description into the GitHub release, so for this PR it
   replaces the "keep PR descriptions short" rule in `AGENTS.md`.

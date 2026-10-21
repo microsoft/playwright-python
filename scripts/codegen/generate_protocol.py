@@ -20,8 +20,11 @@
 # - playwright/_impl/protocol/validator.py: the port of validator.ts.
 #
 # Usage:
-#   PW_SRC_DIR=<microsoft/playwright checkout> python scripts/codegen/generate_protocol.py \
+#   python scripts/codegen/generate_protocol.py \
 #       --out <file> --types-out <file> --channels-out <file> --validator-out <file>
+#
+# The spec comes from .upstream/, the microsoft/playwright checkout at the commit
+# in DRIVER_VERSION (scripts/upstream.py).
 #
 # The spec is loaded the same way as utils/protocol_spec.js does it. The output
 # is not formatted; run black on it.
@@ -29,7 +32,6 @@
 import argparse
 import json
 import keyword
-import os
 import re
 import sys
 from pathlib import Path
@@ -737,12 +739,13 @@ def main() -> None:
     parser.add_argument("--channels-out", required=True)
     parser.add_argument("--validator-out", required=True)
     args = parser.parse_args()
-    pw_src_dir = os.environ.get("PW_SRC_DIR")
-    if not pw_src_dir:
+    upstream_dir = Path(__file__).resolve().parent.parent.parent / ".upstream"
+    spec_dir = upstream_dir / "packages" / "protocol" / "spec"
+    if not spec_dir.is_dir():
         raise SystemExit(
-            "Set PW_SRC_DIR to a microsoft/playwright checkout at the release branch in DRIVER_VERSION."
+            ".upstream/ is missing. Run: python scripts/upstream.py checkout"
         )
-    protocol = load_protocol(Path(pw_src_dir) / "packages" / "protocol" / "spec")
+    protocol = load_protocol(spec_dir)
     text = generate(protocol)
     types_text, interfaces, type_names = generate_types(protocol)
     channels_text = generate_channels(interfaces, type_names)

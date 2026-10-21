@@ -17,76 +17,69 @@ To ensure the maintainability of the project, please note the following:
 
 ## How to Contribute
 
-### Configuring python environment
+### Build and test
 
-The project development requires Python version 3.10+. To set it as default in the environment run the following commands:
+You need Python 3.10+, git, and Node.js with npm. The steps are the same on your
+machine and in CI.
 
-```sh
-# You may need to install python 3.10 venv if it's missing, on Ubuntu just run `sudo apt-get install python3.10-venv`
-python3.10 -m venv env
-source ./env/bin/activate
-```
-
-Install required dependencies:
+**1. Get the code and the Python dependencies.**
 
 ```sh
+git clone https://github.com/microsoft/playwright-python
+cd playwright-python
+python3 -m venv env                      # on Ubuntu, you may need: sudo apt-get install python3-venv
+source env/bin/activate
 python -m pip install --upgrade pip
 pip install -r local-requirements.txt
+pip install -e .
 ```
 
-Build and install drivers:
-
-The driver is assembled from published artifacts — the `playwright-core` npm
-package (version pinned in `DRIVER_VERSION`, `npm=`) and the official Node.js binary
-(pinned in `NODE_VERSION`). Building a wheel downloads them with `npm pack` and
-plain HTTP, so Node.js/npm must be installed; no git or source build is needed.
+**2. Get Playwright.** The driver and the generated API come from
+`microsoft/playwright`, at the commit in `DRIVER_VERSION`. This clones it into
+`.upstream/` (gitignored) and checks out that commit. Run it again when
+`DRIVER_VERSION` changes, for example after a pull.
 
 ```sh
-pip install -e .
+python scripts/upstream.py checkout
+```
+
+**3. Build.** This builds the driver from `.upstream/` (`npm ci`, `npm run build`,
+plus the Node.js binary of `NODE_VERSION`) and the wheel in `dist/`. It also puts the
+driver in `playwright/driver/`, for the editable install of step 1. The first build
+takes a few minutes; later builds reuse the driver until `DRIVER_VERSION` changes.
+
+```sh
 python -m build --wheel
 ```
 
-Install the browsers to test against:
+**4. Test.**
 
 ```sh
 playwright install chromium
+./test.sh                                # tests/sync and tests/async, in parallel, under xvfb
+pytest tests/async --browser chromium -k <name>   # or a part of them
 ```
 
-Run tests:
-
-```sh
-pytest --browser chromium
-```
-
-Checking for typing errors
-
-```sh
-mypy playwright
-```
-
-Lint and format the code (what the Lint job of CI runs; the checks are not a git hook)
+**5. Lint.** This is what the Lint job of CI runs, including mypy. The checks are
+not a git hook.
 
 ```sh
 pre-commit run --all-files
 ```
 
-For more details look at the [CI configuration](./.github/workflows/ci.yml).
+### Regenerating the API
 
-### Regenerating APIs
+`playwright/{async,sync}_api/_generated.py`, `playwright/_impl/_api_structures.py`,
+the protocol files of `playwright/_impl` and `tests/upstream_registry.md` are
+generated from `.upstream/`, and committed. Generate them again after you change
+`scripts/codegen/`:
 
-`update_api.sh` generates `playwright/{async,sync}_api/_generated.py` and the
-public TypedDicts in `playwright/_impl/_api_structures.py` from the API docs in
-a separate `microsoft/playwright` checkout at the commit in `DRIVER_VERSION`
-(`rev=`, the commit that the `npm=` package is built from); point `PW_SRC_DIR`
-at it. The
-generator is
-`scripts/codegen/generate_api.js`; Python facts that the docs do not contain
-live in `scripts/codegen/python_rules.js`.
-
-```bash
-PW_SRC_DIR=../playwright-for-python ./scripts/update_api.sh
-pre-commit run --all-files
+```sh
+./scripts/update_api.sh
 ```
+
+Python facts that the docs do not contain are in `scripts/codegen/python_rules.js`.
+To move to a new Playwright commit, see [ROLLING.md](./ROLLING.md).
 
 ## Contributor License Agreement
 

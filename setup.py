@@ -23,21 +23,12 @@ from pathlib import Path
 from typing import Dict
 
 
-# The driver is assembled by scripts/build_driver.py from published artifacts:
-# the playwright-core npm package (version pinned in DRIVER_VERSION) and the
-# official Node.js binaries (pinned in NODE_VERSION). DRIVER_VERSION is the
-# single source of truth (also read by CI) and is baked into the staged bundle
-# filenames, so it doubles as the build cache key: a roll changes DRIVER_VERSION,
-# which changes the filenames.
-# DRIVER_VERSION has two lines: npm=<playwright-core version> and
-# rev=<the microsoft/playwright commit that the package is built from>.
+# A wheel build builds the driver: scripts/build_driver.py builds playwright-core
+# in .upstream/, the microsoft/playwright checkout at the commit in DRIVER_VERSION,
+# and adds the Node.js binary of NODE_VERSION. The bundles are named after the
+# commit (driver/playwright-<commit>-<suffix>.zip), so a roll builds new ones.
 def read_driver_version() -> str:
-    pins = dict(
-        line.split("=", 1)
-        for line in (Path(__file__).parent / "DRIVER_VERSION").read_text().splitlines()
-        if line.strip()
-    )
-    return pins["npm"].strip()
+    return (Path(__file__).parent / "DRIVER_VERSION").read_text().strip()
 
 
 driver_version = read_driver_version()
@@ -120,9 +111,8 @@ def ensure_driver_bundle(zip_name: str) -> None:
     destination_path = f"driver/playwright-{driver_version}-{zip_name}.zip"
     if os.path.exists(destination_path):
         return
-    # Assemble this platform's bundle by downloading the playwright-core npm
-    # package and the matching Node.js binary. Only the requested platform is
-    # built, so a wheel build downloads just the one Node.js binary it needs.
+    # Build only this platform's bundle, so that a wheel build downloads just the
+    # one Node.js binary it needs.
     build_script = os.path.join(os.path.dirname(__file__), "scripts", "build_driver.py")
     subprocess.check_call([sys.executable, build_script, zip_name])
     if not os.path.exists(destination_path):
@@ -133,6 +123,9 @@ def ensure_driver_bundle(zip_name: str) -> None:
 
 class PlaywrightBDistWheelCommand(BDistWheelCommand):
     def run(self) -> None:
+        # setuptools copies the package into build/lib and keeps what is there: a
+        # module that was deleted since the last build would go into the wheel.
+        shutil.rmtree("build", ignore_errors=True)
         super().run()
         os.makedirs("driver", exist_ok=True)
         os.makedirs("playwright/driver", exist_ok=True)

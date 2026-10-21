@@ -1,4 +1,6 @@
 **/__pycache__/
+# The microsoft/playwright checkout at the commit in DRIVER_VERSION (scripts/upstream.py).
+/.upstream/
 driver/
 playwright/driver/
 playwright.egg-info/

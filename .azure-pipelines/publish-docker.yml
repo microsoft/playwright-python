@@ -82,7 +82,7 @@ extends:
               echo '{ "data-root": "/mnt/docker" }' | sudo tee /etc/docker/daemon.json
               sudo service docker start
 
-        # scripts/build_driver.py fetches playwright-core with `npm pack`, which
+        # The wheel build builds the driver from .upstream/ with `npm ci`, which
         # picks up the registry and credentials from this .npmrc.
         - task: Bash@3
           displayName: "setup .npmrc"
@@ -101,6 +101,9 @@ extends:
             pip install -r requirements.txt --disable-pip-version-check
             pip install -e . --disable-pip-version-check
           displayName: "Install dependencies"
+
+        - script: python scripts/upstream.py checkout
+          displayName: "Get Playwright"
 
         - task: AzureCLI@2
           displayName: "Login to ACR via OIDC"
