@@ -14,18 +14,52 @@
 
 """Port of tests/page/page-network-request.spec.ts."""
 
+import asyncio
 import json
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Awaitable, Callable, Dict, List, Optional, TypeVar
 
 import pytest
+from greenlet import greenlet
 
+from playwright._impl._greenlets import wait_for_future
 from playwright.sync_api import Error, Page, Request, Route
 from tests.helpers.raw_request_headers import raw_headers, record_raw_headers
 from tests.server import Server, TestServerRequest, reactor
 
 from ..utils import Utils
+
+T = TypeVar("T")
+
+
+def wait_for(page: Page, awaitable: "Awaitable[T]") -> T:
+    """Port of `await promise`: runs the event loop until the awaitable settles."""
+    future = asyncio.ensure_future(awaitable, loop=page._loop)
+    wait_for_future(page._loop, page._dispatcher_fiber, future)
+    return future.result()
+
+
+def run_in_background(page: Page, action: Callable[[], Any]) -> "asyncio.Future[Any]":
+    """Like calling an async function without await: starts the action and goes on.
+
+    The action runs in a greenlet of its own. The future settles with the result or the
+    error of the action; wait_for(page, future) waits for it.
+    """
+    result: "asyncio.Future[Any]" = page._loop.create_future()
+
+    def run() -> None:
+        try:
+            result.set_result(action())
+        except Exception as error:
+            result.set_result(error)
+
+    async def start() -> None:
+        greenlet(run).switch()
+
+    # start() returns once the action waits for the driver, after it sent its message.
+    wait_for(page, start())
+    return result
 
 
 def adjust_server_headers(headers: Dict[str, str], browser_name: str) -> Dict[str, str]:
@@ -695,7 +729,11 @@ def test_NE_027_should_not_allow_to_access_frame_on_popup_main_request(
     page.set_content(f'<a target=_blank href="{server.EMPTY_PAGE}">click me</a>')
     with page.context.expect_page() as popup_info:
         with page.context.expect_event("request") as request_info:
-            page.get_by_text("click me").click()
+            # Python: the click is not awaited, as upstream: the frame is checked
+            # as soon as the request arrives, before the popup page exists.
+            clicked = run_in_background(
+                page, lambda: page.get_by_text("click me").click()
+            )
         request = request_info.value
 
         assert request.is_navigation_request() is True
@@ -711,6 +749,7 @@ def test_NE_027_should_not_allow_to_access_frame_on_popup_main_request(
         assert response
         response.finished()
     popup_info.value
+    wait_for(page, clicked)
 
 
 def test_NE_028_page_reload_return_304_status_code(

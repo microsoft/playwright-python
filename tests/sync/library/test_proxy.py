@@ -205,7 +205,11 @@ def test_PR_006_should_allow_bypassing_requests(
 
 
 def test_PR_007_should_authenticate(
-    browser_type: BrowserType, launch_arguments: Dict, server: Server
+    browser_type: BrowserType,
+    launch_arguments: Dict,
+    server: Server,
+    browser_name: str,
+    is_headless_shell: bool,
 ) -> None:
     def handle_target(request: TestServerRequest) -> None:
         auth = request.getHeader("proxy-authorization")
@@ -242,10 +246,17 @@ def test_PR_007_should_authenticate(
     page.goto("http://non-existent.test/target.html")
     assert page.title() == "Basic " + base64.b64encode(b"user:secret").decode()
     # Proxy credentials must not be sent to the website's own auth challenge.
-    response = page.goto("http://non-existent.com/protected.html")
-    assert response
-    assert response.status == 401
-    assert page.locator("body").text_content() == "no credentials"
+    response_or_error: Any
+    try:
+        response_or_error = page.goto("http://non-existent.test/protected.html")
+    except Error as error:
+        response_or_error = error
+    if browser_name == "chromium" and not is_headless_shell:
+        # Branded Chromium shows a login dialog for the 401 and fails the navigation.
+        assert "net::ERR_INVALID_AUTH_CREDENTIALS" in response_or_error.message
+    else:
+        assert response_or_error.status == 401
+        assert page.locator("body").text_content() == "no credentials"
     browser.close()
 
 

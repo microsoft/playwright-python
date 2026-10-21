@@ -66,8 +66,9 @@ version_file = "playwright/_repo_version.py"
 addopts = "-Wall -rsx -vv -s"
 # The timeout of a test is 30 seconds, as upstream; a test marked slow gets three
 # times that, as test.slow() gives upstream (tests/conftest.py). The fixtures count,
-# as upstream counts them. The thread method ends the process of a test that hangs;
-# xdist replaces the worker. The signal method can not be used: it raises inside the
+# as upstream counts them. The thread method ends the process of a test that hangs,
+# after tests/conftest.py has written its stacks to the standard error; xdist
+# replaces the worker. The signal method can not be used: it raises inside the
 # running code, and asyncio's Handle._run() catches and logs every BaseException but
 # SystemExit and KeyboardInterrupt, so a timeout that fires while the event loop runs
 # a callback is lost and the test hangs on.
@@ -80,6 +81,14 @@ markers = [
     "only_platform",
     "skip_protocol_check",
     "slow: the test gets three times the timeout, as test.slow() upstream",
+]
+filterwarnings = [
+    # Twisted 26 passes pyOpenSSL objects to pyOpenSSL 26, which wants cryptography
+    # objects: Twisted's to fix, not visible to this code.
+    "ignore:Passing pyOpenSSL .* objects is deprecated:DeprecationWarning:OpenSSL.SSL",
+    # txaio (the web socket server of the tests) calls asyncio.iscoroutinefunction(),
+    # deprecated in Python 3.14, in its latest version too.
+    "ignore:'asyncio.iscoroutinefunction' is deprecated:DeprecationWarning:txaio.tx",
 ]
 junit_family = "xunit2"
 asyncio_mode = "auto"

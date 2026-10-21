@@ -35,6 +35,7 @@ from playwright.sync_api import (
     Dialog,
     Error,
     Page,
+    Playwright,
     TimeoutError,
     sync_playwright,
 )
@@ -104,7 +105,9 @@ def test_sync_wait_for_event_raise(page: Page) -> None:
     assert "Timeout 500ms exceeded" in exc_info.value.message
 
 
-def test_sync_playwright_multiple_times() -> None:
+def test_sync_playwright_multiple_times(playwright: Playwright) -> None:
+    # The playwright fixture runs the first instance: its event loop is the one
+    # that the second sync_playwright() finds.
     with pytest.raises(Error) as exc:
         with sync_playwright() as pw:
             assert pw.chromium
@@ -163,7 +166,11 @@ def _test_sync_playwright_stop_multiple_times() -> None:
 
 @pytest.mark.slow
 def test_sync_playwright_stop_multiple_times() -> None:
-    p = multiprocessing.Process(target=_test_sync_playwright_stop_multiple_times)
+    # spawn: a fork of this multi-threaded process is unsafe, and Python 3.12 to
+    # 3.13 warn about it; 3.14 and the other platforms do not fork by default.
+    p = multiprocessing.get_context("spawn").Process(
+        target=_test_sync_playwright_stop_multiple_times
+    )
     p.start()
     p.join()
     assert p.exitcode == 0
@@ -189,7 +196,7 @@ def _test_call_sync_method_after_playwright_close_with_own_loop(
 def test_call_sync_method_after_playwright_close_with_own_loop(
     server: Server, browser_name: str, launch_arguments: Dict[str, Any]
 ) -> None:
-    p = multiprocessing.Process(
+    p = multiprocessing.get_context("spawn").Process(
         target=_test_call_sync_method_after_playwright_close_with_own_loop,
         args=[browser_name, launch_arguments, server.EMPTY_PAGE],
     )

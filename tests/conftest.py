@@ -12,26 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import asyncio
+import gc
 import inspect
-import io
 import json
 import os
 import subprocess
 import sys
 import tempfile
+import threading
+import traceback
 from pathlib import Path
 from typing import Any, Callable, Dict, Generator, List, Optional, cast
 
+import greenlet
 import pytest
 import pytest_timeout
+from _pytest.capture import CaptureManager
 from _pytest.terminal import TerminalReporter
-from PIL import Image
-from pixelmatch import pixelmatch
-from pixelmatch.contrib.PIL import from_PIL_to_raw_data
 
 import playwright
 from playwright._impl._protocol_check import take_violations
 
+from .helpers.image_compare import assert_to_match_golden
 from .server import Server, test_server
 
 _dirname = Path(__file__).parent.absolute()
@@ -59,6 +62,97 @@ def pytest_collection_modifyitems(
     for item in items:
         if item.get_closest_marker("slow"):
             item.add_marker(pytest.mark.timeout(timeout * 3))
+
+
+_TIMEOUT_TIMER = pytest.StashKey[threading.Timer]()
+
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_timeout_set_timer(
+    item: pytest.Item, settings: pytest_timeout.Settings
+) -> Optional[bool]:
+    """The timer of the thread method, with the stacks on the standard error.
+
+    pytest-timeout writes the stacks of a test that hangs to the terminal of the
+    test, and an xdist worker has no terminal: its stdout goes nowhere. The
+    standard error of a worker is that of the run, so the stacks reach the log.
+    The dump also has what the stacks of the threads do not show: the greenlets
+    that wait for the event loop under the sync API, and the pending tasks of the
+    event loop under both APIs.
+    """
+    if settings.method != "thread":
+        return None
+    if not settings.disable_debugger_detection and pytest_timeout.is_debugging():
+        return True
+    pytest_timeout_cancel_timer(item)
+    timer = threading.Timer(settings.timeout, _dump_stacks_and_exit, (item, settings))
+    timer.name = f"timeout {item.nodeid}"
+    timer.daemon = True
+    item.stash[_TIMEOUT_TIMER] = timer
+    timer.start()
+    return True
+
+
+@pytest.hookimpl(tryfirst=True)
+def pytest_timeout_cancel_timer(item: pytest.Item) -> Optional[bool]:
+    timer = item.stash.get(_TIMEOUT_TIMER, None)
+    if timer is None:
+        return None
+    del item.stash[_TIMEOUT_TIMER]
+    timer.cancel()
+    return True
+
+
+def _dump_stacks_and_exit(item: pytest.Item, settings: pytest_timeout.Settings) -> None:
+    """Writes the stacks of the process to its standard error and ends the
+    process, as the thread method of pytest-timeout does; xdist replaces the
+    worker."""
+    try:
+        capman = cast(
+            Optional[CaptureManager],
+            item.config.pluginmanager.getplugin("capturemanager"),
+        )
+        captured_stdout = captured_stderr = ""
+        if capman:
+            capman.suspend_global_capture(in_=True)
+            captured_stdout, captured_stderr = capman.read_global_capture()
+        # After the capture is suspended, this is the standard error of the run.
+        stderr = sys.stderr
+
+        def title(text: str, sep: str = "~") -> None:
+            stderr.write(f"\n{sep * 10} {text} {sep * 10}\n")
+
+        title(f"Timeout ({settings.timeout}s): {item.nodeid}", "+")
+        if captured_stdout:
+            title("Captured stdout")
+            stderr.write(captured_stdout)
+        if captured_stderr:
+            title("Captured stderr")
+            stderr.write(captured_stderr)
+        current_ident = threading.current_thread().ident
+        for thread_ident, frame in sys._current_frames().items():
+            if thread_ident == current_ident:
+                continue
+            thread_name = next(
+                (t.name for t in threading.enumerate() if t.ident == thread_ident),
+                "<unknown>",
+            )
+            title(f"Stack of {thread_name} ({thread_ident})")
+            stderr.write("".join(traceback.format_stack(frame)))
+        for obj in gc.get_objects():
+            if isinstance(obj, greenlet.greenlet) and obj.gr_frame is not None:
+                title(f"Stack of {obj!r}, switched away")
+                stderr.write("".join(traceback.format_stack(obj.gr_frame)))
+            elif isinstance(obj, asyncio.Task) and not obj.done():
+                title(f"Stack of {obj!r}")
+                obj.print_stack(file=stderr)
+        title("Timeout", "+")
+    except Exception:
+        traceback.print_exc()
+    finally:
+        sys.stdout.flush()
+        sys.stderr.flush()
+        os._exit(1)
 
 
 @pytest.hookimpl(hookwrapper=True, tryfirst=True)
@@ -316,26 +410,18 @@ def pytest_addoption(parser: pytest.Parser) -> None:
 
 @pytest.fixture(scope="session")
 def assert_to_be_golden(browser_name: str) -> Callable[[bytes, str], None]:
-    def compare(received_raw: bytes, golden_name: str) -> None:
-        golden_file_path = _dirname / f"golden-{browser_name}" / golden_name
-        try:
-            golden_file = golden_file_path.read_bytes()
-            received_image = Image.open(io.BytesIO(received_raw))
-            golden_image = Image.open(io.BytesIO(golden_file))
+    """expect(buffer).toMatchSnapshot(name) against tests/golden-<browser>/<name>.
 
-            if golden_image.size != received_image.size:
-                pytest.fail("Image size differs to golden image")
-                return
-            diff_pixels = pixelmatch(
-                from_PIL_to_raw_data(received_image),
-                from_PIL_to_raw_data(golden_image),
-                golden_image.size[0],
-                golden_image.size[1],
-                threshold=0.2,
-            )
-            assert diff_pixels == 0
+    With PW_WRITE_SCREENSHOT set, a screenshot that does not match is written
+    over the golden file.
+    """
+
+    def compare(received_raw: bytes, golden_name: str) -> None:
+        try:
+            assert_to_match_golden(browser_name, received_raw, golden_name)
         except Exception:
             if os.getenv("PW_WRITE_SCREENSHOT"):
+                golden_file_path = _dirname / f"golden-{browser_name}" / golden_name
                 golden_file_path.parent.mkdir(parents=True, exist_ok=True)
                 golden_file_path.write_bytes(received_raw)
                 print(f"Wrote {golden_file_path}")

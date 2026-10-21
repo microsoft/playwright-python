@@ -66,6 +66,15 @@ class EventContextManager(Generic[T], AbstractContextManager):
         self._event = EventInfo[T](sync_base, future)
 
     def __enter__(self) -> EventInfo[T]:
+        # The wait takes its first step before the body runs; see
+        # AsyncEventContextManager.__aenter__(). The body of a sync block may make
+        # no call at all, so the event loop gets a turn here.
+        sync_base = self._event._sync_base
+        wait_for_future(
+            sync_base._loop,
+            sync_base._dispatcher_fiber,
+            asyncio.ensure_future(asyncio.sleep(0)),
+        )
         return self._event
 
     def __exit__(

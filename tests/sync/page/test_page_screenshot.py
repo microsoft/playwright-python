@@ -116,7 +116,7 @@ def test_SS_001_page_screenshot_should_work_smoke(
     page.set_viewport_size({"width": 500, "height": 500})
     page.goto(server.PREFIX + "/grid.html")
     screenshot = page.screenshot()
-    assert_to_be_golden(screenshot, "screenshot-sanity-upstream.png")
+    assert_to_be_golden(screenshot, "screenshot-sanity.png")
 
 
 @pytest.mark.usefixtures("skip_firefox_headed")
@@ -548,7 +548,7 @@ def test_SS_029_page_screenshot_path_option_should_work(
     page.goto(server.PREFIX + "/grid.html")
     output_path = tmp_path / "screenshot.png"
     page.screenshot(path=output_path)
-    assert_to_be_golden(output_path.read_bytes(), "screenshot-sanity-upstream.png")
+    assert_to_be_golden(output_path.read_bytes(), "screenshot-sanity.png")
 
 
 @pytest.mark.usefixtures("skip_firefox_headed")
@@ -559,7 +559,7 @@ def test_SS_030_page_screenshot_path_option_should_create_subdirectories(
     page.goto(server.PREFIX + "/grid.html")
     output_path = tmp_path / "these" / "are" / "directories" / "screenshot.png"
     page.screenshot(path=output_path)
-    assert_to_be_golden(output_path.read_bytes(), "screenshot-sanity-upstream.png")
+    assert_to_be_golden(output_path.read_bytes(), "screenshot-sanity.png")
 
 
 @pytest.mark.usefixtures("skip_firefox_headed")
@@ -926,7 +926,7 @@ def test_SS_056_page_screenshot_animations_should_resume_infinite_animations(
     buffer1 = page.screenshot()
     utils.rafraf(page)
     buffer2 = page.screenshot()
-    assert not compare_images(buffer1, buffer2, max_diff_pixels=50)
+    assert compare_images(buffer1, buffer2, max_diff_pixels=50) is not None
 
 
 def test_SS_057_page_screenshot_animations_should_not_capture_infinite_web_animations(
@@ -943,7 +943,7 @@ def test_SS_057_page_screenshot_animations_should_not_capture_infinite_web_anima
     buffer1 = page.screenshot()
     utils.rafraf(page)
     buffer2 = page.screenshot()
-    assert not compare_images(buffer1, buffer2, max_diff_pixels=50)
+    assert compare_images(buffer1, buffer2, max_diff_pixels=50) is not None
 
 
 def test_SS_058_page_screenshot_animations_should_fire_transitionend_for_finite_transitions(
