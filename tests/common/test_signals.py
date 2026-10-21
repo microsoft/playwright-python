@@ -23,6 +23,9 @@ import pytest
 from playwright.async_api import async_playwright
 from playwright.sync_api import sync_playwright
 
+# All the tests of the file are slow upstream (test.slow() at the top of the file).
+pytestmark = pytest.mark.slow
+
 
 def _test_signals_async(
     browser_name: str, launch_arguments: Dict, wait_queue: "multiprocessing.Queue[str]"

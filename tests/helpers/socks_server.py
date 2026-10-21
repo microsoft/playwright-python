@@ -28,6 +28,8 @@ import struct
 import threading
 from typing import List, Optional, Set, Tuple
 
+from tests.server import listen_localhost
+
 _SUCCEEDED = 0x00
 _CONNECTION_REFUSED = 0x05
 _COMMAND_NOT_SUPPORTED = 0x07
@@ -65,23 +67,7 @@ class _SocksServer:
     """Accepts SOCKS5 connections; subclasses handle the CONNECT requests."""
 
     def __init__(self, dual_stack: bool) -> None:
-        self._listeners: List[socket.socket] = []
-        listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        listener.bind(("127.0.0.1", 0))
-        listener.listen(128)
-        self._listeners.append(listener)
-        self.port: int = listener.getsockname()[1]
-        if dual_stack:
-            try:
-                listener6 = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
-                listener6.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 1)
-                listener6.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-                listener6.bind(("::1", self.port))
-                listener6.listen(128)
-                self._listeners.append(listener6)
-            except OSError:
-                pass
+        self._listeners, self.port = listen_localhost(128, ipv6=dual_stack)
         self._sockets: Set[socket.socket] = set()
         self._lock = threading.Lock()
         self._closed = False

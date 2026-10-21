@@ -23,6 +23,7 @@ from pathlib import Path
 from typing import Any, Callable, Dict, Generator, List, Optional, cast
 
 import pytest
+import pytest_timeout
 from _pytest.terminal import TerminalReporter
 from PIL import Image
 from pixelmatch import pixelmatch
@@ -48,6 +49,44 @@ os.environ.setdefault(
 def pytest_configure(config: pytest.Config) -> None:
     if os.environ.get("CI"):
         config.option.reruns = 3
+
+
+def pytest_collection_modifyitems(
+    config: pytest.Config, items: List[pytest.Item]
+) -> None:
+    # A slow test gets three times the timeout, as test.slow() gives upstream.
+    timeout = float(config.getini("timeout"))
+    for item in items:
+        if item.get_closest_marker("slow"):
+            item.add_marker(pytest.mark.timeout(timeout * 3))
+
+
+@pytest.hookimpl(hookwrapper=True, tryfirst=True)
+def pytest_runtest_makereport(
+    item: pytest.Item, call: pytest.CallInfo
+) -> Generator[None, None, None]:
+    # pytest-timeout cancels its timer after the report of a failure is built. The
+    # report looks up the source of every frame, which takes long enough for the
+    # timer of a test that failed just before its deadline (the 30-second timeout
+    # of the client, for example) to fire inside pytest, which kills the xdist
+    # worker. Cancel the timer before the report; the teardown gets its own below.
+    if call.when == "call" and call.excinfo is not None:
+        item.config.pluginmanager.hook.pytest_timeout_cancel_timer(item=item)
+    yield
+
+
+@pytest.hookimpl(hookwrapper=True, tryfirst=True)
+def pytest_runtest_teardown(item: pytest.Item) -> Generator[None, None, None]:
+    # The teardown runs with a timer of its own: the timer of a test that failed
+    # is cancelled above, and by pytest-timeout once the failure is reported. The
+    # timer of a test that passed is cancelled first, so that it does not fire
+    # during the teardown.
+    settings = pytest_timeout._get_item_settings(item)
+    if settings.timeout:
+        hooks = item.config.pluginmanager.hook
+        hooks.pytest_timeout_cancel_timer(item=item)
+        hooks.pytest_timeout_set_timer(item=item, settings=settings)
+    yield
 
 
 def pytest_generate_tests(metafunc: pytest.Metafunc) -> None:

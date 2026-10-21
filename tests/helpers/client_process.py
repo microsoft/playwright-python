@@ -30,8 +30,10 @@ and signal of its exit, which upstream gets from the 'close' event of BrowserSer
 import json
 import os
 import re
+import shutil
 import signal
 import sys
+import tempfile
 import time
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
@@ -66,8 +68,10 @@ class ClientProcess:
         exit_on_file: Optional[Union[str, Path]] = None,
         start_stop_and_run_http: bool = False,
     ) -> None:
-        temp_dir = work_dir / "tmp"
-        temp_dir.mkdir(parents=True)
+        # A short path, not one under tmp_path: the user data dir of the browser
+        # goes there, and the socket of Chrome's ProcessSingleton inside it has at
+        # most 104 characters.
+        self._temp_dir = temp_dir = Path(tempfile.mkdtemp(prefix="pw-"))
         options = {
             "flavor": flavor,
             "browserTypeName": browser_name,
@@ -126,11 +130,14 @@ class ClientProcess:
 
     def close(self) -> None:
         """Kills what is left: the Python process and the driver."""
-        if sys.platform == "win32":
-            self._process.kill()
-            return
         try:
-            os.killpg(self.child_pid, signal.SIGKILL)
-        except ProcessLookupError:
-            pass
-        self._process.exit_code()
+            if sys.platform == "win32":
+                self._process.kill()
+                return
+            try:
+                os.killpg(self.child_pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            self._process.exit_code()
+        finally:
+            shutil.rmtree(self._temp_dir, ignore_errors=True)

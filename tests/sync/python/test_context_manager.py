@@ -30,6 +30,7 @@ def test_context_managers_not_hang(context: BrowserContext) -> None:
             raise Exception("Oops!")
 
 
+@pytest.mark.slow
 def test_empty_sync_playwright_does_not_warn(tmp_path: Path) -> None:
     # Regression test for https://github.com/microsoft/playwright-python/issues/3165.
     # __enter__ must wait for initialize to finish; otherwise teardown races the

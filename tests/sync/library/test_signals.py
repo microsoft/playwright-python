@@ -35,6 +35,9 @@ import pytest
 from tests.helpers.client_process import ClientProcess
 from tests.server import Server
 
+# All the tests of the file are slow upstream (test.slow() at the top of the file).
+pytestmark = pytest.mark.slow
+
 FLAVOR = "sync"
 
 skip_on_windows = pytest.mark.skipif(
@@ -169,9 +172,9 @@ def test_SI_006_signals_should_close_the_browser_on_sighup(
     client.kill(signal.SIGHUP)
     assert client.out("exitCode") == "0"
     assert client.out("signal") == "null"
-    # Node.js handles SIGHUP and exits with 0. Python does not handle SIGHUP, so the
-    # signal ends the process.
-    assert client.child_exit_code() == -signal.SIGHUP
+    # The child ignores SIGHUP and ends when the browser has closed, as the Node.js
+    # child does; see client_process_impl.py.
+    assert client.child_exit_code() == 0
 
 
 @skip_on_windows

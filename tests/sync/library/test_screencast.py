@@ -44,6 +44,9 @@ from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
 
 from ..utils import utils
 
+# All the tests of the file are slow upstream (test.slow() at the top of the file).
+pytestmark = pytest.mark.slow
+
 T = TypeVar("T")
 
 

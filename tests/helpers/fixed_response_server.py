@@ -18,11 +18,14 @@ Port of the dummyServerPort and ipV6ServerPort fixtures in
 tests/library/browsertype-connect.spec.ts.
 """
 
+import errno
 import socket
 import socketserver
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
+
+from tests.server import find_free_port
 
 
 class FixedResponseServer:
@@ -51,7 +54,15 @@ class FixedResponseServer:
                 self.server_name = host
                 self.server_port = self.server_address[1]
 
-        self._server = Server((host, 0), Handler)
+        # A port that is free on both addresses, not one that is free on host only:
+        # see find_free_port().
+        for attempt in range(10):
+            try:
+                self._server = Server((host, find_free_port()), Handler)
+                break
+            except OSError as error:
+                if error.errno != errno.EADDRINUSE or attempt == 9:
+                    raise
         self._server.daemon_threads = True
         self.port: int = self._server.server_address[1]
         self._thread = threading.Thread(target=self._server.serve_forever, daemon=True)

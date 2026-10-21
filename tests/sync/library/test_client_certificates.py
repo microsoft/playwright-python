@@ -1090,6 +1090,7 @@ def test_CC_039_browser_should_handle_rejected_certificate_in_handshake_with_htt
     server.close()
 
 
+@pytest.mark.slow
 def test_CC_040_browser_persistent_context_validate_input(
     launch_persistent: LaunchPersistent,
 ) -> None:

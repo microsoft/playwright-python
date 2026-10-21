@@ -55,17 +55,31 @@ packages = [
 ]
 include-package-data = true
 
+[tool.setuptools.exclude-package-data]
+# The rules of the port, for the people who write it; not for the wheel.
+"playwright._impl" = ["transform.md"]
+
 [tool.setuptools_scm]
 version_file = "playwright/_repo_version.py"
 
 [tool.pytest.ini_options]
 addopts = "-Wall -rsx -vv -s"
+# The timeout of a test is 30 seconds, as upstream; a test marked slow gets three
+# times that, as test.slow() gives upstream (tests/conftest.py). The fixtures count,
+# as upstream counts them. The thread method ends the process of a test that hangs;
+# xdist replaces the worker. The signal method can not be used: it raises inside the
+# running code, and asyncio's Handle._run() catches and logs every BaseException but
+# SystemExit and KeyboardInterrupt, so a timeout that fires while the event loop runs
+# a callback is lost and the test hangs on.
+timeout = 30
+timeout_method = "thread"
 markers = [
     "skip_browser",
     "only_browser",
     "skip_platform",
     "only_platform",
-    "skip_protocol_check"
+    "skip_protocol_check",
+    "slow: the test gets three times the timeout, as test.slow() upstream",
 ]
 junit_family = "xunit2"
 asyncio_mode = "auto"

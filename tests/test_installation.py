@@ -19,7 +19,12 @@ import sys
 from pathlib import Path
 from venv import EnvBuilder
 
+import pytest
 
+
+# A venv, a pip install of the wheel and a browser download: minutes, not the 30 s
+# of a test.
+@pytest.mark.timeout(900)
 def test_install(tmp_path: Path, browser_name: str) -> None:
     env_dir = tmp_path / "env"
     env = EnvBuilder(with_pip=True)

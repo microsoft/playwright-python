@@ -28,7 +28,7 @@ classes), _form_data.py and _helper.py. _greenlets.py runs the sync API, _driver
 finds the bundled driver, _protocol_check.py and _protocol.py (generated) check the
 messages in the tests, and pytest-playwright uses _assertions.py.
 
-The rules of the port are in transform.md, in the root of the repository. What
+The rules of the port are in transform.md, next to this file. What
 differs from the JS code is marked with a "Python:" comment. In short:
 
 - Names are snake_case. Implementation methods take the arguments that the

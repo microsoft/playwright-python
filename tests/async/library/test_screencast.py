@@ -43,6 +43,9 @@ from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
 
 from ..utils import utils
 
+# All the tests of the file are slow upstream (test.slow() at the top of the file).
+pytestmark = pytest.mark.slow
+
 
 async def ensure_some_frames(page: Page) -> None:
     """Port of ensureSomeFrames() in tests/config/utils.ts."""

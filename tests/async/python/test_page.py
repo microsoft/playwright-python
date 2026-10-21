@@ -109,6 +109,7 @@ async def page_outside_test_mode(
         await browser.close()
 
 
+@pytest.mark.slow
 async def test_page_pause_should_reset_default_timeouts(
     page_outside_test_mode: Page, headless: bool, server: Server
 ) -> None:
@@ -122,6 +123,7 @@ async def test_page_pause_should_reset_default_timeouts(
         await page.get_by_text("foo").click()
 
 
+@pytest.mark.slow
 async def test_page_pause_should_reset_custom_timeouts(
     page_outside_test_mode: Page, headless: bool, server: Server
 ) -> None:

@@ -199,6 +199,7 @@ def test_IF_008_should_upload_a_file_after_popup(
     assert page.evaluate("e => e.files[0].name", input) == "file-to-upload.txt"
 
 
+@pytest.mark.slow
 def test_IF_009_should_upload_large_file(
     page: Page, server: Server, tmp_path: Path
 ) -> None:
@@ -239,6 +240,7 @@ def test_IF_010_should_throw_an_error_if_the_file_does_not_exist(
     assert "i actually do not exist.txt" in str(exc_info.value)
 
 
+@pytest.mark.slow
 def test_IF_011_should_upload_large_file_with_relative_path(
     page: Page, server: Server, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

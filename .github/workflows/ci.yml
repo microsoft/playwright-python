@@ -43,7 +43,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # ubuntu-22.04, not ubuntu-latest: the 24.04 image has no WebGL for headless
+        # Firefox (CA-008, CA-009).
+        os: [ubuntu-22.04, windows-latest, macos-latest]
         python-version: ['3.14']
         browser: [chromium, firefox, webkit]
         exclude:
@@ -58,7 +60,7 @@ jobs:
         - os: macos-latest
           python-version: '3.10'
           browser: chromium
-        - os: ubuntu-latest
+        - os: ubuntu-22.04
           python-version: '3.10'
           browser: chromium
         - os: macos-15-xlarge
@@ -70,7 +72,7 @@ jobs:
         - os: macos-latest
           python-version: '3.11'
           browser: chromium
-        - os: ubuntu-latest
+        - os: ubuntu-22.04
           python-version: '3.11'
           browser: chromium
         - os: windows-latest
@@ -79,7 +81,7 @@ jobs:
         - os: macos-latest
           python-version: '3.12'
           browser: chromium
-        - os: ubuntu-latest
+        - os: ubuntu-22.04
           python-version: '3.12'
           browser: chromium
         - os: windows-latest
@@ -88,7 +90,7 @@ jobs:
         - os: macos-latest
           python-version: '3.13'
           browser: chromium
-        - os: ubuntu-latest
+        - os: ubuntu-22.04
           python-version: '3.13'
           browser: chromium
     runs-on: ${{ matrix.os }}
@@ -99,6 +101,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies & browsers
+      id: install
       run: |
         python -m pip install --upgrade pip
         pip install -r local-requirements.txt
@@ -107,23 +110,24 @@ jobs:
         python -m build --wheel
         python -m playwright install --with-deps ${{ matrix.browser }}
     - name: Common Tests
-      run: pytest tests/common --browser=${{ matrix.browser }} --timeout 90
+      run: pytest tests/common --browser=${{ matrix.browser }}
     - name: Test Reference count
       run: pytest tests/test_reference_count_async.py --browser=${{ matrix.browser }}
     - name: Test Wheel Installation
       run: pytest tests/test_installation.py --browser=${{ matrix.browser }}
     - name: Test Sync API
-      if: matrix.os != 'ubuntu-latest'
-      run: pytest tests/sync --browser=${{ matrix.browser }} --timeout 90 --timeout-method thread -n auto
+      if: matrix.os != 'ubuntu-22.04'
+      run: pytest tests/sync --browser=${{ matrix.browser }} -n auto
     - name: Test Sync API
-      if: matrix.os == 'ubuntu-latest'
-      run: xvfb-run pytest tests/sync --browser=${{ matrix.browser }} --timeout 90 --timeout-method thread -n auto
+      if: matrix.os == 'ubuntu-22.04'
+      run: xvfb-run pytest tests/sync --browser=${{ matrix.browser }} -n auto
     - name: Test Async API
-      if: matrix.os != 'ubuntu-latest'
-      run: pytest tests/async --browser=${{ matrix.browser }} --timeout 90 --timeout-method thread -n auto
+      # Also after a failed sync step: the two suites report on their own.
+      if: ${{ !cancelled() && steps.install.outcome == 'success' && matrix.os != 'ubuntu-22.04' }}
+      run: pytest tests/async --browser=${{ matrix.browser }} -n auto
     - name: Test Async API
-      if: matrix.os == 'ubuntu-latest'
-      run: xvfb-run pytest tests/async --browser=${{ matrix.browser }} --timeout 90 --timeout-method thread -n auto
+      if: ${{ !cancelled() && steps.install.outcome == 'success' && matrix.os == 'ubuntu-22.04' }}
+      run: xvfb-run pytest tests/async --browser=${{ matrix.browser }} -n auto
 
   test-stable:
     name: Stable
@@ -131,7 +135,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-22.04, windows-latest, macos-latest]
         browser-channel: [chrome]
         include:
         - os: windows-latest
@@ -146,6 +150,7 @@ jobs:
       with:
         python-version: "3.10"
     - name: Install dependencies & browsers
+      id: install
       run: |
         python -m pip install --upgrade pip
         pip install -r local-requirements.txt
@@ -154,19 +159,20 @@ jobs:
         python -m build --wheel
         python -m playwright install ${{ matrix.browser-channel }} --with-deps
     - name: Common Tests
-      run: pytest tests/common --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90
+      run: pytest tests/common --browser=chromium --browser-channel=${{ matrix.browser-channel }}
     - name: Test Sync API
-      if: matrix.os != 'ubuntu-latest'
-      run: pytest tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90 --timeout-method thread -n auto
+      if: matrix.os != 'ubuntu-22.04'
+      run: pytest tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n auto
     - name: Test Sync API
-      if: matrix.os == 'ubuntu-latest'
-      run: xvfb-run pytest tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90 --timeout-method thread -n auto
+      if: matrix.os == 'ubuntu-22.04'
+      run: xvfb-run pytest tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n auto
     - name: Test Async API
-      if: matrix.os != 'ubuntu-latest'
-      run: pytest tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90 --timeout-method thread -n auto
+      # Also after a failed sync step: the two suites report on their own.
+      if: ${{ !cancelled() && steps.install.outcome == 'success' && matrix.os != 'ubuntu-22.04' }}
+      run: pytest tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n auto
     - name: Test Async API
-      if: matrix.os == 'ubuntu-latest'
-      run: xvfb-run pytest tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} --timeout 90 --timeout-method thread -n auto
+      if: ${{ !cancelled() && steps.install.outcome == 'success' && matrix.os == 'ubuntu-22.04' }}
+      run: xvfb-run pytest tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n auto
 
   test_examples:
     name: Examples
@@ -181,6 +187,7 @@ jobs:
       with:
         python-version: '3.10'
     - name: Install dependencies & browsers
+      id: install
       run: |
         pip install -r requirements.txt
         python -m playwright install --with-deps chromium
