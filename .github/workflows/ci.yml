@@ -40,6 +40,9 @@ jobs:
   build:
     name: Build
     timeout-minutes: 90
+    env:
+      # The dot reporter of the test steps (scripts/pytest_dot_reporter.py).
+      PYTHONPATH: scripts
     strategy:
       fail-fast: false
       matrix:
@@ -117,21 +120,24 @@ jobs:
       run: pytest tests/test_installation.py --browser=${{ matrix.browser }}
     - name: Test Sync API
       if: matrix.os != 'ubuntu-22.04'
-      run: pytest tests/sync --browser=${{ matrix.browser }} -n auto
+      run: pytest tests/sync --browser=${{ matrix.browser }} -n auto -p pytest_dot_reporter -rfE --color=yes
     - name: Test Sync API
       if: matrix.os == 'ubuntu-22.04'
-      run: xvfb-run pytest tests/sync --browser=${{ matrix.browser }} -n auto
+      run: xvfb-run pytest tests/sync --browser=${{ matrix.browser }} -n auto -p pytest_dot_reporter -rfE --color=yes
     - name: Test Async API
       # Also after a failed sync step: the two suites report on their own.
       if: ${{ !cancelled() && steps.install.outcome == 'success' && matrix.os != 'ubuntu-22.04' }}
-      run: pytest tests/async --browser=${{ matrix.browser }} -n auto
+      run: pytest tests/async --browser=${{ matrix.browser }} -n auto -p pytest_dot_reporter -rfE --color=yes
     - name: Test Async API
       if: ${{ !cancelled() && steps.install.outcome == 'success' && matrix.os == 'ubuntu-22.04' }}
-      run: xvfb-run pytest tests/async --browser=${{ matrix.browser }} -n auto
+      run: xvfb-run pytest tests/async --browser=${{ matrix.browser }} -n auto -p pytest_dot_reporter -rfE --color=yes
 
   test-stable:
     name: Stable
     timeout-minutes: 90
+    env:
+      # The dot reporter of the test steps (scripts/pytest_dot_reporter.py).
+      PYTHONPATH: scripts
     strategy:
       fail-fast: false
       matrix:
@@ -162,17 +168,17 @@ jobs:
       run: pytest tests/common --browser=chromium --browser-channel=${{ matrix.browser-channel }}
     - name: Test Sync API
       if: matrix.os != 'ubuntu-22.04'
-      run: pytest tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n auto
+      run: pytest tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n auto -p pytest_dot_reporter -rfE --color=yes
     - name: Test Sync API
       if: matrix.os == 'ubuntu-22.04'
-      run: xvfb-run pytest tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n auto
+      run: xvfb-run pytest tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n auto -p pytest_dot_reporter -rfE --color=yes
     - name: Test Async API
       # Also after a failed sync step: the two suites report on their own.
       if: ${{ !cancelled() && steps.install.outcome == 'success' && matrix.os != 'ubuntu-22.04' }}
-      run: pytest tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n auto
+      run: pytest tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n auto -p pytest_dot_reporter -rfE --color=yes
     - name: Test Async API
       if: ${{ !cancelled() && steps.install.outcome == 'success' && matrix.os == 'ubuntu-22.04' }}
-      run: xvfb-run pytest tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n auto
+      run: xvfb-run pytest tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n auto -p pytest_dot_reporter -rfE --color=yes
 
   test_examples:
     name: Examples

@@ -122,7 +122,7 @@ def test_NE_140_should_work_with_web_socket(
     context = browser.new_context(ignore_https_errors=True)
     page = context.new_page()
     value = page.evaluate(
-        WEBSOCKET_VALUE, re.sub(r"https", "wss", https_server.PREFIX, 1) + "/ws"
+        WEBSOCKET_VALUE, re.sub(r"https", "wss", https_server.PREFIX, count=1) + "/ws"
     )
     assert value == "incoming"
     context.close()
@@ -134,7 +134,7 @@ def test_NE_141_should_fail_with_web_socket_if_not_ignored(
     context = browser.new_context()
     page = context.new_page()
     value = page.evaluate(
-        WEBSOCKET_VALUE, re.sub(r"https", "wss", https_server.PREFIX, 1) + "/ws"
+        WEBSOCKET_VALUE, re.sub(r"https", "wss", https_server.PREFIX, count=1) + "/ws"
     )
     assert value == "Error"
     context.close()

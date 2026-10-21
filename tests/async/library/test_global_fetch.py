@@ -546,7 +546,12 @@ async def test_FE_027_should_set_playwright_as_user_agent(
         # on ubuntu: distro is 'ubuntu' and version is 'X.X'
         # on manjaro: distro is 'Manjaro' and version is 'unknown'
         assert (
-            re.sub(r"<ARCH>; \w+ [^)]+", "<ARCH>; distro version", user_agent_masked, 1)
+            re.sub(
+                r"<ARCH>; \w+ [^)]+",
+                "<ARCH>; distro version",
+                user_agent_masked,
+                count=1,
+            )
             == "Playwright/X.X.X (<ARCH>; distro version) python/X.X" + suffix
         )
     elif is_mac:

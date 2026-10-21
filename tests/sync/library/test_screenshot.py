@@ -82,7 +82,7 @@ def test_SS_068_page_screenshot_should_run_in_parallel_in_multiple_pages(
     for i in range(n):
         assert_to_be_golden(
             screenshots[i],
-            "grid-cell-0-upstream.png" if i % 2 == 0 else "grid-cell-1.png",
+            "grid-cell-0.png" if i % 2 == 0 else "grid-cell-1.png",
         )
     sync_gather(*[page.close for page in pages])
 

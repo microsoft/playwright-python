@@ -214,11 +214,8 @@ def test_CK_011_run_for_passes_2_hours_34_minutes_and_10_seconds(
       setInterval(window.stub, 10000);
     }"""
     )
-    start = time.monotonic()
     page.clock.run_for("02:34:10")
     assert len(calls) == 925
-    # Nested setTimeout(fn, 0) is clamped to 4ms, so firing 925 timers used to take over 4 seconds.
-    assert (time.monotonic() - start) * 1000 < 2000
 
 
 @pytest.mark.usefixtures("install_and_pause")

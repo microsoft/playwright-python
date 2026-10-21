@@ -477,7 +477,7 @@ async def test_HE_015_headless_and_headful_should_use_same_default_fonts(
             page.screenshot(), headless_page.screenshot()
         )
         # Port of utils.compare(image1, image2), which counts the different pixels.
-        count = count_different_pixels(image1, image2, threshold=0.1)
+        count = count_different_pixels(image1, image2)
         assert count == 0
     await headless_browser.close()
 

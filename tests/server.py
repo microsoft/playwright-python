@@ -48,8 +48,10 @@ from pyee import EventEmitter
 from twisted.internet import reactor as _twisted_reactor
 from twisted.internet import ssl
 from twisted.internet.error import CannotListenError
+from twisted.internet.interfaces import IProtocolNegotiationFactory
 from twisted.internet.selectreactor import SelectReactor
 from twisted.web import http
+from zope.interface import implementer
 
 _dirname = pathlib.Path(__file__).parent.absolute()
 reactor = cast(SelectReactor, _twisted_reactor)
@@ -136,14 +138,17 @@ def _resolve_threadsafe(future: "asyncio.Future[T]", value: T) -> None:
 
 
 class ExpectResponse(Generic[T]):
-    def __init__(self) -> None:
-        self._value: T
+    """What the server was told to expect: the request or the web socket once it
+    has arrived. Before that, value raises."""
+
+    def __init__(self, future: "asyncio.Future[T]") -> None:
+        self._future = future
 
     @property
     def value(self) -> T:
-        if not hasattr(self, "_value"):
+        if not self._future.done():
             raise ValueError("no received value")
-        return self._value
+        return self._future.result()
 
 
 class TestServerRequest(http.Request):
@@ -312,9 +317,18 @@ class TestServerHTTPChannel(http.HTTPChannel):
     requestFactory = TestServerRequest
 
 
+@implementer(IProtocolNegotiationFactory)
 class TestServerFactory(http.HTTPFactory):
     server_instance: "Server"
     protocol = TestServerHTTPChannel
+
+    def acceptableProtocols(self) -> List[bytes]:
+        """The protocols offered over ALPN, as twisted.web.server.Site offers them.
+
+        HTTPFactory offers none. Twisted 26 then answers a client that offers ALPN,
+        as every browser does, with a fatal alert, where Twisted 25 let the
+        connection go on without a protocol."""
+        return [b"http/1.1"]
 
 
 class Server:
@@ -396,12 +410,19 @@ class Server:
                     raise
                 self._set_port(find_free_port())
 
+    def _request_future(self, path: str) -> "asyncio.Future[TestServerRequest]":
+        """The future of the next request of the path, registered at once: as
+        server.waitForRequest() upstream, before the action that sends the request.
+        A coroutine would register it one turn of the event loop later, after a
+        fast request may have reached the server."""
+        future = self.request_subscribers.get(path)
+        if future is None:
+            future = asyncio.Future()
+            self.request_subscribers[path] = future
+        return future
+
     async def wait_for_request(self, path: str) -> TestServerRequest:
-        if path in self.request_subscribers:
-            return await self.request_subscribers[path]
-        future: asyncio.Future["TestServerRequest"] = asyncio.Future()
-        self.request_subscribers[path] = future
-        return await future
+        return await self._request_future(path)
 
     def wait_for_web_socket(self) -> 'asyncio.Future["WebSocketProtocol"]':
         future: asyncio.Future[WebSocketProtocol] = asyncio.Future()
@@ -444,29 +465,13 @@ class Server:
     def expect_request(
         self, path: str
     ) -> Generator[ExpectResponse[TestServerRequest], None, None]:
-        future = asyncio.create_task(self.wait_for_request(path))
-
-        cb_wrapper: ExpectResponse[TestServerRequest] = ExpectResponse()
-
-        def done_cb(task: asyncio.Task) -> None:
-            cb_wrapper._value = future.result()
-
-        future.add_done_callback(done_cb)
-        yield cb_wrapper
+        yield ExpectResponse(self._request_future(path))
 
     @contextlib.contextmanager
     def expect_websocket(
         self,
     ) -> Generator[ExpectResponse["WebSocketProtocol"], None, None]:
-        future = self.wait_for_web_socket()
-
-        cb_wrapper: ExpectResponse["WebSocketProtocol"] = ExpectResponse()
-
-        def done_cb(_: asyncio.Future) -> None:
-            cb_wrapper._value = future.result()
-
-        future.add_done_callback(done_cb)
-        yield cb_wrapper
+        yield ExpectResponse(self.wait_for_web_socket())
 
     def set_auth(self, path: str, username: str, password: str) -> None:
         self.auth[path] = (username, password)

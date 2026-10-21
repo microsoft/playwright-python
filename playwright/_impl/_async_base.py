@@ -46,6 +46,12 @@ class AsyncEventContextManager(Generic[T], AbstractAsyncContextManager):
         self._event = AsyncEventInfo[T](future)
 
     async def __aenter__(self) -> AsyncEventInfo[T]:
+        # The wait takes its first step before the body runs. A task that is
+        # cancelled before its first step, as __aexit__ cancels it when the body
+        # raised before its first await, never runs its coroutine, and the
+        # coroutines that the wait holds are never awaited: their listeners and
+        # timers stay, and Python warns at their collection.
+        await asyncio.sleep(0)
         return self._event
 
     async def __aexit__(
