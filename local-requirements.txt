@@ -14,6 +14,6 @@ pytest-timeout==2.4.0
 pytest-xdist==3.8.0
 PyYAML==6.0.3
 service_identity==24.2.0
-twisted==25.5.0
+twisted==26.4.0
 types-pyOpenSSL==24.1.0.20240722
 types-PyYAML==6.0.12.20260906
