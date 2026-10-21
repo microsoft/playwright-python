@@ -1247,6 +1247,7 @@ async def test_BT_075_should_fulfill_with_global_fetch_result(
     assert await response.json() == {"foo": "bar"}
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("kind", KINDS)
 async def test_BT_076_should_upload_large_file(
     kind: str,
@@ -1298,6 +1299,7 @@ async def test_BT_076_should_upload_large_file(
     upload_file.unlink()
 
 
+@pytest.mark.slow
 @pytest.mark.parametrize("kind", KINDS)
 async def test_BT_077_should_upload_a_folder(
     kind: str,
@@ -1783,6 +1785,7 @@ async def test_BT_090_launch_server_only_should_properly_disconnect_when_connect
     assert TARGET_CLOSED_ERROR_MESSAGE in (await wait_for_navigation()).message
 
 
+@pytest.mark.slow
 async def test_BT_091_launch_server_only_should_be_able_to_reconnect_to_a_browser_12_times_without_warnings(
     connect: Callable[..., Awaitable[Browser]],
     start_remote_server: RemoteServerStarter,

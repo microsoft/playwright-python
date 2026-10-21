@@ -22,6 +22,12 @@ the test sends it a signal. It prints "(key=>value)" lines, like upstream:
 
 It runs as a standalone script (python -I client_process_impl.py '<json options>'),
 so it imports nothing from the tests package.
+
+On SIGHUP, the Node.js client closes the browser in the process that got the signal
+(launchOptions.handleSIGHUP), and the process goes on until the browser has closed,
+then exits with 0. The Python client has no handler: the signal ends the process,
+and the driver, left without a client, kills the browser. The script closes the
+browser on SIGHUP and ends when it has closed, as the Node.js process does.
 """
 
 import asyncio
@@ -29,6 +35,7 @@ import glob
 import http.server
 import json
 import os
+import signal
 import sys
 import time
 from typing import Any, Dict
@@ -54,6 +61,18 @@ def should_exit() -> bool:
     return bool(exit_on_file and os.path.exists(exit_on_file))
 
 
+_hangup = False
+
+
+def _on_sighup(*_: Any) -> None:
+    global _hangup
+    _hangup = True
+
+
+if sys.platform != "win32":
+    signal.signal(signal.SIGHUP, _on_sighup)
+
+
 def run_sync() -> None:
     from playwright.sync_api import sync_playwright
 
@@ -72,10 +91,12 @@ def run_sync() -> None:
         if OPTIONS.get("url"):
             browser.new_page().goto(OPTIONS["url"])
         out("ready", "true")
-        while True:
+        while browser.is_connected():
             time.sleep(0.1)
             if should_exit():
                 sys.exit(42)
+            if _hangup:
+                browser.close()
 
 
 async def run_async() -> None:
@@ -98,10 +119,12 @@ async def run_async() -> None:
             page = await browser.new_page()
             await page.goto(OPTIONS["url"])
         out("ready", "true")
-        while True:
+        while browser.is_connected():
             await asyncio.sleep(0.1)
             if should_exit():
                 sys.exit(42)
+            if _hangup:
+                await browser.close()
 
 
 if __name__ == "__main__":

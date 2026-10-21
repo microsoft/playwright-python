@@ -161,6 +161,7 @@ def _test_sync_playwright_stop_multiple_times() -> None:
     playwright.stop()
 
 
+@pytest.mark.slow
 def test_sync_playwright_stop_multiple_times() -> None:
     p = multiprocessing.Process(target=_test_sync_playwright_stop_multiple_times)
     p.start()
@@ -184,6 +185,7 @@ def _test_call_sync_method_after_playwright_close_with_own_loop(
     assert "Event loop is closed! Is Playwright already stopped?" in str(exc.value)
 
 
+@pytest.mark.slow
 def test_call_sync_method_after_playwright_close_with_own_loop(
     server: Server, browser_name: str, launch_arguments: Dict[str, Any]
 ) -> None:
@@ -196,6 +198,7 @@ def test_call_sync_method_after_playwright_close_with_own_loop(
     assert p.exitcode == 0
 
 
+@pytest.mark.slow
 def test_should_not_orphan_callback_on_non_serializable_params(
     browser_name: str,
     launch_arguments: Dict[str, Any],
@@ -232,6 +235,7 @@ def test_should_not_orphan_callback_on_non_serializable_params(
     assert "Future exception was never retrieved" not in result.stderr
 
 
+@pytest.mark.slow
 def test_sync_calls_should_raise_after_driver_exit(
     browser_name: str,
     launch_arguments: Dict[str, Any],

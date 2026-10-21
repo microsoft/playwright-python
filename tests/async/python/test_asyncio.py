@@ -106,6 +106,7 @@ async def test_should_not_throw_with_taskgroup(page: Page) -> None:
     assert await page.evaluate("() => 11 * 11") == 121
 
 
+@pytest.mark.slow
 def test_stop_does_not_deadlock_with_asyncio_atexit(tmp_path: Path) -> None:
     # Regression test for https://github.com/microsoft/playwright-python/issues/3004.
     # asyncio.run() cancels all remaining tasks (including transport.run()) before

@@ -57,7 +57,12 @@ class Zone:
         try:
             return await func()
         finally:
-            _async_local_storage.reset(token)
+            try:
+                _async_local_storage.reset(token)
+            except ValueError:
+                # Python: the coroutine was closed (GeneratorExit) from another
+                # context, where the token is not valid; its context is gone with it.
+                pass
 
     def data(self, type: ZoneType) -> Any:
         return self._data.get(type)

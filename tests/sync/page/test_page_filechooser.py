@@ -27,6 +27,7 @@ from tests.server import Server
 from ..utils import Utils
 
 
+@pytest.mark.slow
 def test_FC_001_should_upload_multiple_large_files(
     page: Page, server: Server, tmp_path: Path
 ) -> None:

@@ -15,6 +15,7 @@
 import abc
 import asyncio
 import contextlib
+import errno
 import gzip
 import mimetypes
 import pathlib
@@ -55,10 +56,68 @@ reactor = cast(SelectReactor, _twisted_reactor)
 
 
 def find_free_port() -> int:
-    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+    """A port that is free on 127.0.0.1 and on ::1.
+
+    A dual-stack bind of port 0 picks a port that no process holds on either
+    address. A port that is free on one address only is a trap under xdist: the
+    browser resolves `localhost` to ::1 first, and a server of another worker that
+    holds the port on the other address answers instead.
+    """
+    try:
+        s = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+        s.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 0)
+        s.bind(("::", 0))
+    except OSError:
+        # No IPv6 on this machine.
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind(("", 0))
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    with closing(s):
         return s.getsockname()[1]
+
+
+def _no_ipv6(error: OSError) -> bool:
+    """True when the error says that the machine has no ::1, not that the port is
+    taken (EADDRINUSE, or another error that a listener on ::1 elsewhere causes)."""
+    return error.errno in (
+        errno.EADDRNOTAVAIL,
+        errno.EAFNOSUPPORT,
+        errno.EPROTONOSUPPORT,
+        errno.ENETUNREACH,
+    )
+
+
+def listen_localhost(
+    backlog: int, ipv6: bool = True
+) -> Tuple[List[socket.socket], int]:
+    """Listening sockets on 127.0.0.1 and, when the machine has IPv6, on ::1, on one
+    free port. A port that another process took on one of the two addresses in the
+    meantime is given up, see find_free_port()."""
+    for _ in range(10):
+        port = find_free_port()
+        v4 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        v4.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+            v4.bind(("127.0.0.1", port))
+        except OSError:
+            v4.close()
+            continue
+        v4.listen(backlog)
+        if not ipv6:
+            return [v4], port
+        v6 = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
+        v6.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 1)
+        v6.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+            v6.bind(("::1", port))
+        except OSError as error:
+            v6.close()
+            if _no_ipv6(error):
+                return [v4], port
+            v4.close()
+            continue
+        v6.listen(backlog)
+        return [v4, v6], port
+    raise OSError("No free port on 127.0.0.1 and ::1")
 
 
 T = TypeVar("T")
@@ -285,6 +344,22 @@ class Server:
     def listen(self, factory: TestServerFactory) -> None:
         pass
 
+    def _listen_localhost(self, listen: Callable[[str], Any]) -> List[Any]:
+        """Listens on 127.0.0.1 and ::1 with listen(interface). When the ::1 listener
+        fails for any reason but the absence of IPv6, another process holds the port
+        there: the 127.0.0.1 listener is given up and CannotListenError makes start()
+        try a new port, see find_free_port()."""
+        listeners = [listen("127.0.0.1")]
+        try:
+            listeners.append(listen("::1"))
+        except CannotListenError as error:
+            socket_error = error.socketError
+            if isinstance(socket_error, OSError) and _no_ipv6(socket_error):
+                return listeners
+            listeners[0].stopListening()
+            raise
+        return listeners
+
     def start(self, static_path: pathlib.Path = _dirname / "assets") -> None:
         request_subscribers: Dict[str, asyncio.Future] = {}
         auth: Dict[str, Tuple[str, str]] = {}
@@ -455,15 +530,9 @@ class HTTPServer(Server):
         super().__init__()
 
     def listen(self, factory: http.HTTPFactory) -> None:
-        self._listeners.append(
-            reactor.listenTCP(self.PORT, factory, interface="127.0.0.1")
+        self._listeners += self._listen_localhost(
+            lambda interface: reactor.listenTCP(self.PORT, factory, interface=interface)
         )
-        try:
-            self._listeners.append(
-                reactor.listenTCP(self.PORT, factory, interface="::1")
-            )
-        except Exception:
-            pass
 
     def stop(self) -> None:
         for listener in self._listeners:
@@ -488,15 +557,11 @@ class HTTPSServer(Server):
             ),
         )
         contextFactory = cert.options()
-        self._listeners.append(
-            reactor.listenSSL(self.PORT, factory, contextFactory, interface="127.0.0.1")
-        )
-        try:
-            self._listeners.append(
-                reactor.listenSSL(self.PORT, factory, contextFactory, interface="::1")
+        self._listeners += self._listen_localhost(
+            lambda interface: reactor.listenSSL(
+                self.PORT, factory, contextFactory, interface=interface
             )
-        except Exception:
-            pass
+        )
 
     def stop(self) -> None:
         for listener in self._listeners:

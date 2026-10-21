@@ -154,7 +154,7 @@ A few rules of thumb that catch most "actually a PORT" cases:
 
 #### PORT
 
-Implement the change in `playwright/_impl/<module>.py`, the line-by-line port of `$PW_SRC_DIR/packages/playwright-core/src/client/<module>.ts` (snake_case: `browserContext.ts` is `browser_context.py`). The client change that implements the new API is usually in the same upstream commit as the docs change, or close to it: port it line by line with the rules of [`transform.md`](../../../transform.md), and walk the whole client range as section 14 of that file says (`git -C "$PW_SRC_DIR" log <prev>..<rev> -- packages/playwright-core/src/client packages/isomorphic packages/protocol`). A few reminders:
+Implement the change in `playwright/_impl/<module>.py`, the line-by-line port of `$PW_SRC_DIR/packages/playwright-core/src/client/<module>.ts` (snake_case: `browserContext.ts` is `browser_context.py`). The client change that implements the new API is usually in the same upstream commit as the docs change, or close to it: port it line by line with the rules of [`playwright/_impl/transform.md`](../../../playwright/_impl/transform.md), and walk the whole client range as section 14 of that file says (`git -C "$PW_SRC_DIR" log <prev>..<rev> -- packages/playwright-core/src/client packages/isomorphic packages/protocol`). A few reminders:
 
 | Upstream JS | Python |
 |---|---|

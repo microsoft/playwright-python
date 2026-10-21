@@ -32,6 +32,8 @@ import threading
 from typing import Callable, Dict, List, Optional, Set, Tuple
 from urllib.parse import urljoin, urlsplit, urlunsplit
 
+from tests.server import listen_localhost
+
 # Certain browsers perform telemetry requests which we want to ignore.
 _CONNECT_HOSTS_TO_IGNORE = {"www.bing.com:443", "www.google.com:443"}
 
@@ -155,22 +157,7 @@ class ProxyServer:
     """Listens on localhost (127.0.0.1 and ::1), on a free port."""
 
     def __init__(self) -> None:
-        self._listeners: List[socket.socket] = []
-        listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        listener.bind(("127.0.0.1", 0))
-        listener.listen(128)
-        self._listeners.append(listener)
-        self.PORT: int = listener.getsockname()[1]
-        try:
-            listener6 = socket.socket(socket.AF_INET6, socket.SOCK_STREAM)
-            listener6.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 1)
-            listener6.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            listener6.bind(("::1", self.PORT))
-            listener6.listen(128)
-            self._listeners.append(listener6)
-        except OSError:
-            pass
+        self._listeners, self.PORT = listen_localhost(128)
         self.URL = f"http://localhost:{self.PORT}"
         self.HOST = f"localhost:{self.PORT}"
 

@@ -14,7 +14,7 @@ python=python
 export PYTHONPATH="scripts${PYTHONPATH:+:$PYTHONPATH}"
 # --maxschedchunk=1: a worker gets one test at a time, as soon as it is free, so
 # that the slow tests at the end of the collection spread over all workers.
-args=(--browser "$browser" -n "$workers" --maxschedchunk=1 --timeout 120 --timeout-method thread -p pytest_line_reporter -rfE --disable-warnings)
+args=(--browser "$browser" -n "$workers" --maxschedchunk=1 -p pytest_line_reporter -rfE --disable-warnings)
 status=0
 xvfb-run -a "$python" -m pytest tests/sync "${args[@]}" "$@" || status=$?
 xvfb-run -a "$python" -m pytest tests/async "${args[@]}" "$@" || status=$?
