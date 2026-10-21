@@ -14,13 +14,15 @@
 
 """Image helpers for the screenshot tests, in both flavors.
 
-compare_images() is a port of comparePNGs() in tests/config/comparator.ts, which
-compares with the ssim-cie94 comparator of compareImages() in
-packages/utils/comparators.ts. compare() and the classes and functions above it are
-a port of packages/utils/image_tools: compare.ts, stats.ts, colorUtils.ts and
-imageChannel.ts. The diff image that compare() draws is not ported.
 assert_to_match_golden() is expect(buffer).toMatchSnapshot(name, { maxDiffPixels })
-against tests/golden-<browser>/<name>. is_lossless_webp() is a port of
+against tests/golden-<browser>/<name>: the matcher of @playwright/test compares with
+pixelmatch at the threshold 0.2 (packages/utils/comparators.ts, compareImages()), as
+the configs of the upstream tests set no other comparator. compare_images() is a port
+of comparePNGs() in tests/config/comparator.ts, which compares with the ssim-cie94
+comparator and no threshold. compare() and the classes and functions above it are a
+port of packages/utils/image_tools: compare.ts, stats.ts, colorUtils.ts and
+imageChannel.ts; count_different_pixels() is utils.compare() of the tests. The diff
+image that compare() draws is not ported. is_lossless_webp() is a port of
 isLosslessWebp() in packages/utils/webp/webp.ts.
 """
 
@@ -34,6 +36,8 @@ from pathlib import Path
 from typing import List, Optional, Sequence, Tuple, cast
 
 from PIL import Image
+from pixelmatch import pixelmatch
+from pixelmatch.contrib.PIL import from_PIL_to_raw_data
 
 _tests_dir = Path(__file__).parent.parent
 
@@ -513,10 +517,28 @@ def compare_images(
 def assert_to_match_golden(
     browser_name: str, actual: bytes, golden_name: str, max_diff_pixels: int = 0
 ) -> None:
-    """expect(actual).toMatchSnapshot(golden_name, { maxDiffPixels })."""
+    """expect(actual).toMatchSnapshot(golden_name, { maxDiffPixels }): pixelmatch at the
+    threshold 0.2, as the matcher compares when the config sets no comparator."""
     golden = (_tests_dir / f"golden-{browser_name}" / golden_name).read_bytes()
-    error = compare_images(actual, golden, max_diff_pixels)
-    assert error is None, f"Screenshot comparison failed for {golden_name}: {error}"
+    actual_image = decode_image(actual)
+    golden_image = decode_image(golden)
+    assert actual_image.size == golden_image.size, (
+        f"Expected an image {golden_image.width}px by {golden_image.height}px,"
+        f" received {actual_image.width}px by {actual_image.height}px."
+    )
+    width, height = golden_image.size
+    count = pixelmatch(
+        from_PIL_to_raw_data(golden_image),
+        from_PIL_to_raw_data(actual_image),
+        width,
+        height,
+        threshold=0.2,
+    )
+    ratio = math.ceil(count / (width * height) * 100) / 100
+    assert count <= max_diff_pixels, (
+        f"Screenshot comparison failed for {golden_name}: {count} pixels"
+        f" (ratio {ratio:.2f} of all image pixels) are different."
+    )
 
 
 def is_lossless_webp(buffer: bytes) -> bool:

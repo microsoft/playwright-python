@@ -166,6 +166,7 @@ async def test_BC_058_should_return_bounding_box_with_page_scale(
     await context.close()
 
 
+@pytest.mark.slow
 async def test_BC_059_should_not_leak_listeners_during_navigation_of_20_pages(
     context_factory: Callable[..., Awaitable[BrowserContext]], server: Server
 ) -> None:

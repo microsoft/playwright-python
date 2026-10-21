@@ -112,6 +112,7 @@ def test_HE_001_should_have_default_url_when_launching_browser_smoke(
     assert urls == ["about:blank"]
 
 
+@pytest.mark.slow
 def test_HE_002_should_close_browser_with_beforeunload_page(
     launch_persistent: LaunchPersistent, server: Server
 ) -> None:

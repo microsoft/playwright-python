@@ -193,6 +193,7 @@ def test_DC_024_should_accept_relative_user_data_dir(
     context.close()
 
 
+@pytest.mark.slow
 def test_DC_025_should_restore_state_from_user_data_dir(
     browser_type: BrowserType,
     server: Server,

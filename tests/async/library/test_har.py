@@ -1326,6 +1326,7 @@ async def test_HA_057_should_close_the_context_when_saving_the_har_fails(
         await browser.close()
 
 
+@pytest.mark.slow
 async def test_HA_058_should_support_har_larger_than_512_mb(
     context_factory: Callable[..., Awaitable[BrowserContext]],
     server: Server,

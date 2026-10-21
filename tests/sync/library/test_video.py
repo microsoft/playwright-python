@@ -833,6 +833,7 @@ def test_VI_030_screencast_should_work_with_video_trace(
     assert is_almost_red(pixel) is True
 
 
+@pytest.mark.slow
 def test_VI_031_should_save_as_video(browser: Browser, tmp_path: Path) -> None:
     videos_path = tmp_path
     size: ViewportSize = {"width": 320, "height": 240}

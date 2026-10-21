@@ -43,58 +43,58 @@ jobs:
     env:
       # The dot reporter of the test steps (scripts/pytest_dot_reporter.py).
       PYTHONPATH: scripts
+      # 16 workers on the 64-core runners, as upstream runs its tests there; two on
+      # the 3-core macOS runner, upstream's default of half the cores.
+      WORKERS: ${{ startsWith(matrix.os, 'macos') && '2' || '16' }}
     strategy:
       fail-fast: false
       matrix:
-        # ubuntu-22.04, not ubuntu-latest: the 24.04 image has no WebGL for headless
-        # Firefox (CA-008, CA-009).
-        os: [ubuntu-22.04, windows-latest, macos-latest]
-        python-version: ['3.14']
+        # Linux and Windows run on the 64-core runners of the organization, as
+        # upstream's tests_primary.yml; macOS on the hosted runner.
+        # 3.12 is our most used Python version (base)
+        os: [playwright-x64-ubuntu24-64-core, playwright-x64-server2025-64-core, macos-15-xlarge]
+        python-version: ['3.12']
         browser: [chromium, firefox, webkit]
-        exclude:
-        # WebKit on standard macOS-latest (currently macos-15-arm64) is unstable;
-        # upstream pins paid macos-15-xlarge for cross-browser webkit too.
-        - os: macos-latest
-          browser: webkit
         include:
-        - os: windows-latest
-          python-version: '3.10'
-          browser: chromium
-        - os: macos-latest
-          python-version: '3.10'
-          browser: chromium
-        - os: ubuntu-22.04
+        - os: playwright-x64-server2025-64-core
           python-version: '3.10'
           browser: chromium
         - os: macos-15-xlarge
+          python-version: '3.10'
+          browser: chromium
+        - os: playwright-x64-ubuntu24-64-core
+          python-version: '3.10'
+          browser: chromium
+        - os: playwright-x64-server2025-64-core
+          python-version: '3.11'
+          browser: chromium
+        - os: macos-15-xlarge
+          python-version: '3.11'
+          browser: chromium
+        - os: playwright-x64-ubuntu24-64-core
+          python-version: '3.11'
+          browser: chromium
+        - os: playwright-x64-server2025-64-core
+          python-version: '3.13'
+          browser: chromium
+        - os: macos-15-xlarge
+          python-version: '3.13'
+          browser: chromium
+        - os: playwright-x64-ubuntu24-64-core
+          python-version: '3.13'
+          browser: chromium
+        - os: playwright-x64-server2025-64-core
           python-version: '3.14'
-          browser: webkit
-        - os: windows-latest
-          python-version: '3.11'
           browser: chromium
-        - os: macos-latest
-          python-version: '3.11'
+        - os: macos-15-xlarge
+          python-version: '3.14'
           browser: chromium
-        - os: ubuntu-22.04
-          python-version: '3.11'
+        - os: playwright-x64-ubuntu24-64-core
+          python-version: '3.14'
           browser: chromium
-        - os: windows-latest
+        # Intel macOS, once: *-large is Intel, *-xlarge is arm64, as upstream notes.
+        - os: macos-15-large
           python-version: '3.12'
-          browser: chromium
-        - os: macos-latest
-          python-version: '3.12'
-          browser: chromium
-        - os: ubuntu-22.04
-          python-version: '3.12'
-          browser: chromium
-        - os: windows-latest
-          python-version: '3.13'
-          browser: chromium
-        - os: macos-latest
-          python-version: '3.13'
-          browser: chromium
-        - os: ubuntu-22.04
-          python-version: '3.13'
           browser: chromium
     runs-on: ${{ matrix.os }}
     steps:
@@ -119,34 +119,34 @@ jobs:
     - name: Test Wheel Installation
       run: pytest tests/test_installation.py --browser=${{ matrix.browser }}
     - name: Test Sync API
-      if: matrix.os != 'ubuntu-22.04'
-      run: pytest tests/sync --browser=${{ matrix.browser }} -n auto -p pytest_dot_reporter -rfE --color=yes
+      if: runner.os != 'Linux'
+      run: pytest tests/sync --browser=${{ matrix.browser }} -n ${{ env.WORKERS }} -p pytest_dot_reporter -rfE --color=yes
     - name: Test Sync API
-      if: matrix.os == 'ubuntu-22.04'
-      run: xvfb-run pytest tests/sync --browser=${{ matrix.browser }} -n auto -p pytest_dot_reporter -rfE --color=yes
+      if: runner.os == 'Linux'
+      run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" pytest tests/sync --browser=${{ matrix.browser }} -n ${{ env.WORKERS }} -p pytest_dot_reporter -rfE --color=yes
     - name: Test Async API
       # Also after a failed sync step: the two suites report on their own.
-      if: ${{ !cancelled() && steps.install.outcome == 'success' && matrix.os != 'ubuntu-22.04' }}
-      run: pytest tests/async --browser=${{ matrix.browser }} -n auto -p pytest_dot_reporter -rfE --color=yes
+      if: ${{ !cancelled() && steps.install.outcome == 'success' && runner.os != 'Linux' }}
+      run: pytest tests/async --browser=${{ matrix.browser }} -n ${{ env.WORKERS }} -p pytest_dot_reporter -rfE --color=yes
     - name: Test Async API
-      if: ${{ !cancelled() && steps.install.outcome == 'success' && matrix.os == 'ubuntu-22.04' }}
-      run: xvfb-run pytest tests/async --browser=${{ matrix.browser }} -n auto -p pytest_dot_reporter -rfE --color=yes
+      if: ${{ !cancelled() && steps.install.outcome == 'success' && runner.os == 'Linux' }}
+      run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" pytest tests/async --browser=${{ matrix.browser }} -n ${{ env.WORKERS }} -p pytest_dot_reporter -rfE --color=yes
 
   test-stable:
     name: Stable
-    timeout-minutes: 90
+    # The branded browsers on the 3-core macOS runner take longer than the bundled ones.
+    timeout-minutes: 120
     env:
       # The dot reporter of the test steps (scripts/pytest_dot_reporter.py).
       PYTHONPATH: scripts
+      WORKERS: ${{ startsWith(matrix.os, 'macos') && '2' || '16' }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, windows-latest, macos-latest]
+        os: [playwright-x64-ubuntu24-64-core, playwright-x64-server2025-64-core, macos-15-xlarge]
         browser-channel: [chrome]
         include:
-        - os: windows-latest
-          browser-channel: msedge
-        - os: macos-latest
+        - os: playwright-x64-server2025-64-core
           browser-channel: msedge
     runs-on: ${{ matrix.os }}
     steps:
@@ -167,18 +167,18 @@ jobs:
     - name: Common Tests
       run: pytest tests/common --browser=chromium --browser-channel=${{ matrix.browser-channel }}
     - name: Test Sync API
-      if: matrix.os != 'ubuntu-22.04'
-      run: pytest tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n auto -p pytest_dot_reporter -rfE --color=yes
+      if: runner.os != 'Linux'
+      run: pytest tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n ${{ env.WORKERS }} -p pytest_dot_reporter -rfE --color=yes
     - name: Test Sync API
-      if: matrix.os == 'ubuntu-22.04'
-      run: xvfb-run pytest tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n auto -p pytest_dot_reporter -rfE --color=yes
+      if: runner.os == 'Linux'
+      run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" pytest tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n ${{ env.WORKERS }} -p pytest_dot_reporter -rfE --color=yes
     - name: Test Async API
       # Also after a failed sync step: the two suites report on their own.
-      if: ${{ !cancelled() && steps.install.outcome == 'success' && matrix.os != 'ubuntu-22.04' }}
-      run: pytest tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n auto -p pytest_dot_reporter -rfE --color=yes
+      if: ${{ !cancelled() && steps.install.outcome == 'success' && runner.os != 'Linux' }}
+      run: pytest tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n ${{ env.WORKERS }} -p pytest_dot_reporter -rfE --color=yes
     - name: Test Async API
-      if: ${{ !cancelled() && steps.install.outcome == 'success' && matrix.os == 'ubuntu-22.04' }}
-      run: xvfb-run pytest tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n auto -p pytest_dot_reporter -rfE --color=yes
+      if: ${{ !cancelled() && steps.install.outcome == 'success' && runner.os == 'Linux' }}
+      run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" pytest tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n ${{ env.WORKERS }} -p pytest_dot_reporter -rfE --color=yes
 
   test_examples:
     name: Examples

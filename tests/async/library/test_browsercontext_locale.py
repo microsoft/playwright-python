@@ -130,6 +130,7 @@ async def test_LC_007_should_work_for_multiple_pages_sharing_same_process(
     await context.close()
 
 
+@pytest.mark.slow
 async def test_LC_008_should_be_isolated_between_contexts(
     browser: Browser, server: Server
 ) -> None:

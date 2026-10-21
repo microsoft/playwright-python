@@ -165,6 +165,7 @@ def test_BC_058_should_return_bounding_box_with_page_scale(
     context.close()
 
 
+@pytest.mark.slow
 def test_BC_059_should_not_leak_listeners_during_navigation_of_20_pages(
     context_factory: Callable[..., BrowserContext],
     server: Server,
