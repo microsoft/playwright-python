@@ -26,16 +26,26 @@ jobs:
       uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: "3.10"
+    - name: Set up Node.js
+      uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with:
+        node-version: '24'
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r local-requirements.txt
         pip install -r requirements.txt
         pip install -e .
+    - name: Get Playwright
+      run: python scripts/upstream.py checkout
     - name: Lint
       run: pre-commit run --show-diff-on-failure --color=always --all-files
     - name: Check the tests against the upstream test registry
       run: python scripts/check_test_registry.py --report
+    - name: Check that the generated files are up to date
+      run: |
+        ./scripts/update_api.sh
+        git diff --exit-code
 
   build:
     name: Build
@@ -103,15 +113,23 @@ jobs:
       uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies & browsers
-      id: install
+    - name: Set up Node.js
+      uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with:
+        node-version: '24'
+    - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r local-requirements.txt
         pip install -r requirements.txt
         pip install -e .
-        python -m build --wheel
-        python -m playwright install --with-deps ${{ matrix.browser }}
+    - name: Get Playwright
+      run: python scripts/upstream.py checkout
+    - name: Build the driver and the wheel
+      run: python -m build --wheel
+    - name: Install browsers
+      id: install
+      run: python -m playwright install --with-deps ${{ matrix.browser }}
     - name: Common Tests
       run: pytest tests/common --browser=${{ matrix.browser }}
     - name: Test Reference count
@@ -155,15 +173,23 @@ jobs:
       uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       with:
         python-version: "3.10"
-    - name: Install dependencies & browsers
-      id: install
+    - name: Set up Node.js
+      uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with:
+        node-version: '24'
+    - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r local-requirements.txt
         pip install -r requirements.txt
         pip install -e .
-        python -m build --wheel
-        python -m playwright install ${{ matrix.browser-channel }} --with-deps
+    - name: Get Playwright
+      run: python scripts/upstream.py checkout
+    - name: Build the driver and the wheel
+      run: python -m build --wheel
+    - name: Install browsers
+      id: install
+      run: python -m playwright install ${{ matrix.browser-channel }} --with-deps
     - name: Common Tests
       run: pytest tests/common --browser=chromium --browser-channel=${{ matrix.browser-channel }}
     - name: Test Sync API

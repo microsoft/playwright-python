@@ -22,7 +22,10 @@
 // Playwright docs (docs/src/api in microsoft/playwright).
 //
 // Usage:
-//   PW_SRC_DIR=<microsoft/playwright checkout> node scripts/codegen/generate_api.js --flavor async|sync|structs [--out <file>]
+//   node scripts/codegen/generate_api.js --flavor async|sync|structs [--out <file>]
+//
+// The docs come from .upstream/, the microsoft/playwright checkout at the commit
+// in DRIVER_VERSION (scripts/upstream.py).
 //
 // The docs are parsed with the upstream parser (utils/doclint/api_parser.js) and
 // filtered for Python. Facts that the docs do not contain come from
@@ -113,12 +116,12 @@ function fail(message) {
 const options = parseArgs(process.argv.slice(2));
 const isAsync = options.flavor === 'async';
 
-const PW_SRC_DIR = process.env.PW_SRC_DIR;
-if (!PW_SRC_DIR)
-  fail('Set PW_SRC_DIR to a microsoft/playwright checkout at the commit in DRIVER_VERSION (rev=).');
-const { parseApi } = require(path.join(PW_SRC_DIR, 'utils', 'doclint', 'api_parser'));
-const { Type, parseCodeLang } = require(path.join(PW_SRC_DIR, 'utils', 'doclint', 'documentation'));
-const md = require(path.join(PW_SRC_DIR, 'utils', 'markdown'));
+const UPSTREAM_DIR = path.join(__dirname, '..', '..', '.upstream');
+if (!fs.existsSync(path.join(UPSTREAM_DIR, 'docs', 'src', 'api')))
+  fail('.upstream/ is missing. Run: python scripts/upstream.py checkout');
+const { parseApi } = require(path.join(UPSTREAM_DIR, 'utils', 'doclint', 'api_parser'));
+const { Type, parseCodeLang } = require(path.join(UPSTREAM_DIR, 'utils', 'doclint', 'documentation'));
+const md = require(path.join(UPSTREAM_DIR, 'utils', 'markdown'));
 
 const BASE_CLASS = isAsync ? 'AsyncBase' : 'SyncBase';
 const CONTEXT_MANAGER_CLASS = isAsync ? 'AsyncContextManager' : 'SyncContextManager';
@@ -185,7 +188,7 @@ function escapeRegExp(text) {
 // Docs.
 
 function loadDocumentation() {
-  const documentation = parseApi(path.join(PW_SRC_DIR, 'docs', 'src', 'api'));
+  const documentation = parseApi(path.join(UPSTREAM_DIR, 'docs', 'src', 'api'));
   documentation.filterForLanguage('python');
   return documentation;
 }

@@ -2,7 +2,9 @@
 
 These rules say how to write `tests/async/{page,library}` and `tests/sync/{page,library}`
 from `tests/page` and `tests/library` in `microsoft/playwright`, at the commit in
-`DRIVER_VERSION`. Use them at each roll, for every new or changed upstream test.
+`DRIVER_VERSION`. Use them at each roll, for every new or changed upstream test. The
+upstream tests are in `.upstream/`, the checkout at that commit. The steps of a roll are
+in the `playwright-roll` skill.
 
 The port is line by line, with **zero deviations**. A reviewer reads the `.spec.ts` file
 and the two `.py` files side by side. Each upstream statement maps to one Python
@@ -140,13 +142,3 @@ A behavior that no upstream test covers (the sync API, asyncio, Python types, `_
 a regression of this repository) gets a test in `tests/async/python/` or
 `tests/sync/python/`, in the file named after the upstream file of the feature. These
 are not ports: see the second rule of tests in `AGENTS.md`, and keep them few.
-
-## 7. At each roll
-
-1. Copy the registry: `cp "$PW_SRC_DIR/tests/registry.md" tests/upstream_registry.md`.
-2. `python scripts/check_test_registry.py --report` lists the identifiers to port, the
-   titles that changed and the tests that upstream removed.
-3. For each changed upstream test, diff its `.spec.ts` between the two commits and port
-   each hunk into both flavors, line by line.
-4. Run the ported files on the three browsers, in both flavors. A failure is a bug to
-   fix in the client, the driver or the environment, not in the test.

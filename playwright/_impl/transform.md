@@ -2,7 +2,8 @@
 
 These rules say how to write `playwright/_impl` from `packages/playwright-core/src/client`
 in `microsoft/playwright`. Use them at each roll, for every new or changed line of the
-client.
+client. The upstream code is in `.upstream/`, the checkout at the commit in
+`DRIVER_VERSION`. The steps of a roll are in the `playwright-roll` skill.
 
 The port is line by line. **The structure of the Python follows the JavaScript. The timing
 of the Python follows asyncio.** A reviewer reads the `.ts` file and the `.py` file side by
@@ -535,14 +536,3 @@ The sync API is not a port. It runs on greenlets, in
   (`wait_for_response()`): an `async def` wrapper would call the predicate in a task.
 - Test with `_dispatcher_fiber`, not with a flag: `if route._dispatcher_fiber:`.
 - The async API is the port; the sync branch is always the `# Python:` marked one.
-
-## 14. At each roll
-
-1. List the upstream commits of the range for `packages/playwright-core/src/client`,
-   `packages/isomorphic`, `packages/protocol` and the parts of `packages/utils` that are
-   ported.
-2. For each hunk, find the Python line and apply the rules. Keep the order.
-3. Regenerate the protocol files with `./scripts/update_api.sh`.
-4. Run `pre-commit run --all-files` and `./test.sh`.
-5. Read every `# Python:` mark in the changed members again. Remove a mark whose reason
-   is gone. Add one for each new deviation.

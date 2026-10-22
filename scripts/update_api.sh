@@ -1,22 +1,22 @@
 #!/bin/bash
 
-# Generates the public API (playwright/{async,sync}_api/_generated.py) and its
-# TypedDicts (playwright/_impl/_api_structures.py) from the Playwright API docs
-# (docs/src/api) in a microsoft/playwright checkout, pointed to by PW_SRC_DIR,
-# and the protocol files of playwright/_impl (_protocol.py, protocol_types.py,
-# protocol_channels.py, protocol/validator.py) from its protocol spec
-# (packages/protocol/spec).
-# Use a separate checkout on the exact release branch for the version in
-# DRIVER_VERSION (for example release-1.64). The generator is
-# scripts/codegen/generate_api.js; Python facts that the docs do not contain
-# are in scripts/codegen/python_rules.js.
-driver_version="$(cat DRIVER_VERSION)"
-if [[ -z "$PW_SRC_DIR" ]]; then
-    echo "Set PW_SRC_DIR to a separate microsoft/playwright checkout on the release branch for v${driver_version}, e.g.:" >&2
-    echo "    PW_SRC_DIR=../playwright-for-python ./scripts/update_api.sh" >&2
+# Generates the files that come from microsoft/playwright, from .upstream/ at the
+# commit in DRIVER_VERSION (python scripts/upstream.py checkout):
+# - playwright/{async,sync}_api/_generated.py and playwright/_impl/_api_structures.py,
+#   from the API docs (docs/src/api), by scripts/codegen/generate_api.js;
+# - playwright/_impl/_protocol.py, protocol_types.py, protocol_channels.py and
+#   protocol/validator.py, from the protocol spec (packages/protocol/spec), by
+#   scripts/codegen/generate_protocol.py;
+# - tests/upstream_registry.md, a copy of tests/registry.md.
+# The generated files are committed. The Lint job of CI runs this script and fails
+# when they differ.
+cd "$(dirname "$0")/.." || exit 1
+
+pin="$(cat DRIVER_VERSION)"
+if [[ "$(git -C .upstream rev-parse HEAD 2>/dev/null)" != "$pin" ]]; then
+    echo ".upstream/ is not at $pin, the commit in DRIVER_VERSION. Run: python scripts/upstream.py checkout" >&2
     exit 1
 fi
-export PW_SRC_DIR
 
 function update_api {
     flavor="$1"
@@ -24,7 +24,6 @@ function update_api {
     echo "Generating $file_name"
     if node scripts/codegen/generate_api.js --flavor "$flavor" --out "$file_name"; then
         pre-commit run --files "$file_name"
-        echo "Regenerated APIs"
     else
         echo "Exited due to errors"
         exit 1
@@ -44,6 +43,5 @@ else
     exit 1
 fi
 
-playwright install
-
-python scripts/update_versions.py
+echo "Copying tests/upstream_registry.md"
+cp .upstream/tests/registry.md tests/upstream_registry.md

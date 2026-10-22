@@ -10,7 +10,7 @@ if [[ ($1 == '--help') || ($1 == '-h') || ($1 == '') || ($2 == '') ]]; then
   echo ""
   echo "  docker run --rm -it playwright:localbuild-noble /bin/bash"
   echo ""
-  echo "NOTE: this requires on Playwright PIP dependencies to be installed"
+  echo "NOTE: this requires the Playwright PIP dependencies and .upstream/ (python scripts/upstream.py checkout)"
   echo ""
   exit 0
 fi

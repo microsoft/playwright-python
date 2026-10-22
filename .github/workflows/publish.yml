@@ -44,7 +44,11 @@ jobs:
         node-version: '24'
     - name: Install dependencies
       run: python -m pip install "$(grep '^build==' local-requirements.txt)"
-    - name: Build wheels
+    - name: Get Playwright
+      run: python scripts/upstream.py checkout
+    # Each wheel build builds the driver of its platform; the build of
+    # .upstream/ is shared.
+    - name: Build the driver and the wheels
       run: |
         for wheel in $(python setup.py --list-wheels); do
           PLAYWRIGHT_TARGET_WHEEL=$wheel python -m build --wheel --outdir dist

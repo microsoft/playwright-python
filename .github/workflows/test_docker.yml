@@ -46,22 +46,31 @@ jobs:
         pip install -r local-requirements.txt
         pip install -r requirements.txt
         pip install -e .
+    - name: Get Playwright
+      run: python scripts/upstream.py checkout
+    # build.sh builds the wheels, and with them the driver.
     - name: Build Docker image
       run: |
         ARCH="${{ matrix.runs-on == 'ubuntu-24.04-arm' && 'arm64' || 'amd64' }}"
         bash utils/docker/build.sh --$ARCH ${{ matrix.docker-image-variant }} playwright-python:localbuild-${{ matrix.docker-image-variant }}
-    - name: Test
+    - name: Start the container
+      id: container
       run: |
-        CONTAINER_ID="$(docker run --rm -e CI -v $(pwd):/root/playwright --name playwright-docker-test --workdir /root/playwright/ -d -t playwright-python:localbuild-${{ matrix.docker-image-variant }} /bin/bash)"
+        docker run --rm -e CI -e PYTHONPATH=scripts -v $(pwd):/root/playwright --name playwright-docker-test --workdir /root/playwright/ -d -t playwright-python:localbuild-${{ matrix.docker-image-variant }} /bin/bash
         # Fix permissions for Git inside the container
-        docker exec "${CONTAINER_ID}" chown -R root:root /root/playwright
-        docker exec "${CONTAINER_ID}" pip install -r local-requirements.txt
-        docker exec "${CONTAINER_ID}" pip install -r requirements.txt
-        docker exec "${CONTAINER_ID}" pip install -e .
-        # build.sh (above) already built the driver bundles into driver/ on the
-        # host. The repo is bind-mounted into the container, so this in-container
-        # wheel build reuses those bundles (setup.py skips the source build when
-        # the zip already exists) and therefore needs no Node.js in the image.
-        docker exec "${CONTAINER_ID}" python -m build --wheel
-        docker exec "${CONTAINER_ID}" xvfb-run pytest tests/sync/
-        docker exec "${CONTAINER_ID}" xvfb-run pytest tests/async/
+        docker exec playwright-docker-test chown -R root:root /root/playwright
+        docker exec playwright-docker-test pip install -r local-requirements.txt
+        docker exec playwright-docker-test pip install -r requirements.txt
+        docker exec playwright-docker-test pip install -e .
+        # The repo, with the driver that build.sh built into driver/, is bind-mounted
+        # into the container: this wheel build reuses that driver, and needs no
+        # Node.js in the image.
+        docker exec playwright-docker-test python -m build --wheel
+    # As in ci.yml: the dot reporter (scripts/pytest_dot_reporter.py, found through
+    # PYTHONPATH), and two workers, upstream's default of half the cores of these runners.
+    - name: Test Sync API
+      run: docker exec playwright-docker-test xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" pytest tests/sync -n 2 -p pytest_dot_reporter -rfE --color=yes
+    - name: Test Async API
+      # Also after a failed sync step: the two suites report on their own.
+      if: ${{ !cancelled() && steps.container.outcome == 'success' }}
+      run: docker exec playwright-docker-test xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" pytest tests/async -n 2 -p pytest_dot_reporter -rfE --color=yes

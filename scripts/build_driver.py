@@ -13,33 +13,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Assemble the Playwright driver bundles from published artifacts.
+"""Build the Playwright driver bundles from .upstream/.
 
-Instead of building the driver from upstream source, this downloads the
-already-published ``playwright-core`` npm package (pinned in ``DRIVER_VERSION``)
-and the official Node.js binaries (pinned in ``NODE_VERSION``) and assembles
-per-platform bundles into ``driver/playwright-<version>-<suffix>.zip``. The
-layout mirrors what upstream's ``utils/build/build-playwright-driver.sh``
-produces, which is what ``setup.py`` extracts into ``playwright/driver/`` when
-building a wheel::
+The driver is the playwright-core package of microsoft/playwright, built from
+``.upstream/`` at the commit in ``DRIVER_VERSION``, plus the official Node.js binary
+of ``NODE_VERSION``. ``setup.py`` runs this when it builds a wheel. It:
 
-    node | node.exe   - the Node.js binary
-    LICENSE           - the Node.js license
-    package/**        - the playwright-core npm package
+1. builds ``.upstream/`` with ``npm ci`` and ``npm run build`` (once per commit);
+2. packs ``packages/playwright-core`` with ``npm pack``;
+3. adds the Node.js binary of each platform, and writes
+   ``driver/playwright-<commit>-<suffix>.zip``::
 
-``playwright-core`` is fetched with ``npm pack`` (run from the repository root, so
-a root-level ``.npmrc`` -- e.g. the one the release pipeline writes to point at
-the internal Azure Artifacts feed -- and its credentials are honoured). The
-Node.js binaries are downloaded directly from nodejs.org. Apart from Node.js/npm
-this needs only the Python standard library.
+       node | node.exe   - the Node.js binary
+       LICENSE           - the Node.js license
+       package/**        - the playwright-core npm package
+
+A bundle that exists is not built again. ``.upstream/`` must be checked out at the
+commit in ``DRIVER_VERSION`` (``python scripts/upstream.py checkout``), with no local
+changes. npm uses the registry and the credentials of a root-level ``.npmrc`` when
+there is one, for example the one that the release pipeline writes to point at
+the internal Azure Artifacts feed. Apart from git and Node.js/npm this needs only
+the Python standard library.
 
 Usage::
 
-    scripts/build_driver.py            # assemble every platform bundle
-    scripts/build_driver.py <suffix>   # assemble a single bundle, e.g. mac-arm64
-
-``setup.py`` invokes the single-suffix form so a wheel build only downloads the
-one Node.js binary it needs.
+    python scripts/build_driver.py            # build every platform bundle
+    python scripts/build_driver.py <suffix>   # build one bundle, e.g. mac-arm64
 """
 
 import os
@@ -53,6 +52,8 @@ import urllib.request
 import zipfile
 from pathlib import Path
 from typing import Iterable, List, NamedTuple, Set
+
+import upstream
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DRIVER_DIR = REPO_ROOT / "driver"
@@ -82,21 +83,6 @@ def read_pin(name: str) -> str:
     if not value:
         raise SystemExit(f"{name} is empty or missing at {REPO_ROOT / name}")
     return value
-
-
-def read_driver_version() -> str:
-    # DRIVER_VERSION has two lines: npm=<playwright-core version> and
-    # rev=<the microsoft/playwright commit that the package is built from>.
-    pins = dict(
-        line.split("=", 1)
-        for line in read_pin("DRIVER_VERSION").splitlines()
-        if line.strip()
-    )
-    if "npm" not in pins:
-        raise SystemExit(
-            f"DRIVER_VERSION has no npm= line at {REPO_ROOT / 'DRIVER_VERSION'}"
-        )
-    return pins["npm"].strip()
 
 
 def download(url: str, destination: Path) -> None:
@@ -147,27 +133,52 @@ def _extract_zip_file(archive: zipfile.ZipFile, name: str, destination: Path) ->
         shutil.copyfileobj(source, out)
 
 
-def fetch_playwright_core(version: str, work_dir: Path) -> Path:
-    """Download playwright-core@<version> and extract its package/ tree once."""
+def run_npm(args: List[str], cwd: Path) -> None:
     npm = "npm.cmd" if sys.platform == "win32" else "npm"
-    spec = f"playwright-core@{version}"
-    # npm is run from the repository root so that a root-level .npmrc (registry
-    # and credentials) is honoured. `npm pack` writes <name>-<version>.tgz.
-    print(f"Downloading {spec} with npm pack", flush=True)
+    env = dict(os.environ)
+    npmrc = REPO_ROOT / ".npmrc"
+    if npmrc.is_file():
+        # The release pipeline writes the registry and its credentials here.
+        env["npm_config_userconfig"] = str(npmrc)
+    print(f"Running npm {' '.join(args)} in {cwd}", flush=True)
     try:
-        subprocess.check_call(
-            [npm, "pack", spec, "--pack-destination", str(work_dir)],
-            cwd=REPO_ROOT,
-        )
+        subprocess.check_call([npm, *args], cwd=cwd, env=env)
     except FileNotFoundError:
         raise SystemExit(
-            "npm was not found on PATH; Node.js/npm are required to assemble the driver."
+            "npm was not found on PATH; Node.js/npm are required to build the driver."
         )
     except subprocess.CalledProcessError as error:
-        raise SystemExit(f"npm pack {spec} failed with exit code {error.returncode}")
-    tgz = work_dir / f"playwright-core-{version}.tgz"
-    if not tgz.is_file():
-        raise SystemExit(f"npm pack did not produce {tgz}")
+        raise SystemExit(
+            f"npm {' '.join(args)} failed with exit code {error.returncode}"
+        )
+
+
+def build_playwright_core(commit: str, work_dir: Path) -> Path:
+    """Build .upstream/ and extract its playwright-core package into work_dir."""
+    if upstream.local_changes():
+        raise SystemExit(
+            f"{upstream.UPSTREAM_DIR} has local changes. The driver bundles are named "
+            "after the commit, so build them from a clean checkout."
+        )
+    core_dir = upstream.UPSTREAM_DIR / "packages" / "playwright-core"
+    # npm ci removes node_modules, and the stamp with it.
+    stamp = upstream.UPSTREAM_DIR / "node_modules" / ".playwright-python-build"
+    built = (
+        stamp.is_file()
+        and stamp.read_text().strip() == commit
+        and (core_dir / "lib").is_dir()
+    )
+    if not built:
+        run_npm(["ci", "--no-audit", "--no-fund"], upstream.UPSTREAM_DIR)
+        run_npm(["run", "build"], upstream.UPSTREAM_DIR)
+        stamp.write_text(commit + "\n")
+    run_npm(["pack", "--pack-destination", str(work_dir)], core_dir)
+    tgzs = list(work_dir.glob("playwright-core-*.tgz"))
+    if len(tgzs) != 1:
+        raise SystemExit(
+            f"npm pack did not produce one playwright-core-*.tgz in {work_dir}"
+        )
+    tgz = tgzs[0]
     with tarfile.open(tgz, "r:gz") as tar:
         # npm tarballs nest every file under a top-level "package/" directory,
         # which is exactly the bundle layout we want.
@@ -180,6 +191,10 @@ def fetch_playwright_core(version: str, work_dir: Path) -> Path:
             raise SystemExit(f"No package/ entries found in {tgz.name}")
         _extract_members(tar, work_dir, members)
     tgz.unlink()
+    # Upstream copies these into the package before it publishes it
+    # (LICENCE_FILES in utils/workspace.js).
+    for name in ("NOTICE", "LICENSE"):
+        shutil.copyfile(upstream.UPSTREAM_DIR / name, work_dir / "package" / name)
     return work_dir / "package"
 
 
@@ -216,7 +231,7 @@ def zip_bundle(bundle_dir: Path, destination: Path) -> None:
 
 def assemble(
     platform: Platform,
-    version: str,
+    commit: str,
     node_version: str,
     package_dir: Path,
     work_dir: Path,
@@ -227,14 +242,14 @@ def assemble(
     bundle_dir.mkdir(parents=True)
     fetch_node(platform, node_version, bundle_dir, work_dir)
     shutil.copytree(package_dir, bundle_dir / "package")
-    destination = DRIVER_DIR / f"playwright-{version}-{platform.suffix}.zip"
+    destination = DRIVER_DIR / f"playwright-{commit}-{platform.suffix}.zip"
     zip_bundle(bundle_dir, destination)
     shutil.rmtree(bundle_dir)
     print(f"Created {destination}")
 
 
 def build(suffixes: Set[str]) -> None:
-    version = read_driver_version()
+    commit = upstream.read_pin()
     node_version = read_pin("NODE_VERSION")
     DRIVER_DIR.mkdir(exist_ok=True)
 
@@ -242,19 +257,20 @@ def build(suffixes: Set[str]) -> None:
         p
         for p in PLATFORMS
         if p.suffix in suffixes
-        and not (DRIVER_DIR / f"playwright-{version}-{p.suffix}.zip").exists()
+        and not (DRIVER_DIR / f"playwright-{commit}-{p.suffix}.zip").exists()
     ]
     if not todo:
         print(
-            f"Driver bundles for {version} already present in {DRIVER_DIR}; nothing to do."
+            f"Driver bundles for {commit} already present in {DRIVER_DIR}; nothing to do."
         )
         return
 
+    upstream.require_checkout()
     with tempfile.TemporaryDirectory(prefix="pw-driver-") as tmp_name:
         work_dir = Path(tmp_name)
-        package_dir = fetch_playwright_core(version, work_dir)
+        package_dir = build_playwright_core(commit, work_dir)
         for platform in todo:
-            assemble(platform, version, node_version, package_dir, work_dir)
+            assemble(platform, commit, node_version, package_dir, work_dir)
 
 
 def main(argv: Iterable[str]) -> None:

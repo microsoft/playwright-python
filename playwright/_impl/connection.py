@@ -66,9 +66,12 @@ from playwright._impl.utils.zones import empty_zone
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl.local_utils import LocalUtils
     from playwright._impl.playwright import Playwright
+    from playwright._impl.protocol_channels import RootChannel
 
 
 class Root(ChannelOwner):
+    _channel: "RootChannel"
+
     def __init__(self, connection: "Connection") -> None:
         super().__init__(connection, "Root", "", {})
 
@@ -362,13 +365,13 @@ class Connection(EventEmitter):
         validator = find_validator(object._type, method or "", "Event")
         params = validator(params, "", self._validator_from_wire_context())
         if not self._dispatcher_fiber:
-            object._channel.emit(method, params)
+            cast(Any, object._channel).emit(method, params)
             return
         # Python: under the sync API, a listener may block in a sync call. Each
         # listener runs in its own greenlet, so that it can switch to the dispatcher
         # fiber then, and the loop goes on with the next listener. The greenlet
         # resumes when the sync call completes.
-        channel = object._channel
+        channel = cast(Any, object._channel)
         for listener in channel.raw_listeners(method):
             EventGreenlet(channel._call_handler).switch(method, listener, (params,))
 
