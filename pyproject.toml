@@ -57,7 +57,7 @@ include-package-data = true
 
 [tool.setuptools.exclude-package-data]
 # The rules of the port, for the people who write it; not for the wheel.
-"playwright._impl" = ["transform.md"]
+"playwright._impl" = ["AGENTS.md"]
 
 [tool.setuptools_scm]
 version_file = "playwright/_repo_version.py"

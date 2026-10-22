@@ -1,128 +1,120 @@
 # AGENTS.md
 
-Guidance for coding agents working in this repository.
+- Use 80% of the way to ASD-STE100 when talking to me and when generating docs.
 
-## What this is
+Python bindings for Playwright. The client in `playwright/_impl/` talks to the Node.js
+driver in `playwright/driver/` over a pipe.
 
-Python bindings for [Playwright](https://playwright.dev). The Python client talks JSON over a pipe to the Node-based driver bundled in `playwright/driver/`. The pipe protocol is defined upstream in `packages/protocol/spec/*.yml`.
+## Upstream
 
-## Layout
-
-- `playwright/_impl/` — the client, a line-by-line port of upstream's JS client (`packages/playwright-core/src/client/*.ts`): one module per client file in snake_case (`browserContext.ts` is `browser_context.py`), members in the JS order. `playwright/_impl/transform.md` has the rules of the port; each difference from the JS code has a `# Python:` comment. `isomorphic/`, `protocol/` and `utils/` hold the ports of the parts of `packages/isomorphic`, `packages/protocol` and `packages/utils` that the client uses. The docstring of each ported module names its upstream file (`"""Port of packages/playwright-core/src/client/page.ts.`); `scripts/upstream.py changes` relies on it. The modules whose names start with an underscore are Python only, and the generated API imports most of them by name: `_api_classes.py` (the implementation of each API class), `_async_base.py` / `_sync_base.py` (the base classes of the API objects), `_impl_to_api_mapping.py`, `_errors.py` (the public error classes), `_form_data.py`, `_helper.py`. `_greenlets.py` runs the sync API (see `transform.md`, section 13), `_driver.py` finds the bundled driver, and pytest-playwright uses `_assertions.py` (the soft-assertion scope); the matchers are in `assertions.py`.
-- `playwright/async_api/_generated.py`, `playwright/sync_api/_generated.py`, and the public TypedDicts in `playwright/_impl/_api_structures.py` — **auto-generated** from the upstream API docs, and committed so that they can be read and reviewed. Never edit by hand; rerun `./scripts/update_api.sh` after a roll or after changing `scripts/codegen/`. The Lint job of CI generates them again and fails when they differ.
-- `scripts/codegen/generate_api.js` — the generator. A Node.js script that loads the upstream doc parser (`utils/doclint/api_parser.js`) from `.upstream/`, filters the docs for Python, and writes the whole public API: signatures, types, docstrings, event overloads, the calls into `_impl/`, and the TypedDicts. It does not read `_impl/`.
-- `scripts/codegen/python_rules.js` — the Python facts that the docs do not contain (positional options, struct `total=`, hidden members and options). Policy: the shipped Python API wins; each entry is a candidate for an upstream docs fix, and the generator fails on entries that no longer match anything. Every entry needs a one-line rationale comment above it.
-- `playwright/_impl/protocol_channels.py`, `protocol_types.py`, `protocol/validator.py` and `_protocol.py` — **auto-generated** by `scripts/codegen/generate_protocol.py` (run by `./scripts/update_api.sh`) from the upstream protocol spec.
-  - `protocol_channels.py` has a typed channel class for each interface (`PageChannel`, `FrameChannel`, …), like upstream's `channels.d.ts`. Each command is a method with the protocol name and parameters; as on upstream's channel proxy, calling it sends the message at once and returns an awaitable of the result (`await self._channel.goto(url=..., waitUntil=..., referer=..., timeout=...)`). Each event has `on<Event>` / `off<Event>` methods. A result or event payload has every top-level field; a field that the driver left out is `None`.
-  - `protocol_types.py` has the TypedDicts for initializers, results, events and nested types, named as upstream's `utils/generate_channels.js` names them (`PageInitializer`, `FrameGotoResult`, `PageRouteEvent`, …).
-  - `protocol/validator.py` is the port of upstream's `validator.ts`; the connection validates every message with it.
-  - `_protocol.py` has the parameters of every command. With `PW_CHECK_PROTOCOL=1`, `playwright/_impl/_protocol_check.py` checks each message that the client sends against it. The test suite sets this, and fails a test that sends an unknown command, an unknown or missing parameter, or a value of the wrong type.
-- `scripts/codegen/compare_api.py` — compares two generated files (signatures, annotations, call bodies, docstrings) and lists every difference. Use it to check that a generator change does not change the API.
-- `tests/async/`, `tests/sync/` — pytest suites, ported test for test from the upstream tests, which `tests/upstream_registry.md` (a copy of upstream's `tests/registry.md`, written by `./scripts/update_api.sh`) lists by identifier. See [Tests](#tests). `tests/{async,sync}/page/` and `library/` hold the ports; `tests/{async,sync}/python/` hold the Python-only tests (the sync API, asyncio, Python types, regressions of this repository), and so do `tests/common/` (threads, signals, events) and the two files at the top of `tests/` (memory, wheel installation).
-- `DRIVER_VERSION` — one line: the `microsoft/playwright` commit that the driver, the generated files and the port come from.
-- `.upstream/` — a full clone of `microsoft/playwright` at that commit, gitignored. Read upstream code there; do not commit, branch or edit in it. `scripts/upstream.py` manages it: `checkout` (clone it, check out `DRIVER_VERSION`), `pin <ref>` (move `DRIVER_VERSION` to a branch, a tag or a commit), `changes` (what changed upstream since `DRIVER_VERSION` at `HEAD`, with the Python file to port each change to), `resolve <ref>`.
-- `scripts/build_driver.py` — the wheel build (`setup.py`) runs it: it builds `playwright-core` in `.upstream/` (`npm ci`, `npm run build`), and adds the Node.js binary of `NODE_VERSION` (kept at the latest LTS by `scripts/update_node_version.py`). The bundles are `driver/playwright-<commit>-<suffix>.zip`. The driver reports the version of `packages/playwright-core/package.json` at the commit (`1.65.0-next` on `main`).
-- `scripts/update_api.sh` — generates the API files, the protocol files and `tests/upstream_registry.md` from `.upstream/`.
-- `CONTRIBUTING.md` (build and test) and `ROLLING.md` (rolls) — the same steps, for people.
-
-## Setup
-
-The steps are in `CONTRIBUTING.md`. They need Python 3.10+, git, Node.js and npm:
+Everything comes from `microsoft/playwright` at the commit in `DRIVER_VERSION`: the
+driver, the generated API and the code that we port. `.upstream/` is a full clone of it
+(gitignored). Read upstream code there. Do not edit, commit or switch branches in it.
 
 ```sh
-python3 -m venv env && source env/bin/activate
-pip install --upgrade pip
-pip install -r local-requirements.txt
-pip install -e .
-python scripts/upstream.py checkout   # clone microsoft/playwright into .upstream/ at DRIVER_VERSION
-python -m build --wheel               # build the driver from .upstream/, and the wheel
+python scripts/upstream.py checkout   # clone .upstream/, or move it to DRIVER_VERSION
+python scripts/upstream.py changes    # what changed upstream since DRIVER_VERSION at HEAD
 ```
 
-Run the last two again when `DRIVER_VERSION` changes. If the system lacks `python3-venv`, `uv venv env` is an acceptable substitute (then `uv pip install --python env/bin/python --upgrade pip`).
+## Build and test
 
-## Common commands
+You need Python 3.10+, git, Node.js and npm.
 
-- Regenerate the generated files: `./scripts/update_api.sh` (runs codegen + pre-commit on the generated files).
-- Lint everything: `pre-commit run --all-files` (what the Lint job of CI runs; the checks are not a git hook, do not `pre-commit install`).
-- Type-check: `mypy playwright`.
-- Run tests: `pytest tests/sync tests/async --browser chromium [-k name]`, or `./test.sh [browser]` (both suites, in parallel, under xvfb). Browsers are installed via `playwright install chromium` (do **not** use `--with-deps`, which requires sudo).
+```sh
+python3 -m venv env && source env/bin/activate   # no python3-venv: uv venv env
+pip install -r local-requirements.txt
+pip install -e .
+python scripts/upstream.py checkout
+python -m build --wheel        # builds the driver from .upstream/ into playwright/driver/
+playwright install chromium    # not --with-deps: sudo is denied here
+./test.sh [browser]            # tests/sync and tests/async, under xvfb
+./scripts/lint.sh              # the Lint job of CI; run it before you commit
+```
 
-The public API comes from the upstream docs. After `./scripts/update_api.sh`, run `mypy playwright`: the generated classes type their `_impl_obj`, so every new member or option that `_impl/` does not implement yet is a mypy error in `_generated.py`. Fix it in `_impl/`, or record a justified difference in `scripts/codegen/python_rules.js` — not by hand-editing `_generated.py`.
+When `DRIVER_VERSION` changes, for example after a pull, run
+`python scripts/upstream.py checkout` and build again. Run `tests/sync` and
+`tests/async` in separate pytest runs: a sync test fails in a process where an async
+test ran.
+
+## The port
+
+`playwright/_impl/` is a line-by-line port of the JS client,
+`packages/playwright-core/src/client/*.ts`. `isomorphic/`, `protocol/` and `utils/` port
+the parts of `packages/isomorphic`, `packages/protocol` and `packages/utils` that the
+client uses. The rules are in `playwright/_impl/AGENTS.md`.
+
+- One module per upstream file, in snake_case (`browserContext.ts` is
+  `browser_context.py`), with the members in the JS order and the JS comments. The
+  docstring names the file: `"""Port of packages/playwright-core/src/client/page.ts.`
+  (`upstream.py changes` reads it).
+- Each difference from the JS has a `# Python:` comment.
+- Modules that start with `_` are Python only. `_api_classes.py` lists the
+  implementation of each API class; the generated API imports it. `_greenlets.py` runs
+  the sync API.
+- A new `ChannelOwner` goes in `_object_factories()` in `connection.py`, and declares its
+  channel: `_channel: "PageChannel"`. A plain wrapper class (like `Clock`) takes
+  `_loop` and `_dispatcher_fiber` from its parent.
+- Implementation methods take the snake_case arguments that the generated API passes.
+  An option that can be absent is `Optional[X]` with no default, so that mypy finds
+  each caller that misses a new option.
+- Send messages with the generated channel methods, every parameter by its protocol
+  name: `await self._channel.click(selector=selector, ..., timeout=self._timeout(timeout))`.
+  `None` is not sent. Listen with `self._channel.on<Event>(handler)`. The tests check
+  every sent message against the protocol spec.
+
+## The API comes from the upstream docs
+
+`./scripts/update_api.sh` generates these files from `.upstream/`, and they are
+committed. Never edit them by hand.
+
+- `playwright/{async,sync}_api/_generated.py` and `playwright/_impl/_api_structures.py`,
+  from `docs/src/api`, by `scripts/codegen/generate_api.js`;
+- the protocol files of `_impl/` (`protocol_channels.py`, `protocol_types.py`,
+  `protocol/validator.py`, `_protocol.py`), from `packages/protocol/spec`;
+- `tests/upstream_registry.md`, a copy of `tests/registry.md`.
+
+After a docs change, `mypy playwright` shows what `_impl/` is missing.
+
+- `* langs:` in the docs alone decides if a member is for Python. No `langs` means every
+  language. Do not judge by the name of an API.
+  `node .upstream/utils/doclint/generateApiJson.js` dumps the docs with `langs`.
+- When Python ships a different API, the Python API wins: fix the upstream docs with a
+  Python-only declaration (`* langs: python`).
+- `scripts/codegen/python_rules.js` holds only what the docs can not say, each entry with
+  a one-line comment that says why. The generator fails on an entry that matches
+  nothing.
+- An inline `[Object]` needs a Python name in the docs (`` "Name" <[Object]> `` or
+  `* alias-python:`); the generator then writes its TypedDict. Export it from both
+  `__init__.py` files.
+- Other generator errors name the place: fix the docs, or add the type to `toPy` in
+  `generate_api.js`. `scripts/codegen/compare_api.py` shows what changed between two
+  generated files.
 
 ## Tests
 
-The tests are a port of the upstream tests in `microsoft/playwright` (`tests/page/`, `tests/library/`), test for test. Upstream gives each test an identifier, the first token of its title: `it('CH-001 should check the box', ...)`. `tests/upstream_registry.md` is a copy of upstream's `tests/registry.md`, which lists every identifier with its file and title.
+`tests/{async,sync}/page/` and `library/` port upstream's `tests/page/` and
+`tests/library/` test for test, once per flavor. `tests/AGENTS.md` has the rules.
+`python scripts/check_test_registry.py` checks that each test of the registry is ported,
+or listed in `tests/upstream_not_ported.txt` with the reason (`--missing` prints what is
+left).
 
-**First rule: every upstream test is ported, or listed as not ported.**
+- Port with zero deviations. Never change a port to make it pass: fix the client, the
+  driver or the environment. The only allowed mark is
+  `xfail(reason="python: ...", strict=True)`, for a known bug of the client.
+- The test timeout is 30 s, as upstream. `test.slow()` is `@pytest.mark.slow`.
+- Python-only tests (the sync API, asyncio, regressions) go in `tests/{async,sync}/python/`.
+  Keep them few: extend a test before you add one.
 
-- Port each upstream test twice, to `tests/async/` and to `tests/sync/`, in the file that matches the upstream file: `tests/page/page-check.spec.ts` becomes `tests/async/page/test_page_check.py` and `tests/sync/page/test_page_check.py`; `tests/library/chromium/oopif.spec.ts` becomes `tests/async/library/chromium/test_oopif.py`.
-- Name the test `test_<ID>_<title>`: the identifier with `_`, then the `describe` titles and the title in snake_case. `test('EX-181 toHaveCount pass')` in `test.describe('toHaveCount')` becomes `test_EX_181_to_have_count_to_have_count_pass`. A test that a loop declares several times is one function with `@pytest.mark.parametrize`.
-- Port faithfully: the same steps, assertions and skip conditions. The timeout of a test is 30 seconds, as upstream (`pyproject.toml`); where upstream calls `test.slow()`, mark the port `@pytest.mark.slow`, which triples it. A Python-only test that waits longer than 30 seconds by design gets the same mark. A test that fails because of a bug in the Python client stays, marked `@pytest.mark.xfail(reason="python: ...", strict=True)`.
-- **Never change a port to make it pass.** No skip, condition, mark, wait or assertion that upstream does not have, for any reason: not a browser channel, not a CI image, not an operating system, not flakiness. A port that fails shows a bug in the client, the driver or the environment: fix that, or report it with the evidence. The one allowed mark is the `xfail(reason="python: ...", strict=True)` above, for a bug in the Python client that is not fixed yet. `tests/transform.md` has the rules of the port.
-- A test that can not exist in Python (a JavaScript-only API, Node.js client internals, tools that run in the driver, `@playwright/test` features) goes in `tests/upstream_not_ported.txt`, with the reason.
-- `python scripts/check_test_registry.py` checks all of this. `--missing <code or file glob>` prints the expected names of the tests still to port; `--report` prints the coverage per subsystem.
-- Do not write a new test when an upstream test exists. A Python-only test goes in `tests/async/python/` or `tests/sync/python/`, in the file named after the upstream file of the feature.
+## Rolls
 
-**Second rule: keep the number of tests small.** This applies to every test, and most of all to Python-only behavior that has no upstream test (the sync API, asyncio, the driver).
+Use the `playwright-roll` skill.
 
-- **Extend before you add**: before you write a new test, look for an existing test that covers the same feature or code path. If one exists, add the new edge case or assertion to it. Create a new test only when no existing test is a good fit, or when the new scenario needs a different setup.
-- **New features**: cover the mainstream scenario and the important edge cases only. Do not create matrices of tests for every scenario, option, or aspect.
-- **Regressions**: generalize the provided regression cases into meaningful tests, and stop there. Do not add more tests around them.
+## Commits and PRs
 
-## Rolling Playwright to a new version
-
-This is the recurring high-stakes task. Use the dedicated skill:
-
-→ **[`.claude/skills/playwright-roll/SKILL.md`](.claude/skills/playwright-roll/SKILL.md)**
-
-The steps are pin, build, generate, port and check (also in `ROLLING.md`). The port is line by line: the client with `playwright/_impl/transform.md`, the tests with `tests/transform.md`.
-
-## Working on PRs
-
-- Never post comments, replies, or reviews on GitHub PRs/issues under my account without my explicit approval. Draft the proposed text and wait for me to approve before sending.
-
-## House style
-
-- Don't hand-edit generated files.
-- Don't add `# type: ignore` or modify `_generated.py` to silence pyright; fix the source of the mismatch.
-- New public methods on impl classes need a sync test mirror under `tests/sync/`.
-- Keep `scripts/codegen/python_rules.js` minimal — every entry needs a one-line rationale comment above it. Prefer fixing the upstream docs.
-- Implementation methods take the Python (snake_case) names that the generated API passes. Their options have no default: an option that can be absent is `Optional[X]` without `= None`. So mypy reports each caller that does not pass a new option.
-- Send messages through the generated channel methods, never by name: `await self._channel.click(selector=selector, ..., clickCount=click_count, timeout=self._timeout(timeout))`. Pass every parameter, with the protocol (camelCase) name; an absent option is `None`, and the connection drops it. Declare the channel type on each ChannelOwner subclass (`_channel: "PageChannel"`). Listen to events with `self._channel.on<Event>(handler)`.
-
-## Commit Convention
-
-Before committing, run `pre-commit run --all-files` (the Lint job of CI) and fix errors.
-
-Semantic commit messages: `label(scope): description`
-
-Labels: `fix`, `feat`, `chore`, `docs`, `test`, `devops`
-
-```bash
-git checkout -b fix-12345
-# ... make changes ...
-git add <changed-files>
-git commit -m "$(cat <<'EOF'
-fix(asyncio): do not deadlock in atexit handler
-
-Fixes: https://github.com/microsoft/playwright-python/issues/12345
-EOF
-)"
-git push origin fix-12345
-gh pr create --repo microsoft/playwright-python --head username:fix-12345 \
-  --title "fix(asyncio): do not deadlock in atexit handler" \
-  --body "$(cat <<'EOF'
-## Summary
-- <describe the change very! briefly>
-
-Fixes https://github.com/microsoft/playwright-python/issues/12345
-EOF
-)"
-```
-
-Never add Co-Authored-By agents in commit message.
-Never add "Generated with" in commit message.
-Never add test plan to PR description. Keep PR description short — a few bullet points at most.
-Branch naming for issue fixes: `fix-<issue-number>`
-
-**Never `git push` without an explicit instruction to push.** Applies even when a PR is already open for the branch — additional commits are immediately visible to reviewers. Commit locally, report what was committed, and wait. Only push when the user's message contains "push", "upload", "create PR", "ship it", or equivalent.
+- Never push without "push", "upload", "create PR" or "ship it" in my message, also not
+  to an open PR. Commit locally and tell me.
+- Never post comments or reviews on GitHub as me. Write the text and wait for my OK.
+- Commit message: `label(scope): description`, with `fix`, `feat`, `chore`, `docs`,
+  `test` or `devops`. No Co-Authored-By, no "Generated with".
+- Branch for an issue: `fix-<number>`. PR description: a few bullets, no test plan,
+  `Fixes https://github.com/microsoft/playwright-python/issues/<number>`.

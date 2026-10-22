@@ -28,7 +28,7 @@ classes), _form_data.py and _helper.py. _greenlets.py runs the sync API, _driver
 finds the bundled driver, _protocol_check.py and _protocol.py (generated) check the
 messages in the tests, and pytest-playwright uses _assertions.py.
 
-The rules of the port are in transform.md, next to this file. What
+The rules of the port are in AGENTS.md, next to this file. What
 differs from the JS code is marked with a "Python:" comment. In short:
 
 - Names are snake_case. Implementation methods take the arguments that the
@@ -47,5 +47,5 @@ differs from the JS code is marked with a "Python:" comment. In short:
   _sync_base.py, _greenlets.py): a greenlet runs the event loop, and a sync call
   switches to it. Each object carries `_loop` and `_dispatcher_fiber` for the
   generated API; a user callback that may block runs in a greenlet of its own
-  (transform.md, section 13).
+  (playwright/_impl/AGENTS.md, section 13).
 """
