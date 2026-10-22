@@ -4952,11 +4952,15 @@ class RootChannel(Channel):
     def initialize(
         self,
         sdkLanguage: channels.SDKLanguage,
+        supportsLoneSurrogates: Optional[bool],
         timeout: float = 0,
     ) -> Awaitable[channels.RootInitializeResult]:
         return self._call(
             "initialize",
-            {"sdkLanguage": sdkLanguage},
+            {
+                "sdkLanguage": sdkLanguage,
+                "supportsLoneSurrogates": supportsLoneSurrogates,
+            },
             timeout,
             lambda result: {"playwright": result["playwright"]},
             is_internal=True,

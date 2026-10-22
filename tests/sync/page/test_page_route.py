@@ -1201,16 +1201,25 @@ def test_RO_044_should_support_cors_for_different_methods(
 def test_RO_045_should_support_the_times_parameter_with_route_matching(
     page: Page, server: Server
 ) -> None:
+    page.goto(server.EMPTY_PAGE)
+
+    def fetch_body() -> str:
+        return page.evaluate(
+            "() => fetch('/empty.html').then(response => response.text())"
+        )
+
     intercepted: List[int] = []
 
     def handler(route: Route) -> None:
         intercepted.append(1)
-        route.continue_()
+        route.fulfill(body="first")
 
     page.route("**/empty.html", handler, times=1)
-    page.goto(server.EMPTY_PAGE)
-    page.goto(server.EMPTY_PAGE)
-    page.goto(server.EMPTY_PAGE)
+    assert fetch_body() == "first"
+    page.route("**/empty.html", lambda route: route.fulfill(body="second"), times=1)
+    assert fetch_body() == "second"
+    fetch_body()
+    fetch_body()
     assert len(intercepted) == 1
 
 

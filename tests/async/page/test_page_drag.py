@@ -278,10 +278,6 @@ async def test_DD_008_drag_and_drop_should_respect_the_drop_effect(
     is_mac: bool,
     headless: bool,
 ) -> None:
-    if browser_name == "webkit" and not is_linux:
-        pytest.skip(
-            "fixme: WebKit doesn't handle the drop effect correctly outside of linux."
-        )
     if browser_name == "webkit" and is_linux and not headless:
         pytest.skip("fixme: https://github.com/microsoft/playwright/issues/21646")
     if browser_name == "chromium" and not is_mac and not headless:
@@ -338,6 +334,43 @@ async def test_DD_008_drag_and_drop_should_respect_the_drop_effect(
     assert await test_if_dropped("linkMove", "move") is True
 
     assert await test_if_dropped("uninitialized", "copy") is True
+
+
+async def test_DD_028_drag_and_drop_should_report_the_default_drop_effect_from_effect_allowed(
+    page: Page, browser_name: str, is_linux: bool, headless: bool
+) -> None:
+    if browser_name == "webkit" and is_linux and not headless:
+        pytest.skip("fixme: https://github.com/microsoft/playwright/issues/21646")
+
+    await page.set_content(
+        """
+        <div draggable="true">drag target</div>
+        <drop-target>this is the drop target</drop-target>
+        """
+    )
+    await page.evaluate(
+        """() => {
+            window['dropEffect'] = 'none';
+
+            document.querySelector('div').addEventListener('dragstart', event => {
+              event.dataTransfer.effectAllowed = 'copyMove';
+              event.dataTransfer.setData('text/plain', 'drag data');
+            });
+            document.querySelector('div').addEventListener('dragend', event => {
+              window['dropEffect'] = event.dataTransfer.dropEffect;
+            });
+
+            // The target accepts the drag without setting dropEffect.
+            document.querySelector('drop-target').addEventListener('dragover', event => {
+              event.preventDefault();
+            });
+        }"""
+    )
+    await page.hover("div")
+    await page.mouse.down()
+    await page.hover("drop-target")
+    await page.mouse.up()
+    assert await page.evaluate("dropEffect") == "move"
 
 
 async def test_DD_009_drag_and_drop_should_work_if_the_drag_is_canceled(

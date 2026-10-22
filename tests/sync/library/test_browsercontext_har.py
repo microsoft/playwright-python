@@ -280,11 +280,17 @@ def test_HA_085_should_round_trip_har_zip(
     server: Server,
     tmp_path: Path,
 ) -> None:
-    har_path = tmp_path / "har.zip"
+    har_path = tmp_path / "har.ZIP"
     context1 = context_factory(record_har_mode="minimal", record_har_path=har_path)
     page1 = context1.new_page()
     page1.goto(server.PREFIX + "/one-style.html")
     context1.close()
+
+    har_dir = tmp_path / "har"
+    with zipfile.ZipFile(har_path) as zip_file:
+        zip_file.extractall(har_dir)
+    log = json.loads((har_dir / "har.har").read_text(encoding="utf-8"))["log"]
+    assert isinstance(log["entries"][0]["response"]["content"]["_file"], str)
 
     context2 = context_factory()
     context2.route_from_har(har_path, not_found="abort")

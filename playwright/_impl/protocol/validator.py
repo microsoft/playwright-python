@@ -4181,6 +4181,7 @@ scheme["RootInitializer"] = t_optional(t_object({}))
 scheme["RootInitializeParams"] = t_object(
     {
         "sdkLanguage": t_type("SDKLanguage"),
+        "supportsLoneSurrogates": t_optional(t_boolean),
     }
 )
 scheme["RootInitializeResult"] = t_object(

@@ -506,6 +506,44 @@ async def test_SS_025_page_screenshot_should_work_for_webgl(
 
 
 @pytest.mark.usefixtures("skip_firefox_headed")
+async def test_SS_095_page_screenshot_should_capture_webgl_canvas_after_its_drawing_buffer_is_resized(
+    page: Page, browser_name: str, platform: str, utils: Utils
+) -> None:
+    if (
+        browser_name == "webkit"
+        and platform == "darwin"
+        and os.uname().machine == "x86_64"
+    ):
+        pytest.skip(
+            "WebGL is not available on Intel macOS - https://bugs.webkit.org/show_bug.cgi?id=278277"
+        )
+
+    await page.set_viewport_size({"width": 200, "height": 200})
+    await page.set_content(
+        '<body style="margin:0"><div style="width:100px;height:100px;background:rgb(0,255,0)"></div></body>'
+    )
+    expected = await page.screenshot()
+
+    await page.set_content(
+        """<body style="margin:0"><canvas style="width:100px;height:100px"></canvas><script>
+      const gl = document.querySelector('canvas').getContext('webgl');
+      window.draw = size => {
+        gl.canvas.width = size;
+        gl.canvas.height = size;
+        gl.viewport(0, 0, size, size);
+        gl.clearColor(0, 1, 0, 1);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+      };
+      draw(100);
+    </script></body>"""
+    )
+    await utils.rafraf(page)
+    await page.evaluate("() => window.draw(50)")
+    await utils.rafraf(page)
+    assert compare_images(await page.screenshot(), expected) is None
+
+
+@pytest.mark.usefixtures("skip_firefox_headed")
 async def test_SS_026_page_screenshot_should_work_for_translate_z(
     page: Page, server: Server, assert_to_be_golden: GoldenAssert
 ) -> None:

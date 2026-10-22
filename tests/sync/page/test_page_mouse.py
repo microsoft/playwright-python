@@ -348,17 +348,17 @@ def test_MO_012_should_tween_mouse_movement(
         """() => {
         window['result'] = [];
         document.addEventListener('mousemove', event => {
-          window['result'].push([event.clientX, event.clientY]);
+          window['result'].push([event.clientX, event.clientY, event.movementX, event.movementY]);
         });
       }"""
     )
     page.mouse.move(200, 300, steps=5)
     assert page.evaluate("result") == [
-        [120, 140],
-        [140, 180],
-        [160, 220],
-        [180, 260],
-        [200, 300],
+        [120, 140, 20, 40],
+        [140, 180, 20, 40],
+        [160, 220, 20, 40],
+        [180, 260, 20, 40],
+        [200, 300, 20, 40],
     ]
 
 

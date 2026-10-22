@@ -83,6 +83,9 @@ class Root(ChannelOwner):
                 await self._channel.initialize(
                     # Python: the SDK language of this client.
                     sdkLanguage="python",
+                    # json.dumps() escapes a lone surrogate as \udxxx, and json.loads()
+                    # reads it back, as the JS client does.
+                    supportsLoneSurrogates=True,
                     timeout=NO_TIMEOUT,
                 )
             )["playwright"]

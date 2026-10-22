@@ -188,18 +188,32 @@ def test_LC_010_should_propagate_locale_to_workers(
     context = browser.new_context(locale="ru-RU")
     page = context.new_page()
     page.goto(server.EMPTY_PAGE)
-    with page.expect_console_message(
-        lambda e: e.text.startswith("locale:")
-    ) as msg_info:
+    with (
+        page.expect_console_message(lambda e: e.text.startswith("locale:")) as msg_info,
+        page.expect_console_message(
+            lambda e: e.text.startswith("languages:")
+        ) as languages_info,
+        server.expect_request("/title.html") as request_info,
+    ):
         page.evaluate(
-            """() => new Worker(URL.createObjectURL(new Blob(['console.log("locale:" + Intl.NumberFormat().resolvedOptions().locale)'], { type: 'application/javascript' })))"""
+            """url => new Worker(URL.createObjectURL(new Blob([`
+      console.log("locale:" + Intl.NumberFormat().resolvedOptions().locale);
+      console.log("languages:" + navigator.languages);
+      fetch(${JSON.stringify(url)});
+    `], { type: 'application/javascript' })))""",
+            server.PREFIX + "/title.html",
         )
     msg = msg_info.value
+    languages = languages_info.value
+    request = wait_for_server_request(page, request_info)
     if browser_name == "webkit":
         # Webkit on Ubuntu is "ru-RU", and on other platforms is "ru"
         assert "locale:ru" in msg.text
+        assert "languages:ru" in languages.text
     else:
         assert msg.text == "locale:ru-RU"
+        assert languages.text == "languages:ru-RU"
+    assert "ru-RU" in (request.getHeader("accept-language") or "")
     context.close()
 
 

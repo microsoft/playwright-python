@@ -35,6 +35,7 @@ import asyncio
 import base64
 import json
 import os
+import re
 from pathlib import Path
 from typing import (
     TYPE_CHECKING,
@@ -324,7 +325,9 @@ class BrowserContext(ChannelOwner):
         if not record_har_path:
             return
         default_content: Literal["attach", "embed"] = (
-            "attach" if str(record_har_path).endswith(".zip") else "embed"
+            "attach"
+            if re.search(r"\.zip$", str(record_har_path), re.IGNORECASE)
+            else "embed"
         )
         await self.tracing._record_into_har(
             har=record_har_path,
