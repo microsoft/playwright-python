@@ -192,7 +192,7 @@ class Tracing(ChannelOwner):
         # Not ported: the check of the resourcesDir option against a .zip har file;
         # the option is JavaScript only.
         default_content: Literal["attach", "embed"] = (
-            "attach" if str(path).endswith(".zip") else "embed"
+            "attach" if re.search(r"\.zip$", str(path), re.IGNORECASE) else "embed"
         )
         self._har_id = await self._record_into_har(
             har=path,
@@ -222,7 +222,7 @@ class Tracing(ChannelOwner):
         # Not ported: the resourcesDir option; it is JavaScript only.
         # Python: the path can be a pathlib.Path.
         har = str(har)
-        is_zip = har.endswith(".zip")
+        is_zip = bool(re.search(r"\.zip$", har, re.IGNORECASE))
         options: Dict[str, Any] = {
             "content": update_content if update_content is not None else "attach",
             "urlGlob": url if isinstance(url, str) else None,
@@ -250,7 +250,7 @@ class Tracing(ChannelOwner):
             return
         del self._har_recorders[har_id]
         is_local = not self._connection.is_remote()
-        is_zip = har_params["path"].endswith(".zip")
+        is_zip = bool(re.search(r"\.zip$", har_params["path"], re.IGNORECASE))
 
         if is_local:
             entries = (

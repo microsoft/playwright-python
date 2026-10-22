@@ -516,6 +516,34 @@ async def test_HA_021_should_include_content_smoke(
     assert content["compression"] == 0
 
 
+async def test_HA_113_should_store_binary_content_with_a_textual_mime_type_as_base64(
+    page_with_har: PageWithHar, server: Server, browser_name: str
+) -> None:
+    if browser_name == "webkit":
+        pytest.skip(
+            "fixme: WebKit decodes the body of a textual resource before it gets to us"
+        )
+    body = bytes([0x80, 0xC3, 0x28, 0xFF, 0x41])
+
+    def handle(request: TestServerRequest) -> None:
+        request.setHeader("Content-Type", "application/javascript")
+        request.write(body)
+        request.finish()
+
+    server.set_route("/binary.js", handle)
+    har = await page_with_har()
+    await har.page.goto(server.EMPTY_PAGE)
+    await har.page.evaluate("() => fetch('/binary.js').then(r => r.arrayBuffer())")
+    log = await har.get_log()
+    content = next(
+        entry
+        for entry in log["entries"]
+        if entry["request"]["url"].endswith("/binary.js")
+    )["response"]["content"]
+    assert content["encoding"] == "base64"
+    assert base64.b64decode(content["text"]) == body
+
+
 async def test_HA_022_should_use_attach_mode_for_zip_extension(
     page_with_har: PageWithHar, server: Server
 ) -> None:

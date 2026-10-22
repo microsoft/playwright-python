@@ -2207,7 +2207,12 @@ COMMANDS: Dict[str, Dict[str, Dict[str, Any]]] = {
         },
         "webStorageClear": {"kind": {"type": "enum", "literals": ["local", "session"]}},
     },
-    "Root": {"initialize": {"sdkLanguage": "SDKLanguage"}},
+    "Root": {
+        "initialize": {
+            "sdkLanguage": "SDKLanguage",
+            "supportsLoneSurrogates": "boolean?",
+        }
+    },
     "Playwright": {
         "newRequest": {
             "baseURL": "string?",

@@ -402,12 +402,15 @@ def test_FI_025_should_be_able_to_fill_when_focus_is_in_the_wrong_frame(
     page.set_content(
         """
     <div contentEditable="true"></div>
-    <iframe></iframe>
+    <iframe srcdoc="<body contenteditable><p>old</p></body>"></iframe>
   """
     )
     page.focus("iframe")
     page.fill("div", "some value")
     assert page.eval_on_selector("div", "d => d.textContent") == "some value"
+    paragraph = page.frame_locator("iframe").locator("p")
+    paragraph.fill("new")
+    expect(paragraph).to_have_text("new")
 
 
 def test_FI_026_should_be_able_to_fill_the_input_type_number(

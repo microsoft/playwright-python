@@ -433,12 +433,6 @@ async def test_ST_010_should_handle_malformed_file(
     ) in str(exc_info.value)
 
 
-@pytest.mark.xfail(
-    reason="driver: it replaces lone surrogates with U+FFFD in the messages to the "
-    "clients other than JavaScript (toWellFormed() in cli/driver.ts), "
-    "https://github.com/microsoft/playwright/issues/43542",
-    strict=True,
-)
 async def test_ST_011_should_serialize_storage_state_with_lone_surrogates(
     page: Page, context: BrowserContext, server: Server
 ) -> None:
