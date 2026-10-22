@@ -1,0 +1,269 @@
+# Rolls Playwright to a new microsoft/playwright commit (the tip of main unless
+# told otherwise) and opens a pull request. Copilot CLI ports the upstream changes
+# with the playwright-roll skill. The pull request comes from the
+# microsoft-playwright-automation app, so CI runs on it: this needs the
+# PLAYWRIGHT_APP_CLIENT_ID variable and the PLAYWRIGHT_PRIVATE_KEY secret.
+# Upstream counterpart: microsoft/playwright.dev .github/workflows/roll-next.yml.
+name: Roll to latest Playwright
+
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "microsoft/playwright branch, tag or commit to roll to"
+        default: "main"
+      max_ai_credits:
+        description: "AI credit limit for the Copilot session"
+        default: "3000"
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  versions:
+    name: Find the commit
+    runs-on: ubuntu-24.04
+    if: github.repository == 'microsoft/playwright-python'
+    permissions:
+      contents: read
+    outputs:
+      old_commit: ${{ steps.versions.outputs.old_commit }}
+      new_commit: ${{ steps.versions.outputs.new_commit }}
+      new_short: ${{ steps.versions.outputs.new_short }}
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+    - name: Read the pinned and the new commit
+      id: versions
+      env:
+        REF: ${{ inputs.ref }}
+      run: |
+        old_commit="$(cat DRIVER_VERSION)"
+        new_commit="$(python3 scripts/upstream.py resolve "$REF")"
+        echo "Pinned ${old_commit}, ${REF} is ${new_commit}" >> "$GITHUB_STEP_SUMMARY"
+        {
+          echo "old_commit=${old_commit}"
+          echo "new_commit=${new_commit}"
+          echo "new_short=${new_commit:0:10}"
+        } >> "$GITHUB_OUTPUT"
+
+  roll:
+    name: Roll
+    needs: versions
+    if: needs.versions.outputs.new_commit != needs.versions.outputs.old_commit
+    # The runner of CI: the skill runs ./test.sh, both suites on all its cores.
+    runs-on: playwright-x64-ubuntu24-64-core
+    timeout-minutes: 240
+    permissions:
+      contents: read
+      copilot-requests: write
+    outputs:
+      has_changes: ${{ steps.save.outputs.has_changes }}
+      version: ${{ steps.save.outputs.version }}
+      complete: ${{ steps.agent.outcome == 'success' && steps.check.outcome == 'success' }}
+    env:
+      OLD_COMMIT: ${{ needs.versions.outputs.old_commit }}
+      NEW_COMMIT: ${{ needs.versions.outputs.new_commit }}
+    steps:
+    # No credentials in the checkout: the agent must not push.
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+    # The runner context is not available in the env of the job.
+    - name: Set the output directory
+      run: echo "OUTPUT_DIR=$RUNNER_TEMP/roll" >> "$GITHUB_ENV"
+    - name: Set up Python
+      uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      with:
+        python-version: "3.10"
+    - name: Set up Node.js
+      uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      with:
+        node-version: '24'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r local-requirements.txt
+        pip install -r requirements.txt
+        pip install -e .
+        npm install -g @github/copilot
+    # Steps 1 to 3 of the playwright-roll skill.
+    - name: Pin
+      run: |
+        python scripts/upstream.py pin "$NEW_COMMIT"
+        python scripts/update_node_version.py
+    - name: Generate the API, the protocol files and the test registry
+      run: ./scripts/update_api.sh
+    - name: Build the driver and the wheel
+      run: python -m build --wheel
+    - name: Install browsers
+      run: python -m playwright install --with-deps chromium firefox webkit
+    - name: Roll with Copilot CLI
+      id: agent
+      # A partial roll still opens a pull request, as a draft.
+      continue-on-error: true
+      env:
+        COPILOT_GITHUB_TOKEN: ${{ github.token }}
+        MAX_AI_CREDITS: ${{ inputs.max_ai_credits }}
+      run: |
+        mkdir -p "$OUTPUT_DIR"
+        PROMPT=$(cat <<EOF
+        Roll Playwright Python from microsoft/playwright $OLD_COMMIT to $NEW_COMMIT. Follow the playwright-roll skill.
+
+        The workflow already did steps 1 (pin), 2 (generate) and 3 (build) of the skill: DRIVER_VERSION is
+        $NEW_COMMIT, .upstream/ is checked out at it, NODE_VERSION is the current LTS, ./scripts/update_api.sh has
+        generated the files from .upstream/, the driver is built, and Chromium, Firefox and WebKit are installed. The
+        old pin is $OLD_COMMIT (DRIVER_VERSION at HEAD). Start with mypy playwright and the API comparison of step 2,
+        then step 4.
+
+        Do not commit, push or run gh. A later step of the workflow commits your changes and opens the pull request.
+
+        When you finish, write the pull request description that step 5 of the skill describes to
+        $OUTPUT_DIR/pr-body.md, without the list of upstream commits: the workflow sets the title and adds the list.
+        EOF
+        )
+        copilot \
+          --allow-all-tools \
+          --allow-all-paths \
+          --no-ask-user \
+          --share="$OUTPUT_DIR/copilot-session.md" \
+          --model gpt-6.1-sol \
+          --max-ai-credits "$MAX_AI_CREDITS" \
+          -p "$PROMPT"
+    # The agent runs scripts/lint.sh last (step 5 of the skill); a roll that does
+    # not pass it again here opens as a draft.
+    - name: Check the roll
+      id: check
+      continue-on-error: true
+      run: |
+        test "$(cat DRIVER_VERSION)" = "$NEW_COMMIT"
+        ./scripts/lint.sh
+    - name: Save the changes
+      id: save
+      run: |
+        mkdir -p "$OUTPUT_DIR"
+        git add -A
+        # Against the checked-out commit, in case the agent committed anyway.
+        git diff --cached --binary "$GITHUB_SHA" > "$OUTPUT_DIR/roll.patch"
+        if [[ -s "$OUTPUT_DIR/roll.patch" ]]; then
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "has_changes=false" >> "$GITHUB_OUTPUT"
+        fi
+        echo "version=$(node -p "require('./.upstream/packages/playwright-core/package.json').version")" >> "$GITHUB_OUTPUT"
+        python scripts/upstream.py log "$OLD_COMMIT" > "$OUTPUT_DIR/commits.md"
+        {
+          echo '```'
+          git diff --cached --stat "$GITHUB_SHA"
+          echo '```'
+        } >> "$GITHUB_STEP_SUMMARY"
+    - name: Upload the roll
+      if: always()
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: roll
+        path: ${{ env.OUTPUT_DIR }}
+        if-no-files-found: warn
+
+  publish:
+    name: Open the pull request
+    needs: [versions, roll]
+    if: needs.roll.outputs.has_changes == 'true'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      TITLE: "chore: roll Playwright to ${{ needs.roll.outputs.version }} (${{ needs.versions.outputs.new_short }})"
+      BRANCH: roll/${{ needs.versions.outputs.new_short }}
+    steps:
+    - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+      id: app-token
+      with:
+        client-id: ${{ vars.PLAYWRIGHT_APP_CLIENT_ID }}
+        private-key: ${{ secrets.PLAYWRIGHT_PRIVATE_KEY }}
+    # Pushes as the app, so CI runs on the pull request.
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        token: ${{ steps.app-token.outputs.token }}
+    - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      with:
+        name: roll
+        path: ${{ runner.temp }}/roll
+    - name: Push the branch
+      run: |
+        git apply --index "$RUNNER_TEMP/roll/roll.patch"
+        # A roll changes only what a roll changes. The checks are here and not in a
+        # script, because the roll could change the script. --no-renames lists a
+        # renamed file under its old name too.
+        git diff --cached --name-only --no-renames > "$RUNNER_TEMP/changed.txt"
+        if grep -E '\.ya?ml$' "$RUNNER_TEMP/changed.txt"; then
+          echo "The roll changes YAML files." >&2
+          exit 1
+        fi
+        if grep -E '(^|/)(AGENTS|CLAUDE)\.md$' "$RUNNER_TEMP/changed.txt"; then
+          echo "The roll changes agent instructions." >&2
+          exit 1
+        fi
+        if grep -v -E '^(DRIVER_VERSION|NODE_VERSION|README\.md|scripts/codegen/python_rules\.js)$|^(playwright|tests)/' "$RUNNER_TEMP/changed.txt"; then
+          echo "The roll changes files outside DRIVER_VERSION, NODE_VERSION, README.md, playwright/, tests/ and python_rules.js." >&2
+          exit 1
+        fi
+        if git diff --cached --summary | grep ' mode 120000 '; then
+          echo "The roll adds a symbolic link." >&2
+          exit 1
+        fi
+        git config user.name "microsoft-playwright-automation[bot]"
+        git config user.email "203992400+microsoft-playwright-automation[bot]@users.noreply.github.com"
+        git checkout -b "$BRANCH"
+        git commit -m "$TITLE"
+        git push --force origin "$BRANCH"
+    - name: Create the pull request
+      uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+      env:
+        BASE: ${{ github.ref_name }}
+        COMPLETE: ${{ needs.roll.outputs.complete }}
+        COMPARE_URL: https://github.com/microsoft/playwright/compare/${{ needs.versions.outputs.old_commit }}...${{ needs.versions.outputs.new_commit }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      with:
+        github-token: ${{ steps.app-token.outputs.token }}
+        script: |
+          const fs = require('fs');
+          const { BASE, BRANCH, TITLE, COMPLETE, COMPARE_URL, RUN_URL, RUNNER_TEMP } = process.env;
+          const read = name => {
+            const file = `${RUNNER_TEMP}/roll/${name}`;
+            return fs.existsSync(file) ? fs.readFileSync(file, 'utf8').trim() : '';
+          };
+          const parts = [read('pr-body.md') || 'The agent wrote no description.'];
+          if (COMPLETE !== 'true')
+            parts.push(`**The roll is not complete:** the agent or the checks failed. See the [roll run](${RUN_URL}).`);
+          // A description has at most 65536 characters: a long range keeps its first commits.
+          let commits = read('commits.md').split('\n').filter(Boolean);
+          const total = commits.length;
+          while (commits.join('\n').length > 50000)
+            commits = commits.slice(0, Math.floor(commits.length * 0.9));
+          if (commits.length < total)
+            commits.push(`- … and ${total - commits.length} more: ${COMPARE_URL}`);
+          parts.push(`<details>\n<summary>Upstream commits (${total})</summary>\n\n${commits.join('\n')}\n\n</details>`);
+          parts.push(`Upstream changes: ${COMPARE_URL}`);
+          parts.push(`<sub>Rolled by the [roll workflow](${RUN_URL}).</sub>`);
+          const body = parts.join('\n\n');
+          const { owner, repo } = context.repo;
+          const { data: open } = await github.rest.pulls.list({ owner, repo, head: `${owner}:${BRANCH}`, state: 'open' });
+          if (open.length) {
+            await github.rest.pulls.update({ owner, repo, pull_number: open[0].number, body });
+            core.info(`Updated ${open[0].html_url}`);
+            return;
+          }
+          const { data: pr } = await github.rest.pulls.create({
+            owner,
+            repo,
+            head: BRANCH,
+            base: BASE,
+            title: TITLE,
+            body,
+            draft: COMPLETE !== 'true',
+          });
+          core.info(`Opened ${pr.html_url}`);

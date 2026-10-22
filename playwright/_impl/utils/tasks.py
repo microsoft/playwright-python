@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """Python only: the asyncio counterparts of the Promise built-ins that the client
-uses. See transform.md, section 1.
+uses. See playwright/_impl/AGENTS.md, section 1.
 
 JS cannot cancel a promise; Python can cancel a task. The rules here:
 - race() cancels the tasks that it started for the coroutines it was given, and
@@ -55,7 +55,7 @@ _MAX_TURNS = 100
 
 async def wait_for_next_task() -> None:
     """Waits until the next task would start in JS: until every reaction to the
-    current task has run. See transform.md, 1.17.
+    current task has run. See playwright/_impl/AGENTS.md, 1.17.
 
     JS calls a macrotask a task: a message from the driver, a timer, an I/O
     callback. All the promise reactions (microtasks) run before the next task.

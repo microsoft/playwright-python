@@ -18,7 +18,7 @@ or the environment: fix that, or report it with the evidence. The one allowed ma
 `@pytest.mark.xfail(reason="python: ...", strict=True)`, for a bug in the Python client
 that is not fixed yet.
 
-The rules of the client itself are in `playwright/_impl/transform.md`.
+The rules of the client itself are in `playwright/_impl/AGENTS.md`.
 
 ## 1. Files and names
 
@@ -141,4 +141,4 @@ does.
 A behavior that no upstream test covers (the sync API, asyncio, Python types, `__repr__`,
 a regression of this repository) gets a test in `tests/async/python/` or
 `tests/sync/python/`, in the file named after the upstream file of the feature. These
-are not ports: see the second rule of tests in `AGENTS.md`, and keep them few.
+are not ports: keep them few (Tests in `AGENTS.md`).

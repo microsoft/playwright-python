@@ -28,6 +28,8 @@ Usage::
                                                  # and check it out
     python scripts/upstream.py changes [<from>]  # list what changed upstream since <from> (default:
                                                  # DRIVER_VERSION at HEAD), with the Python files to port it to
+    python scripts/upstream.py log [<from>]      # list the upstream commits since <from>, in Markdown,
+                                                 # for the description of a roll PR
     python scripts/upstream.py resolve <ref>     # print the commit of a branch, a tag or a commit
 
 Apart from git, this needs only the Python standard library.
@@ -39,7 +41,7 @@ import subprocess
 import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence
+from typing import Dict, List, Optional, Sequence, Tuple
 
 from check_test_registry import Entry, Rule, read_rules
 
@@ -222,15 +224,38 @@ def _golden_file(path: str) -> Optional[str]:
     return f"tests/golden-{match[2]}/{match[1]}{match[3]}"
 
 
-def changes(since: Optional[str]) -> None:
+def _roll_range(since: Optional[str]) -> Optional[Tuple[str, str]]:
+    """The old and the new pin: <since> (default: DRIVER_VERSION at HEAD) and DRIVER_VERSION."""
     new = require_checkout()
     old = (
         resolve(since) if since else _git("show", "HEAD:DRIVER_VERSION", cwd=REPO_ROOT)
     )
     if old == new:
         print(f"DRIVER_VERSION is {new} at HEAD too; pass the commit to compare with.")
-        return
+        return None
     fetch(old)
+    return old, new
+
+
+def log(since: Optional[str]) -> None:
+    roll_range = _roll_range(since)
+    if not roll_range:
+        return
+    old, new = roll_range
+    for line in _git(
+        "log", "--reverse", "--format=%h %s", f"{old}..{new}"
+    ).splitlines():
+        commit, subject = line.split(" ", 1)
+        # In a playwright-python PR, "#123" would link to playwright-python#123.
+        subject = re.sub(r"\(#(\d+)\)", r"(microsoft/playwright#\1)", subject)
+        print(f"- microsoft/playwright@{commit} {subject}")
+
+
+def changes(since: Optional[str]) -> None:
+    roll_range = _roll_range(since)
+    if not roll_range:
+        return
+    old, new = roll_range
     count = _git("rev-list", "--count", f"{old}..{new}")
     print(f"microsoft/playwright {old[:10]}..{new[:10]}: {count} commits")
 
@@ -270,15 +295,13 @@ def changes(since: Optional[str]) -> None:
         test_file = _python_test_file(path, rules) or _golden_file(path)
         tests.append(f"{row}  =>  {test_file}" if test_file else row)
 
-    section(
-        "Client: port each hunk line by line (playwright/_impl/transform.md)", client
-    )
+    section("Client: port each hunk line by line (playwright/_impl/AGENTS.md)", client)
     section(
         "Shared code that Python does not port: port it if the client starts to use it",
         shared,
     )
     section(
-        "Tests: port each hunk line by line, async and sync (tests/transform.md);"
+        "Tests: port each hunk line by line, async and sync (tests/AGENTS.md);"
         " copy each snapshot image to its golden file",
         tests,
     )
@@ -297,6 +320,8 @@ def main(argv: List[str]) -> None:
         pin(args[0])
     elif command == "changes" and len(args) <= 1:
         changes(args[0] if args else None)
+    elif command == "log" and len(args) <= 1:
+        log(args[0] if args else None)
     elif command == "resolve" and len(args) == 1:
         print(resolve(args[0]))
     else:

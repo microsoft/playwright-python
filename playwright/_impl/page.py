@@ -724,7 +724,7 @@ class Page(ChannelOwner):
         # Python: the predicate is a plain def too: the JS async function calls the
         # user predicate before its first await, in the listener. Under the sync
         # API the listener runs in the greenlet of the event, where the user
-        # predicate may block; a task would spin (transform.md, 13). The result may
+        # predicate may block; a task would spin (playwright/_impl/AGENTS.md, 13). The result may
         # be an awaitable, as a JS predicate returns a promise; the listener awaits
         # it then.
         def predicate(request: Request) -> Any:
@@ -751,7 +751,7 @@ class Page(ChannelOwner):
         # Python: the predicate is a plain def too: the JS async function calls the
         # user predicate before its first await, in the listener. Under the sync
         # API the listener runs in the greenlet of the event, where the user
-        # predicate may block; a task would spin (transform.md, 13). The result may
+        # predicate may block; a task would spin (playwright/_impl/AGENTS.md, 13). The result may
         # be an awaitable, as a JS predicate returns a promise; the listener awaits
         # it then.
         def predicate(response: Response) -> Any:
