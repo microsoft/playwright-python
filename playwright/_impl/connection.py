@@ -217,7 +217,7 @@ class Connection(EventEmitter):
             )
         # Python: the next API call raises the error of an event listener, as the
         # Python client always has; an unhandled rejection crashes Node.js.
-        if self._error and method != "__waitInfo__":
+        if self._error and method not in ("__waitInfo__", "close", "dispose"):
             error = self._error
             self._error = None
             raise error
@@ -335,9 +335,13 @@ class Connection(EventEmitter):
                 callback.reject(parsed_error)
             else:
                 validator = find_validator(callback.type, callback.method, "Result")
-                callback.resolve(
-                    validator(result, "", self._validator_from_wire_context())
-                )
+                res = validator(result, "", self._validator_from_wire_context())
+                if self._error and callback.method == "close":
+                    error = self._error
+                    self._error = None
+                    callback.reject(error)
+                else:
+                    callback.resolve(res)
             return
 
         if debug_logger.is_enabled("channel"):

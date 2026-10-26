@@ -30,3 +30,21 @@ def test_events(browser_name: str, launch_arguments: Dict, server: Server) -> No
                 with browser.new_page() as page:
                     page.on("response", lambda _: fail())
                     page.goto(server.PREFIX + "/grid.html")
+
+
+def test_event_error_does_not_prevent_browser_close(
+    browser_name: str, launch_arguments: Dict, server: Server
+) -> None:
+    with sync_playwright() as p:
+        browser = p[browser_name].launch(**launch_arguments)
+        try:
+            page = browser.new_page()
+            page.on("response", lambda _: (_ for _ in ()).throw(ValueError("listener error")))
+            page.goto(server.PREFIX + "/grid.html")
+        finally:
+            try:
+                browser.close()
+            except ValueError:
+                pass
+        assert not browser.is_connected()
+
