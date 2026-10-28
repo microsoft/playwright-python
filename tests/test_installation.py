@@ -31,12 +31,16 @@ def _create_venv(env_dir: Path) -> str:
 
 
 def _run_client(python: str, tmp_path: Path, browser_name: str, environ: dict) -> None:
+    # cwd=tmp_path: from the repository root, "-m playwright" imports the checkout
+    # instead of the installed package.
     subprocess.check_output(
-        [python, "-m", "playwright", "install", browser_name], env=environ
+        [python, "-m", "playwright", "install", browser_name],
+        cwd=tmp_path,
+        env=environ,
     )
     shutil.copyfile(ROOT / "tests" / "assets" / "client.py", tmp_path / "main.py")
     subprocess.check_output(
-        [python, str(tmp_path / "main.py"), browser_name], env=environ
+        [python, str(tmp_path / "main.py"), browser_name], cwd=tmp_path, env=environ
     )
     assert (tmp_path / f"{browser_name}.png").exists()
 
@@ -66,7 +70,12 @@ def test_install_sdist(tmp_path: Path, browser_name: str) -> None:
     assert node, "node must be in PATH"
     python = _create_venv(tmp_path / "env")
     sdist = list((ROOT / "dist").glob("playwright-*.tar.gz"))[0]
-    subprocess.check_output([python, "-m", "pip", "install", str(sdist)])
+    # No wheels at all, as poetry's installer.no-binary=:all: in the report: the
+    # dependencies come from source too. The isolated build environment still
+    # takes wheels: pip does not pass the policy on to it, and neither does poetry.
+    subprocess.check_output(
+        [python, "-m", "pip", "install", "--no-binary", ":all:", str(sdist)]
+    )
     driver_dir = Path(
         subprocess.check_output(
             [

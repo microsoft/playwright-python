@@ -135,7 +135,7 @@ jobs:
     - name: Test Reference count
       run: $CI_ENV_EXEC pytest tests/test_reference_count_async.py --browser=${{ matrix.browser }}
     - name: Test Wheel Installation
-      run: $CI_ENV_EXEC pytest tests/test_installation.py --browser=${{ matrix.browser }}
+      run: $CI_ENV_EXEC pytest tests/test_installation.py::test_install --browser=${{ matrix.browser }}
     - name: Test Sync API
       run: $CI_ENV_EXEC pytest tests/sync --browser=${{ matrix.browser }} -n ${{ env.WORKERS }} -p pytest_dot_reporter -rfE --color=yes
     - name: Test Async API
@@ -221,12 +221,16 @@ jobs:
         pip install -e .
     - name: Get Playwright
       run: python scripts/upstream.py checkout
-    - name: Build the driver and the sdist
+    # The wheel build puts the driver with Node.js into the checkout, for the
+    # install-deps step below. The test installs the sdist in its own venv.
+    - name: Build the driver and the wheel
+      run: python -m build --wheel
+    - name: Build the sdist
       run: python -m build --sdist
     - name: Install browser dependencies
-      run: PLAYWRIGHT_NODEJS_PATH=$(which node) python -m playwright install-deps chromium
+      run: python -m playwright install-deps chromium
     - name: Test the sdist installation
-      run: pytest tests/test_installation.py -k test_install_sdist --browser=chromium
+      run: pytest tests/test_installation.py::test_install_sdist --browser=chromium
 
   test_examples:
     name: Examples
