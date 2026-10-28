@@ -127,21 +127,31 @@ jobs:
       id: install
       run: python -m playwright install --with-deps ${{ matrix.browser }}
     - name: Common Tests
-      run: pytest tests/common --browser=${{ matrix.browser }}
+      run: |
+        ${{ runner.os == 'Windows' && '. ./scripts/windows-normal-io.ps1' || '' }}
+        pytest tests/common --browser=${{ matrix.browser }}
     - name: Test Reference count
-      run: pytest tests/test_reference_count_async.py --browser=${{ matrix.browser }}
+      run: |
+        ${{ runner.os == 'Windows' && '. ./scripts/windows-normal-io.ps1' || '' }}
+        pytest tests/test_reference_count_async.py --browser=${{ matrix.browser }}
     - name: Test Wheel Installation
-      run: pytest tests/test_installation.py --browser=${{ matrix.browser }}
+      run: |
+        ${{ runner.os == 'Windows' && '. ./scripts/windows-normal-io.ps1' || '' }}
+        pytest tests/test_installation.py --browser=${{ matrix.browser }}
     - name: Test Sync API
       if: runner.os != 'Linux'
-      run: pytest tests/sync --browser=${{ matrix.browser }} -n ${{ env.WORKERS }} -p pytest_dot_reporter -rfE --color=yes
+      run: |
+        ${{ runner.os == 'Windows' && '. ./scripts/windows-normal-io.ps1' || '' }}
+        pytest tests/sync --browser=${{ matrix.browser }} -n ${{ env.WORKERS }} -p pytest_dot_reporter -rfE --color=yes
     - name: Test Sync API
       if: runner.os == 'Linux'
       run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" pytest tests/sync --browser=${{ matrix.browser }} -n ${{ env.WORKERS }} -p pytest_dot_reporter -rfE --color=yes
     - name: Test Async API
       # Also after a failed sync step: the two suites report on their own.
       if: ${{ !cancelled() && steps.install.outcome == 'success' && runner.os != 'Linux' }}
-      run: pytest tests/async --browser=${{ matrix.browser }} -n ${{ env.WORKERS }} -p pytest_dot_reporter -rfE --color=yes
+      run: |
+        ${{ runner.os == 'Windows' && '. ./scripts/windows-normal-io.ps1' || '' }}
+        pytest tests/async --browser=${{ matrix.browser }} -n ${{ env.WORKERS }} -p pytest_dot_reporter -rfE --color=yes
     - name: Test Async API
       if: ${{ !cancelled() && steps.install.outcome == 'success' && runner.os == 'Linux' }}
       run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" pytest tests/async --browser=${{ matrix.browser }} -n ${{ env.WORKERS }} -p pytest_dot_reporter -rfE --color=yes
@@ -187,17 +197,23 @@ jobs:
       id: install
       run: python -m playwright install ${{ matrix.browser-channel }} --with-deps
     - name: Common Tests
-      run: pytest tests/common --browser=chromium --browser-channel=${{ matrix.browser-channel }}
+      run: |
+        ${{ runner.os == 'Windows' && '. ./scripts/windows-normal-io.ps1' || '' }}
+        pytest tests/common --browser=chromium --browser-channel=${{ matrix.browser-channel }}
     - name: Test Sync API
       if: runner.os != 'Linux'
-      run: pytest tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n ${{ env.WORKERS }} -p pytest_dot_reporter -rfE --color=yes
+      run: |
+        ${{ runner.os == 'Windows' && '. ./scripts/windows-normal-io.ps1' || '' }}
+        pytest tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n ${{ env.WORKERS }} -p pytest_dot_reporter -rfE --color=yes
     - name: Test Sync API
       if: runner.os == 'Linux'
       run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" pytest tests/sync --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n ${{ env.WORKERS }} -p pytest_dot_reporter -rfE --color=yes
     - name: Test Async API
       # Also after a failed sync step: the two suites report on their own.
       if: ${{ !cancelled() && steps.install.outcome == 'success' && runner.os != 'Linux' }}
-      run: pytest tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n ${{ env.WORKERS }} -p pytest_dot_reporter -rfE --color=yes
+      run: |
+        ${{ runner.os == 'Windows' && '. ./scripts/windows-normal-io.ps1' || '' }}
+        pytest tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n ${{ env.WORKERS }} -p pytest_dot_reporter -rfE --color=yes
     - name: Test Async API
       if: ${{ !cancelled() && steps.install.outcome == 'success' && runner.os == 'Linux' }}
       run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" pytest tests/async --browser=chromium --browser-channel=${{ matrix.browser-channel }} -n ${{ env.WORKERS }} -p pytest_dot_reporter -rfE --color=yes
