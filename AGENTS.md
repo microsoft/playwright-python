@@ -26,6 +26,7 @@ pip install -r local-requirements.txt
 pip install -e .
 python scripts/upstream.py checkout
 python -m build --wheel        # builds the driver from .upstream/ into playwright/driver/
+python -m build --sdist        # the driver without Node.js; runs with PLAYWRIGHT_NODEJS_PATH
 playwright install chromium    # not --with-deps: sudo is denied here
 ./test.sh [browser]            # tests/sync and tests/async, under xvfb
 ./scripts/lint.sh              # the Lint job of CI; run it before you commit

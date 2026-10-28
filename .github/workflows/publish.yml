@@ -48,20 +48,22 @@ jobs:
       run: python scripts/upstream.py checkout
     # Each wheel build builds the driver of its platform; the build of
     # .upstream/ is shared.
-    - name: Build the driver and the wheels
+    - name: Build the driver, the wheels and the sdist
       run: |
         for wheel in $(python setup.py --list-wheels); do
           PLAYWRIGHT_TARGET_WHEEL=$wheel python -m build --wheel --outdir dist
         done
-    - name: Check the wheels
+        python -m build --sdist --outdir dist
+    - name: Check the wheels and the sdist
       run: |
         ls -l dist
         test "$(ls dist/*.whl | wc -l)" -eq "$(python setup.py --list-wheels | wc -l)"
+        test -f "dist/playwright-${TAG#v}.tar.gz"
         for file in dist/*; do
-          if [[ "$(basename "$file")" != "playwright-${TAG#v}-"*.whl ]]; then
-            echo "Unexpected file for $TAG: $file"
-            exit 1
-          fi
+          case "$(basename "$file")" in
+            "playwright-${TAG#v}-"*.whl | "playwright-${TAG#v}.tar.gz") ;;
+            *) echo "Unexpected file for $TAG: $file"; exit 1 ;;
+          esac
         done
     - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:

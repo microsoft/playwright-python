@@ -27,11 +27,21 @@ from typing import Dict
 # in .upstream/, the microsoft/playwright checkout at the commit in DRIVER_VERSION,
 # and adds the Node.js binary of NODE_VERSION. The bundles are named after the
 # commit (driver/playwright-<commit>-<suffix>.zip), so a roll builds new ones.
+#
+# A sdist build (python -m build --sdist) builds the "any" bundle the same way, but
+# without the Node.js binary, and ships it. A wheel built from the sdist packs that
+# bundle, so it is py3-none-any and runs with the Node.js of PLAYWRIGHT_NODEJS_PATH.
 def read_driver_version() -> str:
     return (Path(__file__).parent / "DRIVER_VERSION").read_text().strip()
 
 
 driver_version = read_driver_version()
+
+# The sdist unpacks with its metadata at the root; a checkout has none there.
+building_from_sdist = (Path(__file__).parent / "PKG-INFO").is_file()
+
+# "wheel" is the platform tag of the wheel name, as in base_wheel_bundles.
+sdist_bundle = {"wheel": "any.whl", "zip_name": "any"}
 
 base_wheel_bundles = [
     {
@@ -90,6 +100,7 @@ if len(sys.argv) == 2 and sys.argv[1] == "--list-wheels":
     exit(0)
 
 from setuptools import setup  # noqa: E402
+from setuptools.command.sdist import sdist as SDistCommand  # noqa: E402
 
 try:
     from auditwheel.wheeltools import InWheel
@@ -107,10 +118,18 @@ def extractall(zip: zipfile.ZipFile, path: str) -> None:
             os.chmod(extracted_path, attr)
 
 
+def driver_bundle_path(zip_name: str) -> str:
+    return f"driver/playwright-{driver_version}-{zip_name}.zip"
+
+
 def ensure_driver_bundle(zip_name: str) -> None:
-    destination_path = f"driver/playwright-{driver_version}-{zip_name}.zip"
+    destination_path = driver_bundle_path(zip_name)
     if os.path.exists(destination_path):
         return
+    if building_from_sdist:
+        raise RuntimeError(
+            f"Driver bundle {destination_path} is missing from the source distribution."
+        )
     # Build only this platform's bundle, so that a wheel build downloads just the
     # one Node.js binary it needs.
     build_script = os.path.join(os.path.dirname(__file__), "scripts", "build_driver.py")
@@ -119,6 +138,16 @@ def ensure_driver_bundle(zip_name: str) -> None:
         raise RuntimeError(
             f"Driver bundle {destination_path} was not produced by scripts/build_driver.py."
         )
+
+
+class PlaywrightSDistCommand(SDistCommand):
+    def make_distribution(self) -> None:
+        # The driver without Node.js, built from .upstream/ like the platform
+        # bundles; the wheel build of the sdist packs it. The file list comes
+        # from egg_info (the files that git tracks), so the bundle is added here.
+        ensure_driver_bundle(sdist_bundle["zip_name"])
+        self.filelist.append(driver_bundle_path(sdist_bundle["zip_name"]))
+        super().make_distribution()
 
 
 class PlaywrightBDistWheelCommand(BDistWheelCommand):
@@ -132,7 +161,9 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
         self._download_and_extract_local_driver()
 
         wheel = None
-        if os.getenv("PLAYWRIGHT_TARGET_WHEEL", None):
+        if building_from_sdist:
+            wheel = sdist_bundle
+        elif os.getenv("PLAYWRIGHT_TARGET_WHEEL", None):
             wheel = list(
                 filter(
                     lambda wheel: wheel["wheel"]
@@ -162,14 +193,16 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
         # Although the build produces every platform's bundle, only this wheel's
         # target platform driver is extracted and packed below, so the wheel
         # stays single-platform.
-        zip_file = f"driver/playwright-{driver_version}-{wheel_bundle['zip_name']}.zip"
+        zip_file = driver_bundle_path(wheel_bundle["zip_name"])
         extract_dir = f"driver/{wheel_bundle['zip_name']}"
         if os.path.exists(extract_dir):
             shutil.rmtree(extract_dir)
         with zipfile.ZipFile(zip_file, "r") as zip:
             extractall(zip, extract_dir)
         wheel_location = without_platform + wheel_bundle["wheel"]
-        shutil.copy(base_wheel_location, wheel_location)
+        # The base wheel is py3-none-any already: the "any" wheel adds to it in place.
+        if wheel_location != base_wheel_location:
+            shutil.copy(base_wheel_location, wheel_location)
         with zipfile.ZipFile(
             wheel_location, mode="a", compression=zipfile.ZIP_DEFLATED
         ) as zip:
@@ -183,7 +216,8 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
                 "playwright/driver/README.md",
                 f"{wheel_bundle['wheel']} driver package",
             )
-        os.remove(base_wheel_location)
+        if wheel_location != base_wheel_location:
+            os.remove(base_wheel_location)
         for whlfile in glob.glob(os.path.join(self.dist_dir, "*.whl")):
             os.makedirs("wheelhouse", exist_ok=True)
             if InWheel:
@@ -197,20 +231,23 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
     def _download_and_extract_local_driver(
         self,
     ) -> None:
-        zip_names_for_current_system = set(
-            map(
-                lambda wheel: wheel["zip_name"],
-                filter(
-                    lambda wheel: wheel["machine"] == platform.machine().lower()
-                    and wheel["platform"] == sys.platform,
-                    base_wheel_bundles,
-                ),
+        if building_from_sdist:
+            zip_name = sdist_bundle["zip_name"]
+        else:
+            zip_names_for_current_system = set(
+                map(
+                    lambda wheel: wheel["zip_name"],
+                    filter(
+                        lambda wheel: wheel["machine"] == platform.machine().lower()
+                        and wheel["platform"] == sys.platform,
+                        base_wheel_bundles,
+                    ),
+                )
             )
-        )
-        assert len(zip_names_for_current_system) == 1
-        zip_name = zip_names_for_current_system.pop()
+            assert len(zip_names_for_current_system) == 1
+            zip_name = zip_names_for_current_system.pop()
         ensure_driver_bundle(zip_name)
-        zip_file = f"driver/playwright-{driver_version}-{zip_name}.zip"
+        zip_file = driver_bundle_path(zip_name)
         if os.path.exists("playwright/driver"):
             shutil.rmtree("playwright/driver")
         with zipfile.ZipFile(zip_file, "r") as zip:
@@ -218,5 +255,8 @@ class PlaywrightBDistWheelCommand(BDistWheelCommand):
 
 
 setup(
-    cmdclass={"bdist_wheel": PlaywrightBDistWheelCommand},
+    cmdclass={
+        "sdist": PlaywrightSDistCommand,
+        "bdist_wheel": PlaywrightBDistWheelCommand,
+    },
 )
