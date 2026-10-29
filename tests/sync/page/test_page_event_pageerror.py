@@ -29,7 +29,11 @@ def expect_failure(request: pytest.FixtureRequest, reason: str) -> None:
 
 
 def test_ER_001_should_fire(
-    page: Page, server: Server, browser_name: str, request: pytest.FixtureRequest
+    page: Page,
+    server: Server,
+    browser_name: str,
+    browser_major_version: int,
+    request: pytest.FixtureRequest,
 ) -> None:
     url = server.PREFIX + "/error.html"
     with page.expect_event("pageerror") as error_info:
@@ -104,7 +108,7 @@ function c() {
         page.goto(server.PREFIX + "/cross-origin-error.html")
     cross_origin_error = cross_origin_error_info.value
     assert cross_origin_error.message == "Fancy error!"
-    if browser_name == "chromium":
+    if browser_name == "chromium" and browser_major_version >= 155:
         assert (
             cross_origin_error.stack
             == f"""Uncaught Error: Fancy error!

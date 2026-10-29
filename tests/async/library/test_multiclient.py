@@ -563,3 +563,50 @@ async def test_MC_018_should_stop_tracing_upon_disconnect(
     await disconnect(playwright, page_a)
 
     await page_b.context.tracing.start()
+
+
+@pytest.mark.slow
+async def test_MC_020_should_run_locator_handlers_after_reconnecting_with_a_pending_callback(
+    playwright: Playwright,
+    connect: Callable[..., Awaitable[Browser]],
+    remote_server: RemoteServer,
+    server: Server,
+) -> None:
+    browser = await connect(remote_server.ws_endpoint)
+    page = await browser.new_page()
+    await page.goto(server.PREFIX + "/input/handle-locator.html")
+
+    called = 0
+
+    async def handler() -> None:
+        nonlocal called
+        called += 1
+        await asyncio.Future()
+
+    await page.add_locator_handler(
+        page.get_by_text("This interstitial covers the button"), handler
+    )
+    await page.evaluate(
+        """() => {
+        window.setupAnnoyingInterstitial('none', 1);
+    }"""
+    )
+    with pytest.raises(Error) as exc_info:
+        await page.locator("#target").click(timeout=1000)
+    assert "Timeout 1000ms exceeded" in exc_info.value.message
+    assert called == 1
+
+    await disconnect(playwright, page)
+
+    reconnected_browser = await connect(remote_server.ws_endpoint)
+    reconnected_page = reconnected_browser.contexts[0].pages[0]
+
+    async def reconnected_handler() -> None:
+        await reconnected_page.locator("#close").click()
+
+    await reconnected_page.add_locator_handler(
+        reconnected_page.get_by_text("This interstitial covers the button"),
+        reconnected_handler,
+    )
+    await reconnected_page.locator("#target").click(timeout=3000)
+    assert await reconnected_page.evaluate("window.clicked") == 1

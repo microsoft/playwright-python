@@ -692,22 +692,15 @@ async def test_EV_062_should_simulate_a_user_gesture(page: Page) -> None:
 async def test_EV_063_should_throw_a_nice_error_after_a_navigation(
     page: Page,
 ) -> None:
-    async def wait_for_error() -> Error:
+    async with page.expect_navigation():
         with pytest.raises(Error) as exc_info:
-            await page.evaluate("() => new Promise(f => window['__resolve'] = f)")
-        return exc_info.value
-
-    async def reload() -> None:
-        async with page.expect_navigation():
             await page.evaluate(
-                """() => {
+                """() => new Promise(f => setTimeout(() => {
                     window.location.reload();
-                    setTimeout(() => window['__resolve'](42), 1000);
-                }"""
+                    setTimeout(() => f(42), 1000);
+                }, 0))"""
             )
-
-    error, _ = await asyncio.gather(wait_for_error(), reload())
-    assert "navigation" in error.message
+    assert "navigation" in exc_info.value.message
 
 
 async def test_EV_064_should_not_throw_an_error_when_evaluation_does_a_navigation(

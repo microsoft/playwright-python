@@ -17,6 +17,7 @@
 import json
 import os
 import signal
+import time
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import suppress
@@ -25,6 +26,7 @@ from typing import Any, Callable, Dict, Generator, List, Optional, TypeVar
 
 import pytest
 
+from playwright._impl._greenlets import wait_for_future
 from playwright.sync_api import (
     Browser,
     BrowserType,
@@ -916,3 +918,52 @@ def test_CD_035_no_defaults_should_not_affect_new_contexts(
         browser.close()
     finally:
         browser_server.close()
+
+
+def test_CD_053_should_connect_when_another_client_inspects_a_terminated_shared_worker(
+    browser_type: BrowserType, server: Server, launch_arguments: Dict, port: int
+) -> None:
+    pytest.skip("fixme")
+    browser = launch(browser_type, launch_arguments, port)
+    try:
+        # Another client inspects the shared worker.
+        page = browser.new_page()
+        inspector = browser.new_browser_cdp_session()
+        worker_created = browser._loop.create_future()
+
+        def on_target_created(event: Dict[str, Any]) -> None:
+            if event["targetInfo"]["type"] == "shared_worker":
+                worker_created.set_result(event["targetInfo"]["targetId"])
+
+        inspector.on("Target.targetCreated", on_target_created)
+        inspector.send("Target.setDiscoverTargets", {"discover": True})
+        page.goto(server.PREFIX + "/shared-worker/shared-worker.html")
+        assert page.evaluate("window.sharedWorkerResponsePromise") == "echo:hello"
+        # Python: run the event loop until the shared worker's target is known.
+        wait_for_future(browser._loop, browser._dispatcher_fiber, worker_created)
+        worker_target_id = worker_created.result()
+        inspector.send(
+            "Target.attachToTarget", {"targetId": worker_target_id, "flatten": True}
+        )
+
+        # The last client of the shared worker goes away, so the worker is terminated.
+        # The inspector stays attached, so the worker target lingers without a browser context.
+        page.close()
+        # Python: poll the CDP target list instead of expect.poll.
+        deadline = time.monotonic() + 5
+        while True:
+            targets = inspector.send("Target.getTargets")
+            if not any(
+                info["targetId"] == worker_target_id for info in targets["targetInfos"]
+            ):
+                break
+            assert time.monotonic() < deadline
+            time.sleep(0.1)
+
+        # A new client auto-attaches to the lingering worker target.
+        cdp_browser = browser_type.connect_over_cdp(f"http://127.0.0.1:{port}/")
+        page2 = cdp_browser.contexts[0].new_page()
+        assert page2.evaluate("1 + 1") == 2
+        cdp_browser.close()
+    finally:
+        browser.close()

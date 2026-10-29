@@ -504,3 +504,37 @@ async def test_IF_021_should_preserve_last_modified_timestamp(
         assert (
             abs(timestamps[i] - expected_timestamps[i]) <= 1000
         ), f"expected: {expected_timestamps}; actual: {timestamps}"
+
+
+async def test_IF_022_should_store_an_uploaded_file_in_indexed_db(
+    page: Page, server: Server, assetdir: Path, browser_name: str
+) -> None:
+    if browser_name == "webkit":
+        pytest.skip(
+            "WebKit does not support storing files in IndexedDB in private browsing."
+        )
+
+    await page.goto(server.PREFIX + "/input/fileupload.html")
+    input = page.locator("input[type=file]")
+    await input.set_input_files(assetdir / "file-to-upload.txt")
+    stored_file = await input.evaluate(
+        """async input => {
+            const db = await new Promise((resolve, reject) => {
+                const request = indexedDB.open('file-upload');
+                request.onupgradeneeded = () => request.result.createObjectStore('files');
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject(request.error);
+            });
+            const file = await new Promise((resolve, reject) => {
+                const transaction = db.transaction('files', 'readwrite');
+                const store = transaction.objectStore('files');
+                store.put(input.files[0], 'file');
+                const request = store.get('file');
+                transaction.oncomplete = () => resolve(request.result);
+                transaction.onabort = () => reject(transaction.error);
+            });
+            db.close();
+            return { name: file.name, text: await file.text() };
+        }"""
+    )
+    assert stored_file == {"name": "file-to-upload.txt", "text": "contents of the file"}

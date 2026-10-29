@@ -502,7 +502,9 @@ def test_SE_059_should_filter_hidden_unless_explicitly_asked_for(
     ]
 
 
-def test_SE_060_should_support_name(page: Page) -> None:
+def test_SE_060_should_support_name(
+    page: Page, browser_name: str, browser_major_version: int
+) -> None:
     page.set_content(
         """
     <div role="button" aria-label=" Hello "></div>
@@ -510,8 +512,13 @@ def test_SE_060_should_support_name(page: Page) -> None:
     <div role="button" aria-label="Hello" aria-hidden="true"></div>
     <div role="button" aria-label="123" aria-hidden="true"></div>
     <div role="button" aria-label='foo"bar' aria-hidden="true"></div>
+
+    <span id="title">Chosen name</span>
+    <div role="group" aria-labelledby="title"></div>
   """
     )
+    group = page.get_by_role("group")
+    expect(group).to_have_accessible_name("Chosen name")
     assert page.locator('role=button[name="Hello"]').evaluate_all(OUTERS) == [
         '<div role="button" aria-label=" Hello "></div>',
     ]
@@ -580,6 +587,22 @@ def test_SE_060_should_support_name(page: Page) -> None:
     ) == [
         '<div role="button" aria-label="123" aria-hidden="true"></div>',
     ]
+
+    # Old electron/android do not have this API.
+    is_missing_aria_labelled_by_elements = (
+        browser_name == "chromium" and browser_major_version < 135
+    )
+    if not is_missing_aria_labelled_by_elements:
+        group.evaluate(
+            """element => {
+                element.ariaLabelledByElements = [document.querySelector('#title')];
+            }"""
+        )
+        assert page.get_by_role("group", name="Chosen name", exact=True).evaluate_all(
+            OUTERS
+        ) == [
+            '<div role="group" aria-labelledby=""></div>',
+        ]
 
 
 def test_SE_061_should_support_option_name_with_html_whitespace(

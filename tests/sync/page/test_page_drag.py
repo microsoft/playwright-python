@@ -15,7 +15,7 @@
 """Port of tests/page/page-drag.spec.ts."""
 
 import time
-from typing import Any, Callable, List, Optional
+from typing import Any, List, Optional
 
 import pytest
 
@@ -647,21 +647,15 @@ def test_DD_018_should_report_event_buttons(page: Page) -> None:
 
 
 def test_DD_019_should_handle_custom_data_transfer(
-    page: Page, browser_name: str, is_win: bool, sync_gather: Callable
+    page: Page, browser_name: str, is_win: bool
 ) -> None:
     if browser_name == "webkit" and is_win:
         pytest.skip("fixme")
     page.set_content("""<button draggable="true">Draggable</button>""")
 
-    def drag() -> None:
-        page.hover('[draggable="true"]')
-        page.mouse.down()
-        page.mouse.move(100, 100)
-        page.mouse.up()
-
-    result, _ = sync_gather(
-        lambda: page.evaluate(
-            """() => new Promise(resolve => {
+    page.evaluate(
+        """() => {
+              window.__result = new Promise(resolve => {
                 document.addEventListener('dragstart', event => {
                   event.dataTransfer.setData('custom-type', 'Hello World');
                 }, false);
@@ -680,12 +674,16 @@ def test_DD_019_should_handle_custom_data_transfer(
                     data: event.dataTransfer.getData('custom-type'),
                   });
                 }, false);
-            })"""
-        ),
-        drag,
+              });
+            }"""
     )
 
-    assert result == {
+    page.hover('[draggable="true"]')
+    page.mouse.down()
+    page.mouse.move(100, 100)
+    page.mouse.up()
+
+    assert page.evaluate("() => window.__result") == {
         "types": ["custom-type"],
         "data": "Hello World",
     }

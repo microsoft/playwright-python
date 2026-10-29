@@ -1257,23 +1257,15 @@ def test_TR_041_should_not_emit_after_w_o_before(
     page = context.new_page()
 
     context.tracing.start(name="name1", snapshots=True)
-    evaluate_promise = run_in_background(
-        page,
-        lambda: page.evaluate(
-            """() => {
-    console.log('started');
-    return new Promise(f => window.callback = f);
-  }"""
-        ),
-    )
-    with page.expect_event("console"):
-        pass
+    # The wait spans the chunks: its "before" is in the first chunk, and its "after" must not get into the second one.
+    console_promise = run_in_background(page, lambda: page.wait_for_event("console"))
+    page.evaluate("() => 1")
     context.tracing.stop_chunk(path=tmp_path / "trace1.zip")
     assert (traces_dir / "name1.trace").exists() is True
 
     context.tracing.start_chunk(name="name2")
-    page.evaluate_handle("() => window.callback()")
-    wait_for(page, evaluate_promise)
+    page.evaluate("() => console.log('started')")
+    wait_for(page, console_promise)
     context.tracing.stop(path=tmp_path / "trace2.zip")
     assert (traces_dir / "name2.trace").exists() is True
 
@@ -1296,12 +1288,13 @@ def test_TR_041_should_not_emit_after_w_o_before(
     events = parse_trace_raw(tmp_path / "trace1.zip").events
     sanitized = [s for s in map(sanitize, events) if s]
     assert [{k: v for k, v in s.items() if k != "callId"} for s in sanitized] == [
-        {"type": "before"},
         {"type": "before", "title": 'Wait for event "console"'},
+        {"type": "before"},
         {"type": "after"},
     ]
-    call1 = sanitized[0]["callId"]
+    assert sanitized[1]["callId"] > sanitized[0]["callId"]
     assert sanitized[1]["callId"] == sanitized[2]["callId"]
+    call1 = sanitized[1]["callId"]
 
     events = parse_trace_raw(tmp_path / "trace2.zip").events
     sanitized = [s for s in map(sanitize, events) if s]

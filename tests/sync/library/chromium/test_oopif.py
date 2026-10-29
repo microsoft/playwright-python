@@ -297,11 +297,13 @@ def test_OO_012_should_take_screenshot(
     browser: Browser,
     server: Server,
     assert_to_be_golden: Callable[[bytes, str], None],
+    utils: Utils,
 ) -> None:
     page.set_viewport_size({"width": 500, "height": 500})
     page.goto(server.PREFIX + "/dynamic-oopif.html")
     assert len(page.frames) == 2
     assert_oopif_count(browser, 1)
+    utils.rafraf(page.frames[1])
     assert_to_be_golden(page.screenshot(), "screenshot-oopif.png")
 
 

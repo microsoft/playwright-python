@@ -19,7 +19,7 @@ from typing import Any, Awaitable, Callable, Dict
 
 import pytest
 
-from playwright.async_api import Browser, BrowserContext, Error, Playwright
+from playwright.async_api import Browser, BrowserContext, Error, Playwright, Route
 from tests.server import Server, TestServerRequest
 from tests.utils import chromium_version_less_than, must
 
@@ -39,6 +39,25 @@ async def test_UA_001_should_work(browser: Browser, server: Server) -> None:
     request = request_info.value
     assert request.getHeader("user-agent") == "foobar"
     await context.close()
+
+
+async def test_UA_007_should_preserve_custom_user_agent_in_route_fetch(
+    context_factory: Callable[..., Awaitable[BrowserContext]], server: Server
+) -> None:
+    context = await context_factory(user_agent="my-custom-user-agent")
+    page = await context.new_page()
+
+    async def handle(route: Route) -> None:
+        await route.fulfill(response=await route.fetch())
+
+    await page.route("**/empty.html", handle)
+    request, server_request, _ = await asyncio.gather(
+        page.wait_for_event("request", predicate=lambda r: r.url == server.EMPTY_PAGE),
+        server.wait_for_request("/empty.html"),
+        page.goto(server.EMPTY_PAGE),
+    )
+    assert request.headers["user-agent"] == "my-custom-user-agent"
+    assert server_request.getHeader("user-agent") == "my-custom-user-agent"
 
 
 async def test_UA_002_should_work_for_subframes(

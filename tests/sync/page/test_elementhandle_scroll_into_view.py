@@ -108,6 +108,40 @@ def test_EH_096_should_scroll_display_contents_into_view(
     assert abs(scroll_top - 350) < 1
 
 
+def test_EH_124_should_scroll_nested_display_contents_into_view(
+    page: Page, browser_name: str, browser_major_version: int
+) -> None:
+    page.set_content(
+        """
+    <style>
+      html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
+      ::-webkit-scrollbar { display: none; }
+      * { scrollbar-width: none; }
+    </style>
+    <div id=container style="width:200px;height:200px;overflow:scroll;border:1px solid black;">
+      <div style="margin-top:500px;background:red;">
+        <div id=outer style="display:contents"><div style="display:contents"><div id=target style="height:50px;width:100px;background:cyan;">Hello</div></div><div style="height:2000px;"></div><div>Sibling</div></div>
+      </div>
+    </div>
+    """
+    )
+    div = page.query_selector("#outer")
+    assert div
+    div.scroll_into_view_if_needed()
+    # The first box in the flattened subtree of #outer is #target, two levels down,
+    # not the tall sibling. No whitespace text nodes inside #outer: in Firefox they
+    # get boxes of their own, which would hide a fallback that only looks one level down.
+    target_is_visible = page.eval_on_selector(
+        "#target",
+        """target => {
+            const container = document.getElementById('container').getBoundingClientRect();
+            const rect = target.getBoundingClientRect();
+            return rect.top >= container.top && rect.bottom <= container.bottom;
+        }""",
+    )
+    assert target_is_visible is True
+
+
 def test_EH_097_should_work_for_visibility_hidden_element(page: Page) -> None:
     page.set_content('<div style="visibility:hidden">Hello</div>')
     div = page.query_selector("div")

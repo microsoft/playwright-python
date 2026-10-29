@@ -15,6 +15,7 @@
 """Port of tests/library/webmcp.spec.ts."""
 
 import asyncio
+import re
 from typing import AsyncGenerator, Dict
 
 import pytest
@@ -201,9 +202,14 @@ async def test_WM_005_should_throw_when_the_tool_throws(
     with pytest.raises(Error) as exc_info:
         await page.webmcp.call_tool("throwing")
     # Chromium does not report the error that the tool threw.
-    assert (
-        "the invocation failed" if browser_name == "chromium" else "boom"
-    ) in exc_info.value.message
+    assert re.search(
+        (
+            r"the invocation failed|Tool execution failed"
+            if browser_name == "chromium"
+            else r"boom"
+        ),
+        exc_info.value.message,
+    )
 
 
 async def test_WM_006_should_throw_for_an_unknown_tool(

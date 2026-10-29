@@ -110,16 +110,12 @@ async def test_RO_100_should_not_throw_if_request_was_cancelled_by_the_page(
     intercept_future: "asyncio.Future[Route]" = asyncio.Future()
     await page.route("**/data.json", lambda route: intercept_future.set_result(route))
     await page.goto(server.EMPTY_PAGE)
-    evaluate_task = asyncio.create_task(
-        ignore_error(
-            page.evaluate(
-                """url => {
-                    globalThis.controller = new AbortController();
-                    return fetch(url, { signal: globalThis.controller.signal });
-                }""",
-                server.PREFIX + "/data.json",
-            )
-        )
+    await page.evaluate(
+        """url => {
+            globalThis.controller = new AbortController();
+            fetch(url, { signal: globalThis.controller.signal }).catch(() => {});
+        }""",
+        server.PREFIX + "/data.json",
     )
     route = await intercept_future
     async with page.expect_event("requestfailed") as failure_info:
@@ -128,7 +124,6 @@ async def test_RO_100_should_not_throw_if_request_was_cancelled_by_the_page(
     assert cancelled_request.failure
     assert re.search(r"cancelled|aborted", cancelled_request.failure, re.I)
     await route.fulfill(status=200)  # Should not throw.
-    await evaluate_task
 
 
 async def test_RO_101_should_allow_mocking_binary_responses(

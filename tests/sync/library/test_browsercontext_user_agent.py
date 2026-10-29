@@ -18,7 +18,8 @@ from typing import Any, Callable, Dict
 
 import pytest
 
-from playwright.sync_api import Browser, BrowserContext, Error, Page, Playwright
+from playwright._impl._greenlets import wait_for_future
+from playwright.sync_api import Browser, BrowserContext, Error, Page, Playwright, Route
 from tests.server import ExpectResponse, Server, TestServerRequest
 from tests.utils import chromium_version_less_than, must
 
@@ -49,6 +50,36 @@ def test_UA_001_should_work(browser: Browser, server: Server) -> None:
     request = request_info.value
     assert request.getHeader("user-agent") == "foobar"
     context.close()
+
+
+def test_UA_007_should_preserve_custom_user_agent_in_route_fetch(
+    context_factory: Callable[..., BrowserContext],
+    server: Server,
+    sync_gather: Callable,
+) -> None:
+    context = context_factory(user_agent="my-custom-user-agent")
+    page = context.new_page()
+
+    def handle(route: Route) -> None:
+        route.fulfill(response=route.fetch())
+
+    page.route("**/empty.html", handle)
+
+    # Python: the server's async waiter uses the page's event loop.
+    def server_request() -> TestServerRequest:
+        future = page._loop.create_task(server.wait_for_request("/empty.html"))
+        wait_for_future(page._loop, page._dispatcher_fiber, future)
+        return future.result()
+
+    request, received_request, _ = sync_gather(
+        lambda: page.wait_for_event(
+            "request", predicate=lambda r: r.url == server.EMPTY_PAGE
+        ),
+        server_request,
+        lambda: page.goto(server.EMPTY_PAGE),
+    )
+    assert request.headers["user-agent"] == "my-custom-user-agent"
+    assert received_request.getHeader("user-agent") == "my-custom-user-agent"
 
 
 def test_UA_002_should_work_for_subframes(

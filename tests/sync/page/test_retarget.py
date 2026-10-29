@@ -208,6 +208,20 @@ def test_RE_007_enabled_disabled_retargeting(page: Page) -> None:
             False,
             "li",
         ),
+        (
+            dom_in_label(
+                "<select><option disabled>Other employees</option><option>Alex</option></select>"
+            ),
+            False,
+            "option >> nth=0",
+        ),
+        (
+            dom_in_label(
+                '<select><optgroup disabled label="Other employees"><option>Alex</option></optgroup></select>'
+            ),
+            False,
+            "optgroup",
+        ),
     ]
     for dom, enabled, locator in cases:
         # Step: '"{locator}" in "{dom}" should be enabled={enabled}'.
