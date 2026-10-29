@@ -27,9 +27,14 @@ jobs:
           - jammy
           - noble
           - resolute
-        runs-on:
-          - ubuntu-24.04
-          - ubuntu-24.04-arm
+        arch:
+          - amd64
+          - arm64
+        include:
+          - arch: amd64
+            runs-on: playwright-x64-ubuntu24-64-core
+          - arch: arm64
+            runs-on: playwright-arm64-ubuntu24-64-core
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Set up Python
@@ -48,11 +53,20 @@ jobs:
         pip install -e .
     - name: Get Playwright
       run: python scripts/upstream.py checkout
+    - name: Set up Docker
+      run: |
+        if ! command -v docker >/dev/null 2>&1; then
+          curl -fsSL https://get.docker.com | sh
+        fi
+        sudo service docker stop
+        sudo mkdir -p /etc/docker /mnt/docker
+        echo '{ "data-root": "/mnt/docker" }' | sudo tee /etc/docker/daemon.json
+        sudo service docker start
+        # The docker group of a fresh install applies at the next login only.
+        sudo chmod 666 /var/run/docker.sock
     # build.sh builds the wheels, and with them the driver.
     - name: Build Docker image
-      run: |
-        ARCH="${{ matrix.runs-on == 'ubuntu-24.04-arm' && 'arm64' || 'amd64' }}"
-        bash utils/docker/build.sh --$ARCH ${{ matrix.docker-image-variant }} playwright-python:localbuild-${{ matrix.docker-image-variant }}
+      run: bash utils/docker/build.sh --${{ matrix.arch }} ${{ matrix.docker-image-variant }} playwright-python:localbuild-${{ matrix.docker-image-variant }}
     - name: Start the container
       id: container
       run: |
@@ -67,10 +81,10 @@ jobs:
         # Node.js in the image.
         docker exec playwright-docker-test python -m build --wheel
     # As in ci.yml: the dot reporter (scripts/pytest_dot_reporter.py, found through
-    # PYTHONPATH), and two workers, upstream's default of half the cores of these runners.
+    # PYTHONPATH), and 16 workers.
     - name: Test Sync API
-      run: docker exec playwright-docker-test xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" pytest tests/sync -n 2 -p pytest_dot_reporter -rfE --color=yes
+      run: docker exec playwright-docker-test xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" pytest tests/sync -n 16 -p pytest_dot_reporter -rfE --color=yes
     - name: Test Async API
       # Also after a failed sync step: the two suites report on their own.
       if: ${{ !cancelled() && steps.container.outcome == 'success' }}
-      run: docker exec playwright-docker-test xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" pytest tests/async -n 2 -p pytest_dot_reporter -rfE --color=yes
+      run: docker exec playwright-docker-test xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" pytest tests/async -n 16 -p pytest_dot_reporter -rfE --color=yes
