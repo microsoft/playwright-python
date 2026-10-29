@@ -1,0 +1,36 @@
+name: 'Set up the triage runner'
+description: >
+  Prepares the environment that the triage and revision agents work in: the checkout built as CI
+  builds it, with the browsers and the Copilot CLI installed, and the upstream checkout in .upstream/
+  that the driver is built from. Exports PLAYWRIGHT_DIR, the path of that checkout, and CI_ENV_EXEC,
+  the wrapper from microsoft/playwright that runs a command under xvfb on Linux and at normal I/O
+  priority on Windows.
+runs:
+  using: composite
+  steps:
+  - uses: microsoft/playwright/.github/actions/ci-env@main
+  - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+    with:
+      python-version: '3.12'
+  - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+    with:
+      node-version: '24'
+  - name: Install the requirements
+    shell: bash
+    run: |
+      python -m pip install --upgrade pip
+      pip install -r local-requirements.txt
+      pip install -r requirements.txt
+      pip install -e .
+  - name: Check out upstream and build the wheel
+    shell: bash
+    run: |
+      python scripts/upstream.py checkout
+      python -m build --wheel
+      echo "PLAYWRIGHT_DIR=${GITHUB_WORKSPACE//\\//}/.upstream" >> "$GITHUB_ENV"
+  - name: Install the browsers
+    shell: bash
+    run: python -m playwright install --with-deps chromium firefox webkit
+  - name: Install the Copilot CLI
+    shell: bash
+    run: npm install -g @github/copilot
