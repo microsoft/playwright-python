@@ -1,0 +1,227 @@
+# Copilot triages and fixes an issue, or works on a task given by hand, without write credentials.
+# Fresh jobs post the run link on the issue, open the completed fix as a draft PR using the app, so
+# CI runs on it, and comment on the issue. The steps that are the same for every Playwright repo are
+# actions in microsoft/playwright. The skill in .claude/skills/playwright-triage/ has what is
+# specific to this repo.
+name: Issue triage
+
+on:
+  # Apply needs-triage, needs-triage-mac or needs-triage-win; re-apply it to trigger another pass.
+  issues:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: "Issue number to triage; leave empty to work on the task alone"
+        type: string
+        required: false
+        default: ""
+      platform:
+        description: "Platform to triage on"
+        type: choice
+        required: true
+        default: linux
+        options:
+        - linux
+        - mac
+        - windows
+      task:
+        description: "Task to direct the triage, such as what to focus on; the whole job when there is no issue"
+        type: string
+        required: false
+        default: ""
+
+permissions: {}
+
+jobs:
+  start:
+    name: Post the run link on the issue
+    # The triage job's condition, for runs that have an issue.
+    if: >-
+      github.repository == 'microsoft/playwright-python' &&
+      ((github.event_name == 'workflow_dispatch' && inputs.issue != '') ||
+       contains(fromJSON('["needs-triage","needs-triage-mac","needs-triage-win"]'), github.event.label.name))
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    outputs:
+      comment: ${{ steps.post.outputs.id }}
+    env:
+      ISSUE: ${{ github.event.issue.number || inputs.issue }}
+      PLATFORM_NAME: ${{ fromJSON('{"linux":"Linux","mac":"macOS","windows":"Windows","needs-triage":"Linux","needs-triage-mac":"macOS","needs-triage-win":"Windows"}')[inputs.platform || github.event.label.name] }}
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      WORKFLOW_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+    - name: Post the run link
+      id: post
+      run: |
+        [[ "$ISSUE" =~ ^[1-9][0-9]*$ ]] || { echo "issue must be a positive integer" >&2; exit 1; }
+        body=$(printf "Hi, I'm the Playwright bot. I started to triage this issue on %s: [agent run](%s)\n<!-- playwright-triage-started -->" "$PLATFORM_NAME" "$WORKFLOW_URL")
+        id=$(gh api "repos/$GH_REPO/issues/$ISSUE/comments" -f body="$body" --jq .node_id)
+        echo "id=$id" >> "$GITHUB_OUTPUT"
+
+  triage:
+    name: Triage ${{ (github.event.issue.number || inputs.issue) && format('issue {0}', github.event.issue.number || inputs.issue) || 'task' }} (${{ inputs.platform || github.event.label.name }})
+    if: >-
+      github.repository == 'microsoft/playwright-python' &&
+      (github.event_name == 'workflow_dispatch' ||
+       contains(fromJSON('["needs-triage","needs-triage-mac","needs-triage-win"]'), github.event.label.name))
+    # Falls back to a runner name for unrelated labels, where the job is skipped anyway.
+    runs-on: ${{ fromJSON('{"linux":"playwright-x64-ubuntu24-64-core","mac":"macos-15-xlarge","windows":"playwright-x64-server2025-64-core"}')[inputs.platform || fromJSON('{"needs-triage":"linux","needs-triage-mac":"mac","needs-triage-win":"windows"}')[github.event.label.name]] || 'ubuntu-latest' }}
+    timeout-minutes: 240
+    concurrency:
+      group: triage-${{ github.event.issue.number || inputs.issue || github.run_id }}
+      cancel-in-progress: false
+    defaults:
+      run:
+        shell: bash
+    env:
+      ISSUE: ${{ github.event.issue.number || inputs.issue }}
+      TRIAGE_PLATFORM: ${{ inputs.platform || fromJSON('{"needs-triage":"linux","needs-triage-mac":"mac","needs-triage-win":"windows"}')[github.event.label.name] }}
+      TASK: ${{ inputs.task }}
+    permissions:
+      copilot-requests: write
+    outputs:
+      base: ${{ steps.base.outputs.sha }}
+      setup: ${{ steps.setup.outcome }}
+      agent: ${{ steps.agent.outputs.outcome }}
+      has_fix: ${{ steps.agent.outputs.has-result }}
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        ref: main
+        persist-credentials: false
+    - name: Record the base and the directories
+      id: base
+      run: |
+        if [[ -n "$ISSUE" ]]; then
+          [[ "$ISSUE" =~ ^[1-9][0-9]*$ ]] || { echo "issue must be a positive integer" >&2; exit 1; }
+        elif [[ -z "${TASK//[[:space:]]/}" ]]; then
+          echo "give an issue, a task or both" >&2; exit 1
+        fi
+        echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+        echo "OUTPUT_DIR=${RUNNER_TEMP//\\//}/triage" >> "$GITHUB_ENV"
+        echo "SCRATCH_DIR=${RUNNER_TEMP//\\//}/scratch" >> "$GITHUB_ENV"
+        echo "REPO_DIR=${GITHUB_WORKSPACE//\\//}" >> "$GITHUB_ENV"
+        mkdir -p "${RUNNER_TEMP//\\//}/triage" "${RUNNER_TEMP//\\//}/scratch"
+    - name: Set up the runner
+      id: setup
+      uses: ./.github/actions/setup-triage-runner
+    - name: Write the prompt
+      id: prompt
+      run: |
+        delimiter="PROMPT_$RANDOM$RANDOM"
+        {
+          echo "prompt<<$delimiter"
+          echo "Follow .claude/skills/playwright-triage/SKILL.md. Read it, the guide and the AGENTS.md"
+          echo "it points to in full before starting."
+          if [[ -n "$ISSUE" ]]; then
+            printf '\nIssue: https://github.com/%s/issues/%s\n' "$GITHUB_REPOSITORY" "$ISSUE"
+          fi
+          if [[ -n "$TASK" ]]; then
+            printf '\nTask: %s\n' "$TASK"
+          fi
+          echo "$delimiter"
+        } >> "$GITHUB_OUTPUT"
+    - name: Triage with Copilot CLI
+      id: agent
+      uses: microsoft/playwright/.github/actions/run-agent@main
+      with:
+        prompt: ${{ steps.prompt.outputs.prompt }}
+        output-dir: ${{ env.OUTPUT_DIR }}
+        result-file: fix/proposal.json
+        artifact-name: triage
+        github-tools: true
+        exec: ${{ env.CI_ENV_EXEC }}
+    - name: Check the upstream bug report
+      run: |
+        if [[ -f "$OUTPUT_DIR/upstream/report.json" ]]; then
+          title=$(node -p 'String(JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).title ?? "")' "$OUTPUT_DIR/upstream/report.json" || true)
+          if [[ -z "$title" ]]; then
+            echo "::warning::upstream/report.json has no title, so the report is not appended to the comment"
+          else
+            echo "Upstream bug report: $title" >> "$GITHUB_STEP_SUMMARY"
+          fi
+        fi
+
+  publish:
+    name: Open draft pull request
+    needs: triage
+    # proposal.json is written last, so a finished proposal is published even when the job failed later.
+    if: ${{ !cancelled() && needs.triage.outputs.has_fix == 'true' }}
+    runs-on: ubuntu-latest
+    outputs:
+      pr: ${{ steps.publish.outputs.pull-request }}
+    steps:
+    - uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+      id: app-token
+      with:
+        app-id: ${{ vars.PLAYWRIGHT_APP_ID }}
+        private-key: ${{ secrets.PLAYWRIGHT_PRIVATE_KEY }}
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        ref: ${{ needs.triage.outputs.base }}
+        token: ${{ steps.app-token.outputs.token }}
+    - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      with:
+        name: triage
+        path: ${{ runner.temp }}/triage
+    # Never execute code or scripts from the proposed changes in the app job.
+    - name: Validate, push and open draft
+      id: publish
+      uses: microsoft/playwright/.github/actions/publish-patch@main
+      with:
+        token: ${{ steps.app-token.outputs.token }}
+        dir: ${{ runner.temp }}/triage/fix
+        patch: fix.patch
+        metadata: proposal.json
+        body-file: pr-body.md
+        branch: triage/${{ github.event.issue.number || inputs.issue || 'task' }}/${{ github.run_id }}-${{ github.run_attempt }}
+        commit-body: "${{ (github.event.issue.number || inputs.issue) && format('Fixes: https://github.com/{0}/issues/{1}', github.repository, github.event.issue.number || inputs.issue) || '' }}"
+        pull-request: true
+
+  comment:
+    name: Comment on the issue
+    needs: [start, triage, publish]
+    # Runs after every triage run that has an issue, including failed ones, and whatever publish did.
+    if: ${{ !cancelled() && needs.triage.result != 'skipped' && (github.event_name == 'issues' || inputs.issue != '') }}
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+    - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+      # A failed triage run may not have uploaded anything.
+      continue-on-error: true
+      with:
+        name: triage
+        path: ${{ runner.temp }}/triage
+    # The bot never files upstream; the comment hands the report to a maintainer.
+    - name: Describe the upstream bug report
+      id: upstream
+      env:
+        OUTPUT_DIR: ${{ runner.temp }}/triage
+      run: |
+        extra=""
+        if [[ -s "$OUTPUT_DIR/upstream/report.md" && -f "$OUTPUT_DIR/upstream/report.json" ]]; then
+          title=$(jq -r '.title // empty' "$OUTPUT_DIR/upstream/report.json")
+          if [[ -n "$title" ]]; then
+            extra=$(printf 'Upstream bug report, for a maintainer to file in microsoft/playwright:\n\n**Title:** %s\n\n<details>\n<summary>Body</summary>\n\n````markdown\n%s\n````\n\n</details>' "$title" "$(cat "$OUTPUT_DIR/upstream/report.md")")
+          fi
+        fi
+        delimiter="EXTRA_$RANDOM$RANDOM"
+        { echo "extra<<$delimiter"; echo "$extra"; echo "$delimiter"; } >> "$GITHUB_OUTPUT"
+    - name: Post the triage comment
+      uses: microsoft/playwright/.github/actions/triage-comment@main
+      with:
+        issue: ${{ github.event.issue.number || inputs.issue }}
+        dir: ${{ runner.temp }}/triage
+        footer: Triaged on ${{ fromJSON('{"linux":"Linux","mac":"macOS","windows":"Windows","needs-triage":"Linux","needs-triage-mac":"macOS","needs-triage-win":"Windows"}')[inputs.platform || github.event.label.name] }} by the Playwright bot
+        job-result: ${{ needs.triage.result }}
+        setup-outcome: ${{ needs.triage.outputs.setup }}
+        agent-outcome: ${{ needs.triage.outputs.agent }}
+        setup-failure-reason: setting up the runner, building the project or downloading the browsers failed
+        pull-request: ${{ needs.publish.outputs.pr }}
+        publish-result: ${{ needs.publish.result }}
+        extra: ${{ steps.upstream.outputs.extra }}
+        start-comment: ${{ needs.start.outputs.comment }}

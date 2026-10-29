@@ -36,6 +36,10 @@ When `DRIVER_VERSION` changes, for example after a pull, run
 `tests/async` in separate pytest runs: a sync test fails in a process where an async
 test ran.
 
+The install is editable: a change under `playwright/` needs no build, the next
+`pytest` runs it. Run `mypy playwright` after it. Rebuild the wheel only when
+`DRIVER_VERSION` or `NODE_VERSION` changes.
+
 ## The port
 
 `playwright/_impl/` is a line-by-line port of the JS client,
@@ -104,6 +108,32 @@ left).
 - The test timeout is 30 s, as upstream. `test.slow()` is `@pytest.mark.slow`.
 - Python-only tests (the sync API, asyncio, regressions) go in `tests/{async,sync}/python/`.
   Keep them few: extend a test before you add one.
+
+### Regression tests
+
+- A regression test for a bug of the Python client goes in `tests/async/python/` or
+  `tests/sync/python/`, in the file named after the upstream file of the feature
+  (`test_page.py`), as one added case in an existing test. Write it once, in the
+  flavor that the issue uses. When a port carries `xfail(reason="python: ...",
+  strict=True)` for the bug, remove the mark instead: that port is the regression test.
+- Tag the test with the issue in a comment on the first line of its body:
+  `# Regression test for https://github.com/microsoft/playwright-python/issues/<n>.`
+- The fixtures are `page`, `context`, `browser`, `browser_type`, `server`,
+  `https_server`, `browser_name`, `assetdir` and, in sync, `sync_gather`;
+  `tests/AGENTS.md` has the whole map. Use `server.set_route(path, handler)`,
+  `server.PREFIX` and `server.EMPTY_PAGE`. A handler takes a Twisted request:
+  `setHeader`, `setResponseCode`, `write`, `finish`.
+- Annotate every parameter and the return value (`-> None`): mypy and pyright check
+  the tests. A `Protocol violations` failure is a bug in the client, not in the test.
+- Good models: `test_response_headers_should_work` in
+  `tests/async/python/test_network.py`, and
+  `test_sync_calls_should_raise_after_driver_exit` in `tests/sync/python/test_sync.py`.
+- Run one file with one browser: `pytest tests/async/python/test_page.py --browser
+  chromium`, then `--browser firefox` and `--browser webkit`. Without `--browser`,
+  pytest runs all three. `-k <name>` selects one test, `--headed` runs the browser
+  headed. The timeout of a test is 30 s; `@pytest.mark.slow` triples it. A change in
+  `playwright/_impl/` serves both APIs: run the ported files of the feature in both
+  flavors.
 
 ## Rolls
 
