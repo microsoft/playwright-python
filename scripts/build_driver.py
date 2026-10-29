@@ -28,6 +28,9 @@ of ``NODE_VERSION``. ``setup.py`` runs this when it builds a wheel. It:
        LICENSE           - the Node.js license
        package/**        - the playwright-core npm package
 
+The ``any`` bundle, for the source distribution, has only ``package/**``: it runs
+with the Node.js of ``PLAYWRIGHT_NODEJS_PATH``.
+
 A bundle that exists is not built again. ``.upstream/`` must be checked out at the
 commit in ``DRIVER_VERSION`` (``python scripts/upstream.py checkout``), with no local
 changes. npm uses the registry and the credentials of a root-level ``.npmrc`` when
@@ -63,7 +66,7 @@ NODEJS_DIST = "https://nodejs.org/dist"
 
 class Platform(NamedTuple):
     suffix: str  # bundle suffix; matches the "zip_name" values in setup.py
-    node_dir: str  # the nodejs.org archive name infix: node-v<ver>-<node_dir>
+    node_dir: str  # the nodejs.org archive name infix: node-v<ver>-<node_dir>; "" for no Node.js
     windows: bool
 
 
@@ -75,6 +78,7 @@ PLATFORMS: List[Platform] = [
     Platform("linux-arm64", "linux-arm64", False),
     Platform("win32_x64", "win-x64", True),
     Platform("win32_arm64", "win-arm64", True),
+    Platform("any", "", False),  # the source distribution: no Node.js
 ]
 
 
@@ -240,7 +244,8 @@ def assemble(
     if bundle_dir.exists():
         shutil.rmtree(bundle_dir)
     bundle_dir.mkdir(parents=True)
-    fetch_node(platform, node_version, bundle_dir, work_dir)
+    if platform.node_dir:
+        fetch_node(platform, node_version, bundle_dir, work_dir)
     shutil.copytree(package_dir, bundle_dir / "package")
     destination = DRIVER_DIR / f"playwright-{commit}-{platform.suffix}.zip"
     zip_bundle(bundle_dir, destination)

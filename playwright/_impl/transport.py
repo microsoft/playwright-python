@@ -29,7 +29,11 @@ import sys
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, List, Optional, Union
 
-from playwright._impl._driver import compute_driver_executable, get_driver_env
+from playwright._impl._driver import (
+    compute_driver_executable,
+    get_driver_env,
+    node_launch_error,
+)
 from playwright._impl.errors import Error
 from playwright._impl.utils.tasks import wait_for_next_task
 
@@ -133,17 +137,20 @@ class PipeTransport(Transport):
                 startupinfo.wShowWindow = subprocess.SW_HIDE
 
             executable_path, entrypoint_path = compute_driver_executable()
-            self._proc = await asyncio.create_subprocess_exec(
-                executable_path,
-                entrypoint_path,
-                "run-driver",
-                stdin=asyncio.subprocess.PIPE,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=_get_stderr_fileno(),
-                limit=32768,
-                env=env,
-                startupinfo=startupinfo,
-            )
+            try:
+                self._proc = await asyncio.create_subprocess_exec(
+                    executable_path,
+                    entrypoint_path,
+                    "run-driver",
+                    stdin=asyncio.subprocess.PIPE,
+                    stdout=asyncio.subprocess.PIPE,
+                    stderr=_get_stderr_fileno(),
+                    limit=32768,
+                    env=env,
+                    startupinfo=startupinfo,
+                )
+            except OSError as error:
+                raise node_launch_error(executable_path, error)
         except Exception as exc:
             self.on_error_future.set_exception(exc)
             raise exc

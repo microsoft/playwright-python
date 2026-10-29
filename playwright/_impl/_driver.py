@@ -19,18 +19,29 @@ from pathlib import Path
 from typing import Tuple
 
 import playwright
+from playwright._impl._errors import Error
 from playwright._repo_version import version
 
 
 def compute_driver_executable() -> Tuple[str, str]:
     driver_path = Path(inspect.getfile(playwright)).parent / "driver"
     cli_path = str(driver_path / "package" / "cli.js")
-    if sys.platform == "win32":
-        return (
-            os.getenv("PLAYWRIGHT_NODEJS_PATH", str(driver_path / "node.exe")),
-            cli_path,
+    node_path = os.getenv("PLAYWRIGHT_NODEJS_PATH")
+    if node_path:
+        return (node_path, cli_path)
+    bundled_node = driver_path / ("node.exe" if sys.platform == "win32" else "node")
+    if not bundled_node.is_file():
+        # The source distribution ships the driver without Node.js.
+        raise Error(
+            "This installation of Playwright does not include Node.js. "
+            "Set PLAYWRIGHT_NODEJS_PATH pointing to Node.js executable."
         )
-    return (os.getenv("PLAYWRIGHT_NODEJS_PATH", str(driver_path / "node")), cli_path)
+    return (str(bundled_node), cli_path)
+
+
+def node_launch_error(executable: str, error: OSError) -> Error:
+    """The error for a spawn of the driver that failed."""
+    return Error(f"Cannot launch Node.js executable at {executable}: {error}")
 
 
 def get_driver_env() -> dict:

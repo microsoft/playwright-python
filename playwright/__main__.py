@@ -15,16 +15,28 @@
 import subprocess
 import sys
 
-from playwright._impl._driver import compute_driver_executable, get_driver_env
+from playwright._impl._driver import (
+    compute_driver_executable,
+    get_driver_env,
+    node_launch_error,
+)
+from playwright._impl._errors import Error
 
 
 def main() -> None:
     try:
         driver_executable, driver_cli = compute_driver_executable()
-        completed_process = subprocess.run(
-            [driver_executable, driver_cli, *sys.argv[1:]], env=get_driver_env()
-        )
+        try:
+            completed_process = subprocess.run(
+                [driver_executable, driver_cli, *sys.argv[1:]], env=get_driver_env()
+            )
+        except OSError as error:
+            raise node_launch_error(driver_executable, error)
         sys.exit(completed_process.returncode)
+    except Error as error:
+        # No Node.js to run the driver with: a message, not a traceback.
+        print(error.message, file=sys.stderr)
+        sys.exit(1)
     except KeyboardInterrupt:
         sys.exit(130)
 
