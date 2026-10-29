@@ -143,11 +143,13 @@ async def test_NE_089_should_support_redirects(page: Page, server: Server) -> No
     assert redirected_from.redirected_to == response.request
 
 
-async def test_NE_090_should_resolve_responses_after_a_navigation(
+async def test_NE_090_should_resolve_responses_after_a_cross_process_navigation(
     page: Page, server: Server, browser_name: str
 ) -> None:
     if browser_name == "chromium":
-        pytest.skip("fixme")
+        pytest.skip(
+            "Chromium does not report loadingFailed when the navigation swaps the frame"
+        )
     responses_from_server: List[TestServerRequest] = []
     server_got_request = threading.Event()
 
@@ -175,6 +177,47 @@ async def test_NE_090_should_resolve_responses_after_a_navigation(
             response_from_server.finish()
         except RuntimeError:
             # The browser has dropped the request. Like res.end() in Node.js, do nothing.
+            pass
+
+    reactor.callFromThread(end)
+    # the response should resolve to null, because the page navigated.
+    assert await response_promise is None
+
+
+async def test_NE_143_should_resolve_responses_after_a_same_process_navigation(
+    page: Page, server: Server, browser_name: str
+) -> None:
+    if browser_name == "chromium":
+        pytest.skip(
+            "Chromium does not report loadingFailed when the navigation swaps the frame"
+        )
+    responses_from_server: List[TestServerRequest] = []
+    server_got_request = threading.Event()
+
+    def handle(server_request: TestServerRequest) -> None:
+        responses_from_server.append(server_request)
+        server_got_request.set()
+
+    server.set_route("/foo", handle)
+    await page.goto(server.EMPTY_PAGE)
+    async with page.expect_request(lambda _: True) as request_info:
+        # start a long running request and wait until it hits the server
+        await page.evaluate("url => void fetch(url)", server.PREFIX + "/foo")
+    while not server_got_request.is_set():
+        await page.wait_for_timeout(10)
+    response_from_server = responses_from_server[0]
+    request = await request_info.value
+    response_promise = asyncio.create_task(request.response())
+    # navigate within the same process, which should cancel the request
+    await page.goto(server.PREFIX + "/title.html")
+
+    # make sure we aren't stalling this request on the server
+    def end() -> None:
+        try:
+            response_from_server.write(b"done")
+            response_from_server.finish()
+        except RuntimeError:
+            # Python: Node's res.end() also accepts an already dropped request.
             pass
 
     reactor.callFromThread(end)

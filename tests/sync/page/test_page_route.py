@@ -14,6 +14,7 @@
 
 """Port of tests/page/page-route.spec.ts."""
 
+import asyncio
 import json
 import re
 import time
@@ -22,6 +23,7 @@ from urllib.parse import urlparse
 
 import pytest
 
+from playwright._impl._greenlets import wait_for_future
 from playwright.sync_api import Error, Page, Request, Route, expect
 from tests.server import Server, TestServerRequest
 
@@ -294,52 +296,60 @@ def test_RO_012_should_pause_intercepted_xhr_until_continue(
         pytest.skip("fixme: Redirected request is not paused in WebKit")
 
     page.goto(server.EMPTY_PAGE)
+    route_promise: "asyncio.Future[Route]" = page._loop.create_future()
+    page.route("**/global-var.html", lambda route: route_promise.set_result(route))
     xhr_finished = False
-    xhr_finished_while_paused: List[bool] = []
 
-    def handler(route: Route) -> None:
-        # Check that intercepted request is actually paused.
-        page.wait_for_timeout(500)
-        xhr_finished_while_paused.append(xhr_finished)
-        route.continue_()
+    def request_finished(request: Request) -> None:
+        nonlocal xhr_finished
+        if request.url.endswith("/global-var.html"):
+            xhr_finished = True
 
-    page.route("**/global-var.html", handler)
-    status = page.evaluate(
-        """async () => {
-    const request = new XMLHttpRequest();
-    request.open('GET', '/global-var.html', false);  // `false` makes the request synchronous
-    request.send(null);
-    return request.status;
-  }"""
+    page.on("requestfinished", request_finished)
+    # The synchronous request blocks the page, so it is started from a timer.
+    page.evaluate(
+        """() => {
+            window.__statusPromise = new Promise(resolve => setTimeout(() => {
+                const request = new XMLHttpRequest();
+                request.open('GET', '/global-var.html', false);  // `false` makes the request synchronous
+                request.send(null);
+                resolve(request.status);
+            }, 0));
+        }"""
     )
-    xhr_finished = True
-    assert xhr_finished_while_paused == [False]
-    assert status == 200
+    # Python: wait for the promise resolved by the route handler.
+    wait_for_future(page._loop, page._dispatcher_fiber, route_promise)
+    route = route_promise.result()
+    # Check that intercepted request is actually paused.
+    page.wait_for_timeout(500)
+    assert xhr_finished is False
+    route.continue_()
+    assert page.evaluate("() => window.__statusPromise") == 200
 
 
 def test_RO_013_should_pause_intercepted_fetch_request_until_continue(
     page: Page, server: Server
 ) -> None:
     page.goto(server.EMPTY_PAGE)
-    fetch_finished = False
-    fetch_finished_while_paused: List[bool] = []
-
-    def handler(route: Route) -> None:
-        # Check that intercepted request is actually paused.
-        page.wait_for_timeout(500)
-        fetch_finished_while_paused.append(fetch_finished)
-        route.continue_()
-
-    page.route("**/global-var.html", handler)
-    status = page.evaluate(
-        """async () => {
-    const response = await fetch('/global-var.html');
-    return response.status;
-  }"""
+    route_promise: "asyncio.Future[Route]" = page._loop.create_future()
+    page.route("**/global-var.html", lambda route: route_promise.set_result(route))
+    page.evaluate(
+        """() => {
+            window.__fetchFinished = false;
+            window.__statusPromise = fetch('/global-var.html').then(response => {
+                window.__fetchFinished = true;
+                return response.status;
+            });
+        }"""
     )
-    fetch_finished = True
-    assert fetch_finished_while_paused == [False]
-    assert status == 200
+    # Python: wait for the promise resolved by the route handler.
+    wait_for_future(page._loop, page._dispatcher_fiber, route_promise)
+    route = route_promise.result()
+    # Check that intercepted request is actually paused.
+    page.wait_for_timeout(500)
+    assert page.evaluate("() => window.__fetchFinished") is False
+    route.continue_()
+    assert page.evaluate("() => window.__statusPromise") == 200
 
 
 def test_RO_014_should_work_with_custom_referer_headers(
@@ -1486,3 +1496,32 @@ def test_RO_055_should_be_able_to_intercept_every_navigation_to_a_page_controlle
     page.evaluate("() => window['activationPromise']")
     page.goto(url)
     assert interceptions == 2
+
+
+def test_RO_202_should_continue_a_request_reported_while_interception_was_disabled(
+    page: Page, server: Server, sync_gather: Callable[..., List[Any]]
+) -> None:
+    page.goto(server.PREFIX + "/serviceworkers/slow-fallback/sw.html")
+    page.evaluate("() => window['activationPromise']")
+
+    def handler(route: Route) -> None:
+        route.fulfill(body="mocked")
+
+    page.route("**/never-requested", handler)
+    page.unroute("**/never-requested")
+    # The service worker holds the request, so it reaches the network
+    # after interception is enabled again.
+    with page.expect_request("**/simple.json") as request_info:
+
+        def enable_interception() -> None:
+            request_info.value
+            page.route("**/never-requested", handler)
+
+        # Python: run the evaluation and the later route registration concurrently.
+        body, _ = sync_gather(
+            lambda: page.evaluate(
+                "() => fetch('/simple.json').then(response => response.text())"
+            ),
+            enable_interception,
+        )
+    assert body == '{"foo": "bar"}\n'

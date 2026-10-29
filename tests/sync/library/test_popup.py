@@ -217,6 +217,27 @@ def test_PO_022_should_respect_routes_from_browser_context_when_using_window_ope
     context.close()
 
 
+def test_PO_029_should_load_subresources_of_an_about_blank_popup_when_the_opener_has_routes(
+    browser: Browser, server: Server, browser_name: str
+) -> None:
+    if browser_name == "chromium":
+        pytest.skip(
+            "Subresources of an about:blank popup are paused on the opener target and never continued"
+        )
+    context = browser.new_context()
+    page = context.new_page()
+    page.route("**/*", lambda route: route.continue_())
+    page.goto(server.EMPTY_PAGE)
+    with page.expect_popup() as popup_info:
+        page.evaluate(
+            """url => window.open('').document.write(`<img src="${url}">`)""",
+            server.PREFIX + "/pptr.png",
+        )
+    popup = popup_info.value
+    popup.wait_for_function("() => document.querySelector('img')?.naturalWidth > 0")
+    context.close()
+
+
 def test_PO_023_browser_context_add_init_script_should_apply_to_an_in_process_popup(
     browser: Browser, server: Server
 ) -> None:

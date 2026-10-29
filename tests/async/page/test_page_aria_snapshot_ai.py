@@ -190,6 +190,14 @@ async def test_AR_052_should_stitch_all_frame_snapshots(
         await page.get_by_ref("e1000").normalize()
     assert "No element matching aria-ref=e1000" in exc_info.value.message
 
+    await page.locator("iframe").evaluate_all(
+        """iframes => {
+            for (const iframe of iframes)
+                iframe.textContent = 'Your browser does not support frames';
+        }"""
+    )
+    assert await snapshot_for_ai(page) == snapshot
+
 
 async def test_AR_053_should_re_number_refs_across_navigations_but_not_same_document_navigations(
     page: Page, server: Server

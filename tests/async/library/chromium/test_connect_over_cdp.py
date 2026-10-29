@@ -904,3 +904,50 @@ async def test_CD_035_no_defaults_should_not_affect_new_contexts(
         await browser.close()
     finally:
         await browser_server.close()
+
+
+async def test_CD_053_should_connect_when_another_client_inspects_a_terminated_shared_worker(
+    browser_type: BrowserType, server: Server, launch_arguments: Dict, port: int
+) -> None:
+    pytest.skip("fixme")
+    browser = await launch(browser_type, launch_arguments, port)
+    try:
+        # Another client inspects the shared worker.
+        page = await browser.new_page()
+        inspector = await browser.new_browser_cdp_session()
+        worker_created: asyncio.Future[str] = asyncio.get_running_loop().create_future()
+
+        def on_target_created(event: Dict[str, Any]) -> None:
+            if event["targetInfo"]["type"] == "shared_worker":
+                worker_created.set_result(event["targetInfo"]["targetId"])
+
+        inspector.on("Target.targetCreated", on_target_created)
+        await inspector.send("Target.setDiscoverTargets", {"discover": True})
+        await page.goto(server.PREFIX + "/shared-worker/shared-worker.html")
+        assert await page.evaluate("window.sharedWorkerResponsePromise") == "echo:hello"
+        worker_target_id = await worker_created
+        await inspector.send(
+            "Target.attachToTarget", {"targetId": worker_target_id, "flatten": True}
+        )
+
+        # The last client of the shared worker goes away, so the worker is terminated.
+        # The inspector stays attached, so the worker target lingers without a browser context.
+        await page.close()
+        # Python: poll the CDP target list instead of expect.poll.
+        deadline = asyncio.get_running_loop().time() + 5
+        while True:
+            targets = await inspector.send("Target.getTargets")
+            if not any(
+                info["targetId"] == worker_target_id for info in targets["targetInfos"]
+            ):
+                break
+            assert asyncio.get_running_loop().time() < deadline
+            await asyncio.sleep(0.1)
+
+        # A new client auto-attaches to the lingering worker target.
+        cdp_browser = await browser_type.connect_over_cdp(f"http://127.0.0.1:{port}/")
+        page2 = await cdp_browser.contexts[0].new_page()
+        assert await page2.evaluate("1 + 1") == 2
+        await cdp_browser.close()
+    finally:
+        await browser.close()

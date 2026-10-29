@@ -709,6 +709,29 @@ def test_SS_039_page_screenshot_should_take_full_page_screenshots_during_navigat
 
 
 @pytest.mark.usefixtures("skip_firefox_headed")
+def test_SS_096_page_screenshot_should_not_wait_for_unused_font_face_with_failed_local_source(
+    page: Page, server: Server, browser_name: str
+) -> None:
+    if browser_name == "webkit":
+        pytest.skip("Fixed upstream in https://commits.webkit.org/323883@main")
+
+    page.goto(server.EMPTY_PAGE)
+    page.set_content(
+        f"""
+        <style>
+        @font-face {{
+            font-family: 'pwtest-iconfont';
+            src: local('NoSuchFont'), url('{server.PREFIX}/webfont/iconfont.woff2') format('woff2');
+            unicode-range: U+0400-04FF;
+        }}
+        </style>
+        <div style="font-family: 'pwtest-iconfont'">hello</div>
+        """
+    )
+    page.screenshot()
+    assert page.evaluate("() => document.fonts.status") == "loaded"
+
+
 def test_SS_040_page_screenshot_mask_option_should_work(
     page: Page, server: Server, assert_to_be_golden: GoldenAssert
 ) -> None:

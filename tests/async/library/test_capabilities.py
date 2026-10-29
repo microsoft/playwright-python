@@ -183,27 +183,19 @@ async def test_CA_011_should_not_crash_on_show_directory_picker(
     await page.goto(server.EMPTY_PAGE)
     # "User activation is required to show a file picker." - so we click first.
     await page.locator("body").click()
-    picker = asyncio.create_task(
-        page.evaluate(
-            """async () => {
-      const dir = await window.showDirectoryPicker();
-      return dir.name;
-      // In headless it throws (aborted), in headed it stalls (Test ended) and waits for the picker to be accepted.
+    await page.evaluate(
+        """() => {
+      window.showDirectoryPicker().catch(e => { window.__pickerError = String(e); });
     }"""
-        )
     )
     # The dialog will not be accepted, so we just wait for some time to
     # to give the browser a chance to crash.
     await page.wait_for_timeout(3_000)
-    if picker.done():
-        error = picker.exception()
-        assert isinstance(error, Error)
-        assert re.search(
-            r"(DOMException|AbortError): .*The user aborted a request", error.message
-        )
-    else:
-        # In headed mode the picker stalls until the test ends.
-        picker.add_done_callback(lambda task: task.exception())
+    # In headless it throws (aborted), in headed it stalls and waits for the picker to be accepted.
+    error = await page.evaluate("() => window.__pickerError ?? 'stalled'")
+    assert re.search(
+        r"((DOMException|AbortError): .*The user aborted a request|stalled)", error
+    )
 
 
 async def test_CA_012_should_not_crash_on_storage_get_directory(

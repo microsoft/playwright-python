@@ -656,15 +656,9 @@ async def test_DD_019_should_handle_custom_data_transfer(
         pytest.skip("fixme")
     await page.set_content("""<button draggable="true">Draggable</button>""")
 
-    async def drag() -> None:
-        await page.hover('[draggable="true"]')
-        await page.mouse.down()
-        await page.mouse.move(100, 100)
-        await page.mouse.up()
-
-    result, _ = await asyncio.gather(
-        page.evaluate(
-            """() => new Promise(resolve => {
+    await page.evaluate(
+        """() => {
+              window.__result = new Promise(resolve => {
                 document.addEventListener('dragstart', event => {
                   event.dataTransfer.setData('custom-type', 'Hello World');
                 }, false);
@@ -683,12 +677,16 @@ async def test_DD_019_should_handle_custom_data_transfer(
                     data: event.dataTransfer.getData('custom-type'),
                   });
                 }, false);
-            })"""
-        ),
-        drag(),
+              });
+            }"""
     )
 
-    assert result == {
+    await page.hover('[draggable="true"]')
+    await page.mouse.down()
+    await page.mouse.move(100, 100)
+    await page.mouse.up()
+
+    assert await page.evaluate("() => window.__result") == {
         "types": ["custom-type"],
         "data": "Hello World",
     }

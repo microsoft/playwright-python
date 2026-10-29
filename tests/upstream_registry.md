@@ -78,6 +78,7 @@ subsystem, add a row to the Subsystems table. Then update this file:
 | `GN` | Locator and selector generator | `library/{locator-generator, selector-generator}` |
 | `HA` | HAR | `library/{har, browsercontext-har, har-websocket}` |
 | `HE` | Headful | `library/headful` |
+| `HS` | HTTP server | `library/unit/http-server` |
 | `HT` | Hit target | `library/hit-target` |
 | `IF` | Input files | `page/page-set-input-files` |
 | `IN` | Inspector | `library/inspector/{pause, recorder-api, console-api, title}` |
@@ -765,6 +766,7 @@ subsystem, add a row to the Subsystems table. Then update this file:
 | `CD-050` | `library/chromium/session.spec.ts` | should emit close event when session is detached |
 | `CD-051` | `library/chromium/session.spec.ts` | should emit close event when page closes |
 | `CD-052` | `library/chromium/session.spec.ts` | should work with newBrowserCDPSession |
+| `CD-053` | `library/chromium/connect-over-cdp.spec.ts` | should connect when another client inspects a terminated shared worker |
 
 ### CF — Code frame
 
@@ -1999,6 +2001,7 @@ subsystem, add a row to the Subsystems table. Then update this file:
 | `EH-121` | `page/elementhandle-wait-for-element-state.spec.ts` | should wait for button with an aria-disabled parent |
 | `EH-122` | `page/elementhandle-wait-for-element-state.spec.ts` | should wait for stable position |
 | `EH-123` | `page/elementhandle-wait-for-element-state.spec.ts` | should wait for editable input |
+| `EH-124` | `page/elementhandle-scroll-into-view.spec.ts` | should scroll nested display:contents into view |
 
 ### EM — Emulation
 
@@ -2875,6 +2878,7 @@ subsystem, add a row to the Subsystems table. Then update this file:
 | `FO-010` | `page/page-focus.spec.ts` | keeps focus on element when attempting to focus a non-focusable element |
 | `FO-011` | `page/page-focus.spec.ts` | should move focus from an iframe to its parent |
 | `FO-012` | `page/page-focus.spec.ts` | should tab from an iframe to its parent |
+| `FO-013` | `page/page-focus.spec.ts` | should move focus from the parent into its iframe |
 
 ### FR — Frame
 
@@ -3157,6 +3161,7 @@ subsystem, add a row to the Subsystems table. Then update this file:
 | `HA-111` | `library/har-websocket.spec.ts` | should still allow routeWebSocket to modify messages when capturing HAR |
 | `HA-112` | `library/har-websocket.spec.ts` | should respect PLAYWRIGHT\_HAR\_NO\_WEBSOCKET\_FRAMES |
 | `HA-113` | `library/har.spec.ts` | should store binary content with a textual mime type as base64 |
+| `HA-114` | `library/browsercontext-har.spec.ts` | should reject a malformed har.zip |
 
 ### HE — Headful
 
@@ -3178,6 +3183,13 @@ subsystem, add a row to the Subsystems table. Then update this file:
 | `HE-014` | `library/headful.spec.ts` | should click bottom row w/ infobar in OOPIF |
 | `HE-015` | `library/headful.spec.ts` | headless and headful should use same default fonts |
 | `HE-016` | `library/headful.spec.ts` | should have the same hyphen rendering on headless and headed |
+
+### HS — HTTP server
+
+| ID | File | Title |
+|---|---|---|
+| `HS-001` | `library/unit/http-server.spec.ts` | should not serve files through a symlink that leaves the folder |
+| `HS-002` | `library/unit/http-server.spec.ts` | should close upgrade requests to unknown paths |
 
 ### HT — Hit target
 
@@ -3231,6 +3243,7 @@ subsystem, add a row to the Subsystems table. Then update this file:
 | `IF-019` | `page/page-set-input-files.spec.ts` | input event.composed should be true and cross shadow dom boundary |
 | `IF-020` | `page/page-set-input-files.spec.ts` | input should trigger events when files changed second time |
 | `IF-021` | `page/page-set-input-files.spec.ts` | should preserve lastModified timestamp |
+| `IF-022` | `page/page-set-input-files.spec.ts` | should store an uploaded file in IndexedDB |
 
 ### IN — Inspector
 
@@ -3727,6 +3740,7 @@ subsystem, add a row to the Subsystems table. Then update this file:
 | `MC-017` | `library/multiclient.spec.ts` | screencast should deliver cached last frame to a new client |
 | `MC-018` | `library/multiclient.spec.ts` | should stop tracing upon disconnect |
 | `MC-019` | `library/multiclient.spec.ts` | should not deliver an action buffered before the second recording started |
+| `MC-020` | `library/multiclient.spec.ts` | should run locator handlers after reconnecting with a pending callback |
 
 ### MO — Mouse
 
@@ -3950,7 +3964,7 @@ subsystem, add a row to the Subsystems table. Then update this file:
 | `NE-087` | `page/page-event-network.spec.ts` | Page.Events.RequestFinished @smoke |
 | `NE-088` | `page/page-event-network.spec.ts` | should fire events in proper order |
 | `NE-089` | `page/page-event-network.spec.ts` | should support redirects |
-| `NE-090` | `page/page-event-network.spec.ts` | should resolve responses after a navigation |
+| `NE-090` | `page/page-event-network.spec.ts` | should resolve responses after a cross-process navigation |
 | `NE-091` | `page/page-event-request.spec.ts` | should fire for navigation requests |
 | `NE-092` | `page/page-event-request.spec.ts` | should fire for iframes |
 | `NE-093` | `page/page-event-request.spec.ts` | should fire for fetches |
@@ -4003,6 +4017,7 @@ subsystem, add a row to the Subsystems table. Then update this file:
 | `NE-140` | `library/ignorehttpserrors.spec.ts` | should work with WebSocket |
 | `NE-141` | `library/ignorehttpserrors.spec.ts` | should fail with WebSocket if not ignored |
 | `NE-142` | `library/ignorehttpserrors.spec.ts` | serviceWorker should intercept document request |
+| `NE-143` | `page/page-event-network.spec.ts` | should resolve responses after a same-process navigation |
 
 ### OO — OOPIF
 
@@ -4172,6 +4187,7 @@ subsystem, add a row to the Subsystems table. Then update this file:
 | `PO-026` | `library/popup.spec.ts` | should not dispatch binding on a closed page |
 | `PO-027` | `library/popup.spec.ts` | should not throttle rAF in the opener page |
 | `PO-028` | `library/popup.spec.ts` | should not throw when click closes popup |
+| `PO-029` | `library/popup.spec.ts` | should load subresources of an about:blank popup when the opener has routes |
 
 ### PR — Proxy
 
@@ -4528,6 +4544,7 @@ subsystem, add a row to the Subsystems table. Then update this file:
 | `RO-199` | `library/unroute-behavior.spec.ts` | route.fulfill should not throw if page has been closed |
 | `RO-200` | `library/unroute-behavior.spec.ts` | should not continue requests in flight (page) |
 | `RO-201` | `library/unroute-behavior.spec.ts` | should not continue requests in flight (context) |
+| `RO-202` | `page/page-route.spec.ts` | should continue a request reported while interception was disabled |
 
 ### SC — Screencast
 
@@ -4980,6 +4997,7 @@ subsystem, add a row to the Subsystems table. Then update this file:
 | `SS-093` | `library/screenshot.spec.ts` | element screenshot › should capture full element when larger than viewport with device scale factor and scale:css |
 | `SS-094` | `library/screenshot.spec.ts` | element screenshot › page screenshot should capture css transform with device pixels |
 | `SS-095` | `page/page-screenshot.spec.ts` | page screenshot › should capture webgl canvas after its drawing buffer is resized |
+| `SS-096` | `page/page-screenshot.spec.ts` | page screenshot › should not wait for unused font face with failed local() source |
 
 ### ST — Storage
 
@@ -5232,6 +5250,7 @@ subsystem, add a row to the Subsystems table. Then update this file:
 | `TV-133` | `library/snapshot-renderer.spec.ts` | snapshot renderer still renders ordinary custom elements |
 | `TV-134` | `library/snapshot-renderer.spec.ts` | stripAnsiEscapes should not exhibit polynomial backtracking |
 | `TV-135` | `library/snapshot-renderer.spec.ts` | stripAnsiEscapes handles common ANSI sequences after fix |
+| `TV-136` | `library/snapshot-renderer.spec.ts` | snapshot renderer selects the nearest out-of-order screencast frame |
 
 ### TZ — Timezone
 
@@ -5254,6 +5273,7 @@ subsystem, add a row to the Subsystems table. Then update this file:
 | `UA-004` | `library/browsercontext-user-agent.spec.ts` | should make a copy of default options |
 | `UA-005` | `library/browsercontext-user-agent.spec.ts` | custom user agent for download |
 | `UA-006` | `library/browsercontext-user-agent.spec.ts` | should work for navigator.userAgentData and sec-ch-ua headers |
+| `UA-007` | `library/browsercontext-user-agent.spec.ts` | should preserve custom user agent in route.fetch |
 
 ### VI — Video
 

@@ -180,26 +180,19 @@ def test_CA_011_should_not_crash_on_show_directory_picker(
     page.goto(server.EMPTY_PAGE)
     # "User activation is required to show a file picker." - so we click first.
     page.locator("body").click()
-    # The sync API can not leave page.evaluate() running: the page starts the picker
-    # and keeps its error.
     page.evaluate(
         """() => {
-      window.pickerError = undefined;
-      (async () => {
-        const dir = await window.showDirectoryPicker();
-        return dir.name;
-        // In headless it throws (aborted), in headed it stalls (Test ended) and waits for the picker to be accepted.
-      })().catch(e => window.pickerError = String(e));
+      window.showDirectoryPicker().catch(e => { window.__pickerError = String(e); });
     }"""
     )
     # The dialog will not be accepted, so we just wait for some time to
     # to give the browser a chance to crash.
     page.wait_for_timeout(3_000)
-    error = page.evaluate("() => window.pickerError")
-    if error is not None:
-        assert re.search(
-            r"(DOMException|AbortError): .*The user aborted a request", error
-        )
+    # In headless it throws (aborted), in headed it stalls and waits for the picker to be accepted.
+    error = page.evaluate("() => window.__pickerError ?? 'stalled'")
+    assert re.search(
+        r"((DOMException|AbortError): .*The user aborted a request|stalled)", error
+    )
 
 
 def test_CA_012_should_not_crash_on_storage_get_directory(

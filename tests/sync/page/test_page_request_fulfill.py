@@ -115,31 +115,26 @@ def test_RO_099_should_fulfill_with_unuassigned_status_codes(
 
 
 def test_RO_100_should_not_throw_if_request_was_cancelled_by_the_page(
-    page: Page, server: Server, sync_gather: Callable[..., List[Any]]
+    page: Page, server: Server
 ) -> None:
     intercept_future: "asyncio.Future[Route]" = asyncio.Future()
     page.route("**/data.json", lambda route: intercept_future.set_result(route))
     page.goto(server.EMPTY_PAGE)
 
-    def fetch() -> None:
-        page.evaluate(
-            """url => {
-                globalThis.controller = new AbortController();
-                return fetch(url, { signal: globalThis.controller.signal });
-            }""",
-            server.PREFIX + "/data.json",
-        )
-
-    def cancel() -> None:
-        route = wait_for(page, intercept_future)
-        with page.expect_event("requestfailed") as failure_info:
-            page.evaluate("() => globalThis.controller.abort()")
-        cancelled_request: Request = failure_info.value
-        assert cancelled_request.failure
-        assert re.search(r"cancelled|aborted", cancelled_request.failure, re.I)
-        route.fulfill(status=200)  # Should not throw.
-
-    sync_gather(ignore_error(fetch), cancel)
+    page.evaluate(
+        """url => {
+            globalThis.controller = new AbortController();
+            fetch(url, { signal: globalThis.controller.signal }).catch(() => {});
+        }""",
+        server.PREFIX + "/data.json",
+    )
+    route = wait_for(page, intercept_future)
+    with page.expect_event("requestfailed") as failure_info:
+        page.evaluate("() => globalThis.controller.abort()")
+    cancelled_request: Request = failure_info.value
+    assert cancelled_request.failure
+    assert re.search(r"cancelled|aborted", cancelled_request.failure, re.I)
+    route.fulfill(status=200)  # Should not throw.
 
 
 def test_RO_101_should_allow_mocking_binary_responses(

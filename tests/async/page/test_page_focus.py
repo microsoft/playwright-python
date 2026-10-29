@@ -329,3 +329,21 @@ async def test_FO_012_should_tab_from_an_iframe_to_its_parent(
     )
     await page.keyboard.press("Tab")
     await expect(page.locator("#outer")).to_be_focused()
+
+
+async def test_FO_013_should_move_focus_from_the_parent_into_its_iframe(
+    page: Page, server: Server
+) -> None:
+    _frame_route(server)
+    await page.goto(server.EMPTY_PAGE)
+    await page.set_content(
+        f'<iframe src="{server.PREFIX}/frame.html"></iframe><input id=outer>'
+    )
+    await page.locator("#outer").focus()
+    await expect(page.locator("#outer")).to_be_focused()
+    # Call native focus() exactly once, locator.focus() would hide the bug by calling it twice.
+    await page.evaluate(
+        "() => document.querySelector('iframe').contentDocument.querySelector('input').focus()"
+    )
+    await expect(page.locator("iframe")).to_be_focused()
+    await expect(page.frame_locator("iframe").locator("#inner")).to_be_focused()

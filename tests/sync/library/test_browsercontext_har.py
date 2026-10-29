@@ -14,6 +14,7 @@
 
 """Port of tests/library/browsercontext-har.spec.ts."""
 
+import io
 import json
 import re
 import zipfile
@@ -298,6 +299,24 @@ def test_HA_085_should_round_trip_har_zip(
     page2.goto(server.PREFIX + "/one-style.html")
     assert "hello, world!" in page2.content()
     expect(page2.locator("body")).to_have_css("background-color", "rgb(255, 192, 203)")
+
+
+def test_HA_114_should_reject_a_malformed_har_zip(
+    context_factory: Callable[..., BrowserContext], tmp_path: Path
+) -> None:
+    # Python: zipfile builds the in-memory archive instead of yazl's output stream.
+    output = io.BytesIO()
+    with zipfile.ZipFile(output, "w") as zip_file:
+        zip_file.writestr("aa/x.har", b"{}")
+    # yauzl reports '..' in an entry name as an 'error' event while reading entries.
+    zip_data = output.getvalue().replace(b"aa/x.har", b"../x.har")
+    har_path = tmp_path / "malformed.har.zip"
+    har_path.write_bytes(zip_data)
+
+    context = context_factory()
+    with pytest.raises(Error) as exc_info:
+        context.route_from_har(har_path)
+    assert "invalid relative path: ../x.har" in exc_info.value.message
 
 
 def test_HA_086_should_produce_extracted_zip(

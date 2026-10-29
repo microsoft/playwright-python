@@ -138,11 +138,13 @@ def test_NE_089_should_support_redirects(page: Page, server: Server) -> None:
     assert redirected_from.redirected_to == response.request
 
 
-def test_NE_090_should_resolve_responses_after_a_navigation(
+def test_NE_090_should_resolve_responses_after_a_cross_process_navigation(
     page: Page, server: Server, browser_name: str, sync_gather: Callable
 ) -> None:
     if browser_name == "chromium":
-        pytest.skip("fixme")
+        pytest.skip(
+            "Chromium does not report loadingFailed when the navigation swaps the frame"
+        )
     responses_from_server: List[TestServerRequest] = []
     server_got_request = threading.Event()
 
@@ -175,6 +177,50 @@ def test_NE_090_should_resolve_responses_after_a_navigation(
         reactor.callFromThread(end)
 
     # Ask for the response first, then navigate.
+    response, _ = sync_gather(lambda: request.response(), navigate)
+    # the response should resolve to null, because the page navigated.
+    assert response is None
+
+
+def test_NE_143_should_resolve_responses_after_a_same_process_navigation(
+    page: Page, server: Server, browser_name: str, sync_gather: Callable
+) -> None:
+    if browser_name == "chromium":
+        pytest.skip(
+            "Chromium does not report loadingFailed when the navigation swaps the frame"
+        )
+    responses_from_server: List[TestServerRequest] = []
+    server_got_request = threading.Event()
+
+    def handle(server_request: TestServerRequest) -> None:
+        responses_from_server.append(server_request)
+        server_got_request.set()
+
+    server.set_route("/foo", handle)
+    page.goto(server.EMPTY_PAGE)
+    with page.expect_request(lambda _: True) as request_info:
+        # start a long running request and wait until it hits the server
+        page.evaluate("url => void fetch(url)", server.PREFIX + "/foo")
+    while not server_got_request.is_set():
+        page.wait_for_timeout(10)
+    response_from_server = responses_from_server[0]
+    request = request_info.value
+
+    def end() -> None:
+        try:
+            response_from_server.write(b"done")
+            response_from_server.finish()
+        except RuntimeError:
+            # Python: Node's res.end() also accepts an already dropped request.
+            pass
+
+    def navigate() -> None:
+        # navigate within the same process, which should cancel the request
+        page.goto(server.PREFIX + "/title.html")
+        # make sure we aren't stalling this request on the server
+        reactor.callFromThread(end)
+
+    # Python: start the response wait before the navigation.
     response, _ = sync_gather(lambda: request.response(), navigate)
     # the response should resolve to null, because the page navigated.
     assert response is None

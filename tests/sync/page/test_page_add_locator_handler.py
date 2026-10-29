@@ -14,10 +14,12 @@
 
 """Port of tests/page/page-add-locator-handler.spec.ts."""
 
+import asyncio
 from typing import List, Union
 
 import pytest
 
+from playwright._impl._greenlets import wait_for_future
 from playwright.sync_api import Error, Locator, Page, expect
 from tests.server import Server
 
@@ -147,15 +149,20 @@ def test_LH_005_should_throw_when_handler_times_out(page: Page, server: Server) 
     page.goto(server.PREFIX + "/input/handle-locator.html")
 
     called = 0
+    # Python: futures stand for the two ManualPromises.
+    release_handler: "asyncio.Future[None]" = page._loop.create_future()
+    handler_finished: "asyncio.Future[Union[Error, None]]" = page._loop.create_future()
 
     def handler() -> None:
         nonlocal called
         called += 1
         # Deliberately timeout.
+        wait_for_future(page._loop, page._dispatcher_fiber, release_handler)
         try:
-            page.wait_for_timeout(9999999)
-        except Exception:
-            pass
+            page.locator("#close").click(timeout=3000)
+            handler_finished.set_result(None)
+        except Error as error:
+            handler_finished.set_result(error)
 
     page.add_locator_handler(
         page.get_by_text("This interstitial covers the button"), handler
@@ -178,6 +185,9 @@ def test_LH_005_should_throw_when_handler_times_out(page: Page, server: Server) 
 
     # Should not enter the same handler while it is still running.
     assert called == 1
+    release_handler.set_result(None)
+    wait_for_future(page._loop, page._dispatcher_fiber, handler_finished)
+    assert handler_finished.result() is None
 
 
 def test_LH_006_should_work_with_to_be_visible(page: Page, server: Server) -> None:

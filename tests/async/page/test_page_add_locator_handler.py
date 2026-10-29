@@ -154,13 +154,19 @@ async def test_LH_005_should_throw_when_handler_times_out(
     await page.goto(server.PREFIX + "/input/handle-locator.html")
 
     called = 0
-    stall_future: "asyncio.Future[None]" = asyncio.Future()
+    release_handler: "asyncio.Future[None]" = asyncio.Future()
+    handler_finished: "asyncio.Future[Union[Error, None]]" = asyncio.Future()
 
     async def handler() -> None:
         nonlocal called
         called += 1
         # Deliberately timeout.
-        await stall_future
+        await release_handler
+        try:
+            await page.locator("#close").click(timeout=3000)
+            handler_finished.set_result(None)
+        except Error as error:
+            handler_finished.set_result(error)
 
     await page.add_locator_handler(
         page.get_by_text("This interstitial covers the button"), handler
@@ -183,7 +189,8 @@ async def test_LH_005_should_throw_when_handler_times_out(
 
     # Should not enter the same handler while it is still running.
     assert called == 1
-    stall_future.cancel()
+    release_handler.set_result(None)
+    assert await handler_finished is None
 
 
 async def test_LH_006_should_work_with_to_be_visible(
