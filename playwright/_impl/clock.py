@@ -20,12 +20,26 @@ milliseconds, and a Date is a datetime. Ticks are milliseconds, as upstream.
 """
 
 import datetime
-from typing import TYPE_CHECKING, Optional, TypedDict, Union
+import math
+from typing import (
+    TYPE_CHECKING,
+    Awaitable,
+    Callable,
+    Optional,
+    TypedDict,
+    TypeVar,
+    Union,
+)
 
+from playwright._impl.channel_owner import ApiCallOptions, ApiZone, api_call
+from playwright._impl.errors import Error
+from playwright._impl.isomorphic.string_utils import js_string
 from playwright._impl.timeout_settings import NO_TIMEOUT
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl.browser_context import BrowserContext
+
+R = TypeVar("R")
 
 
 class Clock:
@@ -35,6 +49,14 @@ class Clock:
         # each object.
         self._loop = browser_context._loop
         self._dispatcher_fiber = browser_context._dispatcher_fiber
+
+    def _wrap_api_call(
+        self,
+        func: Callable[[ApiZone], Awaitable[R]],
+        options: Optional[ApiCallOptions] = None,
+    ) -> Awaitable[R]:
+        # Python: include the API name in errors raised before the channel call.
+        return self._browser_context._wrap_api_call(func, options)
 
     async def install(
         self, time: Optional[Union[float, str, datetime.datetime]]
@@ -46,6 +68,7 @@ class Clock:
             timeout=NO_TIMEOUT,
         )
 
+    @api_call()
     async def fast_forward(self, ticks: Union[int, str]) -> None:
         params = parse_ticks(ticks)
         await self._browser_context._channel.clockFastForward(
@@ -65,6 +88,7 @@ class Clock:
     async def resume(self) -> None:
         await self._browser_context._channel.clockResume(timeout=NO_TIMEOUT)
 
+    @api_call()
     async def run_for(self, ticks: Union[int, str]) -> None:
         params = parse_ticks(ticks)
         await self._browser_context._channel.clockRunFor(
@@ -113,6 +137,10 @@ def parse_time(time: Union[float, str, datetime.datetime]) -> _TimeParams:
 
 
 def parse_ticks(ticks: Union[int, str]) -> _TicksParams:
+    # Python: reject non-finite ticks before JSON serialization; upstream rejects
+    # them in the server, but JSON cannot carry NaN or Infinity to the driver.
+    if isinstance(ticks, float) and not math.isfinite(ticks):
+        raise Error(f"Invalid ticks: {js_string(ticks)}")
     return {
         "ticksNumber": ticks if isinstance(ticks, (int, float)) else None,
         "ticksString": ticks if isinstance(ticks, str) else None,

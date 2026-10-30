@@ -169,6 +169,40 @@ async def test_SE_052_should_support_checked(page: Page) -> None:
         '<div role="checkbox">Unknown</div>',
     ]
 
+    await page.set_content(
+        """
+    <div role="checkbox" aria-checked="True" aria-readonly="True"
+      onclick="this.setAttribute('aria-checked', String(this.getAttribute('aria-checked').toLowerCase() !== 'true'))">Remember me</div>
+    <button aria-pressed="True">Bold</button>
+    <button aria-expanded="True">Menu</button>
+    <div role="Button" tabindex="0">Save</div>
+  """
+    )
+    checkbox = page.get_by_role("checkbox")
+    assert await page.get_by_role("checkbox", checked=True).count() == 1
+    assert await page.get_by_role("button", pressed=True).count() == 1
+    assert await page.get_by_role("button", expanded=True).count() == 1
+    assert await page.get_by_role("button", name="Save").count() == 1
+    await expect(checkbox).to_be_checked()
+    await expect(checkbox).not_to_be_editable()
+    await expect(page.locator("body")).to_match_aria_snapshot(
+        """
+    - checkbox "Remember me" [checked]
+    - button "Bold" [pressed]
+    - button "Menu" [expanded]
+    - button "Save"
+  """
+    )
+    await checkbox.check()
+    await expect(checkbox).to_have_attribute("aria-checked", "True")
+
+    await checkbox.evaluate("element => element.setAttribute('aria-checked', 'Mixed')")
+    await page.get_by_role("button", name="Bold").evaluate(
+        "element => element.setAttribute('aria-pressed', 'Mixed')"
+    )
+    assert await page.locator("role=checkbox[checked=mixed]").count() == 1
+    assert await page.locator("role=button[pressed=mixed]").count() == 1
+
 
 async def test_SE_053_should_support_pressed(page: Page) -> None:
     await page.set_content(

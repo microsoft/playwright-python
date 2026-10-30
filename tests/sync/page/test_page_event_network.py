@@ -20,7 +20,7 @@ from typing import Callable, Dict, List, Optional, Union
 
 import pytest
 
-from playwright.sync_api import Page, Request, Response
+from playwright.sync_api import Error, Page, Request, Response
 from tests.server import Server, TestServerRequest, reactor
 
 
@@ -141,10 +141,6 @@ def test_NE_089_should_support_redirects(page: Page, server: Server) -> None:
 def test_NE_090_should_resolve_responses_after_a_cross_process_navigation(
     page: Page, server: Server, browser_name: str, sync_gather: Callable
 ) -> None:
-    if browser_name == "chromium":
-        pytest.skip(
-            "Chromium does not report loadingFailed when the navigation swaps the frame"
-        )
     responses_from_server: List[TestServerRequest] = []
     server_got_request = threading.Event()
 
@@ -177,18 +173,22 @@ def test_NE_090_should_resolve_responses_after_a_cross_process_navigation(
         reactor.callFromThread(end)
 
     # Ask for the response first, then navigate.
-    response, _ = sync_gather(lambda: request.response(), navigate)
+    with page.expect_event("requestfailed") as failed_info:
+        response, _ = sync_gather(lambda: request.response(), navigate)
     # the response should resolve to null, because the page navigated.
     assert response is None
+    # the request should fail with the browser's "canceled" error.
+    assert failed_info.value == request
+    assert {
+        "chromium": "net::ERR_ABORTED",
+        "firefox": "NS_BINDING_ABORTED",
+        "webkit": "cancelled",
+    }[browser_name] in (request.failure or "")
 
 
 def test_NE_143_should_resolve_responses_after_a_same_process_navigation(
     page: Page, server: Server, browser_name: str, sync_gather: Callable
 ) -> None:
-    if browser_name == "chromium":
-        pytest.skip(
-            "Chromium does not report loadingFailed when the navigation swaps the frame"
-        )
     responses_from_server: List[TestServerRequest] = []
     server_got_request = threading.Event()
 
@@ -197,14 +197,34 @@ def test_NE_143_should_resolve_responses_after_a_same_process_navigation(
         server_got_request.set()
 
     server.set_route("/foo", handle)
+
+    def stream(server_request: TestServerRequest) -> None:
+        server_request.setResponseCode(200)
+        server_request.setHeader("Content-Type", "text/plain")
+        server_request.write(b"partial body")
+
+    server.set_route("/streaming", stream)
     page.goto(server.EMPTY_PAGE)
-    with page.expect_request(lambda _: True) as request_info:
-        # start a long running request and wait until it hits the server
-        page.evaluate("url => void fetch(url)", server.PREFIX + "/foo")
+    with page.expect_request(server.PREFIX + "/foo") as request_info:
+        with page.expect_response(
+            server.PREFIX + "/streaming"
+        ) as streaming_response_info:
+            # start a long running request and wait until it hits the server
+            page.evaluate("url => void fetch(url)", server.PREFIX + "/foo")
+            # start a request that never finishes streaming its body
+            page.evaluate("url => void fetch(url)", server.PREFIX + "/streaming")
     while not server_got_request.is_set():
         page.wait_for_timeout(10)
     response_from_server = responses_from_server[0]
     request = request_info.value
+    streaming_response = streaming_response_info.value
+
+    def streaming_text_error() -> Error:
+        with pytest.raises(Error) as exc_info:
+            streaming_response.text()
+        return exc_info.value
+
+    failed_requests: List[Request] = []
 
     def end() -> None:
         try:
@@ -215,12 +235,29 @@ def test_NE_143_should_resolve_responses_after_a_same_process_navigation(
             pass
 
     def navigate() -> None:
-        # navigate within the same process, which should cancel the request
+        page.on("requestfailed", lambda request: failed_requests.append(request))
+        # navigate within the same process, which should cancel the requests
         page.goto(server.PREFIX + "/title.html")
         # make sure we aren't stalling this request on the server
         reactor.callFromThread(end)
 
-    # Python: start the response wait before the navigation.
-    response, _ = sync_gather(lambda: request.response(), navigate)
+    # Python: start the response and body waits before the navigation.
+    response, streaming_error, _ = sync_gather(
+        lambda: request.response(), streaming_text_error, navigate
+    )
     # the response should resolve to null, because the page navigated.
     assert response is None
+    # both requests should fail with the browser's "canceled" error.
+    error_text = {
+        "chromium": "net::ERR_ABORTED",
+        "firefox": "NS_BINDING_ABORTED",
+        "webkit": "cancelled",
+    }[browser_name]
+    assert sorted(request.url for request in failed_requests) == [
+        server.PREFIX + "/foo",
+        server.PREFIX + "/streaming",
+    ]
+    assert error_text in (request.failure or "")
+    assert error_text in (streaming_response.request.failure or "")
+    # the partial body should not be available anymore.
+    assert "navigated away" in streaming_error.message

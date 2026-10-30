@@ -82,14 +82,24 @@ async def test_PA_041_add_locator_handler_should_throw_when_page_closes(
 
 
 async def test_PA_042_should_reject_all_promises_when_page_is_closed(
-    page: Page,
+    page: Page, server: Server
 ) -> None:
+    server.set_route("/hang", lambda request: None)
+    request_promise = asyncio.create_task(server.wait_for_request("/hang"))
+    await page.set_content(
+        f'<iframe src="{server.PREFIX}/hang"></iframe>', wait_until="domcontentloaded"
+    )
+    await request_promise
+    frame_error_promise = asyncio.create_task(
+        error_of(page.frames[1].evaluate("() => new Promise(() => {})"))
+    )
     error, _ = await asyncio.gather(
         error_of(page.evaluate("() => new Promise(r => {})")),
         page.close(),
     )
     assert isinstance(error, Error)
     assert TARGET_CLOSED_ERROR_MESSAGE in error.message
+    assert TARGET_CLOSED_ERROR_MESSAGE in (await frame_error_promise).message
 
 
 async def test_PA_043_should_set_the_page_close_state(page: Page) -> None:

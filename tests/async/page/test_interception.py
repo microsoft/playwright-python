@@ -53,7 +53,7 @@ async def test_RO_151_should_work_with_navigation_smoke(
 
 
 async def test_RO_152_should_intercept_after_a_service_worker(
-    page: Page, server: Server, browser_name: str
+    page: Page, server: Server, browser_name: str, is_frozen_webkit: bool
 ) -> None:
     await page.goto(server.PREFIX + "/serviceworkers/fetchdummy/sw.html")
     await page.evaluate("() => window['activationPromise']")
@@ -75,6 +75,22 @@ async def test_RO_152_should_intercept_after_a_service_worker(
     # Page route is applied after service worker fetch event.
     sw_response2 = await page.evaluate("() => window['fetchDummy']('foo')")
     assert sw_response2 == "responseFromServiceWorker:foo"
+
+    # Frozen WebKit predates the header preservation fix.
+    if not is_frozen_webkit:
+        headers = {
+            "cache-control": "max-age=12345",
+            "accept-language": "fr-CH",
+            "accept": "application/custom",
+        }
+        received_headers = await page.evaluate(
+            """async headers => {
+          const response = await fetch('headers', { headers });
+          return response.json();
+        }""",
+            headers,
+        )
+        assert received_headers.items() >= headers.items()
 
     # Page route is not applied to service worker initiated fetch.
     non_intercepted_response = await page.evaluate(

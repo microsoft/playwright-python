@@ -225,7 +225,7 @@ async def test_CK_011_run_for_passes_2_hours_34_minutes_and_10_seconds(
 
 @pytest.mark.usefixtures("install_and_pause")
 async def test_CK_012_run_for_throws_for_invalid_format(
-    page: Page, calls: Calls
+    page: Page, calls: Calls, server: Server
 ) -> None:
     await page.evaluate(
         """async () => {
@@ -234,7 +234,13 @@ async def test_CK_012_run_for_throws_for_invalid_format(
     )
     with pytest.raises(Error):
         await page.clock.run_for("12:02:34:10")
+    with pytest.raises(Error, match="Clock.run_for: Invalid ticks: NaN"):
+        await page.clock.run_for(float("nan"))  # type: ignore[arg-type]
+    with pytest.raises(Error, match="Clock.fast_forward: Invalid ticks: Infinity"):
+        await page.clock.fast_forward(float("inf"))  # type: ignore[arg-type]
     assert calls == []
+    await page.goto(server.EMPTY_PAGE)
+    assert await page.evaluate("() => Date.now()") == 1000
 
 
 @pytest.mark.usefixtures("install_and_pause")
@@ -262,8 +268,9 @@ async def test_CK_014_fast_forward_ignores_timers_which_wouldn_t_be_run(
 
 @pytest.mark.usefixtures("install_and_pause")
 async def test_CK_015_fast_forward_pushes_back_execution_time_for_skipped_timers(
-    page: Page, calls: Calls
+    page: Page, calls: Calls, server: Server
 ) -> None:
+    await page.goto(server.EMPTY_PAGE)
     await page.evaluate(
         """async () => {
       setTimeout(() => {
@@ -271,8 +278,12 @@ async def test_CK_015_fast_forward_pushes_back_execution_time_for_skipped_timers
       }, 1000);
     }"""
     )
-    await page.clock.fast_forward(2000)
-    assert calls == [{"params": [1000 + 2000]}]
+    fifty_days = 50 * 24 * 60 * 60 * 1000
+    await page.clock.fast_forward(fifty_days)
+    assert calls == [{"params": [1000 + fifty_days]}]
+    assert await page.evaluate("() => Date.now()") == 1000 + fifty_days
+    await page.reload()
+    assert await page.evaluate("() => Date.now()") == 1000 + fifty_days
 
 
 @pytest.mark.usefixtures("install_and_pause")

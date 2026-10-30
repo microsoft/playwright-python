@@ -1224,12 +1224,16 @@ def test_AR_142_invalid_attribute(page: Page) -> None:
         """
     <input type="text" aria-label="Bio" aria-invalid="grammar">
     <input type="text" aria-label="Note" aria-invalid="spelling">
+    <input type="text" aria-label="Mixed-case grammar" aria-invalid="Grammar">
+    <input type="text" aria-label="Mixed-case spelling" aria-invalid="Spelling">
   """
     )
     expect(page).to_match_aria_snapshot(
         """
     - textbox "Bio" [invalid=grammar]
     - textbox "Note" [invalid=spelling]
+    - textbox "Mixed-case grammar" [invalid=grammar]
+    - textbox "Mixed-case spelling" [invalid=spelling]
   """
     )
 
