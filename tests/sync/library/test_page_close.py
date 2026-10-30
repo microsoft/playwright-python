@@ -110,14 +110,25 @@ def test_PA_041_add_locator_handler_should_throw_when_page_closes(
 
 
 def test_PA_042_should_reject_all_promises_when_page_is_closed(
-    page: Page, sync_gather: Callable[..., List[Any]]
+    page: Page, server: Server, sync_gather: Callable[..., List[Any]]
 ) -> None:
-    error, _ = sync_gather(
+    server.set_route("/hang", lambda request: None)
+    request_promise = page._loop.create_task(server.wait_for_request("/hang"))
+    page.set_content(
+        f'<iframe src="{server.PREFIX}/hang"></iframe>', wait_until="domcontentloaded"
+    )
+    wait_for(page, request_promise)
+    # Python: start both evaluations before closing the page.
+    frame_error, error, _ = sync_gather(
+        lambda: error_of(
+            lambda: page.frames[1].evaluate("() => new Promise(() => {})")
+        ),
         lambda: error_of(lambda: page.evaluate("() => new Promise(r => {})")),
         page.close,
     )
     assert isinstance(error, Error)
     assert TARGET_CLOSED_ERROR_MESSAGE in error.message
+    assert TARGET_CLOSED_ERROR_MESSAGE in frame_error.message
 
 
 def test_PA_043_should_set_the_page_close_state(page: Page) -> None:

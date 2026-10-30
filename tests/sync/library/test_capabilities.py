@@ -615,9 +615,25 @@ def test_CA_028_should_not_auto_play_audio(
 
 
 def test_CA_029_should_not_crash_on_feature_detection_for_public_key_credential(
-    page: Page, server: Server
+    page: Page, server: Server, context: BrowserContext
 ) -> None:
     page.goto(server.EMPTY_PAGE)
+    assert page.evaluate("() => typeof PublicKeyCredential") == "function"
+    assert page.evaluate("() => PublicKeyCredential.name") == "PublicKeyCredential"
+    assert page.evaluate("() => ({}) instanceof PublicKeyCredential") is False
+    assert (
+        page.evaluate(
+            """() => {
+      try {
+        new PublicKeyCredential();
+        return false;
+      } catch (e) {
+        return e instanceof TypeError;
+      }
+    }"""
+        )
+        is True
+    )
     page.evaluate(
         """async () => {
       await PublicKeyCredential.getClientCapabilities();
@@ -625,3 +641,5 @@ def test_CA_029_should_not_crash_on_feature_detection_for_public_key_credential(
       await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
     }"""
     )
+    context.credentials.install()
+    assert page.evaluate("() => typeof PublicKeyCredential") == "function"

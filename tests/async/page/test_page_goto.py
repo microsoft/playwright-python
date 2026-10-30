@@ -826,9 +826,34 @@ async def test_NA_050_should_fail_when_navigating_and_show_the_url_at_the_error_
 async def test_NA_051_should_be_able_to_navigate_to_a_page_controlled_by_service_worker(
     page: Page, server: Server
 ) -> None:
+    transaction = """async value => {
+      const db = await new Promise((resolve, reject) => {
+        const request = indexedDB.open('roundtrip', 1);
+        request.onupgradeneeded = () => request.result.createObjectStore('items');
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      return new Promise((resolve, reject) => {
+        const tx = db.transaction('items', 'readwrite');
+        const request = tx.objectStore('items').get('name');
+        request.onsuccess = () => {
+          if (value)
+            tx.objectStore('items').put(value, 'name');
+        };
+        tx.oncomplete = () => resolve(request.result);
+        tx.onerror = tx.onabort = () => reject(tx.error);
+      });
+    }"""
+
     await page.goto(server.PREFIX + "/serviceworkers/fetch/sw.html")
     await page.evaluate("() => window['activationPromise']")
     await page.goto(server.PREFIX + "/serviceworkers/fetch/sw.html")
+    await page.wait_for_function("() => !!navigator.serviceWorker.controller")
+    await page.evaluate(transaction, "value")
+    await page.goto(server.CROSS_PROCESS_PREFIX + "/empty.html")
+    await page.go_back()
+    await page.wait_for_function("() => !!navigator.serviceWorker.controller")
+    assert await page.evaluate(transaction, None) == "value"
 
 
 async def test_NA_052_should_send_referer(page: Page, server: Server) -> None:

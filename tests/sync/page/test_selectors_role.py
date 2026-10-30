@@ -180,6 +180,40 @@ def test_SE_052_should_support_checked(page: Page) -> None:
         '<div role="checkbox">Unknown</div>',
     ]
 
+    page.set_content(
+        """
+    <div role="checkbox" aria-checked="True" aria-readonly="True"
+      onclick="this.setAttribute('aria-checked', String(this.getAttribute('aria-checked').toLowerCase() !== 'true'))">Remember me</div>
+    <button aria-pressed="True">Bold</button>
+    <button aria-expanded="True">Menu</button>
+    <div role="Button" tabindex="0">Save</div>
+  """
+    )
+    checkbox = page.get_by_role("checkbox")
+    assert page.get_by_role("checkbox", checked=True).count() == 1
+    assert page.get_by_role("button", pressed=True).count() == 1
+    assert page.get_by_role("button", expanded=True).count() == 1
+    assert page.get_by_role("button", name="Save").count() == 1
+    expect(checkbox).to_be_checked()
+    expect(checkbox).not_to_be_editable()
+    expect(page.locator("body")).to_match_aria_snapshot(
+        """
+    - checkbox "Remember me" [checked]
+    - button "Bold" [pressed]
+    - button "Menu" [expanded]
+    - button "Save"
+  """
+    )
+    checkbox.check()
+    expect(checkbox).to_have_attribute("aria-checked", "True")
+
+    checkbox.evaluate("element => element.setAttribute('aria-checked', 'Mixed')")
+    page.get_by_role("button", name="Bold").evaluate(
+        "element => element.setAttribute('aria-pressed', 'Mixed')"
+    )
+    assert page.locator("role=checkbox[checked=mixed]").count() == 1
+    assert page.locator("role=button[pressed=mixed]").count() == 1
+
 
 def test_SE_053_should_support_pressed(page: Page) -> None:
     page.set_content(

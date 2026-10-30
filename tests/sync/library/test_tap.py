@@ -73,6 +73,20 @@ def test_TA_001_should_send_all_of_the_correct_events_smoke(page: Page) -> None:
         "click",
     ]
 
+    events_handle.evaluate("events => events.length = 0")
+    page.locator("#b").evaluate(
+        """target => {
+      target.addEventListener('pointerdown', event => event.preventDefault(), { once: true });
+    }"""
+    )
+    page.tap("#b")
+    events = [
+        event
+        for event in events_handle.json_value()
+        if event in ["pointerdown", "pointerup", "mousedown", "mouseup", "click"]
+    ]
+    assert events == ["pointerdown", "pointerup", "click"]
+
 
 def test_TA_002_trial_run_should_not_tap(page: Page) -> None:
     page.set_content(

@@ -300,6 +300,22 @@ def test_HA_085_should_round_trip_har_zip(
     assert "hello, world!" in page2.content()
     expect(page2.locator("body")).to_have_css("background-color", "rgb(255, 192, 203)")
 
+    # Python: zipfile builds the in-memory archive instead of yazl's output stream.
+    output = io.BytesIO()
+    with zipfile.ZipFile(output, "w") as zip_file:
+        for entry in har_dir.iterdir():
+            zip_file.write(
+                entry, "Recording.HAR" if entry.name == "har.har" else entry.name
+            )
+    uppercase_har_path = tmp_path / "uppercase.har.zip"
+    uppercase_har_path.write_bytes(output.getvalue())
+
+    context2.unroute_all(behavior="wait")
+    context2.route_from_har(uppercase_har_path, not_found="abort")
+    page2.reload()
+    assert "hello, world!" in page2.content()
+    expect(page2.locator("body")).to_have_css("background-color", "rgb(255, 192, 203)")
+
 
 def test_HA_114_should_reject_a_malformed_har_zip(
     context_factory: Callable[..., BrowserContext], tmp_path: Path
