@@ -8,9 +8,10 @@
 name: Roll to latest Playwright
 
 on:
-  # Apply needs-roll to an issue to roll to the tip of main; re-apply it to trigger another roll.
-  issues:
-    types: [labeled]
+  # Mon, Wed and Fri at 9:17 UTC: 2:17 at night Pacific time, 1:17 in winter. Not on the hour, when
+  # GitHub delays scheduled runs. A scheduled roll skips while a roll pull request is open.
+  schedule:
+  - cron: "17 9 * * 1,3,5"
   workflow_dispatch:
     inputs:
       ref:
@@ -23,39 +24,18 @@ on:
 permissions: {}
 
 jobs:
-  start:
-    name: Post the run link on the issue
-    if: github.repository == 'microsoft/playwright-python' && github.event.label.name == 'needs-roll'
-    runs-on: ubuntu-latest
-    permissions:
-      issues: write
-    outputs:
-      comment: ${{ steps.post.outputs.id }}
-    env:
-      ISSUE: ${{ github.event.issue.number }}
-      GH_TOKEN: ${{ github.token }}
-      GH_REPO: ${{ github.repository }}
-      WORKFLOW_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-    steps:
-    - name: Post the run link
-      id: post
-      run: |
-        body=$(printf "Hi, I'm the Playwright bot. I started to roll Playwright to the tip of main: [agent run](%s)\n<!-- playwright-roll-started -->" "$WORKFLOW_URL")
-        id=$(gh api "repos/$GH_REPO/issues/$ISSUE/comments" -f body="$body" --jq .node_id)
-        echo "id=$id" >> "$GITHUB_OUTPUT"
-
   versions:
     name: Find the commit
-    if: >-
-      github.repository == 'microsoft/playwright-python' &&
-      (github.event_name == 'workflow_dispatch' || github.event.label.name == 'needs-roll')
+    if: github.repository == 'microsoft/playwright-python'
     runs-on: ubuntu-24.04
     permissions:
       contents: read
+      pull-requests: read
     outputs:
       old_commit: ${{ steps.versions.outputs.old_commit }}
       new_commit: ${{ steps.versions.outputs.new_commit }}
       new_short: ${{ steps.versions.outputs.new_short }}
+      open_roll: ${{ steps.open.outputs.pr }}
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Read the pinned and the new commit
@@ -71,16 +51,30 @@ jobs:
           echo "new_commit=${new_commit}"
           echo "new_short=${new_commit:0:10}"
         } >> "$GITHUB_OUTPUT"
+    # A manual run rolls anyway: a maintainer asked for it.
+    - name: Look for an open roll pull request
+      id: open
+      if: github.event_name == 'schedule'
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GH_REPO: ${{ github.repository }}
+      run: |
+        pr=$(gh pr list --state open --author app/microsoft-playwright-automation --json number,headRefName \
+          --jq '[.[] | select(.headRefName | startswith("roll/")) | .number] | first // empty')
+        if [[ -n "$pr" ]]; then
+          echo "pr=$pr" >> "$GITHUB_OUTPUT"
+          echo "Skipped: roll pull request #$pr is open." >> "$GITHUB_STEP_SUMMARY"
+        fi
 
   roll:
     name: Roll to ${{ needs.versions.outputs.new_short }}
     needs: versions
-    if: needs.versions.outputs.new_commit != needs.versions.outputs.old_commit
+    if: >-
+      needs.versions.outputs.new_commit != needs.versions.outputs.old_commit &&
+      needs.versions.outputs.open_roll == ''
     # The runner of CI: the skill runs ./test.sh, both suites on all its cores.
     runs-on: playwright-x64-ubuntu24-64-core
     timeout-minutes: 240
-    # On the job and not on the workflow: every issue label starts this workflow, and a skipped
-    # run would replace a roll that waits in a group of the workflow.
     concurrency:
       group: roll
       cancel-in-progress: false
@@ -153,7 +147,6 @@ jobs:
       env:
         COMPLETE: ${{ steps.agent.outputs.outcome == 'success' && steps.check.outcome == 'success' }}
         TITLE: "chore: roll Playwright to ${{ steps.record.outputs.version }} (${{ needs.versions.outputs.new_short }})"
-        ISSUE_URL: ${{ github.event.issue.html_url }}
         COMPARE_URL: https://github.com/microsoft/playwright/compare/${{ needs.versions.outputs.old_commit }}...${{ needs.versions.outputs.new_commit }}
         RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
       run: |
@@ -187,8 +180,6 @@ jobs:
             commits.append(f"- … and {total - len(commits)} more: {env['COMPARE_URL']}")
         parts.append(f"<details>\n<summary>Upstream commits ({total})</summary>\n\n" + "\n".join(commits) + "\n\n</details>")
         parts.append(f"Upstream changes: {env['COMPARE_URL']}")
-        if env.get("ISSUE_URL"):
-            parts.append(f"Fixes {env['ISSUE_URL']}")
         Path(env["PATCH_DIR"], "pr-body.md").write_text("\n\n".join(parts) + "\n", encoding="utf-8")
         Path(env["PATCH_DIR"], "roll.json").write_text(json.dumps({"title": env["TITLE"]}) + "\n", encoding="utf-8")
         EOF
@@ -264,7 +255,6 @@ jobs:
         metadata: roll.json
         body-file: pr-body.md
         branch: roll/${{ needs.versions.outputs.new_short }}/${{ github.run_id }}-${{ github.run_attempt }}
-        commit-body: "${{ github.event.issue.html_url && format('Fixes: {0}', github.event.issue.html_url) || '' }}"
         pull-request: true
         base: ${{ github.ref_name }}
         workflow-name: roll workflow
@@ -276,54 +266,3 @@ jobs:
         GH_REPO: ${{ github.repository }}
         PR: ${{ steps.publish.outputs.number }}
       run: gh pr ready "$PR"
-
-  comment:
-    name: Comment on the issue
-    needs: [start, versions, roll, publish]
-    # Runs after every run that the label started, including failed ones, and whatever publish did.
-    if: ${{ !cancelled() && needs.start.result != 'skipped' }}
-    runs-on: ubuntu-latest
-    permissions:
-      issues: write
-    steps:
-    - name: Post the result and hide the run link
-      env:
-        GH_TOKEN: ${{ github.token }}
-        GH_REPO: ${{ github.repository }}
-        ISSUE: ${{ github.event.issue.number }}
-        START_COMMENT: ${{ needs.start.outputs.comment }}
-        VERSIONS_RESULT: ${{ needs.versions.result }}
-        OLD_COMMIT: ${{ needs.versions.outputs.old_commit }}
-        NEW_COMMIT: ${{ needs.versions.outputs.new_commit }}
-        ROLL_RESULT: ${{ needs.roll.result }}
-        SETUP_OUTCOME: ${{ needs.roll.outputs.setup }}
-        VERSION: ${{ needs.roll.outputs.version }}
-        COMPLETE: ${{ needs.roll.outputs.complete }}
-        PR_URL: ${{ needs.publish.outputs.pr }}
-        PUBLISH_RESULT: ${{ needs.publish.result }}
-        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-      run: |
-        commit="microsoft/playwright@${NEW_COMMIT:0:10}"
-        if [[ "$VERSIONS_RESULT" != "success" ]]; then
-          text="I couldn't roll Playwright: finding the commit to roll to failed."
-        elif [[ "$OLD_COMMIT" == "$NEW_COMMIT" ]]; then
-          text="Nothing to roll: \`DRIVER_VERSION\` is at the tip of main already, $commit."
-        elif [[ -n "$PR_URL" && "$COMPLETE" == "true" ]]; then
-          text="I rolled Playwright to $VERSION, $commit: $PR_URL"
-        elif [[ -n "$PR_URL" ]]; then
-          text="I rolled Playwright to $VERSION, $commit, but the roll is not complete: the agent or the checks failed. Draft PR: $PR_URL"
-        elif [[ "$PUBLISH_RESULT" == "failure" ]]; then
-          text="I rolled Playwright to $VERSION, $commit, but opening the pull request failed."
-        elif [[ "$SETUP_OUTCOME" == "failure" ]]; then
-          text="I couldn't roll Playwright to $commit: pinning, generating the API, building the driver or installing the browsers failed."
-        elif [[ "$ROLL_RESULT" == "success" ]]; then
-          text="I couldn't roll Playwright to $commit: the roll changed no file."
-        else
-          text="I couldn't roll Playwright to $commit: the roll job ended with result \`$ROLL_RESULT\`, for example after a timeout."
-        fi
-        printf "Hi, I'm the Playwright bot. %s\n\n<sub>Rolled by the Playwright bot - [agent run](%s)</sub>\n<!-- playwright-roll -->\n" "$text" "$RUN_URL" > "$RUNNER_TEMP/comment.md"
-        gh issue comment "$ISSUE" --body-file "$RUNNER_TEMP/comment.md"
-        if [[ -n "$START_COMMENT" ]]; then
-          gh api graphql -f query='mutation($id: ID!) { minimizeComment(input: { subjectId: $id, classifier: OUTDATED }) { clientMutationId } }' -f id="$START_COMMENT" \
-            || echo "::warning::Could not hide the comment with the run link"
-        fi

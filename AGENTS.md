@@ -139,8 +139,8 @@ left).
 ## Rolls
 
 Use the `playwright-roll` skill. On CI, `.github/workflows/roll.yml` runs it and opens the
-PR. Apply the `needs-roll` label to an issue to roll to the tip of `main`, or start the
-workflow by hand with a branch, a tag or a commit.
+PR, on Mon, Wed and Fri at night unless a roll PR is open. To roll at another time, start
+the workflow by hand with a branch, a tag or a commit.
 
 ## Commits and PRs
 
