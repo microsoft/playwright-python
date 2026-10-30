@@ -121,6 +121,8 @@ jobs:
         python scripts/upstream.py log "$OLD_COMMIT" > "$RUNNER_TEMP/commits.md"
     - name: Roll with Copilot CLI
       id: agent
+      # No GitHub tools and no URL access: the agent reads upstream only from .upstream/, so text from
+      # issues and PRs does not reach it.
       uses: microsoft/playwright/.github/actions/run-agent@main
       with:
         prompt: |
@@ -134,7 +136,6 @@ jobs:
         output-dir: ${{ env.OUTPUT_DIR }}
         result-file: summary.md
         artifact-name: roll
-        github-tools: true
         exec: ${{ env.CI_ENV_EXEC }}
         max-ai-credits: ${{ inputs.max_ai_credits || '3000' }}
     # The agent runs scripts/lint.sh last (step 5 of the skill); a roll that does
@@ -246,8 +247,10 @@ jobs:
           echo "The roll changes files outside DRIVER_VERSION, NODE_VERSION, README.md, playwright/, tests/ and python_rules.js." >&2
           exit 1
         fi
-        if git diff --cached --summary | grep ' mode 120000 '; then
-          echo "The roll adds a symbolic link." >&2
+        # The new mode of each path, also when a file changes its type: 120000 is a symbolic link,
+        # 160000 a submodule.
+        if git diff --cached --raw --no-renames | awk '$2 ~ /^1[26]0000$/ { found = 1; print } END { exit !found }'; then
+          echo "The roll adds a symbolic link or a submodule." >&2
           exit 1
         fi
     # Never execute code or scripts from the roll in the app job.
