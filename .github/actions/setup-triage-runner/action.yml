@@ -1,10 +1,16 @@
 name: 'Set up the triage runner'
 description: >
-  Prepares the environment that the triage and revision agents work in: the checkout built as CI
-  builds it, with the browsers and the Copilot CLI installed, and the upstream checkout in .upstream/
-  that the driver is built from. Exports PLAYWRIGHT_DIR, the path of that checkout, and CI_ENV_EXEC,
-  the wrapper from microsoft/playwright that runs a command under xvfb on Linux and at normal I/O
-  priority on Windows.
+  Prepares the environment that the triage, revision and roll agents work in: the checkout built as
+  CI builds it, with the browsers and the Copilot CLI installed, and the upstream checkout in
+  .upstream/ that the driver is built from. Exports PLAYWRIGHT_DIR, the path of that checkout, and
+  CI_ENV_EXEC, the wrapper from microsoft/playwright that runs a command under xvfb on Linux and at
+  normal I/O priority on Windows. With pin, it does steps 1 and 2 of the playwright-roll skill before
+  the build: it pins that commit, updates NODE_VERSION and generates the API from the new pin.
+inputs:
+  pin:
+    description: 'microsoft/playwright commit to roll to; empty builds the commit in DRIVER_VERSION'
+    required: false
+    default: ''
 runs:
   using: composite
   steps:
@@ -22,6 +28,15 @@ runs:
       pip install -r local-requirements.txt
       pip install -r requirements.txt
       pip install -e .
+  - name: Pin and generate the API
+    if: inputs.pin != ''
+    shell: bash
+    env:
+      PIN: ${{ inputs.pin }}
+    run: |
+      python scripts/upstream.py pin "$PIN"
+      python scripts/update_node_version.py
+      ./scripts/update_api.sh
   - name: Check out upstream and build the wheel
     shell: bash
     run: |
