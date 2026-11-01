@@ -1,8 +1,9 @@
 # Copilot triages and fixes an issue, or works on a task given by hand, without write credentials.
-# Fresh jobs post the run link on the issue, open the completed fix as a draft PR using the app, so
-# CI runs on it, and comment on the issue. The steps that are the same for every Playwright repo are
-# actions in microsoft/playwright. The skill in .claude/skills/playwright-triage/ has what is
-# specific to this repo.
+# The agent leaves the calls to make on GitHub in calls.json. A fresh job posts the run link on the
+# issue first. After the agent, a fresh job checks the calls and makes them using the app: it opens
+# the fix as a draft PR, so CI runs on it, and comments on the issue. The steps that are the same
+# for every Playwright repo are actions in microsoft/playwright. The skill in
+# .claude/skills/playwright-triage/ has what is specific to this repo.
 name: Issue triage
 
 on:
@@ -86,7 +87,6 @@ jobs:
       base: ${{ steps.base.outputs.sha }}
       setup: ${{ steps.setup.outcome }}
       agent: ${{ steps.agent.outputs.outcome }}
-      has_fix: ${{ steps.agent.outputs.has-result }}
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
@@ -130,98 +130,78 @@ jobs:
       with:
         prompt: ${{ steps.prompt.outputs.prompt }}
         output-dir: ${{ env.OUTPUT_DIR }}
-        result-file: fix/proposal.json
+        result-file: calls.json
         artifact-name: triage
         github-tools: true
         exec: ${{ env.CI_ENV_EXEC }}
-    - name: Check the upstream bug report
-      run: |
-        if [[ -f "$OUTPUT_DIR/upstream/report.json" ]]; then
-          title=$(node -p 'String(JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).title ?? "")' "$OUTPUT_DIR/upstream/report.json" || true)
-          if [[ -z "$title" ]]; then
-            echo "::warning::upstream/report.json has no title, so the report is not appended to the comment"
-          else
-            echo "Upstream bug report: $title" >> "$GITHUB_STEP_SUMMARY"
-          fi
-        fi
 
   publish:
-    name: Open draft pull request
-    needs: triage
-    # proposal.json is written last, so a finished proposal is published even when the job failed later.
-    if: ${{ !cancelled() && needs.triage.outputs.has_fix == 'true' }}
+    name: Publish the results
+    needs: [start, triage]
+    # Runs after every triage run, also a failed one: without a comment from the agent, the comment
+    # says why the bot could not finish.
+    if: ${{ !cancelled() && needs.triage.result != 'skipped' }}
     runs-on: ubuntu-latest
-    outputs:
-      pr: ${{ steps.publish.outputs.pull-request }}
     steps:
     - uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
       id: app-token
       with:
         app-id: ${{ vars.PLAYWRIGHT_APP_ID }}
         private-key: ${{ secrets.PLAYWRIGHT_PRIVATE_KEY }}
+        permission-contents: write
+        permission-issues: write
+        permission-pull-requests: write
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         ref: ${{ needs.triage.outputs.base }}
         token: ${{ steps.app-token.outputs.token }}
-    - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-      with:
-        name: triage
-        path: ${{ runner.temp }}/triage
-    # Never execute code or scripts from the proposed changes in the app job.
-    - name: Validate, push and open draft
-      id: publish
-      uses: microsoft/playwright/.github/actions/publish-patch@main
-      with:
-        token: ${{ steps.app-token.outputs.token }}
-        dir: ${{ runner.temp }}/triage/fix
-        patch: fix.patch
-        metadata: proposal.json
-        body-file: pr-body.md
-        branch: triage/${{ github.event.issue.number || inputs.issue || 'task' }}/${{ github.run_id }}-${{ github.run_attempt }}
-        commit-body: "${{ (github.event.issue.number || inputs.issue) && format('Fixes: https://github.com/{0}/issues/{1}', github.repository, github.event.issue.number || inputs.issue) || '' }}"
-        pull-request: true
-
-  comment:
-    name: Comment on the issue
-    needs: [start, triage, publish]
-    # Runs after every triage run that has an issue, including failed ones, and whatever publish did.
-    if: ${{ !cancelled() && needs.triage.result != 'skipped' && (github.event_name == 'issues' || inputs.issue != '') }}
-    runs-on: ubuntu-latest
-    permissions:
-      issues: write
-    steps:
     - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
       # A failed triage run may not have uploaded anything.
       continue-on-error: true
       with:
         name: triage
         path: ${{ runner.temp }}/triage
-    # The bot never files upstream; the comment hands the report to a maintainer.
-    - name: Describe the upstream bug report
-      id: upstream
+    # Without a comment from the agent on the issue, for example after a failed run, the issue gets
+    # one that says that the bot could not finish.
+    - name: Add a comment when the agent left none
+      if: github.event.issue.number || inputs.issue
       env:
-        OUTPUT_DIR: ${{ runner.temp }}/triage
+        CALLS: ${{ runner.temp }}/triage/calls.json
+        ISSUE: ${{ github.event.issue.number || inputs.issue }}
+        SETUP: ${{ needs.triage.outputs.setup }}
+        AGENT: ${{ needs.triage.outputs.agent }}
+        FOOTER: Triaged on ${{ fromJSON('{"linux":"Linux","mac":"macOS","windows":"Windows","needs-triage":"Linux","needs-triage-mac":"macOS","needs-triage-win":"Windows"}')[inputs.platform || github.event.label.name] }} by the Playwright bot
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
       run: |
-        extra=""
-        if [[ -s "$OUTPUT_DIR/upstream/report.md" && -f "$OUTPUT_DIR/upstream/report.json" ]]; then
-          title=$(jq -r '.title // empty' "$OUTPUT_DIR/upstream/report.json")
-          if [[ -n "$title" ]]; then
-            extra=$(printf 'Upstream bug report, for a maintainer to file in microsoft/playwright:\n\n**Title:** %s\n\n<details>\n<summary>Body</summary>\n\n````markdown\n%s\n````\n\n</details>' "$title" "$(cat "$OUTPUT_DIR/upstream/report.md")")
-          fi
+        mkdir -p "$(dirname "$CALLS")"
+        if jq -e --argjson issue "$ISSUE" 'any(.[]; .call == "comment" and .issue == $issue)' "$CALLS" > /dev/null 2>&1; then
+          exit 0
         fi
-        delimiter="EXTRA_$RANDOM$RANDOM"
-        { echo "extra<<$delimiter"; echo "$extra"; echo "$delimiter"; } >> "$GITHUB_OUTPUT"
-    - name: Post the triage comment
-      uses: microsoft/playwright/.github/actions/triage-comment@main
+        if [[ "$SETUP" == "failure" ]]; then
+          reason="setting up the runner failed"
+        elif [[ "$AGENT" == "failure" ]]; then
+          reason="the Copilot session failed or ran out of budget"
+        else
+          reason="the session ended without a comment"
+        fi
+        body=$(printf "Hi, I'm the Playwright bot. I couldn't finish triaging this issue: %s. The agent run has the details.\n\n<sub>%s - [agent run](%s)</sub>\n<!-- playwright-ai-triage -->" "$reason" "$FOOTER" "$RUN_URL")
+        comment=$(jq -n --arg repo "$GITHUB_REPOSITORY" --argjson issue "$ISSUE" --arg body "$body" '{call: "comment", repo: $repo, issue: $issue, body: $body}')
+        # A calls.json that is not an array is replaced: its calls would be rejected anyway.
+        jq --argjson comment "$comment" '. + [$comment]' "$CALLS" > "$CALLS.tmp" 2> /dev/null \
+          || jq -n --argjson comment "$comment" '[$comment]' > "$CALLS.tmp"
+        mv "$CALLS.tmp" "$CALLS"
+    # Never execute code or scripts from the artifact in the app job. The calls are data.
+    - name: Check and make the calls
+      id: publish
+      uses: microsoft/playwright/.github/actions/publish-calls@main
       with:
-        issue: ${{ github.event.issue.number || inputs.issue }}
+        token: ${{ steps.app-token.outputs.token }}
         dir: ${{ runner.temp }}/triage
-        footer: Triaged on ${{ fromJSON('{"linux":"Linux","mac":"macOS","windows":"Windows","needs-triage":"Linux","needs-triage-mac":"macOS","needs-triage-win":"Windows"}')[inputs.platform || github.event.label.name] }} by the Playwright bot
-        job-result: ${{ needs.triage.result }}
-        setup-outcome: ${{ needs.triage.outputs.setup }}
-        agent-outcome: ${{ needs.triage.outputs.agent }}
-        setup-failure-reason: setting up the runner, building the project or downloading the browsers failed
-        pull-request: ${{ needs.publish.outputs.pr }}
-        publish-result: ${{ needs.publish.result }}
-        extra: ${{ steps.upstream.outputs.extra }}
-        start-comment: ${{ needs.start.outputs.comment }}
+    - name: Hide the comment with the run link
+      if: ${{ !cancelled() && steps.publish.outputs.comment == 'true' && needs.start.outputs.comment != '' }}
+      env:
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        ID: ${{ needs.start.outputs.comment }}
+      run: |
+        gh api graphql -f query='mutation($id: ID!) { minimizeComment(input: { subjectId: $id, classifier: OUTDATED }) { clientMutationId } }' -f id="$ID" \
+          || echo "::warning::Could not hide the comment with the run link"

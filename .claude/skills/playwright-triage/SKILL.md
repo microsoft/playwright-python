@@ -69,18 +69,32 @@ file, and delete the file when you are done, so that the checkout is clean.
   language). The gap is in the docs, so it is an upstream change too. Do not edit a generated file,
   and do not add to `scripts/codegen/python_rules.js` to go around the docs.
 
-Create `$OUTPUT_DIR/upstream/` with:
+The report is for an engineer of `microsoft/playwright` who did not read the Python issue: what
+fails, expected versus actual, the versions (the Python package, the commit in `DRIVER_VERSION`, the
+browser, the platform), the root cause when you found it, and the condensed Node test as the repro.
+The title has at most 256 characters, for example `route.fulfill() drops the charset of
+Content-Type`.
 
-- `report.md`: the report for an engineer of `microsoft/playwright` who did not read the Python
-  issue: what fails, expected versus actual, the versions (the Python package, the commit in
-  `DRIVER_VERSION`, the browser, the platform), the root cause when you found it, and the condensed
-  Node test as the repro.
-- `report.json`: `{"title": "..."}`, at most 256 characters, for example
-  `route.fulfill() drops the charset of Content-Type`.
+The bot never files it in `microsoft/playwright`: this run allows no `issue` call (the calls are
+in `$AGENT_GUIDES_DIR/calls.d.ts`). Put the report at the end of your comment, for a maintainer to
+file, in this form:
 
-The comment job appends the title and the body to your comment, for a maintainer to file in
-`microsoft/playwright`. The bot never files it. Write `report.json` last, when `report.md` and the
-comment are done. Like `proposal.json`, it marks the report as ready.
+`````markdown
+Upstream bug report, for a maintainer to file in microsoft/playwright:
+
+**Title:** <title>
+
+<details>
+<summary>Body</summary>
+
+````markdown
+<the report>
+````
+
+</details>
+`````
+
+Write the rest of the comment as the note: the verdict, the evidence, and that the bug is upstream.
 
 ## PRs from third parties
 
