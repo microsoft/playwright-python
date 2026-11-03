@@ -21,7 +21,7 @@ from typing import Any, Callable, Dict, Generator, List, Optional
 
 import pytest
 
-from playwright.sync_api import BrowserType, Error
+from playwright.sync_api import BrowserType, Error, Request
 from tests.helpers.proxy_server import ProxyRequest, ProxyServer
 from tests.helpers.socks_server import MockSocksServer, SocksForwardingServer
 from tests.server import Server, TestServerRequest
@@ -69,8 +69,18 @@ def test_PR_002_should_use_proxy_smoke(
     )
     browser = browser_type.launch(**launch_arguments, proxy={"server": server.HOST})
     page = browser.new_page()
-    page.goto("http://non-existent.test/target.html")
+    url = "http://staging.example.org/target.html"
+    requests: List[str] = []
+
+    def on_request(request: Request) -> None:
+        if request.is_navigation_request():
+            requests.append(request.url)
+
+    page.on("request", on_request)
+    page.goto(url)
     assert page.title() == "Served by the proxy"
+    assert page.url == url
+    assert requests == [url]
     browser.close()
 
 

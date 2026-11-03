@@ -580,3 +580,44 @@ async def test_SO_033_should_wait_for_select_to_be_swapped(page: Page) -> None:
     await select_promise
     await expect(page.locator("select")).to_have_value("two")
     assert await page.evaluate("() => window['result']") == "two"
+
+
+async def test_SO_034_should_wait_for_select_to_become_non_inert(
+    page: Page, utils: Utils
+) -> None:
+    await page.set_content(
+        """
+    <div inert id=container>
+      <select>
+        <option>one</option>
+        <option>two</option>
+      </select>
+    </div>
+  """
+    )
+
+    done = False
+
+    async def select() -> None:
+        nonlocal done
+        await page.locator("select").select_option("two")
+        done = True
+
+    select_task = asyncio.create_task(select())
+    await give_it_a_chance_to_resolve(utils, page)
+    assert done is False
+    await expect(page.locator("select")).to_have_value("one")
+
+    await page.evaluate(
+        "() => document.getElementById('container').removeAttribute('inert')"
+    )
+    await select_task
+    await expect(page.locator("select")).to_have_value("two")
+
+    await page.evaluate(
+        "() => document.getElementById('container').setAttribute('inert', '')"
+    )
+    with pytest.raises(Error) as exc_info:
+        await page.locator("select").select_option("one", timeout=1000)
+    assert "Timeout 1000ms exceeded" in exc_info.value.message
+    assert "element is inert" in exc_info.value.message

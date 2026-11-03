@@ -582,3 +582,45 @@ def test_SO_033_should_wait_for_select_to_be_swapped(
     sync_gather(select, rest)
     expect(page.locator("select")).to_have_value("two")
     assert page.evaluate("() => window['result']") == "two"
+
+
+def test_SO_034_should_wait_for_select_to_become_non_inert(
+    page: Page, utils: Utils, sync_gather: Callable[..., List[Any]]
+) -> None:
+    page.set_content(
+        """
+    <div inert id=container>
+      <select>
+        <option>one</option>
+        <option>two</option>
+      </select>
+    </div>
+  """
+    )
+
+    done = False
+
+    def select() -> None:
+        nonlocal done
+        page.locator("select").select_option("two")
+        done = True
+
+    def rest() -> None:
+        give_it_a_chance_to_resolve(utils, page)
+        assert done is False
+        expect(page.locator("select")).to_have_value("one")
+
+        page.evaluate(
+            "() => document.getElementById('container').removeAttribute('inert')"
+        )
+
+    sync_gather(select, rest)
+    expect(page.locator("select")).to_have_value("two")
+
+    page.evaluate(
+        "() => document.getElementById('container').setAttribute('inert', '')"
+    )
+    with pytest.raises(Error) as exc_info:
+        page.locator("select").select_option("one", timeout=1000)
+    assert "Timeout 1000ms exceeded" in exc_info.value.message
+    assert "element is inert" in exc_info.value.message

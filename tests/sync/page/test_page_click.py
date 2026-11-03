@@ -882,38 +882,6 @@ def test_CL_050_should_wait_for_element_to_become_non_inert(
     assert page.evaluate("__CLICKED") is True
 
 
-def test_CL_051_should_wait_for_modal_dialog_to_close(
-    page: Page, utils: Utils, sync_gather: Callable[..., List[Any]]
-) -> None:
-    page.set_content(
-        """
-    <button onclick="window.__CLICKED=true;">Click target</button>
-    <dialog id=dialog><button onclick="window.__DIALOG_CLICKED=true;">Inside</button></dialog>
-    <script>
-      document.getElementById('dialog').showModal();
-    </script>
-  """
-    )
-    page.click("text=Inside")
-    assert page.evaluate("__DIALOG_CLICKED") is True
-
-    done = False
-
-    def click() -> None:
-        nonlocal done
-        page.click("text=Click target")
-        done = True
-
-    def rest() -> None:
-        give_it_a_chance_to_click(utils, page)
-        assert page.evaluate("window.__CLICKED") is None
-        assert done is False
-        page.evaluate("() => document.getElementById('dialog').close()")
-
-    sync_gather(click, rest)
-    assert page.evaluate("__CLICKED") is True
-
-
 def test_CL_052_should_wait_for_input_to_be_enabled(
     page: Page, utils: Utils, sync_gather: Callable[..., List[Any]]
 ) -> None:

@@ -17,6 +17,7 @@
 import json
 import os
 import signal
+import sys
 import time
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
@@ -37,7 +38,7 @@ from playwright.sync_api import (
     sync_playwright,
 )
 from tests.helpers.proxy_server import ProxyServer
-from tests.helpers.remote_server import RemoteServer
+from tests.helpers.remote_server import ChildProcess, RemoteServer
 from tests.server import Server, TestServerRequest, WebSocketProtocol, find_free_port
 
 pytestmark = pytest.mark.only_browser("chromium")
@@ -96,16 +97,62 @@ def run_with_env_playwright(
 
 
 def test_CD_001_should_connect_to_an_existing_cdp_session(
-    browser_type: BrowserType, launch_arguments: Dict, port: int
+    browser_type: BrowserType,
+    launch_arguments: Dict,
+    tmp_path: Path,
+    is_linux: bool,
 ) -> None:
-    browser_server = launch(browser_type, launch_arguments, port)
+    config_home = tmp_path / "config"
+    user_data_dir = config_home / "google-chrome"
+    browser_server = browser_type.launch_persistent_context(
+        user_data_dir, **launch_arguments, args=["--remote-debugging-port=0"]
+    )
     try:
+        port = (user_data_dir / "DevToolsActivePort").read_text().splitlines()[0]
         cdp_browser = browser_type.connect_over_cdp(
             endpoint_url=f"http://127.0.0.1:{port}/",
         )
         contexts = cdp_browser.contexts
         assert len(contexts) == 1
         cdp_browser.close()
+
+        if is_linux:
+            environments: List[Dict[str, Optional[str]]] = [
+                {
+                    "CHROME_USER_DATA_DIR": "",
+                    "CHROME_CONFIG_HOME": "",
+                    "XDG_CONFIG_HOME": str(config_home),
+                },
+                {
+                    "CHROME_USER_DATA_DIR": "",
+                    "CHROME_CONFIG_HOME": str(config_home),
+                    "XDG_CONFIG_HOME": str(tmp_path / "unused-config"),
+                },
+                {
+                    "CHROME_USER_DATA_DIR": str(user_data_dir),
+                    "CHROME_CONFIG_HOME": str(tmp_path / "unused-config"),
+                    "XDG_CONFIG_HOME": str(tmp_path / "unused-xdg-config"),
+                },
+            ]
+            for env in environments:
+                # Python: use the Python client in the child process.
+                child = ChildProcess(
+                    [
+                        sys.executable,
+                        "-c",
+                        """
+from playwright.sync_api import sync_playwright
+
+with sync_playwright() as playwright:
+    browser = playwright.chromium.connect_over_cdp('chrome')
+    print('contexts: ' + str(len(browser.contexts)))
+    browser.close()
+""",
+                    ],
+                    env=env,
+                )
+                assert child.exit_code() == 0, child.output
+                assert "contexts: 1" in child.output
     finally:
         browser_server.close()
 

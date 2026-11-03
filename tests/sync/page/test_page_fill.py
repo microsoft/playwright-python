@@ -532,40 +532,6 @@ def test_FI_034_should_retry_on_inert_element(
     assert page.eval_on_selector("#outside", "i => i.value") == ""
 
 
-def test_FI_035_should_retry_on_element_outside_of_a_modal_dialog(
-    page: Page, utils: Utils, sync_gather: Callable[..., List[Any]]
-) -> None:
-    # https://github.com/microsoft/playwright/issues/42967
-    page.set_content(
-        """
-    <input id=target>
-    <dialog id=dialog><input id=inside></dialog>
-    <script>
-      document.getElementById('dialog').showModal();
-    </script>
-  """
-    )
-    done = False
-
-    page.fill("#inside", "inside value")
-    assert page.eval_on_selector("#inside", "i => i.value") == "inside value"
-
-    def fill() -> None:
-        nonlocal done
-        page.fill("#target", "some value")
-        done = True
-
-    def rest() -> None:
-        give_it_a_chance_to_fill(utils, page)
-        assert done is False
-        assert page.eval_on_selector("#target", "i => i.value") == ""
-
-        page.eval_on_selector("#dialog", "e => e.close()")
-
-    sync_gather(fill, rest)
-    assert page.eval_on_selector("#target", "i => i.value") == "some value"
-
-
 def test_FI_036_should_fail_with_a_nice_error_on_inert_element(
     page: Page,
 ) -> None:

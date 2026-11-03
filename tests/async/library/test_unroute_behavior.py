@@ -384,33 +384,53 @@ async def test_RO_200_should_not_continue_requests_in_flight_page(
     page: Page, server: Server
 ) -> None:
     route_future: "asyncio.Future[None]" = asyncio.Future()
+    started = 0
     await page.goto(server.EMPTY_PAGE)
 
     async def handler(route: Route) -> None:
-        resolve(route_future, None)
-        await asyncio.sleep(3)
+        nonlocal started
+        started += 1
+        if started == 2:
+            resolve(route_future, None)
+        await route_future
+        await asyncio.sleep(0.1 if route.request.url.endswith("/a") else 1)
         response = await route.fetch()
-        await route.fulfill(response=response)
+        await route.fulfill(response=response, body="mocked")
 
     await page.route("**/*", handler)
-    asyncio.create_task(ignore_error(page.evaluate("() => fetch('/')")))
+    fetch_task = asyncio.create_task(
+        page.evaluate(
+            "() => Promise.all(['/a', '/b'].map(async path => (await fetch(path)).text()))"
+        )
+    )
     await route_future
-    await page.unroute_all(behavior="wait")
+    _, bodies = await asyncio.gather(page.unroute_all(behavior="wait"), fetch_task)
+    assert bodies == ["mocked", "mocked"]
 
 
 async def test_RO_201_should_not_continue_requests_in_flight_context(
     page: Page, context: BrowserContext, server: Server
 ) -> None:
     route_future: "asyncio.Future[None]" = asyncio.Future()
+    started = 0
     await page.goto(server.EMPTY_PAGE)
 
     async def handler(route: Route) -> None:
-        resolve(route_future, None)
-        await asyncio.sleep(3)
+        nonlocal started
+        started += 1
+        if started == 2:
+            resolve(route_future, None)
+        await route_future
+        await asyncio.sleep(0.1 if route.request.url.endswith("/a") else 1)
         response = await route.fetch()
-        await route.fulfill(response=response)
+        await route.fulfill(response=response, body="mocked")
 
     await context.route("**/*", handler)
-    asyncio.create_task(ignore_error(page.evaluate("() => fetch('/')")))
+    fetch_task = asyncio.create_task(
+        page.evaluate(
+            "() => Promise.all(['/a', '/b'].map(async path => (await fetch(path)).text()))"
+        )
+    )
     await route_future
-    await context.unroute_all(behavior="wait")
+    _, bodies = await asyncio.gather(context.unroute_all(behavior="wait"), fetch_task)
+    assert bodies == ["mocked", "mocked"]
