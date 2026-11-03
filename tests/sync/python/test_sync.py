@@ -186,6 +186,9 @@ def _test_call_sync_method_after_playwright_close_with_own_loop(
     context = browser.new_context()
     page = context.new_page()
     page.goto(empty_page)
+    with page.expect_console_message(lambda m: m.text == "hello") as console_info:
+        page.evaluate("console.log('hello')")
+    assert console_info.value.text == "hello"
     playwright.stop()
     with pytest.raises(Error) as exc:
         page.evaluate("1+1")
@@ -196,6 +199,7 @@ def _test_call_sync_method_after_playwright_close_with_own_loop(
 def test_call_sync_method_after_playwright_close_with_own_loop(
     server: Server, browser_name: str, launch_arguments: Dict[str, Any]
 ) -> None:
+    # Regression test for https://github.com/microsoft/playwright-python/issues/3307.
     p = multiprocessing.get_context("spawn").Process(
         target=_test_call_sync_method_after_playwright_close_with_own_loop,
         args=[browser_name, launch_arguments, server.EMPTY_PAGE],
