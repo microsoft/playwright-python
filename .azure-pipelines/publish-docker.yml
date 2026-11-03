@@ -47,6 +47,7 @@ extends:
         # Full history and tags: setuptools-scm derives the package version
         # (and thus the image tags) from the release tag.
         - checkout: self
+          persistCredentials: false
           fetchDepth: 0
           fetchTags: true
           displayName: "Checkout code"
