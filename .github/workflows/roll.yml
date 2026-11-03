@@ -146,7 +146,6 @@ jobs:
       id: save
       env:
         COMPLETE: ${{ steps.agent.outputs.outcome == 'success' && steps.check.outcome == 'success' }}
-        TITLE: "chore: roll Playwright to ${{ steps.record.outputs.version }} (${{ needs.versions.outputs.new_short }})"
         COMPARE_URL: https://github.com/microsoft/playwright/compare/${{ needs.versions.outputs.old_commit }}...${{ needs.versions.outputs.new_commit }}
         RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
       run: |
@@ -160,7 +159,6 @@ jobs:
         fi
         echo "complete=$COMPLETE" >> "$GITHUB_OUTPUT"
         python - <<'EOF'
-        import json
         import os
         from pathlib import Path
 
@@ -180,8 +178,9 @@ jobs:
             commits.append(f"- … and {total - len(commits)} more: {env['COMPARE_URL']}")
         parts.append(f"<details>\n<summary>Upstream commits ({total})</summary>\n\n" + "\n".join(commits) + "\n\n</details>")
         parts.append(f"Upstream changes: {env['COMPARE_URL']}")
+        # publish-calls adds nothing to the text, so the footer is here.
+        parts.append(f"<sub>Prepared by the [roll workflow]({env['RUN_URL']}).</sub>")
         Path(env["PATCH_DIR"], "pr-body.md").write_text("\n\n".join(parts) + "\n", encoding="utf-8")
-        Path(env["PATCH_DIR"], "roll.json").write_text(json.dumps({"title": env["TITLE"]}) + "\n", encoding="utf-8")
         EOF
         {
           echo '```'
@@ -215,9 +214,9 @@ jobs:
       with:
         name: roll-patch
         path: ${{ runner.temp }}/roll
-    # A roll changes only what a roll changes; publish-patch rejects only .github/. The checks are
+    # A roll changes only what a roll changes; publish-calls rejects only .github/. The checks are
     # here and not in a script, because the roll could change the script. They apply the patch to
-    # a separate index, so the checkout stays clean for publish-patch.
+    # a separate index, so the checkout stays clean for publish-calls.
     - name: Check the changed files
       env:
         GIT_INDEX_FILE: ${{ runner.temp }}/roll.index
@@ -244,25 +243,29 @@ jobs:
           echo "The roll adds a symbolic link or a submodule." >&2
           exit 1
         fi
-    # Never execute code or scripts from the roll in the app job.
-    - name: Validate, push and open draft
+    # This job writes the call, and not the roll job, so that nothing in the artifact can add a call
+    # or name a patch other than the one that the checks above read.
+    - name: Write the call
+      env:
+        BRANCH: roll/${{ needs.versions.outputs.new_short }}/${{ github.run_id }}-${{ github.run_attempt }}
+        TITLE: "chore: roll Playwright to ${{ needs.roll.outputs.version }} (${{ needs.versions.outputs.new_short }})"
+      run: |
+        jq -n --arg repo "$GITHUB_REPOSITORY" --arg branch "$BRANCH" --arg title "$TITLE" \
+          '[{call: "pull-request", repo: $repo, branch: $branch, title: $title, patch: "roll.patch", bodyFile: "pr-body.md"}]' \
+          > "$RUNNER_TEMP/roll/calls.json"
+    # Never execute code or scripts from the roll in the app job. The call is data.
+    - name: Check and make the call
       id: publish
-      uses: microsoft/playwright/.github/actions/publish-patch@main
+      uses: microsoft/playwright/.github/actions/publish-calls@main
       with:
         token: ${{ steps.app-token.outputs.token }}
         dir: ${{ runner.temp }}/roll
-        patch: roll.patch
-        metadata: roll.json
-        body-file: pr-body.md
-        branch: roll/${{ needs.versions.outputs.new_short }}/${{ github.run_id }}-${{ github.run_attempt }}
-        pull-request: true
-        base: ${{ github.ref_name }}
-        workflow-name: roll workflow
-    # publish-patch opens a draft; a complete roll is ready for review.
+        scope-kinds: pull-request
+    # publish-calls opens a draft; a complete roll is ready for review.
     - name: Mark the pull request as ready
       if: needs.roll.outputs.complete == 'true'
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
         GH_REPO: ${{ github.repository }}
-        PR: ${{ steps.publish.outputs.number }}
+        PR: ${{ steps.publish.outputs.pull-request }}
       run: gh pr ready "$PR"
