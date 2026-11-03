@@ -6,4 +6,3 @@
 **/.env*
 **/.pypirc
 **/pip.conf
-**/__pycache__
