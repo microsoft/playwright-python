@@ -3,7 +3,6 @@
 # local environment files out of the build context.
 **/.git
 **/.npmrc
-**/.netrc
 **/.env*
 **/.pypirc
 **/pip.conf
