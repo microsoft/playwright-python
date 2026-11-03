@@ -6,6 +6,7 @@ objgraph==3.7.0
 Pillow==12.3.0
 pixelmatch==0.3.0
 pre-commit==3.5.0
+pyee==13.0.1
 pyOpenSSL==26.0.0
 pytest==9.0.3
 pytest-asyncio==1.4.1
