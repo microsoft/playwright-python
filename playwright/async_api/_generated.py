@@ -4009,6 +4009,10 @@ class BrowserType(AsyncBase):
         endpoint_url : str
             A CDP websocket endpoint or http url to connect to. For example `http://localhost:9222/` or
             `ws://127.0.0.1:9222/devtools/browser/387adf4c-243f-4051-a181-46798f4a46f4`.
+
+            Alternatively, a browser channel name such as `chrome` or `msedge` to connect to a browser with remote debugging
+            enabled in its default user data directory. On Linux, Playwright uses `CHROME_USER_DATA_DIR` when set. Otherwise,
+            it uses `CHROME_CONFIG_HOME`, then `XDG_CONFIG_HOME`, then `~/.config` to locate that directory.
         artifacts_dir : Union[pathlib.Path, str, None]
             If specified, browser artifacts (such as traces and downloads) are saved into this directory.
         headers : Union[Dict[str, str], None]
@@ -4018,10 +4022,10 @@ class BrowserType(AsyncBase):
             upon the file system being the same between Playwright and the Browser.
         no_defaults : Union[bool, None]
             When true, Playwright will not apply its default overrides to the existing default browser context. Specifically,
-            `accept_downloads` is left at the browser's setting, focus emulation is not enabled, and media emulation options
-            (such as `color_scheme`, `reduced_motion`, `forced_colors`, and `contrast`) are not applied. Useful when attaching
-            to a user's daily-driver browser where these overrides would interfere with existing browser state. New contexts
-            created via `browser.new_context()` are not affected. Defaults to `false`.
+            `accept_downloads` and font families are left at the browser's settings, focus emulation is not enabled, and media
+            emulation options (such as `color_scheme`, `reduced_motion`, `forced_colors`, and `contrast`) are not applied.
+            Useful when attaching to a user's daily-driver browser where these overrides would interfere with existing browser
+            state. New contexts created via `browser.new_context()` are not affected. Defaults to `false`.
         slow_mo : Union[float, None]
             Slows down Playwright operations by the specified amount of milliseconds. Useful so that you can see what is going
             on. Defaults to 0.
@@ -10735,7 +10739,9 @@ class Locator(AsyncBase):
 
         An AI-optimized snapshot, controlled by `mode`, is different from a default snapshot:
         1. Includes element references `[ref=e2]`. 2. Does not wait for an element matching the locator, and throws when
-           no elements match. 3. Includes snapshots of `<iframe>`s inside the target.
+           no elements match. 3. Includes snapshots of `<iframe>`s inside the target. 4. Can omit names that repeat
+           printed descendants, such as a heading containing a link. Names that identify dialogs, landmarks, groups,
+           tables and table headers are retained.
 
         Parameters
         ----------

@@ -45,22 +45,3 @@ def test_CL_112_should_timeout_waiting_for_inert_element_to_become_non_inert(
     assert "Page.click: Timeout 3000ms exceeded." in exc_info.value.message
     assert "element is inert" in exc_info.value.message
     assert "retrying click action" in exc_info.value.message
-
-
-def test_CL_113_should_timeout_waiting_for_element_outside_of_a_modal_dialog(
-    page: Page,
-) -> None:
-    page.set_content(
-        """
-    <button onclick="javascript:window.__CLICKED=true;">Click target</button>
-    <dialog id=dialog><button>Inside</button></dialog>
-    <script>
-      document.getElementById('dialog').showModal();
-    </script>
-  """
-    )
-    with pytest.raises(Error) as exc_info:
-        page.click("text=Click target", timeout=3000)
-    assert page.evaluate("window.__CLICKED") is None
-    assert "Page.click: Timeout 3000ms exceeded." in exc_info.value.message
-    assert "element is inert" in exc_info.value.message

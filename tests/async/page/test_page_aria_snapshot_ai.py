@@ -456,6 +456,15 @@ async def test_AR_060_should_omit_names_that_just_repeat_printed_descendant_node
     await page.set_content(
         """
     <h3><a style="cursor: pointer" href="/issues/1">Clipboard API</a></h3>
+    <dialog open aria-labelledby="title">
+      <h2 id="title">Delete item?</h2>
+      <button>OK</button>
+    </dialog>
+    <nav aria-labelledby="nav-title"><h2 id="nav-title">Account</h2></nav>
+    <table>
+      <caption>Monthly totals</caption>
+      <tr><th scope="col"><button>Price</button></th></tr>
+    </table>
   """
     )
 
@@ -463,9 +472,21 @@ async def test_AR_060_should_omit_names_that_just_repeat_printed_descendant_node
     assert_contains_yaml(
         snapshot,
         """
-    - heading [level=3] [ref=e2]:
-      - link "Clipboard API" [ref=e3] [cursor=pointer]:
-        - /url: /issues/1
+    - generic [active] [ref=e1]:
+      - heading [level=3] [ref=e2]:
+        - link "Clipboard API" [ref=e3] [cursor=pointer]:
+          - /url: /issues/1
+      - dialog "Delete item?" [ref=e4]:
+        - heading "Delete item?" [level=2] [ref=e5]
+        - button "OK" [ref=e6]
+      - navigation "Account" [ref=e7]:
+        - heading "Account" [level=2] [ref=e8]
+      - table "Monthly totals" [ref=e9]:
+        - caption [ref=e10]: Monthly totals
+        - rowgroup [ref=e11]:
+          - row [ref=e12]:
+            - columnheader "Price" [ref=e13]:
+              - button "Price" [ref=e14]
   """,
     )
 
@@ -1308,56 +1329,3 @@ async def test_AR_093_should_not_include_hidden_iframes(page: Page) -> None:
     )
     assert "Hidden" not in snapshot
     assert "None" not in snapshot
-
-
-async def test_AR_094_should_not_generate_refs_for_inert_elements(page: Page) -> None:
-    # https://github.com/microsoft/playwright/issues/36938
-    await page.set_content(
-        """
-    <button>with-ref</button>
-    <button inert>no-ref</button>
-    <div inert>
-      <button>no-ref</button>
-    </div>
-  """
-    )
-
-    snapshot = await snapshot_for_ai(page)
-    assert_contains_yaml(
-        snapshot,
-        """
-    - generic [active] [ref=e1]:
-      - button "with-ref" [ref=e2]
-      - button: no-ref
-      - generic:
-        - button: no-ref
-  """,
-    )
-
-
-async def test_AR_095_should_not_generate_refs_for_elements_outside_of_a_modal_dialog(
-    page: Page,
-) -> None:
-    # https://github.com/microsoft/playwright/issues/36938
-    await page.set_content(
-        """
-    <button>Outside</button>
-    <dialog id=dialog>
-      <button>Inside</button>
-    </dialog>
-    <script>
-      document.getElementById('dialog').showModal();
-    </script>
-  """
-    )
-
-    snapshot = await snapshot_for_ai(page)
-    assert_contains_yaml(
-        snapshot,
-        """
-    - generic:
-      - button: Outside
-      - dialog [ref=e1]:
-        - button "Inside" [active] [ref=e2]
-  """,
-    )

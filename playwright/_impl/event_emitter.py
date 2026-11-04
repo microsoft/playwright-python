@@ -82,11 +82,15 @@ class EventEmitter:
         return True
 
     def _call_handler(self, type: EventType, handler: Listener, args: Any) -> None:
-        promise = handler(*args)
-        if not inspect.isawaitable(promise):
+        try:
+            promise = handler(*args)
+            if not inspect.isawaitable(promise):
+                return
+            # Python: an awaitable is the counterpart of a JS promise or thenable.
+            future = asyncio.ensure_future(promise)
+        except Exception as error:
+            self._handle_listener_error(type, error)
             return
-        # Python: the coroutine of an async def handler runs as a task.
-        future = asyncio.ensure_future(promise)
         pending = self._pending_handlers.get(type)
         if pending is None:
             pending = set()
@@ -103,10 +107,18 @@ class EventEmitter:
             if self._rejection_handler:
                 self._rejection_handler(e)
             else:
-                # Python: the counterpart of an unhandled rejection.
-                self._report_unhandled_error(e)
+                try:
+                    self._handle_listener_error(type, e)
+                except Exception as error:
+                    # Python: report an unhandled rejection outside the task callback.
+                    self._report_unhandled_error(error)
 
         future.add_done_callback(on_done)
+
+    def _handle_listener_error(self, type: EventType, error: BaseException) -> None:
+        if type == "error" or not self.listener_count("error"):
+            raise error
+        self.emit("error", error)
 
     def _report_unhandled_error(self, error: BaseException) -> None:
         # Python: an unhandled rejection crashes Node.js; see report_unhandled_error().

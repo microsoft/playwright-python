@@ -438,13 +438,18 @@ def test_RO_200_should_not_continue_requests_in_flight_page(
     page: Page, server: Server, sync_gather: Callable[..., List[Any]]
 ) -> None:
     route_future: "asyncio.Future[None]" = asyncio.Future()
+    started = 0
     page.goto(server.EMPTY_PAGE)
 
     def handler(route: Route) -> None:
-        resolve(route_future, None)
-        wait_for(page, asyncio.sleep(3))
+        nonlocal started
+        started += 1
+        if started == 2:
+            resolve(route_future, None)
+        wait_for(page, route_future)
+        wait_for(page, asyncio.sleep(0.1 if route.request.url.endswith("/a") else 1))
         response = route.fetch()
-        route.fulfill(response=response)
+        route.fulfill(response=response, body="mocked")
 
     page.route("**/*", handler)
 
@@ -452,7 +457,14 @@ def test_RO_200_should_not_continue_requests_in_flight_page(
         wait_for(page, route_future)
         page.unroute_all(behavior="wait")
 
-    sync_gather(ignore_error(lambda: page.evaluate("() => fetch('/')")), unroute)
+    # Python: sync_gather starts the fetch before unroute waits for both handlers.
+    bodies, _ = sync_gather(
+        lambda: page.evaluate(
+            "() => Promise.all(['/a', '/b'].map(async path => (await fetch(path)).text()))"
+        ),
+        unroute,
+    )
+    assert bodies == ["mocked", "mocked"]
 
 
 def test_RO_201_should_not_continue_requests_in_flight_context(
@@ -462,13 +474,18 @@ def test_RO_201_should_not_continue_requests_in_flight_context(
     sync_gather: Callable[..., List[Any]],
 ) -> None:
     route_future: "asyncio.Future[None]" = asyncio.Future()
+    started = 0
     page.goto(server.EMPTY_PAGE)
 
     def handler(route: Route) -> None:
-        resolve(route_future, None)
-        wait_for(page, asyncio.sleep(3))
+        nonlocal started
+        started += 1
+        if started == 2:
+            resolve(route_future, None)
+        wait_for(page, route_future)
+        wait_for(page, asyncio.sleep(0.1 if route.request.url.endswith("/a") else 1))
         response = route.fetch()
-        route.fulfill(response=response)
+        route.fulfill(response=response, body="mocked")
 
     context.route("**/*", handler)
 
@@ -476,4 +493,11 @@ def test_RO_201_should_not_continue_requests_in_flight_context(
         wait_for(page, route_future)
         context.unroute_all(behavior="wait")
 
-    sync_gather(ignore_error(lambda: page.evaluate("() => fetch('/')")), unroute)
+    # Python: sync_gather starts the fetch before unroute waits for both handlers.
+    bodies, _ = sync_gather(
+        lambda: page.evaluate(
+            "() => Promise.all(['/a', '/b'].map(async path => (await fetch(path)).text()))"
+        ),
+        unroute,
+    )
+    assert bodies == ["mocked", "mocked"]

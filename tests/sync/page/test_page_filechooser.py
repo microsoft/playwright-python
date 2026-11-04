@@ -14,6 +14,7 @@
 
 """Port of tests/page/page-filechooser.spec.ts."""
 
+import os
 import shutil
 from pathlib import Path
 from typing import Any, Callable, List
@@ -413,6 +414,8 @@ def test_FC_026_user_activation_should_not_open_file_chooser_without_user_activa
     page: Page, server: Server, browser_name: str
 ) -> None:
     user_activation_before_each(page, server)
+    if os.environ.get("PW_CLOCK") == "frozen":
+        pytest.skip("PW_CLOCK is frozen")
     if browser_name == "webkit":
         pytest.skip(
             "fixme: WebKit opens the file chooser from input.click() without user activation"

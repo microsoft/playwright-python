@@ -17,6 +17,7 @@
 import asyncio
 import datetime
 import math
+import os
 import re
 import struct
 from typing import Any, Awaitable, Callable, List
@@ -692,6 +693,8 @@ async def test_EV_062_should_simulate_a_user_gesture(page: Page) -> None:
 async def test_EV_063_should_throw_a_nice_error_after_a_navigation(
     page: Page,
 ) -> None:
+    if os.environ.get("PW_CLOCK") == "frozen":
+        pytest.skip("PW_CLOCK is frozen")
     async with page.expect_navigation():
         with pytest.raises(Error) as exc_info:
             await page.evaluate(

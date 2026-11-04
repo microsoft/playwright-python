@@ -541,39 +541,6 @@ async def test_FI_034_should_retry_on_inert_element(page: Page, utils: Utils) ->
     assert await page.eval_on_selector("#outside", "i => i.value") == ""
 
 
-async def test_FI_035_should_retry_on_element_outside_of_a_modal_dialog(
-    page: Page, utils: Utils
-) -> None:
-    # https://github.com/microsoft/playwright/issues/42967
-    await page.set_content(
-        """
-    <input id=target>
-    <dialog id=dialog><input id=inside></dialog>
-    <script>
-      document.getElementById('dialog').showModal();
-    </script>
-  """
-    )
-    done = False
-
-    await page.fill("#inside", "inside value")
-    assert await page.eval_on_selector("#inside", "i => i.value") == "inside value"
-
-    async def fill() -> None:
-        nonlocal done
-        await page.fill("#target", "some value")
-        done = True
-
-    promise = asyncio.create_task(fill())
-    await give_it_a_chance_to_fill(utils, page)
-    assert done is False
-    assert await page.eval_on_selector("#target", "i => i.value") == ""
-
-    await page.eval_on_selector("#dialog", "e => e.close()")
-    await promise
-    assert await page.eval_on_selector("#target", "i => i.value") == "some value"
-
-
 async def test_FI_036_should_fail_with_a_nice_error_on_inert_element(
     page: Page,
 ) -> None:

@@ -1133,7 +1133,9 @@ async def test_AR_045_should_not_include_hidden_iframes(page: Page) -> None:
     )
 
 
-async def test_AR_046_should_not_include_inert_elements(page: Page) -> None:
+async def test_AR_171_should_include_inert_elements_and_elements_outside_of_a_modal_dialog(
+    page: Page,
+) -> None:
     # https://github.com/microsoft/playwright/issues/36938
     await page.set_content(
         """
@@ -1141,35 +1143,9 @@ async def test_AR_046_should_not_include_inert_elements(page: Page) -> None:
     <button inert>Hello</button>
     <div inert>
       <button>Yay</button>
-      <p>Some text</p>
     </div>
-    <p>Visible <span inert>inert</span> text</p>
-    <button><span inert>Save</span></button>
-  """
-    )
-
-    await check_and_match_snapshot(
-        page.locator("body"),
-        """
-    - button "Hi"
-    - paragraph: Visible text
-    - button
-  """,
-    )
-
-
-async def test_AR_047_should_only_include_the_modal_dialog_content(
-    page: Page,
-) -> None:
-    # https://github.com/microsoft/playwright/issues/36938
-    await page.set_content(
-        """
-    <h1>Title</h1>
-    <button>Outside</button>
     <dialog id=dialog>
-      <h2>Dialog</h2>
       <button>Inside</button>
-      <div inert><button>Inert inside</button></div>
     </dialog>
     <script>
       document.getElementById('dialog').showModal();
@@ -1180,17 +1156,10 @@ async def test_AR_047_should_only_include_the_modal_dialog_content(
     await check_and_match_snapshot(
         page.locator("body"),
         """
+    - button "Hi"
+    - button "Hello"
+    - button "Yay"
     - dialog:
-      - heading "Dialog" [level=2]
       - button "Inside"
-  """,
-    )
-
-    await page.locator("#dialog").evaluate("e => e.close()")
-    await check_and_match_snapshot(
-        page.locator("body"),
-        """
-    - heading "Title" [level=1]
-    - button "Outside"
   """,
     )

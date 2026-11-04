@@ -330,8 +330,8 @@ class Page(ChannelOwner):
 
     async def _on_route(self, route: Route) -> None:
         route._context = self.context
-        route_handlers = list(self._routes)
-        for route_handler in route_handlers:
+        route_handlers = self._routes
+        for route_handler in route_handlers[:]:
             # If the page was closed we stall all requests right away.
             if self._close_was_called or self._browser_context.is_closed():
                 return
@@ -346,7 +346,8 @@ class Page(ChannelOwner):
             if route_handler.will_expire():
                 self._routes.pop(index)
             handled = await route_handler.handle(route)
-            if not self._routes:
+            # unrouteAll() replaces _routes and updates interception after waiting for handlers.
+            if route_handlers is self._routes and not self._routes:
                 fire_and_forget(self._disable_interception())
             if handled:
                 return

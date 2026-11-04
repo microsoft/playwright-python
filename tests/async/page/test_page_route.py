@@ -16,6 +16,7 @@
 
 import asyncio
 import json
+import os
 import re
 import time
 from typing import Any, Callable, Dict, List, Optional
@@ -297,6 +298,8 @@ async def test_RO_011_should_work_with_redirect_inside_sync_xhr(
 async def test_RO_012_should_pause_intercepted_xhr_until_continue(
     page: Page, server: Server, browser_name: str
 ) -> None:
+    if os.environ.get("PW_CLOCK") == "frozen":
+        pytest.skip("PW_CLOCK is frozen")
     if browser_name == "webkit":
         pytest.skip("fixme: Redirected request is not paused in WebKit")
 

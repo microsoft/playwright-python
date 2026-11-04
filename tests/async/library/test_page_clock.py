@@ -663,15 +663,26 @@ async def test_CK_044_while_on_pause_run_for_should_not_run_nested_immediate_fro
 async def test_CK_045_while_on_pause_should_stay_paused_on_the_next_page_when_an_init_script_reads_the_time(
     page: Page, server: Server
 ) -> None:
+    def handler(request: TestServerRequest) -> None:
+        request.setHeader("Content-Type", "text/html")
+        request.write(
+            b"<script>setTimeout(() => document.documentElement.dataset.fired = 'true', 0);</script>"
+        )
+        request.finish()
+
+    server.set_route("/timer.html", handler)
     await page.clock.install(time=0)
     await page.clock.pause_at(1)
     await page.add_init_script("(() => Date.now())()")
     await page.goto(server.EMPTY_PAGE)
     await page.clock.run_for(1000)
-    await page.goto(server.PREFIX + "/title.html")
+    await page.goto(server.PREFIX + "/timer.html")
     assert await page.evaluate("() => Date.now()") == 2000
     await page.wait_for_timeout(500)
     assert await page.evaluate("() => Date.now()") == 2000
+    assert await page.evaluate("() => document.documentElement.dataset.fired") is None
+    await page.clock.run_for(0)
+    assert await page.evaluate("() => document.documentElement.dataset.fired") == "true"
 
 
 async def test_CK_046_while_on_pause_should_not_advance_performance_now_before_the_first_clock_call_on_a_new_page(
@@ -681,6 +692,26 @@ async def test_CK_046_while_on_pause_should_not_advance_performance_now_before_t
     await page.goto(server.EMPTY_PAGE)
     await page.wait_for_timeout(500)
     assert await page.evaluate("() => [performance.now(), Date.now()]") == [0, 1000]
+
+
+async def test_CK_220_while_on_pause_should_keep_timers_scheduled_during_load_pending_when_paused(
+    page: Page, server: Server
+) -> None:
+    def handler(request: TestServerRequest) -> None:
+        request.setHeader("Content-Type", "text/html")
+        request.write(
+            b"<script>setTimeout(() => document.documentElement.dataset.fired = 'true', 0);</script>"
+        )
+        request.finish()
+
+    server.set_route("/timer.html", handler)
+    await page.clock.install(time=0)
+    await page.clock.pause_at(1)
+    await page.goto(server.PREFIX + "/timer.html")
+    await page.wait_for_timeout(500)
+    assert await page.evaluate("() => document.documentElement.dataset.fired") is None
+    await page.clock.run_for(0)
+    assert await page.evaluate("() => document.documentElement.dataset.fired") == "true"
 
 
 async def test_CK_047_date_now_check_date_now_is_an_integer(page: Page) -> None:
