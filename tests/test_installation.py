@@ -49,6 +49,7 @@ def _run_client(python: str, tmp_path: Path, browser_name: str, environ: dict) -
 # of a test.
 @pytest.mark.timeout(900)
 def test_install(tmp_path: Path, browser_name: str) -> None:
+    # Regression test for https://github.com/microsoft/playwright-python/issues/3312.
     python = _create_venv(tmp_path / "env")
     if sys.platform == "win32":
         wheelpath = list((ROOT / "dist").glob("playwright*win_amd64*.whl"))[0]
@@ -57,6 +58,14 @@ def test_install(tmp_path: Path, browser_name: str) -> None:
     elif sys.platform == "darwin":
         wheelpath = list((ROOT / "dist").glob("playwright*macosx_*.whl"))[0]
     subprocess.check_output([python, "-m", "pip", "install", str(wheelpath)])
+    subprocess.check_output(
+        [
+            python,
+            "-c",
+            "import importlib.util; assert importlib.util.find_spec('pyee') is None",
+        ],
+        cwd=tmp_path,
+    )
     environ = os.environ.copy()
     environ["PLAYWRIGHT_BROWSERS_PATH"] = str(tmp_path)
     _run_client(python, tmp_path, browser_name, environ)
