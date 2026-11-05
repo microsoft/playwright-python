@@ -108,7 +108,7 @@ jobs:
         shell: bash
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-    - uses: microsoft/playwright/.github/actions/ci-env@main
+    - uses: microsoft/playwright/.github/actions/ci-env@d1518e3e3fca90352c4390814943cced496fd7e4 # main
     - name: Set up Python
       uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
       with:
@@ -165,7 +165,7 @@ jobs:
         shell: bash
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-    - uses: microsoft/playwright/.github/actions/ci-env@main
+    - uses: microsoft/playwright/.github/actions/ci-env@d1518e3e3fca90352c4390814943cced496fd7e4 # main
     - name: Set up Python
       uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
       with:

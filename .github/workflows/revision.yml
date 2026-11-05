@@ -37,7 +37,7 @@ jobs:
     steps:
     - name: Collect the PR and the maintainers' comments
       id: collect
-      uses: microsoft/playwright/.github/actions/collect-review@main
+      uses: microsoft/playwright/.github/actions/collect-review@d1518e3e3fca90352c4390814943cced496fd7e4 # main
       with:
         pull-request: ${{ github.event.pull_request.number }}
     - name: Post the run link
@@ -92,7 +92,7 @@ jobs:
     - name: Revise with Copilot CLI
       id: agent
       # No GitHub tools and no URL access: the agent reads the PR only from the review the prepare job filtered.
-      uses: microsoft/playwright/.github/actions/run-agent@main
+      uses: microsoft/playwright/.github/actions/run-agent@d1518e3e3fca90352c4390814943cced496fd7e4 # main
       with:
         prompt: |
           Follow the shared guide revision.md and this repo's AGENTS.md. Read both in full before starting. $PLAYWRIGHT_DIR is the .upstream/ checkout of microsoft/playwright at the commit in DRIVER_VERSION; do not edit, commit or switch branches in it.
@@ -127,7 +127,7 @@ jobs:
         path: ${{ runner.temp }}/revision
     # Never execute code or scripts from the artifact in the app job. The calls are data.
     - name: Check and make the calls
-      uses: microsoft/playwright/.github/actions/publish-calls@main
+      uses: microsoft/playwright/.github/actions/publish-calls@d1518e3e3fca90352c4390814943cced496fd7e4 # main
       with:
         token: ${{ steps.app-token.outputs.token }}
         dir: ${{ runner.temp }}/revision

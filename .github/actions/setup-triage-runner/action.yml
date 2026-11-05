@@ -14,7 +14,7 @@ inputs:
 runs:
   using: composite
   steps:
-  - uses: microsoft/playwright/.github/actions/ci-env@main
+  - uses: microsoft/playwright/.github/actions/ci-env@d1518e3e3fca90352c4390814943cced496fd7e4 # main
   - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
     with:
       python-version: '3.12'
