@@ -117,7 +117,7 @@ jobs:
       id: agent
       # No GitHub tools and no URL access: the agent reads upstream only from .upstream/, so text from
       # issues and PRs does not reach it.
-      uses: microsoft/playwright/.github/actions/run-agent@main
+      uses: microsoft/playwright/.github/actions/run-agent@d1518e3e3fca90352c4390814943cced496fd7e4 # main
       with:
         prompt: |
           Roll Playwright Python from microsoft/playwright ${{ env.OLD_COMMIT }} to ${{ env.NEW_COMMIT }}. Follow the playwright-roll skill, .claude/skills/playwright-roll/SKILL.md, and AGENTS.md. Read both in full before starting.
@@ -256,7 +256,7 @@ jobs:
     # Never execute code or scripts from the roll in the app job. The call is data.
     - name: Check and make the call
       id: publish
-      uses: microsoft/playwright/.github/actions/publish-calls@main
+      uses: microsoft/playwright/.github/actions/publish-calls@d1518e3e3fca90352c4390814943cced496fd7e4 # main
       with:
         token: ${{ steps.app-token.outputs.token }}
         dir: ${{ runner.temp }}/roll
