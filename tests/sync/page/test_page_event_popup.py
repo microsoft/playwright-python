@@ -15,10 +15,13 @@
 """Port of tests/page/page-event-popup.spec.ts."""
 
 
+from concurrent.futures import Future
 from typing import Any, Callable, List
 
+import pytest
+
 from playwright.sync_api import Page
-from tests.server import Server
+from tests.server import Server, TestServerRequest, reactor
 
 
 def test_PO_001_should_work_smoke(page: Page) -> None:
@@ -180,3 +183,46 @@ def test_PO_013_should_report_popup_opened_from_iframes(
         frame.evaluate("() => window.open('')")
     popup = popup_info.value
     assert popup
+
+
+def test_PO_030_should_finish_loading_after_opening_a_popup_while_a_cross_site_iframe_is_loading(
+    page: Page, server: Server, is_headless_shell: bool
+) -> None:
+    if is_headless_shell:
+        pytest.skip(
+            "fixme: Without site isolation, which is the default in headless shell, the opener never fires the load event"
+        )
+
+    # Python: a thread-safe future gates the response on the Twisted reactor thread.
+    frame_may_finish: Future[None] = Future()
+
+    def handle_frame(request: TestServerRequest) -> None:
+        def finish() -> None:
+            request.setHeader("Content-Type", "text/html")
+            request.write(b"<body>frame</body>")
+            request.finish()
+
+        frame_may_finish.add_done_callback(lambda _: reactor.callFromThread(finish))
+
+    server.set_route("/frame.html", handle_frame)
+
+    def handle_opener(request: TestServerRequest) -> None:
+        request.setHeader("Content-Type", "text/html")
+        request.write(
+            f"""
+      <iframe src="{server.CROSS_PROCESS_PREFIX}/frame.html"></iframe>
+      <script>window.open('{server.EMPTY_PAGE}')</script>
+    """.encode()
+        )
+        request.finish()
+
+    server.set_route("/opener.html", handle_opener)
+
+    with page.expect_popup() as popup_info:
+        page.goto(server.PREFIX + "/opener.html", wait_until="commit")
+    popup = popup_info.value
+    # The iframe is still loading when the popup opens.
+    frame_may_finish.set_result(None)
+    popup.wait_for_load_state("load")
+    page.wait_for_load_state("load")
+    assert page.evaluate("() => document.readyState") == "complete"
