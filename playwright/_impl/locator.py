@@ -20,6 +20,10 @@ has no locator generator (isomorphic/locatorGenerators.ts): the driver generates
 Python code of a normalized locator, and repr() shows the selector otherwise. The
 JavaScript-only API (util.inspect.custom, toString(), ariaSnapshotJSON(), the object
 form of the highlight style, signal) is not ported.
+
+Not ported: selectorForQuery(), for the JavaScript-only locateOnlyVisible context
+option (docs: langs: js). Python queries keep the unmodified selector, including
+screenshot masks and locator handlers.
 """
 
 import json

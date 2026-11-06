@@ -477,6 +477,7 @@ subsystem, add a row to the Subsystems table. Then update this file:
 | `BC-081` | `library/browsercontext-reuse.spec.ts` | reuse {launch, connect} › should continue issuing events after closing the reused page *(2 copies)* |
 | `BC-082` | `library/browsercontext-reuse.spec.ts` | reuse {launch, connect} › should work with routeWebSocket *(2 copies)* |
 | `BC-083` | `library/browsercontext-reuse.spec.ts` | reuse {launch, connect} › should update viewport and media *(2 copies)* |
+| `BC-084` | `library/browsercontext-basic.spec.ts` | should locate only visible elements when configured |
 
 ### BP — Browsers path
 
@@ -4190,6 +4191,7 @@ subsystem, add a row to the Subsystems table. Then update this file:
 | `PO-027` | `library/popup.spec.ts` | should not throttle rAF in the opener page |
 | `PO-028` | `library/popup.spec.ts` | should not throw when click closes popup |
 | `PO-029` | `library/popup.spec.ts` | should load subresources of an about:blank popup when the opener has routes |
+| `PO-030` | `page/page-event-popup.spec.ts` | should finish loading after opening a popup while a cross-site iframe is loading |
 
 ### PR — Proxy
 

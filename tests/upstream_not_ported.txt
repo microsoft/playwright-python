@@ -53,6 +53,8 @@ IS-031      browserContext.addInitScript(script, arg, { exposeFunctions }) expos
 IS-032      browserContext.addInitScript(script, arg, { exposeFunctions }) exposes functions passed in arg; the arg parameter and the exposeFunctions option are JavaScript-only (docs: langs: js); Python add_init_script takes only script=<str> or path=.
 IS-033      browserContext.addInitScript(script, arg, { exposeFunctions }) exposes functions passed in arg; the arg parameter and the exposeFunctions option are JavaScript-only (docs: langs: js); Python add_init_script takes only script=<str> or path=.
 IS-034      browserContext.addInitScript(script, arg, { exposeFunctions }) exposes functions passed in arg; the arg parameter and the exposeFunctions option are JavaScript-only (docs: langs: js); Python add_init_script takes only script=<str> or path=.
+# library/browsercontext-basic
+BC-084      The locateOnlyVisible context option is JavaScript-only (docs: langs: js).
 # library/browsercontext-credentials
 AU-002      BrowserContext.setHTTPCredentials() is JavaScript-only (langs: js); it is not in the Python API.
 AU-003      BrowserContext.setHTTPCredentials() is JavaScript-only (langs: js); it is not in the Python API.
