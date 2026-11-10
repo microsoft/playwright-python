@@ -1,5 +1,7 @@
 # Trigger: any `v*` release tag (e.g. v1.40.0).
-# Can also be queued manually from the ADO UI.
+# Can also be queued manually from the ADO UI. A manual 'stable' run is possible only
+# on a `release-*` branch: it publishes the images of the last release tag of that
+# branch again, from the tip of the branch.
 trigger:
   tags:
     include:

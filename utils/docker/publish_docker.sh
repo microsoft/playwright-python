@@ -16,6 +16,21 @@ if [[ "${RELEASE_CHANNEL}" != "stable" && "${RELEASE_CHANNEL}" != "canary" ]]; t
 fi
 
 PW_VERSION=$(python -c "from playwright._repo_version import version;print(version)")
+# A stable run on a release branch publishes the images of the last release of that
+# branch again, for example with a cherry-picked fix of the image. The commit has no
+# tag then, so setuptools-scm gives a dev version: use the version of the last tag,
+# also for the wheels that build.sh puts into the image.
+if [[ "${RELEASE_CHANNEL}" == "stable" && "${BUILD_SOURCEBRANCH:-}" =~ ^refs/heads/release-([0-9]+\.[0-9]+)$ ]]; then
+  BRANCH_VERSION="${BASH_REMATCH[1]}"
+  LAST_TAG=$(git describe --tags --abbrev=0 --match 'v[0-9]*')
+  if [[ ! "${LAST_TAG}" =~ ^v${BRANCH_VERSION//./\\.}\.[0-9]+$ ]]; then
+    echo "ERROR: the last tag '${LAST_TAG}' is not a release of ${BUILD_SOURCEBRANCH}"
+    exit 1
+  fi
+  PW_VERSION="${LAST_TAG#v}"
+  export SETUPTOOLS_SCM_PRETEND_VERSION="${PW_VERSION}"
+  echo "== STABLE build from ${BUILD_SOURCEBRANCH}: publishing as v${PW_VERSION} =="
+fi
 if [[ "${RELEASE_CHANNEL}" == "stable" && ! "${PW_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
   echo "ERROR: cannot publish stable docker with Playwright version '${PW_VERSION}'"
   exit 1
