@@ -16,6 +16,12 @@ python scripts/upstream.py checkout   # clone .upstream/, or move it to DRIVER_V
 python scripts/upstream.py changes    # what changed upstream since DRIVER_VERSION at HEAD
 ```
 
+The client talks to the Node.js driver that is built from `.upstream/`. When the same calls fail in
+a Node.js test upstream too, the cause is upstream, and the fix lands in `microsoft/playwright`: do
+not work around it in `playwright/_impl/`. When Node.js passes, the bug is in the Python client.
+`git show v<version>:DRIVER_VERSION` prints the upstream commit of a release, or, for releases up to
+1.64, the `playwright-core` version of its driver.
+
 ## Build and test
 
 You need Python 3.10+, git, Node.js and npm.
@@ -138,7 +144,7 @@ left).
 
 ## Rolls
 
-Use the `playwright-roll` skill. On CI, `.github/workflows/roll.yml` runs it and opens the
+Use the `playwright-roll` skill. On CI, `.github/workflows/agent-roll.yml` runs it and opens the
 PR, on Mon, Wed and Fri at night unless a roll PR is open. To roll at another time, start
 the workflow by hand with a branch, a tag or a commit.
 
