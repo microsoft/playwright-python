@@ -16,7 +16,7 @@ RUN --mount=type=secret,id=pipconf,target=/etc/pip.conf,required=false \
       -exec sed -i "s|http://archive.ubuntu.com|http://${UBUNTU_MIRROR_PREFIX}archive.ubuntu.com|g; s|http://ports.ubuntu.com|http://${UBUNTU_MIRROR_PREFIX}ports.ubuntu.com|g" {} + && \
     apt-get update && \
     # Pick up security fixes that the base image does not have yet.
-    apt-get upgrade -y -o Acquire::Retries=0 && \
+    apt-get upgrade -y && \
     # Install Python
     apt-get install -y python3 python3-distutils curl && \
     update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
