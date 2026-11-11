@@ -15,6 +15,8 @@ RUN --mount=type=secret,id=pipconf,target=/etc/pip.conf,required=false \
     find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) \
       -exec sed -i "s|http://archive.ubuntu.com|http://${UBUNTU_MIRROR_PREFIX}archive.ubuntu.com|g; s|http://ports.ubuntu.com|http://${UBUNTU_MIRROR_PREFIX}ports.ubuntu.com|g" {} + && \
     apt-get update && \
+    # Pick up security fixes that the base image does not have yet.
+    apt-get upgrade -y -o Acquire::Retries=0 && \
     # Install Python
     apt-get install -y python3 curl && \
     # Align with upstream Python image and don't be externally managed:
