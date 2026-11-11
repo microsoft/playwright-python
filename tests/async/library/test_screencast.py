@@ -88,10 +88,11 @@ async def test_SC_001_screencast_start_delivers_frames_via_on_frame_callback(
         # Each frame must be a valid JPEG (starts with FF D8)
         assert frame[0] == 0xFF
         assert frame[1] == 0xD8
-        dimensions = jpeg_dimensions(frame)
-        # Frame should be scaled down to fit the maximum size.
-        assert dimensions["width"] == 500
-        assert dimensions["height"] == 200
+    # Chromium scales the first frame against the window size it had before the viewport
+    # was applied, so only the last frame is reliably scaled down to fit the maximum size.
+    dimensions = jpeg_dimensions(frames[-1])
+    assert dimensions["width"] == 500
+    assert dimensions["height"] == 200
 
     await context.close()
 

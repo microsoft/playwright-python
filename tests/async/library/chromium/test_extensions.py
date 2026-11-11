@@ -16,12 +16,14 @@
 
 import asyncio
 import re
+import subprocess
 import time
 from pathlib import Path
 from typing import Any, AsyncGenerator, Awaitable, Callable, Dict, List, Optional
 
 import pytest
 
+from playwright._impl._driver import compute_driver_executable
 from playwright.async_api import BrowserContext, BrowserType, CDPSession, Page, Worker
 from tests.server import Server, TestServerRequest
 
@@ -188,11 +190,29 @@ async def test_CR_037_mv3_should_give_access_to_the_service_worker(
     launch_persistent_context: LaunchPersistentContext, assetdir: Path
 ) -> None:
     extension_path = assetdir / "extension-mv3-simple"
-    context = await launch_persistent_context(extension_path)
+    # Python: ask Node.js for the same host timezone as Intl in the upstream test.
+    host_timezone = subprocess.check_output(
+        [
+            compute_driver_executable()[0],
+            "-p",
+            "Intl.DateTimeFormat().resolvedOptions().timeZone",
+        ],
+        text=True,
+    ).strip()
+    timezone_id = "America/Jamaica" if host_timezone == "Asia/Tokyo" else "Asia/Tokyo"
+    context = await launch_persistent_context(extension_path, timezone_id=timezone_id)
     service_worker = await get_service_worker(context)
     assert service_worker
     assert service_worker in context.service_workers
     await poll(lambda: service_worker.evaluate("() => globalThis.MAGIC"), 42)
+    assert await service_worker.evaluate("() => globalThis.initialTimezone") == {
+        "timezone": timezone_id,
+        "localDate": (
+            "2030-01-01T14:00:00.000Z"
+            if timezone_id == "Asia/Tokyo"
+            else "2030-01-02T04:00:00.000Z"
+        ),
+    }
     await context.close()
     assert len(context.background_pages) == 0
 

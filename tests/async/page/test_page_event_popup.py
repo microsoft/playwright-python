@@ -16,9 +16,12 @@
 
 
 import asyncio
+from concurrent.futures import Future
+
+import pytest
 
 from playwright.async_api import Page
-from tests.server import Server
+from tests.server import Server, TestServerRequest, reactor
 
 
 async def test_PO_001_should_work_smoke(page: Page) -> None:
@@ -185,3 +188,44 @@ async def test_PO_013_should_report_popup_opened_from_iframes(
         await frame.evaluate("() => window.open('')")
     popup = await popup_info.value
     assert popup
+
+
+async def test_PO_030_should_finish_loading_after_opening_a_popup_while_a_cross_site_iframe_is_loading(
+    page: Page, server: Server, is_headless_shell: bool
+) -> None:
+    if is_headless_shell:
+        pytest.skip(
+            "fixme: Without site isolation, which is the default in headless shell, the opener never fires the load event"
+        )
+
+    # Python: the reactor thread must not block while the response waits to finish.
+    frame_may_finish: Future[None] = Future()
+
+    def frame(req: TestServerRequest) -> None:
+        def finish() -> None:
+            req.setHeader("Content-Type", "text/html")
+            req.write(b"<body>frame</body>")
+            req.finish()
+
+        frame_may_finish.add_done_callback(lambda _: reactor.callFromThread(finish))
+
+    def opener(req: TestServerRequest) -> None:
+        req.setHeader("Content-Type", "text/html")
+        req.write(
+            f"""
+      <iframe src="{server.CROSS_PROCESS_PREFIX}/frame.html"></iframe>
+      <script>window.open('{server.EMPTY_PAGE}')</script>
+    """.encode()
+        )
+        req.finish()
+
+    server.set_route("/frame.html", frame)
+    server.set_route("/opener.html", opener)
+    async with page.expect_popup() as popup_info:
+        await page.goto(server.PREFIX + "/opener.html", wait_until="commit")
+    popup = await popup_info.value
+    # The iframe is still loading when the popup opens.
+    frame_may_finish.set_result(None)
+    await popup.wait_for_load_state("load")
+    await page.wait_for_load_state("load")
+    assert await page.evaluate("() => document.readyState") == "complete"

@@ -356,13 +356,27 @@ async def test_CK_021_stub_timers_replaces_global_clear_timeout(
 async def test_CK_022_stub_timers_replaces_global_set_interval(
     page: Page, calls: Calls
 ) -> None:
-    await page.evaluate(
-        """async () => {
-      setInterval(window.stub, 500);
+    interval = await page.evaluate(
+        """() => {
+      return setInterval(window.stub, 500);
     }"""
     )
     await page.clock.run_for(1000)
     assert len(calls) == 2
+
+    await page.evaluate(
+        """interval => {
+      clearInterval(interval);
+      setInterval(window.stub);
+    }""",
+        interval,
+    )
+    await page.clock.fast_forward(0)
+    assert len(calls) == 3
+    await page.clock.fast_forward(1000)
+    assert len(calls) == 4
+    await page.clock.run_for(10)
+    assert len(calls) == 14
 
 
 @pytest.mark.usefixtures("install_and_pause")

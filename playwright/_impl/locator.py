@@ -139,6 +139,8 @@ class Locator:
         # Not ported: util.inspect.custom is Node.js only; __repr__() is the Python
         # counterpart.
 
+    # Not ported: selectorForQuery() supports locateOnlyVisible (langs: js).
+
     def _wrap_api_call(
         self,
         func: Callable[[ApiZone], Awaitable[R]],

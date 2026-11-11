@@ -944,6 +944,8 @@ async def prepare_browser_context_params(options: Dict[str, Any]) -> Dict[str, A
             else None
         ),
         "strictSelectors": options.get("strict_selectors"),
+        # Python: locateOnlyVisible is JavaScript-only (docs: langs: js).
+        "locateOnlyVisible": None,
         "selectorEngines": options.get("selectorEngines"),
         "testIdAttributeName": options.get("testIdAttributeName"),
         "proxy": options.get("proxy"),

@@ -113,25 +113,32 @@ async def test_FC_007_should_work_when_file_input_is_attached_to_dom(
 async def test_FC_008_should_work_when_file_input_is_not_attached_to_dom(
     page: Page, assetdir: Path
 ) -> None:
-    async def set_files() -> None:
-        chooser = await page.wait_for_event("filechooser")
-        await chooser.set_files(assetdir / "file-to-upload.txt")
-
-    async def evaluate() -> Any:
-        return await page.evaluate(
-            """async () => {
-      const el = document.createElement('input');
-      el.type = 'file';
-      el.click();
-      await new Promise(x => el.oninput = x);
+    await page.set_content("<button>Open</button>")
+    await page.evaluate(
+        """() => {
+      document.querySelector('button').onclick = () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        window['events'] = [];
+        for (const type of ['cancel', 'input', 'change'])
+          input.addEventListener(type, () => window['events'].push(`${type} ${input.files.length}`));
+        input.click();
+      };
+    }"""
+    )
+    async with page.expect_file_chooser() as chooser_info:
+        await page.click("button")
+    chooser = await chooser_info.value
+    await chooser.set_files(assetdir / "file-to-upload.txt")
+    assert await page.evaluate("() => window['events']") == ["input 1", "change 1"]
+    content = await chooser.element.evaluate(
+        """input => {
       const reader = new FileReader();
       const promise = new Promise(fulfill => reader.onload = fulfill);
-      reader.readAsText(el.files[0]);
+      reader.readAsText(input.files[0]);
       return promise.then(() => reader.result);
     }"""
-        )
-
-    _, content = await asyncio.gather(set_files(), evaluate())
+    )
     assert content == "contents of the file"
 
 

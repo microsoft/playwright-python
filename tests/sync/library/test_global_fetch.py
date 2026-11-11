@@ -421,7 +421,7 @@ def test_FE_019_should_propagate_ignore_https_errors_on_redirects(
 
 
 def test_FE_020_should_return_server_address_from_response(
-    playwright: Playwright, server: Server
+    playwright: Playwright, server: Server, sync_gather: Callable
 ) -> None:
     request = playwright.request.new_context()
     # The second request reuses the keep-alive socket and should report the address as well.
@@ -431,6 +431,34 @@ def test_FE_020_should_return_server_address_from_response(
         assert addr
         assert re.match(r"^(127\.0\.0\.1|::1)$", addr["ipAddress"])
         assert addr["port"] == server.PORT
+
+    def idle(req: TestServerRequest) -> None:
+        # Keep the server socket open beyond its advertised timeout.
+        channel = req.channel
+        req.setHeader("Keep-Alive", "timeout=2")
+        req.write(b"ok")
+        req.finish()
+        # Python: Twisted sets the idle timeout on the HTTP channel.
+        channel.setTimeout(30)
+
+    server.set_route("/idle", idle)
+    server_request, _ = sync_gather(
+        lambda: wait_for_server_request(playwright, server, "/idle"),
+        lambda: request.get(server.PREFIX + "/idle"),
+    )
+    transport = server_request.transport
+    assert transport
+    # Python: poll Twisted's disconnected flag, as req.socket.destroyed in Node.js.
+    deadline = time.monotonic() + 7
+    while not transport.disconnected and time.monotonic() < deadline:
+        time.sleep(0.1)
+    assert transport.disconnected
+    response = request.get(server.EMPTY_PAGE)
+    addr = response.server_addr()
+    assert addr
+    assert set(addr) == {"ipAddress", "port"}
+    assert isinstance(addr["ipAddress"], str)
+    assert addr["port"] == server.PORT
     request.dispose()
 
 

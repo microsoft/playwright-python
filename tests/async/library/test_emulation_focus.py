@@ -299,3 +299,26 @@ async def test_EM_024_should_trigger_hover_state_concurrently(
 
     await browser1.close()
     await browser2.close()
+
+
+async def test_EM_028_should_keep_mouse_drag_when_interacting_with_another_page_context(
+    context_factory: Callable[..., Awaitable[BrowserContext]],
+) -> None:
+    page1 = await (await context_factory()).new_page()
+    page2 = await (await context_factory()).new_page()
+    for page in [page1, page2]:
+        await page.set_content(
+            """
+      <body style="margin: 0">
+        <input type="range" style="margin: 0; width: 200px; height: 20px" onchange="window.changed = true">
+      </body>
+    """
+        )
+    await page1.mouse.move(100, 10)
+    await page1.mouse.down()
+    await page1.mouse.move(150, 10)
+    await page2.mouse.move(50, 50)
+    await page1.mouse.move(180, 10)
+    await page1.mouse.up()
+    assert await page1.evaluate("() => !!window['changed']") is True
+    assert float(await page1.locator("input").input_value()) > 80

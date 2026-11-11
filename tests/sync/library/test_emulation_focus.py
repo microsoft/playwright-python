@@ -298,3 +298,26 @@ def test_EM_024_should_trigger_hover_state_concurrently(
 
     browser1.close()
     browser2.close()
+
+
+def test_EM_028_should_keep_mouse_drag_when_interacting_with_another_page_context(
+    context_factory: Callable[..., BrowserContext],
+) -> None:
+    page1 = context_factory().new_page()
+    page2 = context_factory().new_page()
+    for page in [page1, page2]:
+        page.set_content(
+            """
+      <body style="margin: 0">
+        <input type="range" style="margin: 0; width: 200px; height: 20px" onchange="window.changed = true">
+      </body>
+    """
+        )
+    page1.mouse.move(100, 10)
+    page1.mouse.down()
+    page1.mouse.move(150, 10)
+    page2.mouse.move(50, 50)
+    page1.mouse.move(180, 10)
+    page1.mouse.up()
+    assert page1.evaluate("() => !!window['changed']") is True
+    assert float(page1.locator("input").input_value()) > 80
