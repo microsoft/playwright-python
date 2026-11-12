@@ -324,6 +324,7 @@ scheme["AndroidDeviceLaunchBrowserParams"] = t_object(
             )
         ),
         "strictSelectors": t_optional(t_boolean),
+        "locateOnlyVisible": t_optional(t_boolean),
         "serviceWorkers": t_optional(t_enum(["allow", "block"])),
         "selectorEngines": t_optional(t_array(t_type("SelectorEngine"))),
         "testIdAttributeName": t_optional(t_string),
@@ -783,6 +784,7 @@ scheme["BrowserNewContextParams"] = t_object(
             )
         ),
         "strictSelectors": t_optional(t_boolean),
+        "locateOnlyVisible": t_optional(t_boolean),
         "serviceWorkers": t_optional(t_enum(["allow", "block"])),
         "selectorEngines": t_optional(t_array(t_type("SelectorEngine"))),
         "testIdAttributeName": t_optional(t_string),
@@ -923,6 +925,7 @@ scheme["BrowserNewContextForReuseParams"] = t_object(
             )
         ),
         "strictSelectors": t_optional(t_boolean),
+        "locateOnlyVisible": t_optional(t_boolean),
         "serviceWorkers": t_optional(t_enum(["allow", "block"])),
         "selectorEngines": t_optional(t_array(t_type("SelectorEngine"))),
         "testIdAttributeName": t_optional(t_string),
@@ -1100,6 +1103,7 @@ scheme["BrowserContextInitializer"] = t_object(
                     )
                 ),
                 "strictSelectors": t_optional(t_boolean),
+                "locateOnlyVisible": t_optional(t_boolean),
                 "serviceWorkers": t_optional(t_enum(["allow", "block"])),
                 "selectorEngines": t_optional(t_array(t_type("SelectorEngine"))),
                 "testIdAttributeName": t_optional(t_string),
@@ -1717,6 +1721,7 @@ scheme["BrowserTypeLaunchPersistentContextParams"] = t_object(
             )
         ),
         "strictSelectors": t_optional(t_boolean),
+        "locateOnlyVisible": t_optional(t_boolean),
         "serviceWorkers": t_optional(t_enum(["allow", "block"])),
         "selectorEngines": t_optional(t_array(t_type("SelectorEngine"))),
         "testIdAttributeName": t_optional(t_string),
@@ -1869,6 +1874,7 @@ scheme["ElectronLaunchParams"] = t_object(
             )
         ),
         "strictSelectors": t_optional(t_boolean),
+        "locateOnlyVisible": t_optional(t_boolean),
         "timezoneId": t_optional(t_string),
         "tracesDir": t_optional(t_string),
         "artifactsDir": t_optional(t_string),

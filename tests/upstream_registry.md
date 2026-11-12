@@ -477,6 +477,7 @@ subsystem, add a row to the Subsystems table. Then update this file:
 | `BC-081` | `library/browsercontext-reuse.spec.ts` | reuse {launch, connect} › should continue issuing events after closing the reused page *(2 copies)* |
 | `BC-082` | `library/browsercontext-reuse.spec.ts` | reuse {launch, connect} › should work with routeWebSocket *(2 copies)* |
 | `BC-083` | `library/browsercontext-reuse.spec.ts` | reuse {launch, connect} › should update viewport and media *(2 copies)* |
+| `BC-084` | `library/browsercontext-basic.spec.ts` | should locate only visible elements when configured |
 
 ### BP — Browsers path
 
@@ -2036,6 +2037,7 @@ subsystem, add a row to the Subsystems table. Then update this file:
 | `EM-025` | `library/emulation-coop.spec.ts` | emulation with COOP › should preserve context options |
 | `EM-026` | `library/emulation-coop.spec.ts` | emulation with COOP › should preserve page.emulateMedia |
 | `EM-027` | `library/emulation-coop.spec.ts` | emulation with COOP › should preserve mobile emulation |
+| `EM-028` | `library/emulation-focus.spec.ts` | should keep mouse drag when interacting with another page/context |
 
 ### ER — Page errors and crashes
 
@@ -4020,6 +4022,8 @@ subsystem, add a row to the Subsystems table. Then update this file:
 | `NE-141` | `library/ignorehttpserrors.spec.ts` | should fail with WebSocket if not ignored |
 | `NE-142` | `library/ignorehttpserrors.spec.ts` | serviceWorker should intercept document request |
 | `NE-143` | `page/page-event-network.spec.ts` | should resolve responses after a same-process navigation |
+| `NE-144` | `library/browsercontext-network-event.spec.ts` | should not wait for navigation after background cache revalidation |
+| `NE-145` | `page/page-network-response.spec.ts` | should return source for a module script loaded from cache |
 
 ### OO — OOPIF
 
@@ -4190,6 +4194,7 @@ subsystem, add a row to the Subsystems table. Then update this file:
 | `PO-027` | `library/popup.spec.ts` | should not throttle rAF in the opener page |
 | `PO-028` | `library/popup.spec.ts` | should not throw when click closes popup |
 | `PO-029` | `library/popup.spec.ts` | should load subresources of an about:blank popup when the opener has routes |
+| `PO-030` | `page/page-event-popup.spec.ts` | should finish loading after opening a popup while a cross-site iframe is loading |
 
 ### PR — Proxy
 
@@ -4996,6 +5001,8 @@ subsystem, add a row to the Subsystems table. Then update this file:
 | `SS-094` | `library/screenshot.spec.ts` | element screenshot › page screenshot should capture css transform with device pixels |
 | `SS-095` | `page/page-screenshot.spec.ts` | page screenshot › should capture webgl canvas after its drawing buffer is resized |
 | `SS-096` | `page/page-screenshot.spec.ts` | page screenshot › should not wait for unused font face with failed local() source |
+| `SS-097` | `page/page-screenshot.spec.ts` | page screenshot › should take fullPage screenshots of SVG documents |
+| `SS-098` | `page/page-screenshot.spec.ts` | page screenshot animations › should preserve scroll animation progress during screenshots |
 
 ### ST — Storage
 
@@ -5572,3 +5579,4 @@ subsystem, add a row to the Subsystems table. Then update this file:
 | `WS-038` | `library/route-web-socket.spec.ts` | should work with baseURL regardless of scheme casing |
 | `WS-039` | `library/route-web-socket.spec.ts` | should expose protocols to the route handler |
 | `WS-040` | `library/route-web-socket.spec.ts` | should expose protocols on server-side route |
+| `WS-041` | `library/web-socket.spec.ts` | should navigate while an iframe opens WebSockets |

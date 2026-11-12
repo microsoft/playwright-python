@@ -19,7 +19,7 @@ from typing import List
 
 import pytest
 
-from playwright.async_api import BrowserContext, Error, Page, Request, Response
+from playwright.async_api import BrowserContext, Error, Page, Request, Response, expect
 from tests.server import Server, TestServerRequest
 
 
@@ -195,3 +195,27 @@ async def test_NE_127_should_reject_response_finished_if_context_closes(
     with pytest.raises(Error) as exc_info:
         await finish_task
     assert "closed" in exc_info.value.message
+
+
+async def test_NE_144_should_not_wait_for_navigation_after_background_cache_revalidation(
+    context: BrowserContext, server: Server
+) -> None:
+    def handler(req: TestServerRequest) -> None:
+        req.setHeader("Content-Type", "text/html")
+        req.setHeader("Cache-Control", "s-maxage=900, stale-while-revalidate=31535100")
+        req.setHeader("ETag", '"v1"')
+        if req.getHeader("if-none-match") == '"v1"':
+            req.setResponseCode(304)
+            req.finish()
+            return
+        req.setResponseCode(200)
+        req.write(b"<h1>Hello</h1>")
+        req.finish()
+
+    server.set_route("/swr.html", handler)
+    page1 = await context.new_page()
+    await page1.goto(server.PREFIX + "/swr.html")
+    page2 = await context.new_page()
+    await page2.goto(server.PREFIX + "/swr.html")
+    await page2.wait_for_timeout(1000)
+    await expect(page2.locator("h1")).to_have_text("Hello")

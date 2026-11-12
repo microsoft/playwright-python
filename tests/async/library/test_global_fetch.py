@@ -424,6 +424,33 @@ async def test_FE_020_should_return_server_address_from_response(
         assert addr
         assert re.match(r"^(127\.0\.0\.1|::1)$", addr["ipAddress"])
         assert addr["port"] == server.PORT
+
+    def idle(req: TestServerRequest) -> None:
+        # Keep the server socket open beyond its advertised timeout.
+        channel = req.channel
+        req.setHeader("Keep-Alive", "timeout=2")
+        req.write(b"ok")
+        req.finish()
+        # Python: Twisted sets the idle timeout on the HTTP channel.
+        channel.setTimeout(30)
+
+    server.set_route("/idle", idle)
+    server_request, _ = await asyncio.gather(
+        server.wait_for_request("/idle"), request.get(server.PREFIX + "/idle")
+    )
+    transport = server_request.transport
+    assert transport
+    # Python: poll Twisted's disconnected flag, as req.socket.destroyed in Node.js.
+    deadline = time.monotonic() + 7
+    while not transport.disconnected and time.monotonic() < deadline:
+        await asyncio.sleep(0.1)
+    assert transport.disconnected
+    response = await request.get(server.EMPTY_PAGE)
+    addr = await response.server_addr()
+    assert addr
+    assert set(addr) == {"ipAddress", "port"}
+    assert isinstance(addr["ipAddress"], str)
+    assert addr["port"] == server.PORT
     await request.dispose()
 
 

@@ -16,6 +16,7 @@
 
 
 import asyncio
+import os
 import re
 import sys
 from pathlib import Path
@@ -61,11 +62,13 @@ def wait_for(page: Page, awaitable: "Awaitable[T]") -> T:
 
 @pytest.fixture(autouse=True)
 def before_each(browser_name: str, browser_channel: Optional[str]) -> None:
+    if os.environ.get("CI") and sys.platform == "linux" and browser_name == "webkit":
+        pytest.skip(
+            "crash event takes about a minute to arrive and often exceeds the test timeout"
+        )
     if browser_channel == "webkit-wsl":
         pytest.skip("WebKit on WSL is even slower than above ^^ - skipping for now")
     if browser_name == "chromium" and host_platform().startswith("ubuntu24.04"):
-        pytest.skip("never dispatches the crash event")
-    if browser_name == "webkit" and host_platform().startswith("debian13"):
         pytest.skip("never dispatches the crash event")
     if browser_name != "chromium":
         pytest.skip(

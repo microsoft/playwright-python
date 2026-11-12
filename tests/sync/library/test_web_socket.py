@@ -21,7 +21,7 @@ import pytest
 
 from playwright.sync_api import Error, Page, WebSocket
 from tests.helpers import web_socket_server
-from tests.server import Server, WebSocketProtocol
+from tests.server import Server, TestServerRequest, WebSocketProtocol
 from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
 
 T = TypeVar("T")
@@ -397,3 +397,26 @@ def test_WS_014_should_send_extra_http_headers_on_web_socket_handshake_from_a_wo
     )
     request = wait_for(page, request_promise)
     assert request.headers["foo"] == "bar"
+
+
+def test_WS_041_should_navigate_while_an_iframe_opens_web_sockets(
+    page: Page, server: Server
+) -> None:
+    def parent(req: TestServerRequest) -> None:
+        req.setHeader("Content-Type", "text/html")
+        req.write(b'<iframe src="/child"></iframe>')
+        req.finish()
+
+    def child(req: TestServerRequest) -> None:
+        req.setHeader("Content-Type", "text/html")
+        req.write(
+            b"<script>setInterval(() => new WebSocket('ws://' + location.host + '/ws'), 5)</script>"
+        )
+        req.finish()
+
+    server.set_route("/parent", parent)
+    server.set_route("/child", child)
+    for _ in range(100):
+        page.goto(server.PREFIX + "/parent")
+    assert len(page.frames) == 2
+    assert page.evaluate("() => 1 + 1") == 2

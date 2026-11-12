@@ -510,6 +510,34 @@ def test_NE_051_should_return_body_for_image_with_evicted_body(
     assert base64.b64encode(body).decode() == image_base64
 
 
+def test_NE_145_should_return_source_for_a_module_script_loaded_from_cache(
+    page: Page, server: Server
+) -> None:
+    source = "\n".join(f"export function f{i}() {{ return {i}; }}" for i in range(400))
+
+    def module(req: TestServerRequest) -> None:
+        req.setResponseCode(200)
+        req.setHeader("Content-Type", "text/javascript")
+        req.setHeader("Cache-Control", "max-age=3600")
+        req.write(source.encode())
+        req.finish()
+
+    def document(req: TestServerRequest) -> None:
+        req.setHeader("Content-Type", "text/html")
+        req.write(b'<script type="module" src="/module.js"></script>')
+        req.finish()
+
+    server.set_route("/module.js", module)
+    server.set_route("/module.html", document)
+    # Firefox stores module bytecode in the HTTP cache after several loads.
+    for _ in range(5):
+        with page.expect_response("**/module.js") as response_info:
+            page.goto(server.PREFIX + "/module.html")
+        response = response_info.value
+        assert response.body().decode() == source
+        page.wait_for_timeout(500)
+
+
 def test_NE_052_should_bypass_disk_cache_when_page_interception_is_enabled(
     page: Page, server: Server
 ) -> None:

@@ -570,6 +570,7 @@ class BrowserContextInitializerOptions(TypedDict):
     baseURL: NotRequired[str]
     recordVideo: NotRequired[BrowserContextInitializerOptionsRecordVideo]
     strictSelectors: NotRequired[bool]
+    locateOnlyVisible: NotRequired[bool]
     serviceWorkers: NotRequired[Literal["allow", "block"]]
     selectorEngines: NotRequired[List[SelectorEngine]]
     testIdAttributeName: NotRequired[str]

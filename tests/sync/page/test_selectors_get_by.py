@@ -108,6 +108,39 @@ def test_SE_077_get_by_label_should_work(page: Page) -> None:
         page.locator("div").get_by_label("Name").evaluate("e => e.nodeName") == "INPUT"
     )
 
+    page.set_content(
+        """
+    <label for="city">City</label><my-field id="city" role="combobox">Pick one</my-field>
+    <label>Street <my-field id="street" role="combobox">Pick one</my-field></label>
+  """
+    )
+    page.evaluate(
+        """() => {
+    customElements.define('my-field', class extends HTMLElement {
+      static formAssociated = true;
+      constructor() {
+        super();
+        this.attachInternals();
+      }
+    });
+  }"""
+    )
+    assert page.evaluate(
+        "() => [...document.querySelectorAll('label')].map(label => label.control?.id)"
+    ) == ["city", "street"]
+    assert page.get_by_label("City").evaluate_all(
+        "elements => elements.map(e => e.id)"
+    ) == ["city"]
+    assert page.get_by_label("Street").evaluate_all(
+        "elements => elements.map(e => e.id)"
+    ) == ["street"]
+    assert page.get_by_role("combobox", name="City", exact=True).evaluate_all(
+        "elements => elements.map(e => e.id)"
+    ) == ["city"]
+    assert page.get_by_role("combobox", name="Street", exact=True).evaluate_all(
+        "elements => elements.map(e => e.id)"
+    ) == ["street"]
+
 
 def test_SE_078_get_by_label_should_work_with_nested_elements(
     page: Page,

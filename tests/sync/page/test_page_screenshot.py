@@ -301,6 +301,27 @@ def test_SS_011_page_screenshot_should_take_full_page_screenshots(
 
 
 @pytest.mark.usefixtures("skip_firefox_headed")
+def test_SS_097_page_screenshot_should_take_full_page_screenshots_of_svg_documents(
+    page: Page, server: Server
+) -> None:
+    page.set_viewport_size({"width": 500, "height": 500})
+
+    def handler(req: TestServerRequest) -> None:
+        req.setHeader("Content-Type", "image/svg+xml")
+        req.write(
+            b'<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1000"><rect width="800" height="1000" fill="orange"/></svg>'
+        )
+        req.finish()
+
+    server.set_route("/full-page.svg", handler)
+    page.goto(server.PREFIX + "/full-page.svg")
+    svg_screenshot = decode_image(page.screenshot(full_page=True))
+    assert svg_screenshot.width == 800
+    assert svg_screenshot.height == 1000
+    assert pixel(svg_screenshot, 799, 999) == (255, 165, 0, 255)
+
+
+@pytest.mark.usefixtures("skip_firefox_headed")
 def test_SS_012_page_screenshot_should_take_full_page_screenshots_and_mask_elements_outside_of_it(
     page: Page, server: Server, assert_to_be_golden: GoldenAssert
 ) -> None:
@@ -943,6 +964,30 @@ def test_SS_051_page_screenshot_mask_option_should_remove_elements_based_on_attr
     )
     display = page.locator("div").nth(5).evaluate("element => element.style.display")
     assert display == ""
+
+
+def test_SS_098_page_screenshot_animations_should_preserve_scroll_animation_progress_during_screenshots(
+    page: Page, utils: Utils
+) -> None:
+    page.set_content(
+        """
+      <style>
+        @keyframes reveal { from { opacity: 0 } to { opacity: 1 } }
+        body { timeline-scope: --progress; }
+        #scroller { width: 100px; overflow-x: auto; scroll-timeline: --progress x; }
+        #content { width: 200px; height: 20px; }
+        #indicator { width: 40px; height: 40px; background: red;
+          animation: reveal linear both; animation-timeline: --progress; }
+      </style>
+      <div id="scroller"><div id="content"></div></div>
+      <div id="indicator"></div>
+    """
+    )
+    utils.rafraf(page)
+    expected = page.screenshot(animations="allow")
+    actual = page.screenshot(animations="disabled")
+    assert compare_images(actual, expected) is None
+    assert page.screenshot(animations="allow") == expected
 
 
 def test_SS_052_page_screenshot_animations_should_not_capture_infinite_css_animation(
