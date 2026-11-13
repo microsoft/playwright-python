@@ -15,6 +15,7 @@
 """Port of tests/page/page-evaluate.spec.ts."""
 
 import datetime
+import json
 import math
 import os
 import re
@@ -327,11 +328,32 @@ def test_EV_031_should_include_a_non_error_rejection_value_in_the_error_message(
     assert "null" in exc_info.value.message
 
 
+@pytest.mark.xfail(
+    reason="python: protocol validation exceeds the recursion limit for a 200-level evaluation argument",
+    strict=True,
+)
 def test_EV_032_should_return_complex_objects(page: Page) -> None:
     object = {"foo": "bar!"}
     result = page.evaluate("a => a", object)
     assert result is not object
     assert result == object
+
+    argument: Any = 0
+    # Chromium rejects protocol arguments at 60 levels, WebKit at 200.
+    for _ in range(200):
+        argument = {"children": [argument]}
+    assert page.evaluate("value => JSON.stringify(value).length", argument) == len(
+        json.dumps(argument, separators=(",", ":"))
+    )
+
+    # An argument that is too deep rejects and does not hang.
+    for _ in range(800):
+        argument = {"children": [argument]}
+    with pytest.raises(Error) as exc_info:
+        page.evaluate("value => JSON.stringify(value).length", argument)
+    assert re.search(
+        "Maximum call stack size exceeded|too much recursion", exc_info.value.message
+    )
 
 
 def test_EV_033_should_return_na_n(page: Page) -> None:

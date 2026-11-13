@@ -15,12 +15,13 @@
 """Port of tests/page/page-event-pageerror.spec.ts."""
 
 
-from typing import Optional
+import asyncio
+from typing import List, Optional
 
 import pytest
 
 from playwright.async_api import Page
-from tests.server import Server, TestServerRequest
+from tests.server import Server, TestServerRequest, reactor
 
 
 def expect_failure(request: pytest.FixtureRequest, reason: str) -> None:
@@ -349,3 +350,53 @@ async def test_ER_013_should_fire_illegal_character_error(
         assert "Invalid character" in error.message
     else:
         assert "illegal character" in error.message
+
+
+async def test_ER_022_should_not_fire_for_a_caught_fetch_rejected_by_a_pending_navigation(
+    page: Page, server: Server
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+    errors: List[str] = []
+    page.on("pageerror", lambda error: errors.append(error.message))
+    loop = asyncio.get_running_loop()
+    wait_response: asyncio.Future[TestServerRequest] = loop.create_future()
+    replacement_response: asyncio.Future[TestServerRequest] = loop.create_future()
+    # Python: the server handlers run on the reactor thread.
+    server.set_route(
+        "/wait",
+        lambda request: loop.call_soon_threadsafe(wait_response.set_result, request),
+    )
+    server.set_route(
+        "/replacement",
+        lambda request: loop.call_soon_threadsafe(
+            replacement_response.set_result, request
+        ),
+    )
+    async with page.expect_event(
+        "console", predicate=lambda message: message.text == "fetch done"
+    ) as fetch_done:
+        # Chromium does not run evaluate during a pending navigation, so the page starts the second fetch.
+        await page.evaluate(
+            """() => {
+    void fetch('/wait').catch(() => {}).then(() => fetch('/empty.html')).catch(() => {}).then(() => console.log('fetch done'));
+  }"""
+        )
+        navigation = asyncio.create_task(page.goto(server.PREFIX + "/replacement"))
+        response = await replacement_response
+        # WebKit rejects the second fetch, because the document is about to go away.
+        reactor.callFromThread((await wait_response).finish)
+        await fetch_done.value
+
+        def finish() -> None:
+            response.write(b"replacement")
+            response.finish()
+
+        reactor.callFromThread(finish)
+        await navigation
+    async with page.expect_event("pageerror") as error_info:
+        await page.evaluate(
+            "() => setTimeout(() => { throw new Error('genuine error'); }, 0)"
+        )
+    error = await error_info.value
+    assert error.message == "genuine error"
+    assert errors == ["genuine error"]
