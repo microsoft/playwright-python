@@ -146,7 +146,10 @@ left).
 
 Use the `playwright-roll` skill. On CI, `.github/workflows/agent-roll.yml` runs it and opens the
 PR, on Mon, Wed and Fri at night unless a roll PR is open. To roll at another time, start
-the workflow by hand with a branch, a tag or a commit.
+the workflow by hand. Its `branch` input is the branch to roll, in both repositories:
+`main` rolls to the tip of upstream `main`, and `release-1.xx` rolls to the tip of
+upstream `release-1.xx`. The PR goes to that branch. The `ref` input rolls to another
+upstream branch, tag or commit.
 
 ## Commits and PRs
 
