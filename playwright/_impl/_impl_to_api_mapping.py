@@ -13,14 +13,15 @@
 # limitations under the License.
 
 import inspect
+import types
 from typing import Any, Callable, Dict, List, Optional, Sequence, Union
+from weakref import WeakValueDictionary
 
 from playwright._impl._errors import Error
 from playwright._impl._map import Map
 from playwright._impl._signature import signature
 
 API_ATTR = "_pw_api_instance_"
-IMPL_ATTR = "_pw_impl_instance_"
 
 
 class ImplWrapper:
@@ -34,6 +35,9 @@ class ImplWrapper:
 class ImplToApiMapping:
     def __init__(self) -> None:
         self._mapping: Dict[type, type] = {}
+        self._wrapped_handlers: WeakValueDictionary[Any, Callable[..., None]] = (
+            WeakValueDictionary()
+        )
 
     def register(self, impl_class: type, api_class: type) -> None:
         self._mapping[impl_class] = api_class
@@ -119,6 +123,23 @@ class ImplToApiMapping:
         except RecursionError:
             raise Error("Maximum argument depth exceeded")
 
+    def _wrap_handler_key(self, handler: Callable[..., Any]) -> Any:
+        # Built-in and bound methods may return a fresh wrapper object on each
+        # attribute lookup, so key them by underlying receiver and function identity
+        # without mutating immutable, built-in, or __slots__ objects.
+        if inspect.ismethod(handler):
+            return ("method", id(handler.__self__), id(handler.__func__))
+        if isinstance(
+            handler, (types.BuiltinFunctionType, types.MethodWrapperType)
+        ) and hasattr(handler, "__self__"):
+            return (
+                "builtin_method",
+                id(handler.__self__),
+                getattr(handler, "__qualname__", None),
+                handler.__name__,
+            )
+        return id(handler)
+
     def wrap_handler(self, handler: Callable[..., Any]) -> Callable[..., None]:
         def wrapper_func(*args: Any) -> Any:
             parameters = signature(handler).parameters
@@ -142,19 +163,9 @@ class ImplToApiMapping:
                 *list(map(lambda a: self.from_maybe_impl(a), args))[:arg_count]
             )
 
-        if inspect.ismethod(handler):
-            wrapper = getattr(handler.__self__, IMPL_ATTR + handler.__name__, None)
-            if not wrapper:
-                wrapper = wrapper_func
-                setattr(
-                    handler.__self__,
-                    IMPL_ATTR + handler.__name__,
-                    wrapper,
-                )
-            return wrapper
-
-        wrapper = getattr(handler, IMPL_ATTR, None)
+        key = self._wrap_handler_key(handler)
+        wrapper = self._wrapped_handlers.get(key)
         if not wrapper:
             wrapper = wrapper_func
-            setattr(handler, IMPL_ATTR, wrapper)
+            self._wrapped_handlers[key] = wrapper
         return wrapper
