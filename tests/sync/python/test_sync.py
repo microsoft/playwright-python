@@ -23,7 +23,7 @@ import textwrap
 import time
 from datetime import timedelta
 from pathlib import Path
-from typing import Any, Dict, Generator, List
+from typing import Any, Dict, Generator, List, Set
 
 import pytest
 from greenlet import greenlet
@@ -87,11 +87,22 @@ def test_dialog_repr(page: Page) -> None:
 
 
 def test_console_repr(page: Page) -> None:
-    messages = []
-    page.on("console", lambda m: messages.append(m))
+    # Regression test for https://github.com/microsoft/playwright-python/issues/3340.
+    messages: List[ConsoleMessage] = []
+    page.on("console", messages.append)
     page.evaluate('() => console.log("Hello world")')
     message = messages[0]
     assert repr(message) == f"<ConsoleMessage type={message.type} text={message.text}>"
+
+    page.remove_listener("console", messages.append)
+    page.evaluate('() => console.log("removed")')
+    assert messages == [message]
+
+    once_messages: Set[ConsoleMessage] = set()
+    page.once("console", once_messages.add)
+    page.evaluate('() => { console.log("once"); console.log("ignored"); }')
+    assert [m.text for m in once_messages] == ["once"]
+    assert messages == [message]
 
 
 def test_sync_wait_for_event_raise(page: Page) -> None:

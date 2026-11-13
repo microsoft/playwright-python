@@ -13,14 +13,15 @@
 # limitations under the License.
 
 import inspect
-from typing import Any, Callable, Dict, List, Optional, Sequence, Union
+from types import BuiltinMethodType, MethodWrapperType
+from typing import Any, Callable, Dict, Hashable, List, Optional, Sequence, Union
+from weakref import WeakValueDictionary
 
 from playwright._impl._errors import Error
 from playwright._impl._map import Map
 from playwright._impl._signature import signature
 
 API_ATTR = "_pw_api_instance_"
-IMPL_ATTR = "_pw_impl_instance_"
 
 
 class ImplWrapper:
@@ -34,6 +35,9 @@ class ImplWrapper:
 class ImplToApiMapping:
     def __init__(self) -> None:
         self._mapping: Dict[type, type] = {}
+        self._wrapped_handlers: WeakValueDictionary[Hashable, Callable[..., None]] = (
+            WeakValueDictionary()
+        )
 
     def register(self, impl_class: type, api_class: type) -> None:
         self._mapping[impl_class] = api_class
@@ -120,41 +124,48 @@ class ImplToApiMapping:
             raise Error("Maximum argument depth exceeded")
 
     def wrap_handler(self, handler: Callable[..., Any]) -> Callable[..., None]:
+        # Cache without modifying user objects or keeping unused handlers alive.
+        # A bound method can be a new object on each attribute lookup.
+        key: Hashable = id(handler)
+        if inspect.ismethod(handler):
+            key = (id(handler.__self__), id(handler.__func__))
+        elif (
+            isinstance(handler, (BuiltinMethodType, MethodWrapperType))
+            and handler.__self__ is not None
+        ):
+            key = (id(handler.__self__), type(handler), handler.__qualname__)
+        wrapper = self._wrapped_handlers.get(key)
+        if wrapper is not None:
+            return wrapper
+
         def wrapper_func(*args: Any) -> Any:
-            parameters = signature(handler).parameters
-            has_varargs = any(
-                parameter.kind == inspect.Parameter.VAR_POSITIONAL
-                for parameter in parameters.values()
-            )
-            arg_count = (
-                len(args)
-                if has_varargs
-                else sum(
-                    parameter.kind
-                    in (
-                        inspect.Parameter.POSITIONAL_ONLY,
-                        inspect.Parameter.POSITIONAL_OR_KEYWORD,
-                    )
+            try:
+                parameters = signature(handler).parameters
+            except ValueError:
+                if not isinstance(handler, (BuiltinMethodType, MethodWrapperType)):
+                    raise
+                # Some built-ins, such as set.add, have no inspectable signature.
+                arg_count = len(args)
+            else:
+                has_varargs = any(
+                    parameter.kind == inspect.Parameter.VAR_POSITIONAL
                     for parameter in parameters.values()
                 )
-            )
+                arg_count = (
+                    len(args)
+                    if has_varargs
+                    else sum(
+                        parameter.kind
+                        in (
+                            inspect.Parameter.POSITIONAL_ONLY,
+                            inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                        )
+                        for parameter in parameters.values()
+                    )
+                )
             return handler(
                 *list(map(lambda a: self.from_maybe_impl(a), args))[:arg_count]
             )
 
-        if inspect.ismethod(handler):
-            wrapper = getattr(handler.__self__, IMPL_ATTR + handler.__name__, None)
-            if not wrapper:
-                wrapper = wrapper_func
-                setattr(
-                    handler.__self__,
-                    IMPL_ATTR + handler.__name__,
-                    wrapper,
-                )
-            return wrapper
-
-        wrapper = getattr(handler, IMPL_ATTR, None)
-        if not wrapper:
-            wrapper = wrapper_func
-            setattr(handler, IMPL_ATTR, wrapper)
-        return wrapper
+        self._wrapped_handlers[key] = wrapper_func
+        return wrapper_func
