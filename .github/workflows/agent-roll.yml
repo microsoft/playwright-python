@@ -1,18 +1,24 @@
-# Rolls Playwright Python to a new microsoft/playwright commit, the tip of main unless told
-# otherwise. Starts the Playwright bot with the task below. The bot does it with the
-# playwright-roll skill, and opens the pull request as the app.
+# Rolls a branch of Playwright Python to a new microsoft/playwright commit: the tip of the branch
+# with the same name, unless told otherwise. So main rolls to main, and release-1.xx rolls to
+# release-1.xx. Starts the Playwright bot with the task below. The bot starts from the branch,
+# does the roll with the playwright-roll skill of that branch, and opens the pull request to the
+# branch as the app.
 name: "Agent: roll Playwright"
 
 on:
   # Mon, Wed and Fri at 9:17 UTC: 2:17 at night Pacific time, 1:17 in winter. Not on the hour, when
-  # GitHub delays scheduled runs. A scheduled roll skips while a roll pull request is open.
+  # GitHub delays scheduled runs. A scheduled roll is a roll of main. It skips while a roll pull
+  # request to main is open.
   schedule:
   - cron: "17 9 * * 1,3,5"
   workflow_dispatch:
     inputs:
-      ref:
-        description: "microsoft/playwright branch, tag or commit to roll to"
+      branch:
+        description: "Branch to roll, in microsoft/playwright-python and in microsoft/playwright: main or release-1.xx"
         default: "main"
+      ref:
+        description: "microsoft/playwright branch, tag or commit to roll to; empty for the tip of the branch above"
+        default: ""
 
 permissions: {}
 
@@ -24,6 +30,8 @@ jobs:
     timeout-minutes: 5
     permissions:
       pull-requests: read
+    env:
+      BRANCH: ${{ inputs.branch || 'main' }}
     steps:
     # A manual run rolls anyway: a maintainer asked for it. The skill gives the title of a roll.
     - name: Look for an open roll pull request
@@ -33,11 +41,11 @@ jobs:
         GH_TOKEN: ${{ github.token }}
         GH_REPO: ${{ github.repository }}
       run: |
-        pr=$(gh pr list --state open --author app/microsoft-playwright-automation --json number,title \
+        pr=$(gh pr list --state open --base "$BRANCH" --author app/microsoft-playwright-automation --json number,title \
           --jq '[.[] | select(.title | startswith("chore: roll Playwright to")) | .number] | first // empty')
         if [[ -n "$pr" ]]; then
           echo "pr=$pr" >> "$GITHUB_OUTPUT"
-          echo "Skipped: roll pull request #$pr is open." >> "$GITHUB_STEP_SUMMARY"
+          echo "Skipped: roll pull request #$pr to $BRANCH is open." >> "$GITHUB_STEP_SUMMARY"
         fi
     - uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
       if: steps.open.outputs.pr == ''
@@ -52,8 +60,15 @@ jobs:
       if: steps.open.outputs.pr == ''
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
-        REF: ${{ inputs.ref || 'main' }}
+        REF: ${{ inputs.ref || inputs.branch || 'main' }}
       run: |
-        task="Roll Playwright Python to $REF of microsoft/playwright, as the playwright-roll skill, .claude/skills/playwright-roll/SKILL.md, says. When the roll is not complete, open the pull request anyway: the pin and the generated files are a start for a maintainer. Say in it what is left."
+        # The bot checks the name again. This check gives the error here, in the run that a
+        # maintainer started.
+        if [[ ! "$BRANCH" =~ ^(main|release-[0-9]+\.[0-9]+)$ ]]; then
+          echo "::error::branch must be main or release-1.xx, got '$BRANCH'"
+          exit 1
+        fi
+        task="Roll the $BRANCH branch of Playwright Python to $REF of microsoft/playwright, as the playwright-roll skill, .claude/skills/playwright-roll/SKILL.md, says. Your checkout is the $BRANCH branch, not main: the old pin is its DRIVER_VERSION. The pull request goes to the $BRANCH branch. In the pull-request call, base is $BRANCH, commit is the output of git rev-parse origin/$BRANCH, and the patch is against that commit. When the roll is not complete, open the pull request anyway: the pin and the generated files are a start for a maintainer. Say in it what is left."
         gh workflow run task.yml --repo microsoft/devops.playwright.dev --ref main \
-          -f repo="$GITHUB_REPOSITORY" -f task="$task"
+          -f repo="$GITHUB_REPOSITORY" -f branch="$BRANCH" -f task="$task"
+        echo "Started the roll of $BRANCH to $REF of microsoft/playwright." >> "$GITHUB_STEP_SUMMARY"
