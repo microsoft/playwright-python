@@ -23,7 +23,7 @@ from ..utils import Utils
 
 
 def test_LO_193_highlight_should_accept_a_css_string_style(
-    browser: Browser, server: Server, browser_name: str, is_frozen_webkit: bool
+    browser: Browser, server: Server, is_frozen_webkit: bool
 ) -> None:
     if is_frozen_webkit:
         pytest.skip("frozen WebKit")
@@ -40,14 +40,16 @@ def test_LO_193_highlight_should_accept_a_css_string_style(
     expect(highlight).to_be_visible()
     style = highlight.evaluate(
         """el => ({
-    outline: el.style.outline,
+    // Browsers serialize the 'outline' shorthand in different orders, check the longhands.
+    outlineWidth: el.style.outlineWidth,
+    outlineStyle: el.style.outlineStyle,
+    outlineColor: el.style.outlineColor,
     backgroundColor: el.style.backgroundColor,
   })"""
     )
-    if browser_name == "chromium" or browser_name == "firefox":
-        assert style["outline"] == "rgb(255, 0, 0) solid 3px"
-    else:
-        assert style["outline"] == "3px solid rgb(255, 0, 0)"
+    assert style["outlineWidth"] == "3px"
+    assert style["outlineStyle"] == "solid"
+    assert style["outlineColor"] == "rgb(255, 0, 0)"
     assert style["backgroundColor"] == "rgba(0, 255, 0, 0.25)"
 
     context.close()
