@@ -15,12 +15,14 @@
 """Port of tests/page/page-event-pageerror.spec.ts."""
 
 
-from typing import Optional
+import asyncio
+from typing import Any, Callable, List, Optional
 
 import pytest
 
+from playwright._impl._greenlets import wait_for_future
 from playwright.sync_api import Page
-from tests.server import Server, TestServerRequest
+from tests.server import Server, TestServerRequest, reactor
 
 
 def expect_failure(request: pytest.FixtureRequest, reason: str) -> None:
@@ -349,3 +351,59 @@ def test_ER_013_should_fire_illegal_character_error(
         assert "Invalid character" in error.message
     else:
         assert "illegal character" in error.message
+
+
+def test_ER_022_should_not_fire_for_a_caught_fetch_rejected_by_a_pending_navigation(
+    page: Page, server: Server, sync_gather: Callable[..., List[Any]]
+) -> None:
+    page.goto(server.EMPTY_PAGE)
+    errors: List[str] = []
+    page.on("pageerror", lambda error: errors.append(error.message))
+    loop = page._loop
+    wait_response: asyncio.Future[TestServerRequest] = loop.create_future()
+    replacement_response: asyncio.Future[TestServerRequest] = loop.create_future()
+    # Python: the server handlers run on the reactor thread.
+    server.set_route(
+        "/wait",
+        lambda request: loop.call_soon_threadsafe(wait_response.set_result, request),
+    )
+    server.set_route(
+        "/replacement",
+        lambda request: loop.call_soon_threadsafe(
+            replacement_response.set_result, request
+        ),
+    )
+    with page.expect_event(
+        "console", predicate=lambda message: message.text == "fetch done"
+    ) as fetch_done:
+        # Chromium does not run evaluate during a pending navigation, so the page starts the second fetch.
+        page.evaluate(
+            """() => {
+    void fetch('/wait').catch(() => {}).then(() => fetch('/empty.html')).catch(() => {}).then(() => console.log('fetch done'));
+  }"""
+        )
+
+        def finish_navigation() -> None:
+            wait_for_future(loop, page._dispatcher_fiber, replacement_response)
+            response = replacement_response.result()
+            # WebKit rejects the second fetch, because the document is about to go away.
+            wait_for_future(loop, page._dispatcher_fiber, wait_response)
+            reactor.callFromThread(wait_response.result().finish)
+            fetch_done.value
+
+            def finish() -> None:
+                response.write(b"replacement")
+                response.finish()
+
+            reactor.callFromThread(finish)
+
+        sync_gather(
+            lambda: page.goto(server.PREFIX + "/replacement"), finish_navigation
+        )
+    with page.expect_event("pageerror") as error_info:
+        page.evaluate(
+            "() => setTimeout(() => { throw new Error('genuine error'); }, 0)"
+        )
+    error = error_info.value
+    assert error.message == "genuine error"
+    assert errors == ["genuine error"]

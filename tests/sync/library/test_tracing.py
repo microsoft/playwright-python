@@ -152,6 +152,8 @@ def test_TR_001_should_collect_trace_with_resources_but_no_js(
     assetdir: Path,
     tmp_path: Path,
 ) -> None:
+    # Python: the driver is out of process, so the in-process internalBody hook
+    # and its fetchedBodies checks do not apply (mode !== 'default' upstream).
     context.tracing.start(screenshots=True, snapshots=True)
     page.goto(server.PREFIX + "/frames/frame.html")
     page.set_content("<button>Click</button>")
@@ -189,6 +191,8 @@ def test_TR_001_should_collect_trace_with_resources_but_no_js(
     script = resource_snapshot(events, "script.js")
     assert script
     assert "_file" not in script["snapshot"]["response"]["content"]
+    assert script["snapshot"]["response"]["bodySize"] > 0
+    assert script["snapshot"]["response"]["headersSize"] > 0
 
 
 def test_TR_002_should_use_the_correct_title_for_event_driven_callbacks(
