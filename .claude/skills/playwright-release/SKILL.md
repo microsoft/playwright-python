@@ -1,6 +1,6 @@
 ---
 name: playwright-release
-description: Prepare a Playwright Python release. Checks open bugs, adds Python-specific changes to the Python release notes in microsoft/playwright, opens the release PR, cuts the release branch, and saves a draft GitHub release. Never publishes the release.
+description: Prepare a new Playwright Python release, v1.xx.0, with the full release notes. For a patch release of a release branch, use playwright-patch-release. Checks open bugs, adds Python-specific changes to the Python release notes in microsoft/playwright, opens the release PR, cuts the release branch, and saves a draft GitHub release. Never publishes the release.
 ---
 
 # Preparing a Playwright Python release
@@ -9,6 +9,10 @@ In this skill, `1.xx` is the release (for example `1.64`), and `v1.xx.0` is its 
 `.upstream/` is the checkout of `microsoft/playwright` at the commit in
 `DRIVER_VERSION` (`python scripts/upstream.py checkout`). Only read from it: do not
 commit or switch branches there.
+
+This skill prepares `v1.xx.0`, the first release of a branch, with the full release
+notes. A patch release, `v1.xx.1` and later, has only the list of the fixes: use the
+`playwright-patch-release` skill for it.
 
 Remotes: find the remote for `microsoft/playwright-python` with `git remote -v`.
 The commands below call it `upstream`.

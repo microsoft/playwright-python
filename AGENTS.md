@@ -151,6 +151,15 @@ the workflow by hand. Its `branch` input is the branch to roll, in both reposito
 upstream `release-1.xx`. The PR goes to that branch. The `ref` input rolls to another
 upstream branch, tag or commit.
 
+## Releases
+
+The `playwright-release` skill prepares `v1.xx.0`: the full release notes, the release PR
+and the release branch. The `playwright-patch-release` skill prepares `v1.xx.1` and later
+from `release-1.xx`: the notes are the list of the fixes in `microsoft/playwright` between
+the driver of the previous release of the branch and the driver of its tip. On CI, `.github/workflows/agent-patch-release.yml` runs it: start the workflow by
+hand, with the release branch as its `branch` input. Both end with a draft GitHub release.
+A new run replaces the draft. Only a maintainer publishes it.
+
 ## Commits and PRs
 
 - Never push without "push", "upload", "create PR" or "ship it" in my message, also not
