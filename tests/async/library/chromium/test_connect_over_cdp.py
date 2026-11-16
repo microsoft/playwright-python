@@ -330,9 +330,13 @@ async def test_CD_007_should_write_traces_to_provided_artifacts_dir_on_connect_o
         await context.tracing.start(name="cdp-trace", snapshots=True, screenshots=True)
         page = await context.new_page()
         await page.set_content("<button>Hello</button>")
+        # The trace file of a discarded chunk is removed, check it before the chunk stops.
+        deadline = asyncio.get_running_loop().time() + 5
+        while not (artifacts_dir / "cdp-trace.trace").exists():
+            assert asyncio.get_running_loop().time() < deadline
+            await asyncio.sleep(0.1)
         await context.tracing.stop_chunk()
 
-        assert (artifacts_dir / "cdp-trace.trace").exists()
         assert (artifacts_dir / "cdp-trace.network").exists()
         assert (artifacts_dir / "resources").exists()
 

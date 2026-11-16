@@ -303,7 +303,10 @@ async def test_EM_024_should_trigger_hover_state_concurrently(
 
 async def test_EM_028_should_keep_mouse_drag_when_interacting_with_another_page_context(
     context_factory: Callable[..., Awaitable[BrowserContext]],
+    headless: bool,
 ) -> None:
+    if not headless:
+        pytest.skip("Stray mouse events mess up the test")
     page1 = await (await context_factory()).new_page()
     page2 = await (await context_factory()).new_page()
     for page in [page1, page2]:

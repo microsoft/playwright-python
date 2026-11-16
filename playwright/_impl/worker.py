@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING, Any, Awaitable, Callable, Optional
 
 from playwright._impl.channel_owner import ChannelOwner, api_call, from_channel
 from playwright._impl.console_message import ConsoleMessage
-from playwright._impl.errors import TargetClosedError, is_target_closed_error
+from playwright._impl.errors import TargetClosedError
 from playwright._impl.event_context_manager import EventContextManagerImpl
 from playwright._impl.events import Events
 from playwright._impl.isomorphic.manual_promise import LongStandingScope
@@ -70,7 +70,6 @@ class Worker(ChannelOwner):
                 Events.Worker.Console: "console",
             }
         )
-        # Note: we only receive console events here for workers from "chromium._connectToWorker".
         self._channel.onConsole(
             lambda event: self.emit(
                 Events.Worker.Console, ConsoleMessage(event, None, self, self)
@@ -163,16 +162,6 @@ class Worker(ChannelOwner):
             return result
 
         return result()
-
-    async def _disconnect(self, reason: Optional[str]) -> None:
-        # Python: options is the reason parameter.
-        self._close_reason = reason
-        try:
-            await self._channel.disconnect(reason=reason, timeout=NO_TIMEOUT)
-        except Exception as e:
-            if is_target_closed_error(e):
-                return
-            raise
 
     # Python only: the members of the Python API that upstream does not have.
 

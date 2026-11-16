@@ -85,7 +85,6 @@ CD-005      toImpl(cdpBrowser).options.artifactsDir is a server internal; the Py
 CD-030      toImpl(cdpBrowser)._isBrowserCollocatedWithServer is a server internal; the Python client can not reach it.
 CD-032      toImpl(frame).evaluateExpression() in the utility world is a server internal; the Python client can not reach it.
 CD-036      connectOverCDP(transport) takes a server ConnectionTransport object (WebSocketTransport), which only the in-process Node.js client can pass.
-library/chromium/connect-to-worker  browserType._connectToWorker() is a private method of the Node.js client; the Python client has no such API.
 # library/chromium/session
 CD-041      page.coverage (startJSCoverage/stopJSCoverage) is JavaScript-only; it is not in the Python API.
 # library/debugger
