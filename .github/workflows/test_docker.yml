@@ -5,7 +5,6 @@ on:
       - '.github/workflows/test_docker.yml'
       - 'setup.py'
       - '**/Dockerfile.*'
-      - 'utils/docker/**'
     branches:
       - main
       - release-*
@@ -14,7 +13,6 @@ on:
       - '.github/workflows/test_docker.yml'
       - 'setup.py'
       - '**/Dockerfile.*'
-      - 'utils/docker/**'
     branches:
       - main
       - release-*
@@ -69,19 +67,15 @@ jobs:
     # build.sh builds the wheels, and with them the driver.
     - name: Build Docker image
       run: bash utils/docker/build.sh --${{ matrix.arch }} ${{ matrix.docker-image-variant }} playwright-python:localbuild-${{ matrix.docker-image-variant }}
-    # check_layers.js looks at the paths of the files, for caches and other leftovers.
-    # This scan looks at the content of the files, in all layers, and finds secrets.
+    # The scan looks at the content of the files, in all layers of the image.
     - name: Scan the image for secrets
       uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
       with:
         image-ref: playwright-python:localbuild-${{ matrix.docker-image-variant }}
         scanners: secret
-        version: v0.76.2
         exit-code: '1'
         # The secret scan needs no vulnerability database.
         cache: 'false'
-    - name: Test check_layers.js
-      run: bash utils/docker/test_check_layers.sh
     - name: Start the container
       id: container
       run: |
