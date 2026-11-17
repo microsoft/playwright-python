@@ -5,6 +5,9 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG TZ=America/Los_Angeles
 ARG DOCKER_IMAGE_NAME_TEMPLATE="mcr.microsoft.com/playwright/python:v%version%-noble"
 ARG UBUNTU_MIRROR_PREFIX
+# pip and virtualenv write their caches here during the build. /dev/shm is a tmpfs,
+# so no image layer keeps them. The image itself uses the default ~/.cache.
+ARG XDG_CACHE_HOME=/dev/shm/cache
 
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
