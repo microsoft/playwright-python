@@ -833,10 +833,6 @@ class BrowserTypeConnectOverCDPResult(TypedDict):
     defaultContext: Optional[BrowserContextChannel]
 
 
-class BrowserTypeConnectToWorkerResult(TypedDict):
-    worker: WorkerChannel
-
-
 class MetadataLocation(TypedDict):
     file: str
     line: NotRequired[int]

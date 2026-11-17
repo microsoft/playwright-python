@@ -1305,7 +1305,6 @@ COMMANDS: Dict[str, Dict[str, Dict[str, Any]]] = {
             "artifactsDir": "string?",
             "transport": "binary?",
         },
-        "connectToWorker": {"endpoint": "string"},
     },
     "Disposable": {"dispose": {}},
     "Electron": {
@@ -2328,7 +2327,6 @@ COMMANDS: Dict[str, Dict[str, Dict[str, Any]]] = {
         },
     },
     "Worker": {
-        "disconnect": {"reason": "string?"},
         "evaluateExpression": {
             "expression": "string",
             "isFunction": "boolean?",

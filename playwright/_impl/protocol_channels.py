@@ -1906,18 +1906,6 @@ class BrowserTypeChannel(Channel):
             },
         )
 
-    def connectToWorker(
-        self,
-        endpoint: str,
-        timeout: float = 0,
-    ) -> Awaitable[channels.BrowserTypeConnectToWorkerResult]:
-        return self._call(
-            "connectToWorker",
-            {"endpoint": endpoint},
-            timeout,
-            lambda result: {"worker": result["worker"]},
-        )
-
 
 class DisposableChannel(Channel):
     def dispose(
@@ -5552,13 +5540,6 @@ class TracingChannel(Channel):
 
 
 class WorkerChannel(Channel):
-    def disconnect(
-        self,
-        reason: Optional[str],
-        timeout: float = 0,
-    ) -> Awaitable[None]:
-        return self._call("disconnect", {"reason": reason}, timeout, None)
-
     def evaluateExpression(
         self,
         expression: str,

@@ -62,7 +62,6 @@ from playwright._impl.connect import connect_to_browser
 from playwright._impl.errors import Error
 from playwright._impl.isomorphic.headers import headers_object_to_array
 from playwright._impl.timeout_settings import TimeoutSettings
-from playwright._impl.worker import Worker
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl import protocol_types as channels
@@ -433,17 +432,6 @@ class BrowserType(ChannelOwner):
                 BrowserContext.from_(result["defaultContext"])
             )
         return browser
-
-    async def _connect_to_worker(
-        self, endpoint: str, timeout: Optional[float]
-    ) -> Worker:
-        if self.name != "chromium":
-            raise Error("Connecting to workers is only supported in Chromium.")
-        result = await self._channel.connectToWorker(
-            endpoint=endpoint,
-            timeout=TimeoutSettings().timeout(timeout),
-        )
-        return Worker.from_(result["worker"])
 
     # Python only: the members of the Python API that upstream does not have.
 

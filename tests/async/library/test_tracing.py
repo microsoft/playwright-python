@@ -532,6 +532,67 @@ async def test_TR_013_should_respect_traces_dir_and_name(
     assert (traces_dir / "name2.trace").exists() is True
     assert (traces_dir / "name2.network").exists() is True
 
+    await context.tracing.start(
+        name="discarded",
+        screenshots=True,
+        snapshots=True,
+        screen_snapshots=True,
+        aria_snapshots=True,
+    )
+    await page.goto(server.PREFIX + "/har.html")
+    # A stylesheet changed through CSSOM is saved as a snapshot resource.
+    await page.evaluate(
+        "() => document.styleSheets[0].insertRule('.discarded-rule { color: red }')"
+    )
+    await page.click("body")
+
+    def snapshot_resources() -> List[str]:
+        return sorted(
+            file.name
+            for file in (traces_dir / "resources").iterdir()
+            if ".discarded-rule" in file.read_text(errors="replace")
+        )
+
+    for directory in ["screencast", "screenshots", "aria"]:
+
+        def has_files() -> None:
+            assert len(list((traces_dir / directory).iterdir())) > 0
+
+        await to_pass(page, has_files)
+
+    def has_snapshot_resource() -> None:
+        assert len(snapshot_resources()) == 1
+
+    await to_pass(page, has_snapshot_resource)
+    network_resources = sorted(
+        file.name
+        for file in (traces_dir / "resources").iterdir()
+        if file.name not in snapshot_resources()
+    )
+    await context.tracing.stop_chunk()
+
+    # Discarded files are removed in the background.
+    def trace_removed() -> None:
+        assert not (traces_dir / "discarded.trace").exists()
+
+    await to_pass(page, trace_removed)
+    for directory in ["screencast", "screenshots", "aria"]:
+
+        def is_empty() -> None:
+            assert list((traces_dir / directory).iterdir()) == []
+
+        await to_pass(page, is_empty)
+
+    def only_network_resources() -> None:
+        assert (
+            sorted(file.name for file in (traces_dir / "resources").iterdir())
+            == network_resources
+        )
+
+    await to_pass(page, only_network_resources)
+    assert (traces_dir / "discarded.network").exists() is True
+    await context.tracing.stop()
+
     await browser.close()
 
     def resource_names(resources: Dict[str, bytes]) -> List[str]:

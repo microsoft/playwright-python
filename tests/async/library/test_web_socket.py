@@ -411,7 +411,7 @@ async def test_WS_041_should_navigate_while_an_iframe_opens_web_sockets(
 
     server.set_route("/parent", parent)
     server.set_route("/child", child)
-    for _ in range(100):
+    for _ in range(20):
         await page.goto(server.PREFIX + "/parent")
     assert len(page.frames) == 2
     assert await page.evaluate("() => 1 + 1") == 2

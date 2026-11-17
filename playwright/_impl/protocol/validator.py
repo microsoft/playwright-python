@@ -1753,16 +1753,6 @@ scheme["BrowserTypeConnectOverCDPResult"] = t_object(
         "defaultContext": t_optional(t_channel(["BrowserContext"])),
     }
 )
-scheme["BrowserTypeConnectToWorkerParams"] = t_object(
-    {
-        "endpoint": t_string,
-    }
-)
-scheme["BrowserTypeConnectToWorkerResult"] = t_object(
-    {
-        "worker": t_channel(["Worker"]),
-    }
-)
 scheme["Metadata"] = t_object(
     {
         "location": t_optional(
@@ -4885,12 +4875,6 @@ scheme["WorkerConsoleEvent"] = t_object(
     }
 )
 scheme["WorkerCloseEvent"] = t_optional(t_object({}))
-scheme["WorkerDisconnectParams"] = t_object(
-    {
-        "reason": t_optional(t_string),
-    }
-)
-scheme["WorkerDisconnectResult"] = t_optional(t_object({}))
 scheme["WorkerEvaluateExpressionParams"] = t_object(
     {
         "expression": t_string,
