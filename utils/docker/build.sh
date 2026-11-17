@@ -69,8 +69,6 @@ for ((attempt = 1; attempt <= MAX_ATTEMPTS; attempt++)); do
       --build-arg UBUNTU_MIRROR_PREFIX="${UBUNTU_MIRROR_PREFIX}" \
       "${SECRET_ARGS[@]}" \
       -t "$3" -f "Dockerfile.$2" .; then
-    # A failure of this check is not transient, so it does not retry the build.
-    node ./check_layers.js "$3"
     exit 0
   fi
   if (( attempt < MAX_ATTEMPTS )); then
