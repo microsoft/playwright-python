@@ -5,6 +5,7 @@ on:
       - '.github/workflows/test_docker.yml'
       - 'setup.py'
       - '**/Dockerfile.*'
+      - 'utils/docker/**'
     branches:
       - main
       - release-*
@@ -13,6 +14,7 @@ on:
       - '.github/workflows/test_docker.yml'
       - 'setup.py'
       - '**/Dockerfile.*'
+      - 'utils/docker/**'
     branches:
       - main
       - release-*
@@ -67,6 +69,8 @@ jobs:
     # build.sh builds the wheels, and with them the driver.
     - name: Build Docker image
       run: bash utils/docker/build.sh --${{ matrix.arch }} ${{ matrix.docker-image-variant }} playwright-python:localbuild-${{ matrix.docker-image-variant }}
+    - name: Test check_layers.js
+      run: bash utils/docker/test_check_layers.sh
     - name: Start the container
       id: container
       run: |
