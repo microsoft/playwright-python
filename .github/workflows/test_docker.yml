@@ -69,8 +69,8 @@ jobs:
     # build.sh builds the wheels, and with them the driver.
     - name: Build Docker image
       run: bash utils/docker/build.sh --${{ matrix.arch }} ${{ matrix.docker-image-variant }} playwright-python:localbuild-${{ matrix.docker-image-variant }}
-    # check_layers.js looks at the paths of the files. This scan looks at their content,
-    # in all layers, and finds tokens and keys in files with any name.
+    # check_layers.js looks at the paths of the files, for caches and other leftovers.
+    # This scan looks at the content of the files, in all layers, and finds secrets.
     - name: Scan the image for secrets
       uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
       with:
