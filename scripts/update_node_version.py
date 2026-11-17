@@ -13,14 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Pin NODE_VERSION to the latest Node.js LTS.
+"""Pin NODE_VERSION to the latest Node.js release of the same major version.
 
-A Python port of upstream's utils/build/update-playwright-node.mjs: fetch the
-Node.js release index and take the most recent LTS release, which is the Node.js
-version Playwright bundles. Run this during a roll, alongside bumping
-DRIVER_VERSION. (Unlike upstream we don't touch Dockerfiles — the
-playwright-python images don't pin a Node.js version; the bundled driver carries
-its own Node.js.)
+Fetch the Node.js release index and take the most recent release of the major
+version that NODE_VERSION names. Run this during a roll, alongside bumping
+DRIVER_VERSION. To move to a new major version, edit NODE_VERSION by hand, for
+example to 28.0.0, and run this script.
 """
 
 import json
@@ -28,25 +26,26 @@ import urllib.request
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+NODE_VERSION_PATH = REPO_ROOT / "NODE_VERSION"
 NODE_INDEX_URL = "https://nodejs.org/dist/index.json"
 
 
-def latest_lts_version() -> str:
+def latest_version(major: str) -> str:
     with urllib.request.urlopen(NODE_INDEX_URL) as response:  # noqa: S310
         releases = json.load(response)
-    # The index is ordered newest-first; each release's "lts" field is false for
-    # non-LTS lines and the LTS codename otherwise. The first truthy one is the
-    # latest LTS release, e.g. {"version": "v24.16.0", "lts": "Krypton"}.
+    # The index is ordered newest-first, e.g. {"version": "v26.13.1", ...}.
     for release in releases:
-        if release.get("lts"):
-            return str(release["version"]).lstrip("v")
-    raise SystemExit("No LTS release found in the Node.js release index")
+        version = str(release["version"]).lstrip("v")
+        if version.split(".")[0] == major:
+            return version
+    raise SystemExit(f"No Node.js {major} release found in the Node.js release index")
 
 
 def main() -> None:
-    version = latest_lts_version()
-    (REPO_ROOT / "NODE_VERSION").write_text(version + "\n")
-    print(f"NODE_VERSION set to {version}")
+    old_version = NODE_VERSION_PATH.read_text().strip()
+    version = latest_version(old_version.split(".")[0])
+    NODE_VERSION_PATH.write_text(version + "\n")
+    print(f"NODE_VERSION: {old_version} -> {version}")
 
 
 if __name__ == "__main__":
