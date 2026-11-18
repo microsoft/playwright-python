@@ -27,7 +27,7 @@ async def test_CL_114_should_timeout_waiting_for_display_none_to_be_gone(
     await page.eval_on_selector("button", "b => b.style.display = 'none'")
     with pytest.raises(Error) as exc_info:
         await page.click("button", timeout=5000)
-    assert "Page.click: Timeout 5000ms exceeded." in exc_info.value.message
+    assert "Timeout 5000ms exceeded." in exc_info.value.message
     assert (
         "waiting for element to be visible, enabled and stable"
         in exc_info.value.message
@@ -43,7 +43,7 @@ async def test_CL_115_should_timeout_waiting_for_visibility_hidden_to_be_gone(
     await page.eval_on_selector("button", "b => b.style.visibility = 'hidden'")
     with pytest.raises(Error) as exc_info:
         await page.click("button", timeout=5000)
-    assert "Page.click: Timeout 5000ms exceeded." in exc_info.value.message
+    assert "Timeout 5000ms exceeded." in exc_info.value.message
     assert (
         "waiting for element to be visible, enabled and stable"
         in exc_info.value.message

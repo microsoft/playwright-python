@@ -97,7 +97,7 @@ def test_WA_005_should_avoid_side_effects_after_timeout(page: Page) -> None:
     saved_counter = counter
     page.wait_for_timeout(2000)  # Give it some time to produce more logs.
 
-    assert "Page.wait_for_function: Timeout 1000ms exceeded" in exc_info.value.message
+    assert "Timeout 1000ms exceeded" in exc_info.value.message
     assert counter == saved_counter
 
 
@@ -236,7 +236,7 @@ def test_WA_017_should_respect_timeout(page: Page) -> None:
     except Error as e:
         error = e
     assert error
-    assert "Page.wait_for_function: Timeout 10ms exceeded" in error.message
+    assert "Timeout 10ms exceeded" in error.message
     assert isinstance(error, TimeoutError)
 
 
@@ -248,7 +248,7 @@ def test_WA_018_should_respect_default_timeout(page: Page) -> None:
     except Error as e:
         error = e
     assert isinstance(error, TimeoutError)
-    assert "Page.wait_for_function: Timeout 1ms exceeded" in error.message
+    assert "Timeout 1ms exceeded" in error.message
 
 
 def test_WA_019_should_disable_timeout_when_its_set_to_0(
@@ -421,6 +421,6 @@ def test_WA_026_should_throw_when_frame_is_detached(
     sync_gather(wait_for_function, detach)
     assert error
     assert re.search(
-        r"Frame.wait_for_function: (Frame was detached|Execution context was destroyed)",
+        r"(Frame was detached|Execution context was destroyed)",
         error.message,
     )

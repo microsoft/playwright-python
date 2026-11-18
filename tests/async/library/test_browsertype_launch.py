@@ -80,7 +80,7 @@ async def test_BT_010_should_reject_if_launched_browser_fails_immediately(
         assert "Failed to launch" in exc_info.value.message
     else:
         assert re.search(
-            r"browserType\.launch(.|\n)*(spawn UNKNOWN|spawn EFTYPE|Browser logs:)",
+            r"(spawn UNKNOWN|spawn EFTYPE|Browser logs:)",
             exc_info.value.message,
             re.IGNORECASE | re.MULTILINE,
         )

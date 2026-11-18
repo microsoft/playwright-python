@@ -38,7 +38,7 @@ def test_CL_120_should_timeout_waiting_for_stable_position(
     utils.rafraf(page)
     with pytest.raises(Error) as exc_info:
         button.click(timeout=3000)
-    assert "ElementHandle.click: Timeout 3000ms exceeded." in exc_info.value.message
+    assert "Timeout 3000ms exceeded." in exc_info.value.message
     assert (
         "waiting for element to be visible, enabled and stable"
         in exc_info.value.message

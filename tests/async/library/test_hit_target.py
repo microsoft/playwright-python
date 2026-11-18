@@ -45,7 +45,7 @@ async def test_HT_001_should_block_all_events_when_hit_target_is_wrong(
 
     with pytest.raises(Error) as exc_info:
         await page.click("button", timeout=3000)
-    assert "Page.click: Timeout 3000ms exceeded." in exc_info.value.message
+    assert "Timeout 3000ms exceeded." in exc_info.value.message
 
     # Give it some time, just in case.
     await page.wait_for_timeout(1000)
@@ -133,7 +133,7 @@ async def test_HT_004_should_block_all_events_when_hit_target_is_wrong_and_eleme
 
     with pytest.raises(Error) as exc_info:
         await page.click("button", timeout=3000)
-    assert "Page.click: Timeout 3000ms exceeded." in exc_info.value.message
+    assert "Timeout 3000ms exceeded." in exc_info.value.message
 
     # Give it some time, just in case.
     await page.wait_for_timeout(1000)

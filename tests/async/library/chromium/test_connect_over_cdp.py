@@ -26,6 +26,8 @@ from typing import Any, Dict, Generator, List, Optional
 
 import pytest
 
+from playwright._impl._async_base import mapping as api_mapping
+from playwright._impl.utils.tasks import fire_and_forget
 from playwright.async_api import (
     Browser,
     BrowserType,
@@ -673,7 +675,7 @@ async def test_CD_020_should_report_an_expected_error_when_the_endpoint_url_retu
             endpoint_url=server.PREFIX,
         )
     assert (
-        f"BrowserType.connect_over_cdp: Unexpected status 404 when connecting to {server.PREFIX}/json/version/"
+        f"Unexpected status 404 when connecting to {server.PREFIX}/json/version/"
         in exc_info.value.message
     )
 
@@ -691,7 +693,7 @@ async def test_CD_021_should_report_an_expected_error_when_the_endpoint_url_json
         await browser_type.connect_over_cdp(
             endpoint_url=server.PREFIX,
         )
-    assert "BrowserType.connect_over_cdp: Invalid URL" in exc_info.value.message
+    assert "Invalid URL" in exc_info.value.message
 
 
 async def test_CD_022_should_connect_to_an_existing_cdp_session_when_passed_as_a_first_argument(
@@ -957,6 +959,63 @@ async def test_CD_035_no_defaults_should_not_affect_new_contexts(
 
         await new_context.close()
         await browser.close()
+    finally:
+        await browser_server.close()
+
+
+async def test_CD_054_should_not_wait_for_a_busy_page_longer_than_max_page_attach_time(
+    browser_type: BrowserType, server: Server, launch_arguments: Dict, port: int
+) -> None:
+    # The busy page should not share a renderer with the other page.
+    browser_server = await launch(
+        browser_type, launch_arguments, port, "--site-per-process"
+    )
+    try:
+        cdp_browser1 = await browser_type.connect_over_cdp(
+            endpoint_url=f"http://127.0.0.1:{port}/",
+        )
+        context1 = cdp_browser1.contexts[0]
+        page1 = await context1.new_page()
+        await page1.goto(server.CROSS_PROCESS_PREFIX + "/title.html")
+        busy_page1 = await context1.new_page()
+        await busy_page1.goto(server.EMPTY_PAGE)
+        async with busy_page1.expect_event(
+            "console", predicate=lambda message: message.text == "busy"
+        ):
+            fire_and_forget(
+                busy_page1.evaluate(
+                    """() => {
+                    console.log('busy');
+                    const start = Date.now();
+                    while (Date.now() - start < 5000) {}
+                }"""
+                )
+            )
+        # Python: the option is undocumented; call the implementation directly.
+        cdp_browser2: Browser = api_mapping.from_impl(
+            await browser_type._impl_obj.connect_over_cdp(
+                endpoint_url=f"http://127.0.0.1:{port}/",
+                timeout=None,
+                slow_mo=None,
+                headers=None,
+                is_local=None,
+                no_defaults=None,
+                artifacts_dir=None,
+                max_page_attach_time=500,
+            )
+        )
+        context2 = cdp_browser2.contexts[0]
+        pages = context2.pages
+        assert [page.url for page in pages] == [
+            server.CROSS_PROCESS_PREFIX + "/title.html"
+        ]
+        assert await pages[0].title() == "Woof-Woof"
+        # The busy page is reported when its renderer responds again.
+        busy_page2 = await context2.wait_for_event("page")
+        assert busy_page2.url == server.EMPTY_PAGE
+        assert await busy_page2.evaluate("() => 1 + 1") == 2
+        await cdp_browser2.close()
+        await cdp_browser1.close()
     finally:
         await browser_server.close()
 

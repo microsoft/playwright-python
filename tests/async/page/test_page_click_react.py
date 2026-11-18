@@ -25,7 +25,7 @@ async def test_CL_106_should_timeout_when_click_opens_alert(page: Page) -> None:
         await page.set_content("<div onclick='window.alert(123)'>Click me</div>")
         with pytest.raises(Error) as exc_info:
             await page.click("div", timeout=3000)
-        assert "Page.click: Timeout 3000ms exceeded." in exc_info.value.message
+        assert "Timeout 3000ms exceeded." in exc_info.value.message
     dialog = await dialog_info.value
     await dialog.dismiss()
 

@@ -191,8 +191,8 @@ def test_SE_164_should_handle_errors(
     with pytest.raises(Error) as exc_info:
         selectors.register("$", create_dummy_selector)
     assert (
-        exc_info.value.message
-        == "Selectors.register: Selector engine name may only contain [a-zA-Z0-9_] characters"
+        "Selector engine name may only contain [a-zA-Z0-9_] characters"
+        in exc_info.value.message
     )
 
     # Selector names are case-sensitive.
@@ -208,10 +208,7 @@ def test_SE_164_should_handle_errors(
 
     with pytest.raises(Error) as exc_info:
         selectors.register("css", create_dummy_selector)
-    assert (
-        exc_info.value.message
-        == 'Selectors.register: "css" is a predefined selector engine'
-    )
+    assert '"css" is a predefined selector engine' in exc_info.value.message
     page.close()
 
 

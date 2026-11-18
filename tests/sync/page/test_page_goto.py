@@ -491,7 +491,7 @@ def test_NA_030_should_fail_when_exceeding_maximum_navigation_timeout(
     server.set_route("/empty.html", lambda request: None)
     with pytest.raises(Error) as exc_info:
         page.goto(server.PREFIX + "/empty.html", timeout=1)
-    assert "Page.goto: Timeout 1ms exceeded." in exc_info.value.message
+    assert "Timeout 1ms exceeded." in exc_info.value.message
     assert server.PREFIX + "/empty.html" in exc_info.value.message
     assert isinstance(exc_info.value, TimeoutError)
 
@@ -505,7 +505,7 @@ def test_NA_031_should_fail_when_exceeding_default_maximum_navigation_timeout(
     page.set_default_navigation_timeout(1)
     with pytest.raises(Error) as exc_info:
         page.goto(server.PREFIX + "/empty.html")
-    assert "Page.goto: Timeout 1ms exceeded." in exc_info.value.message
+    assert "Timeout 1ms exceeded." in exc_info.value.message
     assert server.PREFIX + "/empty.html" in exc_info.value.message
     assert isinstance(exc_info.value, TimeoutError)
 
@@ -518,7 +518,7 @@ def test_NA_032_should_fail_when_exceeding_browser_context_navigation_timeout(
     page.context.set_default_navigation_timeout(2)
     with pytest.raises(Error) as exc_info:
         page.goto(server.PREFIX + "/empty.html")
-    assert "Page.goto: Timeout 2ms exceeded." in exc_info.value.message
+    assert "Timeout 2ms exceeded." in exc_info.value.message
     assert server.PREFIX + "/empty.html" in exc_info.value.message
     assert isinstance(exc_info.value, TimeoutError)
 
@@ -534,7 +534,7 @@ def test_NA_033_should_fail_when_exceeding_default_maximum_timeout(
     page.set_default_timeout(1)
     with pytest.raises(Error) as exc_info:
         page.goto(server.PREFIX + "/empty.html")
-    assert "Page.goto: Timeout 1ms exceeded." in exc_info.value.message
+    assert "Timeout 1ms exceeded." in exc_info.value.message
     assert server.PREFIX + "/empty.html" in exc_info.value.message
     assert isinstance(exc_info.value, TimeoutError)
 
@@ -549,7 +549,7 @@ def test_NA_034_should_fail_when_exceeding_browser_context_timeout(
     page.context.set_default_timeout(2)
     with pytest.raises(Error) as exc_info:
         page.goto(server.PREFIX + "/empty.html")
-    assert "Page.goto: Timeout 2ms exceeded." in exc_info.value.message
+    assert "Timeout 2ms exceeded." in exc_info.value.message
     assert server.PREFIX + "/empty.html" in exc_info.value.message
     assert isinstance(exc_info.value, TimeoutError)
 
@@ -563,7 +563,7 @@ def test_NA_035_should_prioritize_default_navigation_timeout_over_default_timeou
     page.set_default_navigation_timeout(1)
     with pytest.raises(Error) as exc_info:
         page.goto(server.PREFIX + "/empty.html")
-    assert "Page.goto: Timeout 1ms exceeded." in exc_info.value.message
+    assert "Timeout 1ms exceeded." in exc_info.value.message
     assert server.PREFIX + "/empty.html" in exc_info.value.message
     assert isinstance(exc_info.value, TimeoutError)
 
@@ -601,13 +601,13 @@ def test_NA_037_should_fail_when_replaced_by_another_navigation(
         assert "net::ERR_ABORTED" in error.message
     elif browser_name == "webkit":
         assert (
-            f'Page.goto: Navigation to "{server.PREFIX}/empty.html" is interrupted by another navigation to "{server.PREFIX}/one-style.html"'
+            f'Navigation to "{server.PREFIX}/empty.html" is interrupted by another navigation to "{server.PREFIX}/one-style.html"'
             in error.message
         )
     elif browser_name == "firefox":
         # Firefox might yield either NS_BINDING_ABORTED or 'navigation interrupted by another one'
         assert (
-            f'Page.goto: Navigation to "{server.PREFIX}/empty.html" is interrupted by another navigation to "{server.PREFIX}/one-style.html"'
+            f'Navigation to "{server.PREFIX}/empty.html" is interrupted by another navigation to "{server.PREFIX}/one-style.html"'
             in error.message
             or "NS_BINDING_ABORTED" in error.message
         )
@@ -680,7 +680,7 @@ def test_NA_038_js_redirect_overrides_url_bar_navigation(
     elif browser_name == "webkit":
         assert error
         assert (
-            f'Page.goto: Navigation to "{server.PREFIX}/b" is interrupted by another navigation to "{server.PREFIX}/c"'
+            f'Navigation to "{server.PREFIX}/b" is interrupted by another navigation to "{server.PREFIX}/c"'
             in error.message
         )
         expect(page).to_have_url(server.PREFIX + "/c")

@@ -1743,6 +1743,7 @@ scheme["BrowserTypeConnectOverCDPParams"] = t_object(
         "isLocal": t_optional(t_boolean),
         "noDefaults": t_optional(t_boolean),
         "isWebView": t_optional(t_boolean),
+        "maxPageAttachTime": t_optional(t_float),
         "artifactsDir": t_optional(t_string),
         "transport": t_optional(t_binary),
     }

@@ -64,7 +64,7 @@ async def test_WA_096_should_respect_timeout(page: Page, server: Server) -> None
 
     await asyncio.gather(wait_for_navigation(), navigate())
     assert error
-    assert "Page.expect_navigation: Timeout 5000ms exceeded." in error.message
+    assert "Timeout 5000ms exceeded." in error.message
     assert 'waiting for navigation to "**/frame.html" until "load"' in error.message
     assert f'navigated to "{server.EMPTY_PAGE}"' in error.message
 

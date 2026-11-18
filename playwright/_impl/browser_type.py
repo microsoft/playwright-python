@@ -155,21 +155,7 @@ class BrowserType(ChannelOwner):
 
         # Not ported: the logger option (JavaScript only).
         options = {**(self._playwright._default_launch_options or {}), **options}
-        launch_options = {
-            **_launch_params(options),
-            "ignoreDefaultArgs": (
-                options["ignore_default_args"]
-                if _is_array(options.get("ignore_default_args"))
-                else None
-            ),
-            "ignoreAllDefaultArgs": bool(options.get("ignore_default_args"))
-            and not _is_array(options.get("ignore_default_args")),
-            "env": (
-                env_object_to_array(options["env"])
-                if options.get("env") is not None
-                else None
-            ),
-        }
+        launch_options = to_launch_params(options)
         browser = Browser.from_(
             (
                 await self._channel.launch(
@@ -373,6 +359,7 @@ class BrowserType(ChannelOwner):
         return await self._connect({**options, "endpoint": endpoint})
 
     async def _connect(self, params: Dict[str, Any]) -> Browser:
+        # Not ported: launchOptions (langs: js).
         browser = await connect_to_browser(
             self._playwright, {"browser_name": self.name, **params}
         )
@@ -388,6 +375,8 @@ class BrowserType(ChannelOwner):
         is_local: Optional[bool],
         no_defaults: Optional[bool],
         artifacts_dir: Optional[Union[str, Path]],
+        # Python: an undocumented option, available only to implementation callers.
+        max_page_attach_time: Optional[float] = None,
     ) -> Browser:
         # Not ported: connectOverCDP() with an options object or with a
         # ConnectOverCDPTransport (JavaScript only), so there is no transport.
@@ -399,6 +388,7 @@ class BrowserType(ChannelOwner):
             headers=headers,
             is_local=is_local,
             no_defaults=no_defaults,
+            max_page_attach_time=max_page_attach_time,
             artifacts_dir=_to_path_string(artifacts_dir),
         )
         if endpoint_url and self.name != "chromium" and self.name != "webkit":
@@ -417,6 +407,7 @@ class BrowserType(ChannelOwner):
             noDefaults=params.get("no_defaults"),
             # Python: the Python API has no isWebView option.
             isWebView=None,
+            maxPageAttachTime=params.get("max_page_attach_time"),
             artifactsDir=params.get("artifacts_dir"),
             timeout=TimeoutSettings().timeout(params.get("timeout")),
         )
@@ -437,6 +428,24 @@ class BrowserType(ChannelOwner):
 
     def __repr__(self) -> str:
         return f"<BrowserType name={self.name} executable_path={self.executable_path}>"
+
+
+def to_launch_params(options: Dict[str, Any]) -> Dict[str, Any]:
+    return {
+        **_launch_params(options),
+        "ignoreDefaultArgs": (
+            options["ignore_default_args"]
+            if _is_array(options.get("ignore_default_args"))
+            else None
+        ),
+        "ignoreAllDefaultArgs": bool(options.get("ignore_default_args"))
+        and not _is_array(options.get("ignore_default_args")),
+        "env": (
+            env_object_to_array(options["env"])
+            if options.get("env") is not None
+            else None
+        ),
+    }
 
 
 # Not ported: isConnectionTransport(), for connectOverCDP() with a

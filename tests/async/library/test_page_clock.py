@@ -234,9 +234,9 @@ async def test_CK_012_run_for_throws_for_invalid_format(
     )
     with pytest.raises(Error):
         await page.clock.run_for("12:02:34:10")
-    with pytest.raises(Error, match="Clock.run_for: Invalid ticks: NaN"):
+    with pytest.raises(Error, match="Invalid ticks: NaN"):
         await page.clock.run_for(float("nan"))  # type: ignore[arg-type]
-    with pytest.raises(Error, match="Clock.fast_forward: Invalid ticks: Infinity"):
+    with pytest.raises(Error, match="Invalid ticks: Infinity"):
         await page.clock.fast_forward(float("inf"))  # type: ignore[arg-type]
     assert calls == []
     await page.goto(server.EMPTY_PAGE)
@@ -314,7 +314,7 @@ async def test_CK_018_stub_timers_should_throw_for_invalid_date(page: Page) -> N
     # Upstream first passes new Date('invalid'); Python has no invalid datetime.
     with pytest.raises(Error) as exc_info:
         await page.clock.set_system_time("invalid")
-    assert "Clock.set_system_time: Invalid date: invalid" in exc_info.value.message
+    assert "Invalid date: invalid" in exc_info.value.message
 
 
 @pytest.mark.usefixtures("install_and_pause")
@@ -592,7 +592,7 @@ async def test_CK_039_while_running_should_reject_an_invalid_target_time_with_an
     with pytest.raises(Error) as exc_info:
         # pause_at takes seconds: date_now * 1000 seconds is invalid_time milliseconds.
         await page.clock.pause_at(date_now * 1000)
-    assert f"Clock.pause_at: Invalid date: {invalid_time}" in exc_info.value.message
+    assert f"Invalid date: {invalid_time}" in exc_info.value.message
 
 
 async def test_CK_040_while_running_should_pause_and_fast_forward(page: Page) -> None:

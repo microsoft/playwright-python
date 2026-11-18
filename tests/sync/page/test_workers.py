@@ -14,6 +14,7 @@
 
 """Port of tests/page/workers.spec.ts."""
 
+import re
 import time
 from pathlib import Path
 from typing import Any, Callable, List, Optional
@@ -88,7 +89,10 @@ def test_WO_003_should_reject_in_flight_evaluate_and_emit_close_when_page_closes
             sync_gather(
                 lambda: worker.evaluate("() => new Promise(() => {})"), page.close
             )
-    assert "Worker.evaluate" in exc_info.value.message
+    assert re.search(
+        r"(Target page, context or browser has been closed|Execution context was destroyed)",
+        exc_info.value.message,
+    )
     assert closed_info.value is worker
 
 

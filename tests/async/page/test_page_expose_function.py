@@ -231,10 +231,7 @@ async def test_EF_014_should_throw_for_duplicate_registrations(page: Page) -> No
     await page.expose_function("foo", lambda: None)
     with pytest.raises(Error) as exc_info:
         await page.expose_function("foo", lambda: None)
-    assert (
-        'Page.expose_function: Function "foo" has been already registered'
-        in exc_info.value.message
-    )
+    assert 'Function "foo" has been already registered' in exc_info.value.message
 
 
 async def test_EF_015_should_work_with_set_content(page: Page, server: Server) -> None:

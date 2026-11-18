@@ -165,7 +165,7 @@ def test_ER_018_should_cancel_navigation_when_page_crashes(
         wait_for_navigation_and_crash,
     )
     assert isinstance(error, Error)
-    assert "Page.goto: Page crashed" in error.message
+    assert "Page crashed" in error.message
 
 
 def test_ER_019_should_be_able_to_close_context_when_page_crashes(

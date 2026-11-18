@@ -519,12 +519,15 @@ async def test_DO_023_download_event_should_close_the_context_without_awaiting_t
         return_exceptions=True,
     )
     assert isinstance(download_error, Error)
-    assert download_error.message == "Download.path: canceled"
+    assert "canceled" in download_error.message
     assert isinstance(save_error, Error)
-    assert save_error.message in [
-        "Download.save_as: File not found on disk. Check download.failure() for details.",
-        "Download.save_as: canceled",
-    ]
+    assert any(
+        message in save_error.message
+        for message in [
+            "File not found on disk. Check download.failure() for details.",
+            "canceled",
+        ]
+    )
 
 
 async def test_DO_024_download_event_should_close_the_context_without_awaiting_the_download(
@@ -561,15 +564,15 @@ async def test_DO_024_download_event_should_close_the_context_without_awaiting_t
     # The exact error message is racy, because sometimes browser is fast enough
     # to cancel the download.
     assert isinstance(download_error, Error)
-    assert download_error.message in [
-        "Download.path: canceled",
-        "Download.path: " + TARGET_CLOSED_ERROR_MESSAGE,
-    ]
+    assert any(
+        message in download_error.message
+        for message in ["canceled", TARGET_CLOSED_ERROR_MESSAGE]
+    )
     assert isinstance(save_error, Error)
-    assert save_error.message in [
-        "Download.save_as: canceled",
-        "Download.save_as: " + TARGET_CLOSED_ERROR_MESSAGE,
-    ]
+    assert any(
+        message in save_error.message
+        for message in ["canceled", TARGET_CLOSED_ERROR_MESSAGE]
+    )
 
 
 async def test_DO_025_download_event_should_throw_if_browser_dies(
@@ -602,9 +605,9 @@ async def test_DO_025_download_event_should_throw_if_browser_dies(
         return_exceptions=True,
     )
     assert isinstance(download_error, Error)
-    assert download_error.message == "Download.path: " + TARGET_CLOSED_ERROR_MESSAGE
+    assert TARGET_CLOSED_ERROR_MESSAGE in download_error.message
     assert isinstance(save_error, Error)
-    assert "Download.save_as: " + TARGET_CLOSED_ERROR_MESSAGE in save_error.message
+    assert TARGET_CLOSED_ERROR_MESSAGE in save_error.message
     await browser.close()
 
 

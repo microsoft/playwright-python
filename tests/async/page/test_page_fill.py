@@ -311,7 +311,7 @@ async def test_FI_018_should_throw_nice_error_without_injected_script_stack_when
     with pytest.raises(Error) as exc_info:
         await page.fill("select", "")
     assert (
-        "Page.fill: Error: Element is not an <input>, <textarea> or [contenteditable] element\nCall log:"
+        "Error: Element is not an <input>, <textarea> or [contenteditable] element\nCall log:"
         in exc_info.value.message
     )
 

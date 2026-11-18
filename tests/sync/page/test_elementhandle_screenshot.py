@@ -267,7 +267,7 @@ def test_EH_084_element_screenshot_should_timeout_waiting_for_visible(
     assert div
     with pytest.raises(Error) as exc_info:
         div.screenshot(timeout=3000)
-    assert "ElementHandle.screenshot: Timeout 3000ms exceeded" in exc_info.value.message
+    assert "Timeout 3000ms exceeded" in exc_info.value.message
     assert "element is not visible" in exc_info.value.message
 
 

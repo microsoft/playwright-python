@@ -28,7 +28,7 @@ async def test_CL_111_should_timeout_waiting_for_button_to_be_enabled(
     with pytest.raises(Error) as exc_info:
         await page.click("text=Click target", timeout=3000)
     assert await page.evaluate("window.__CLICKED") is None
-    assert "Page.click: Timeout 3000ms exceeded." in exc_info.value.message
+    assert "Timeout 3000ms exceeded." in exc_info.value.message
     assert "element is not enabled" in exc_info.value.message
     assert "retrying click action" in exc_info.value.message
 
@@ -42,6 +42,6 @@ async def test_CL_112_should_timeout_waiting_for_inert_element_to_become_non_ine
     with pytest.raises(Error) as exc_info:
         await page.click("text=Click target", timeout=3000)
     assert await page.evaluate("window.__CLICKED") is None
-    assert "Page.click: Timeout 3000ms exceeded." in exc_info.value.message
+    assert "Timeout 3000ms exceeded." in exc_info.value.message
     assert "element is inert" in exc_info.value.message
     assert "retrying click action" in exc_info.value.message

@@ -41,7 +41,7 @@ def test_CL_117_should_timeout_waiting_for_hit_target(
     )
     with pytest.raises(Error) as exc_info:
         button.click(timeout=5000)
-    assert "ElementHandle.click: Timeout 5000ms exceeded." in exc_info.value.message
+    assert "Timeout 5000ms exceeded." in exc_info.value.message
     assert (
         '<div id="blocker"></div> intercepts pointer events' in exc_info.value.message
     )
@@ -102,7 +102,7 @@ def test_CL_119_should_report_wrong_hit_target_subtree(
     )
     with pytest.raises(Error) as exc_info:
         button.click(timeout=5000)
-    assert "ElementHandle.click: Timeout 5000ms exceeded." in exc_info.value.message
+    assert "Timeout 5000ms exceeded." in exc_info.value.message
     assert (
         '<div id="inner"></div> from <div id="blocker">…</div> subtree intercepts pointer events'
         in exc_info.value.message

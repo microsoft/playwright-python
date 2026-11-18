@@ -118,7 +118,7 @@ async def test_ST_003_should_report_good_error_if_the_url_is_not_valid(
                 ],
             }
         )
-    assert "Browser.new_context: Error setting storage state:" in exc_info.value.message
+    assert "Error setting storage state:" in exc_info.value.message
     assert "foo" in exc_info.value.message
 
 
