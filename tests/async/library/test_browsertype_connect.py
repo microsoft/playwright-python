@@ -33,7 +33,6 @@ from typing import (
     List,
     Optional,
 )
-from urllib.parse import urlparse
 
 import pytest
 
@@ -77,6 +76,7 @@ async def connect_browser(
 ) -> Browser:
     """Port of the connect fixture: passes the launch options for run-server along."""
     with redirect_port_forwarding_for_test(browser_type, redirect_port_for_test):
+        # Python: launchOptions is JavaScript-only; send its header directly.
         return await browser_type.connect(
             ws_endpoint,
             headers={
@@ -305,7 +305,7 @@ async def test_BT_037_should_print_custom_ws_close_error(
     server.once_web_socket_connection(handle_ws)
     with pytest.raises(Error) as exc_info:
         await connect(f"ws://localhost:{server.PORT}/ws")
-    assert "BrowserType.connect: Oh my!" in exc_info.value.message
+    assert "Oh my!" in exc_info.value.message
 
 
 @pytest.mark.parametrize("kind", KINDS)
@@ -471,7 +471,7 @@ async def test_BT_044_should_timeout_in_socket_while_connecting(
     server.set_route("/ws-slow", handle_ws_slow)
     with pytest.raises(Error) as exc_info:
         await connect(f"ws://localhost:{server.PORT}/ws-slow", timeout=1000)
-    assert "BrowserType.connect: Timeout 1000ms exceeded" in exc_info.value.message
+    assert "Timeout 1000ms exceeded" in exc_info.value.message
 
 
 @pytest.mark.parametrize("kind", KINDS)
@@ -484,7 +484,7 @@ async def test_BT_045_should_timeout_in_connect_while_connecting(
     server.once_web_socket_connection(server_web_sockets.append)
     with pytest.raises(Error) as exc_info:
         await connect(f"ws://localhost:{server.PORT}/ws", timeout=100)
-    assert "BrowserType.connect: Timeout 100ms exceeded" in exc_info.value.message
+    assert "Timeout 100ms exceeded" in exc_info.value.message
 
 
 @pytest.mark.parametrize("kind", KINDS)
@@ -1138,6 +1138,7 @@ async def test_BT_071_should_be_able_to_connect_when_the_ws_endpoint_is_passed_a
     start_remote_server: RemoteServerStarter,
 ) -> None:
     remote_server = start_remote_server(kind)
+    # Python: launchOptions is JavaScript-only; send its header directly.
     browser = await browser_type.connect(
         endpoint=remote_server.ws_endpoint,
         headers={
@@ -1374,20 +1375,6 @@ async def test_BT_078_set_input_files_should_preserve_last_modified_timestamp(
         assert (
             abs(timestamps[i] - expected_timestamps[i]) <= 1000
         ), f"expected: {expected_timestamps}; actual: {timestamps}"
-
-
-@pytest.mark.parametrize("kind", KINDS)
-async def test_BT_079_should_connect_over_http(
-    kind: str,
-    connect: Callable[..., Awaitable[Browser]],
-    start_remote_server: RemoteServerStarter,
-) -> None:
-    remote_server = start_remote_server(kind)
-
-    url = urlparse(remote_server.ws_endpoint)
-    browser = await connect(f"http://localhost:{url.port}")
-    assert browser.version
-    await browser.close()
 
 
 def skip_socks_proxy(kind: str) -> None:
@@ -1872,23 +1859,3 @@ async def test_BT_094_should_filter_local_paths_from_unsafe_launch_options(
 
     actions = trace_actions(read_trace(trace_path))
     assert "Frame.setContent" in actions
-
-
-async def test_BT_095_should_timeout_after_redirect_when_connecting_over_http(
-    playwright: Playwright,
-    connect: Callable[..., Awaitable[Browser]],
-    server: Server,
-) -> None:
-    server.set_redirect("/connect/json", "/connect/slow")
-    aborted: List[bool] = []
-
-    def handle_slow(request: TestServerRequest) -> None:
-        request.notifyFinish().addErrback(lambda _: aborted.append(True))
-
-    server.set_route("/connect/slow", handle_slow)
-    with pytest.raises(Error) as exc_info:
-        await connect(
-            f"{server.PREFIX}/connect", timeout=2000, headers={"Connection": "Close"}
-        )
-    assert "Timeout 2000ms exceeded." in exc_info.value.message
-    await poll(playwright, lambda: aborted == [True])

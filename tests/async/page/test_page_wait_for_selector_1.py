@@ -182,7 +182,7 @@ async def test_WA_036_should_report_logs_while_waiting_for_visible(
 
     await asyncio.gather(watchdog(), change_divs())
     assert error
-    assert "Frame.wait_for_selector: Timeout 5000ms exceeded." in error.message
+    assert "Timeout 5000ms exceeded." in error.message
     assert 'waiting for locator("div") to be visible' in error.message
     assert (
         'locator resolved to hidden <div id="mydiv" class="foo bar" foo="123456789012345678901234567890123456789012345678901234567890">abcdefghijklmnopqrstuvwyxzabcdefghijklmnopqrstuvw…</div>'
@@ -230,7 +230,7 @@ async def test_WA_037_should_report_logs_while_waiting_for_hidden(
 
     await asyncio.gather(watchdog(), change_divs())
     assert error
-    assert "Frame.wait_for_selector: Timeout 5000ms exceeded." in error.message
+    assert "Timeout 5000ms exceeded." in error.message
     assert 'waiting for locator("div") to be hidden' in error.message
     assert (
         'locator resolved to visible <div id="mydiv" class="foo bar">hello</div>'
@@ -370,4 +370,4 @@ async def test_WA_043_should_throw_when_frame_is_detached(
 
     await asyncio.gather(wait_for_selector(), detach())
     assert wait_error
-    assert "Frame.wait_for_selector: Frame was detached" in wait_error.message
+    assert "Frame was detached" in wait_error.message

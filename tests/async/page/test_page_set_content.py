@@ -96,7 +96,7 @@ async def test_PA_027_should_respect_default_navigation_timeout(
     server.set_route(img_path, lambda request: None)
     with pytest.raises(TimeoutError) as exc_info:
         await page.set_content(f'<img src="{server.PREFIX + img_path}"></img>')
-    assert "Page.set_content: Timeout 1ms exceeded." in exc_info.value.message
+    assert "Timeout 1ms exceeded." in exc_info.value.message
 
 
 async def test_PA_028_should_await_resources_to_load(

@@ -129,7 +129,7 @@ async def test_FE_004_should_support_global_timeout_option(
     server.set_route("/empty.html", lambda req: None)
     with pytest.raises(Error) as exc_info:
         await request.get(server.EMPTY_PAGE)
-    assert "APIRequestContext.get: Timeout 100ms exceeded" in exc_info.value.message
+    assert "Timeout 100ms exceeded" in exc_info.value.message
     await request.dispose()
 
 

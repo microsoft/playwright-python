@@ -1302,6 +1302,7 @@ COMMANDS: Dict[str, Dict[str, Dict[str, Any]]] = {
             "isLocal": "boolean?",
             "noDefaults": "boolean?",
             "isWebView": "boolean?",
+            "maxPageAttachTime": "float?",
             "artifactsDir": "string?",
             "transport": "binary?",
         },

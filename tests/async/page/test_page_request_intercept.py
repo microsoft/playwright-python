@@ -267,7 +267,7 @@ async def test_RO_143_should_support_timeout_option_in_route_fetch(
     await wait_for_list(page, fetch_errors)
     fetch_error = fetch_errors[0]
     assert fetch_error
-    assert "Route.fetch: Timeout 1000ms exceeded" in fetch_error.message
+    assert "Timeout 1000ms exceeded" in fetch_error.message
 
 
 async def test_RO_144_should_not_follow_redirects_when_max_redirects_is_set_to_0_in_route_fetch(

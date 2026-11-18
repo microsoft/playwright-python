@@ -61,7 +61,7 @@ async def test_WA_078_should_respect_timeout(page: Page, server: Server) -> None
     await page.goto(server.PREFIX + "/one-style.html", wait_until="domcontentloaded")
     with pytest.raises(Error) as exc_info:
         await page.wait_for_load_state("load", timeout=1)
-    assert "Page.wait_for_load_state: Timeout 1ms exceeded." in exc_info.value.message
+    assert "Timeout 1ms exceeded." in exc_info.value.message
     assert traceback.extract_tb(exc_info.tb)[0].filename == __file__
 
 

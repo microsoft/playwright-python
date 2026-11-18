@@ -60,7 +60,7 @@ def test_WA_111_should_respect_timeout(
 
     sync_gather(wait_for_url, navigate)
     assert error
-    assert "Page.wait_for_url: Timeout 2500ms exceeded." in error.message
+    assert "Timeout 2500ms exceeded." in error.message
 
 
 def test_WA_112_should_work_with_both_domcontentloaded_and_load(

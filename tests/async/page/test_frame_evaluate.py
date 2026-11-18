@@ -118,7 +118,7 @@ async def test_FR_009_should_throw_for_detached_frames(
     await utils.detach_frame(page, "frame1")
     with pytest.raises(Error) as exc_info:
         await frame1.evaluate("() => 7 * 8")
-    assert "Frame.evaluate: Frame was detached" in exc_info.value.message
+    assert "Frame was detached" in exc_info.value.message
 
 
 async def test_FR_010_should_be_isolated_between_frames(

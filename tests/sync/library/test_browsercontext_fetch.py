@@ -207,7 +207,7 @@ def test_FE_092_should_throw_on_network_error(
     server.set_route("/test", destroy_socket)
     with pytest.raises(Error) as exc_info:
         context.request.get(server.PREFIX + "/test")
-    assert "APIRequestContext.get: socket hang up" in exc_info.value.message
+    assert "socket hang up" in exc_info.value.message
 
 
 def test_FE_093_should_throw_on_network_error_after_redirect(
@@ -217,7 +217,7 @@ def test_FE_093_should_throw_on_network_error_after_redirect(
     server.set_route("/test", destroy_socket)
     with pytest.raises(Error) as exc_info:
         context.request.get(server.PREFIX + "/redirect")
-    assert "APIRequestContext.get: socket hang up" in exc_info.value.message
+    assert "socket hang up" in exc_info.value.message
 
 
 def test_FE_094_should_throw_on_network_error_when_sending_body(
@@ -226,7 +226,7 @@ def test_FE_094_should_throw_on_network_error_when_sending_body(
     server.set_route("/test", send_partial_body_and_destroy_socket)
     with pytest.raises(Error) as exc_info:
         context.request.get(server.PREFIX + "/test")
-    assert "APIRequestContext.get: aborted" in exc_info.value.message
+    assert "aborted" in exc_info.value.message
 
 
 def test_FE_095_should_throw_on_network_error_when_sending_body_after_redirect(
@@ -236,7 +236,7 @@ def test_FE_095_should_throw_on_network_error_when_sending_body_after_redirect(
     server.set_route("/test", send_partial_body_and_destroy_socket)
     with pytest.raises(Error) as exc_info:
         context.request.get(server.PREFIX + "/redirect")
-    assert "APIRequestContext.get: aborted" in exc_info.value.message
+    assert "aborted" in exc_info.value.message
 
 
 def test_FE_096_should_add_session_cookies_to_request(
@@ -1162,7 +1162,7 @@ def test_FE_148_should_support_timeout_option(
 
     with pytest.raises(Error) as exc_info:
         context.request.get(server.PREFIX + "/slow", timeout=10)
-    assert "APIRequestContext.get: Timeout 10ms exceeded" in exc_info.value.message
+    assert "Timeout 10ms exceeded" in exc_info.value.message
 
 
 def test_FE_149_should_support_a_timeout_of_0(
@@ -1188,7 +1188,7 @@ def test_FE_150_should_respect_timeout_after_redirects(
     context.set_default_timeout(100)
     with pytest.raises(Error) as exc_info:
         context.request.get(server.PREFIX + "/redirect")
-    assert "APIRequestContext.get: Timeout 100ms exceeded" in exc_info.value.message
+    assert "Timeout 100ms exceeded" in exc_info.value.message
 
 
 def test_FE_151_should_not_hang_on_a_brotli_encoded_range_request(

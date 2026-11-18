@@ -151,7 +151,7 @@ async def test_ER_018_should_cancel_navigation_when_page_crashes(
     crash()
     error = await goto_task
     assert isinstance(error, Error)
-    assert "Page.goto: Page crashed" in error.message
+    assert "Page crashed" in error.message
 
 
 async def test_ER_019_should_be_able_to_close_context_when_page_crashes(

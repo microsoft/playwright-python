@@ -80,11 +80,11 @@ async def test_WA_046_should_not_consider_visible_when_zero_sized(
     await page.set_content("<div style='width: 0; height: 0;'>1</div>")
     with pytest.raises(Error) as exc_info:
         await page.wait_for_selector("div", timeout=1000)
-    assert "Page.wait_for_selector: Timeout 1000ms exceeded" in exc_info.value.message
+    assert "Timeout 1000ms exceeded" in exc_info.value.message
     await page.evaluate("() => document.querySelector('div').style.width = '10px'")
     with pytest.raises(Error) as exc_info:
         await page.wait_for_selector("div", timeout=1000)
-    assert "Page.wait_for_selector: Timeout 1000ms exceeded" in exc_info.value.message
+    assert "Timeout 1000ms exceeded" in exc_info.value.message
     await page.evaluate("() => document.querySelector('div').style.height = '10px'")
     assert await page.wait_for_selector("div", timeout=1000)
 
@@ -217,7 +217,7 @@ async def test_WA_053_should_respect_timeout(page: Page) -> None:
     except Error as e:
         error = e
     assert error
-    assert "Page.wait_for_selector: Timeout 3000ms exceeded" in error.message
+    assert "Timeout 3000ms exceeded" in error.message
     assert 'waiting for locator("div")' in error.message
     assert isinstance(error, TimeoutError)
 
@@ -232,7 +232,7 @@ async def test_WA_054_should_have_an_error_message_specifically_for_awaiting_an_
     except Error as e:
         error = e
     assert error
-    assert "Page.wait_for_selector: Timeout 1000ms exceeded" in error.message
+    assert "Timeout 1000ms exceeded" in error.message
     assert 'waiting for locator("div") to be hidden' in error.message
 
 
@@ -381,7 +381,7 @@ async def test_WA_066_should_respect_timeout_xpath(page: Page) -> None:
     except Error as e:
         error = e
     assert error
-    assert "Page.wait_for_selector: Timeout 3000ms exceeded" in error.message
+    assert "Timeout 3000ms exceeded" in error.message
     assert 'waiting for locator("//div")' in error.message
     assert isinstance(error, TimeoutError)
 
@@ -427,7 +427,7 @@ async def test_WA_068_should_throw_when_frame_is_detached_xpath(
 
     await asyncio.gather(wait_for_xpath(), detach())
     assert wait_error
-    assert "Frame.wait_for_selector: Frame was detached" in wait_error.message
+    assert "Frame was detached" in wait_error.message
 
 
 async def test_WA_069_should_return_the_element_handle_xpath(

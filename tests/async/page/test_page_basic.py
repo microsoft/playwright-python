@@ -19,6 +19,8 @@ import asyncio
 import re
 from typing import Any, List, Optional
 
+import pytest
+
 from playwright.async_api import ConsoleMessage, Error, Page, expect
 from tests.server import Server, TestServerRequest
 
@@ -211,3 +213,11 @@ async def test_PA_019_should_iterate_over_page_properties(page: Page) -> None:
         value = getattr(page, prop)
         if value is not None and not callable(value):
             props.append(getattr(value, "__iter__", None))
+
+
+async def test_PA_057_should_prefix_the_error_message_with_the_api_name(
+    page: Page, server: Server
+) -> None:
+    with pytest.raises(Error) as exc_info:
+        await page.goto(server.PREFIX + "/empty.html", timeout=1)
+    assert "Page.goto: Timeout 1ms exceeded." in exc_info.value.message

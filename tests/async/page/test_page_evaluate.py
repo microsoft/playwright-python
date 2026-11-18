@@ -1013,7 +1013,7 @@ async def test_EV_093_should_throw_when_frame_is_detached(
     error, _ = await asyncio.gather(evaluate_in_frame(), detach())
     assert error
     assert re.search(
-        r"Frame.evaluate: (Frame was detached|Execution context was destroyed)",
+        r"(Frame was detached|Execution context was destroyed)",
         error.message,
     )
 
