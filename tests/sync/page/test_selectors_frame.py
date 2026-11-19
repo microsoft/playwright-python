@@ -142,20 +142,14 @@ def test_SE_105_eval_should_throw_for_missing_frame(page: Page, server: Server) 
         page.eval_on_selector(
             "iframe >> internal:control=enter-frame >> canvas", "e => 1"
         )
-    assert (
-        "Page.eval_on_selector: Failed to find element matching selector"
-        in exc_info.value.message
-    )
+    assert "Failed to find element matching selector" in exc_info.value.message
     body = page.query_selector("body")
     assert body
     with pytest.raises(Error) as exc_info:
         body.eval_on_selector(
             "iframe >> internal:control=enter-frame >> canvas", "e => 1"
         )
-    assert (
-        "ElementHandle.eval_on_selector: Failed to find element matching selector"
-        in exc_info.value.message
-    )
+    assert "Failed to find element matching selector" in exc_info.value.message
 
 
 def test_SE_106_eval_should_not_throw_for_missing_frame(

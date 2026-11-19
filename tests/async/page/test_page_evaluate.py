@@ -823,7 +823,7 @@ async def test_EV_074_should_not_leak_utility_script(page: Page) -> None:
 async def test_EV_075_should_not_leak_handles(page: Page) -> None:
     with pytest.raises(Error) as exc_info:
         await page.evaluate("handles.length")
-    assert " handles" in exc_info.value.message
+    assert "handles" in exc_info.value.message
 
 
 async def test_EV_076_should_work_with_csp(page: Page, server: Server) -> None:

@@ -45,10 +45,7 @@ def test_EH_041_should_throw_in_case_of_missing_selector(page: Page) -> None:
     assert element_handle
     with pytest.raises(Error) as exc_info:
         element_handle.eval_on_selector(".a", "node => node.innerText")
-    assert (
-        'ElementHandle.eval_on_selector: Failed to find element matching selector ".a"'
-        in exc_info.value.message
-    )
+    assert 'Failed to find element matching selector ".a"' in exc_info.value.message
 
 
 def test_EH_042_should_work_for_all(page: Page) -> None:

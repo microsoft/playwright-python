@@ -59,10 +59,21 @@ async def test_LO_186_should_accept_string_expression(page: Page) -> None:
 async def test_LO_187_should_resolve_a_promise_returned_by_the_predicate(
     page: Page,
 ) -> None:
-    await page.set_content("<div id=target>yes</div>")
-    await page.locator("#target").wait_for_function(
-        "async element => element.textContent === 'yes'"
+    await page.set_content("<div id=target>no</div>")
+    target = page.locator("#target")
+    with pytest.raises(Error, match="Timeout 250ms exceeded"):
+        await target.wait_for_function(
+            "async element => element.textContent === 'yes'", timeout=250
+        )
+    await target.wait_for_function(
+        """async element => {
+    await new Promise(resolve => window.builtins.setTimeout(resolve, 10));
+    const result = element.textContent === 'yes';
+    element.textContent = 'yes';
+    return result;
+  }"""
     )
+    assert await target.text_content() == "yes"
 
 
 async def test_LO_188_should_wait_for_element_to_appear_and_survive_rerender(
@@ -102,6 +113,16 @@ async def test_LO_189_should_throw_when_predicate_throws(page: Page) -> None:
   }"""
         )
     assert "oh my" in exc_info.value.message
+
+
+async def test_LO_200_should_throw_when_predicate_rejects(page: Page) -> None:
+    await page.set_content("<div id=target>no</div>")
+    with pytest.raises(Error, match="async oh my"):
+        await page.locator("#target").wait_for_function(
+            """async () => {
+    throw new Error('async oh my');
+  }"""
+        )
 
 
 async def test_LO_190_should_throw_on_strict_mode_violation(page: Page) -> None:

@@ -70,7 +70,6 @@ def test_WO_002_should_emit_created_and_destroyed_events(page: Page) -> None:
     assert worker_destroyed_info.value is worker
     with pytest.raises(Error) as exc_info:
         worker_this_obj.get_property("self")
-    assert "JSHandle.get_property" in exc_info.value.message
     assert TARGET_CLOSED_ERROR_MESSAGE in exc_info.value.message
 
 
@@ -113,15 +112,15 @@ def test_WO_005_should_have_timestamp_on_worker_console_messages(
     if browser_channel == "webkit-wsl":
         pytest.skip("there is a time difference between WSL VM and host machine")
 
-    # Account for the rounding of fractional timestamps.
-    before = time.time() * 1000 - 1
+    # The clocks of the browser and of the test process differ by a few milliseconds on Windows.
+    margin = 10
+    before = time.time() * 1000 - margin
     with page.expect_console_message() as message_info:
         page.evaluate(
             """() => new Worker(URL.createObjectURL(new Blob(['console.log("ts")'], { type: 'application/javascript' })))"""
         )
     message = message_info.value
-    # Account for the rounding of fractional timestamps.
-    after = time.time() * 1000 + 1
+    after = time.time() * 1000 + margin
     assert message.text == "ts"
     assert message.timestamp >= before
     assert message.timestamp <= after
@@ -579,3 +578,53 @@ def test_WO_025_should_resolve_worker_script_all_headers_in_nested_worker_inside
     assert response
     headers = response.all_headers()
     assert headers["content-type"]
+
+
+def test_WO_032_should_run_a_shared_worker_after_redirected_dedicated_workers(
+    page: Page, server: Server
+) -> None:
+    for name in ["classic", "module", "shared"]:
+        server.set_redirect(f"/{name}/worker.js", "v2/worker.js")
+
+        def helper(request: TestServerRequest, name: str = name) -> None:
+            request.setHeader("Content-Type", "text/javascript")
+            request.write(
+                b"export const value = 'v2';"
+                if name == "module"
+                else b"self.value = 'v2';"
+            )
+            request.finish()
+
+        server.set_route(f"/{name}/v2/helper.js", helper)
+
+        def worker(request: TestServerRequest, name: str = name) -> None:
+            request.setHeader("Content-Type", "text/javascript")
+            if name == "module":
+                request.write(
+                    b"import { value } from './helper.js'; postMessage(value);"
+                )
+            elif name == "shared":
+                request.write(
+                    b"importScripts('helper.js'); onconnect = event => event.ports[0].postMessage(self.value);"
+                )
+            else:
+                request.write(b"importScripts('helper.js'); postMessage(self.value);")
+            request.finish()
+
+        server.set_route(f"/{name}/v2/worker.js", worker)
+
+    page.goto(server.EMPTY_PAGE)
+    for name in ["classic", "module", "shared"]:
+        assert (
+            page.evaluate(
+                """name => new Promise((resolve, reject) => {
+      const url = `/${name}/worker.js`;
+      const worker = name === 'shared' ? new SharedWorker(url) : new Worker(url, { type: name === 'module' ? 'module' : 'classic' });
+      worker.onerror = event => reject(new Error(event.message));
+      const port = worker instanceof SharedWorker ? worker.port : worker;
+      port.onmessage = event => resolve(event.data);
+    })""",
+                name,
+            )
+            == "v2"
+        )

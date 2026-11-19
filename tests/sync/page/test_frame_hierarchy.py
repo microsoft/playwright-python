@@ -15,12 +15,13 @@
 """Port of tests/page/frame-hierarchy.spec.ts."""
 
 import functools
+import json
 import re
 from typing import List
 
 import pytest
 
-from playwright.sync_api import Frame, Page
+from playwright.sync_api import Frame, Page, expect
 from tests.server import Server, TestServerRequest
 
 from ..utils import Utils
@@ -135,6 +136,44 @@ def test_FR_029_should_detach_child_frames_on_navigation(
     assert len(attached_frames) == 0
     assert len(detached_frames) == 4
     assert len(navigated_frames) == 1
+
+    for path, next_path in [
+        ("/redirect1.html", "/redirect2.html"),
+        ("/redirect2.html", "/empty.html"),
+    ]:
+
+        def redirect(request: TestServerRequest, next_path: str = next_path) -> None:
+            request.setHeader("Content-Type", "text/html")
+            request.write(
+                f"""
+        <script>
+          addEventListener('message', () => location.href = {json.dumps(server.PREFIX + next_path)}, {{ once: true }});
+        </script>
+        <iframe src="{server.CROSS_PROCESS_PREFIX}/navigating-child.html"></iframe>
+      """.encode()
+            )
+            request.finish()
+
+        server.set_route(path, redirect)
+
+    def navigating_child(request: TestServerRequest) -> None:
+        request.setHeader("Content-Type", "text/html")
+        request.write(
+            b"""
+      <iframe src="/frames/frame.html"></iframe>
+      <script>
+        parent.postMessage('redirect', '*');
+        location.href = '/frames/two-frames.html';
+      </script>
+    """
+        )
+        request.finish()
+
+    server.set_route("/navigating-child.html", navigating_child)
+    page.goto(server.PREFIX + "/redirect1.html", wait_until="commit")
+    page.wait_for_url(server.EMPTY_PAGE)
+    assert page.frames == [page.main_frame]
+    expect(page.locator("iframe")).to_have_count(0)
 
 
 def test_FR_030_should_support_framesets(page: Page, server: Server) -> None:

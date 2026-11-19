@@ -259,7 +259,8 @@ async def test_CD_004_should_connect_when_an_existing_page_has_been_discarded(
         await discards.goto("chrome://discards/")
         # Discarding replaces the tab's WebContents, but the url in the table survives.
         row = discards.get_by_role("row", name=victim_url)
-        await row.get_by_text("Urgent Discard").click()
+        # This click hangs on the macOS bots sometimes. The timeout makes the error show the call log.
+        await row.get_by_text("Urgent Discard").click(timeout=10000)
         await expect(row).to_contain_text("discarded")
         # The renderer process is shut down asynchronously after the discard.
         await discards.wait_for_timeout(3000)

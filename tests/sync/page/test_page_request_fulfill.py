@@ -505,17 +505,55 @@ def test_RO_115_should_fulfill_preload_link_requests(
 
 def test_RO_116_should_fulfill_json(page: Page, server: Server) -> None:
     page.goto(server.EMPTY_PAGE)
+    # Not ported: json: null; None means an absent option in the Python API.
+    cases: List[Dict[str, Any]] = [
+        {"options": {"json": {"bar": "baz"}}, "content_type": "application/json"},
+        {"options": {"json": 1}, "content_type": "application/json"},
+        {"options": {"json": False}, "content_type": "application/json"},
+        {"options": {"json": 0}, "content_type": "application/json"},
+        {"options": {"json": ""}, "content_type": "application/json"},
+        {
+            "options": {
+                "json": {"bar": "baz"},
+                "headers": {"content-type": "application/problem+json"},
+            },
+            "content_type": "application/problem+json",
+        },
+        {
+            "options": {
+                "json": {"bar": "baz"},
+                "headers": {"Content-Type": "application/problem+json"},
+            },
+            "content_type": "application/problem+json",
+        },
+        {
+            "options": {
+                "json": {"bar": "baz"},
+                "headers": {"Content-Type": "application/problem+json"},
+                "content_type": "text/plain",
+            },
+            "content_type": "text/plain",
+        },
+    ]
+    for case in cases:
+        options = case["options"]
 
-    def handler(route: Route) -> None:
-        route.fulfill(status=201, headers={"foo": "bar"}, json={"bar": "baz"})
+        def handler(route: Route) -> None:
+            route.fulfill(
+                **{
+                    **options,
+                    "status": 201,
+                    "headers": {"foo": "bar", **options.get("headers", {})},
+                }
+            )
 
-    page.route("**/data.json", handler)
-    with page.expect_response("**/*") as response_info:
-        body = page.evaluate("() => fetch('./data.json').then(r => r.text())")
-    response = response_info.value
-    assert response.status == 201
-    assert response.headers["content-type"] == "application/json"
-    assert body == '{"bar":"baz"}'
+        page.route("**/data.json", handler, times=1)
+        with page.expect_response("**/data.json") as response_info:
+            body = page.evaluate("() => fetch('./data.json').then(r => r.text())")
+        response = response_info.value
+        assert response.status == 201
+        assert response.headers["content-type"] == case["content_type"], options
+        assert body == json.dumps(options["json"], separators=(",", ":"))
 
 
 def test_RO_117_should_fulfill_with_gzip_and_readback(

@@ -504,17 +504,55 @@ async def test_RO_115_should_fulfill_preload_link_requests(
 
 async def test_RO_116_should_fulfill_json(page: Page, server: Server) -> None:
     await page.goto(server.EMPTY_PAGE)
+    # Not ported: json: null; None means an absent option in the Python API.
+    cases: List[Dict[str, Any]] = [
+        {"options": {"json": {"bar": "baz"}}, "content_type": "application/json"},
+        {"options": {"json": 1}, "content_type": "application/json"},
+        {"options": {"json": False}, "content_type": "application/json"},
+        {"options": {"json": 0}, "content_type": "application/json"},
+        {"options": {"json": ""}, "content_type": "application/json"},
+        {
+            "options": {
+                "json": {"bar": "baz"},
+                "headers": {"content-type": "application/problem+json"},
+            },
+            "content_type": "application/problem+json",
+        },
+        {
+            "options": {
+                "json": {"bar": "baz"},
+                "headers": {"Content-Type": "application/problem+json"},
+            },
+            "content_type": "application/problem+json",
+        },
+        {
+            "options": {
+                "json": {"bar": "baz"},
+                "headers": {"Content-Type": "application/problem+json"},
+                "content_type": "text/plain",
+            },
+            "content_type": "text/plain",
+        },
+    ]
+    for case in cases:
+        options = case["options"]
 
-    async def handler(route: Route) -> None:
-        await route.fulfill(status=201, headers={"foo": "bar"}, json={"bar": "baz"})
+        async def handler(route: Route) -> None:
+            await route.fulfill(
+                **{
+                    **options,
+                    "status": 201,
+                    "headers": {"foo": "bar", **options.get("headers", {})},
+                }
+            )
 
-    await page.route("**/data.json", handler)
-    async with page.expect_response("**/*") as response_info:
-        body = await page.evaluate("() => fetch('./data.json').then(r => r.text())")
-    response = await response_info.value
-    assert response.status == 201
-    assert response.headers["content-type"] == "application/json"
-    assert body == '{"bar":"baz"}'
+        await page.route("**/data.json", handler, times=1)
+        async with page.expect_response("**/data.json") as response_info:
+            body = await page.evaluate("() => fetch('./data.json').then(r => r.text())")
+        response = await response_info.value
+        assert response.status == 201
+        assert response.headers["content-type"] == case["content_type"], options
+        assert body == json.dumps(options["json"], separators=(",", ":"))
 
 
 async def test_RO_117_should_fulfill_with_gzip_and_readback(
