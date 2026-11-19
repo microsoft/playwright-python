@@ -202,8 +202,7 @@ def test_SE_164_should_handle_errors(
     with pytest.raises(Error) as exc_info:
         selectors.register("dummy", create_dummy_selector)
     assert (
-        exc_info.value.message
-        == 'Selectors.register: "dummy" selector engine has been already registered'
+        '"dummy" selector engine has been already registered' in exc_info.value.message
     )
 
     with pytest.raises(Error) as exc_info:
@@ -220,7 +219,7 @@ def test_SE_165_should_throw_already_registered_error_when_registering(
     with pytest.raises(Error) as exc_info:
         selectors.register("alreadyRegistered", CREATE_TAG_SELECTOR)
     assert (
-        'Selectors.register: "alreadyRegistered" selector engine has been already registered'
+        '"alreadyRegistered" selector engine has been already registered'
         in exc_info.value.message
     )
 

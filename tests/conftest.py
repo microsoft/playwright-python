@@ -270,6 +270,14 @@ def https_server() -> Generator[Server, None, None]:
 
 
 @pytest.fixture(autouse=True, scope="session")
+def _coredump_filter() -> None:
+    if sys.platform == "linux":
+        # Large renderer core dumps delay crash events. Piped core handlers ignore RLIMIT_CORE.
+        # This filter is inherited by child processes and leaves the browser sandbox enabled.
+        Path("/proc/self/coredump_filter").write_text("0")
+
+
+@pytest.fixture(autouse=True, scope="session")
 def start_server() -> Generator[None, None, None]:
     test_server.start()
     yield

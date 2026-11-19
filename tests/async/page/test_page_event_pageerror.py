@@ -395,7 +395,7 @@ async def test_ER_022_should_not_fire_for_a_caught_fetch_rejected_by_a_pending_n
         await navigation
     async with page.expect_event("pageerror") as error_info:
         await page.evaluate(
-            "() => setTimeout(() => { throw new Error('genuine error'); }, 0)"
+            "() => window.builtins.setTimeout(() => { throw new Error('genuine error'); }, 0)"
         )
     error = await error_info.value
     assert error.message == "genuine error"

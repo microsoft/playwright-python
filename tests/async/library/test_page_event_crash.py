@@ -19,27 +19,12 @@ import asyncio
 import os
 import re
 import sys
-from pathlib import Path
 from typing import Any, AsyncGenerator, Awaitable, Callable, List, Optional
 
 import pytest
 
 from playwright.async_api import Error, Page, expect
 from tests.server import Server
-
-
-def host_platform() -> str:
-    """The start of hostPlatform (packages/playwright-core/src/server/utils/hostPlatform.ts) on Linux."""
-    if not sys.platform.startswith("linux"):
-        return sys.platform
-    try:
-        os_release = Path("/etc/os-release").read_text()
-    except OSError:
-        return "linux"
-    fields = dict(re.findall(r'^(\w+)="?([^"\n]*)"?$', os_release, re.MULTILINE))
-    if fields.get("ID") in ("ubuntu", "debian"):
-        return fields["ID"] + fields.get("VERSION_ID", "")
-    return "linux"
 
 
 async def error_of(awaitable: Awaitable[Any]) -> Any:
@@ -58,8 +43,6 @@ def before_each(browser_name: str, browser_channel: Optional[str]) -> None:
         )
     if browser_channel == "webkit-wsl":
         pytest.skip("WebKit on WSL is even slower than above ^^ - skipping for now")
-    if browser_name == "chromium" and host_platform().startswith("ubuntu24.04"):
-        pytest.skip("never dispatches the crash event")
     if browser_name != "chromium":
         pytest.skip(
             "crashes the page with toImpl(page) (Page.crash), the Python client can not reach server internals"

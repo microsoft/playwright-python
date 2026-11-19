@@ -71,7 +71,8 @@ def test_WA_004_should_poll_on_interval(page: Page, server: Server) -> None:
         arg={},
         polling=polling,
     )
-    assert time_delta.json_value() >= polling
+    # Firefox timers sometimes fire one millisecond early.
+    assert time_delta.json_value() >= polling - 1
 
 
 def test_WA_005_should_avoid_side_effects_after_timeout(page: Page) -> None:

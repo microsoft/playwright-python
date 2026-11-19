@@ -611,9 +611,8 @@ class Route(ChannelOwner):
             )
         if content_type:
             protocol_headers["content-type"] = js_string(content_type)
-        # Python: [] and {} are truthy in JS.
-        elif json or isinstance(json, (list, tuple, dict)):
-            protocol_headers["content-type"] = "application/json"
+        elif json is not None:
+            protocol_headers.setdefault("content-type", "application/json")
         elif path:
             protocol_headers["content-type"] = (
                 get_mime_type_for_path(str(path)) or "application/octet-stream"
