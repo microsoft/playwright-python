@@ -88,7 +88,6 @@ After a docs change, `mypy playwright` shows what `_impl/` is missing.
 
 - `* langs:` in the docs alone decides if a member is for Python. No `langs` means every
   language. Do not judge by the name of an API.
-  `node .upstream/utils/doclint/generateApiJson.js` dumps the docs with `langs`.
 - When Python ships a different API, the Python API wins: fix the upstream docs with a
   Python-only declaration (`* langs: python`).
 - `scripts/codegen/python_rules.js` holds only what the docs can not say, each entry with
