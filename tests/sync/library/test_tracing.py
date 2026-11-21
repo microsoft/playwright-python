@@ -1442,3 +1442,31 @@ def test_TR_042_should_save_trace_while_a_web_socket_keeps_streaming_frames(
         web_socket_lines.append({"path": path, "lines": lines})
     assert web_socket_lines[0]["path"] != web_socket_lines[1]["path"]
     assert web_socket_lines[1]["lines"] == web_socket_lines[1]["lines"]
+
+
+def test_TR_043_should_resolve_relative_trace_and_har_paths_against_current_directory(
+    browser: Browser, server: Server, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # Regression test for python#3361: the driver process is started before a
+    # test changes the current directory, so relative artifact paths must be
+    # resolved by the Python client.
+    original_cwd = Path.cwd()
+    har_context = None
+    try:
+        monkeypatch.chdir(tmp_path)
+        har_context = browser.new_context(record_har_path="relative.har")
+        context = har_context
+        context.tracing.start()
+        page = context.new_page()
+        page.goto(server.EMPTY_PAGE)
+        context.tracing.stop(path="relative-trace.zip")
+        context.close()
+        har_context = None
+
+        assert (tmp_path / "relative-trace.zip").is_file()
+        assert (tmp_path / "relative.har").is_file()
+        assert not (original_cwd / "relative-trace.zip").exists()
+        assert not (original_cwd / "relative.har").exists()
+    finally:
+        if har_context:
+            har_context.close()
