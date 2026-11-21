@@ -22,6 +22,7 @@ re.Pattern, whose flags are sent in the JS letters.
 """
 
 import asyncio
+import os
 import re
 from pathlib import Path
 from typing import (
@@ -62,6 +63,12 @@ class _HarRecorder(TypedDict):
     # Python: the { path, resourcesDir } object of _harRecorders, without the
     # resourcesDir option, which is JavaScript only.
     path: str
+
+
+def _absolute_path(path: Union[str, Path]) -> str:
+    # Python: the driver is another process, so a relative path must be resolved
+    # here against the current directory, as Artifact.save_as() does.
+    return os.path.abspath(os.fspath(path))
 
 
 class Tracing(ChannelOwner):
@@ -220,8 +227,9 @@ class Tracing(ChannelOwner):
         update_mode: Optional[Literal["minimal", "full"]],
     ) -> str:
         # Not ported: the resourcesDir option; it is JavaScript only.
-        # Python: the path can be a pathlib.Path.
-        har = str(har)
+        # Python: the path can be a pathlib.Path and is resolved against the
+        # current directory before it is sent to the driver.
+        har = _absolute_path(har)
         is_zip = bool(re.search(r"\.zip$", har, re.IGNORECASE))
         options: Dict[str, Any] = {
             "content": update_content if update_content is not None else "attach",
@@ -344,6 +352,8 @@ class Tracing(ChannelOwner):
         if not local_utils:
             raise Error("Cannot save trace in thin clients")
 
+        # Python: resolve relative paths here; the driver is another process.
+        file_path = _absolute_path(file_path)
         is_local = not self._connection.is_remote()
 
         if is_local:
