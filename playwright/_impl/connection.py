@@ -44,7 +44,6 @@ from playwright._impl.client_instrumentation import (
 )
 from playwright._impl.errors import (
     Error,
-    PlaywrightError,
     TargetClosedError,
     parse_error,
 )
@@ -319,11 +318,8 @@ class Connection(EventEmitter):
             if error and not result:
                 parsed_error = parse_error(error)
                 parsed_error._log = log or []
-                parsed_error = cast(
-                    PlaywrightError,
-                    rewrite_error_message(
-                        parsed_error, parsed_error.message + format_call_log(log)
-                    ),
+                parsed_error = rewrite_error_message(
+                    parsed_error, parsed_error.message + format_call_log(log)
                 )
                 details_validator = maybe_find_validator(
                     callback.type, callback.method, "ErrorDetails"

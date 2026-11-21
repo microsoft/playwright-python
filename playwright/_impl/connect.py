@@ -50,7 +50,11 @@ from playwright._impl.internal_structures import HeadersArray
 from playwright._impl.isomorphic.string_utils import js_string
 from playwright._impl.isomorphic.time import monotonic_time
 from playwright._impl.timeout_settings import NO_TIMEOUT
-from playwright._impl.utils.tasks import call_in_next_task, fire_and_forget
+from playwright._impl.utils.tasks import (
+    CONTROL_FLOW_EXCEPTIONS,
+    call_in_next_task,
+    fire_and_forget,
+)
 
 if TYPE_CHECKING:  # pragma: no cover
     from playwright._impl.local_utils import LocalUtils
@@ -164,7 +168,9 @@ async def connect_to_endpoint(
         nonlocal close_error
         try:
             connection.dispatch(message)
-        except Exception as e:
+        except CONTROL_FLOW_EXCEPTIONS:
+            raise
+        except BaseException as e:
             # Python: String(e) is the name and the message of the error.
             close_error = f"{e.name if isinstance(e, Error) else type(e).__name__}: {e}"
             fire_and_forget(transport.close())

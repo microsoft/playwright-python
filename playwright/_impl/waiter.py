@@ -34,7 +34,12 @@ from typing import (
 from playwright._impl.errors import TimeoutError
 from playwright._impl.utils.crypto import create_guid
 from playwright._impl.utils.stack_trace import rewrite_error_message
-from playwright._impl.utils.tasks import completed, fire_and_forget, race
+from playwright._impl.utils.tasks import (
+    CONTROL_FLOW_EXCEPTIONS,
+    completed,
+    fire_and_forget,
+    race,
+)
 from playwright._impl.utils.zones import Zone, current_zone
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -185,15 +190,16 @@ class Waiter:
             if dispose:
                 dispose()
             return result
-        except asyncio.CancelledError:
+        except CONTROL_FLOW_EXCEPTIONS as e:
             # Python: the task that waits was cancelled, for example by an expect_*()
             # block that raised. Clean up as for an error.
             if dispose:
                 dispose()
-            self._error = "The operation was aborted"
+            if isinstance(e, asyncio.CancelledError):
+                self._error = "The operation was aborted"
             self.dispose()
             raise
-        except Exception as e:
+        except BaseException as e:
             if dispose:
                 dispose()
             self._error = str(e)
@@ -240,7 +246,7 @@ def wait_for_event(
             if not promise.done():
                 promise.set_result(event_arg)
 
-        def fail(e: Exception) -> None:
+        def fail(e: BaseException) -> None:
             emitter.remove_listener(event, listener)
             if not promise.done():
                 promise.set_exception(e)
@@ -256,13 +262,17 @@ def wait_for_event(
                     async def continuation() -> None:
                         try:
                             settle(bool(await matched))
-                        except Exception as e:
+                        except CONTROL_FLOW_EXCEPTIONS:
+                            raise
+                        except BaseException as e:
                             fail(e)
 
                     # Python: started here, so that it runs in the saved zone.
                     return asyncio.ensure_future(continuation())
                 settle(bool(matched))
-            except Exception as e:
+            except CONTROL_FLOW_EXCEPTIONS:
+                raise
+            except BaseException as e:
                 fail(e)
             return None
 

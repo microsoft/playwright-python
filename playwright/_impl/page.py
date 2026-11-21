@@ -118,7 +118,7 @@ from playwright._impl.network import (
 )
 from playwright._impl.screencast import Screencast
 from playwright._impl.timeout_settings import NO_TIMEOUT, TimeoutSettings
-from playwright._impl.utils.tasks import fire_and_forget
+from playwright._impl.utils.tasks import CONTROL_FLOW_EXCEPTIONS, fire_and_forget
 from playwright._impl.video import Video
 from playwright._impl.waiter import Waiter
 from playwright._impl.web_storage import WebStorage
@@ -1882,7 +1882,9 @@ class BindingCall(ChannelOwner):
                     result=serialize_argument(_to_impl(result)), timeout=NO_TIMEOUT
                 )
             )
-        except Exception as e:
+        except CONTROL_FLOW_EXCEPTIONS:
+            raise
+        except BaseException as e:
             fire_and_forget(
                 self._channel.reject(error=serialize_error(e), timeout=NO_TIMEOUT)
             )
