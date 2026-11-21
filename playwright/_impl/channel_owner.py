@@ -53,7 +53,11 @@ from playwright._impl.utils.stack_trace import (
     show_internal_stack_frames,
     stringify_stack_frames,
 )
-from playwright._impl.utils.tasks import failed, fire_and_forget
+from playwright._impl.utils.tasks import (
+    CONTROL_FLOW_EXCEPTIONS,
+    failed,
+    fire_and_forget,
+)
 from playwright._impl.utils.zones import current_zone
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -80,7 +84,7 @@ class ApiZone:
         self.reported = False
         self.user_data: Any = None
         self.call_id: Optional[str] = None
-        self.error: Optional[Exception] = None
+        self.error: Optional[BaseException] = None
 
     def options(self) -> Dict[str, Any]:
         # Python: `{ ...apiZone }` in the options of sendMessageToServer().
@@ -157,7 +161,9 @@ class Channel(EventEmitter):
         # option, which is enough.
         try:
             result = owner._wrap_api_call(func, ApiCallOptions(internal=is_internal))
-        except Exception as e:
+        except CONTROL_FLOW_EXCEPTIONS:
+            raise
+        except BaseException as e:
             return failed(e)
         if mapper is None:
             return result
@@ -354,14 +360,14 @@ class ChannelOwner(EventEmitter):
                     log_api_call(logger, f"<= {api_zone.api_name} succeeded")
                     self._instrumentation.on_api_call_end(api_zone)
                 return result
-            except asyncio.CancelledError:
+            except CONTROL_FLOW_EXCEPTIONS:
                 # Python: the task that awaits the call was cancelled, and the call
                 # is aborted; upstream sees an AbortError.
                 if not (options and options.internal):
                     log_api_call(logger, f"<= {api_zone.api_name} failed")
                     self._instrumentation.on_api_call_end(api_zone)
                 raise
-            except Exception as e:
+            except BaseException as e:
                 stack = getattr(e, "_stack", None)
                 inner_error = (
                     "\n<inner error>\n" + stack

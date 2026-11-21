@@ -18,6 +18,7 @@ from typing import Any, Callable, Tuple, Type
 import greenlet
 
 from playwright._impl._errors import TargetClosedError
+from playwright._impl.utils.tasks import CONTROL_FLOW_EXCEPTIONS
 
 
 def _greenlet_trace_callback(
@@ -80,7 +81,9 @@ def run_in_greenlet(
     def body() -> None:
         try:
             future.set_result(func())
-        except Exception as e:
+        except CONTROL_FLOW_EXCEPTIONS:
+            raise
+        except BaseException as e:
             future.set_exception(e)
 
     greenlet_class(body).switch()

@@ -83,7 +83,11 @@ from playwright._impl.isomorphic.url_match import (
 )
 from playwright._impl.timeout_settings import NO_TIMEOUT
 from playwright._impl.utils.stack_trace import rewrite_error_message
-from playwright._impl.utils.tasks import completed, fire_and_forget
+from playwright._impl.utils.tasks import (
+    CONTROL_FLOW_EXCEPTIONS,
+    completed,
+    fire_and_forget,
+)
 from playwright._impl.utils.zones import Zone, current_zone
 from playwright._impl.waiter import Waiter
 
@@ -1276,7 +1280,9 @@ class RouteHandler:
         self._active_invocations.add(handler_invocation)
         try:
             return await self._handle_internal(route)
-        except Exception as e:
+        except CONTROL_FLOW_EXCEPTIONS:
+            raise
+        except BaseException as e:
             # If the handler was stopped (without waiting for completion), we ignore all exceptions.
             if self._ignore_exception:
                 return False

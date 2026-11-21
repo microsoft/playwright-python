@@ -26,11 +26,13 @@ import site
 import sys
 import sysconfig
 from types import FrameType
-from typing import List, Optional, Tuple, TypedDict
+from typing import List, Optional, Tuple, TypedDict, TypeVar
 
 import playwright
 from playwright._impl.errors import Error
 from playwright._impl.utils.debug import get_as_boolean_from_env
+
+E = TypeVar("E", bound=BaseException)
 
 
 class StackFrame(TypedDict, total=False):
@@ -71,7 +73,7 @@ def _sync_caller_frame() -> Optional[FrameType]:
     return getattr(task, "__pw_caller_frame__", None)
 
 
-def rewrite_error_message(e: Exception, new_message: str) -> Exception:
+def rewrite_error_message(e: E, new_message: str) -> E:
     """Port of rewriteErrorMessage().
 
     Python: upstream changes the error itself; this changes a copy, because the same

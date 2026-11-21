@@ -26,6 +26,7 @@ from typing import Any, Tuple
 from playwright._impl.connection import Connection
 from playwright._impl.playwright import Playwright
 from playwright._impl.transport import PipeTransport
+from playwright._impl.utils.tasks import CONTROL_FLOW_EXCEPTIONS
 
 
 async def start() -> Tuple[Playwright, "PlaywrightClient"]:
@@ -50,7 +51,9 @@ class PlaywrightClient:
             # call raises it, and the transport goes on.
             try:
                 connection.dispatch(message)
-            except Exception as error:
+            except CONTROL_FLOW_EXCEPTIONS:
+                raise
+            except BaseException as error:
                 connection._on_event_listener_error(error)
 
         transport.on_message = on_message

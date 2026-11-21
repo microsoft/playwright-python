@@ -23,7 +23,7 @@ import textwrap
 import time
 from datetime import timedelta
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Set
+from typing import Any, Dict, Generator, List, Set, cast
 
 import pytest
 from greenlet import greenlet
@@ -36,6 +36,7 @@ from playwright.sync_api import (
     Error,
     Page,
     Playwright,
+    Route,
     TimeoutError,
     sync_playwright,
 )
@@ -385,3 +386,61 @@ def test_sync_should_survive_exception_raised_by_signal_handler_while_event_hand
 def test_click_should_accept_timedelta_for_timeout(page: Page) -> None:
     with pytest.raises(TimeoutError, match="Timeout 1ms exceeded"):
         page.click("does-not-exist", timeout=timedelta(milliseconds=1))
+
+
+def test_handlers_should_preserve_base_exception(
+    context: BrowserContext, server: Server
+) -> None:
+    # Regression test for https://github.com/microsoft/playwright-python/issues/3360.
+    page = context.new_page()
+
+    def fail_console(msg: ConsoleMessage) -> None:
+        pytest.fail(f"console: {msg.text}")
+
+    try:
+        page.on("console", fail_console)
+        page.evaluate("console.log('hi')")
+        with pytest.raises(pytest.fail.Exception, match="console: hi"):
+            page.evaluate("1 + 1")
+        assert page.evaluate("1 + 1") == 2
+
+        page.remove_listener("console", fail_console)
+        seen: List[BaseException] = []
+
+        def fail_handled(msg: ConsoleMessage) -> None:
+            pytest.fail(f"handled: {msg.text}")
+
+        cast(Any, page).on("error", seen.append)
+        page.on("console", fail_handled)
+        page.evaluate("console.log('ok')")
+        assert len(seen) == 1
+        assert isinstance(seen[0], pytest.fail.Exception)
+        assert "handled: ok" in str(seen[0])
+        assert page.evaluate("1 + 1") == 2
+
+        page.remove_listener("console", fail_handled)
+        cast(Any, page).remove_listener("error", seen.append)
+
+        def fail_after_fulfill(route: Route) -> None:
+            route.fulfill(body="ok")
+            pytest.fail("route failed")
+
+        page.route("**/empty.html", fail_after_fulfill)
+        page.goto(server.EMPTY_PAGE)
+        with pytest.raises(pytest.fail.Exception, match="route failed"):
+            page.evaluate("1 + 1")
+        page.unroute("**/empty.html")
+
+        with pytest.raises(pytest.fail.Exception, match="predicate: boom"):
+            with page.expect_console_message(
+                lambda msg: pytest.fail(f"predicate: {msg.text}")
+            ):
+                page.evaluate("console.log('boom')")
+        assert page.evaluate("1 + 1") == 2
+
+        page.expose_function("pwFail", lambda: pytest.fail("binding failed"))
+        with pytest.raises(Error, match="binding failed"):
+            page.evaluate("window.pwFail()")
+        assert page.evaluate("1 + 1") == 2
+    finally:
+        page.close()
