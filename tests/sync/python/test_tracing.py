@@ -19,6 +19,8 @@ import threading
 from pathlib import Path
 from typing import Callable, ContextManager
 
+import pytest
+
 from playwright.sync_api import BrowserContext, Page, Response, expect
 from tests.server import Server
 
@@ -26,12 +28,16 @@ from ..conftest import TraceViewerPage
 
 
 def test_should_collect_sources(
-    context: BrowserContext,
-    page: Page,
+    context_factory: Callable[..., BrowserContext],
     server: Server,
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
     show_trace_viewer: Callable[[Path], ContextManager[TraceViewerPage]],
 ) -> None:
+    # Regression test for https://github.com/microsoft/playwright-python/issues/3361.
+    monkeypatch.chdir(tmp_path)
+    context = context_factory(record_har_path="log.har")
+    page = context.new_page()
     context.tracing.start(sources=True)
     page.goto(server.EMPTY_PAGE)
     page.set_content("<button>Click</button>")
@@ -44,7 +50,10 @@ def test_should_collect_sources(
 
     my_method_outer()
     path = tmp_path / "trace.zip"
-    context.tracing.stop(path=path)
+    context.tracing.stop(path=Path("trace.zip"))
+    context.close()
+    assert path.is_file()
+    assert (tmp_path / "log.har").is_file()
 
     with show_trace_viewer(path) as trace_viewer:
         expect(trace_viewer.action_titles).to_have_text(

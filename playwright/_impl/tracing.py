@@ -22,6 +22,7 @@ re.Pattern, whose flags are sent in the JS letters.
 """
 
 import asyncio
+import os
 import re
 from pathlib import Path
 from typing import (
@@ -220,8 +221,9 @@ class Tracing(ChannelOwner):
         update_mode: Optional[Literal["minimal", "full"]],
     ) -> str:
         # Not ported: the resourcesDir option; it is JavaScript only.
-        # Python: the path can be a pathlib.Path.
-        har = str(har)
+        # Python: accept pathlib.Path and resolve against the Python cwd, which
+        # can change independently of the driver's cwd.
+        har = os.path.abspath(har)
         is_zip = bool(re.search(r"\.zip$", har, re.IGNORECASE))
         options: Dict[str, Any] = {
             "content": update_content if update_content is not None else "attach",
@@ -344,6 +346,9 @@ class Tracing(ChannelOwner):
         if not local_utils:
             raise Error("Cannot save trace in thin clients")
 
+        # Python: accept pathlib.Path and resolve against the Python cwd before
+        # the driver writes the trace.
+        file_path = os.path.abspath(file_path)
         is_local = not self._connection.is_remote()
 
         if is_local:
@@ -352,8 +357,7 @@ class Tracing(ChannelOwner):
             )
             await local_utils.zip(
                 {
-                    # Python: the path can be a pathlib.Path.
-                    "zipFile": str(file_path),
+                    "zipFile": file_path,
                     "entries": result["entries"],
                     "mode": "write",
                     "stacksId": stacks_id,
@@ -388,8 +392,7 @@ class Tracing(ChannelOwner):
 
         await local_utils.zip(
             {
-                # Python: the path can be a pathlib.Path.
-                "zipFile": str(file_path),
+                "zipFile": file_path,
                 "entries": [],
                 "mode": "append",
                 "stacksId": stacks_id,
