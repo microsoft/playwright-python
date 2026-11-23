@@ -386,18 +386,6 @@ class Frame(ChannelOwner):
         )
         return parse_result(result["value"])
 
-    async def _evaluate_expose_utility_script(
-        self, expression: str, arg: Serializable
-    ) -> Any:
-        result = await self._channel.evaluateExpression(
-            expression=expression,
-            # Python: undefined; see the docstring of js_handle.py.
-            isFunction=None,
-            arg=serialize_argument(arg),
-            timeout=NO_TIMEOUT,
-        )
-        return parse_result(result["value"])
-
     async def query_selector(
         self, selector: str, strict: Optional[bool]
     ) -> Optional[ElementHandle]:

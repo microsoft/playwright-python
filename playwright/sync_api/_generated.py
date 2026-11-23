@@ -3943,13 +3943,41 @@ class BrowserType(SyncBase):
             A CDP websocket endpoint or http url to connect to. For example `http://localhost:9222/` or
             `ws://127.0.0.1:9222/devtools/browser/387adf4c-243f-4051-a181-46798f4a46f4`.
 
-            Alternatively, a browser channel name such as `chrome` or `msedge` to connect to a browser with remote debugging
-            enabled in its default user data directory. On Linux, Playwright uses `CHROME_USER_DATA_DIR` when set. Otherwise,
-            it uses `CHROME_CONFIG_HOME`, then `XDG_CONFIG_HOME`, then `~/.config` to locate that directory.
+            Alternatively, a URL that tells which running browser to connect to:
+            - `remote-debugging://<channel>` - a browser with remote debugging enabled, for example
+              `remote-debugging://msedge`. The optional `userDataDir` parameter is the user data directory of the browser,
+              when it is not the default one: `remote-debugging://chrome?userDataDir=/path/to/data`. A bare channel name such
+              as `chrome` is the same as `remote-debugging://chrome`.
+            - `extension://<channel>/<profile directory>` - the tabs of a browser profile, through the
+              [Playwright Extension](https://chromewebstore.google.com/detail/playwright-extension/mmlmfjhmonkocbjadbfplnigmagldckm),
+              for example `extension://chrome/Profile 1`. Playwright opens the connect page of the extension in that profile,
+              and the user selects the tabs to share. Without the profile directory, Playwright uses the `Default` profile.
+              The optional parameters are `userDataDir`, the user data directory of the browser when it is not the default
+              one, and `executablePath`, the path to the browser executable when it is not at the standard location:
+              `extension://chromium?executablePath=/path/to/chrome&userDataDir=/path/to/data`. Pass the other options of this
+              connection in `headers`.
+
+            The values of `userDataDir` and `executablePath` must be URL-encoded, for example with `encodeURIComponent` or
+            `URLSearchParams`. The channel is a browser channel name such as `chrome`, `chrome-beta` or `msedge`. The default
+            user data directory of the channel is where the browser keeps its data. On Linux, Playwright uses
+            `CHROME_USER_DATA_DIR` when set. Otherwise, it uses `CHROME_CONFIG_HOME`, then `XDG_CONFIG_HOME`, then `~/.config`
+            to locate that directory.
         artifacts_dir : Union[pathlib.Path, str, None]
             If specified, browser artifacts (such as traces and downloads) are saved into this directory.
         headers : Union[Dict[str, str], None]
             Additional HTTP headers to be sent with connect request. Optional.
+
+            When `endpoint_url` is an extension URL such as `extension://chrome`, the headers are not sent. They are the
+            options of the connection:
+            - `x-playwright-extension-token` - the token of the extension. With the token, the user does not have to approve
+              the connection. Without the token, the user must approve the connection before `timeout` expires, so set it to
+              a value that gives the user enough time.
+            - `x-playwright-extension-client-name` - the name of the client that the extension shows to the user.
+            - `x-playwright-extension-tab-group` - pass `false` to keep the tabs out of a tab group.
+            - `x-playwright-extension-tab-group-title` - the title of the tab group.
+            - `x-playwright-extension-tab-group-color` - the color of the tab group: `green`, `blue`, `purple`, `orange`,
+              `pink`, `cyan`, `yellow` or `red`.
+            - `x-playwright-extension-background` - pass `true` to keep the tabs from becoming active.
         is_local : Union[bool, None]
             Tells Playwright that it runs on the same host as the CDP server. It will enable certain optimizations that rely
             upon the file system being the same between Playwright and the Browser.

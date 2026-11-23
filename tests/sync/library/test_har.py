@@ -148,8 +148,15 @@ def test_HA_003_should_have_pages(page_with_har: PageWithHar) -> None:
     har.page.goto("data:text/html,<title>Hello</title>")
     # For data: load comes before domcontentloaded...
     har.page.wait_for_load_state("domcontentloaded")
+
+    page_with_dialog = har.page.context.new_page()
+    with page_with_dialog.expect_event("dialog"):
+        page_with_dialog.goto(
+            'data:text/html,<body onload="alert(1)">', wait_until="commit"
+        )
+
     log = har.get_log()
-    assert len(log["pages"]) == 1
+    assert len(log["pages"]) == 2
     page_entry = log["pages"][0]
     assert page_entry["id"]
     assert page_entry["title"] == "Hello"
