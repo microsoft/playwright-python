@@ -27,8 +27,9 @@ import inspect
 import sys
 from typing import Any, Callable, Dict, List, Optional, Set, Union
 
+from playwright._impl._errors import listener_error_types
 from playwright._impl.utils.debug import is_under_test
-from playwright._impl.utils.tasks import CONTROL_FLOW_EXCEPTIONS, completed
+from playwright._impl.utils.tasks import completed
 
 EventType = str
 Listener = Callable[..., Any]
@@ -88,11 +89,8 @@ class EventEmitter:
                 return
             # Python: an awaitable is the counterpart of a JS promise or thenable.
             future = asyncio.ensure_future(promise)
-        # Python: pytest outcomes inherit BaseException, but cancellation and exits
-        # must not be treated as listener errors.
-        except CONTROL_FLOW_EXCEPTIONS:
-            raise
-        except BaseException as error:
+        # Python: also forward pytest outcomes, which do not inherit Exception.
+        except listener_error_types() as error:
             self._handle_listener_error(type, error)
             return
         pending = self._pending_handlers.get(type)
@@ -113,9 +111,7 @@ class EventEmitter:
             else:
                 try:
                     self._handle_listener_error(type, e)
-                except CONTROL_FLOW_EXCEPTIONS:
-                    raise
-                except BaseException as error:
+                except listener_error_types() as error:
                     # Python: report an unhandled rejection outside the task callback.
                     self._report_unhandled_error(error)
 

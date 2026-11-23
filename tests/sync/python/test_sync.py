@@ -123,6 +123,16 @@ def test_console_repr(page: Page) -> None:
     page.remove_listener("console", fail_console)
     assert page.evaluate("1 + 1") == 2
 
+    def interrupt_console(message: ConsoleMessage) -> None:
+        raise Interrupted("not a pytest outcome")
+
+    page._impl_obj.on("error", errors.append)
+    page.on("console", interrupt_console)
+    with pytest.raises(Interrupted, match="not a pytest outcome"):
+        page._impl_obj.emit("console", message._impl_obj)
+    assert len(errors) == 1
+    page.remove_listener("console", interrupt_console)
+
 
 def test_sync_wait_for_event_raise(page: Page) -> None:
     with pytest.raises(AssertionError):
