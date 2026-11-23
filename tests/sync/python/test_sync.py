@@ -87,6 +87,7 @@ def test_dialog_repr(page: Page) -> None:
 
 
 def test_console_repr(page: Page) -> None:
+    # Regression test for https://github.com/microsoft/playwright-python/issues/3360.
     # Regression test for https://github.com/microsoft/playwright-python/issues/3340.
     messages: List[ConsoleMessage] = []
     page.on("console", messages.append)
@@ -103,6 +104,24 @@ def test_console_repr(page: Page) -> None:
     page.evaluate('() => { console.log("once"); console.log("ignored"); }')
     assert [m.text for m in once_messages] == ["once"]
     assert messages == [message]
+
+    def fail_console(message: ConsoleMessage) -> None:
+        pytest.fail(f"console: {message.text}")
+
+    errors: List[BaseException] = []
+    page._impl_obj.on("error", errors.append)
+    page.on("console", fail_console)
+    page.evaluate("console.log('handled')")
+    assert len(errors) == 1
+    assert isinstance(errors[0], pytest.fail.Exception)
+    assert str(errors[0]) == "console: handled"
+
+    page._impl_obj.remove_listener("error", errors.append)
+    page.evaluate("console.log('unhandled')")
+    with pytest.raises(pytest.fail.Exception, match="console: unhandled"):
+        page.evaluate("1 + 1")
+    page.remove_listener("console", fail_console)
+    assert page.evaluate("1 + 1") == 2
 
 
 def test_sync_wait_for_event_raise(page: Page) -> None:

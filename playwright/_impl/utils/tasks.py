@@ -24,7 +24,18 @@ JS cannot cancel a promise; Python can cancel a task. The rules here:
 import asyncio
 from typing import Any, Awaitable, Callable, List, Sequence, Set, TypeVar
 
+from greenlet import GreenletExit
+
 T = TypeVar("T")
+
+# Python only: these stop execution, unlike user errors such as pytest.fail().
+CONTROL_FLOW_EXCEPTIONS = (
+    KeyboardInterrupt,
+    SystemExit,
+    GeneratorExit,
+    asyncio.CancelledError,
+    GreenletExit,
+)
 
 # The tasks of fire_and_forget(): the event loop keeps only weak references.
 _tasks: Set["asyncio.Future[Any]"] = set()
