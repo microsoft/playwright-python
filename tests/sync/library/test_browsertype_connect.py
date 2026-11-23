@@ -45,6 +45,7 @@ from tests.helpers.fixed_response_server import FixedResponseServer
 from tests.helpers.remote_server import (
     KIND_LAUNCH_SERVER,
     KIND_RUN_SERVER,
+    ChildProcess,
     RemoteServerStarter,
     RunServer,
     redirect_port_forwarding_for_test,
@@ -56,6 +57,21 @@ from tests.utils import TARGET_CLOSED_ERROR_MESSAGE
 from ..utils import Utils
 
 KINDS = [KIND_LAUNCH_SERVER, KIND_RUN_SERVER]
+
+
+@pytest.fixture
+def child_process() -> Generator[Callable[..., ChildProcess], None, None]:
+    """Port of the childProcess fixture in tests/config/commonFixtures.ts."""
+    processes: List[ChildProcess] = []
+
+    def start(command: List[str]) -> ChildProcess:
+        process = ChildProcess(command)
+        processes.append(process)
+        return process
+
+    yield start
+    for process in processes:
+        process.kill()
 
 
 def connect_browser(
@@ -1846,6 +1862,18 @@ def test_BT_093_should_refuse_connecting_when_versions_do_not_match(
     assert "Playwright version mismatch" in exc_info.value.message
     assert "server version: v1.2" in exc_info.value.message
     assert "client version: v" + client_version() in exc_info.value.message
+
+
+def test_BT_105_run_server_should_exit_when_stdin_closes(
+    child_process: Callable[..., ChildProcess],
+) -> None:
+    node, cli = compute_driver_executable()
+    server = child_process([node, cli, "run-server", "--port=0"])
+    server.wait_for_output("Listening on ")
+    assert server.process.stdin
+    server.process.stdin.close()
+    # Python: a zero return code means exitCode: 0 and signal: null.
+    assert server.exit_code() == 0
 
 
 def test_BT_094_should_filter_local_paths_from_unsafe_launch_options(

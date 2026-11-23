@@ -19,6 +19,7 @@ import json
 import os
 import signal
 import sys
+import urllib.parse
 import urllib.request
 from contextlib import suppress
 from pathlib import Path
@@ -104,6 +105,13 @@ async def test_CD_001_should_connect_to_an_existing_cdp_session(
         contexts = cdp_browser.contexts
         assert len(contexts) == 1
         await cdp_browser.close()
+
+        url_browser = await browser_type.connect_over_cdp(
+            "remote-debugging://chromium?"
+            + urllib.parse.urlencode({"userDataDir": str(user_data_dir)})
+        )
+        assert len(url_browser.contexts) == 1
+        await url_browser.close()
 
         if is_linux:
             environments: List[Dict[str, Optional[str]]] = [

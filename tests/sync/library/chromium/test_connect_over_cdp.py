@@ -19,6 +19,7 @@ import os
 import signal
 import sys
 import time
+import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import suppress
@@ -116,6 +117,13 @@ def test_CD_001_should_connect_to_an_existing_cdp_session(
         contexts = cdp_browser.contexts
         assert len(contexts) == 1
         cdp_browser.close()
+
+        url_browser = browser_type.connect_over_cdp(
+            "remote-debugging://chromium?"
+            + urllib.parse.urlencode({"userDataDir": str(user_data_dir)})
+        )
+        assert len(url_browser.contexts) == 1
+        url_browser.close()
 
         if is_linux:
             environments: List[Dict[str, Optional[str]]] = [
