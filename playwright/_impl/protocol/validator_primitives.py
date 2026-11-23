@@ -182,6 +182,8 @@ def t_optional(v: Validator) -> Validator:
             return _NULL if keeps_null and context.in_array else arg
         return v(arg, path, context)
 
+    # Python: mark optional validators so t_object can skip absent fields.
+    setattr(validator, "_is_optional", True)
     return validator
 
 
@@ -200,11 +202,16 @@ def t_array(v: Validator) -> Validator:
 
 
 def t_object(s: Dict[str, Validator]) -> Validator:
+    # Python: cache the schema and optional flags to avoid calls for absent fields.
+    fields = [(key, v, getattr(v, "_is_optional", False)) for key, v in s.items()]
+
     def validator(arg: Any, path: str, context: ValidatorContext) -> Any:
         if not isinstance(arg, dict):
             raise ValidationError(f"{path}: expected object, got {_typeof(arg)}")
         result: Dict[str, Any] = {}
-        for key, v in s.items():
+        for key, v, optional in fields:
+            if optional and key not in arg:
+                continue
             value = v(arg.get(key), path + "." + key if path else key, context)
             if value is _NULL:
                 # Python: a key that is there with None is null; a key that is not
