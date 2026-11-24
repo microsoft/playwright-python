@@ -23,6 +23,7 @@ own macrotask.
 import asyncio
 from typing import Any, Tuple
 
+from playwright._impl._errors import listener_error_types
 from playwright._impl.connection import Connection
 from playwright._impl.playwright import Playwright
 from playwright._impl.transport import PipeTransport
@@ -47,10 +48,10 @@ class PlaywrightClient:
 
         def on_message(message: Any) -> None:
             # Python: an exception in a listener crashes Node.js; here the next API
-            # call raises it, and the transport goes on.
+            # call raises it, and the transport goes on, also for pytest outcomes.
             try:
                 connection.dispatch(message)
-            except Exception as error:
+            except listener_error_types() as error:
                 connection._on_event_listener_error(error)
 
         transport.on_message = on_message

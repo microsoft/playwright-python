@@ -19,7 +19,23 @@ export them from here. The client raises them through errors.py, the port of
 packages/playwright-core/src/client/errors.ts.
 """
 
-from typing import Any, List, Optional
+import sys
+from typing import Any, List, Optional, Tuple, Type
+
+
+def listener_error_types() -> Tuple[Type[BaseException], ...]:
+    """Errors to forward from listeners, including pytest's supported outcomes."""
+    # Do not import pytest in applications that do not use it. Look it up at the
+    # catch site so importing pytest after Playwright also works.
+    pytest = sys.modules.get("pytest")
+    if pytest is None:
+        return (Exception,)
+    return (
+        Exception,
+        pytest.fail.Exception,
+        pytest.skip.Exception,
+        pytest.xfail.Exception,
+    )
 
 
 class Error(Exception):
