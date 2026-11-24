@@ -1384,7 +1384,43 @@ class RawHeaders:
 
 def _json_stringify(value: Any) -> str:
     # JSON.stringify(value): no spaces, and no escapes for non-ASCII characters.
-    return json.dumps(value, allow_nan=False, ensure_ascii=False, separators=(",", ":"))
+    serialized = json.dumps(
+        value,
+        allow_nan=False,
+        ensure_ascii=False,
+        separators=(",", ":"),
+    )
+
+    # Python permits lone surrogates in strings, but UTF-8 does not.
+    # Match JSON.stringify(): escape unpaired surrogates and combine valid pairs.
+    result: List[str] = []
+    index = 0
+
+    while index < len(serialized):
+        codepoint = ord(serialized[index])
+
+        if 0xD800 <= codepoint <= 0xDBFF:
+            if index + 1 < len(serialized):
+                next_codepoint = ord(serialized[index + 1])
+                if 0xDC00 <= next_codepoint <= 0xDFFF:
+                    combined = (
+                        0x10000
+                        + ((codepoint - 0xD800) << 10)
+                        + (next_codepoint - 0xDC00)
+                    )
+                    result.append(chr(combined))
+                    index += 2
+                    continue
+
+            result.append(f"\\u{codepoint:04x}")
+        elif 0xDC00 <= codepoint <= 0xDFFF:
+            result.append(f"\\u{codepoint:04x}")
+        else:
+            result.append(serialized[index])
+
+        index += 1
+
+    return "".join(result)
 
 
 def _js_typeof(value: Any) -> str:

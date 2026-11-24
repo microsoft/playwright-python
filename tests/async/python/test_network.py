@@ -111,3 +111,41 @@ async def test_response_security_details_none_without_https(
     assert response
     security_details = await response.security_details()
     assert security_details is None
+
+
+async def test_route_fallback_should_serialize_json_with_surrogates(
+    page: Page, server: Server
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+
+    post_data = {
+        "high": "\ud800",
+        "low": "\udfff",
+        "pair": "\ud83d\ude00",
+        "emoji": "😀",
+        "unicode": "é",
+    }
+
+    async def handler1(route: Route) -> None:
+        await route.continue_()
+
+    async def handler2(route: Route) -> None:
+        await route.fallback(post_data=post_data)
+
+    await page.route("**/*", handler1)
+    await page.route("**/*", handler2)
+
+    with server.expect_request("/sleep.zzz") as request_info:
+        await page.evaluate(
+            "() => fetch('/sleep.zzz', { method: 'POST', body: 'birdy' })"
+        )
+
+    expected = (
+        b'{"high":"\\ud800","low":"\\udfff",'
+        b'"pair":"\xf0\x9f\x98\x80","emoji":"\xf0\x9f\x98\x80",'
+        b'"unicode":"\xc3\xa9"}'
+    )
+
+    post_body = request_info.value.post_body
+    assert post_body is not None
+    assert post_body == expected
