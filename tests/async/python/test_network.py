@@ -86,6 +86,7 @@ async def test_response_headers_should_work(page: Page, server: Server) -> None:
 async def test_should_parse_the_json_post_data_when_content_type_header_is_missing(
     page: Page, server: Server
 ) -> None:
+    # Regression test for https://github.com/microsoft/playwright-python/issues/3374.
     await page.goto(server.EMPTY_PAGE)
     async with page.expect_request("**/*") as request_info:
         await page.evaluate(
@@ -102,6 +103,20 @@ async def test_should_parse_the_json_post_data_when_content_type_header_is_missi
     request = await request_info.value
     assert "content-type" not in request.headers
     assert request.post_data_json == {"value": 42}
+
+    route_future: "asyncio.Future[Route]" = asyncio.Future()
+    await page.route("**/title.html", lambda route: route_future.set_result(route))
+    await page.evaluate("() => { fetch('/title.html', {method: 'POST'}); }")
+    route = await route_future
+    _, server_request = await asyncio.gather(
+        route.continue_(
+            post_data={"text": "\ud800|\udfff|\ud83d\ude00|\u00e9|\U0001f600"}
+        ),
+        server.wait_for_request("/title.html"),
+    )
+    assert server_request.post_body == (
+        '{"text":"\\ud800|\\udfff|\U0001f600|\u00e9|\U0001f600"}'.encode("utf-8")
+    )
 
 
 async def test_response_security_details_none_without_https(

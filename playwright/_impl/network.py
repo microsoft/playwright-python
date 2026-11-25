@@ -1383,8 +1383,18 @@ class RawHeaders:
 
 
 def _json_stringify(value: Any) -> str:
-    # JSON.stringify(value): no spaces, and no escapes for non-ASCII characters.
-    return json.dumps(value, allow_nan=False, ensure_ascii=False, separators=(",", ":"))
+    # Python: JSON.stringify escapes lone surrogates, but preserves valid pairs.
+    def escape_surrogate(match: "re.Match[str]") -> str:
+        text = match[0]
+        if len(text) == 2:
+            return text.encode("utf-16-le", "surrogatepass").decode("utf-16-le")
+        return f"\\u{ord(text):04x}"
+
+    return re.sub(
+        r"[\ud800-\udbff][\udc00-\udfff]|[\ud800-\udfff]",
+        escape_surrogate,
+        json.dumps(value, allow_nan=False, ensure_ascii=False, separators=(",", ":")),
+    )
 
 
 def _js_typeof(value: Any) -> str:
