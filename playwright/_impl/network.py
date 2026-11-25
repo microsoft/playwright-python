@@ -254,8 +254,11 @@ class Request(ChannelOwner):
                 entries[k] = v
             return entries
 
+        def reject_json_constant(value: str) -> None:
+            raise ValueError(f"Invalid JSON constant: {value}")
+
         try:
-            return json.loads(post_data)
+            return json.loads(post_data, parse_constant=reject_json_constant)
         except Exception:
             raise Error("POST data is not a valid JSON object: " + post_data)
 

@@ -17,7 +17,9 @@
 import asyncio
 from typing import List
 
-from playwright.async_api import Page, Request, Route
+import pytest
+
+from playwright.async_api import Error, Page, Request, Route
 from tests.server import Server
 
 
@@ -102,6 +104,31 @@ async def test_should_parse_the_json_post_data_when_content_type_header_is_missi
     request = await request_info.value
     assert "content-type" not in request.headers
     assert request.post_data_json == {"value": 42}
+
+
+async def test_should_reject_non_standard_json_constants_in_post_data(
+    page: Page, server: Server
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+
+    for value in ["NaN", "Infinity", "-Infinity"]:
+        async with page.expect_request("**/*") as request_info:
+            await page.evaluate(
+                """({url, value}) => {
+                    return fetch(url, {
+                        method: 'POST',
+                        headers: { 'content-type': 'application/json' },
+                        body: value,
+                    });
+                }""",
+                {"url": server.PREFIX + "/title.html", "value": value},
+            )
+
+        request = await request_info.value
+        with pytest.raises(
+            Error, match="POST data is not a valid JSON object"
+        ):
+            request.post_data_json
 
 
 async def test_response_security_details_none_without_https(
