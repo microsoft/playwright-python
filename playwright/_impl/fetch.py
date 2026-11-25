@@ -150,6 +150,10 @@ class APIRequest:
             else options.get("storage_state")
         )
         default_launch_options = self._playwright._default_launch_options
+        default_traces_dir = (
+            default_launch_options.get("traces_dir") if default_launch_options else None
+        )
+        traces_dir = os.path.abspath(default_traces_dir) if default_traces_dir else None
         context = APIRequestContext.from_(
             (
                 await self._playwright._channel.newRequest(
@@ -178,11 +182,7 @@ class APIRequest:
                         storage_state,
                     ),
                     # We do not expose tracesDir in the API, so do not allow options to accidentally override it.
-                    tracesDir=(
-                        default_launch_options.get("traces_dir")
-                        if default_launch_options
-                        else None
-                    ),
+                    tracesDir=traces_dir,
                     timeout=NO_TIMEOUT,
                 )
             )["request"]
@@ -195,9 +195,7 @@ class APIRequest:
             if context_timeout is not None
             else self._playwright._default_context_timeout
         )
-        context.tracing._traces_dir = (
-            default_launch_options.get("traces_dir") if default_launch_options else None
-        )
+        context.tracing._traces_dir = traces_dir
         await context._instrumentation.run_after_create_request_context(context)
         return context
 

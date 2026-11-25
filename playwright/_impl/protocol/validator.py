@@ -44,11 +44,12 @@ from playwright._impl.protocol.validator_primitives import (  # noqa: F401
 
 scheme["AndroidInitializer"] = t_optional(t_object({}))
 scheme["AndroidDevicesParams"] = t_object(
+    {},
     {
-        "host": t_optional(t_string),
-        "port": t_optional(t_int),
-        "omitDriverInstall": t_optional(t_boolean),
-    }
+        "host": t_string,
+        "port": t_int,
+        "omitDriverInstall": t_boolean,
+    },
 )
 scheme["AndroidDevicesResult"] = t_object(
     {
@@ -90,8 +91,10 @@ scheme["AndroidDeviceWebViewRemovedEvent"] = t_object(
 scheme["AndroidDeviceWaitParams"] = t_object(
     {
         "androidSelector": t_type("AndroidSelector"),
-        "state": t_optional(t_enum(["gone"])),
-    }
+    },
+    {
+        "state": t_enum(["gone"]),
+    },
 )
 scheme["AndroidDeviceWaitResult"] = t_optional(t_object({}))
 scheme["AndroidDeviceFillParams"] = t_object(
@@ -104,24 +107,30 @@ scheme["AndroidDeviceFillResult"] = t_optional(t_object({}))
 scheme["AndroidDeviceTapParams"] = t_object(
     {
         "androidSelector": t_type("AndroidSelector"),
-        "duration": t_optional(t_float),
-    }
+    },
+    {
+        "duration": t_float,
+    },
 )
 scheme["AndroidDeviceTapResult"] = t_optional(t_object({}))
 scheme["AndroidDeviceDragParams"] = t_object(
     {
         "androidSelector": t_type("AndroidSelector"),
         "dest": t_type("Point"),
-        "speed": t_optional(t_float),
-    }
+    },
+    {
+        "speed": t_float,
+    },
 )
 scheme["AndroidDeviceDragResult"] = t_optional(t_object({}))
 scheme["AndroidDeviceFlingParams"] = t_object(
     {
         "androidSelector": t_type("AndroidSelector"),
         "direction": t_enum(["up", "down", "left", "right"]),
-        "speed": t_optional(t_float),
-    }
+    },
+    {
+        "speed": t_float,
+    },
 )
 scheme["AndroidDeviceFlingResult"] = t_optional(t_object({}))
 scheme["AndroidDeviceLongTapParams"] = t_object(
@@ -134,16 +143,20 @@ scheme["AndroidDevicePinchCloseParams"] = t_object(
     {
         "androidSelector": t_type("AndroidSelector"),
         "percent": t_float,
-        "speed": t_optional(t_float),
-    }
+    },
+    {
+        "speed": t_float,
+    },
 )
 scheme["AndroidDevicePinchCloseResult"] = t_optional(t_object({}))
 scheme["AndroidDevicePinchOpenParams"] = t_object(
     {
         "androidSelector": t_type("AndroidSelector"),
         "percent": t_float,
-        "speed": t_optional(t_float),
-    }
+    },
+    {
+        "speed": t_float,
+    },
 )
 scheme["AndroidDevicePinchOpenResult"] = t_optional(t_object({}))
 scheme["AndroidDeviceScrollParams"] = t_object(
@@ -151,8 +164,10 @@ scheme["AndroidDeviceScrollParams"] = t_object(
         "androidSelector": t_type("AndroidSelector"),
         "direction": t_enum(["up", "down", "left", "right"]),
         "percent": t_float,
-        "speed": t_optional(t_float),
-    }
+    },
+    {
+        "speed": t_float,
+    },
 )
 scheme["AndroidDeviceScrollResult"] = t_optional(t_object({}))
 scheme["AndroidDeviceSwipeParams"] = t_object(
@@ -160,8 +175,10 @@ scheme["AndroidDeviceSwipeParams"] = t_object(
         "androidSelector": t_type("AndroidSelector"),
         "direction": t_enum(["up", "down", "left", "right"]),
         "percent": t_float,
-        "speed": t_optional(t_float),
-    }
+    },
+    {
+        "speed": t_float,
+    },
 )
 scheme["AndroidDeviceSwipeResult"] = t_optional(t_object({}))
 scheme["AndroidDeviceInfoParams"] = t_object(
@@ -214,133 +231,119 @@ scheme["AndroidDeviceInputDragParams"] = t_object(
 )
 scheme["AndroidDeviceInputDragResult"] = t_optional(t_object({}))
 scheme["AndroidDeviceLaunchBrowserParams"] = t_object(
+    {},
     {
-        "noDefaultViewport": t_optional(t_boolean),
-        "viewport": t_optional(
+        "noDefaultViewport": t_boolean,
+        "viewport": t_object(
+            {
+                "width": t_int,
+                "height": t_int,
+            }
+        ),
+        "screen": t_object(
+            {
+                "width": t_int,
+                "height": t_int,
+            }
+        ),
+        "ignoreHTTPSErrors": t_boolean,
+        "clientCertificates": t_array(
             t_object(
                 {
-                    "width": t_int,
-                    "height": t_int,
-                }
-            )
-        ),
-        "screen": t_optional(
-            t_object(
+                    "origin": t_string,
+                },
                 {
-                    "width": t_int,
-                    "height": t_int,
-                }
+                    "cert": t_binary,
+                    "key": t_binary,
+                    "passphrase": t_string,
+                    "pfx": t_binary,
+                },
             )
         ),
-        "ignoreHTTPSErrors": t_optional(t_boolean),
-        "clientCertificates": t_optional(
-            t_array(
-                t_object(
+        "javaScriptEnabled": t_boolean,
+        "bypassCSP": t_boolean,
+        "userAgent": t_string,
+        "locale": t_string,
+        "timezoneId": t_string,
+        "geolocation": t_object(
+            {
+                "longitude": t_float,
+                "latitude": t_float,
+            },
+            {
+                "accuracy": t_float,
+            },
+        ),
+        "permissions": t_array(t_string),
+        "extraHTTPHeaders": t_array(t_type("NameValue")),
+        "offline": t_boolean,
+        "httpCredentials": t_array(t_type("HttpCredentials")),
+        "deviceScaleFactor": t_float,
+        "isMobile": t_boolean,
+        "hasTouch": t_boolean,
+        "colorScheme": t_enum(["dark", "light", "no-preference", "no-override"]),
+        "reducedMotion": t_enum(["reduce", "no-preference", "no-override"]),
+        "forcedColors": t_enum(["active", "none", "no-override"]),
+        "acceptDownloads": t_enum(["accept", "deny", "internal-browser-default"]),
+        "contrast": t_enum(["no-preference", "more", "no-override"]),
+        "baseURL": t_string,
+        "recordVideo": t_object(
+            {},
+            {
+                "dir": t_string,
+                "size": t_object(
                     {
-                        "origin": t_string,
-                        "cert": t_optional(t_binary),
-                        "key": t_optional(t_binary),
-                        "passphrase": t_optional(t_string),
-                        "pfx": t_optional(t_binary),
+                        "width": t_int,
+                        "height": t_int,
                     }
-                )
-            )
-        ),
-        "javaScriptEnabled": t_optional(t_boolean),
-        "bypassCSP": t_optional(t_boolean),
-        "userAgent": t_optional(t_string),
-        "locale": t_optional(t_string),
-        "timezoneId": t_optional(t_string),
-        "geolocation": t_optional(
-            t_object(
-                {
-                    "longitude": t_float,
-                    "latitude": t_float,
-                    "accuracy": t_optional(t_float),
-                }
-            )
-        ),
-        "permissions": t_optional(t_array(t_string)),
-        "extraHTTPHeaders": t_optional(t_array(t_type("NameValue"))),
-        "offline": t_optional(t_boolean),
-        "httpCredentials": t_optional(t_array(t_type("HttpCredentials"))),
-        "deviceScaleFactor": t_optional(t_float),
-        "isMobile": t_optional(t_boolean),
-        "hasTouch": t_optional(t_boolean),
-        "colorScheme": t_optional(
-            t_enum(["dark", "light", "no-preference", "no-override"])
-        ),
-        "reducedMotion": t_optional(t_enum(["reduce", "no-preference", "no-override"])),
-        "forcedColors": t_optional(t_enum(["active", "none", "no-override"])),
-        "acceptDownloads": t_optional(
-            t_enum(["accept", "deny", "internal-browser-default"])
-        ),
-        "contrast": t_optional(t_enum(["no-preference", "more", "no-override"])),
-        "baseURL": t_optional(t_string),
-        "recordVideo": t_optional(
-            t_object(
-                {
-                    "dir": t_optional(t_string),
-                    "size": t_optional(
-                        t_object(
+                ),
+                "fps": t_int,
+                "showActions": t_object(
+                    {},
+                    {
+                        "duration": t_float,
+                        "position": t_enum(
+                            [
+                                "top-left",
+                                "top",
+                                "top-right",
+                                "bottom-left",
+                                "bottom",
+                                "bottom-right",
+                            ]
+                        ),
+                        "fontSize": t_int,
+                        "cursor": t_enum(["none", "pointer"]),
+                        "style": t_object(
+                            {},
                             {
-                                "width": t_int,
-                                "height": t_int,
-                            }
-                        )
-                    ),
-                    "fps": t_optional(t_int),
-                    "showActions": t_optional(
-                        t_object(
-                            {
-                                "duration": t_optional(t_float),
-                                "position": t_optional(
-                                    t_enum(
-                                        [
-                                            "top-left",
-                                            "top",
-                                            "top-right",
-                                            "bottom-left",
-                                            "bottom",
-                                            "bottom-right",
-                                        ]
-                                    )
-                                ),
-                                "fontSize": t_optional(t_int),
-                                "cursor": t_optional(t_enum(["none", "pointer"])),
-                                "style": t_optional(
-                                    t_object(
-                                        {
-                                            "point": t_optional(t_string),
-                                            "highlight": t_optional(t_string),
-                                            "title": t_optional(t_string),
-                                        }
-                                    )
-                                ),
-                            }
-                        )
-                    ),
-                }
-            )
+                                "point": t_string,
+                                "highlight": t_string,
+                                "title": t_string,
+                            },
+                        ),
+                    },
+                ),
+            },
         ),
-        "strictSelectors": t_optional(t_boolean),
-        "locateOnlyVisible": t_optional(t_boolean),
-        "serviceWorkers": t_optional(t_enum(["allow", "block"])),
-        "selectorEngines": t_optional(t_array(t_type("SelectorEngine"))),
-        "testIdAttributeName": t_optional(t_string),
-        "pkg": t_optional(t_string),
-        "args": t_optional(t_array(t_string)),
-        "proxy": t_optional(
-            t_object(
-                {
-                    "server": t_string,
-                    "bypass": t_optional(t_string),
-                    "username": t_optional(t_string),
-                    "password": t_optional(t_string),
-                }
-            )
+        "strictSelectors": t_boolean,
+        "locateOnlyVisible": t_boolean,
+        "serviceWorkers": t_enum(["allow", "block"]),
+        "selectorEngines": t_array(t_type("SelectorEngine")),
+        "testIdAttributeName": t_string,
+        "pkg": t_string,
+        "args": t_array(t_string),
+        "proxy": t_object(
+            {
+                "server": t_string,
+            },
+            {
+                "bypass": t_string,
+                "username": t_string,
+                "password": t_string,
+            },
         ),
-    }
+    },
 )
 scheme["AndroidDeviceLaunchBrowserResult"] = t_object(
     {
@@ -370,16 +373,20 @@ scheme["AndroidDeviceShellResult"] = t_object(
 scheme["AndroidDeviceInstallApkParams"] = t_object(
     {
         "file": t_binary,
-        "args": t_optional(t_array(t_string)),
-    }
+    },
+    {
+        "args": t_array(t_string),
+    },
 )
 scheme["AndroidDeviceInstallApkResult"] = t_optional(t_object({}))
 scheme["AndroidDevicePushParams"] = t_object(
     {
         "file": t_binary,
         "path": t_string,
-        "mode": t_optional(t_int),
-    }
+    },
+    {
+        "mode": t_int,
+    },
 )
 scheme["AndroidDevicePushResult"] = t_optional(t_object({}))
 scheme["AndroidDeviceConnectToWebViewParams"] = t_object(
@@ -402,42 +409,40 @@ scheme["AndroidWebView"] = t_object(
     }
 )
 scheme["AndroidSelector"] = t_object(
+    {},
     {
-        "checkable": t_optional(t_boolean),
-        "checked": t_optional(t_boolean),
-        "clazz": t_optional(t_string),
-        "clickable": t_optional(t_boolean),
-        "depth": t_optional(t_int),
-        "desc": t_optional(t_string),
-        "enabled": t_optional(t_boolean),
-        "focusable": t_optional(t_boolean),
-        "focused": t_optional(t_boolean),
-        "hasChild": t_optional(
-            t_object(
-                {
-                    "androidSelector": t_type("AndroidSelector"),
-                }
-            )
+        "checkable": t_boolean,
+        "checked": t_boolean,
+        "clazz": t_string,
+        "clickable": t_boolean,
+        "depth": t_int,
+        "desc": t_string,
+        "enabled": t_boolean,
+        "focusable": t_boolean,
+        "focused": t_boolean,
+        "hasChild": t_object(
+            {
+                "androidSelector": t_type("AndroidSelector"),
+            }
         ),
-        "hasDescendant": t_optional(
-            t_object(
-                {
-                    "androidSelector": t_type("AndroidSelector"),
-                    "maxDepth": t_optional(t_int),
-                }
-            )
+        "hasDescendant": t_object(
+            {
+                "androidSelector": t_type("AndroidSelector"),
+            },
+            {
+                "maxDepth": t_int,
+            },
         ),
-        "longClickable": t_optional(t_boolean),
-        "pkg": t_optional(t_string),
-        "res": t_optional(t_string),
-        "scrollable": t_optional(t_boolean),
-        "selected": t_optional(t_boolean),
-        "text": t_optional(t_string),
-    }
+        "longClickable": t_boolean,
+        "pkg": t_string,
+        "res": t_string,
+        "scrollable": t_boolean,
+        "selected": t_boolean,
+        "text": t_string,
+    },
 )
 scheme["AndroidElementInfo"] = t_object(
     {
-        "children": t_optional(t_array(t_type("AndroidElementInfo"))),
         "clazz": t_string,
         "desc": t_string,
         "res": t_string,
@@ -453,7 +458,10 @@ scheme["AndroidElementInfo"] = t_object(
         "longClickable": t_boolean,
         "scrollable": t_boolean,
         "selected": t_boolean,
-    }
+    },
+    {
+        "children": t_array(t_type("AndroidElementInfo")),
+    },
 )
 scheme["APIRequestContextInitializer"] = t_object(
     {
@@ -463,19 +471,21 @@ scheme["APIRequestContextInitializer"] = t_object(
 scheme["APIRequestContextFetchParams"] = t_object(
     {
         "url": t_string,
-        "encodedParams": t_optional(t_string),
-        "params": t_optional(t_array(t_type("NameValue"))),
-        "method": t_optional(t_string),
-        "headers": t_optional(t_array(t_type("NameValue"))),
-        "postData": t_optional(t_binary),
-        "jsonData": t_optional(t_string),
-        "formData": t_optional(t_array(t_type("NameValue"))),
-        "multipartData": t_optional(t_array(t_type("FormField"))),
-        "failOnStatusCode": t_optional(t_boolean),
-        "ignoreHTTPSErrors": t_optional(t_boolean),
-        "maxRedirects": t_optional(t_int),
-        "maxRetries": t_optional(t_int),
-    }
+    },
+    {
+        "encodedParams": t_string,
+        "params": t_array(t_type("NameValue")),
+        "method": t_string,
+        "headers": t_array(t_type("NameValue")),
+        "postData": t_binary,
+        "jsonData": t_string,
+        "formData": t_array(t_type("NameValue")),
+        "multipartData": t_array(t_type("FormField")),
+        "failOnStatusCode": t_boolean,
+        "ignoreHTTPSErrors": t_boolean,
+        "maxRedirects": t_int,
+        "maxRetries": t_int,
+    },
 )
 scheme["APIRequestContextFetchResult"] = t_object(
     {
@@ -488,9 +498,10 @@ scheme["APIRequestContextFetchResponseBodyParams"] = t_object(
     }
 )
 scheme["APIRequestContextFetchResponseBodyResult"] = t_object(
+    {},
     {
-        "binary": t_optional(t_binary),
-    }
+        "binary": t_binary,
+    },
 )
 scheme["APIRequestContextFetchLogParams"] = t_object(
     {
@@ -509,17 +520,18 @@ scheme["APIRequestContextAddCookiesParams"] = t_object(
 )
 scheme["APIRequestContextAddCookiesResult"] = t_optional(t_object({}))
 scheme["APIRequestContextClearCookiesParams"] = t_object(
+    {},
     {
-        "name": t_optional(t_string),
-        "nameRegexSource": t_optional(t_string),
-        "nameRegexFlags": t_optional(t_string),
-        "domain": t_optional(t_string),
-        "domainRegexSource": t_optional(t_string),
-        "domainRegexFlags": t_optional(t_string),
-        "path": t_optional(t_string),
-        "pathRegexSource": t_optional(t_string),
-        "pathRegexFlags": t_optional(t_string),
-    }
+        "name": t_string,
+        "nameRegexSource": t_string,
+        "nameRegexFlags": t_string,
+        "domain": t_string,
+        "domainRegexSource": t_string,
+        "domainRegexFlags": t_string,
+        "path": t_string,
+        "pathRegexSource": t_string,
+        "pathRegexFlags": t_string,
+    },
 )
 scheme["APIRequestContextClearCookiesResult"] = t_optional(t_object({}))
 scheme["APIRequestContextCookiesParams"] = t_object(
@@ -533,10 +545,11 @@ scheme["APIRequestContextCookiesResult"] = t_object(
     }
 )
 scheme["APIRequestContextStorageStateParams"] = t_object(
+    {},
     {
-        "indexedDB": t_optional(t_boolean),
-        "opfs": t_optional(t_boolean),
-    }
+        "indexedDB": t_boolean,
+        "opfs": t_boolean,
+    },
 )
 scheme["APIRequestContextStorageStateResult"] = t_object(
     {
@@ -551,9 +564,10 @@ scheme["APIRequestContextDisposeAPIResponseParams"] = t_object(
 )
 scheme["APIRequestContextDisposeAPIResponseResult"] = t_optional(t_object({}))
 scheme["APIRequestContextDisposeParams"] = t_object(
+    {},
     {
-        "reason": t_optional(t_string),
-    }
+        "reason": t_string,
+    },
 )
 scheme["APIRequestContextDisposeResult"] = t_optional(t_object({}))
 scheme["APIResponse"] = t_object(
@@ -563,11 +577,13 @@ scheme["APIResponse"] = t_object(
         "status": t_int,
         "statusText": t_string,
         "headers": t_array(t_type("NameValue")),
-        "securityDetails": t_optional(t_type("SecurityDetails")),
-        "serverAddr": t_optional(t_type("RemoteAddr")),
-        "timing": t_optional(t_type("ResourceTiming")),
-        "responseEndTiming": t_optional(t_float),
-    }
+    },
+    {
+        "securityDetails": t_type("SecurityDetails"),
+        "serverAddr": t_type("RemoteAddr"),
+        "timing": t_type("ResourceTiming"),
+        "responseEndTiming": t_float,
+    },
 )
 scheme["ArtifactInitializer"] = t_object(
     {
@@ -594,9 +610,10 @@ scheme["ArtifactSaveAsStreamResult"] = t_object(
 )
 scheme["ArtifactFailureParams"] = t_optional(t_object({}))
 scheme["ArtifactFailureResult"] = t_object(
+    {},
     {
-        "error": t_optional(t_string),
-    }
+        "error": t_string,
+    },
 )
 scheme["ArtifactStreamParams"] = t_optional(t_object({}))
 scheme["ArtifactStreamResult"] = t_object(
@@ -610,9 +627,10 @@ scheme["ArtifactDeleteParams"] = t_optional(t_object({}))
 scheme["ArtifactDeleteResult"] = t_optional(t_object({}))
 scheme["StreamInitializer"] = t_optional(t_object({}))
 scheme["StreamReadParams"] = t_object(
+    {},
     {
-        "size": t_optional(t_int),
-    }
+        "size": t_int,
+    },
 )
 scheme["StreamReadResult"] = t_object(
     {
@@ -646,11 +664,13 @@ scheme["BrowserCloseEvent"] = t_optional(t_object({}))
 scheme["BrowserStartServerParams"] = t_object(
     {
         "title": t_string,
-        "workspaceDir": t_optional(t_string),
-        "metadata": t_optional(t_any),
-        "host": t_optional(t_string),
-        "port": t_optional(t_int),
-    }
+    },
+    {
+        "workspaceDir": t_string,
+        "metadata": t_any,
+        "host": t_string,
+        "port": t_int,
+    },
 )
 scheme["BrowserStartServerResult"] = t_object(
     {
@@ -660,9 +680,10 @@ scheme["BrowserStartServerResult"] = t_object(
 scheme["BrowserStopServerParams"] = t_optional(t_object({}))
 scheme["BrowserStopServerResult"] = t_optional(t_object({}))
 scheme["BrowserCloseParams"] = t_object(
+    {},
     {
-        "reason": t_optional(t_string),
-    }
+        "reason": t_string,
+    },
 )
 scheme["BrowserCloseResult"] = t_optional(t_object({}))
 scheme["BrowserKillForTestsParams"] = t_optional(t_object({}))
@@ -674,140 +695,125 @@ scheme["BrowserDefaultUserAgentForTestResult"] = t_object(
     }
 )
 scheme["BrowserNewContextParams"] = t_object(
+    {},
     {
-        "noDefaultViewport": t_optional(t_boolean),
-        "viewport": t_optional(
+        "noDefaultViewport": t_boolean,
+        "viewport": t_object(
+            {
+                "width": t_int,
+                "height": t_int,
+            }
+        ),
+        "screen": t_object(
+            {
+                "width": t_int,
+                "height": t_int,
+            }
+        ),
+        "ignoreHTTPSErrors": t_boolean,
+        "clientCertificates": t_array(
             t_object(
                 {
-                    "width": t_int,
-                    "height": t_int,
-                }
-            )
-        ),
-        "screen": t_optional(
-            t_object(
+                    "origin": t_string,
+                },
                 {
-                    "width": t_int,
-                    "height": t_int,
-                }
+                    "cert": t_binary,
+                    "key": t_binary,
+                    "passphrase": t_string,
+                    "pfx": t_binary,
+                },
             )
         ),
-        "ignoreHTTPSErrors": t_optional(t_boolean),
-        "clientCertificates": t_optional(
-            t_array(
-                t_object(
+        "javaScriptEnabled": t_boolean,
+        "bypassCSP": t_boolean,
+        "userAgent": t_string,
+        "locale": t_string,
+        "timezoneId": t_string,
+        "geolocation": t_object(
+            {
+                "longitude": t_float,
+                "latitude": t_float,
+            },
+            {
+                "accuracy": t_float,
+            },
+        ),
+        "permissions": t_array(t_string),
+        "extraHTTPHeaders": t_array(t_type("NameValue")),
+        "offline": t_boolean,
+        "httpCredentials": t_array(t_type("HttpCredentials")),
+        "deviceScaleFactor": t_float,
+        "isMobile": t_boolean,
+        "hasTouch": t_boolean,
+        "colorScheme": t_enum(["dark", "light", "no-preference", "no-override"]),
+        "reducedMotion": t_enum(["reduce", "no-preference", "no-override"]),
+        "forcedColors": t_enum(["active", "none", "no-override"]),
+        "acceptDownloads": t_enum(["accept", "deny", "internal-browser-default"]),
+        "contrast": t_enum(["no-preference", "more", "no-override"]),
+        "baseURL": t_string,
+        "recordVideo": t_object(
+            {},
+            {
+                "dir": t_string,
+                "size": t_object(
                     {
-                        "origin": t_string,
-                        "cert": t_optional(t_binary),
-                        "key": t_optional(t_binary),
-                        "passphrase": t_optional(t_string),
-                        "pfx": t_optional(t_binary),
+                        "width": t_int,
+                        "height": t_int,
                     }
-                )
-            )
-        ),
-        "javaScriptEnabled": t_optional(t_boolean),
-        "bypassCSP": t_optional(t_boolean),
-        "userAgent": t_optional(t_string),
-        "locale": t_optional(t_string),
-        "timezoneId": t_optional(t_string),
-        "geolocation": t_optional(
-            t_object(
-                {
-                    "longitude": t_float,
-                    "latitude": t_float,
-                    "accuracy": t_optional(t_float),
-                }
-            )
-        ),
-        "permissions": t_optional(t_array(t_string)),
-        "extraHTTPHeaders": t_optional(t_array(t_type("NameValue"))),
-        "offline": t_optional(t_boolean),
-        "httpCredentials": t_optional(t_array(t_type("HttpCredentials"))),
-        "deviceScaleFactor": t_optional(t_float),
-        "isMobile": t_optional(t_boolean),
-        "hasTouch": t_optional(t_boolean),
-        "colorScheme": t_optional(
-            t_enum(["dark", "light", "no-preference", "no-override"])
-        ),
-        "reducedMotion": t_optional(t_enum(["reduce", "no-preference", "no-override"])),
-        "forcedColors": t_optional(t_enum(["active", "none", "no-override"])),
-        "acceptDownloads": t_optional(
-            t_enum(["accept", "deny", "internal-browser-default"])
-        ),
-        "contrast": t_optional(t_enum(["no-preference", "more", "no-override"])),
-        "baseURL": t_optional(t_string),
-        "recordVideo": t_optional(
-            t_object(
-                {
-                    "dir": t_optional(t_string),
-                    "size": t_optional(
-                        t_object(
+                ),
+                "fps": t_int,
+                "showActions": t_object(
+                    {},
+                    {
+                        "duration": t_float,
+                        "position": t_enum(
+                            [
+                                "top-left",
+                                "top",
+                                "top-right",
+                                "bottom-left",
+                                "bottom",
+                                "bottom-right",
+                            ]
+                        ),
+                        "fontSize": t_int,
+                        "cursor": t_enum(["none", "pointer"]),
+                        "style": t_object(
+                            {},
                             {
-                                "width": t_int,
-                                "height": t_int,
-                            }
-                        )
-                    ),
-                    "fps": t_optional(t_int),
-                    "showActions": t_optional(
-                        t_object(
-                            {
-                                "duration": t_optional(t_float),
-                                "position": t_optional(
-                                    t_enum(
-                                        [
-                                            "top-left",
-                                            "top",
-                                            "top-right",
-                                            "bottom-left",
-                                            "bottom",
-                                            "bottom-right",
-                                        ]
-                                    )
-                                ),
-                                "fontSize": t_optional(t_int),
-                                "cursor": t_optional(t_enum(["none", "pointer"])),
-                                "style": t_optional(
-                                    t_object(
-                                        {
-                                            "point": t_optional(t_string),
-                                            "highlight": t_optional(t_string),
-                                            "title": t_optional(t_string),
-                                        }
-                                    )
-                                ),
-                            }
-                        )
-                    ),
-                }
-            )
+                                "point": t_string,
+                                "highlight": t_string,
+                                "title": t_string,
+                            },
+                        ),
+                    },
+                ),
+            },
         ),
-        "strictSelectors": t_optional(t_boolean),
-        "locateOnlyVisible": t_optional(t_boolean),
-        "serviceWorkers": t_optional(t_enum(["allow", "block"])),
-        "selectorEngines": t_optional(t_array(t_type("SelectorEngine"))),
-        "testIdAttributeName": t_optional(t_string),
-        "proxy": t_optional(
-            t_object(
-                {
-                    "server": t_string,
-                    "bypass": t_optional(t_string),
-                    "username": t_optional(t_string),
-                    "password": t_optional(t_string),
-                }
-            )
+        "strictSelectors": t_boolean,
+        "locateOnlyVisible": t_boolean,
+        "serviceWorkers": t_enum(["allow", "block"]),
+        "selectorEngines": t_array(t_type("SelectorEngine")),
+        "testIdAttributeName": t_string,
+        "proxy": t_object(
+            {
+                "server": t_string,
+            },
+            {
+                "bypass": t_string,
+                "username": t_string,
+                "password": t_string,
+            },
         ),
-        "storageState": t_optional(
-            t_object(
-                {
-                    "cookies": t_optional(t_array(t_type("SetNetworkCookie"))),
-                    "origins": t_optional(t_array(t_type("SetOriginStorage"))),
-                    "credentials": t_optional(t_array(t_type("SetVirtualCredential"))),
-                }
-            )
+        "storageState": t_object(
+            {},
+            {
+                "cookies": t_array(t_type("SetNetworkCookie")),
+                "origins": t_array(t_type("SetOriginStorage")),
+                "credentials": t_array(t_type("SetVirtualCredential")),
+            },
         ),
-    }
+    },
 )
 scheme["BrowserNewContextResult"] = t_object(
     {
@@ -815,140 +821,125 @@ scheme["BrowserNewContextResult"] = t_object(
     }
 )
 scheme["BrowserNewContextForReuseParams"] = t_object(
+    {},
     {
-        "noDefaultViewport": t_optional(t_boolean),
-        "viewport": t_optional(
+        "noDefaultViewport": t_boolean,
+        "viewport": t_object(
+            {
+                "width": t_int,
+                "height": t_int,
+            }
+        ),
+        "screen": t_object(
+            {
+                "width": t_int,
+                "height": t_int,
+            }
+        ),
+        "ignoreHTTPSErrors": t_boolean,
+        "clientCertificates": t_array(
             t_object(
                 {
-                    "width": t_int,
-                    "height": t_int,
-                }
-            )
-        ),
-        "screen": t_optional(
-            t_object(
+                    "origin": t_string,
+                },
                 {
-                    "width": t_int,
-                    "height": t_int,
-                }
+                    "cert": t_binary,
+                    "key": t_binary,
+                    "passphrase": t_string,
+                    "pfx": t_binary,
+                },
             )
         ),
-        "ignoreHTTPSErrors": t_optional(t_boolean),
-        "clientCertificates": t_optional(
-            t_array(
-                t_object(
+        "javaScriptEnabled": t_boolean,
+        "bypassCSP": t_boolean,
+        "userAgent": t_string,
+        "locale": t_string,
+        "timezoneId": t_string,
+        "geolocation": t_object(
+            {
+                "longitude": t_float,
+                "latitude": t_float,
+            },
+            {
+                "accuracy": t_float,
+            },
+        ),
+        "permissions": t_array(t_string),
+        "extraHTTPHeaders": t_array(t_type("NameValue")),
+        "offline": t_boolean,
+        "httpCredentials": t_array(t_type("HttpCredentials")),
+        "deviceScaleFactor": t_float,
+        "isMobile": t_boolean,
+        "hasTouch": t_boolean,
+        "colorScheme": t_enum(["dark", "light", "no-preference", "no-override"]),
+        "reducedMotion": t_enum(["reduce", "no-preference", "no-override"]),
+        "forcedColors": t_enum(["active", "none", "no-override"]),
+        "acceptDownloads": t_enum(["accept", "deny", "internal-browser-default"]),
+        "contrast": t_enum(["no-preference", "more", "no-override"]),
+        "baseURL": t_string,
+        "recordVideo": t_object(
+            {},
+            {
+                "dir": t_string,
+                "size": t_object(
                     {
-                        "origin": t_string,
-                        "cert": t_optional(t_binary),
-                        "key": t_optional(t_binary),
-                        "passphrase": t_optional(t_string),
-                        "pfx": t_optional(t_binary),
+                        "width": t_int,
+                        "height": t_int,
                     }
-                )
-            )
-        ),
-        "javaScriptEnabled": t_optional(t_boolean),
-        "bypassCSP": t_optional(t_boolean),
-        "userAgent": t_optional(t_string),
-        "locale": t_optional(t_string),
-        "timezoneId": t_optional(t_string),
-        "geolocation": t_optional(
-            t_object(
-                {
-                    "longitude": t_float,
-                    "latitude": t_float,
-                    "accuracy": t_optional(t_float),
-                }
-            )
-        ),
-        "permissions": t_optional(t_array(t_string)),
-        "extraHTTPHeaders": t_optional(t_array(t_type("NameValue"))),
-        "offline": t_optional(t_boolean),
-        "httpCredentials": t_optional(t_array(t_type("HttpCredentials"))),
-        "deviceScaleFactor": t_optional(t_float),
-        "isMobile": t_optional(t_boolean),
-        "hasTouch": t_optional(t_boolean),
-        "colorScheme": t_optional(
-            t_enum(["dark", "light", "no-preference", "no-override"])
-        ),
-        "reducedMotion": t_optional(t_enum(["reduce", "no-preference", "no-override"])),
-        "forcedColors": t_optional(t_enum(["active", "none", "no-override"])),
-        "acceptDownloads": t_optional(
-            t_enum(["accept", "deny", "internal-browser-default"])
-        ),
-        "contrast": t_optional(t_enum(["no-preference", "more", "no-override"])),
-        "baseURL": t_optional(t_string),
-        "recordVideo": t_optional(
-            t_object(
-                {
-                    "dir": t_optional(t_string),
-                    "size": t_optional(
-                        t_object(
+                ),
+                "fps": t_int,
+                "showActions": t_object(
+                    {},
+                    {
+                        "duration": t_float,
+                        "position": t_enum(
+                            [
+                                "top-left",
+                                "top",
+                                "top-right",
+                                "bottom-left",
+                                "bottom",
+                                "bottom-right",
+                            ]
+                        ),
+                        "fontSize": t_int,
+                        "cursor": t_enum(["none", "pointer"]),
+                        "style": t_object(
+                            {},
                             {
-                                "width": t_int,
-                                "height": t_int,
-                            }
-                        )
-                    ),
-                    "fps": t_optional(t_int),
-                    "showActions": t_optional(
-                        t_object(
-                            {
-                                "duration": t_optional(t_float),
-                                "position": t_optional(
-                                    t_enum(
-                                        [
-                                            "top-left",
-                                            "top",
-                                            "top-right",
-                                            "bottom-left",
-                                            "bottom",
-                                            "bottom-right",
-                                        ]
-                                    )
-                                ),
-                                "fontSize": t_optional(t_int),
-                                "cursor": t_optional(t_enum(["none", "pointer"])),
-                                "style": t_optional(
-                                    t_object(
-                                        {
-                                            "point": t_optional(t_string),
-                                            "highlight": t_optional(t_string),
-                                            "title": t_optional(t_string),
-                                        }
-                                    )
-                                ),
-                            }
-                        )
-                    ),
-                }
-            )
+                                "point": t_string,
+                                "highlight": t_string,
+                                "title": t_string,
+                            },
+                        ),
+                    },
+                ),
+            },
         ),
-        "strictSelectors": t_optional(t_boolean),
-        "locateOnlyVisible": t_optional(t_boolean),
-        "serviceWorkers": t_optional(t_enum(["allow", "block"])),
-        "selectorEngines": t_optional(t_array(t_type("SelectorEngine"))),
-        "testIdAttributeName": t_optional(t_string),
-        "proxy": t_optional(
-            t_object(
-                {
-                    "server": t_string,
-                    "bypass": t_optional(t_string),
-                    "username": t_optional(t_string),
-                    "password": t_optional(t_string),
-                }
-            )
+        "strictSelectors": t_boolean,
+        "locateOnlyVisible": t_boolean,
+        "serviceWorkers": t_enum(["allow", "block"]),
+        "selectorEngines": t_array(t_type("SelectorEngine")),
+        "testIdAttributeName": t_string,
+        "proxy": t_object(
+            {
+                "server": t_string,
+            },
+            {
+                "bypass": t_string,
+                "username": t_string,
+                "password": t_string,
+            },
         ),
-        "storageState": t_optional(
-            t_object(
-                {
-                    "cookies": t_optional(t_array(t_type("SetNetworkCookie"))),
-                    "origins": t_optional(t_array(t_type("SetOriginStorage"))),
-                    "credentials": t_optional(t_array(t_type("SetVirtualCredential"))),
-                }
-            )
+        "storageState": t_object(
+            {},
+            {
+                "cookies": t_array(t_type("SetNetworkCookie")),
+                "origins": t_array(t_type("SetOriginStorage")),
+                "credentials": t_array(t_type("SetVirtualCredential")),
+            },
         ),
-    }
+    },
 )
 scheme["BrowserNewContextForReuseResult"] = t_object(
     {
@@ -968,11 +959,12 @@ scheme["BrowserNewBrowserCDPSessionResult"] = t_object(
     }
 )
 scheme["BrowserStartTracingParams"] = t_object(
+    {},
     {
-        "page": t_optional(t_channel(["Page"])),
-        "screenshots": t_optional(t_boolean),
-        "categories": t_optional(t_array(t_string)),
-    }
+        "page": t_channel(["Page"]),
+        "screenshots": t_boolean,
+        "categories": t_array(t_string),
+    },
 )
 scheme["BrowserStartTracingResult"] = t_optional(t_object({}))
 scheme["BrowserStopTracingParams"] = t_optional(t_object({}))
@@ -987,127 +979,111 @@ scheme["BrowserContextInitializer"] = t_object(
         "requestContext": t_channel(["APIRequestContext"]),
         "tracing": t_channel(["Tracing"]),
         "options": t_object(
+            {},
             {
-                "noDefaultViewport": t_optional(t_boolean),
-                "viewport": t_optional(
+                "noDefaultViewport": t_boolean,
+                "viewport": t_object(
+                    {
+                        "width": t_int,
+                        "height": t_int,
+                    }
+                ),
+                "screen": t_object(
+                    {
+                        "width": t_int,
+                        "height": t_int,
+                    }
+                ),
+                "ignoreHTTPSErrors": t_boolean,
+                "clientCertificates": t_array(
                     t_object(
                         {
-                            "width": t_int,
-                            "height": t_int,
-                        }
-                    )
-                ),
-                "screen": t_optional(
-                    t_object(
+                            "origin": t_string,
+                        },
                         {
-                            "width": t_int,
-                            "height": t_int,
-                        }
+                            "cert": t_binary,
+                            "key": t_binary,
+                            "passphrase": t_string,
+                            "pfx": t_binary,
+                        },
                     )
                 ),
-                "ignoreHTTPSErrors": t_optional(t_boolean),
-                "clientCertificates": t_optional(
-                    t_array(
-                        t_object(
+                "javaScriptEnabled": t_boolean,
+                "bypassCSP": t_boolean,
+                "userAgent": t_string,
+                "locale": t_string,
+                "timezoneId": t_string,
+                "geolocation": t_object(
+                    {
+                        "longitude": t_float,
+                        "latitude": t_float,
+                    },
+                    {
+                        "accuracy": t_float,
+                    },
+                ),
+                "permissions": t_array(t_string),
+                "extraHTTPHeaders": t_array(t_type("NameValue")),
+                "offline": t_boolean,
+                "httpCredentials": t_array(t_type("HttpCredentials")),
+                "deviceScaleFactor": t_float,
+                "isMobile": t_boolean,
+                "hasTouch": t_boolean,
+                "colorScheme": t_enum(
+                    ["dark", "light", "no-preference", "no-override"]
+                ),
+                "reducedMotion": t_enum(["reduce", "no-preference", "no-override"]),
+                "forcedColors": t_enum(["active", "none", "no-override"]),
+                "acceptDownloads": t_enum(
+                    ["accept", "deny", "internal-browser-default"]
+                ),
+                "contrast": t_enum(["no-preference", "more", "no-override"]),
+                "baseURL": t_string,
+                "recordVideo": t_object(
+                    {},
+                    {
+                        "dir": t_string,
+                        "size": t_object(
                             {
-                                "origin": t_string,
-                                "cert": t_optional(t_binary),
-                                "key": t_optional(t_binary),
-                                "passphrase": t_optional(t_string),
-                                "pfx": t_optional(t_binary),
+                                "width": t_int,
+                                "height": t_int,
                             }
-                        )
-                    )
-                ),
-                "javaScriptEnabled": t_optional(t_boolean),
-                "bypassCSP": t_optional(t_boolean),
-                "userAgent": t_optional(t_string),
-                "locale": t_optional(t_string),
-                "timezoneId": t_optional(t_string),
-                "geolocation": t_optional(
-                    t_object(
-                        {
-                            "longitude": t_float,
-                            "latitude": t_float,
-                            "accuracy": t_optional(t_float),
-                        }
-                    )
-                ),
-                "permissions": t_optional(t_array(t_string)),
-                "extraHTTPHeaders": t_optional(t_array(t_type("NameValue"))),
-                "offline": t_optional(t_boolean),
-                "httpCredentials": t_optional(t_array(t_type("HttpCredentials"))),
-                "deviceScaleFactor": t_optional(t_float),
-                "isMobile": t_optional(t_boolean),
-                "hasTouch": t_optional(t_boolean),
-                "colorScheme": t_optional(
-                    t_enum(["dark", "light", "no-preference", "no-override"])
-                ),
-                "reducedMotion": t_optional(
-                    t_enum(["reduce", "no-preference", "no-override"])
-                ),
-                "forcedColors": t_optional(t_enum(["active", "none", "no-override"])),
-                "acceptDownloads": t_optional(
-                    t_enum(["accept", "deny", "internal-browser-default"])
-                ),
-                "contrast": t_optional(
-                    t_enum(["no-preference", "more", "no-override"])
-                ),
-                "baseURL": t_optional(t_string),
-                "recordVideo": t_optional(
-                    t_object(
-                        {
-                            "dir": t_optional(t_string),
-                            "size": t_optional(
-                                t_object(
+                        ),
+                        "fps": t_int,
+                        "showActions": t_object(
+                            {},
+                            {
+                                "duration": t_float,
+                                "position": t_enum(
+                                    [
+                                        "top-left",
+                                        "top",
+                                        "top-right",
+                                        "bottom-left",
+                                        "bottom",
+                                        "bottom-right",
+                                    ]
+                                ),
+                                "fontSize": t_int,
+                                "cursor": t_enum(["none", "pointer"]),
+                                "style": t_object(
+                                    {},
                                     {
-                                        "width": t_int,
-                                        "height": t_int,
-                                    }
-                                )
-                            ),
-                            "fps": t_optional(t_int),
-                            "showActions": t_optional(
-                                t_object(
-                                    {
-                                        "duration": t_optional(t_float),
-                                        "position": t_optional(
-                                            t_enum(
-                                                [
-                                                    "top-left",
-                                                    "top",
-                                                    "top-right",
-                                                    "bottom-left",
-                                                    "bottom",
-                                                    "bottom-right",
-                                                ]
-                                            )
-                                        ),
-                                        "fontSize": t_optional(t_int),
-                                        "cursor": t_optional(
-                                            t_enum(["none", "pointer"])
-                                        ),
-                                        "style": t_optional(
-                                            t_object(
-                                                {
-                                                    "point": t_optional(t_string),
-                                                    "highlight": t_optional(t_string),
-                                                    "title": t_optional(t_string),
-                                                }
-                                            )
-                                        ),
-                                    }
-                                )
-                            ),
-                        }
-                    )
+                                        "point": t_string,
+                                        "highlight": t_string,
+                                        "title": t_string,
+                                    },
+                                ),
+                            },
+                        ),
+                    },
                 ),
-                "strictSelectors": t_optional(t_boolean),
-                "locateOnlyVisible": t_optional(t_boolean),
-                "serviceWorkers": t_optional(t_enum(["allow", "block"])),
-                "selectorEngines": t_optional(t_array(t_type("SelectorEngine"))),
-                "testIdAttributeName": t_optional(t_string),
-            }
+                "strictSelectors": t_boolean,
+                "locateOnlyVisible": t_boolean,
+                "serviceWorkers": t_enum(["allow", "block"]),
+                "selectorEngines": t_array(t_type("SelectorEngine")),
+                "testIdAttributeName": t_string,
+            },
         ),
     }
 )
@@ -1129,9 +1105,11 @@ scheme["BrowserContextConsoleEvent"] = t_object(
             }
         ),
         "timestamp": t_float,
-        "page": t_optional(t_channel(["Page"])),
-        "worker": t_optional(t_channel(["Worker"])),
-    }
+    },
+    {
+        "page": t_channel(["Page"]),
+        "worker": t_channel(["Worker"]),
+    },
 )
 scheme["BrowserContextCloseEvent"] = t_optional(t_object({}))
 scheme["BrowserContextDialogEvent"] = t_object(
@@ -1180,30 +1158,38 @@ scheme["BrowserContextServiceWorkerEvent"] = t_object(
 scheme["BrowserContextRequestEvent"] = t_object(
     {
         "request": t_channel(["Request"]),
-        "page": t_optional(t_channel(["Page"])),
-    }
+    },
+    {
+        "page": t_channel(["Page"]),
+    },
 )
 scheme["BrowserContextRequestFailedEvent"] = t_object(
     {
         "request": t_channel(["Request"]),
-        "failureText": t_optional(t_string),
         "responseEndTiming": t_float,
-        "page": t_optional(t_channel(["Page"])),
-    }
+    },
+    {
+        "failureText": t_string,
+        "page": t_channel(["Page"]),
+    },
 )
 scheme["BrowserContextRequestFinishedEvent"] = t_object(
     {
         "request": t_channel(["Request"]),
-        "response": t_optional(t_channel(["Response"])),
         "responseEndTiming": t_float,
-        "page": t_optional(t_channel(["Page"])),
-    }
+    },
+    {
+        "response": t_channel(["Response"]),
+        "page": t_channel(["Page"]),
+    },
 )
 scheme["BrowserContextResponseEvent"] = t_object(
     {
         "response": t_channel(["Response"]),
-        "page": t_optional(t_channel(["Page"])),
-    }
+    },
+    {
+        "page": t_channel(["Page"]),
+    },
 )
 scheme["BrowserContextRecorderEventEvent"] = t_object(
     {
@@ -1230,25 +1216,27 @@ scheme["BrowserContextAddInitScriptResult"] = t_object(
     }
 )
 scheme["BrowserContextClearCookiesParams"] = t_object(
+    {},
     {
-        "name": t_optional(t_string),
-        "nameRegexSource": t_optional(t_string),
-        "nameRegexFlags": t_optional(t_string),
-        "domain": t_optional(t_string),
-        "domainRegexSource": t_optional(t_string),
-        "domainRegexFlags": t_optional(t_string),
-        "path": t_optional(t_string),
-        "pathRegexSource": t_optional(t_string),
-        "pathRegexFlags": t_optional(t_string),
-    }
+        "name": t_string,
+        "nameRegexSource": t_string,
+        "nameRegexFlags": t_string,
+        "domain": t_string,
+        "domainRegexSource": t_string,
+        "domainRegexFlags": t_string,
+        "path": t_string,
+        "pathRegexSource": t_string,
+        "pathRegexFlags": t_string,
+    },
 )
 scheme["BrowserContextClearCookiesResult"] = t_optional(t_object({}))
 scheme["BrowserContextClearPermissionsParams"] = t_optional(t_object({}))
 scheme["BrowserContextClearPermissionsResult"] = t_optional(t_object({}))
 scheme["BrowserContextCloseParams"] = t_object(
+    {},
     {
-        "reason": t_optional(t_string),
-    }
+        "reason": t_string,
+    },
 )
 scheme["BrowserContextCloseResult"] = t_optional(t_object({}))
 scheme["BrowserContextCookiesParams"] = t_object(
@@ -1264,8 +1252,10 @@ scheme["BrowserContextCookiesResult"] = t_object(
 scheme["BrowserContextExposeBindingParams"] = t_object(
     {
         "name": t_string,
-        "noGlobal": t_optional(t_boolean),
-    }
+    },
+    {
+        "noGlobal": t_boolean,
+    },
 )
 scheme["BrowserContextExposeBindingResult"] = t_object(
     {
@@ -1275,8 +1265,10 @@ scheme["BrowserContextExposeBindingResult"] = t_object(
 scheme["BrowserContextGrantPermissionsParams"] = t_object(
     {
         "permissions": t_array(t_string),
-        "origin": t_optional(t_string),
-    }
+    },
+    {
+        "origin": t_string,
+    },
 )
 scheme["BrowserContextGrantPermissionsResult"] = t_optional(t_object({}))
 scheme["BrowserContextNewPageParams"] = t_optional(t_object({}))
@@ -1304,35 +1296,38 @@ scheme["BrowserContextSetExtraHTTPHeadersParams"] = t_object(
 )
 scheme["BrowserContextSetExtraHTTPHeadersResult"] = t_optional(t_object({}))
 scheme["BrowserContextSetGeolocationParams"] = t_object(
+    {},
     {
-        "geolocation": t_optional(
-            t_object(
-                {
-                    "longitude": t_float,
-                    "latitude": t_float,
-                    "accuracy": t_optional(t_float),
-                }
-            )
+        "geolocation": t_object(
+            {
+                "longitude": t_float,
+                "latitude": t_float,
+            },
+            {
+                "accuracy": t_float,
+            },
         ),
-    }
+    },
 )
 scheme["BrowserContextSetGeolocationResult"] = t_optional(t_object({}))
 scheme["BrowserContextSetHTTPCredentialsParams"] = t_object(
+    {},
     {
-        "httpCredentials": t_optional(t_array(t_type("HttpCredentials"))),
-    }
+        "httpCredentials": t_array(t_type("HttpCredentials")),
+    },
 )
 scheme["BrowserContextSetHTTPCredentialsResult"] = t_optional(t_object({}))
 scheme["BrowserContextSetNetworkInterceptionPatternsParams"] = t_object(
     {
         "patterns": t_array(
             t_object(
+                {},
                 {
-                    "glob": t_optional(t_string),
-                    "regexSource": t_optional(t_string),
-                    "regexFlags": t_optional(t_string),
-                    "urlPattern": t_optional(t_type("URLPattern")),
-                }
+                    "glob": t_string,
+                    "regexSource": t_string,
+                    "regexFlags": t_string,
+                    "urlPattern": t_type("URLPattern"),
+                },
             )
         ),
     }
@@ -1342,12 +1337,13 @@ scheme["BrowserContextSetWebSocketInterceptionPatternsParams"] = t_object(
     {
         "patterns": t_array(
             t_object(
+                {},
                 {
-                    "glob": t_optional(t_string),
-                    "regexSource": t_optional(t_string),
-                    "regexFlags": t_optional(t_string),
-                    "urlPattern": t_optional(t_type("URLPattern")),
-                }
+                    "glob": t_string,
+                    "regexSource": t_string,
+                    "regexFlags": t_string,
+                    "urlPattern": t_type("URLPattern"),
+                },
             )
         ),
     }
@@ -1362,55 +1358,60 @@ scheme["BrowserContextSetOfflineParams"] = t_object(
 )
 scheme["BrowserContextSetOfflineResult"] = t_optional(t_object({}))
 scheme["BrowserContextStorageStateParams"] = t_object(
+    {},
     {
-        "indexedDB": t_optional(t_boolean),
-        "opfs": t_optional(t_boolean),
-        "credentials": t_optional(t_boolean),
-    }
+        "indexedDB": t_boolean,
+        "opfs": t_boolean,
+        "credentials": t_boolean,
+    },
 )
 scheme["BrowserContextStorageStateResult"] = t_object(
     {
         "cookies": t_array(t_type("NetworkCookie")),
         "origins": t_array(t_type("OriginStorage")),
-        "credentials": t_optional(t_array(t_type("VirtualCredential"))),
-    }
+    },
+    {
+        "credentials": t_array(t_type("VirtualCredential")),
+    },
 )
 scheme["BrowserContextSetStorageStateParams"] = t_object(
+    {},
     {
-        "storageState": t_optional(
-            t_object(
-                {
-                    "cookies": t_optional(t_array(t_type("SetNetworkCookie"))),
-                    "origins": t_optional(t_array(t_type("SetOriginStorage"))),
-                    "credentials": t_optional(t_array(t_type("SetVirtualCredential"))),
-                }
-            )
+        "storageState": t_object(
+            {},
+            {
+                "cookies": t_array(t_type("SetNetworkCookie")),
+                "origins": t_array(t_type("SetOriginStorage")),
+                "credentials": t_array(t_type("SetVirtualCredential")),
+            },
         ),
-    }
+    },
 )
 scheme["BrowserContextSetStorageStateResult"] = t_optional(t_object({}))
 scheme["BrowserContextPauseParams"] = t_optional(t_object({}))
 scheme["BrowserContextPauseResult"] = t_optional(t_object({}))
 scheme["BrowserContextShowRecorderParams"] = t_object(
+    {},
     {
-        "language": t_optional(t_string),
-        "mode": t_optional(t_enum(["inspecting", "recording"])),
-        "pauseOnNextStatement": t_optional(t_boolean),
-        "testIdAttributeName": t_optional(t_string),
-        "launchOptions": t_optional(t_any),
-        "contextOptions": t_optional(t_any),
-        "device": t_optional(t_string),
-        "saveStorage": t_optional(t_string),
-        "outputFile": t_optional(t_string),
-        "handleSIGINT": t_optional(t_boolean),
-        "omitCallTracking": t_optional(t_boolean),
-    }
+        "language": t_string,
+        "mode": t_enum(["inspecting", "recording"]),
+        "pauseOnNextStatement": t_boolean,
+        "testIdAttributeName": t_string,
+        "launchOptions": t_any,
+        "contextOptions": t_any,
+        "device": t_string,
+        "saveStorage": t_string,
+        "outputFile": t_string,
+        "handleSIGINT": t_boolean,
+        "omitCallTracking": t_boolean,
+    },
 )
 scheme["BrowserContextShowRecorderResult"] = t_optional(t_object({}))
 scheme["BrowserContextStartRecordingParams"] = t_object(
+    {},
     {
-        "language": t_optional(t_string),
-    }
+        "language": t_string,
+    },
 )
 scheme["BrowserContextStartRecordingResult"] = t_optional(t_object({}))
 scheme["BrowserContextStopRecordingParams"] = t_optional(t_object({}))
@@ -1418,10 +1419,11 @@ scheme["BrowserContextStopRecordingResult"] = t_optional(t_object({}))
 scheme["BrowserContextExposeConsoleApiParams"] = t_optional(t_object({}))
 scheme["BrowserContextExposeConsoleApiResult"] = t_optional(t_object({}))
 scheme["BrowserContextNewCDPSessionParams"] = t_object(
+    {},
     {
-        "page": t_optional(t_channel(["Page"])),
-        "frame": t_optional(t_channel(["Frame"])),
-    }
+        "page": t_channel(["Page"]),
+        "frame": t_channel(["Frame"]),
+    },
 )
 scheme["BrowserContextNewCDPSessionResult"] = t_object(
     {
@@ -1430,22 +1432,28 @@ scheme["BrowserContextNewCDPSessionResult"] = t_object(
 )
 scheme["BrowserContextCreateTempFilesParams"] = t_object(
     {
-        "rootDirName": t_optional(t_string),
         "items": t_array(
             t_object(
                 {
                     "name": t_string,
-                    "lastModifiedMs": t_optional(t_float),
-                }
+                },
+                {
+                    "lastModifiedMs": t_float,
+                },
             )
         ),
-    }
+    },
+    {
+        "rootDirName": t_string,
+    },
 )
 scheme["BrowserContextCreateTempFilesResult"] = t_object(
     {
-        "rootDir": t_optional(t_channel(["WritableStream"])),
         "writableStreams": t_array(t_channel(["WritableStream"])),
-    }
+    },
+    {
+        "rootDir": t_channel(["WritableStream"]),
+    },
 )
 scheme["BrowserContextUpdateSubscriptionParams"] = t_object(
     {
@@ -1465,47 +1473,53 @@ scheme["BrowserContextUpdateSubscriptionParams"] = t_object(
 )
 scheme["BrowserContextUpdateSubscriptionResult"] = t_optional(t_object({}))
 scheme["BrowserContextClockFastForwardParams"] = t_object(
+    {},
     {
-        "ticksNumber": t_optional(t_float),
-        "ticksString": t_optional(t_string),
-    }
+        "ticksNumber": t_float,
+        "ticksString": t_string,
+    },
 )
 scheme["BrowserContextClockFastForwardResult"] = t_optional(t_object({}))
 scheme["BrowserContextClockInstallParams"] = t_object(
+    {},
     {
-        "timeNumber": t_optional(t_float),
-        "timeString": t_optional(t_string),
-    }
+        "timeNumber": t_float,
+        "timeString": t_string,
+    },
 )
 scheme["BrowserContextClockInstallResult"] = t_optional(t_object({}))
 scheme["BrowserContextClockPauseAtParams"] = t_object(
+    {},
     {
-        "timeNumber": t_optional(t_float),
-        "timeString": t_optional(t_string),
-    }
+        "timeNumber": t_float,
+        "timeString": t_string,
+    },
 )
 scheme["BrowserContextClockPauseAtResult"] = t_optional(t_object({}))
 scheme["BrowserContextClockResumeParams"] = t_optional(t_object({}))
 scheme["BrowserContextClockResumeResult"] = t_optional(t_object({}))
 scheme["BrowserContextClockRunForParams"] = t_object(
+    {},
     {
-        "ticksNumber": t_optional(t_float),
-        "ticksString": t_optional(t_string),
-    }
+        "ticksNumber": t_float,
+        "ticksString": t_string,
+    },
 )
 scheme["BrowserContextClockRunForResult"] = t_optional(t_object({}))
 scheme["BrowserContextClockSetFixedTimeParams"] = t_object(
+    {},
     {
-        "timeNumber": t_optional(t_float),
-        "timeString": t_optional(t_string),
-    }
+        "timeNumber": t_float,
+        "timeString": t_string,
+    },
 )
 scheme["BrowserContextClockSetFixedTimeResult"] = t_optional(t_object({}))
 scheme["BrowserContextClockSetSystemTimeParams"] = t_object(
+    {},
     {
-        "timeNumber": t_optional(t_float),
-        "timeString": t_optional(t_string),
-    }
+        "timeNumber": t_float,
+        "timeString": t_string,
+    },
 )
 scheme["BrowserContextClockSetSystemTimeResult"] = t_optional(t_object({}))
 scheme["BrowserContextCredentialsInstallParams"] = t_optional(t_object({}))
@@ -1513,12 +1527,14 @@ scheme["BrowserContextCredentialsInstallResult"] = t_optional(t_object({}))
 scheme["BrowserContextCredentialsCreateParams"] = t_object(
     {
         "rpId": t_string,
-        "id": t_optional(t_string),
-        "userHandle": t_optional(t_string),
-        "privateKey": t_optional(t_string),
-        "publicKey": t_optional(t_string),
-        "signCount": t_optional(t_int),
-    }
+    },
+    {
+        "id": t_string,
+        "userHandle": t_string,
+        "privateKey": t_string,
+        "publicKey": t_string,
+        "signCount": t_int,
+    },
 )
 scheme["BrowserContextCredentialsCreateResult"] = t_object(
     {
@@ -1526,10 +1542,11 @@ scheme["BrowserContextCredentialsCreateResult"] = t_object(
     }
 )
 scheme["BrowserContextCredentialsGetParams"] = t_object(
+    {},
     {
-        "rpId": t_optional(t_string),
-        "id": t_optional(t_string),
-    }
+        "rpId": t_string,
+        "id": t_string,
+    },
 )
 scheme["BrowserContextCredentialsGetResult"] = t_object(
     {
@@ -1549,35 +1566,36 @@ scheme["BrowserTypeInitializer"] = t_object(
     }
 )
 scheme["BrowserTypeLaunchParams"] = t_object(
+    {},
     {
-        "channel": t_optional(t_string),
-        "executablePath": t_optional(t_string),
-        "args": t_optional(t_array(t_string)),
-        "ignoreAllDefaultArgs": t_optional(t_boolean),
-        "ignoreDefaultArgs": t_optional(t_array(t_string)),
-        "handleSIGINT": t_optional(t_boolean),
-        "handleSIGTERM": t_optional(t_boolean),
-        "handleSIGHUP": t_optional(t_boolean),
-        "env": t_optional(t_array(t_type("NameValue"))),
-        "headless": t_optional(t_boolean),
-        "proxy": t_optional(
-            t_object(
-                {
-                    "server": t_string,
-                    "bypass": t_optional(t_string),
-                    "username": t_optional(t_string),
-                    "password": t_optional(t_string),
-                }
-            )
+        "channel": t_string,
+        "executablePath": t_string,
+        "args": t_array(t_string),
+        "ignoreAllDefaultArgs": t_boolean,
+        "ignoreDefaultArgs": t_array(t_string),
+        "handleSIGINT": t_boolean,
+        "handleSIGTERM": t_boolean,
+        "handleSIGHUP": t_boolean,
+        "env": t_array(t_type("NameValue")),
+        "headless": t_boolean,
+        "proxy": t_object(
+            {
+                "server": t_string,
+            },
+            {
+                "bypass": t_string,
+                "username": t_string,
+                "password": t_string,
+            },
         ),
-        "downloadsPath": t_optional(t_string),
-        "tracesDir": t_optional(t_string),
-        "artifactsDir": t_optional(t_string),
-        "chromiumSandbox": t_optional(t_boolean),
-        "firefoxUserPrefs": t_optional(t_any),
-        "cdpPort": t_optional(t_int),
-        "slowMo": t_optional(t_float),
-    }
+        "downloadsPath": t_string,
+        "tracesDir": t_string,
+        "artifactsDir": t_string,
+        "chromiumSandbox": t_boolean,
+        "firefoxUserPrefs": t_any,
+        "cdpPort": t_int,
+        "slowMo": t_float,
+    },
 )
 scheme["BrowserTypeLaunchResult"] = t_object(
     {
@@ -1586,148 +1604,135 @@ scheme["BrowserTypeLaunchResult"] = t_object(
 )
 scheme["BrowserTypeLaunchPersistentContextParams"] = t_object(
     {
-        "channel": t_optional(t_string),
-        "executablePath": t_optional(t_string),
-        "args": t_optional(t_array(t_string)),
-        "ignoreAllDefaultArgs": t_optional(t_boolean),
-        "ignoreDefaultArgs": t_optional(t_array(t_string)),
-        "handleSIGINT": t_optional(t_boolean),
-        "handleSIGTERM": t_optional(t_boolean),
-        "handleSIGHUP": t_optional(t_boolean),
-        "env": t_optional(t_array(t_type("NameValue"))),
-        "headless": t_optional(t_boolean),
-        "proxy": t_optional(
-            t_object(
-                {
-                    "server": t_string,
-                    "bypass": t_optional(t_string),
-                    "username": t_optional(t_string),
-                    "password": t_optional(t_string),
-                }
-            )
-        ),
-        "downloadsPath": t_optional(t_string),
-        "tracesDir": t_optional(t_string),
-        "artifactsDir": t_optional(t_string),
-        "chromiumSandbox": t_optional(t_boolean),
-        "firefoxUserPrefs": t_optional(t_any),
-        "cdpPort": t_optional(t_int),
-        "noDefaultViewport": t_optional(t_boolean),
-        "viewport": t_optional(
-            t_object(
-                {
-                    "width": t_int,
-                    "height": t_int,
-                }
-            )
-        ),
-        "screen": t_optional(
-            t_object(
-                {
-                    "width": t_int,
-                    "height": t_int,
-                }
-            )
-        ),
-        "ignoreHTTPSErrors": t_optional(t_boolean),
-        "clientCertificates": t_optional(
-            t_array(
-                t_object(
-                    {
-                        "origin": t_string,
-                        "cert": t_optional(t_binary),
-                        "key": t_optional(t_binary),
-                        "passphrase": t_optional(t_string),
-                        "pfx": t_optional(t_binary),
-                    }
-                )
-            )
-        ),
-        "javaScriptEnabled": t_optional(t_boolean),
-        "bypassCSP": t_optional(t_boolean),
-        "userAgent": t_optional(t_string),
-        "locale": t_optional(t_string),
-        "timezoneId": t_optional(t_string),
-        "geolocation": t_optional(
-            t_object(
-                {
-                    "longitude": t_float,
-                    "latitude": t_float,
-                    "accuracy": t_optional(t_float),
-                }
-            )
-        ),
-        "permissions": t_optional(t_array(t_string)),
-        "extraHTTPHeaders": t_optional(t_array(t_type("NameValue"))),
-        "offline": t_optional(t_boolean),
-        "httpCredentials": t_optional(t_array(t_type("HttpCredentials"))),
-        "deviceScaleFactor": t_optional(t_float),
-        "isMobile": t_optional(t_boolean),
-        "hasTouch": t_optional(t_boolean),
-        "colorScheme": t_optional(
-            t_enum(["dark", "light", "no-preference", "no-override"])
-        ),
-        "reducedMotion": t_optional(t_enum(["reduce", "no-preference", "no-override"])),
-        "forcedColors": t_optional(t_enum(["active", "none", "no-override"])),
-        "acceptDownloads": t_optional(
-            t_enum(["accept", "deny", "internal-browser-default"])
-        ),
-        "contrast": t_optional(t_enum(["no-preference", "more", "no-override"])),
-        "baseURL": t_optional(t_string),
-        "recordVideo": t_optional(
-            t_object(
-                {
-                    "dir": t_optional(t_string),
-                    "size": t_optional(
-                        t_object(
-                            {
-                                "width": t_int,
-                                "height": t_int,
-                            }
-                        )
-                    ),
-                    "fps": t_optional(t_int),
-                    "showActions": t_optional(
-                        t_object(
-                            {
-                                "duration": t_optional(t_float),
-                                "position": t_optional(
-                                    t_enum(
-                                        [
-                                            "top-left",
-                                            "top",
-                                            "top-right",
-                                            "bottom-left",
-                                            "bottom",
-                                            "bottom-right",
-                                        ]
-                                    )
-                                ),
-                                "fontSize": t_optional(t_int),
-                                "cursor": t_optional(t_enum(["none", "pointer"])),
-                                "style": t_optional(
-                                    t_object(
-                                        {
-                                            "point": t_optional(t_string),
-                                            "highlight": t_optional(t_string),
-                                            "title": t_optional(t_string),
-                                        }
-                                    )
-                                ),
-                            }
-                        )
-                    ),
-                }
-            )
-        ),
-        "strictSelectors": t_optional(t_boolean),
-        "locateOnlyVisible": t_optional(t_boolean),
-        "serviceWorkers": t_optional(t_enum(["allow", "block"])),
-        "selectorEngines": t_optional(t_array(t_type("SelectorEngine"))),
-        "testIdAttributeName": t_optional(t_string),
         "userDataDir": t_string,
-        "slowMo": t_optional(t_float),
-    }
+    },
+    {
+        "channel": t_string,
+        "executablePath": t_string,
+        "args": t_array(t_string),
+        "ignoreAllDefaultArgs": t_boolean,
+        "ignoreDefaultArgs": t_array(t_string),
+        "handleSIGINT": t_boolean,
+        "handleSIGTERM": t_boolean,
+        "handleSIGHUP": t_boolean,
+        "env": t_array(t_type("NameValue")),
+        "headless": t_boolean,
+        "proxy": t_object(
+            {
+                "server": t_string,
+            },
+            {
+                "bypass": t_string,
+                "username": t_string,
+                "password": t_string,
+            },
+        ),
+        "downloadsPath": t_string,
+        "tracesDir": t_string,
+        "artifactsDir": t_string,
+        "chromiumSandbox": t_boolean,
+        "firefoxUserPrefs": t_any,
+        "cdpPort": t_int,
+        "noDefaultViewport": t_boolean,
+        "viewport": t_object(
+            {
+                "width": t_int,
+                "height": t_int,
+            }
+        ),
+        "screen": t_object(
+            {
+                "width": t_int,
+                "height": t_int,
+            }
+        ),
+        "ignoreHTTPSErrors": t_boolean,
+        "clientCertificates": t_array(
+            t_object(
+                {
+                    "origin": t_string,
+                },
+                {
+                    "cert": t_binary,
+                    "key": t_binary,
+                    "passphrase": t_string,
+                    "pfx": t_binary,
+                },
+            )
+        ),
+        "javaScriptEnabled": t_boolean,
+        "bypassCSP": t_boolean,
+        "userAgent": t_string,
+        "locale": t_string,
+        "timezoneId": t_string,
+        "geolocation": t_object(
+            {
+                "longitude": t_float,
+                "latitude": t_float,
+            },
+            {
+                "accuracy": t_float,
+            },
+        ),
+        "permissions": t_array(t_string),
+        "extraHTTPHeaders": t_array(t_type("NameValue")),
+        "offline": t_boolean,
+        "httpCredentials": t_array(t_type("HttpCredentials")),
+        "deviceScaleFactor": t_float,
+        "isMobile": t_boolean,
+        "hasTouch": t_boolean,
+        "colorScheme": t_enum(["dark", "light", "no-preference", "no-override"]),
+        "reducedMotion": t_enum(["reduce", "no-preference", "no-override"]),
+        "forcedColors": t_enum(["active", "none", "no-override"]),
+        "acceptDownloads": t_enum(["accept", "deny", "internal-browser-default"]),
+        "contrast": t_enum(["no-preference", "more", "no-override"]),
+        "baseURL": t_string,
+        "recordVideo": t_object(
+            {},
+            {
+                "dir": t_string,
+                "size": t_object(
+                    {
+                        "width": t_int,
+                        "height": t_int,
+                    }
+                ),
+                "fps": t_int,
+                "showActions": t_object(
+                    {},
+                    {
+                        "duration": t_float,
+                        "position": t_enum(
+                            [
+                                "top-left",
+                                "top",
+                                "top-right",
+                                "bottom-left",
+                                "bottom",
+                                "bottom-right",
+                            ]
+                        ),
+                        "fontSize": t_int,
+                        "cursor": t_enum(["none", "pointer"]),
+                        "style": t_object(
+                            {},
+                            {
+                                "point": t_string,
+                                "highlight": t_string,
+                                "title": t_string,
+                            },
+                        ),
+                    },
+                ),
+            },
+        ),
+        "strictSelectors": t_boolean,
+        "locateOnlyVisible": t_boolean,
+        "serviceWorkers": t_enum(["allow", "block"]),
+        "selectorEngines": t_array(t_type("SelectorEngine")),
+        "testIdAttributeName": t_string,
+        "slowMo": t_float,
+    },
 )
 scheme["BrowserTypeLaunchPersistentContextResult"] = t_object(
     {
@@ -1736,45 +1741,51 @@ scheme["BrowserTypeLaunchPersistentContextResult"] = t_object(
     }
 )
 scheme["BrowserTypeConnectOverCDPParams"] = t_object(
+    {},
     {
-        "endpointURL": t_optional(t_string),
-        "headers": t_optional(t_array(t_type("NameValue"))),
-        "slowMo": t_optional(t_float),
-        "isLocal": t_optional(t_boolean),
-        "noDefaults": t_optional(t_boolean),
-        "isWebView": t_optional(t_boolean),
-        "maxPageAttachTime": t_optional(t_float),
-        "artifactsDir": t_optional(t_string),
-        "transport": t_optional(t_binary),
-    }
+        "endpointURL": t_string,
+        "headers": t_array(t_type("NameValue")),
+        "slowMo": t_float,
+        "isLocal": t_boolean,
+        "noDefaults": t_boolean,
+        "isWebView": t_boolean,
+        "maxPageAttachTime": t_float,
+        "artifactsDir": t_string,
+        "transport": t_binary,
+    },
 )
 scheme["BrowserTypeConnectOverCDPResult"] = t_object(
     {
         "browser": t_channel(["Browser"]),
-        "defaultContext": t_optional(t_channel(["BrowserContext"])),
-    }
+    },
+    {
+        "defaultContext": t_channel(["BrowserContext"]),
+    },
 )
 scheme["Metadata"] = t_object(
+    {},
     {
-        "location": t_optional(
-            t_object(
-                {
-                    "file": t_string,
-                    "line": t_optional(t_int),
-                    "column": t_optional(t_int),
-                }
-            )
+        "location": t_object(
+            {
+                "file": t_string,
+            },
+            {
+                "line": t_int,
+                "column": t_int,
+            },
         ),
-        "title": t_optional(t_string),
-        "internal": t_optional(t_boolean),
-        "timeout": t_optional(t_float),
-    }
+        "title": t_string,
+        "internal": t_boolean,
+        "timeout": t_float,
+    },
 )
 scheme["ClientSideCallMetadata"] = t_object(
     {
         "id": t_string,
-        "stack": t_optional(t_array(t_type("StackFrame"))),
-    }
+    },
+    {
+        "stack": t_array(t_type("StackFrame")),
+    },
 )
 scheme["SDKLanguage"] = t_enum(["javascript", "python", "java", "csharp"])
 scheme["DisposableInitializer"] = t_optional(t_object({}))
@@ -1784,94 +1795,86 @@ scheme["WaitInfo"] = t_object(
     {
         "waitId": t_string,
         "phase": t_enum(["before", "after", "log"]),
-        "event": t_optional(t_string),
-        "message": t_optional(t_string),
-        "error": t_optional(t_string),
-    }
+    },
+    {
+        "event": t_string,
+        "message": t_string,
+        "error": t_string,
+    },
 )
 scheme["ElectronInitializer"] = t_optional(t_object({}))
 scheme["ElectronLaunchParams"] = t_object(
+    {},
     {
-        "executablePath": t_optional(t_string),
-        "args": t_optional(t_array(t_string)),
-        "chromiumSandbox": t_optional(t_boolean),
-        "cwd": t_optional(t_string),
-        "env": t_optional(t_array(t_type("NameValue"))),
-        "acceptDownloads": t_optional(
-            t_enum(["accept", "deny", "internal-browser-default"])
+        "executablePath": t_string,
+        "args": t_array(t_string),
+        "chromiumSandbox": t_boolean,
+        "cwd": t_string,
+        "env": t_array(t_type("NameValue")),
+        "acceptDownloads": t_enum(["accept", "deny", "internal-browser-default"]),
+        "bypassCSP": t_boolean,
+        "colorScheme": t_enum(["dark", "light", "no-preference", "no-override"]),
+        "extraHTTPHeaders": t_array(t_type("NameValue")),
+        "geolocation": t_object(
+            {
+                "longitude": t_float,
+                "latitude": t_float,
+            },
+            {
+                "accuracy": t_float,
+            },
         ),
-        "bypassCSP": t_optional(t_boolean),
-        "colorScheme": t_optional(
-            t_enum(["dark", "light", "no-preference", "no-override"])
-        ),
-        "extraHTTPHeaders": t_optional(t_array(t_type("NameValue"))),
-        "geolocation": t_optional(
-            t_object(
-                {
-                    "longitude": t_float,
-                    "latitude": t_float,
-                    "accuracy": t_optional(t_float),
-                }
-            )
-        ),
-        "httpCredentials": t_optional(t_array(t_type("HttpCredentials"))),
-        "ignoreHTTPSErrors": t_optional(t_boolean),
-        "locale": t_optional(t_string),
-        "offline": t_optional(t_boolean),
-        "recordVideo": t_optional(
-            t_object(
-                {
-                    "dir": t_optional(t_string),
-                    "size": t_optional(
-                        t_object(
+        "httpCredentials": t_array(t_type("HttpCredentials")),
+        "ignoreHTTPSErrors": t_boolean,
+        "locale": t_string,
+        "offline": t_boolean,
+        "recordVideo": t_object(
+            {},
+            {
+                "dir": t_string,
+                "size": t_object(
+                    {
+                        "width": t_int,
+                        "height": t_int,
+                    }
+                ),
+                "fps": t_int,
+                "showActions": t_object(
+                    {},
+                    {
+                        "duration": t_float,
+                        "position": t_enum(
+                            [
+                                "top-left",
+                                "top",
+                                "top-right",
+                                "bottom-left",
+                                "bottom",
+                                "bottom-right",
+                            ]
+                        ),
+                        "fontSize": t_int,
+                        "cursor": t_enum(["none", "pointer"]),
+                        "style": t_object(
+                            {},
                             {
-                                "width": t_int,
-                                "height": t_int,
-                            }
-                        )
-                    ),
-                    "fps": t_optional(t_int),
-                    "showActions": t_optional(
-                        t_object(
-                            {
-                                "duration": t_optional(t_float),
-                                "position": t_optional(
-                                    t_enum(
-                                        [
-                                            "top-left",
-                                            "top",
-                                            "top-right",
-                                            "bottom-left",
-                                            "bottom",
-                                            "bottom-right",
-                                        ]
-                                    )
-                                ),
-                                "fontSize": t_optional(t_int),
-                                "cursor": t_optional(t_enum(["none", "pointer"])),
-                                "style": t_optional(
-                                    t_object(
-                                        {
-                                            "point": t_optional(t_string),
-                                            "highlight": t_optional(t_string),
-                                            "title": t_optional(t_string),
-                                        }
-                                    )
-                                ),
-                            }
-                        )
-                    ),
-                }
-            )
+                                "point": t_string,
+                                "highlight": t_string,
+                                "title": t_string,
+                            },
+                        ),
+                    },
+                ),
+            },
         ),
-        "strictSelectors": t_optional(t_boolean),
-        "locateOnlyVisible": t_optional(t_boolean),
-        "timezoneId": t_optional(t_string),
-        "tracesDir": t_optional(t_string),
-        "artifactsDir": t_optional(t_string),
-        "selectorEngines": t_optional(t_array(t_type("SelectorEngine"))),
-        "testIdAttributeName": t_optional(t_string),
-    }
+        "strictSelectors": t_boolean,
+        "locateOnlyVisible": t_boolean,
+        "timezoneId": t_string,
+        "tracesDir": t_string,
+        "artifactsDir": t_string,
+        "selectorEngines": t_array(t_type("SelectorEngine")),
+        "testIdAttributeName": t_string,
+    },
 )
 scheme["ElectronLaunchResult"] = t_object(
     {
@@ -1912,9 +1915,11 @@ scheme["ElectronApplicationBrowserWindowResult"] = t_object(
 scheme["ElectronApplicationEvaluateExpressionParams"] = t_object(
     {
         "expression": t_string,
-        "isFunction": t_optional(t_boolean),
         "arg": t_type("SerializedArgument"),
-    }
+    },
+    {
+        "isFunction": t_boolean,
+    },
 )
 scheme["ElectronApplicationEvaluateExpressionResult"] = t_object(
     {
@@ -1924,9 +1929,11 @@ scheme["ElectronApplicationEvaluateExpressionResult"] = t_object(
 scheme["ElectronApplicationEvaluateExpressionHandleParams"] = t_object(
     {
         "expression": t_string,
-        "isFunction": t_optional(t_boolean),
         "arg": t_type("SerializedArgument"),
-    }
+    },
+    {
+        "isFunction": t_boolean,
+    },
 )
 scheme["ElectronApplicationEvaluateExpressionHandleResult"] = t_object(
     {
@@ -1944,38 +1951,44 @@ scheme["FrameInitializer"] = t_object(
     {
         "url": t_string,
         "name": t_string,
-        "parentFrame": t_optional(t_channel(["Frame"])),
         "loadStates": t_array(t_type("LifecycleEvent")),
-    }
+    },
+    {
+        "parentFrame": t_channel(["Frame"]),
+    },
 )
 scheme["FrameLoadstateEvent"] = t_object(
+    {},
     {
-        "add": t_optional(t_type("LifecycleEvent")),
-        "remove": t_optional(t_type("LifecycleEvent")),
-    }
+        "add": t_type("LifecycleEvent"),
+        "remove": t_type("LifecycleEvent"),
+    },
 )
 scheme["FrameNavigatedEvent"] = t_object(
     {
         "url": t_string,
         "name": t_string,
-        "newDocument": t_optional(
-            t_object(
-                {
-                    "request": t_optional(t_channel(["Request"])),
-                }
-            )
+    },
+    {
+        "newDocument": t_object(
+            {},
+            {
+                "request": t_channel(["Request"]),
+            },
         ),
-        "error": t_optional(t_string),
-    }
+        "error": t_string,
+    },
 )
 scheme["FrameEvalOnSelectorParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
         "expression": t_string,
-        "isFunction": t_optional(t_boolean),
         "arg": t_type("SerializedArgument"),
-    }
+    },
+    {
+        "strict": t_boolean,
+        "isFunction": t_boolean,
+    },
 )
 scheme["FrameEvalOnSelectorResult"] = t_object(
     {
@@ -1986,9 +1999,11 @@ scheme["FrameEvalOnSelectorAllParams"] = t_object(
     {
         "selector": t_string,
         "expression": t_string,
-        "isFunction": t_optional(t_boolean),
         "arg": t_type("SerializedArgument"),
-    }
+    },
+    {
+        "isFunction": t_boolean,
+    },
 )
 scheme["FrameEvalOnSelectorAllResult"] = t_object(
     {
@@ -1996,11 +2011,12 @@ scheme["FrameEvalOnSelectorAllResult"] = t_object(
     }
 )
 scheme["FrameAddScriptTagParams"] = t_object(
+    {},
     {
-        "url": t_optional(t_string),
-        "content": t_optional(t_string),
-        "type": t_optional(t_string),
-    }
+        "url": t_string,
+        "content": t_string,
+        "type": t_string,
+    },
 )
 scheme["FrameAddScriptTagResult"] = t_object(
     {
@@ -2008,10 +2024,11 @@ scheme["FrameAddScriptTagResult"] = t_object(
     }
 )
 scheme["FrameAddStyleTagParams"] = t_object(
+    {},
     {
-        "url": t_optional(t_string),
-        "content": t_optional(t_string),
-    }
+        "url": t_string,
+        "content": t_string,
+    },
 )
 scheme["FrameAddStyleTagResult"] = t_object(
     {
@@ -2019,12 +2036,13 @@ scheme["FrameAddStyleTagResult"] = t_object(
     }
 )
 scheme["FrameAriaSnapshotParams"] = t_object(
+    {},
     {
-        "mode": t_optional(t_enum(["ai", "default"])),
-        "selector": t_optional(t_string),
-        "depth": t_optional(t_int),
-        "boxes": t_optional(t_boolean),
-    }
+        "mode": t_enum(["ai", "default"]),
+        "selector": t_string,
+        "depth": t_int,
+        "boxes": t_boolean,
+    },
 )
 scheme["FrameAriaSnapshotResult"] = t_object(
     {
@@ -2032,12 +2050,13 @@ scheme["FrameAriaSnapshotResult"] = t_object(
     }
 )
 scheme["FrameAriaSnapshotJSONParams"] = t_object(
+    {},
     {
-        "mode": t_optional(t_enum(["ai", "default"])),
-        "selector": t_optional(t_string),
-        "depth": t_optional(t_int),
-        "boxes": t_optional(t_boolean),
-    }
+        "mode": t_enum(["ai", "default"]),
+        "selector": t_string,
+        "depth": t_int,
+        "boxes": t_boolean,
+    },
 )
 scheme["FrameAriaSnapshotJSONResult"] = t_object(
     {
@@ -2047,44 +2066,51 @@ scheme["FrameAriaSnapshotJSONResult"] = t_object(
 scheme["FrameBlurParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
-    }
+    },
+    {
+        "strict": t_boolean,
+    },
 )
 scheme["FrameBlurResult"] = t_optional(t_object({}))
 scheme["FrameCheckParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
-        "force": t_optional(t_boolean),
-        "scroll": t_optional(t_enum(["auto", "none"])),
-        "position": t_optional(t_type("Point")),
-        "trial": t_optional(t_boolean),
-    }
+    },
+    {
+        "strict": t_boolean,
+        "force": t_boolean,
+        "scroll": t_enum(["auto", "none"]),
+        "position": t_type("Point"),
+        "trial": t_boolean,
+    },
 )
 scheme["FrameCheckResult"] = t_optional(t_object({}))
 scheme["FrameClickParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
-        "force": t_optional(t_boolean),
-        "scroll": t_optional(t_enum(["auto", "none"])),
-        "noWaitAfter": t_optional(t_boolean),
-        "modifiers": t_optional(
-            t_array(t_enum(["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]))
+    },
+    {
+        "strict": t_boolean,
+        "force": t_boolean,
+        "scroll": t_enum(["auto", "none"]),
+        "noWaitAfter": t_boolean,
+        "modifiers": t_array(
+            t_enum(["Alt", "Control", "ControlOrMeta", "Meta", "Shift"])
         ),
-        "position": t_optional(t_type("Point")),
-        "delay": t_optional(t_float),
-        "button": t_optional(t_enum(["left", "right", "middle"])),
-        "clickCount": t_optional(t_int),
-        "trial": t_optional(t_boolean),
-        "steps": t_optional(t_int),
-    }
+        "position": t_type("Point"),
+        "delay": t_float,
+        "button": t_enum(["left", "right", "middle"]),
+        "clickCount": t_int,
+        "trial": t_boolean,
+        "steps": t_int,
+    },
 )
 scheme["FrameClickResult"] = t_optional(t_object({}))
 scheme["FrameContentParams"] = t_object(
+    {},
     {
-        "includeShadow": t_optional(t_boolean),
-    }
+        "includeShadow": t_boolean,
+    },
 )
 scheme["FrameContentResult"] = t_object(
     {
@@ -2095,79 +2121,87 @@ scheme["FrameDragAndDropParams"] = t_object(
     {
         "source": t_string,
         "target": t_string,
-        "force": t_optional(t_boolean),
-        "scroll": t_optional(t_enum(["auto", "none"])),
-        "trial": t_optional(t_boolean),
-        "sourcePosition": t_optional(t_type("Point")),
-        "targetPosition": t_optional(t_type("Point")),
-        "strict": t_optional(t_boolean),
-        "steps": t_optional(t_int),
-    }
+    },
+    {
+        "force": t_boolean,
+        "scroll": t_enum(["auto", "none"]),
+        "trial": t_boolean,
+        "sourcePosition": t_type("Point"),
+        "targetPosition": t_type("Point"),
+        "strict": t_boolean,
+        "steps": t_int,
+    },
 )
 scheme["FrameDragAndDropResult"] = t_optional(t_object({}))
 scheme["FrameDropParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
-        "position": t_optional(t_type("Point")),
-        "payloads": t_optional(
-            t_array(
-                t_object(
-                    {
-                        "name": t_string,
-                        "mimeType": t_optional(t_string),
-                        "buffer": t_binary,
-                    }
-                )
+    },
+    {
+        "strict": t_boolean,
+        "position": t_type("Point"),
+        "payloads": t_array(
+            t_object(
+                {
+                    "name": t_string,
+                    "buffer": t_binary,
+                },
+                {
+                    "mimeType": t_string,
+                },
             )
         ),
-        "localPaths": t_optional(t_array(t_string)),
-        "streams": t_optional(t_array(t_channel(["WritableStream"]))),
-        "data": t_optional(
-            t_array(
-                t_object(
-                    {
-                        "mimeType": t_string,
-                        "value": t_string,
-                    }
-                )
+        "localPaths": t_array(t_string),
+        "streams": t_array(t_channel(["WritableStream"])),
+        "data": t_array(
+            t_object(
+                {
+                    "mimeType": t_string,
+                    "value": t_string,
+                }
             )
         ),
-    }
+    },
 )
 scheme["FrameDropResult"] = t_optional(t_object({}))
 scheme["FrameDblclickParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
-        "force": t_optional(t_boolean),
-        "scroll": t_optional(t_enum(["auto", "none"])),
-        "modifiers": t_optional(
-            t_array(t_enum(["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]))
+    },
+    {
+        "strict": t_boolean,
+        "force": t_boolean,
+        "scroll": t_enum(["auto", "none"]),
+        "modifiers": t_array(
+            t_enum(["Alt", "Control", "ControlOrMeta", "Meta", "Shift"])
         ),
-        "position": t_optional(t_type("Point")),
-        "delay": t_optional(t_float),
-        "button": t_optional(t_enum(["left", "right", "middle"])),
-        "trial": t_optional(t_boolean),
-        "steps": t_optional(t_int),
-    }
+        "position": t_type("Point"),
+        "delay": t_float,
+        "button": t_enum(["left", "right", "middle"]),
+        "trial": t_boolean,
+        "steps": t_int,
+    },
 )
 scheme["FrameDblclickResult"] = t_optional(t_object({}))
 scheme["FrameDispatchEventParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
         "type": t_string,
         "eventInit": t_type("SerializedArgument"),
-    }
+    },
+    {
+        "strict": t_boolean,
+    },
 )
 scheme["FrameDispatchEventResult"] = t_optional(t_object({}))
 scheme["FrameEvaluateExpressionParams"] = t_object(
     {
         "expression": t_string,
-        "isFunction": t_optional(t_boolean),
         "arg": t_type("SerializedArgument"),
-    }
+    },
+    {
+        "isFunction": t_boolean,
+    },
 )
 scheme["FrameEvaluateExpressionResult"] = t_object(
     {
@@ -2177,9 +2211,11 @@ scheme["FrameEvaluateExpressionResult"] = t_object(
 scheme["FrameEvaluateExpressionHandleParams"] = t_object(
     {
         "expression": t_string,
-        "isFunction": t_optional(t_boolean),
         "arg": t_type("SerializedArgument"),
-    }
+    },
+    {
+        "isFunction": t_boolean,
+    },
 )
 scheme["FrameEvaluateExpressionHandleResult"] = t_object(
     {
@@ -2189,17 +2225,21 @@ scheme["FrameEvaluateExpressionHandleResult"] = t_object(
 scheme["FrameFillParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
         "value": t_string,
-        "force": t_optional(t_boolean),
-    }
+    },
+    {
+        "strict": t_boolean,
+        "force": t_boolean,
+    },
 )
 scheme["FrameFillResult"] = t_optional(t_object({}))
 scheme["FrameFocusParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
-    }
+    },
+    {
+        "strict": t_boolean,
+    },
 )
 scheme["FrameFocusResult"] = t_optional(t_object({}))
 scheme["FrameFrameElementParams"] = t_optional(t_object({}))
@@ -2211,20 +2251,26 @@ scheme["FrameFrameElementResult"] = t_object(
 scheme["FrameResolveSelectorParams"] = t_object(
     {
         "selector": t_string,
-        "sdkLanguage": t_optional(t_type("SDKLanguage")),
-    }
+    },
+    {
+        "sdkLanguage": t_type("SDKLanguage"),
+    },
 )
 scheme["FrameResolveSelectorResult"] = t_object(
     {
         "resolvedSelector": t_string,
-        "locatorCode": t_optional(t_string),
-    }
+    },
+    {
+        "locatorCode": t_string,
+    },
 )
 scheme["FrameHighlightParams"] = t_object(
     {
         "selector": t_string,
-        "style": t_optional(t_string),
-    }
+    },
+    {
+        "style": t_string,
+    },
 )
 scheme["FrameHighlightResult"] = t_optional(t_object({}))
 scheme["FrameHideHighlightParams"] = t_object(
@@ -2236,46 +2282,56 @@ scheme["FrameHideHighlightResult"] = t_optional(t_object({}))
 scheme["FrameGetAttributeParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
         "name": t_string,
-    }
+    },
+    {
+        "strict": t_boolean,
+    },
 )
 scheme["FrameGetAttributeResult"] = t_object(
+    {},
     {
-        "value": t_optional(t_string),
-    }
+        "value": t_string,
+    },
 )
 scheme["FrameGotoParams"] = t_object(
     {
         "url": t_string,
-        "waitUntil": t_optional(t_type("LifecycleEvent")),
-        "referer": t_optional(t_string),
-    }
+    },
+    {
+        "waitUntil": t_type("LifecycleEvent"),
+        "referer": t_string,
+    },
 )
 scheme["FrameGotoResult"] = t_object(
+    {},
     {
-        "response": t_optional(t_channel(["Response"])),
-    }
+        "response": t_channel(["Response"]),
+    },
 )
 scheme["FrameHoverParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
-        "force": t_optional(t_boolean),
-        "scroll": t_optional(t_enum(["auto", "none"])),
-        "modifiers": t_optional(
-            t_array(t_enum(["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]))
+    },
+    {
+        "strict": t_boolean,
+        "force": t_boolean,
+        "scroll": t_enum(["auto", "none"]),
+        "modifiers": t_array(
+            t_enum(["Alt", "Control", "ControlOrMeta", "Meta", "Shift"])
         ),
-        "position": t_optional(t_type("Point")),
-        "trial": t_optional(t_boolean),
-    }
+        "position": t_type("Point"),
+        "trial": t_boolean,
+    },
 )
 scheme["FrameHoverResult"] = t_optional(t_object({}))
 scheme["FrameInnerHTMLParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
-    }
+    },
+    {
+        "strict": t_boolean,
+    },
 )
 scheme["FrameInnerHTMLResult"] = t_object(
     {
@@ -2285,8 +2341,10 @@ scheme["FrameInnerHTMLResult"] = t_object(
 scheme["FrameInnerTextParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
-    }
+    },
+    {
+        "strict": t_boolean,
+    },
 )
 scheme["FrameInnerTextResult"] = t_object(
     {
@@ -2296,8 +2354,10 @@ scheme["FrameInnerTextResult"] = t_object(
 scheme["FrameInputValueParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
-    }
+    },
+    {
+        "strict": t_boolean,
+    },
 )
 scheme["FrameInputValueResult"] = t_object(
     {
@@ -2307,8 +2367,10 @@ scheme["FrameInputValueResult"] = t_object(
 scheme["FrameIsCheckedParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
-    }
+    },
+    {
+        "strict": t_boolean,
+    },
 )
 scheme["FrameIsCheckedResult"] = t_object(
     {
@@ -2318,8 +2380,10 @@ scheme["FrameIsCheckedResult"] = t_object(
 scheme["FrameIsDisabledParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
-    }
+    },
+    {
+        "strict": t_boolean,
+    },
 )
 scheme["FrameIsDisabledResult"] = t_object(
     {
@@ -2329,8 +2393,10 @@ scheme["FrameIsDisabledResult"] = t_object(
 scheme["FrameIsEnabledParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
-    }
+    },
+    {
+        "strict": t_boolean,
+    },
 )
 scheme["FrameIsEnabledResult"] = t_object(
     {
@@ -2340,8 +2406,10 @@ scheme["FrameIsEnabledResult"] = t_object(
 scheme["FrameIsHiddenParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
-    }
+    },
+    {
+        "strict": t_boolean,
+    },
 )
 scheme["FrameIsHiddenResult"] = t_object(
     {
@@ -2351,8 +2419,10 @@ scheme["FrameIsHiddenResult"] = t_object(
 scheme["FrameIsVisibleParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
-    }
+    },
+    {
+        "strict": t_boolean,
+    },
 )
 scheme["FrameIsVisibleResult"] = t_object(
     {
@@ -2362,8 +2432,10 @@ scheme["FrameIsVisibleResult"] = t_object(
 scheme["FrameIsEditableParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
-    }
+    },
+    {
+        "strict": t_boolean,
+    },
 )
 scheme["FrameIsEditableResult"] = t_object(
     {
@@ -2373,23 +2445,28 @@ scheme["FrameIsEditableResult"] = t_object(
 scheme["FramePressParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
         "key": t_string,
-        "delay": t_optional(t_float),
-        "noWaitAfter": t_optional(t_boolean),
-    }
+    },
+    {
+        "strict": t_boolean,
+        "delay": t_float,
+        "noWaitAfter": t_boolean,
+    },
 )
 scheme["FramePressResult"] = t_optional(t_object({}))
 scheme["FrameQuerySelectorParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
-    }
+    },
+    {
+        "strict": t_boolean,
+    },
 )
 scheme["FrameQuerySelectorResult"] = t_object(
+    {},
     {
-        "element": t_optional(t_channel(["ElementHandle"])),
-    }
+        "element": t_channel(["ElementHandle"]),
+    },
 )
 scheme["FrameQuerySelectorAllParams"] = t_object(
     {
@@ -2414,22 +2491,23 @@ scheme["FrameQueryCountResult"] = t_object(
 scheme["FrameSelectOptionParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
-        "elements": t_optional(t_array(t_channel(["ElementHandle"]))),
-        "options": t_optional(
-            t_array(
-                t_object(
-                    {
-                        "valueOrLabel": t_optional(t_string),
-                        "value": t_optional(t_string),
-                        "label": t_optional(t_string),
-                        "index": t_optional(t_int),
-                    }
-                )
+    },
+    {
+        "strict": t_boolean,
+        "elements": t_array(t_channel(["ElementHandle"])),
+        "options": t_array(
+            t_object(
+                {},
+                {
+                    "valueOrLabel": t_string,
+                    "value": t_string,
+                    "label": t_string,
+                    "index": t_int,
+                },
             )
         ),
-        "force": t_optional(t_boolean),
-    }
+        "force": t_boolean,
+    },
 )
 scheme["FrameSelectOptionResult"] = t_object(
     {
@@ -2439,56 +2517,65 @@ scheme["FrameSelectOptionResult"] = t_object(
 scheme["FrameSetContentParams"] = t_object(
     {
         "html": t_string,
-        "waitUntil": t_optional(t_type("LifecycleEvent")),
-    }
+    },
+    {
+        "waitUntil": t_type("LifecycleEvent"),
+    },
 )
 scheme["FrameSetContentResult"] = t_optional(t_object({}))
 scheme["FrameSetInputFilesParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
-        "payloads": t_optional(
-            t_array(
-                t_object(
-                    {
-                        "name": t_string,
-                        "mimeType": t_optional(t_string),
-                        "buffer": t_binary,
-                    }
-                )
+    },
+    {
+        "strict": t_boolean,
+        "payloads": t_array(
+            t_object(
+                {
+                    "name": t_string,
+                    "buffer": t_binary,
+                },
+                {
+                    "mimeType": t_string,
+                },
             )
         ),
-        "localDirectory": t_optional(t_string),
-        "directoryStream": t_optional(t_channel(["WritableStream"])),
-        "localPaths": t_optional(t_array(t_string)),
-        "streams": t_optional(t_array(t_channel(["WritableStream"]))),
-    }
+        "localDirectory": t_string,
+        "directoryStream": t_channel(["WritableStream"]),
+        "localPaths": t_array(t_string),
+        "streams": t_array(t_channel(["WritableStream"])),
+    },
 )
 scheme["FrameSetInputFilesResult"] = t_optional(t_object({}))
 scheme["FrameTapParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
-        "force": t_optional(t_boolean),
-        "scroll": t_optional(t_enum(["auto", "none"])),
-        "modifiers": t_optional(
-            t_array(t_enum(["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]))
+    },
+    {
+        "strict": t_boolean,
+        "force": t_boolean,
+        "scroll": t_enum(["auto", "none"]),
+        "modifiers": t_array(
+            t_enum(["Alt", "Control", "ControlOrMeta", "Meta", "Shift"])
         ),
-        "position": t_optional(t_type("Point")),
-        "trial": t_optional(t_boolean),
-    }
+        "position": t_type("Point"),
+        "trial": t_boolean,
+    },
 )
 scheme["FrameTapResult"] = t_optional(t_object({}))
 scheme["FrameTextContentParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
-    }
+    },
+    {
+        "strict": t_boolean,
+    },
 )
 scheme["FrameTextContentResult"] = t_object(
+    {},
     {
-        "value": t_optional(t_string),
-    }
+        "value": t_string,
+    },
 )
 scheme["FrameTitleParams"] = t_optional(t_object({}))
 scheme["FrameTitleResult"] = t_object(
@@ -2499,21 +2586,25 @@ scheme["FrameTitleResult"] = t_object(
 scheme["FrameTypeParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
         "text": t_string,
-        "delay": t_optional(t_float),
-    }
+    },
+    {
+        "strict": t_boolean,
+        "delay": t_float,
+    },
 )
 scheme["FrameTypeResult"] = t_optional(t_object({}))
 scheme["FrameUncheckParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
-        "force": t_optional(t_boolean),
-        "scroll": t_optional(t_enum(["auto", "none"])),
-        "position": t_optional(t_type("Point")),
-        "trial": t_optional(t_boolean),
-    }
+    },
+    {
+        "strict": t_boolean,
+        "force": t_boolean,
+        "scroll": t_enum(["auto", "none"]),
+        "position": t_type("Point"),
+        "trial": t_boolean,
+    },
 )
 scheme["FrameUncheckResult"] = t_optional(t_object({}))
 scheme["FrameWaitForTimeoutParams"] = t_object(
@@ -2525,58 +2616,66 @@ scheme["FrameWaitForTimeoutResult"] = t_optional(t_object({}))
 scheme["FrameWaitForFunctionParams"] = t_object(
     {
         "expression": t_string,
-        "isFunction": t_optional(t_boolean),
         "arg": t_type("SerializedArgument"),
-        "pollingInterval": t_optional(t_float),
-        "selector": t_optional(t_string),
-        "strict": t_optional(t_boolean),
-    }
+    },
+    {
+        "isFunction": t_boolean,
+        "pollingInterval": t_float,
+        "selector": t_string,
+        "strict": t_boolean,
+    },
 )
 scheme["FrameWaitForFunctionResult"] = t_object(
+    {},
     {
-        "handle": t_optional(t_channel(["ElementHandle", "JSHandle"])),
-    }
+        "handle": t_channel(["ElementHandle", "JSHandle"]),
+    },
 )
 scheme["FrameWaitForSelectorParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
-        "state": t_optional(t_enum(["attached", "detached", "visible", "hidden"])),
-        "omitReturnValue": t_optional(t_boolean),
-    }
+    },
+    {
+        "strict": t_boolean,
+        "state": t_enum(["attached", "detached", "visible", "hidden"]),
+        "omitReturnValue": t_boolean,
+    },
 )
 scheme["FrameWaitForSelectorResult"] = t_object(
+    {},
     {
-        "element": t_optional(t_channel(["ElementHandle"])),
-    }
+        "element": t_channel(["ElementHandle"]),
+    },
 )
 scheme["FrameExpectParams"] = t_object(
     {
-        "selector": t_optional(t_string),
         "expression": t_string,
-        "expressionArg": t_optional(t_any),
-        "pseudo": t_optional(t_enum(["before", "after"])),
-        "expectedText": t_optional(t_array(t_type("ExpectedTextValue"))),
-        "expectedNumber": t_optional(t_float),
-        "expectedValue": t_optional(t_type("SerializedArgument")),
-        "useInnerText": t_optional(t_boolean),
         "isNot": t_boolean,
-    }
+    },
+    {
+        "selector": t_string,
+        "expressionArg": t_any,
+        "pseudo": t_enum(["before", "after"]),
+        "expectedText": t_array(t_type("ExpectedTextValue")),
+        "expectedNumber": t_float,
+        "expectedValue": t_type("SerializedArgument"),
+        "useInnerText": t_boolean,
+    },
 )
 scheme["FrameExpectResult"] = t_optional(t_object({}))
 scheme["FrameExpectErrorDetails"] = t_object(
+    {},
     {
-        "received": t_optional(
-            t_object(
-                {
-                    "value": t_optional(t_type("SerializedValue")),
-                    "ariaSnapshot": t_optional(t_string),
-                }
-            )
+        "received": t_object(
+            {},
+            {
+                "value": t_type("SerializedValue"),
+                "ariaSnapshot": t_string,
+            },
         ),
-        "timedOut": t_optional(t_boolean),
-        "customErrorMessage": t_optional(t_string),
-    }
+        "timedOut": t_boolean,
+        "customErrorMessage": t_string,
+    },
 )
 scheme["FrameWebmcpToolsParams"] = t_optional(t_object({}))
 scheme["FrameWebmcpToolsResult"] = t_object(
@@ -2586,17 +2685,18 @@ scheme["FrameWebmcpToolsResult"] = t_object(
                 {
                     "name": t_string,
                     "description": t_string,
-                    "inputSchema": t_optional(t_any),
-                    "annotations": t_optional(
-                        t_object(
-                            {
-                                "readOnly": t_optional(t_boolean),
-                                "untrustedContent": t_optional(t_boolean),
-                                "consequential": t_optional(t_boolean),
-                            }
-                        )
+                },
+                {
+                    "inputSchema": t_any,
+                    "annotations": t_object(
+                        {},
+                        {
+                            "readOnly": t_boolean,
+                            "untrustedContent": t_boolean,
+                            "consequential": t_boolean,
+                        },
                     ),
-                }
+                },
             )
         ),
     }
@@ -2630,9 +2730,11 @@ scheme["ElementHandleDisposeResult"] = t_type("JSHandleDisposeResult")
 scheme["JSHandleEvaluateExpressionParams"] = t_object(
     {
         "expression": t_string,
-        "isFunction": t_optional(t_boolean),
         "arg": t_type("SerializedArgument"),
-    }
+    },
+    {
+        "isFunction": t_boolean,
+    },
 )
 scheme["ElementHandleEvaluateExpressionParams"] = t_type(
     "JSHandleEvaluateExpressionParams"
@@ -2648,9 +2750,11 @@ scheme["ElementHandleEvaluateExpressionResult"] = t_type(
 scheme["JSHandleEvaluateExpressionHandleParams"] = t_object(
     {
         "expression": t_string,
-        "isFunction": t_optional(t_boolean),
         "arg": t_type("SerializedArgument"),
-    }
+    },
+    {
+        "isFunction": t_boolean,
+    },
 )
 scheme["ElementHandleEvaluateExpressionHandleParams"] = t_type(
     "JSHandleEvaluateExpressionHandleParams"
@@ -2706,11 +2810,13 @@ scheme["ElementHandleInitializer"] = t_object(
 scheme["ElementHandleEvalOnSelectorParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
         "expression": t_string,
-        "isFunction": t_optional(t_boolean),
         "arg": t_type("SerializedArgument"),
-    }
+    },
+    {
+        "strict": t_boolean,
+        "isFunction": t_boolean,
+    },
 )
 scheme["ElementHandleEvalOnSelectorResult"] = t_object(
     {
@@ -2721,9 +2827,11 @@ scheme["ElementHandleEvalOnSelectorAllParams"] = t_object(
     {
         "selector": t_string,
         "expression": t_string,
-        "isFunction": t_optional(t_boolean),
         "arg": t_type("SerializedArgument"),
-    }
+    },
+    {
+        "isFunction": t_boolean,
+    },
 )
 scheme["ElementHandleEvalOnSelectorAllResult"] = t_object(
     {
@@ -2732,55 +2840,60 @@ scheme["ElementHandleEvalOnSelectorAllResult"] = t_object(
 )
 scheme["ElementHandleBoundingBoxParams"] = t_optional(t_object({}))
 scheme["ElementHandleBoundingBoxResult"] = t_object(
+    {},
     {
-        "value": t_optional(t_type("Rect")),
-    }
+        "value": t_type("Rect"),
+    },
 )
 scheme["ElementHandleCheckParams"] = t_object(
+    {},
     {
-        "force": t_optional(t_boolean),
-        "scroll": t_optional(t_enum(["auto", "none"])),
-        "position": t_optional(t_type("Point")),
-        "trial": t_optional(t_boolean),
-    }
+        "force": t_boolean,
+        "scroll": t_enum(["auto", "none"]),
+        "position": t_type("Point"),
+        "trial": t_boolean,
+    },
 )
 scheme["ElementHandleCheckResult"] = t_optional(t_object({}))
 scheme["ElementHandleClickParams"] = t_object(
+    {},
     {
-        "force": t_optional(t_boolean),
-        "scroll": t_optional(t_enum(["auto", "none"])),
-        "noWaitAfter": t_optional(t_boolean),
-        "modifiers": t_optional(
-            t_array(t_enum(["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]))
+        "force": t_boolean,
+        "scroll": t_enum(["auto", "none"]),
+        "noWaitAfter": t_boolean,
+        "modifiers": t_array(
+            t_enum(["Alt", "Control", "ControlOrMeta", "Meta", "Shift"])
         ),
-        "position": t_optional(t_type("Point")),
-        "delay": t_optional(t_float),
-        "button": t_optional(t_enum(["left", "right", "middle"])),
-        "clickCount": t_optional(t_int),
-        "trial": t_optional(t_boolean),
-        "steps": t_optional(t_int),
-    }
+        "position": t_type("Point"),
+        "delay": t_float,
+        "button": t_enum(["left", "right", "middle"]),
+        "clickCount": t_int,
+        "trial": t_boolean,
+        "steps": t_int,
+    },
 )
 scheme["ElementHandleClickResult"] = t_optional(t_object({}))
 scheme["ElementHandleContentFrameParams"] = t_optional(t_object({}))
 scheme["ElementHandleContentFrameResult"] = t_object(
+    {},
     {
-        "frame": t_optional(t_channel(["Frame"])),
-    }
+        "frame": t_channel(["Frame"]),
+    },
 )
 scheme["ElementHandleDblclickParams"] = t_object(
+    {},
     {
-        "force": t_optional(t_boolean),
-        "scroll": t_optional(t_enum(["auto", "none"])),
-        "modifiers": t_optional(
-            t_array(t_enum(["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]))
+        "force": t_boolean,
+        "scroll": t_enum(["auto", "none"]),
+        "modifiers": t_array(
+            t_enum(["Alt", "Control", "ControlOrMeta", "Meta", "Shift"])
         ),
-        "position": t_optional(t_type("Point")),
-        "delay": t_optional(t_float),
-        "button": t_optional(t_enum(["left", "right", "middle"])),
-        "trial": t_optional(t_boolean),
-        "steps": t_optional(t_int),
-    }
+        "position": t_type("Point"),
+        "delay": t_float,
+        "button": t_enum(["left", "right", "middle"]),
+        "trial": t_boolean,
+        "steps": t_int,
+    },
 )
 scheme["ElementHandleDblclickResult"] = t_optional(t_object({}))
 scheme["ElementHandleDispatchEventParams"] = t_object(
@@ -2793,8 +2906,10 @@ scheme["ElementHandleDispatchEventResult"] = t_optional(t_object({}))
 scheme["ElementHandleFillParams"] = t_object(
     {
         "value": t_string,
-        "force": t_optional(t_boolean),
-    }
+    },
+    {
+        "force": t_boolean,
+    },
 )
 scheme["ElementHandleFillResult"] = t_optional(t_object({}))
 scheme["ElementHandleFocusParams"] = t_optional(t_object({}))
@@ -2805,20 +2920,22 @@ scheme["ElementHandleGetAttributeParams"] = t_object(
     }
 )
 scheme["ElementHandleGetAttributeResult"] = t_object(
+    {},
     {
-        "value": t_optional(t_string),
-    }
+        "value": t_string,
+    },
 )
 scheme["ElementHandleHoverParams"] = t_object(
+    {},
     {
-        "force": t_optional(t_boolean),
-        "scroll": t_optional(t_enum(["auto", "none"])),
-        "modifiers": t_optional(
-            t_array(t_enum(["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]))
+        "force": t_boolean,
+        "scroll": t_enum(["auto", "none"]),
+        "modifiers": t_array(
+            t_enum(["Alt", "Control", "ControlOrMeta", "Meta", "Shift"])
         ),
-        "position": t_optional(t_type("Point")),
-        "trial": t_optional(t_boolean),
-    }
+        "position": t_type("Point"),
+        "trial": t_boolean,
+    },
 )
 scheme["ElementHandleHoverResult"] = t_optional(t_object({}))
 scheme["ElementHandleInnerHTMLParams"] = t_optional(t_object({}))
@@ -2877,28 +2994,34 @@ scheme["ElementHandleIsVisibleResult"] = t_object(
 )
 scheme["ElementHandleOwnerFrameParams"] = t_optional(t_object({}))
 scheme["ElementHandleOwnerFrameResult"] = t_object(
+    {},
     {
-        "frame": t_optional(t_channel(["Frame"])),
-    }
+        "frame": t_channel(["Frame"]),
+    },
 )
 scheme["ElementHandlePressParams"] = t_object(
     {
         "key": t_string,
-        "delay": t_optional(t_float),
-        "noWaitAfter": t_optional(t_boolean),
-    }
+    },
+    {
+        "delay": t_float,
+        "noWaitAfter": t_boolean,
+    },
 )
 scheme["ElementHandlePressResult"] = t_optional(t_object({}))
 scheme["ElementHandleQuerySelectorParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
-    }
+    },
+    {
+        "strict": t_boolean,
+    },
 )
 scheme["ElementHandleQuerySelectorResult"] = t_object(
+    {},
     {
-        "element": t_optional(t_channel(["ElementHandle"])),
-    }
+        "element": t_channel(["ElementHandle"]),
+    },
 )
 scheme["ElementHandleQuerySelectorAllParams"] = t_object(
     {
@@ -2911,26 +3034,25 @@ scheme["ElementHandleQuerySelectorAllResult"] = t_object(
     }
 )
 scheme["ElementHandleScreenshotParams"] = t_object(
+    {},
     {
-        "type": t_optional(t_enum(["png", "jpeg", "webp"])),
-        "quality": t_optional(t_int),
-        "omitBackground": t_optional(t_boolean),
-        "caret": t_optional(t_enum(["hide", "initial"])),
-        "animations": t_optional(t_enum(["disabled", "allow"])),
-        "scale": t_optional(t_enum(["css", "device"])),
-        "mask": t_optional(
-            t_array(
-                t_object(
-                    {
-                        "frame": t_channel(["Frame"]),
-                        "selector": t_string,
-                    }
-                )
+        "type": t_enum(["png", "jpeg", "webp"]),
+        "quality": t_int,
+        "omitBackground": t_boolean,
+        "caret": t_enum(["hide", "initial"]),
+        "animations": t_enum(["disabled", "allow"]),
+        "scale": t_enum(["css", "device"]),
+        "mask": t_array(
+            t_object(
+                {
+                    "frame": t_channel(["Frame"]),
+                    "selector": t_string,
+                }
             )
         ),
-        "maskColor": t_optional(t_string),
-        "style": t_optional(t_string),
-    }
+        "maskColor": t_string,
+        "style": t_string,
+    },
 )
 scheme["ElementHandleScreenshotResult"] = t_object(
     {
@@ -2940,22 +3062,22 @@ scheme["ElementHandleScreenshotResult"] = t_object(
 scheme["ElementHandleScrollIntoViewIfNeededParams"] = t_optional(t_object({}))
 scheme["ElementHandleScrollIntoViewIfNeededResult"] = t_optional(t_object({}))
 scheme["ElementHandleSelectOptionParams"] = t_object(
+    {},
     {
-        "elements": t_optional(t_array(t_channel(["ElementHandle"]))),
-        "options": t_optional(
-            t_array(
-                t_object(
-                    {
-                        "valueOrLabel": t_optional(t_string),
-                        "value": t_optional(t_string),
-                        "label": t_optional(t_string),
-                        "index": t_optional(t_int),
-                    }
-                )
+        "elements": t_array(t_channel(["ElementHandle"])),
+        "options": t_array(
+            t_object(
+                {},
+                {
+                    "valueOrLabel": t_string,
+                    "value": t_string,
+                    "label": t_string,
+                    "index": t_int,
+                },
             )
         ),
-        "force": t_optional(t_boolean),
-    }
+        "force": t_boolean,
+    },
 )
 scheme["ElementHandleSelectOptionResult"] = t_object(
     {
@@ -2963,63 +3085,70 @@ scheme["ElementHandleSelectOptionResult"] = t_object(
     }
 )
 scheme["ElementHandleSelectTextParams"] = t_object(
+    {},
     {
-        "force": t_optional(t_boolean),
-    }
+        "force": t_boolean,
+    },
 )
 scheme["ElementHandleSelectTextResult"] = t_optional(t_object({}))
 scheme["ElementHandleSetInputFilesParams"] = t_object(
+    {},
     {
-        "payloads": t_optional(
-            t_array(
-                t_object(
-                    {
-                        "name": t_string,
-                        "mimeType": t_optional(t_string),
-                        "buffer": t_binary,
-                    }
-                )
+        "payloads": t_array(
+            t_object(
+                {
+                    "name": t_string,
+                    "buffer": t_binary,
+                },
+                {
+                    "mimeType": t_string,
+                },
             )
         ),
-        "localDirectory": t_optional(t_string),
-        "directoryStream": t_optional(t_channel(["WritableStream"])),
-        "localPaths": t_optional(t_array(t_string)),
-        "streams": t_optional(t_array(t_channel(["WritableStream"]))),
-    }
+        "localDirectory": t_string,
+        "directoryStream": t_channel(["WritableStream"]),
+        "localPaths": t_array(t_string),
+        "streams": t_array(t_channel(["WritableStream"])),
+    },
 )
 scheme["ElementHandleSetInputFilesResult"] = t_optional(t_object({}))
 scheme["ElementHandleTapParams"] = t_object(
+    {},
     {
-        "force": t_optional(t_boolean),
-        "scroll": t_optional(t_enum(["auto", "none"])),
-        "modifiers": t_optional(
-            t_array(t_enum(["Alt", "Control", "ControlOrMeta", "Meta", "Shift"]))
+        "force": t_boolean,
+        "scroll": t_enum(["auto", "none"]),
+        "modifiers": t_array(
+            t_enum(["Alt", "Control", "ControlOrMeta", "Meta", "Shift"])
         ),
-        "position": t_optional(t_type("Point")),
-        "trial": t_optional(t_boolean),
-    }
+        "position": t_type("Point"),
+        "trial": t_boolean,
+    },
 )
 scheme["ElementHandleTapResult"] = t_optional(t_object({}))
 scheme["ElementHandleTextContentParams"] = t_optional(t_object({}))
 scheme["ElementHandleTextContentResult"] = t_object(
+    {},
     {
-        "value": t_optional(t_string),
-    }
+        "value": t_string,
+    },
 )
 scheme["ElementHandleTypeParams"] = t_object(
     {
         "text": t_string,
-        "delay": t_optional(t_float),
-    }
+    },
+    {
+        "delay": t_float,
+    },
 )
 scheme["ElementHandleTypeResult"] = t_optional(t_object({}))
 scheme["ElementHandleUncheckParams"] = t_object(
+    {},
     {
-        "force": t_optional(t_boolean),
-        "scroll": t_optional(t_enum(["auto", "none"])),
-        "position": t_optional(t_type("Point")),
-        "trial": t_optional(t_boolean),
-    }
+        "force": t_boolean,
+        "scroll": t_enum(["auto", "none"]),
+        "position": t_type("Point"),
+        "trial": t_boolean,
+    },
 )
 scheme["ElementHandleUncheckResult"] = t_optional(t_object({}))
 scheme["ElementHandleWaitForElementStateParams"] = t_object(
@@ -3033,14 +3162,17 @@ scheme["ElementHandleWaitForElementStateResult"] = t_optional(t_object({}))
 scheme["ElementHandleWaitForSelectorParams"] = t_object(
     {
         "selector": t_string,
-        "strict": t_optional(t_boolean),
-        "state": t_optional(t_enum(["attached", "detached", "visible", "hidden"])),
-    }
+    },
+    {
+        "strict": t_boolean,
+        "state": t_enum(["attached", "detached", "visible", "hidden"]),
+    },
 )
 scheme["ElementHandleWaitForSelectorResult"] = t_object(
+    {},
     {
-        "element": t_optional(t_channel(["ElementHandle"])),
-    }
+        "element": t_channel(["ElementHandle"]),
+    },
 )
 scheme["LocalUtilsInitializer"] = t_object(
     {
@@ -3057,21 +3189,21 @@ scheme["LocalUtilsInitializer"] = t_object(
                                     "height": t_int,
                                 }
                             ),
-                            "screen": t_optional(
-                                t_object(
-                                    {
-                                        "width": t_int,
-                                        "height": t_int,
-                                    }
-                                )
-                            ),
                             "deviceScaleFactor": t_float,
                             "isMobile": t_boolean,
                             "hasTouch": t_boolean,
                             "defaultBrowserType": t_enum(
                                 ["chromium", "firefox", "webkit"]
                             ),
-                        }
+                        },
+                        {
+                            "screen": t_object(
+                                {
+                                    "width": t_int,
+                                    "height": t_int,
+                                }
+                            ),
+                        },
                     ),
                 }
             )
@@ -3082,11 +3214,13 @@ scheme["LocalUtilsZipParams"] = t_object(
     {
         "zipFile": t_string,
         "entries": t_array(t_type("NameValue")),
-        "stacksId": t_optional(t_string),
         "mode": t_enum(["write", "append"]),
         "includeSources": t_boolean,
-        "additionalSources": t_optional(t_array(t_string)),
-    }
+    },
+    {
+        "stacksId": t_string,
+        "additionalSources": t_array(t_string),
+    },
 )
 scheme["LocalUtilsZipResult"] = t_optional(t_object({}))
 scheme["LocalUtilsHarOpenParams"] = t_object(
@@ -3095,10 +3229,11 @@ scheme["LocalUtilsHarOpenParams"] = t_object(
     }
 )
 scheme["LocalUtilsHarOpenResult"] = t_object(
+    {},
     {
-        "harId": t_optional(t_string),
-        "error": t_optional(t_string),
-    }
+        "harId": t_string,
+        "error": t_string,
+    },
 )
 scheme["LocalUtilsHarLookupParams"] = t_object(
     {
@@ -3106,19 +3241,23 @@ scheme["LocalUtilsHarLookupParams"] = t_object(
         "url": t_string,
         "method": t_string,
         "headers": t_array(t_type("NameValue")),
-        "postData": t_optional(t_binary),
         "isNavigationRequest": t_boolean,
-    }
+    },
+    {
+        "postData": t_binary,
+    },
 )
 scheme["LocalUtilsHarLookupResult"] = t_object(
     {
         "action": t_enum(["error", "redirect", "fulfill", "noentry"]),
-        "message": t_optional(t_string),
-        "redirectURL": t_optional(t_string),
-        "status": t_optional(t_int),
-        "headers": t_optional(t_array(t_type("NameValue"))),
-        "body": t_optional(t_binary),
-    }
+    },
+    {
+        "message": t_string,
+        "redirectURL": t_string,
+        "status": t_int,
+        "headers": t_array(t_type("NameValue")),
+        "body": t_binary,
+    },
 )
 scheme["LocalUtilsHarCloseParams"] = t_object(
     {
@@ -3130,18 +3269,22 @@ scheme["LocalUtilsHarUnzipParams"] = t_object(
     {
         "zipFile": t_string,
         "harFile": t_string,
-        "resourcesDir": t_optional(t_string),
-    }
+    },
+    {
+        "resourcesDir": t_string,
+    },
 )
 scheme["LocalUtilsHarUnzipResult"] = t_optional(t_object({}))
 scheme["LocalUtilsConnectParams"] = t_object(
     {
         "endpoint": t_string,
-        "headers": t_optional(t_any),
-        "exposeNetwork": t_optional(t_string),
-        "slowMo": t_optional(t_float),
-        "socksProxyRedirectPortForTest": t_optional(t_int),
-    }
+    },
+    {
+        "headers": t_any,
+        "exposeNetwork": t_string,
+        "slowMo": t_float,
+        "socksProxyRedirectPortForTest": t_int,
+    },
 )
 scheme["LocalUtilsConnectResult"] = t_object(
     {
@@ -3151,10 +3294,12 @@ scheme["LocalUtilsConnectResult"] = t_object(
 )
 scheme["LocalUtilsTracingStartedParams"] = t_object(
     {
-        "tracesDir": t_optional(t_string),
         "traceName": t_string,
-        "live": t_optional(t_boolean),
-    }
+    },
+    {
+        "tracesDir": t_string,
+        "live": t_boolean,
+    },
 )
 scheme["LocalUtilsTracingStartedResult"] = t_object(
     {
@@ -3176,9 +3321,11 @@ scheme["LocalUtilsTraceDiscardedResult"] = t_optional(t_object({}))
 scheme["LocalUtilsGlobToRegexParams"] = t_object(
     {
         "glob": t_string,
-        "baseURL": t_optional(t_string),
-        "webSocketUrl": t_optional(t_boolean),
-    }
+    },
+    {
+        "baseURL": t_string,
+        "webSocketUrl": t_boolean,
+    },
 )
 scheme["LocalUtilsGlobToRegexResult"] = t_object(
     {
@@ -3200,24 +3347,28 @@ scheme["HttpCredentials"] = t_object(
     {
         "username": t_string,
         "password": t_string,
-        "origin": t_optional(t_string),
-        "send": t_optional(t_enum(["always", "unauthorized"])),
-    }
+    },
+    {
+        "origin": t_string,
+        "send": t_enum(["always", "unauthorized"]),
+    },
 )
 scheme["SetNetworkCookie"] = t_object(
     {
         "name": t_string,
         "value": t_string,
-        "url": t_optional(t_string),
-        "domain": t_optional(t_string),
-        "path": t_optional(t_string),
-        "expires": t_optional(t_float),
-        "httpOnly": t_optional(t_boolean),
-        "secure": t_optional(t_boolean),
-        "sameSite": t_optional(t_enum(["Strict", "Lax", "None"])),
-        "partitionKey": t_optional(t_string),
-        "_crHasCrossSiteAncestor": t_optional(t_boolean),
-    }
+    },
+    {
+        "url": t_string,
+        "domain": t_string,
+        "path": t_string,
+        "expires": t_float,
+        "httpOnly": t_boolean,
+        "secure": t_boolean,
+        "sameSite": t_enum(["Strict", "Lax", "None"]),
+        "partitionKey": t_string,
+        "_crHasCrossSiteAncestor": t_boolean,
+    },
 )
 scheme["NetworkCookie"] = t_object(
     {
@@ -3229,28 +3380,33 @@ scheme["NetworkCookie"] = t_object(
         "httpOnly": t_boolean,
         "secure": t_boolean,
         "sameSite": t_enum(["Strict", "Lax", "None"]),
-        "partitionKey": t_optional(t_string),
-        "_crHasCrossSiteAncestor": t_optional(t_boolean),
-    }
+    },
+    {
+        "partitionKey": t_string,
+        "_crHasCrossSiteAncestor": t_boolean,
+    },
 )
 scheme["RequestInitializer"] = t_object(
     {
-        "frame": t_optional(t_channel(["Frame"])),
-        "serviceWorker": t_optional(t_channel(["Worker"])),
         "url": t_string,
         "resourceType": t_string,
         "method": t_string,
-        "postData": t_optional(t_binary),
         "headers": t_array(t_type("NameValue")),
         "isNavigationRequest": t_boolean,
-        "redirectedFrom": t_optional(t_channel(["Request"])),
-    }
+    },
+    {
+        "frame": t_channel(["Frame"]),
+        "serviceWorker": t_channel(["Worker"]),
+        "postData": t_binary,
+        "redirectedFrom": t_channel(["Request"]),
+    },
 )
 scheme["RequestResponseParams"] = t_optional(t_object({}))
 scheme["RequestResponseResult"] = t_object(
+    {},
     {
-        "response": t_optional(t_channel(["Response"])),
-    }
+        "response": t_channel(["Response"]),
+    },
 )
 scheme["RequestRawRequestHeadersParams"] = t_optional(t_object({}))
 scheme["RequestRawRequestHeadersResult"] = t_object(
@@ -3270,29 +3426,33 @@ scheme["RouteRedirectNavigationRequestParams"] = t_object(
 )
 scheme["RouteRedirectNavigationRequestResult"] = t_optional(t_object({}))
 scheme["RouteAbortParams"] = t_object(
+    {},
     {
-        "errorCode": t_optional(t_string),
-    }
+        "errorCode": t_string,
+    },
 )
 scheme["RouteAbortResult"] = t_optional(t_object({}))
 scheme["RouteContinueParams"] = t_object(
     {
-        "url": t_optional(t_string),
-        "method": t_optional(t_string),
-        "headers": t_optional(t_array(t_type("NameValue"))),
-        "postData": t_optional(t_binary),
         "isFallback": t_boolean,
-    }
+    },
+    {
+        "url": t_string,
+        "method": t_string,
+        "headers": t_array(t_type("NameValue")),
+        "postData": t_binary,
+    },
 )
 scheme["RouteContinueResult"] = t_optional(t_object({}))
 scheme["RouteFulfillParams"] = t_object(
+    {},
     {
-        "status": t_optional(t_int),
-        "headers": t_optional(t_array(t_type("NameValue"))),
-        "body": t_optional(t_string),
-        "isBase64": t_optional(t_boolean),
-        "fetchResponseUid": t_optional(t_string),
-    }
+        "status": t_int,
+        "headers": t_array(t_type("NameValue")),
+        "body": t_string,
+        "isBase64": t_boolean,
+        "fetchResponseUid": t_string,
+    },
 )
 scheme["RouteFulfillResult"] = t_optional(t_object({}))
 scheme["WebSocketRouteInitializer"] = t_object(
@@ -3315,17 +3475,21 @@ scheme["WebSocketRouteMessageFromServerEvent"] = t_object(
 )
 scheme["WebSocketRouteClosePageEvent"] = t_object(
     {
-        "code": t_optional(t_int),
-        "reason": t_optional(t_string),
         "wasClean": t_boolean,
-    }
+    },
+    {
+        "code": t_int,
+        "reason": t_string,
+    },
 )
 scheme["WebSocketRouteCloseServerEvent"] = t_object(
     {
-        "code": t_optional(t_int),
-        "reason": t_optional(t_string),
         "wasClean": t_boolean,
-    }
+    },
+    {
+        "code": t_int,
+        "reason": t_string,
+    },
 )
 scheme["WebSocketRouteConnectParams"] = t_optional(t_object({}))
 scheme["WebSocketRouteConnectResult"] = t_optional(t_object({}))
@@ -3347,18 +3511,22 @@ scheme["WebSocketRouteSendToServerParams"] = t_object(
 scheme["WebSocketRouteSendToServerResult"] = t_optional(t_object({}))
 scheme["WebSocketRouteClosePageParams"] = t_object(
     {
-        "code": t_optional(t_int),
-        "reason": t_optional(t_string),
         "wasClean": t_boolean,
-    }
+    },
+    {
+        "code": t_int,
+        "reason": t_string,
+    },
 )
 scheme["WebSocketRouteClosePageResult"] = t_optional(t_object({}))
 scheme["WebSocketRouteCloseServerParams"] = t_object(
     {
-        "code": t_optional(t_int),
-        "reason": t_optional(t_string),
         "wasClean": t_boolean,
-    }
+    },
+    {
+        "code": t_int,
+        "reason": t_string,
+    },
 )
 scheme["WebSocketRouteCloseServerResult"] = t_optional(t_object({}))
 scheme["ResourceTiming"] = t_object(
@@ -3392,15 +3560,17 @@ scheme["ResponseBodyResult"] = t_object(
 )
 scheme["ResponseSecurityDetailsParams"] = t_optional(t_object({}))
 scheme["ResponseSecurityDetailsResult"] = t_object(
+    {},
     {
-        "value": t_optional(t_type("SecurityDetails")),
-    }
+        "value": t_type("SecurityDetails"),
+    },
 )
 scheme["ResponseServerAddrParams"] = t_optional(t_object({}))
 scheme["ResponseServerAddrResult"] = t_object(
+    {},
     {
-        "value": t_optional(t_type("RemoteAddr")),
-    }
+        "value": t_type("RemoteAddr"),
+    },
 )
 scheme["ResponseRawResponseHeadersParams"] = t_optional(t_object({}))
 scheme["ResponseRawResponseHeadersResult"] = t_object(
@@ -3421,13 +3591,14 @@ scheme["ResponseSizesResult"] = t_object(
     }
 )
 scheme["SecurityDetails"] = t_object(
+    {},
     {
-        "issuer": t_optional(t_string),
-        "protocol": t_optional(t_string),
-        "subjectName": t_optional(t_string),
-        "validFrom": t_optional(t_float),
-        "validTo": t_optional(t_float),
-    }
+        "issuer": t_string,
+        "protocol": t_string,
+        "subjectName": t_string,
+        "validFrom": t_float,
+        "validTo": t_float,
+    },
 )
 scheme["RequestSizes"] = t_object(
     {
@@ -3470,18 +3641,18 @@ scheme["WebSocketCloseEvent"] = t_optional(t_object({}))
 scheme["PageInitializer"] = t_object(
     {
         "mainFrame": t_channel(["Frame"]),
-        "viewportSize": t_optional(
-            t_object(
-                {
-                    "width": t_int,
-                    "height": t_int,
-                }
-            )
-        ),
         "isClosed": t_boolean,
-        "opener": t_optional(t_channel(["Page"])),
-        "video": t_optional(t_channel(["Artifact"])),
-    }
+    },
+    {
+        "viewportSize": t_object(
+            {
+                "width": t_int,
+                "height": t_int,
+            }
+        ),
+        "opener": t_channel(["Page"]),
+        "video": t_channel(["Artifact"]),
+    },
 )
 scheme["PageBindingCallEvent"] = t_object(
     {
@@ -3498,16 +3669,15 @@ scheme["PageDownloadEvent"] = t_object(
     }
 )
 scheme["PageViewportSizeChangedEvent"] = t_object(
+    {},
     {
-        "viewportSize": t_optional(
-            t_object(
-                {
-                    "width": t_int,
-                    "height": t_int,
-                }
-            )
+        "viewportSize": t_object(
+            {
+                "width": t_int,
+                "height": t_int,
+            }
         ),
-    }
+    },
 )
 scheme["PageFileChooserEvent"] = t_object(
     {
@@ -3570,9 +3740,10 @@ scheme["PageAddInitScriptResult"] = t_object(
     }
 )
 scheme["PageCloseParams"] = t_object(
+    {},
     {
-        "reason": t_optional(t_string),
-    }
+        "reason": t_string,
+    },
 )
 scheme["PageCloseResult"] = t_optional(t_object({}))
 scheme["PageRunBeforeUnloadParams"] = t_optional(t_object({}))
@@ -3580,9 +3751,10 @@ scheme["PageRunBeforeUnloadResult"] = t_optional(t_object({}))
 scheme["PageClearConsoleMessagesParams"] = t_optional(t_object({}))
 scheme["PageClearConsoleMessagesResult"] = t_optional(t_object({}))
 scheme["PageConsoleMessagesParams"] = t_object(
+    {},
     {
-        "filter": t_optional(t_type("ConsoleMessagesFilter")),
-    }
+        "filter": t_type("ConsoleMessagesFilter"),
+    },
 )
 scheme["PageConsoleMessagesResult"] = t_object(
     {
@@ -3606,22 +3778,23 @@ scheme["PageConsoleMessagesResult"] = t_object(
     }
 )
 scheme["PageEmulateMediaParams"] = t_object(
+    {},
     {
-        "media": t_optional(t_enum(["screen", "print", "no-override"])),
-        "colorScheme": t_optional(
-            t_enum(["dark", "light", "no-preference", "no-override"])
-        ),
-        "reducedMotion": t_optional(t_enum(["reduce", "no-preference", "no-override"])),
-        "forcedColors": t_optional(t_enum(["active", "none", "no-override"])),
-        "contrast": t_optional(t_enum(["no-preference", "more", "no-override"])),
-    }
+        "media": t_enum(["screen", "print", "no-override"]),
+        "colorScheme": t_enum(["dark", "light", "no-preference", "no-override"]),
+        "reducedMotion": t_enum(["reduce", "no-preference", "no-override"]),
+        "forcedColors": t_enum(["active", "none", "no-override"]),
+        "contrast": t_enum(["no-preference", "more", "no-override"]),
+    },
 )
 scheme["PageEmulateMediaResult"] = t_optional(t_object({}))
 scheme["PageExposeBindingParams"] = t_object(
     {
         "name": t_string,
-        "noGlobal": t_optional(t_boolean),
-    }
+    },
+    {
+        "noGlobal": t_boolean,
+    },
 )
 scheme["PageExposeBindingResult"] = t_object(
     {
@@ -3629,32 +3802,38 @@ scheme["PageExposeBindingResult"] = t_object(
     }
 )
 scheme["PageGoBackParams"] = t_object(
+    {},
     {
-        "waitUntil": t_optional(t_type("LifecycleEvent")),
-    }
+        "waitUntil": t_type("LifecycleEvent"),
+    },
 )
 scheme["PageGoBackResult"] = t_object(
+    {},
     {
-        "response": t_optional(t_channel(["Response"])),
-    }
+        "response": t_channel(["Response"]),
+    },
 )
 scheme["PageGoForwardParams"] = t_object(
+    {},
     {
-        "waitUntil": t_optional(t_type("LifecycleEvent")),
-    }
+        "waitUntil": t_type("LifecycleEvent"),
+    },
 )
 scheme["PageGoForwardResult"] = t_object(
+    {},
     {
-        "response": t_optional(t_channel(["Response"])),
-    }
+        "response": t_channel(["Response"]),
+    },
 )
 scheme["PageRequestGCParams"] = t_optional(t_object({}))
 scheme["PageRequestGCResult"] = t_optional(t_object({}))
 scheme["PageRegisterLocatorHandlerParams"] = t_object(
     {
         "selector": t_string,
-        "noWaitAfter": t_optional(t_boolean),
-    }
+    },
+    {
+        "noWaitAfter": t_boolean,
+    },
 )
 scheme["PageRegisterLocatorHandlerResult"] = t_object(
     {
@@ -3664,8 +3843,10 @@ scheme["PageRegisterLocatorHandlerResult"] = t_object(
 scheme["PageResolveLocatorHandlerNoReplyParams"] = t_object(
     {
         "uid": t_int,
-        "remove": t_optional(t_boolean),
-    }
+    },
+    {
+        "remove": t_boolean,
+    },
 )
 scheme["PageResolveLocatorHandlerNoReplyResult"] = t_optional(t_object({}))
 scheme["PageUnregisterLocatorHandlerParams"] = t_object(
@@ -3675,20 +3856,41 @@ scheme["PageUnregisterLocatorHandlerParams"] = t_object(
 )
 scheme["PageUnregisterLocatorHandlerResult"] = t_optional(t_object({}))
 scheme["PageReloadParams"] = t_object(
+    {},
     {
-        "waitUntil": t_optional(t_type("LifecycleEvent")),
-    }
+        "waitUntil": t_type("LifecycleEvent"),
+    },
 )
 scheme["PageReloadResult"] = t_object(
+    {},
     {
-        "response": t_optional(t_channel(["Response"])),
-    }
+        "response": t_channel(["Response"]),
+    },
 )
 scheme["PageExpectScreenshotParams"] = t_object(
     {
-        "expected": t_optional(t_binary),
         "isNot": t_boolean,
-        "locator": t_optional(
+    },
+    {
+        "expected": t_binary,
+        "locator": t_object(
+            {
+                "frame": t_channel(["Frame"]),
+                "selector": t_string,
+            }
+        ),
+        "comparator": t_string,
+        "maxDiffPixels": t_int,
+        "maxDiffPixelRatio": t_float,
+        "threshold": t_float,
+        "fullPage": t_boolean,
+        "clip": t_type("Rect"),
+        "type": t_enum(["png", "webp"]),
+        "omitBackground": t_boolean,
+        "caret": t_enum(["hide", "initial"]),
+        "animations": t_enum(["disabled", "allow"]),
+        "scale": t_enum(["css", "device"]),
+        "mask": t_array(
             t_object(
                 {
                     "frame": t_channel(["Frame"]),
@@ -3696,69 +3898,49 @@ scheme["PageExpectScreenshotParams"] = t_object(
                 }
             )
         ),
-        "comparator": t_optional(t_string),
-        "maxDiffPixels": t_optional(t_int),
-        "maxDiffPixelRatio": t_optional(t_float),
-        "threshold": t_optional(t_float),
-        "fullPage": t_optional(t_boolean),
-        "clip": t_optional(t_type("Rect")),
-        "type": t_optional(t_enum(["png", "webp"])),
-        "omitBackground": t_optional(t_boolean),
-        "caret": t_optional(t_enum(["hide", "initial"])),
-        "animations": t_optional(t_enum(["disabled", "allow"])),
-        "scale": t_optional(t_enum(["css", "device"])),
-        "mask": t_optional(
-            t_array(
-                t_object(
-                    {
-                        "frame": t_channel(["Frame"]),
-                        "selector": t_string,
-                    }
-                )
-            )
-        ),
-        "maskColor": t_optional(t_string),
-        "style": t_optional(t_string),
-    }
+        "maskColor": t_string,
+        "style": t_string,
+    },
 )
 scheme["PageExpectScreenshotResult"] = t_object(
+    {},
     {
-        "actual": t_optional(t_binary),
-    }
+        "actual": t_binary,
+    },
 )
 scheme["PageExpectScreenshotErrorDetails"] = t_object(
+    {},
     {
-        "diff": t_optional(t_binary),
-        "customErrorMessage": t_optional(t_string),
-        "actual": t_optional(t_binary),
-        "previous": t_optional(t_binary),
-        "timedOut": t_optional(t_boolean),
-        "log": t_optional(t_array(t_string)),
-    }
+        "diff": t_binary,
+        "customErrorMessage": t_string,
+        "actual": t_binary,
+        "previous": t_binary,
+        "timedOut": t_boolean,
+        "log": t_array(t_string),
+    },
 )
 scheme["PageScreenshotParams"] = t_object(
+    {},
     {
-        "type": t_optional(t_enum(["png", "jpeg", "webp"])),
-        "quality": t_optional(t_int),
-        "fullPage": t_optional(t_boolean),
-        "clip": t_optional(t_type("Rect")),
-        "omitBackground": t_optional(t_boolean),
-        "caret": t_optional(t_enum(["hide", "initial"])),
-        "animations": t_optional(t_enum(["disabled", "allow"])),
-        "scale": t_optional(t_enum(["css", "device"])),
-        "mask": t_optional(
-            t_array(
-                t_object(
-                    {
-                        "frame": t_channel(["Frame"]),
-                        "selector": t_string,
-                    }
-                )
+        "type": t_enum(["png", "jpeg", "webp"]),
+        "quality": t_int,
+        "fullPage": t_boolean,
+        "clip": t_type("Rect"),
+        "omitBackground": t_boolean,
+        "caret": t_enum(["hide", "initial"]),
+        "animations": t_enum(["disabled", "allow"]),
+        "scale": t_enum(["css", "device"]),
+        "mask": t_array(
+            t_object(
+                {
+                    "frame": t_channel(["Frame"]),
+                    "selector": t_string,
+                }
             )
         ),
-        "maskColor": t_optional(t_string),
-        "style": t_optional(t_string),
-    }
+        "maskColor": t_string,
+        "style": t_string,
+    },
 )
 scheme["PageScreenshotResult"] = t_object(
     {
@@ -3775,12 +3957,13 @@ scheme["PageSetNetworkInterceptionPatternsParams"] = t_object(
     {
         "patterns": t_array(
             t_object(
+                {},
                 {
-                    "glob": t_optional(t_string),
-                    "regexSource": t_optional(t_string),
-                    "regexFlags": t_optional(t_string),
-                    "urlPattern": t_optional(t_type("URLPattern")),
-                }
+                    "glob": t_string,
+                    "regexSource": t_string,
+                    "regexFlags": t_string,
+                    "urlPattern": t_type("URLPattern"),
+                },
             )
         ),
     }
@@ -3790,12 +3973,13 @@ scheme["PageSetWebSocketInterceptionPatternsParams"] = t_object(
     {
         "patterns": t_array(
             t_object(
+                {},
                 {
-                    "glob": t_optional(t_string),
-                    "regexSource": t_optional(t_string),
-                    "regexFlags": t_optional(t_string),
-                    "urlPattern": t_optional(t_type("URLPattern")),
-                }
+                    "glob": t_string,
+                    "regexSource": t_string,
+                    "regexFlags": t_string,
+                    "urlPattern": t_type("URLPattern"),
+                },
             )
         ),
     }
@@ -3833,47 +4017,57 @@ scheme["PageKeyboardInsertTextResult"] = t_optional(t_object({}))
 scheme["PageKeyboardTypeParams"] = t_object(
     {
         "text": t_string,
-        "delay": t_optional(t_float),
-    }
+    },
+    {
+        "delay": t_float,
+    },
 )
 scheme["PageKeyboardTypeResult"] = t_optional(t_object({}))
 scheme["PageKeyboardPressParams"] = t_object(
     {
         "key": t_string,
-        "delay": t_optional(t_float),
-    }
+    },
+    {
+        "delay": t_float,
+    },
 )
 scheme["PageKeyboardPressResult"] = t_optional(t_object({}))
 scheme["PageMouseMoveParams"] = t_object(
     {
         "x": t_float,
         "y": t_float,
-        "steps": t_optional(t_int),
-    }
+    },
+    {
+        "steps": t_int,
+    },
 )
 scheme["PageMouseMoveResult"] = t_optional(t_object({}))
 scheme["PageMouseDownParams"] = t_object(
+    {},
     {
-        "button": t_optional(t_enum(["left", "right", "middle"])),
-        "clickCount": t_optional(t_int),
-    }
+        "button": t_enum(["left", "right", "middle"]),
+        "clickCount": t_int,
+    },
 )
 scheme["PageMouseDownResult"] = t_optional(t_object({}))
 scheme["PageMouseUpParams"] = t_object(
+    {},
     {
-        "button": t_optional(t_enum(["left", "right", "middle"])),
-        "clickCount": t_optional(t_int),
-    }
+        "button": t_enum(["left", "right", "middle"]),
+        "clickCount": t_int,
+    },
 )
 scheme["PageMouseUpResult"] = t_optional(t_object({}))
 scheme["PageMouseClickParams"] = t_object(
     {
         "x": t_float,
         "y": t_float,
-        "delay": t_optional(t_float),
-        "button": t_optional(t_enum(["left", "right", "middle"])),
-        "clickCount": t_optional(t_int),
-    }
+    },
+    {
+        "delay": t_float,
+        "button": t_enum(["left", "right", "middle"]),
+        "clickCount": t_int,
+    },
 )
 scheme["PageMouseClickResult"] = t_optional(t_object({}))
 scheme["PageMouseWheelParams"] = t_object(
@@ -3893,9 +4087,10 @@ scheme["PageTouchscreenTapResult"] = t_optional(t_object({}))
 scheme["PageClearPageErrorsParams"] = t_optional(t_object({}))
 scheme["PageClearPageErrorsResult"] = t_optional(t_object({}))
 scheme["PagePageErrorsParams"] = t_object(
+    {},
     {
-        "filter": t_optional(t_type("ConsoleMessagesFilter")),
-    }
+        "filter": t_type("ConsoleMessagesFilter"),
+    },
 )
 scheme["PagePageErrorsResult"] = t_object(
     {
@@ -3903,31 +4098,31 @@ scheme["PagePageErrorsResult"] = t_object(
     }
 )
 scheme["PagePdfParams"] = t_object(
+    {},
     {
-        "scale": t_optional(t_float),
-        "displayHeaderFooter": t_optional(t_boolean),
-        "headerTemplate": t_optional(t_string),
-        "footerTemplate": t_optional(t_string),
-        "printBackground": t_optional(t_boolean),
-        "landscape": t_optional(t_boolean),
-        "pageRanges": t_optional(t_string),
-        "format": t_optional(t_string),
-        "width": t_optional(t_string),
-        "height": t_optional(t_string),
-        "preferCSSPageSize": t_optional(t_boolean),
-        "margin": t_optional(
-            t_object(
-                {
-                    "top": t_optional(t_string),
-                    "bottom": t_optional(t_string),
-                    "left": t_optional(t_string),
-                    "right": t_optional(t_string),
-                }
-            )
+        "scale": t_float,
+        "displayHeaderFooter": t_boolean,
+        "headerTemplate": t_string,
+        "footerTemplate": t_string,
+        "printBackground": t_boolean,
+        "landscape": t_boolean,
+        "pageRanges": t_string,
+        "format": t_string,
+        "width": t_string,
+        "height": t_string,
+        "preferCSSPageSize": t_boolean,
+        "margin": t_object(
+            {},
+            {
+                "top": t_string,
+                "bottom": t_string,
+                "left": t_string,
+                "right": t_string,
+            },
         ),
-        "tagged": t_optional(t_boolean),
-        "outline": t_optional(t_boolean),
-    }
+        "tagged": t_boolean,
+        "outline": t_boolean,
+    },
 )
 scheme["PagePdfResult"] = t_object(
     {
@@ -3941,10 +4136,11 @@ scheme["PageRequestsResult"] = t_object(
     }
 )
 scheme["PageStartJSCoverageParams"] = t_object(
+    {},
     {
-        "resetOnNavigation": t_optional(t_boolean),
-        "reportAnonymousScripts": t_optional(t_boolean),
-    }
+        "resetOnNavigation": t_boolean,
+        "reportAnonymousScripts": t_boolean,
+    },
 )
 scheme["PageStartJSCoverageResult"] = t_optional(t_object({}))
 scheme["PageStopJSCoverageParams"] = t_optional(t_object({}))
@@ -3955,7 +4151,6 @@ scheme["PageStopJSCoverageResult"] = t_object(
                 {
                     "url": t_string,
                     "scriptId": t_string,
-                    "source": t_optional(t_string),
                     "functions": t_array(
                         t_object(
                             {
@@ -3973,15 +4168,19 @@ scheme["PageStopJSCoverageResult"] = t_object(
                             }
                         )
                     ),
-                }
+                },
+                {
+                    "source": t_string,
+                },
             )
         ),
     }
 )
 scheme["PageStartCSSCoverageParams"] = t_object(
+    {},
     {
-        "resetOnNavigation": t_optional(t_boolean),
-    }
+        "resetOnNavigation": t_boolean,
+    },
 )
 scheme["PageStartCSSCoverageResult"] = t_optional(t_object({}))
 scheme["PageStopCSSCoverageParams"] = t_optional(t_object({}))
@@ -3991,7 +4190,6 @@ scheme["PageStopCSSCoverageResult"] = t_object(
             t_object(
                 {
                     "url": t_string,
-                    "text": t_optional(t_string),
                     "ranges": t_array(
                         t_object(
                             {
@@ -4000,7 +4198,10 @@ scheme["PageStopCSSCoverageResult"] = t_object(
                             }
                         )
                     ),
-                }
+                },
+                {
+                    "text": t_string,
+                },
             )
         ),
     }
@@ -4020,8 +4221,10 @@ scheme["PageHideHighlightResult"] = t_optional(t_object({}))
 scheme["PageScreencastShowOverlayParams"] = t_object(
     {
         "html": t_string,
-        "duration": t_optional(t_float),
-    }
+    },
+    {
+        "duration": t_float,
+    },
 )
 scheme["PageScreencastShowOverlayResult"] = t_object(
     {
@@ -4037,9 +4240,11 @@ scheme["PageScreencastRemoveOverlayResult"] = t_optional(t_object({}))
 scheme["PageScreencastChapterParams"] = t_object(
     {
         "title": t_string,
-        "description": t_optional(t_string),
-        "duration": t_optional(t_float),
-    }
+    },
+    {
+        "description": t_string,
+        "duration": t_float,
+    },
 )
 scheme["PageScreencastChapterResult"] = t_optional(t_object({}))
 scheme["PageScreencastSetOverlayVisibleParams"] = t_object(
@@ -4049,56 +4254,47 @@ scheme["PageScreencastSetOverlayVisibleParams"] = t_object(
 )
 scheme["PageScreencastSetOverlayVisibleResult"] = t_optional(t_object({}))
 scheme["PageScreencastShowActionsParams"] = t_object(
+    {},
     {
-        "duration": t_optional(t_float),
-        "position": t_optional(
-            t_enum(
-                [
-                    "top-left",
-                    "top",
-                    "top-right",
-                    "bottom-left",
-                    "bottom",
-                    "bottom-right",
-                ]
-            )
+        "duration": t_float,
+        "position": t_enum(
+            ["top-left", "top", "top-right", "bottom-left", "bottom", "bottom-right"]
         ),
-        "fontSize": t_optional(t_int),
-        "cursor": t_optional(t_enum(["none", "pointer"])),
-        "style": t_optional(
-            t_object(
-                {
-                    "point": t_optional(t_string),
-                    "highlight": t_optional(t_string),
-                    "title": t_optional(t_string),
-                }
-            )
+        "fontSize": t_int,
+        "cursor": t_enum(["none", "pointer"]),
+        "style": t_object(
+            {},
+            {
+                "point": t_string,
+                "highlight": t_string,
+                "title": t_string,
+            },
         ),
-    }
+    },
 )
 scheme["PageScreencastShowActionsResult"] = t_optional(t_object({}))
 scheme["PageScreencastHideActionsParams"] = t_optional(t_object({}))
 scheme["PageScreencastHideActionsResult"] = t_optional(t_object({}))
 scheme["PageScreencastStartParams"] = t_object(
+    {},
     {
-        "size": t_optional(
-            t_object(
-                {
-                    "width": t_int,
-                    "height": t_int,
-                }
-            )
+        "size": t_object(
+            {
+                "width": t_int,
+                "height": t_int,
+            }
         ),
-        "quality": t_optional(t_int),
-        "fps": t_optional(t_int),
-        "sendFrames": t_optional(t_boolean),
-        "record": t_optional(t_boolean),
-    }
+        "quality": t_int,
+        "fps": t_int,
+        "sendFrames": t_boolean,
+        "record": t_boolean,
+    },
 )
 scheme["PageScreencastStartResult"] = t_object(
+    {},
     {
-        "artifact": t_optional(t_channel(["Artifact"])),
-    }
+        "artifact": t_channel(["Artifact"]),
+    },
 )
 scheme["PageScreencastFrameAckParams"] = t_object(
     {
@@ -4149,9 +4345,10 @@ scheme["PageWebStorageGetItemParams"] = t_object(
     }
 )
 scheme["PageWebStorageGetItemResult"] = t_object(
+    {},
     {
-        "value": t_optional(t_string),
-    }
+        "value": t_string,
+    },
 )
 scheme["PageWebStorageSetItemParams"] = t_object(
     {
@@ -4178,8 +4375,10 @@ scheme["RootInitializer"] = t_optional(t_object({}))
 scheme["RootInitializeParams"] = t_object(
     {
         "sdkLanguage": t_type("SDKLanguage"),
-        "supportsLoneSurrogates": t_optional(t_boolean),
-    }
+    },
+    {
+        "supportsLoneSurrogates": t_boolean,
+    },
 )
 scheme["RootInitializeResult"] = t_object(
     {
@@ -4193,54 +4392,56 @@ scheme["PlaywrightInitializer"] = t_object(
         "webkit": t_channel(["BrowserType"]),
         "android": t_channel(["Android"]),
         "electron": t_channel(["Electron"]),
-        "utils": t_optional(t_channel(["LocalUtils"])),
-        "preLaunchedBrowser": t_optional(t_channel(["Browser"])),
-        "preConnectedAndroidDevice": t_optional(t_channel(["AndroidDevice"])),
-        "socksSupport": t_optional(t_channel(["SocksSupport"])),
-    }
+    },
+    {
+        "utils": t_channel(["LocalUtils"]),
+        "preLaunchedBrowser": t_channel(["Browser"]),
+        "preConnectedAndroidDevice": t_channel(["AndroidDevice"]),
+        "socksSupport": t_channel(["SocksSupport"]),
+    },
 )
 scheme["PlaywrightNewRequestParams"] = t_object(
+    {},
     {
-        "baseURL": t_optional(t_string),
-        "userAgent": t_optional(t_string),
-        "ignoreHTTPSErrors": t_optional(t_boolean),
-        "extraHTTPHeaders": t_optional(t_array(t_type("NameValue"))),
-        "failOnStatusCode": t_optional(t_boolean),
-        "clientCertificates": t_optional(
-            t_array(
-                t_object(
-                    {
-                        "origin": t_string,
-                        "cert": t_optional(t_binary),
-                        "key": t_optional(t_binary),
-                        "passphrase": t_optional(t_string),
-                        "pfx": t_optional(t_binary),
-                    }
-                )
-            )
-        ),
-        "maxRedirects": t_optional(t_int),
-        "httpCredentials": t_optional(t_array(t_type("HttpCredentials"))),
-        "proxy": t_optional(
+        "baseURL": t_string,
+        "userAgent": t_string,
+        "ignoreHTTPSErrors": t_boolean,
+        "extraHTTPHeaders": t_array(t_type("NameValue")),
+        "failOnStatusCode": t_boolean,
+        "clientCertificates": t_array(
             t_object(
                 {
-                    "server": t_string,
-                    "bypass": t_optional(t_string),
-                    "username": t_optional(t_string),
-                    "password": t_optional(t_string),
-                }
-            )
-        ),
-        "storageState": t_optional(
-            t_object(
+                    "origin": t_string,
+                },
                 {
-                    "cookies": t_optional(t_array(t_type("NetworkCookie"))),
-                    "origins": t_optional(t_array(t_type("SetOriginStorage"))),
-                }
+                    "cert": t_binary,
+                    "key": t_binary,
+                    "passphrase": t_string,
+                    "pfx": t_binary,
+                },
             )
         ),
-        "tracesDir": t_optional(t_string),
-    }
+        "maxRedirects": t_int,
+        "httpCredentials": t_array(t_type("HttpCredentials")),
+        "proxy": t_object(
+            {
+                "server": t_string,
+            },
+            {
+                "bypass": t_string,
+                "username": t_string,
+                "password": t_string,
+            },
+        ),
+        "storageState": t_object(
+            {},
+            {
+                "cookies": t_array(t_type("NetworkCookie")),
+                "origins": t_array(t_type("SetOriginStorage")),
+            },
+        ),
+        "tracesDir": t_string,
+    },
 )
 scheme["PlaywrightNewRequestResult"] = t_object(
     {
@@ -4268,10 +4469,12 @@ scheme["DebugControllerStateChangedEvent"] = t_object(
 scheme["DebugControllerSourceChangedEvent"] = t_object(
     {
         "text": t_string,
-        "header": t_optional(t_string),
-        "footer": t_optional(t_string),
-        "actions": t_optional(t_array(t_string)),
-    }
+    },
+    {
+        "header": t_string,
+        "footer": t_string,
+        "actions": t_array(t_string),
+    },
 )
 scheme["DebugControllerPausedEvent"] = t_object(
     {
@@ -4294,16 +4497,19 @@ scheme["DebugControllerSetReportStateChangedResult"] = t_optional(t_object({}))
 scheme["DebugControllerSetRecorderModeParams"] = t_object(
     {
         "mode": t_enum(["inspecting", "recording", "none"]),
-        "testIdAttributeName": t_optional(t_string),
-        "generateAutoExpect": t_optional(t_boolean),
-    }
+    },
+    {
+        "testIdAttributeName": t_string,
+        "generateAutoExpect": t_boolean,
+    },
 )
 scheme["DebugControllerSetRecorderModeResult"] = t_optional(t_object({}))
 scheme["DebugControllerHighlightParams"] = t_object(
+    {},
     {
-        "selector": t_optional(t_string),
-        "ariaTemplate": t_optional(t_string),
-    }
+        "selector": t_string,
+        "ariaTemplate": t_string,
+    },
 )
 scheme["DebugControllerHighlightResult"] = t_optional(t_object({}))
 scheme["DebugControllerHideHighlightParams"] = t_optional(t_object({}))
@@ -4373,9 +4579,10 @@ scheme["JsonPipeMessageEvent"] = t_object(
     }
 )
 scheme["JsonPipeClosedEvent"] = t_object(
+    {},
     {
-        "reason": t_optional(t_string),
-    }
+        "reason": t_string,
+    },
 )
 scheme["JsonPipeSendParams"] = t_object(
     {
@@ -4386,36 +4593,41 @@ scheme["JsonPipeSendResult"] = t_optional(t_object({}))
 scheme["JsonPipeCloseParams"] = t_optional(t_object({}))
 scheme["JsonPipeCloseResult"] = t_optional(t_object({}))
 scheme["ExpectedTextValue"] = t_object(
+    {},
     {
-        "string": t_optional(t_string),
-        "regexSource": t_optional(t_string),
-        "regexFlags": t_optional(t_string),
-        "matchSubstring": t_optional(t_boolean),
-        "ignoreCase": t_optional(t_boolean),
-        "normalizeWhiteSpace": t_optional(t_boolean),
-    }
+        "string": t_string,
+        "regexSource": t_string,
+        "regexFlags": t_string,
+        "matchSubstring": t_boolean,
+        "ignoreCase": t_boolean,
+        "normalizeWhiteSpace": t_boolean,
+    },
 )
 scheme["SelectorEngine"] = t_object(
     {
         "name": t_string,
         "source": t_string,
-        "contentScript": t_optional(t_boolean),
-    }
+    },
+    {
+        "contentScript": t_boolean,
+    },
 )
 scheme["FormField"] = t_object(
     {
         "name": t_string,
-        "value": t_optional(t_string),
-        "file": t_optional(
-            t_object(
-                {
-                    "name": t_string,
-                    "mimeType": t_optional(t_string),
-                    "buffer": t_binary,
-                }
-            )
+    },
+    {
+        "value": t_string,
+        "file": t_object(
+            {
+                "name": t_string,
+                "buffer": t_binary,
+            },
+            {
+                "mimeType": t_string,
+            },
         ),
-    }
+    },
 )
 scheme["LifecycleEvent"] = t_enum(["load", "domcontentloaded", "networkidle", "commit"])
 scheme["ConsoleMessagesFilter"] = t_enum(["all", "since-navigation"])
@@ -4434,9 +4646,11 @@ scheme["RecorderSource"] = t_object(
                 }
             )
         ),
-        "revealLine": t_optional(t_int),
-        "group": t_optional(t_string),
-    }
+    },
+    {
+        "revealLine": t_int,
+        "group": t_string,
+    },
 )
 scheme["IndexedDBDatabase"] = t_object(
     {
@@ -4447,30 +4661,35 @@ scheme["IndexedDBDatabase"] = t_object(
                 {
                     "name": t_string,
                     "autoIncrement": t_boolean,
-                    "keyPath": t_optional(t_string),
-                    "keyPathArray": t_optional(t_array(t_string)),
                     "records": t_array(
                         t_object(
+                            {},
                             {
-                                "key": t_optional(t_any),
-                                "keyEncoded": t_optional(t_any),
-                                "value": t_optional(t_any),
-                                "valueEncoded": t_optional(t_any),
-                            }
+                                "key": t_any,
+                                "keyEncoded": t_any,
+                                "value": t_any,
+                                "valueEncoded": t_any,
+                            },
                         )
                     ),
                     "indexes": t_array(
                         t_object(
                             {
                                 "name": t_string,
-                                "keyPath": t_optional(t_string),
-                                "keyPathArray": t_optional(t_array(t_string)),
                                 "multiEntry": t_boolean,
                                 "unique": t_boolean,
-                            }
+                            },
+                            {
+                                "keyPath": t_string,
+                                "keyPathArray": t_array(t_string),
+                            },
                         )
                     ),
-                }
+                },
+                {
+                    "keyPath": t_string,
+                    "keyPathArray": t_array(t_string),
+                },
             )
         ),
     }
@@ -4479,49 +4698,60 @@ scheme["OPFSEntry"] = t_object(
     {
         "path": t_string,
         "type": t_enum(["file", "directory"]),
-        "base64": t_optional(t_string),
-    }
+    },
+    {
+        "base64": t_string,
+    },
 )
 scheme["SetOriginStorage"] = t_object(
     {
         "origin": t_string,
         "localStorage": t_array(t_type("NameValue")),
-        "indexedDB": t_optional(t_array(t_type("IndexedDBDatabase"))),
-        "opfs": t_optional(t_array(t_type("OPFSEntry"))),
-    }
+    },
+    {
+        "indexedDB": t_array(t_type("IndexedDBDatabase")),
+        "opfs": t_array(t_type("OPFSEntry")),
+    },
 )
 scheme["OriginStorage"] = t_object(
     {
         "origin": t_string,
         "localStorage": t_array(t_type("NameValue")),
-        "indexedDB": t_optional(t_array(t_type("IndexedDBDatabase"))),
-        "opfs": t_optional(t_array(t_type("OPFSEntry"))),
-    }
+    },
+    {
+        "indexedDB": t_array(t_type("IndexedDBDatabase")),
+        "opfs": t_array(t_type("OPFSEntry")),
+    },
 )
 scheme["RecordHarOptions"] = t_object(
+    {},
     {
-        "content": t_optional(t_enum(["embed", "attach", "omit"])),
-        "mode": t_optional(t_enum(["full", "minimal"])),
-        "urlGlob": t_optional(t_string),
-        "urlRegexSource": t_optional(t_string),
-        "urlRegexFlags": t_optional(t_string),
-        "harPath": t_optional(t_string),
-        "resourcesDir": t_optional(t_string),
-    }
+        "content": t_enum(["embed", "attach", "omit"]),
+        "mode": t_enum(["full", "minimal"]),
+        "urlGlob": t_string,
+        "urlRegexSource": t_string,
+        "urlRegexFlags": t_string,
+        "harPath": t_string,
+        "resourcesDir": t_string,
+    },
 )
 scheme["CDPSessionInitializer"] = t_optional(t_object({}))
 scheme["CDPSessionEventEvent"] = t_object(
     {
         "method": t_string,
-        "params": t_optional(t_any),
-    }
+    },
+    {
+        "params": t_any,
+    },
 )
 scheme["CDPSessionCloseEvent"] = t_optional(t_object({}))
 scheme["CDPSessionSendParams"] = t_object(
     {
         "method": t_string,
-        "params": t_optional(t_any),
-    }
+    },
+    {
+        "params": t_any,
+    },
 )
 scheme["CDPSessionSendResult"] = t_object(
     {
@@ -4551,23 +4781,26 @@ scheme["BindingCallResolveParams"] = t_object(
 scheme["BindingCallResolveResult"] = t_optional(t_object({}))
 scheme["DebuggerInitializer"] = t_optional(t_object({}))
 scheme["DebuggerPausedStateChangedEvent"] = t_object(
+    {},
     {
-        "pausedDetails": t_optional(
-            t_object(
-                {
-                    "location": t_object(
-                        {
-                            "file": t_string,
-                            "line": t_optional(t_int),
-                            "column": t_optional(t_int),
-                        }
-                    ),
-                    "title": t_string,
-                    "stack": t_optional(t_string),
-                }
-            )
+        "pausedDetails": t_object(
+            {
+                "location": t_object(
+                    {
+                        "file": t_string,
+                    },
+                    {
+                        "line": t_int,
+                        "column": t_int,
+                    },
+                ),
+                "title": t_string,
+            },
+            {
+                "stack": t_string,
+            },
         ),
-    }
+    },
 )
 scheme["DebuggerApiCallsUpdatedEvent"] = t_object(
     {
@@ -4576,20 +4809,22 @@ scheme["DebuggerApiCallsUpdatedEvent"] = t_object(
                 {
                     "id": t_string,
                     "title": t_string,
-                    "location": t_optional(
-                        t_object(
-                            {
-                                "file": t_string,
-                                "line": t_optional(t_int),
-                                "column": t_optional(t_int),
-                            }
-                        )
-                    ),
                     "newLogEntries": t_array(t_string),
-                    "actionPoint": t_optional(t_type("Point")),
                     "status": t_enum(["running", "success", "error"]),
-                    "error": t_optional(t_string),
-                }
+                },
+                {
+                    "location": t_object(
+                        {
+                            "file": t_string,
+                        },
+                        {
+                            "line": t_int,
+                            "column": t_int,
+                        },
+                    ),
+                    "actionPoint": t_type("Point"),
+                    "error": t_string,
+                },
             )
         ),
     }
@@ -4605,9 +4840,11 @@ scheme["DebuggerRunToParams"] = t_object(
         "location": t_object(
             {
                 "file": t_string,
-                "line": t_optional(t_int),
-                "column": t_optional(t_int),
-            }
+            },
+            {
+                "line": t_int,
+                "column": t_int,
+            },
         ),
     }
 )
@@ -4616,86 +4853,80 @@ scheme["DebuggerEnableParams"] = t_optional(t_object({}))
 scheme["DebuggerEnableResult"] = t_optional(t_object({}))
 scheme["DialogInitializer"] = t_object(
     {
-        "page": t_optional(t_channel(["Page"])),
         "type": t_string,
         "message": t_string,
         "defaultValue": t_string,
-    }
+    },
+    {
+        "page": t_channel(["Page"]),
+    },
 )
 scheme["DialogAcceptParams"] = t_object(
+    {},
     {
-        "promptText": t_optional(t_string),
-    }
+        "promptText": t_string,
+    },
 )
 scheme["DialogAcceptResult"] = t_optional(t_object({}))
 scheme["DialogDismissParams"] = t_optional(t_object({}))
 scheme["DialogDismissResult"] = t_optional(t_object({}))
 scheme["SerializedValue"] = t_object(
+    {},
     {
-        "n": t_optional(t_float),
-        "b": t_optional(t_boolean),
-        "s": t_optional(t_string),
-        "v": t_optional(
-            t_enum(["null", "undefined", "NaN", "Infinity", "-Infinity", "-0"])
+        "n": t_float,
+        "b": t_boolean,
+        "s": t_string,
+        "v": t_enum(["null", "undefined", "NaN", "Infinity", "-Infinity", "-0"]),
+        "d": t_string,
+        "u": t_string,
+        "bi": t_string,
+        "ta": t_object(
+            {
+                "b": t_binary,
+                "k": t_enum(
+                    [
+                        "i8",
+                        "ui8",
+                        "ui8c",
+                        "i16",
+                        "ui16",
+                        "i32",
+                        "ui32",
+                        "f32",
+                        "f64",
+                        "bi64",
+                        "bui64",
+                    ]
+                ),
+            }
         ),
-        "d": t_optional(t_string),
-        "u": t_optional(t_string),
-        "bi": t_optional(t_string),
-        "ta": t_optional(
+        "e": t_object(
+            {
+                "m": t_string,
+                "n": t_string,
+                "s": t_string,
+            }
+        ),
+        "r": t_object(
+            {
+                "p": t_string,
+                "f": t_string,
+            }
+        ),
+        "a": t_array(t_type("SerializedValue")),
+        "o": t_array(
             t_object(
                 {
-                    "b": t_binary,
-                    "k": t_enum(
-                        [
-                            "i8",
-                            "ui8",
-                            "ui8c",
-                            "i16",
-                            "ui16",
-                            "i32",
-                            "ui32",
-                            "f32",
-                            "f64",
-                            "bi64",
-                            "bui64",
-                        ]
-                    ),
+                    "k": t_string,
+                    "v": t_type("SerializedValue"),
                 }
             )
         ),
-        "e": t_optional(
-            t_object(
-                {
-                    "m": t_string,
-                    "n": t_string,
-                    "s": t_string,
-                }
-            )
-        ),
-        "r": t_optional(
-            t_object(
-                {
-                    "p": t_string,
-                    "f": t_string,
-                }
-            )
-        ),
-        "a": t_optional(t_array(t_type("SerializedValue"))),
-        "o": t_optional(
-            t_array(
-                t_object(
-                    {
-                        "k": t_string,
-                        "v": t_type("SerializedValue"),
-                    }
-                )
-            )
-        ),
-        "h": t_optional(t_int),
-        "fn": t_optional(t_string),
-        "id": t_optional(t_int),
-        "ref": t_optional(t_int),
-    }
+        "h": t_int,
+        "fn": t_string,
+        "id": t_int,
+        "ref": t_int,
+    },
 )
 scheme["SerializedArgument"] = t_object(
     {
@@ -4704,27 +4935,30 @@ scheme["SerializedArgument"] = t_object(
     }
 )
 scheme["SerializedError"] = t_object(
+    {},
     {
-        "error": t_optional(
-            t_object(
-                {
-                    "message": t_string,
-                    "name": t_string,
-                    "stack": t_optional(t_string),
-                    "code": t_optional(t_string),
-                }
-            )
+        "error": t_object(
+            {
+                "message": t_string,
+                "name": t_string,
+            },
+            {
+                "stack": t_string,
+                "code": t_string,
+            },
         ),
-        "value": t_optional(t_type("SerializedValue")),
-    }
+        "value": t_type("SerializedValue"),
+    },
 )
 scheme["StackFrame"] = t_object(
     {
         "file": t_string,
         "line": t_int,
         "column": t_int,
-        "function": t_optional(t_string),
-    }
+    },
+    {
+        "function": t_string,
+    },
 )
 scheme["VirtualCredential"] = t_object(
     {
@@ -4743,8 +4977,10 @@ scheme["SetVirtualCredential"] = t_object(
         "userHandle": t_string,
         "privateKey": t_string,
         "publicKey": t_string,
-        "signCount": t_optional(t_int),
-    }
+    },
+    {
+        "signCount": t_int,
+    },
 )
 scheme["Point"] = t_object(
     {
@@ -4780,22 +5016,24 @@ scheme["NameValue"] = t_object(
 )
 scheme["TracingInitializer"] = t_optional(t_object({}))
 scheme["TracingTracingStartParams"] = t_object(
+    {},
     {
-        "name": t_optional(t_string),
-        "snapshotDom": t_optional(t_boolean),
-        "snapshotAria": t_optional(t_boolean),
-        "snapshotScreen": t_optional(t_boolean),
-        "screencast": t_optional(t_boolean),
-        "coverage": t_optional(t_boolean),
-        "live": t_optional(t_boolean),
-    }
+        "name": t_string,
+        "snapshotDom": t_boolean,
+        "snapshotAria": t_boolean,
+        "snapshotScreen": t_boolean,
+        "screencast": t_boolean,
+        "coverage": t_boolean,
+        "live": t_boolean,
+    },
 )
 scheme["TracingTracingStartResult"] = t_optional(t_object({}))
 scheme["TracingTracingStartChunkParams"] = t_object(
+    {},
     {
-        "name": t_optional(t_string),
-        "title": t_optional(t_string),
-    }
+        "name": t_string,
+        "title": t_string,
+    },
 )
 scheme["TracingTracingStartChunkResult"] = t_object(
     {
@@ -4805,16 +5043,18 @@ scheme["TracingTracingStartChunkResult"] = t_object(
 scheme["TracingTracingGroupParams"] = t_object(
     {
         "name": t_string,
-        "location": t_optional(
-            t_object(
-                {
-                    "file": t_string,
-                    "line": t_optional(t_int),
-                    "column": t_optional(t_int),
-                }
-            )
+    },
+    {
+        "location": t_object(
+            {
+                "file": t_string,
+            },
+            {
+                "line": t_int,
+                "column": t_int,
+            },
         ),
-    }
+    },
 )
 scheme["TracingTracingGroupResult"] = t_optional(t_object({}))
 scheme["TracingTracingGroupEndParams"] = t_optional(t_object({}))
@@ -4825,18 +5065,21 @@ scheme["TracingTracingStopChunkParams"] = t_object(
     }
 )
 scheme["TracingTracingStopChunkResult"] = t_object(
+    {},
     {
-        "artifact": t_optional(t_channel(["Artifact"])),
-        "entries": t_optional(t_array(t_type("NameValue"))),
-    }
+        "artifact": t_channel(["Artifact"]),
+        "entries": t_array(t_type("NameValue")),
+    },
 )
 scheme["TracingTracingStopParams"] = t_optional(t_object({}))
 scheme["TracingTracingStopResult"] = t_optional(t_object({}))
 scheme["TracingHarStartParams"] = t_object(
     {
-        "page": t_optional(t_channel(["Page"])),
         "options": t_type("RecordHarOptions"),
-    }
+    },
+    {
+        "page": t_channel(["Page"]),
+    },
 )
 scheme["TracingHarStartResult"] = t_object(
     {
@@ -4845,15 +5088,18 @@ scheme["TracingHarStartResult"] = t_object(
 )
 scheme["TracingHarExportParams"] = t_object(
     {
-        "harId": t_optional(t_string),
         "mode": t_enum(["archive", "entries"]),
-    }
+    },
+    {
+        "harId": t_string,
+    },
 )
 scheme["TracingHarExportResult"] = t_object(
+    {},
     {
-        "artifact": t_optional(t_channel(["Artifact"])),
-        "entries": t_optional(t_array(t_type("NameValue"))),
-    }
+        "artifact": t_channel(["Artifact"]),
+        "entries": t_array(t_type("NameValue")),
+    },
 )
 scheme["WorkerInitializer"] = t_object(
     {
@@ -4879,9 +5125,11 @@ scheme["WorkerCloseEvent"] = t_optional(t_object({}))
 scheme["WorkerEvaluateExpressionParams"] = t_object(
     {
         "expression": t_string,
-        "isFunction": t_optional(t_boolean),
         "arg": t_type("SerializedArgument"),
-    }
+    },
+    {
+        "isFunction": t_boolean,
+    },
 )
 scheme["WorkerEvaluateExpressionResult"] = t_object(
     {
@@ -4891,9 +5139,11 @@ scheme["WorkerEvaluateExpressionResult"] = t_object(
 scheme["WorkerEvaluateExpressionHandleParams"] = t_object(
     {
         "expression": t_string,
-        "isFunction": t_optional(t_boolean),
         "arg": t_type("SerializedArgument"),
-    }
+    },
+    {
+        "isFunction": t_boolean,
+    },
 )
 scheme["WorkerEvaluateExpressionHandleResult"] = t_object(
     {

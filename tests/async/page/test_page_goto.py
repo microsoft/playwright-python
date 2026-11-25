@@ -1149,3 +1149,55 @@ async def test_NA_066_should_return_url_with_basic_auth_info(
     url = f"http://admin:admin@localhost:{server.PORT}/empty.html"
     await page.goto(url)
     assert page.url == url
+
+
+async def test_NA_097_should_navigate_while_a_new_service_worker_takes_over(
+    page: Page, server: Server, browser_name: str
+) -> None:
+    if browser_name == "chromium":
+        pytest.skip("fixme: https://issues.chromium.org/issues/589233823")
+
+    version = 0
+
+    def handle_worker(request: TestServerRequest) -> None:
+        nonlocal version
+        version += 1
+        request.setHeader("Content-Type", "text/javascript")
+        request.write(
+            (
+                f"// version {version}\n"
+                """
+                let release;
+                self.addEventListener('install', () => self.skipWaiting());
+                self.addEventListener('fetch', event => event.respondWith(fetch(event.request)));
+                self.addEventListener('message', event => {
+                    if (event.data === 'hold') {
+                        event.waitUntil(new Promise(f => release = f));
+                        return;
+                    }
+                    // Block the worker, so that the navigation starts before the worker becomes idle.
+                    const end = Date.now() + 500;
+                    while (Date.now() < end) {}
+                    release();
+                });
+                """
+            ).encode()
+        )
+        request.finish()
+
+    server.set_route("/sw.js", handle_worker)
+
+    await page.goto(server.EMPTY_PAGE)
+    registration = await page.evaluate_handle(
+        """async () => {
+            await navigator.serviceWorker.register('/sw.js');
+            const registration = await navigator.serviceWorker.ready;
+            registration.active.postMessage('hold');
+            return registration;
+        }"""
+    )
+    await registration.evaluate("r => r.update()")
+    await page.wait_for_function("r => r.waiting", arg=registration)
+    await registration.evaluate("r => r.active.postMessage('release')")
+    await page.goto(server.PREFIX + "/title.html")
+    await expect(page).to_have_title("Woof-Woof")

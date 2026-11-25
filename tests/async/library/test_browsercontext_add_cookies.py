@@ -37,12 +37,6 @@ def by_name(cookies: Sequence[Any]) -> List[Dict[str, Any]]:
     return sorted((dict(cookie) for cookie in cookies), key=lambda c: c["name"])
 
 
-def is_webkit_on_windows(
-    browser_name: str, is_win: bool, browser_channel: Optional[str]
-) -> bool:
-    return browser_name == "webkit" and is_win and browser_channel != "webkit-wsl"
-
-
 async def test_CO_019_should_work_smoke(
     context: BrowserContext, page: Page, server: Server
 ) -> None:
@@ -107,7 +101,6 @@ async def test_CO_021_should_add_cookies_with_empty_value(
 async def test_CO_022_should_set_cookies_with_same_site_attribute_and_no_secure_attribute(
     context: BrowserContext,
     browser_name: str,
-    is_win: bool,
     is_linux: bool,
     default_same_site_cookie_value: str,
     browser_channel: Optional[str],
@@ -140,7 +133,6 @@ async def test_CO_022_should_set_cookies_with_same_site_attribute_and_no_secure_
         ]
     )
     cookies = by_name(await context.cookies(["https://foo.com"]))
-    webkit_on_windows = is_webkit_on_windows(browser_name, is_win, browser_channel)
     expected: List[Dict[str, Any]] = [
         {
             "name": "same-site-unset",
@@ -180,7 +172,7 @@ async def test_CO_022_should_set_cookies_with_same_site_attribute_and_no_secure_
             "expires": -1,
             "httpOnly": False,
             "secure": False,
-            "sameSite": "None" if webkit_on_windows else "Lax",
+            "sameSite": "Lax",
         },
         {
             "name": "same-site-strict",
@@ -190,7 +182,7 @@ async def test_CO_022_should_set_cookies_with_same_site_attribute_and_no_secure_
             "expires": -1,
             "httpOnly": False,
             "secure": False,
-            "sameSite": "None" if webkit_on_windows else "Strict",
+            "sameSite": "Strict",
         },
     ]
     assert cookies == by_name(expected)
@@ -414,15 +406,26 @@ async def test_CO_032_should_set_cookie_with_reasonable_defaults(
             "sameSite": default_same_site_cookie_value,
         }
     ]
+    await context.add_cookies(
+        [{"url": server.PREFIX + "/foo/bar", "name": "default-path", "value": "test"}]
+    )
+    assert (
+        next(
+            cookie
+            for cookie in await context.cookies()
+            if cookie["name"] == "default-path"
+        )["path"]
+        == "/foo"
+    )
+    assert sorted(
+        cookie["name"] for cookie in await context.cookies(server.PREFIX + "/foo")
+    ) == ["default-path", "defaults"]
 
 
 async def test_CO_033_should_set_a_cookie_with_a_path(
     context: BrowserContext,
     page: Page,
     server: Server,
-    browser_name: str,
-    is_win: bool,
-    browser_channel: Optional[str],
 ) -> None:
     await page.goto(server.PREFIX + "/grid.html")
     await context.add_cookies(
@@ -445,11 +448,7 @@ async def test_CO_033_should_set_a_cookie_with_a_path(
             "expires": -1,
             "httpOnly": False,
             "secure": False,
-            "sameSite": (
-                "None"
-                if is_webkit_on_windows(browser_name, is_win, browser_channel)
-                else "Lax"
-            ),
+            "sameSite": "Lax",
         }
     ]
     assert await page.evaluate("document.cookie") == "gridcookie=GRID"
@@ -517,9 +516,6 @@ async def test_CO_038_should_set_a_cookie_on_a_different_domain(
     context: BrowserContext,
     page: Page,
     server: Server,
-    browser_name: str,
-    is_win: bool,
-    browser_channel: Optional[str],
 ) -> None:
     await page.goto(server.EMPTY_PAGE)
     await context.add_cookies(
@@ -542,11 +538,7 @@ async def test_CO_038_should_set_a_cookie_on_a_different_domain(
             "expires": -1,
             "httpOnly": False,
             "secure": True,
-            "sameSite": (
-                "None"
-                if is_webkit_on_windows(browser_name, is_win, browser_channel)
-                else "Lax"
-            ),
+            "sameSite": "Lax",
         }
     ]
 

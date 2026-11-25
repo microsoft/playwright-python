@@ -655,9 +655,6 @@ async def test_FE_115_should_remove_cookie_with_expires_far_in_the_past(
 async def test_FE_116_should_handle_cookies_on_redirects(
     context: BrowserContext,
     server: Server,
-    browser_name: str,
-    is_win: bool,
-    browser_channel: Optional[str],
 ) -> None:
     def redirect1(request: TestServerRequest) -> None:
         request.setHeader("Set-Cookie", "r1=v1;SameSite=Lax")
@@ -696,15 +693,10 @@ async def test_FE_116_should_handle_cookies_on_redirects(
     ]
     assert req3_info.value.getHeader("cookie") == "r1=v1"
 
-    same_site = (
-        "None"
-        if browser_name == "webkit" and is_win and browser_channel != "webkit-wsl"
-        else "Lax"
-    )
     cookies = await context.cookies()
     assert sorted(cookies, key=lambda c: c["name"]) == [
         {
-            "sameSite": same_site,
+            "sameSite": "Lax",
             "name": "r1",
             "value": "v1",
             "domain": server.HOSTNAME,
@@ -714,7 +706,7 @@ async def test_FE_116_should_handle_cookies_on_redirects(
             "secure": False,
         },
         {
-            "sameSite": same_site,
+            "sameSite": "Lax",
             "name": "r2",
             "value": "v2",
             "domain": server.HOSTNAME,
@@ -1666,9 +1658,6 @@ async def test_FE_169_should_work_with_connect_over_cdp(
 async def test_FE_170_should_support_same_site_cookie_attribute_over_https(
     context_factory: ContextFactory,
     https_server: Server,
-    browser_name: str,
-    is_win: bool,
-    browser_channel: Optional[str],
 ) -> None:
     # Cookies with SameSite=None must also specify the Secure attribute. WebKit navigation
     # to HTTP url will fail if the response contains a cookie with Secure attribute, so
@@ -1683,10 +1672,7 @@ async def test_FE_170_should_support_same_site_cookie_attribute_over_https(
         )
         await page.request.get(https_server.EMPTY_PAGE)
         [cookie] = await page.context.cookies()
-        if browser_name == "webkit" and is_win and browser_channel != "webkit-wsl":
-            assert cookie["sameSite"] == "None"
-        else:
-            assert cookie["sameSite"] == value
+        assert cookie["sameSite"] == value
 
 
 async def test_FE_171_should_set_domain_localhost_cookie(
@@ -1716,7 +1702,6 @@ async def test_FE_173_should_support_set_cookie_with_same_site_and_without_secur
     page: Page,
     server: Server,
     browser_name: str,
-    is_win: bool,
     is_linux: bool,
     browser_channel: Optional[str],
 ) -> None:
@@ -1732,8 +1717,6 @@ async def test_FE_173_should_support_set_cookie_with_same_site_and_without_secur
             and value == "None"
         ):
             assert not cookies
-        elif browser_name == "webkit" and is_win and browser_channel != "webkit-wsl":
-            assert cookies[0]["sameSite"] == "None"
         else:
             assert cookies[0]["sameSite"] == value
 

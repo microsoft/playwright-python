@@ -69,8 +69,6 @@ async def test_DC_001_context_cookies_should_work_smoke(
 async def test_DC_002_context_add_cookies_should_work(
     server: Server,
     launch_persistent: LaunchPersistent,
-    browser_name: str,
-    is_win: bool,
     browser_channel: Optional[str],
 ) -> None:
     _, page = await launch_persistent()
@@ -95,13 +93,7 @@ async def test_DC_002_context_add_cookies_should_work(
             "expires": -1,
             "httpOnly": False,
             "secure": False,
-            "sameSite": (
-                "None"
-                if browser_name == "webkit"
-                and is_win
-                and browser_channel != "webkit-wsl"
-                else "Lax"
-            ),
+            "sameSite": "Lax",
         }
     ]
 
