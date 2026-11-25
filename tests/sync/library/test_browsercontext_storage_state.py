@@ -100,6 +100,18 @@ def test_ST_002_should_set_local_storage(
     local_storage2 = page.evaluate("window.localStorage")
     assert local_storage2 == {"name2": "value2"}
 
+    disabled_context = context_factory(
+        java_script_enabled=False, storage_state=context.storage_state()
+    )
+    disabled_page = disabled_context.new_page()
+
+    def fulfill_clear_storage(route: Route) -> None:
+        route.fulfill(body="<script>localStorage.clear()</script>")
+
+    disabled_page.route("**/*", fulfill_clear_storage)
+    disabled_page.goto("https://www.example.com")
+    assert disabled_page.evaluate("window.localStorage") == {"name2": "value2"}
+
     context.close()
 
 

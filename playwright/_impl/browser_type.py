@@ -155,6 +155,8 @@ class BrowserType(ChannelOwner):
 
         # Not ported: the logger option (JavaScript only).
         options = {**(self._playwright._default_launch_options or {}), **options}
+        if options.get("traces_dir"):
+            options["traces_dir"] = os.path.abspath(options["traces_dir"])
         launch_options = to_launch_params(options)
         browser = Browser.from_(
             (
@@ -289,6 +291,8 @@ class BrowserType(ChannelOwner):
                 **options,
             }
         )
+        if options.get("traces_dir"):
+            options["traces_dir"] = os.path.abspath(options["traces_dir"])
         await self._instrumentation.run_before_create_browser_context(options)
 
         # Not ported: the logger option (JavaScript only).

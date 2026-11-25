@@ -199,12 +199,17 @@ def t_array(v: Validator) -> Validator:
     return validator
 
 
-def t_object(s: Dict[str, Validator]) -> Validator:
+def t_object(
+    required: Dict[str, Validator], optional: Optional[Dict[str, Validator]] = None
+) -> Validator:
+    required_fields = list(required.items())
+    optional_fields = list((optional or {}).items())
+
     def validator(arg: Any, path: str, context: ValidatorContext) -> Any:
         if not isinstance(arg, dict):
             raise ValidationError(f"{path}: expected object, got {_typeof(arg)}")
         result: Dict[str, Any] = {}
-        for key, v in s.items():
+        for key, v in required_fields:
             value = v(arg.get(key), path + "." + key if path else key, context)
             if value is _NULL:
                 # Python: a key that is there with None is null; a key that is not
@@ -212,6 +217,16 @@ def t_object(s: Dict[str, Validator]) -> Validator:
                 if key in arg:
                     result[key] = None
             elif value is not None:
+                result[key] = value
+        for key, v in optional_fields:
+            field_value = arg.get(key)
+            if field_value is None:
+                # Python: None also represents JSON null in array data.
+                if v is t_any and context.in_array and key in arg:
+                    result[key] = None
+                continue
+            value = v(field_value, path + "." + key if path else key, context)
+            if value is not None:
                 result[key] = value
         if context.is_under_test():
             for key, value in arg.items():

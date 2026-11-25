@@ -25,20 +25,9 @@ from playwright.sync_api import BrowserContext, Error, Page, Route, expect
 from tests.server import Server, TestServerRequest
 
 
-def expect_failure(request: pytest.FixtureRequest, reason: str) -> None:
-    """Like `it.fail()`: the test must fail."""
-    request.applymarker(pytest.mark.xfail(reason=f"upstream: {reason}", strict=True))
-
-
 def by_name(cookies: Sequence[Any]) -> List[Dict[str, Any]]:
     """The cookies sorted by name, to compare them like a Set upstream."""
     return sorted((dict(cookie) for cookie in cookies), key=lambda c: c["name"])
-
-
-def is_webkit_on_windows(
-    browser_name: str, is_win: bool, browser_channel: Optional[str]
-) -> bool:
-    return browser_name == "webkit" and is_win and browser_channel != "webkit-wsl"
 
 
 def test_CO_001_should_return_no_cookies_in_pristine_browser_context(
@@ -170,18 +159,7 @@ def test_CO_006_should_properly_report_strict_same_site_cookie(
     context: BrowserContext,
     page: Page,
     server: Server,
-    browser_name: str,
-    platform: str,
-    browser_channel: Optional[str],
-    request: pytest.FixtureRequest,
 ) -> None:
-    if (
-        browser_name == "webkit"
-        and platform == "win32"
-        and browser_channel != "webkit-wsl"
-    ):
-        expect_failure(request, "webkit on win32")
-
     def handler(request: TestServerRequest) -> None:
         request.setHeader("Set-Cookie", "name=value;SameSite=Strict")
         request.finish()
@@ -197,18 +175,7 @@ def test_CO_007_should_properly_report_lax_same_site_cookie(
     context: BrowserContext,
     page: Page,
     server: Server,
-    browser_name: str,
-    platform: str,
-    browser_channel: Optional[str],
-    request: pytest.FixtureRequest,
 ) -> None:
-    if (
-        browser_name == "webkit"
-        and platform == "win32"
-        and browser_channel != "webkit-wsl"
-    ):
-        expect_failure(request, "webkit on win32")
-
     def handler(request: TestServerRequest) -> None:
         request.setHeader("Set-Cookie", "name=value;SameSite=Lax")
         request.finish()
@@ -262,9 +229,6 @@ def test_CO_008_should_get_multiple_cookies(
 
 def test_CO_009_should_get_cookies_from_multiple_urls(
     context: BrowserContext,
-    browser_name: str,
-    is_win: bool,
-    browser_channel: Optional[str],
 ) -> None:
     context.add_cookies(
         [
@@ -298,11 +262,7 @@ def test_CO_009_should_get_cookies_from_multiple_urls(
             "expires": -1,
             "httpOnly": False,
             "secure": True,
-            "sameSite": (
-                "None"
-                if is_webkit_on_windows(browser_name, is_win, browser_channel)
-                else "Lax"
-            ),
+            "sameSite": "Lax",
         },
         {
             "name": "doggo",
@@ -319,9 +279,6 @@ def test_CO_009_should_get_cookies_from_multiple_urls(
 
 def test_CO_010_should_work_with_subdomain_cookie(
     context: BrowserContext,
-    browser_name: str,
-    is_win: bool,
-    browser_channel: Optional[str],
 ) -> None:
     context.add_cookies(
         [
@@ -335,9 +292,6 @@ def test_CO_010_should_work_with_subdomain_cookie(
             }
         ]
     )
-    same_site = (
-        "None" if is_webkit_on_windows(browser_name, is_win, browser_channel) else "Lax"
-    )
     assert context.cookies("https://foo.com") == [
         {
             "name": "doggo",
@@ -347,7 +301,7 @@ def test_CO_010_should_work_with_subdomain_cookie(
             "expires": -1,
             "httpOnly": False,
             "secure": True,
-            "sameSite": same_site,
+            "sameSite": "Lax",
         }
     ]
     assert context.cookies("https://sub.foo.com") == [
@@ -359,7 +313,7 @@ def test_CO_010_should_work_with_subdomain_cookie(
             "expires": -1,
             "httpOnly": False,
             "secure": True,
-            "sameSite": same_site,
+            "sameSite": "Lax",
         }
     ]
 
@@ -405,9 +359,6 @@ def test_CO_012_should_return_cookies_with_empty_value(
 
 def test_CO_013_should_return_secure_cookies_based_on_http_s_protocol(
     context: BrowserContext,
-    browser_name: str,
-    is_win: bool,
-    browser_channel: Optional[str],
 ) -> None:
     context.add_cookies(
         [
@@ -427,9 +378,6 @@ def test_CO_013_should_return_secure_cookies_based_on_http_s_protocol(
             },
         ]
     )
-    same_site = (
-        "None" if is_webkit_on_windows(browser_name, is_win, browser_channel) else "Lax"
-    )
     cookies = by_name(context.cookies("https://foo.com"))
     assert cookies == [
         {
@@ -440,7 +388,7 @@ def test_CO_013_should_return_secure_cookies_based_on_http_s_protocol(
             "expires": -1,
             "httpOnly": False,
             "secure": False,
-            "sameSite": same_site,
+            "sameSite": "Lax",
         },
         {
             "name": "doggo",
@@ -450,7 +398,7 @@ def test_CO_013_should_return_secure_cookies_based_on_http_s_protocol(
             "expires": -1,
             "httpOnly": False,
             "secure": True,
-            "sameSite": same_site,
+            "sameSite": "Lax",
         },
     ]
     assert context.cookies("http://foo.com/") == [
@@ -462,7 +410,7 @@ def test_CO_013_should_return_secure_cookies_based_on_http_s_protocol(
             "expires": -1,
             "httpOnly": False,
             "secure": False,
-            "sameSite": same_site,
+            "sameSite": "Lax",
         }
     ]
 

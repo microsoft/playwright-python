@@ -356,6 +356,35 @@ async def test_CA_020_request_fullscreen(
     )
     assert not await page.evaluate("() => !!document.fullscreenElement")
 
+    async with page.expect_popup() as popup_info:
+        await page.evaluate(
+            "url => window.open(url, 'popup', 'popup')", server.EMPTY_PAGE
+        )
+    popup = await popup_info.value
+    await popup.wait_for_load_state()
+    await popup.evaluate(
+        """() => {
+            document.addEventListener('keydown', event => {
+                if (event.key === 'f')
+                    document.documentElement.requestFullscreen().then(() => window['fullscreenResult'] = 'success', error => window['fullscreenResult'] = String(error));
+            });
+        }"""
+    )
+    await popup.keyboard.press("f")
+    # Python: poll the evaluated value, as expect.poll() does upstream.
+    deadline = time.monotonic() + 5
+    result = await popup.evaluate("() => window['fullscreenResult']")
+    while result != "success" and time.monotonic() < deadline:
+        await asyncio.sleep(0.1)
+        result = await popup.evaluate("() => window['fullscreenResult']")
+    assert result == "success"
+    assert (
+        await popup.evaluate(
+            "() => document.fullscreenElement === document.documentElement"
+        )
+        is True
+    )
+
 
 async def test_CA_021_should_send_no_content_length_header_for_get_requests_with_a_content_type(
     page: Page, server: Server

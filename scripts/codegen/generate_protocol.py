@@ -544,22 +544,36 @@ def generate_validator(protocol: Dict[str, Any]) -> str:
             return object_type(type.get("properties") or {}, indent), optional
         raise SystemExit(f"Invalid item: {type}")
 
-    def properties(props: Any, indent: str) -> List[str]:
-        result: List[str] = []
+    def properties(props: Any, indent: str) -> Tuple[List[str], List[str]]:
+        required: List[str] = []
+        optional: List[str] = []
         for name, value in (props or {}).items():
             if name.startswith("$mixin"):
-                result.extend(properties(mixins[value].get("properties"), indent))
+                mixin_required, mixin_optional = properties(
+                    mixins[value].get("properties"), indent
+                )
+                required.extend(mixin_required)
+                optional.extend(mixin_optional)
                 continue
-            inner, optional = inline_type(value, indent)
-            wrapped = f"t_optional({inner})" if optional else inner
-            result.append(f'{indent}"{name}": {wrapped},')
-        return result
+            inner, is_optional = inline_type(value, indent)
+            (optional if is_optional else required).append(
+                f'{indent}"{name}": {inner},'
+            )
+        return required, optional
 
     def object_type(props: Any, indent: str) -> str:
         if not props:
             return "t_object({})"
-        inner = "\n".join(properties(props, indent + "    "))
-        return f"t_object(\n{indent}    {{\n{inner}\n{indent}    }}\n{indent})"
+        required, optional = properties(props, indent + "    ")
+
+        def fields(items: List[str]) -> str:
+            inner = "\n".join(items)
+            return f"{{\n{inner}\n{indent}    }}" if items else "{}"
+
+        arguments = fields(required)
+        if optional:
+            arguments += ",\n" + indent + "    " + fields(optional)
+        return f"t_object(\n{indent}    {arguments}\n{indent})"
 
     for name, item in protocol.items():
         if item["type"] == "interface":

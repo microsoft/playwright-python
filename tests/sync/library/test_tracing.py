@@ -528,7 +528,10 @@ def test_TR_013_should_respect_traces_dir_and_name(
     browser_type: BrowserType, launch_arguments: Dict, server: Server, tmp_path: Path
 ) -> None:
     traces_dir = tmp_path / "traces"
-    browser = browser_type.launch(**launch_arguments, traces_dir=traces_dir)
+    # A relative path resolves against the current directory.
+    browser = browser_type.launch(
+        **launch_arguments, traces_dir=os.path.relpath(traces_dir)
+    )
     context = browser.new_context()
     page = context.new_page()
 
@@ -687,15 +690,16 @@ def test_TR_015_should_overwrite_existing_file(
     page.goto(server.EMPTY_PAGE)
     page.set_content("<button>Click</button>")
     page.click('"Click"')
-    path = tmp_path / "trace1.zip"
-    context.tracing.stop(path=path)
-    names = list(parse_trace_raw(path).resources)
+    trace_path = tmp_path / "trace1.zip"
+    context.tracing.stop(path=trace_path)
+    names = list(parse_trace_raw(trace_path).resources)
     assert len([n for n in names if n.endswith(".html")]) == 1
 
     context.tracing.start(screenshots=True, snapshots=True, sources=True)
-    context.tracing.stop(path=path)
+    # A relative path resolves against the current directory.
+    context.tracing.stop(path=os.path.relpath(trace_path))
 
-    names = list(parse_trace_raw(path).resources)
+    names = list(parse_trace_raw(trace_path).resources)
     assert len([n for n in names if n.endswith(".html")]) == 0
 
 

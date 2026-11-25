@@ -516,7 +516,10 @@ async def test_TR_013_should_respect_traces_dir_and_name(
     browser_type: BrowserType, launch_arguments: Dict, server: Server, tmp_path: Path
 ) -> None:
     traces_dir = tmp_path / "traces"
-    browser = await browser_type.launch(**launch_arguments, traces_dir=traces_dir)
+    # A relative path resolves against the current directory.
+    browser = await browser_type.launch(
+        **launch_arguments, traces_dir=os.path.relpath(traces_dir)
+    )
     context = await browser.new_context()
     page = await context.new_page()
 
@@ -675,15 +678,16 @@ async def test_TR_015_should_overwrite_existing_file(
     await page.goto(server.EMPTY_PAGE)
     await page.set_content("<button>Click</button>")
     await page.click('"Click"')
-    path = tmp_path / "trace1.zip"
-    await context.tracing.stop(path=path)
-    names = list(parse_trace_raw(path).resources)
+    trace_path = tmp_path / "trace1.zip"
+    await context.tracing.stop(path=trace_path)
+    names = list(parse_trace_raw(trace_path).resources)
     assert len([n for n in names if n.endswith(".html")]) == 1
 
     await context.tracing.start(screenshots=True, snapshots=True, sources=True)
-    await context.tracing.stop(path=path)
+    # A relative path resolves against the current directory.
+    await context.tracing.stop(path=os.path.relpath(trace_path))
 
-    names = list(parse_trace_raw(path).resources)
+    names = list(parse_trace_raw(trace_path).resources)
     assert len([n for n in names if n.endswith(".html")]) == 0
 
 

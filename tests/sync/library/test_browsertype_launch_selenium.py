@@ -45,8 +45,8 @@ def standalone_3_141_59() -> str:
 
 
 @pytest.fixture
-def selenium_4_8_3() -> str:
-    return os.path.join(os.environ["PWTEST_SELENIUM"], "selenium-server-4.8.3.jar")
+def selenium_4_11_0() -> str:
+    return os.path.join(os.environ["PWTEST_SELENIUM"], "selenium-server-4.11.0.jar")
 
 
 @pytest.fixture
@@ -186,12 +186,12 @@ def test_BT_098_selenium_grid_3_141_59_hub_node_chromium(
     node.wait_for_output("Removing session")
 
 
-def test_BT_099_selenium_grid_4_8_3_standalone_chromium(
+def test_BT_099_selenium_grid_4_11_0_standalone_chromium(
     browser_name: str,
     child_process: Callable[..., ChildProcess],
     browser_type: BrowserType,
     launch_arguments: Dict,
-    selenium_4_8_3: str,
+    selenium_4_11_0: str,
     worker_index: int,
     tmp_path: Path,
     assetdir: Path,
@@ -205,7 +205,7 @@ def test_BT_099_selenium_grid_4_8_3_standalone_chromium(
             "java",
             f"-Dwebdriver.chrome.driver={CHROME_DRIVER}",
             "-jar",
-            selenium_4_8_3,
+            selenium_4_11_0,
             "standalone",
             "--config",
             str(write_selenium_config(tmp_path, assetdir, port)),
@@ -224,24 +224,40 @@ def test_BT_099_selenium_grid_4_8_3_standalone_chromium(
     expect(page).to_have_title("Hello world")
     browser.close()
 
-    assert "Starting ChromeDriver" in grid.output
-    assert "Session created" in grid.output
+    assert "Session created by the Node" in grid.output
     grid.wait_for_output("Deleted session")
 
 
-def test_BT_100_selenium_grid_4_8_3_hub_node_chromium(
+def test_BT_100_selenium_grid_4_11_0_hub_node_chromium(
     browser_name: str,
     child_process: Callable[..., ChildProcess],
     browser_type: BrowserType,
     launch_arguments: Dict,
-    selenium_4_8_3: str,
+    selenium_4_11_0: str,
     worker_index: int,
 ) -> None:
     if browser_name != "chromium":
         pytest.skip()
 
     port = (worker_index * 5) + 15123
-    hub = child_process(["java", "-jar", selenium_4_8_3, "hub", "--port", str(port)])
+    help_process = child_process(
+        [
+            "java",
+            "-jar",
+            selenium_4_11_0,
+            "node",
+            "--grid-url",
+            f"http://127.0.0.1:{port}",
+            "--port",
+            str(port + 1),
+            "--help",
+        ]
+    )
+    assert help_process.exit_code() == 0
+    assert "Was passed main parameter" not in help_process.output
+    assert "--grid-url" in help_process.output
+
+    hub = child_process(["java", "-jar", selenium_4_11_0, "hub", "--port", str(port)])
     wait_for_port(port)
     selenium_remote_url = f"http://127.0.0.1:{port}/"
 
@@ -250,7 +266,7 @@ def test_BT_100_selenium_grid_4_8_3_hub_node_chromium(
             "java",
             f"-Dwebdriver.chrome.driver={CHROME_DRIVER}",
             "-jar",
-            selenium_4_8_3,
+            selenium_4_11_0,
             "node",
             "--grid-url",
             f"http://127.0.0.1:{port}",
@@ -272,16 +288,16 @@ def test_BT_100_selenium_grid_4_8_3_hub_node_chromium(
     browser.close()
 
     assert "session request received by the distributor" in hub.output.lower()
-    assert "Starting ChromeDriver" in node.output
+    assert "Session created by the Node" in node.output
     hub.wait_for_output("Deleted session")
 
 
-def test_BT_101_selenium_grid_4_8_3_standalone_chromium_broken_driver(
+def test_BT_101_selenium_grid_4_11_0_standalone_chromium_broken_driver(
     browser_name: str,
     child_process: Callable[..., ChildProcess],
     browser_type: BrowserType,
     launch_arguments: Dict,
-    selenium_4_8_3: str,
+    selenium_4_11_0: str,
     broken_driver: Path,
     worker_index: int,
     tmp_path: Path,
@@ -296,7 +312,7 @@ def test_BT_101_selenium_grid_4_8_3_standalone_chromium_broken_driver(
             "java",
             f"-Dwebdriver.chrome.driver={broken_driver}",
             "-jar",
-            selenium_4_8_3,
+            selenium_4_11_0,
             "standalone",
             "--config",
             str(write_selenium_config(tmp_path, assetdir, port)),
@@ -315,7 +331,7 @@ def test_BT_101_selenium_grid_4_8_3_standalone_chromium_broken_driver(
         in exc_info.value.message
     )
 
-    assert "Starting ChromeDriver" not in grid.output
+    assert "Session created by the Node" not in grid.output
 
 
 def test_BT_102_selenium_grid_3_141_59_standalone_non_chromium(

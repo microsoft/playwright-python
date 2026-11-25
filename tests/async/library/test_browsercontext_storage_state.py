@@ -100,6 +100,18 @@ async def test_ST_002_should_set_local_storage(
     local_storage2 = await page.evaluate("window.localStorage")
     assert local_storage2 == {"name2": "value2"}
 
+    disabled_context = await context_factory(
+        java_script_enabled=False, storage_state=await context.storage_state()
+    )
+    disabled_page = await disabled_context.new_page()
+
+    async def fulfill_clear_storage(route: Route) -> None:
+        await route.fulfill(body="<script>localStorage.clear()</script>")
+
+    await disabled_page.route("**/*", fulfill_clear_storage)
+    await disabled_page.goto("https://www.example.com")
+    assert await disabled_page.evaluate("window.localStorage") == {"name2": "value2"}
+
     await context.close()
 
 

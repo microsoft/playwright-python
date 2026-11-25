@@ -19,6 +19,7 @@ and the body are base64 strings on the wire. [Symbol.asyncDispose]() is not port
 """
 
 import base64
+import os
 from typing import TYPE_CHECKING, Dict, Literal, Optional, cast
 
 from playwright._impl.errors import Error
@@ -43,7 +44,7 @@ class HarRouter:
         not_found_action: HarNotFoundAction,
         url_match: Optional[URLMatch],
     ) -> "HarRouter":
-        result = await local_utils.har_open({"file": file})
+        result = await local_utils.har_open({"file": os.path.abspath(file)})
         har_id, error = result["harId"], result["error"]
         if error:
             raise Error(error)
