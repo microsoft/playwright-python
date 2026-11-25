@@ -26,13 +26,13 @@ Python:
 - A binary is base64 on the channel.
 - `x || y` and `!x` on an object are None checks: an empty dict is truthy in JS.
 - assert(value, message) throws an Error with the message; here it is a raise.
-- JSON.stringify() is _json_stringify(), which raises for NaN and Infinity, where
-  JSON.stringify() writes null.
+- JSON.stringify() is _json_stringify(), which converts NaN and Infinity to null.
 """
 
 import asyncio
 import base64
 import json
+import math
 import os
 from pathlib import Path
 from typing import (
@@ -835,10 +835,27 @@ def is_file_payload(value: Any) -> bool:
 
 
 def _json_stringify(value: Any, indent: Optional[int] = None) -> str:
-    # JSON.stringify(value, undefined, indent): no spaces without an indent, and no
-    # escapes of non-ASCII characters. NaN and Infinity raise a ValueError.
+    # JSON.stringify(value, undefined, indent): no spaces without an indent, no
+    # escapes of non-ASCII characters, and non-finite numbers become null.
+
+    def replace_non_finite_numbers(item: Any) -> Any:
+        if isinstance(item, float) and not math.isfinite(item):
+            return None
+        if isinstance(item, dict):
+            return {
+                key: replace_non_finite_numbers(nested_value)
+                for key, nested_value in item.items()
+            }
+        if isinstance(item, list):
+            return [replace_non_finite_numbers(nested_value) for nested_value in item]
+        if isinstance(item, tuple):
+            return tuple(
+                replace_non_finite_numbers(nested_value) for nested_value in item
+            )
+        return item
+
     return json.dumps(
-        value,
+        replace_non_finite_numbers(value),
         allow_nan=False,
         ensure_ascii=False,
         indent=indent,

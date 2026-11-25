@@ -1325,6 +1325,30 @@ async def test_FE_157_should_encode_to_application_json_by_default(
     assert json.loads(body) == data
 
 
+async def test_fetch_data_should_serialize_non_finite_numbers_as_null(
+    context: BrowserContext, server: Server
+) -> None:
+    data = {
+        "nan": float("nan"),
+        "positiveInfinity": float("inf"),
+        "negativeInfinity": float("-inf"),
+        "nested": [float("nan"), {"value": float("inf")}],
+    }
+
+    with server.expect_request("/empty.html") as request_info:
+        await context.request.post(server.EMPTY_PAGE, data=data)
+
+    request = request_info.value
+    assert request.getHeader("content-type") == "application/json"
+    body = must(request.post_body).decode()
+    assert json.loads(body) == {
+        "nan": None,
+        "positiveInfinity": None,
+        "negativeInfinity": None,
+        "nested": [None, {"value": None}],
+    }
+
+
 def multipart_route(
     assetdir: Path, received: Dict[str, Any]
 ) -> Callable[[TestServerRequest], None]:
