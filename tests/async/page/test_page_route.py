@@ -1503,6 +1503,37 @@ async def test_RO_054_should_intercept_when_post_data_is_more_than_1_mb(
     await wait_for_list(page, post_data)
     assert post_data[0] == POST_BODY
 
+async def test_route_continue_should_handle_lone_surrogates(
+    page: Page, server: Server
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+
+    async def handler(route: Route) -> None:
+        await route.continue_(
+            post_data={
+                "high": "\ud800",
+                "low": "\udfff",
+                "pair": "\ud83d\ude00",
+                "unicode": "é",
+                "emoji": "😀",
+            }
+        )
+
+    await page.route("**/surrogate", handler)
+
+    with server.expect_request("/surrogate") as request_info:
+        await page.evaluate(
+            """async () => {
+                await fetch('/surrogate', { method: 'POST' });
+            }"""
+        )
+
+    expected = (
+        '{"high":"\\ud800","low":"\\udfff","pair":"😀",'
+        '"unicode":"é","emoji":"😀"}'
+    ).encode("utf-8")
+    assert request_info.value.post_body == expected
+
 
 async def test_RO_055_should_be_able_to_intercept_every_navigation_to_a_page_controlled_by_service_worker(
     page: Page, server: Server
