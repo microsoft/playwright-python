@@ -14,6 +14,7 @@
 
 """Python only: tests of behaviors that no upstream test covers."""
 
+import asyncio
 from typing import Any, AsyncGenerator, Dict
 
 import pytest
@@ -55,6 +56,19 @@ async def test_expect_response_should_reject_when_async_predicate_throws(
         raise Exception("Async oops!")
 
     with pytest.raises(Exception, match="Async oops!"):
+        async with page.expect_response(predicate):
+            await page.evaluate("() => fetch('/digits/1.png')")
+
+
+async def test_expect_response_should_propagate_async_predicate_cancellation(
+    page: Page, server: Server
+) -> None:
+    await page.goto(server.EMPTY_PAGE)
+
+    async def predicate(response: Any) -> bool:
+        raise asyncio.CancelledError("Predicate cancelled")
+
+    with pytest.raises(asyncio.CancelledError, match="Predicate cancelled"):
         async with page.expect_response(predicate):
             await page.evaluate("() => fetch('/digits/1.png')")
 

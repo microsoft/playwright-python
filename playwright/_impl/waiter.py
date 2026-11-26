@@ -240,7 +240,7 @@ def wait_for_event(
             if not promise.done():
                 promise.set_result(event_arg)
 
-        def fail(e: Exception) -> None:
+        def fail(e: BaseException) -> None:
             emitter.remove_listener(event, listener)
             if not promise.done():
                 promise.set_exception(e)
@@ -256,6 +256,9 @@ def wait_for_event(
                     async def continuation() -> None:
                         try:
                             settle(bool(await matched))
+                        except asyncio.CancelledError as e:
+                            fail(e)
+                            raise
                         except Exception as e:
                             fail(e)
 
