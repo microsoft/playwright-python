@@ -14,7 +14,8 @@
 
 """Python only: tests of behaviors that no upstream test covers."""
 
-from typing import Any, AsyncGenerator, Dict
+import asyncio
+from typing import Any, AsyncGenerator, Dict, Type
 
 import pytest
 
@@ -46,17 +47,22 @@ async def test_wait_for_request_should_work_with_predicate(
     assert request.url == server.PREFIX + "/digits/2.png"
 
 
+@pytest.mark.parametrize("error_type", [Exception, asyncio.CancelledError])
 async def test_expect_response_should_reject_when_async_predicate_throws(
-    page: Page, server: Server
+    page: Page, server: Server, error_type: Type[BaseException]
 ) -> None:
+    # Regression test for https://github.com/microsoft/playwright-python/issues/3379.
     await page.goto(server.EMPTY_PAGE)
+    listener_count = page._impl_obj.listener_count("response")
 
     async def predicate(response: Any) -> bool:
-        raise Exception("Async oops!")
+        raise error_type("Async oops!")
 
-    with pytest.raises(Exception, match="Async oops!"):
-        async with page.expect_response(predicate):
+    with pytest.raises(error_type, match="Async oops!"):
+        async with page.expect_response(predicate, timeout=1_000):
             await page.evaluate("() => fetch('/digits/1.png')")
+
+    assert page._impl_obj.listener_count("response") == listener_count
 
 
 async def test_expect_response_should_reject_when_sync_predicate_throws(
