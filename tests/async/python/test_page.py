@@ -15,6 +15,7 @@
 """Python only: tests of behaviors that no upstream test covers."""
 
 import asyncio
+import sys
 from typing import Any, AsyncGenerator, Dict, Type
 
 import pytest
@@ -47,7 +48,19 @@ async def test_wait_for_request_should_work_with_predicate(
     assert request.url == server.PREFIX + "/digits/2.png"
 
 
-@pytest.mark.parametrize("error_type", [Exception, asyncio.CancelledError])
+@pytest.mark.parametrize(
+    "error_type",
+    [
+        Exception,
+        pytest.param(
+            asyncio.CancelledError,
+            marks=pytest.mark.skipif(
+                sys.version_info < (3, 11),
+                reason="Python 3.10 does not preserve the CancelledError message",
+            ),
+        ),
+    ],
+)
 async def test_expect_response_should_reject_when_async_predicate_throws(
     page: Page, server: Server, error_type: Type[BaseException]
 ) -> None:
