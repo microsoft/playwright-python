@@ -47,6 +47,14 @@ def skip_firefox_headed(browser_name: str, headless: bool) -> None:
         pytest.skip("Firefox headed produces a different image.")
 
 
+@pytest.fixture
+def skip_firefox_headed_animations(browser_name: str, headless: bool) -> None:
+    if browser_name == "firefox" and not headless:
+        pytest.skip(
+            "Firefox headed produces a different image: https://github.com/microsoft/playwright-browsers/issues/2714"
+        )
+
+
 CARET_CONTENT = """
       <!-- Refer to stylesheet from other origin. Accessing this
            stylesheet rules will throw.
@@ -966,6 +974,7 @@ def test_SS_051_page_screenshot_mask_option_should_remove_elements_based_on_attr
     assert display == ""
 
 
+@pytest.mark.usefixtures("skip_firefox_headed_animations")
 def test_SS_098_page_screenshot_animations_should_preserve_scroll_animation_progress_during_screenshots(
     page: Page, utils: Utils
 ) -> None:
@@ -990,6 +999,7 @@ def test_SS_098_page_screenshot_animations_should_preserve_scroll_animation_prog
     assert page.screenshot(animations="allow") == expected
 
 
+@pytest.mark.usefixtures("skip_firefox_headed_animations")
 def test_SS_052_page_screenshot_animations_should_not_capture_infinite_css_animation(
     page: Page, server: Server, utils: Utils
 ) -> None:
@@ -1002,6 +1012,7 @@ def test_SS_052_page_screenshot_animations_should_not_capture_infinite_css_anima
         assert new_screenshot == screenshot
 
 
+@pytest.mark.usefixtures("skip_firefox_headed_animations")
 def test_SS_053_page_screenshot_animations_should_not_capture_pseudo_element_css_animation(
     page: Page, server: Server, utils: Utils
 ) -> None:
@@ -1014,6 +1025,7 @@ def test_SS_053_page_screenshot_animations_should_not_capture_pseudo_element_css
         assert new_screenshot == screenshot
 
 
+@pytest.mark.usefixtures("skip_firefox_headed_animations")
 def test_SS_054_page_screenshot_animations_should_not_capture_css_animations_in_shadow_dom(
     page: Page, server: Server, utils: Utils
 ) -> None:
@@ -1025,6 +1037,7 @@ def test_SS_054_page_screenshot_animations_should_not_capture_css_animations_in_
         assert new_screenshot == screenshot
 
 
+@pytest.mark.usefixtures("skip_firefox_headed_animations")
 def test_SS_056_page_screenshot_animations_should_resume_infinite_animations(
     page: Page, server: Server, utils: Utils
 ) -> None:
@@ -1036,6 +1049,7 @@ def test_SS_056_page_screenshot_animations_should_resume_infinite_animations(
     assert compare_images(buffer1, buffer2, max_diff_pixels=50) is not None
 
 
+@pytest.mark.usefixtures("skip_firefox_headed_animations")
 def test_SS_057_page_screenshot_animations_should_not_capture_infinite_web_animations(
     page: Page, server: Server, utils: Utils
 ) -> None:
@@ -1053,6 +1067,7 @@ def test_SS_057_page_screenshot_animations_should_not_capture_infinite_web_anima
     assert compare_images(buffer1, buffer2, max_diff_pixels=50) is not None
 
 
+@pytest.mark.usefixtures("skip_firefox_headed_animations")
 def test_SS_058_page_screenshot_animations_should_fire_transitionend_for_finite_transitions(
     page: Page, server: Server, utils: Utils
 ) -> None:
@@ -1080,6 +1095,7 @@ def test_SS_058_page_screenshot_animations_should_fire_transitionend_for_finite_
     assert page.evaluate("() => window['__TRANSITION_END']") is True
 
 
+@pytest.mark.usefixtures("skip_firefox_headed_animations")
 def test_SS_059_page_screenshot_animations_should_capture_screenshots_after_layoutchanges_in_transitionend_event(
     page: Page, server: Server, utils: Utils
 ) -> None:
@@ -1119,6 +1135,7 @@ def test_SS_059_page_screenshot_animations_should_capture_screenshots_after_layo
     assert screenshot1 == screenshot2
 
 
+@pytest.mark.usefixtures("skip_firefox_headed_animations")
 def test_SS_060_page_screenshot_animations_should_not_change_animation_with_playback_rate_equal_to_0(
     page: Page, server: Server, utils: Utils
 ) -> None:
@@ -1147,6 +1164,7 @@ def test_SS_060_page_screenshot_animations_should_not_change_animation_with_play
     )
 
 
+@pytest.mark.usefixtures("skip_firefox_headed_animations")
 def test_SS_061_page_screenshot_animations_should_trigger_particular_events_for_css_transitions(
     page: Page, server: Server
 ) -> None:
@@ -1174,6 +1192,7 @@ def test_SS_061_page_screenshot_animations_should_trigger_particular_events_for_
     ]
 
 
+@pytest.mark.usefixtures("skip_firefox_headed_animations")
 def test_SS_062_page_screenshot_animations_should_trigger_particular_events_for_i_nfinite_css_animation(
     page: Page, server: Server
 ) -> None:
@@ -1201,6 +1220,7 @@ def test_SS_062_page_screenshot_animations_should_trigger_particular_events_for_
     ]
 
 
+@pytest.mark.usefixtures("skip_firefox_headed_animations")
 def test_SS_063_page_screenshot_animations_should_trigger_particular_events_for_finite_css_animation(
     page: Page, server: Server
 ) -> None:
@@ -1237,6 +1257,7 @@ def test_SS_063_page_screenshot_animations_should_trigger_particular_events_for_
     ]
 
 
+@pytest.mark.usefixtures("skip_firefox_headed_animations")
 def test_SS_064_page_screenshot_animations_should_wait_for_fonts_to_load(
     page: Page, server: Server, browser_name: str, is_win: bool
 ) -> None:
