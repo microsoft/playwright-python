@@ -670,6 +670,55 @@ async def test_CD_019_should_return_valid_browser_from_context_browser(
         await browser_server.close()
 
 
+async def test_CD_055_should_work_with_registered_selector_engines(
+    playwright: Playwright,
+    browser_type: BrowserType,
+    launch_arguments: Dict,
+    port: int,
+) -> None:
+    browser_server = await launch(browser_type, launch_arguments, port)
+    try:
+        # Python: invoke the engine factory, as the JS function argument does.
+        await playwright.selectors.register(
+            "cdpTag",
+            """(() => ({
+      query: (root, selector) => root.querySelector(selector),
+      queryAll: (root, selector) => Array.from(root.querySelectorAll(selector)),
+    }))()""",
+        )
+        cdp_browser = await browser_type.connect_over_cdp(f"http://127.0.0.1:{port}/")
+        page = await cdp_browser.contexts[0].new_page()
+        await page.set_content("<div>hello</div>")
+        assert await page.locator("cdpTag=div").text_content() == "hello"
+        await cdp_browser.close()
+    finally:
+        await browser_server.close()
+
+
+async def test_CD_056_should_respect_the_test_id_attribute_in_strict_mode_errors(
+    playwright: Playwright,
+    browser_type: BrowserType,
+    launch_arguments: Dict,
+    port: int,
+) -> None:
+    browser_server = await launch(browser_type, launch_arguments, port)
+    try:
+        playwright.selectors.set_test_id_attribute("data-foo")
+        cdp_browser = await browser_type.connect_over_cdp(f"http://127.0.0.1:{port}/")
+        page = await cdp_browser.contexts[0].new_page()
+        await page.set_content(
+            '<button data-foo="a">x</button><button data-foo="b">x</button>'
+        )
+        with pytest.raises(Error) as exc_info:
+            await page.locator("button").click()
+        # Python: strict mode errors name the Python locator API.
+        assert 'aka get_by_test_id("a")' in exc_info.value.message
+        await cdp_browser.close()
+    finally:
+        playwright.selectors.set_test_id_attribute("data-testid")
+        await browser_server.close()
+
+
 async def test_CD_020_should_report_an_expected_error_when_the_endpoint_url_returns_a_non_expected_status_code(
     browser_type: BrowserType, server: Server
 ) -> None:

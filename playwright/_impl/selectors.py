@@ -75,6 +75,16 @@ class Selectors:
             )
         self._selector_engines.append(selector_engine)
 
+    async def _register_on_context(self, context: "BrowserContext") -> None:
+        for selector_engine in self._selector_engines:
+            await context._channel.registerSelectorEngine(
+                selectorEngine=selector_engine, timeout=NO_TIMEOUT
+            )
+        if self._test_id_attribute_name is not None:
+            await context._channel.setTestIdAttributeName(
+                testIdAttributeName=self._test_id_attribute_name, timeout=NO_TIMEOUT
+            )
+
     def set_test_id_attribute(self, attribute_name: str) -> None:
         self._test_id_attribute_name = attribute_name
         set_test_id_attribute(attribute_name)

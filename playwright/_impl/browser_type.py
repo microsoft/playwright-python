@@ -423,9 +423,9 @@ class BrowserType(ChannelOwner):
         browser = Browser.from_(result["browser"])
         browser._connect_to_browser_type(self, {}, None)
         if result["defaultContext"]:
-            await self._instrumentation.run_after_create_browser_context(
-                BrowserContext.from_(result["defaultContext"])
-            )
+            context = BrowserContext.from_(result["defaultContext"])
+            await self._playwright.selectors._register_on_context(context)
+            await self._instrumentation.run_after_create_browser_context(context)
         return browser
 
     # Python only: the members of the Python API that upstream does not have.

@@ -18,12 +18,37 @@ import asyncio
 import re
 import time
 from pathlib import Path
-from typing import Awaitable, Callable, Optional
+from typing import AsyncGenerator, Awaitable, Callable, Dict, Optional
 
 import pytest
 
-from playwright.async_api import BrowserContext, Error, Page, Route, expect
+from playwright.async_api import (
+    Browser,
+    BrowserContext,
+    BrowserType,
+    Error,
+    Page,
+    Route,
+    expect,
+)
 from tests.server import Server, TestServerRequest
+
+
+@pytest.fixture(scope="module")
+async def browser(
+    browser_type: BrowserType, browser_name: str, launch_arguments: Dict
+) -> AsyncGenerator[Browser, None]:
+    # Python: the module's browser uses the upstream launchOptions fixture.
+    options = dict(launch_arguments)
+    if browser_name == "firefox":
+        options["firefox_user_prefs"] = {
+            **options.get("firefox_user_prefs", {}),
+            # Test DOM fullscreen without requiring a window manager under Xvfb.
+            "full-screen-api.ignore-widgets": True,
+        }
+    browser = await browser_type.launch(**options)
+    yield browser
+    await browser.close()
 
 
 async def test_CA_001_shared_array_buffer_should_work_smoke(
@@ -330,12 +355,8 @@ async def test_CA_019_window_gesture_event_in_web_kit(
 
 
 async def test_CA_020_request_fullscreen(
-    page: Page, server: Server, browser_name: str, headless: bool
+    page: Page, server: Server, browser_name: str, platform: str
 ) -> None:
-    if browser_name == "firefox" and not headless:
-        pytest.skip(
-            "fixme: Error: Request for fullscreen was denied because requesting element is not in the currently focused tab"
-        )
     await page.goto(server.EMPTY_PAGE)
     await page.evaluate(
         """() => {
@@ -356,6 +377,10 @@ async def test_CA_020_request_fullscreen(
     )
     assert not await page.evaluate("() => !!document.fullscreenElement")
 
+    if browser_name == "webkit" and platform != "linux":
+        pytest.skip(
+            "fixme: requestFullscreen() in a popup rejects with InvalidStateError on Windows and hangs the context teardown on macOS"
+        )
     async with page.expect_popup() as popup_info:
         await page.evaluate(
             "url => window.open(url, 'popup', 'popup')", server.EMPTY_PAGE

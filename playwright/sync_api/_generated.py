@@ -3214,8 +3214,6 @@ class BrowserContext(SyncContextManager):
         context = browser.new_context()
         page = context.new_page()
         context.route(re.compile(r\"(\\.png$)|(\\.jpg$)\"), lambda route: route.abort())
-        page = await context.new_page()
-        page = context.new_page()
         page.goto(\"https://example.com\")
         browser.close()
         ```
@@ -11530,7 +11528,7 @@ class Locator(SyncBase):
         Passing argument to `expression`:
 
         ```py
-        result = page.get_by_testid(\"myId\").evaluate(\"(element, [x, y]) => element.textContent + ' ' + x * y\", [7, 8])
+        result = page.get_by_test_id(\"myId\").evaluate(\"(element, [x, y]) => element.textContent + ' ' + x * y\", [7, 8])
         print(result) # prints \"myId text 56\"
         ```
 
@@ -14930,7 +14928,7 @@ class LocatorAssertions(SyncBase):
         from playwright.sync_api import expect
 
         locator = page.locator(\".list > .component\")
-        await expect(locator).to_contain_class([\"inactive\", \"active\", \"inactive\"])
+        expect(locator).to_contain_class([\"inactive\", \"active\", \"inactive\"])
         ```
 
         Parameters

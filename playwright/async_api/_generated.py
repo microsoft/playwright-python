@@ -2166,7 +2166,7 @@ class BrowserContext(AsyncContextManager):
         context = await browser.new_context()
         await context.grant_permissions([\"clipboard-read\"])
         # do stuff ..
-        context.clear_permissions()
+        await context.clear_permissions()
         ```
         """
 
@@ -11511,7 +11511,7 @@ class Locator(AsyncBase):
         Passing argument to `expression`:
 
         ```py
-        result = await page.get_by_testid(\"myId\").evaluate(\"(element, [x, y]) => element.textContent + ' ' + x * y\", [7, 8])
+        result = await page.get_by_test_id(\"myId\").evaluate(\"(element, [x, y]) => element.textContent + ' ' + x * y\", [7, 8])
         print(result) # prints \"myId text 56\"
         ```
 
