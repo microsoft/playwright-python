@@ -77,9 +77,16 @@ def _inner_parse_serialized_value(
             # An invalid Date serializes as null, and new Date(null) is the epoch.
             return datetime.datetime.fromtimestamp(0, datetime.timezone.utc)
         # Node.js Date objects are always in UTC.
-        return datetime.datetime.strptime(value["d"], "%Y-%m-%dT%H:%M:%S.%fZ").replace(
-            tzinfo=datetime.timezone.utc
-        )
+        # Python: datetime cannot represent JavaScript Dates outside years 1-9999.
+        try:
+            return datetime.datetime.strptime(
+                value["d"], "%Y-%m-%dT%H:%M:%S.%fZ"
+            ).replace(tzinfo=datetime.timezone.utc)
+        except ValueError as exc:
+            raise Error(
+                f"Cannot deserialize Date{_access_chain_to_display_string(access_chain)}: "
+                f'{value["d"]}. Python datetime only supports years 1-9999.'
+            ) from exc
     if "u" in value:
         return urlparse(value["u"])
     if "bi" in value:
