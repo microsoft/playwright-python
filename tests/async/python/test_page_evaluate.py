@@ -104,3 +104,57 @@ async def test_evaluate_throw_for_unsupported_regex(page: Page) -> None:
         await page.evaluate("a => a", re.compile("foo", re.VERBOSE))
     with pytest.raises(Error, match="Only str patterns are supported"):
         await page.evaluate("a => a", re.compile(b"foo"))
+
+
+async def test_evaluate_large_integers(page: Page) -> None:
+    # Python ints within JS safe integer range (abs(n) <= 2**53 - 1) serialize as Number
+    assert await page.evaluate("x => typeof x", 2**53 - 1) == "number"
+    assert await page.evaluate("x => typeof x", -(2**53 - 1)) == "number"
+
+    # Python ints outside safe range serialize as BigInt without precision loss
+    assert await page.evaluate("x => typeof x", 2**53) == "bigint"
+    assert await page.evaluate("x => typeof x", -(2**53)) == "bigint"
+    assert await page.evaluate("x => typeof x", 2**64) == "bigint"
+    assert await page.evaluate("x => x", 2**53 + 1) == 2**53 + 1
+    assert await page.evaluate("x => x", -(2**53 + 1)) == -(2**53 + 1)
+    assert await page.evaluate("x => x", 2**64) == 2**64
+    assert await page.evaluate("x => x", -2**63) == -2**63
+    assert await page.evaluate("x => x", 2**70) == 2**70
+    assert await page.evaluate("x => x", [2**64, 1]) == [2**64, 1]
+    assert await page.evaluate("x => x.id", {"id": 2**70}) == 2**70
+
+
+def test_serializers_large_integers() -> None:
+    from playwright._impl.protocol.serializers import (
+        MAX_SAFE_INTEGER,
+        parse_serialized_value,
+        serialize_value,
+    )
+
+    def fall_through(v: object) -> dict:
+        return {"fallThrough": v}
+
+    # Safe integer range serializes as number
+    assert serialize_value(0, fall_through) == {"n": 0}
+    assert serialize_value(42, fall_through) == {"n": 42}
+    assert serialize_value(MAX_SAFE_INTEGER, fall_through) == {"n": MAX_SAFE_INTEGER}
+    assert serialize_value(-MAX_SAFE_INTEGER, fall_through) == {"n": -MAX_SAFE_INTEGER}
+
+    # Outside safe integer range serializes as bigint {"bi": str}
+    assert serialize_value(MAX_SAFE_INTEGER + 1, fall_through) == {
+        "bi": str(MAX_SAFE_INTEGER + 1)
+    }
+    assert serialize_value(-(MAX_SAFE_INTEGER + 1), fall_through) == {
+        "bi": str(-(MAX_SAFE_INTEGER + 1))
+    }
+    assert serialize_value(2**64, fall_through) == {"bi": "18446744073709551616"}
+    assert serialize_value(-2**63, fall_through) == {"bi": "-9223372036854775808"}
+    assert serialize_value(2**70, fall_through) == {"bi": "1180591620717411303424"}
+
+    # Booleans are still serialized as boolean
+    assert serialize_value(True, fall_through) == {"b": True}
+    assert serialize_value(False, fall_through) == {"b": False}
+
+    # Deserialization round-trip
+    assert parse_serialized_value({"bi": "18446744073709551616"}, None) == 2**64
+    assert parse_serialized_value({"bi": "-9223372036854775808"}, None) == -2**63
