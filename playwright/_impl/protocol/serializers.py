@@ -39,6 +39,8 @@ from playwright._impl.isomorphic.string_utils import (
 )
 from playwright._impl.utils.map import Map
 
+MAX_SAFE_INTEGER = 2**53 - 1
+
 
 def parse_serialized_value(value: Any, handles: Optional[List[Any]]) -> Any:
     return _inner_parse_serialized_value(value, handles, {}, [])
@@ -180,8 +182,14 @@ def _inner_serialize_value(
             return {"v": "-0"}
     if isinstance(value, bool):
         return {"b": value}
-    # A Python int is a number, not a BigInt.
-    if isinstance(value, (int, float)):
+    # Integers outside JavaScript's safe integer range ±(2**53 - 1) serialize as
+    # BigInt so that large integers (e.g. 64-bit ints, Snowflake IDs) do not lose
+    # precision when passed to the browser or Node.js driver.
+    if isinstance(value, int):
+        if abs(value) > MAX_SAFE_INTEGER:
+            return {"bi": str(value)}
+        return {"n": value}
+    if isinstance(value, float):
         return {"n": value}
     if isinstance(value, str):
         return {"s": value}
