@@ -43,7 +43,7 @@ class EventEmitter:
         self._events_count = 0
         self._max_listeners: Optional[float] = None
         self._pending_handlers: Dict[EventType, Set["asyncio.Future[Any]"]] = {}
-        self._rejection_handler: Optional[Callable[[BaseException], None]] = None
+        self._pending_handlers_to_ignore_errors: Set["asyncio.Future[Any]"] = set()
         # Python: a list takes no attributes, so the `warned` flag of each listener
         # array is kept here, by event type.
         self._warned: Set[EventType] = set()
@@ -102,18 +102,19 @@ class EventEmitter:
         def on_done(f: "asyncio.Future[Any]") -> None:
             pending.discard(f)
             if f.cancelled():
+                self._pending_handlers_to_ignore_errors.discard(f)
                 return
             e = f.exception()
             if e is None:
+                self._pending_handlers_to_ignore_errors.discard(f)
                 return
-            if self._rejection_handler:
-                self._rejection_handler(e)
-            else:
+            if f not in self._pending_handlers_to_ignore_errors:
                 try:
                     self._handle_listener_error(type, e)
                 except listener_error_types() as error:
                     # Python: report an unhandled rejection outside the task callback.
                     self._report_unhandled_error(error)
+            self._pending_handlers_to_ignore_errors.discard(f)
 
         future.add_done_callback(on_done)
 
@@ -258,22 +259,10 @@ class EventEmitter:
             return self
 
         if behavior == "wait":
-            errors: List[BaseException] = []
-            self._rejection_handler = lambda error: errors.append(error)
-
-            # Python: the pending handlers are taken now, as _waitFor() takes them
-            # before its first await.
-            pending = self._wait_for(type)
-
-            async def wait() -> None:
-                await pending
-                if errors:
-                    raise errors[0]
-
-            return wait()
+            return self._wait_for(type, ignore_errors=True)
 
         if behavior == "ignoreErrors":
-            self._rejection_handler = lambda error: None
+            self._ignore_pending_handler_errors(type)
 
         return completed(None)
 
@@ -332,15 +321,33 @@ class EventEmitter:
     def event_names(self) -> List[EventType]:
         return list(self._events.keys()) if self._events_count > 0 else []
 
-    def _wait_for(self, type: Optional[EventType] = None) -> "asyncio.Future[Any]":
-        # Python: not an async def; the pending handlers are taken at call time, as
-        # the JS async function takes them before its first await.
+    def _ignore_pending_handler_errors(
+        self, type: Optional[EventType] = None
+    ) -> None:
+        if type:
+            promises = list(self._pending_handlers.get(type) or [])
+        else:
+            promises = [
+                future
+                for pending in self._pending_handlers.values()
+                for future in pending
+            ]
+        self._pending_handlers_to_ignore_errors.update(promises)
+
+    def _wait_for(
+        self, type: Optional[EventType] = None, ignore_errors: bool = False
+    ) -> "asyncio.Future[Any]":
+        # Python: not an async def; pending handlers are taken at call time.
         promises: List["asyncio.Future[Any]"] = []
         if type:
             promises = list(self._pending_handlers.get(type) or [])
         else:
             for pending in self._pending_handlers.values():
                 promises.extend(pending)
+
+        if ignore_errors:
+            self._pending_handlers_to_ignore_errors.update(promises)
+
         return asyncio.gather(*promises)
 
     def _listeners(
